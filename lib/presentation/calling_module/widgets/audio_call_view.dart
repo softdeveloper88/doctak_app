@@ -1,28 +1,39 @@
 // lib/presentation/call_module/widgets/audio_call_view.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doctak_app/presentation/calling_module/providers/call_provider.dart';
-import 'package:doctak_app/presentation/calling_module/models/call_state.dart';
 import 'package:doctak_app/presentation/calling_module/widgets/waveform_painter.dart';
 
-/// Widget that displays the audio call UI
+/// Widget that displays the audio call UI with OneUI 8.5 theming
+/// Note: Calling screens always use dark background for consistent experience
 class AudioCallView extends StatelessWidget {
   const AudioCallView({Key? key}) : super(key: key);
+
+  // Calling screen colors - always dark for consistent experience
+  static const _callBackgroundDark = Color(0xFF1A2332);
+  static const _callBackgroundLight = Color(0xFF243447);
 
   @override
   Widget build(BuildContext context) {
     final callProvider = Provider.of<CallProvider>(context);
     final callState = callProvider.callState;
     final remoteUser = callProvider.remoteUser;
+    final theme = OneUITheme.of(context);
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.blue.shade900, Colors.black],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            theme.primary.withOpacity(0.3),
+            _callBackgroundLight,
+            _callBackgroundDark,
+          ],
+          stops: const [0.0, 0.3, 1.0],
         ),
       ),
       child: Stack(
@@ -52,31 +63,37 @@ class AudioCallView extends StatelessWidget {
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
                   ),
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1,
+                    ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Icon(
-                        Icons.phone,
-                        color: Colors.white70,
-                        size: 16,
+                        Icons.phone_rounded,
+                        color: Colors.white,
+                        size: 18,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         "${translation(context).lbl_in_call} · ${callState.formattedCallDuration}",
-                        style: const TextStyle(
-                          color: Colors.white70,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
+                          fontFamily: 'Poppins',
                         ),
                       ),
                     ],
@@ -109,6 +126,10 @@ class SpeakingAvatar extends StatefulWidget {
 class _SpeakingAvatarState extends State<SpeakingAvatar> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
+  // Calling screen colors
+  static final _callSurfaceVariant = Colors.white.withOpacity(0.1);
+  static final _callTextTertiary = Colors.white.withOpacity(0.5);
+
   @override
   void initState() {
     super.initState();
@@ -126,6 +147,8 @@ class _SpeakingAvatarState extends State<SpeakingAvatar> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -147,7 +170,7 @@ class _SpeakingAvatarState extends State<SpeakingAvatar> with SingleTickerProvid
                           width: 150,
                           height: 150,
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.4),
+                            color: theme.success.withOpacity(0.4),
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -169,14 +192,21 @@ class _SpeakingAvatarState extends State<SpeakingAvatar> with SingleTickerProvid
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: widget.isSpeaking
-                      ? Colors.green.withOpacity(0.7)
-                      : Colors.white24,
-                  width: widget.isSpeaking ? 3 : 1,
+                      ? theme.success.withOpacity(0.7)
+                      : Colors.white.withOpacity(0.3),
+                  width: widget.isSpeaking ? 3 : 2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primary.withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 4,
+                  ),
+                ],
               ),
               child: CircleAvatar(
                 radius: 70,
-                backgroundColor: Colors.grey.shade800,
+                backgroundColor: _callSurfaceVariant,
                 child: widget.avatarUrl.isNotEmpty
                     ? ClipOval(
                         child: CachedNetworkImage(
@@ -184,11 +214,11 @@ class _SpeakingAvatarState extends State<SpeakingAvatar> with SingleTickerProvid
                           width: 140,
                           height: 140,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => const Icon(Icons.person, size: 70, color: Colors.white),
-                          errorWidget: (context, url, error) => const Icon(Icons.person, size: 70, color: Colors.white),
+                          placeholder: (context, url) => Icon(Icons.person_rounded, size: 70, color: _callTextTertiary),
+                          errorWidget: (context, url, error) => Icon(Icons.person_rounded, size: 70, color: _callTextTertiary),
                         ),
                       )
-                    : const Icon(Icons.person, size: 70, color: Colors.white),
+                    : Icon(Icons.person_rounded, size: 70, color: _callTextTertiary),
               ),
             ),
           ],

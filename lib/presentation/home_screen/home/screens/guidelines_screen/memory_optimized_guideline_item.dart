@@ -1,48 +1,47 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../main.dart';
-
-/// Memory-optimized guideline item widget with performance improvements
+/// Memory-optimized guideline item widget with One UI 8.5 styling
 class MemoryOptimizedGuidelineItem extends StatefulWidget {
   final Data guideline;
 
-  const MemoryOptimizedGuidelineItem({
-    super.key,
-    required this.guideline,
-  });
+  const MemoryOptimizedGuidelineItem({super.key, required this.guideline});
 
   @override
-  State<MemoryOptimizedGuidelineItem> createState() => _MemoryOptimizedGuidelineItemState();
+  State<MemoryOptimizedGuidelineItem> createState() =>
+      _MemoryOptimizedGuidelineItemState();
 }
 
-class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineItem> {
+class _MemoryOptimizedGuidelineItemState
+    extends State<MemoryOptimizedGuidelineItem> {
   bool isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     // Process description text
     String description = widget.guideline.description!
         .replaceAll('\r', '')
         .replaceAll('\n', '')
         .replaceAll('\u0002', ' ');
-    
+
     String trimmedDescription = _trimDescription(description, 100);
-    
+
     return RepaintBoundary(
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: context.cardColor,
+          color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: theme.textPrimary.withOpacity(0.05),
               spreadRadius: 0,
               blurRadius: 10,
               offset: const Offset(0, 3),
@@ -55,10 +54,10 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Guideline Header
-              _buildGuidelineHeader(description, trimmedDescription),
-              
+              _buildGuidelineHeader(description, trimmedDescription, theme),
+
               // Guideline Action
-              _buildGuidelineAction(),
+              _buildGuidelineAction(theme),
             ],
           ),
         ),
@@ -66,13 +65,15 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
     );
   }
 
-  // Guideline header section
-  Widget _buildGuidelineHeader(String description, String trimmedDescription) {
+  // Guideline header section with One UI 8.5 styling
+  Widget _buildGuidelineHeader(
+    String description,
+    String trimmedDescription,
+    OneUITheme theme,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      decoration: BoxDecoration(color: theme.cardBackground),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -80,13 +81,20 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              gradient: LinearGradient(
+                colors: [
+                  theme.primary.withOpacity(0.2),
+                  theme.primary.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
               child: Icon(
-                Icons.medical_information_outlined,
-                color: Colors.blue[700],
+                Icons.medical_information_rounded,
+                color: theme.primary,
                 size: 28,
               ),
             ),
@@ -99,7 +107,7 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
                 Text(
                   widget.guideline.diseaseName ?? "",
                   style: TextStyle(
-                    color: Colors.blue[800],
+                    color: theme.primary,
                     fontSize: 16,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
@@ -118,7 +126,7 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
                         ? "<p>$description</p>"
                         : "<p>$trimmedDescription</p>",
                     textStyle: TextStyle(
-                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                      color: theme.textPrimary,
                       fontSize: 14,
                       fontFamily: 'Poppins',
                     ),
@@ -132,15 +140,15 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
     );
   }
 
-  // Guideline action section
-  Widget _buildGuidelineAction() {
+  // Guideline action section with One UI 8.5 styling
+  Widget _buildGuidelineAction(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
+        color: theme.surfaceVariant.withOpacity(0.3),
         border: Border(
           top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.surfaceVariant.withOpacity(0.5),
             width: 1,
           ),
         ),
@@ -153,7 +161,8 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
               if (isExpanded) {
                 // If description is expanded, download the file
                 downloadAndOpenFile(
-                    "${AppData.base}/guidelines/${widget.guideline.fileName!}");
+                  "${AppData.base}/guidelines/${widget.guideline.fileName!}",
+                );
               } else {
                 // If description is not expanded, expand it
                 setState(() {
@@ -162,21 +171,23 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
               }
             },
             icon: Icon(
-              isExpanded ? Icons.download_outlined : Icons.read_more,
-              color: Colors.blue[600],
+              isExpanded ? Icons.download_rounded : Icons.read_more_rounded,
+              color: theme.primary,
               size: 18,
             ),
             label: Text(
-              isExpanded ? translation(context).lbl_download_pdf : translation(context).lbl_see_more,
+              isExpanded
+                  ? translation(context).lbl_download_pdf
+                  : translation(context).lbl_see_more,
               style: TextStyle(
-                color: Colors.blue[600],
+                color: theme.primary,
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
             ),
             style: TextButton.styleFrom(
-              backgroundColor: Colors.blue.withOpacity(0.1),
+              backgroundColor: theme.primary.withOpacity(0.1),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -197,6 +208,8 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
 
   // Function to download and open file
   Future<void> downloadAndOpenFile(String url) async {
+    final theme = OneUITheme.of(context);
+
     try {
       final Uri fileUri = Uri.parse(url);
       await launchUrl(fileUri);
@@ -205,8 +218,10 @@ class _MemoryOptimizedGuidelineItemState extends State<MemoryOptimizedGuidelineI
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("${translation(context).msg_error_occurred}: ${e.toString()}"),
-            backgroundColor: Colors.red,
+            content: Text(
+              "${translation(context).msg_error_occurred}: ${e.toString()}",
+            ),
+            backgroundColor: theme.error,
           ),
         );
       }

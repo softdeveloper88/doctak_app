@@ -2,11 +2,10 @@ import 'dart:convert';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_state.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -104,14 +103,15 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_suggestions,
         titleIcon: Icons.feedback_rounded,
       ),
       body: Container(
-        color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
+        color: theme.scaffoldBackground,
         child: Form(
           key: _formKey,
           child: ListView(
@@ -127,16 +127,9 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                 margin: const EdgeInsets.only(bottom: 24),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                  color: theme.cardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                    ),
-                  ],
+                  boxShadow: theme.cardShadow,
                 ),
                 child: Column(
                   children: [
@@ -144,12 +137,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.message_rounded,
-                        color: Colors.blue[600],
+                        color: theme.primary,
                         size: 32,
                       ),
                     ),
@@ -160,7 +153,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
-                        color: Colors.blue[800],
+                        color: theme.primary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -170,7 +163,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Poppins',
-                        color: Colors.grey[600],
+                        color: theme.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -182,16 +175,9 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                 margin: const EdgeInsets.only(bottom: 24),
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                  color: theme.cardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                    ),
-                  ],
+                  boxShadow: theme.cardShadow,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,11 +188,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
-                        color: Colors.blue[800],
+                        color: theme.primary,
                       ),
                     ),
                     const SizedBox(height: 20),
                     _buildTextField(
+                      theme,
                       translation(context).lbl_enter_your_name,
                       _nameController,
                       translation(context).lbl_name,
@@ -219,6 +206,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                       },
                     ),
                     _buildTextField(
+                      theme,
                       '03xxxxxxxx',
                       _phoneController,
                       translation(context).lbl_phone,
@@ -231,6 +219,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                       },
                     ),
                     _buildTextField(
+                      theme,
                       'info@doctak.net',
                       _emailController,
                       translation(context).lbl_email,
@@ -254,11 +243,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
-                        color: Colors.blue[800],
+                        color: theme.primary,
                       ),
                     ),
                     const SizedBox(height: 12),
                     _buildTextField(
+                      theme,
                       translation(context).lbl_type_message_here,
                       _messageController,
                       translation(context).lbl_message,
@@ -290,7 +280,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : submitSuggestion,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: theme.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -331,15 +321,15 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                  color: theme.cardBackground,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colors.green.withOpacity(0.2),
+                    color: theme.success.withOpacity(0.2),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.05),
+                      color: theme.success.withOpacity(0.05),
                       offset: const Offset(0, 2),
                       blurRadius: 8,
                       spreadRadius: 0,
@@ -354,12 +344,12 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color: theme.success.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.support_agent_rounded,
-                            color: Colors.green[700],
+                            color: theme.success,
                             size: 24,
                           ),
                         ),
@@ -370,11 +360,11 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                             children: [
                               Text(
                                 translation(context).msg_need_more_help,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Poppins',
-                                  color: Colors.black87,
+                                  color: theme.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 4),
@@ -383,7 +373,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontFamily: 'Poppins',
-                                  color: Colors.grey[600],
+                                  color: theme.textSecondary,
                                 ),
                               ),
                             ],
@@ -408,7 +398,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                                 children: [
                                   Icon(
                                     Icons.open_in_new_rounded,
-                                    color: Colors.green[600],
+                                    color: theme.success,
                                     size: 24,
                                   ),
                                   const SizedBox(width: 12),
@@ -442,7 +432,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                                   child: Text(
                                     translation(context).lbl_cancel,
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: theme.textSecondary,
                                       fontFamily: 'Poppins',
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -452,7 +442,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                                   onPressed: () =>
                                       Navigator.of(context).pop(true),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
+                                    backgroundColor: theme.success,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 20,
@@ -486,10 +476,10 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: theme.success.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.green.withOpacity(0.3),
+                            color: theme.success.withOpacity(0.3),
                             width: 1.5,
                           ),
                         ),
@@ -500,13 +490,13 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                               'assets/logo/whatsapp.png',
                               height: 24,
                               width: 24,
-                              color: Colors.green[700],
+                              color: theme.success,
                             ),
                             const SizedBox(width: 12),
                             Text(
                               translation(context).msg_connect_on_whatsapp,
                               style: TextStyle(
-                                color: Colors.green[700],
+                                color: theme.success,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 fontFamily: 'Poppins',
@@ -515,7 +505,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                             const SizedBox(width: 8),
                             Icon(
                               Icons.arrow_forward_rounded,
-                              color: Colors.green[700],
+                              color: theme.success,
                               size: 20,
                             ),
                           ],
@@ -533,6 +523,7 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
   }
 
   Widget _buildTextField(
+    OneUITheme theme,
     String hint,
     TextEditingController controller,
     String label,
@@ -547,10 +538,10 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
         focusNode: controller == _nameController ? _nameFocusNode : null,
         maxLines: maxLines,
         validator: validator,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 14,
-          color: Colors.black87,
+          color: theme.textPrimary,
         ),
         decoration: InputDecoration(
           labelText: label,
@@ -560,52 +551,46 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
             width: 20,
             height: 20,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: theme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 18, color: Colors.blue[600]),
+            child: Icon(icon, size: 18, color: theme.primary),
           ),
           labelStyle: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
-            color: Colors.grey[600],
+            color: theme.textSecondary,
           ),
           hintStyle: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
-            color: Colors.grey[400],
+            color: theme.textTertiary,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey.withOpacity(0.3),
-              width: 1.5,
-            ),
+            borderSide: BorderSide(color: theme.border, width: 1.5),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey.withOpacity(0.3),
-              width: 1.5,
-            ),
+            borderSide: BorderSide(color: theme.border, width: 1.5),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.blue, width: 2),
+            borderSide: BorderSide(color: theme.primary, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.red.withOpacity(0.7),
+              color: theme.error.withOpacity(0.7),
               width: 1.5,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.red, width: 2),
+            borderSide: BorderSide(color: theme.error, width: 2),
           ),
           filled: true,
-          fillColor: appStore.isDarkMode ? Colors.grey[800] : Colors.grey[50],
+          fillColor: theme.surfaceVariant,
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16,
             vertical: maxLines > 1 ? 16 : 14,

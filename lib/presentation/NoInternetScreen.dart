@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 
 class NoInternetScreen extends StatefulWidget {
    NoInternetScreen({super.key});
@@ -14,12 +15,14 @@ class NoInternetScreen extends StatefulWidget {
 class _NoInternetScreenState extends State<NoInternetScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return WillPopScope(
       onWillPop: () async{
         return false;
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackground,
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -73,6 +76,8 @@ class ErrorInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -86,12 +91,18 @@ class ErrorInfo extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall!
-                  .copyWith(fontWeight: FontWeight.bold),
+                  .copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
+                  ),
             ),
             const SizedBox(height: 16),
             Text(
               description,
               textAlign: TextAlign.center,
+              style: TextStyle(
+                color: theme.textSecondary,
+              ),
             ),
             const SizedBox(height: 16 * 2.5),
             button ??
@@ -99,10 +110,10 @@ class ErrorInfo extends StatelessWidget {
                   onPressed: press,
                   style: ElevatedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
-                      backgroundColor: Colors.black,
+                      backgroundColor: theme.primary,
                       foregroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)))),
+                          borderRadius: BorderRadius.all(Radius.circular(12)))),
                   child: Text(btnText ?? translation(context).lbl_retry.toUpperCase()),
                 ),
             const SizedBox(height: 16),

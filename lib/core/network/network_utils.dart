@@ -194,7 +194,7 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
       //   throw TokenException(e);
       // });
     } else {
-      throw '';
+      throw 'Session expired. Please login again.';
     }
   }
 
@@ -203,12 +203,80 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
   } else {
     try {
       var body = jsonDecode(response.body);
-      throw parseHtmlString(body['message']);
-    } on Exception catch (e) {
+      // Extract error message from various possible response structures
+      String errorMessage = _extractErrorMessage(body);
+      throw errorMessage;
+    } on FormatException {
+      // Response body is not valid JSON
+      throw 'Server error (${response.statusCode})';
+    } catch (e) {
+      if (e is String) {
+        throw e; // Re-throw if it's already a formatted string
+      }
       log(e);
-      throw 'Something Went Wrong';
+      throw 'Something went wrong. Please try again.';
     }
   }
+}
+
+/// Extracts a user-friendly error message from API response body
+String _extractErrorMessage(dynamic body) {
+  if (body == null) {
+    return 'An unexpected error occurred';
+  }
+  
+  // Try different common API error response formats
+  String? message;
+  
+  // Format 1: { "message": "Error text" }
+  if (body is Map && body['message'] != null) {
+    message = body['message'].toString();
+  }
+  // Format 2: { "error": "Error text" }
+  else if (body is Map && body['error'] != null) {
+    if (body['error'] is String) {
+      message = body['error'];
+    } else if (body['error'] is Map && body['error']['message'] != null) {
+      message = body['error']['message'].toString();
+    }
+  }
+  // Format 3: { "errors": { "field": ["Error 1", "Error 2"] } }
+  else if (body is Map && body['errors'] != null) {
+    if (body['errors'] is Map) {
+      // Get first error message from validation errors
+      var errors = body['errors'] as Map;
+      for (var key in errors.keys) {
+        var fieldErrors = errors[key];
+        if (fieldErrors is List && fieldErrors.isNotEmpty) {
+          message = fieldErrors.first.toString();
+          break;
+        } else if (fieldErrors is String) {
+          message = fieldErrors;
+          break;
+        }
+      }
+    } else if (body['errors'] is List) {
+      var errorsList = body['errors'] as List;
+      if (errorsList.isNotEmpty) {
+        message = errorsList.first.toString();
+      }
+    }
+  }
+  // Format 4: { "msg": "Error text" }
+  else if (body is Map && body['msg'] != null) {
+    message = body['msg'].toString();
+  }
+  // Format 5: Body is just a string
+  else if (body is String) {
+    message = body;
+  }
+  
+  // Clean up HTML if present and return
+  if (message != null && message.isNotEmpty) {
+    return parseHtmlString(message);
+  }
+  
+  return 'An unexpected error occurred';
 }
 
 enum HttpMethod { GET, POST, DELETE, PUT }

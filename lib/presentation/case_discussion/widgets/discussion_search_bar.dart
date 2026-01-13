@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../theme/one_ui_theme.dart';
 
 class DiscussionSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -20,17 +21,12 @@ class DiscussionSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: theme.cardBackground,
+        boxShadow: theme.cardShadow,
       ),
       child: Column(
         children: [
@@ -45,7 +41,7 @@ class DiscussionSearchBar extends StatelessWidget {
                 borderSide: BorderSide.none,
               ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: theme.inputBackground,
             ),
             onChanged: onSearch,
           ),

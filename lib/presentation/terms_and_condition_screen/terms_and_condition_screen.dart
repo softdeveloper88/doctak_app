@@ -1,6 +1,5 @@
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
@@ -18,8 +17,10 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       body: Column(
         children: [
           // Custom App Bar with DoctakAppBar
@@ -31,7 +32,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
           // Content
           Expanded(
             child: Container(
-              color: svGetScaffoldColor(),
+              color: theme.scaffoldBackground,
               child: Column(
                 children: [
                   // Terms Content
@@ -40,22 +41,18 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                       margin: const EdgeInsets.all(16),
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardBackground,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withAlpha(13),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                        boxShadow: theme.isDark ? [] : theme.cardShadow,
                         border: Border.all(
-                          color: Colors.blue.withAlpha(26),
+                          color: theme.isDark
+                              ? theme.surfaceVariant
+                              : theme.primary.withOpacity(0.1),
                           width: 1,
                         ),
                       ),
                       child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -66,15 +63,22 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                                 horizontal: 16,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
+                                color: theme.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.blue[600],
-                                    size: 24,
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: theme.primary.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.info_outline_rounded,
+                                      color: theme.primary,
+                                      size: 22,
+                                    ),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
@@ -82,8 +86,8 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                                       'Terms of Service',
                                       style: TextStyle(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.blue[800],
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.textPrimary,
                                         fontFamily: 'Poppins',
                                       ),
                                     ),
@@ -165,11 +169,11 @@ These Terms shall be governed by and construed in accordance with the laws of [Y
 If you have any questions about these Terms, please contact us at info@DocTak.net.
 
 By using the App, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service''',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                height: 1.5,
+                                height: 1.6,
                                 fontFamily: 'Poppins',
-                                color: Color(0xFF374151),
+                                color: theme.textSecondary,
                               ),
                             ),
                           ],
@@ -183,14 +187,19 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: svGetScaffoldColor(),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withAlpha(13),
-                          offset: const Offset(0, -3),
-                          blurRadius: 6,
-                        ),
-                      ],
+                      color: theme.cardBackground,
+                      border: Border(
+                        top: BorderSide(color: theme.divider, width: 1),
+                      ),
+                      boxShadow: theme.isDark
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                offset: const Offset(0, -3),
+                                blurRadius: 6,
+                              ),
+                            ],
                     ),
                     child: Column(
                       children: [
@@ -198,12 +207,14 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: _isChecked
+                                ? theme.primary.withOpacity(0.05)
+                                : theme.surfaceVariant.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _isChecked
-                                  ? Colors.blue.withAlpha(100)
-                                  : Colors.grey.withAlpha(50),
+                                  ? theme.primary.withOpacity(0.3)
+                                  : theme.border,
                               width: 1.5,
                             ),
                           ),
@@ -213,7 +224,7 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                 padding: const EdgeInsets.all(2),
                                 decoration: BoxDecoration(
                                   color: _isChecked
-                                      ? Colors.blue.withOpacity(0.1)
+                                      ? theme.primary.withOpacity(0.1)
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -222,7 +233,12 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  activeColor: Colors.blue[600],
+                                  activeColor: theme.primary,
+                                  checkColor: Colors.white,
+                                  side: BorderSide(
+                                    color: theme.textSecondary,
+                                    width: 1.5,
+                                  ),
                                   onChanged: (bool? value) {
                                     setState(() {
                                       _isChecked = value!;
@@ -241,8 +257,8 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                     fontWeight: FontWeight.w500,
                                     fontFamily: 'Poppins',
                                     color: _isChecked
-                                        ? Colors.blue[800]
-                                        : const Color(0xFF6B7280),
+                                        ? theme.primary
+                                        : theme.textSecondary,
                                   ),
                                 ),
                               ),
@@ -257,10 +273,10 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: _isChecked
+                            boxShadow: _isChecked && !theme.isDark
                                 ? [
                                     BoxShadow(
-                                      color: Colors.blue.withOpacity(0.3),
+                                      color: theme.primary.withOpacity(0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -278,9 +294,11 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _isChecked
-                                  ? Colors.blue[600]
-                                  : Colors.grey[300],
+                                  ? theme.primary
+                                  : theme.surfaceVariant,
                               foregroundColor: Colors.white,
+                              disabledBackgroundColor: theme.surfaceVariant,
+                              disabledForegroundColor: theme.textTertiary,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -292,12 +310,12 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                               children: [
                                 Icon(
                                   _isChecked
-                                      ? Icons.check_circle_outline
-                                      : Icons.radio_button_unchecked,
+                                      ? Icons.check_circle_rounded
+                                      : Icons.radio_button_unchecked_rounded,
                                   size: 20,
                                   color: _isChecked
                                       ? Colors.white
-                                      : Colors.grey[600],
+                                      : theme.textTertiary,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
@@ -308,7 +326,7 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                     fontFamily: 'Poppins',
                                     color: _isChecked
                                         ? Colors.white
-                                        : Colors.grey[600],
+                                        : theme.textTertiary,
                                   ),
                                 ),
                               ],

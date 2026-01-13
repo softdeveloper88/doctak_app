@@ -1,28 +1,18 @@
 import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/doctak_ai_module/presentation/ai_chat/widgets/user_message_bubble.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
-import '../../../theme/theme_helper.dart';
-import '../../../main.dart';
 import '../blocs/ai_chat/ai_chat_bloc.dart';
-import '../data/api/streaming_message_service.dart';
 import '../data/models/ai_chat_model/ai_chat_message_model.dart';
 import '../data/models/ai_chat_model/ai_chat_session_model.dart';
-import 'ai_chat/widgets/ai_message_bubble.dart';
 import 'ai_chat/widgets/session_settings_bottom_sheet.dart';
-import 'ai_chat/widgets/streaming_message_bubble.dart';
 import 'ai_chat/widgets/virtualized_message_list.dart';
-import 'ai_chat/widgets/ai_typing_indicator.dart';
 import 'ai_chat/widgets/message_input.dart';
 
 class AiChatScreen extends StatefulWidget {
@@ -144,9 +134,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
       debugPrint("Blocked message send - already waiting for response");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            translation(context).msg_wait_for_ai_response,
-          ),
+          content: Text(translation(context).msg_wait_for_ai_response),
           duration: Duration(seconds: 2),
           behavior: SnackBarBehavior.floating,
         ),
@@ -255,7 +243,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
       // Show error toast if we can't get session
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(translation(context).msg_cannot_access_session_settings),
+          content: Text(
+            translation(context).msg_cannot_access_session_settings,
+          ),
           behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 2),
         ),
@@ -323,13 +313,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   // Enhanced welcome screen with 4 essential medical prompt cards
   Widget _buildWelcomeScreen() {
-    final isDarkMode = appStore.isDarkMode;
+    final theme = OneUITheme.of(context);
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen = screenSize.width < 400;
     final isVerySmallScreen = screenSize.height < 700;
 
     return Container(
-      color: svGetScaffoldColor(),
+      color: theme.scaffoldBackground,
       child: SafeArea(
         child: Column(
           children: [
@@ -343,16 +333,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
               ),
               child: Column(
                 children: [
-                  // AI Icon matching ChatGPT design
+                  // AI Icon - OneUI 8.5 style
                   Container(
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      color: Colors.blue[600],
+                      color: theme.primary,
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
+                          color: theme.primary.withOpacity(0.3),
                           spreadRadius: 2,
                           blurRadius: 12,
                           offset: const Offset(0, 4),
@@ -372,7 +362,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20),
                   ),
 
-                  // Title text matching ChatGPT design
+                  // Title text - OneUI 8.5 style
                   Text(
                     translation(context).lbl_doctak_ai_assistant,
                     style: TextStyle(
@@ -380,7 +370,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Poppins',
                       letterSpacing: 0.5,
-                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                      color: theme.textPrimary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -389,7 +379,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12),
                   ),
 
-                  // Description matching ChatGPT design
+                  // Description - OneUI 8.5 style
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
@@ -399,9 +389,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         fontSize: 14,
                         fontFamily: 'Poppins',
                         height: 1.5,
-                        color: appStore.isDarkMode 
-                            ? Colors.white70
-                            : Colors.black.withAlpha(179),
+                        color: theme.textSecondary,
                       ),
                     ),
                   ),
@@ -414,14 +402,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  // Section header matching ChatGPT design
+                  // Section header - OneUI 8.5 style
                   Text(
                     translation(context).lbl_quick_start,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
-                      color: Colors.blue[800],
+                      color: theme.primary,
                     ),
                   ),
 
@@ -449,27 +437,42 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   children: [
                     _buildEnhancedFeatureCard(
                       title: translation(context).lbl_diagnosis_support,
-                      description: translation(context).lbl_clinical_decision_assistance,
+                      description: translation(
+                        context,
+                      ).lbl_clinical_decision_assistance,
                       icon: Icons.medical_services_rounded,
-                      gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
+                      gradientColors: [
+                        theme.primary.withOpacity(0.6),
+                        theme.primary,
+                      ],
                       prompt: translation(context).msg_diagnosis_support_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
                     _buildEnhancedFeatureCard(
                       title: translation(context).lbl_drug_information,
-                      description: translation(context).lbl_medication_safety_interactions,
+                      description: translation(
+                        context,
+                      ).lbl_medication_safety_interactions,
                       icon: Icons.medication_liquid_rounded,
-                      gradientColors: [Colors.blue[200]!, Colors.blue[500]!],
+                      gradientColors: [
+                        theme.primary.withOpacity(0.4),
+                        theme.primary.withOpacity(0.8),
+                      ],
                       prompt: translation(context).msg_drug_information_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
                     _buildEnhancedFeatureCard(
                       title: translation(context).lbl_treatment_plans,
-                      description: translation(context).lbl_evidence_based_protocols,
+                      description: translation(
+                        context,
+                      ).lbl_evidence_based_protocols,
                       icon: Icons.assignment_turned_in_rounded,
-                      gradientColors: [Colors.blue[400]!, Colors.blue[700]!],
+                      gradientColors: [
+                        theme.primary.withOpacity(0.7),
+                        theme.primary,
+                      ],
                       prompt: translation(context).msg_treatment_plans_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
@@ -478,7 +481,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       title: translation(context).lbl_medical_codes,
                       description: translation(context).lbl_icd_cpt_code_lookup,
                       icon: Icons.qr_code_scanner_rounded,
-                      gradientColors: [Colors.blue[300]!, Colors.blue[600]!],
+                      gradientColors: [
+                        theme.primary.withOpacity(0.6),
+                        theme.primary,
+                      ],
                       prompt: translation(context).msg_medical_codes_prompt,
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
@@ -498,194 +504,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
-  // Medical feature card with icon, title, description, and prompt text
-  Widget _buildFeatureCard(
-    String title,
-    String description,
-    IconData icon,
-    String promptText, {
-    double? cardWidth,
-  }) {
-    final isDarkMode = appStore.isDarkMode;
-    final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.width < 360;
-    final isMediumScreen = screenSize.width >= 360 && screenSize.width < 600;
-
-    // Calculate default width if not provided - ensure proper sizing on all screens
-    final width =
-        cardWidth ?? (screenSize.width > 600 ? 220 : screenSize.width * 0.42);
-
-    // Adjust height based on screen size - use more compact heights to fit more cards
-    final double minHeight = isSmallScreen
-        ? 100.0
-        : (isMediumScreen ? 110.0 : 120.0);
-    final double maxHeight = isSmallScreen
-        ? 120.0
-        : (isMediumScreen ? 130.0 : 140.0);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          // Add haptic feedback for better user experience
-          HapticFeedback.lightImpact();
-          // Pre-create session then send the prompt
-          _preCreateSession(promptText);
-        },
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          width: width,
-          constraints: BoxConstraints(
-            minHeight: minHeight,
-            maxHeight: maxHeight,
-          ),
-          padding: EdgeInsets.symmetric(
-            horizontal: isSmallScreen ? 10 : 12,
-            vertical: isSmallScreen ? 8 : 10,
-          ),
-          decoration: BoxDecoration(
-            color: isDarkMode ? Colors.blueGrey[800] : Colors.grey[100],
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blue.withOpacity(0.05),
-                offset: const Offset(0, 2),
-                blurRadius: 6,
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top row with icon and title for better space usage
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Icon in a small circle with better padding
-                  Container(
-                    padding: EdgeInsets.all(isSmallScreen ? 6 : 7),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      icon,
-                      size: isSmallScreen ? 14 : 16,
-                      color: Colors.blue[600],
-                    ),
-                  ),
-
-                  SizedBox(width: isSmallScreen ? 8 : 10),
-
-                  // Title in bold - make sure it doesn't overflow
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: isSmallScreen ? 11 : 13,
-                        fontFamily: 'Poppins',
-                        color: Colors.blue[800],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: isSmallScreen ? 8 : 10),
-
-              // Description with better text styling
-              Text(
-                description,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: isDarkMode ? Colors.white70 : Colors.black54,
-                  fontSize: isSmallScreen ? 10 : 11,
-                  height: 1.2, // More compact line height
-                  letterSpacing: -0.1,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              // Example text (hidden - just for tooltip/semantic access)
-              Semantics(label: promptText, child: const SizedBox.shrink()),
-
-              // Use flexible spacing
-              const Spacer(flex: 1),
-
-              // Action row with try it button and hint about prompt
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Small hint about the prompt with tooltip for full text
-                    Expanded(
-                      child: Tooltip(
-                        message: promptText,
-                        child: Text(
-                          _shortenPrompt(promptText),
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: isDarkMode ? Colors.white60 : Colors.black45,
-                            fontSize: isSmallScreen ? 9 : 10,
-                            fontStyle: FontStyle.italic,
-                            height: 1.2, // Better line height
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-
-                    // Spacing
-                    const SizedBox(width: 8),
-
-                    // Try it button with improved styling
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isSmallScreen ? 8 : 10,
-                        vertical: isSmallScreen ? 4 : 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.blue.withOpacity(0.2)
-                            : Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        translation(context).lbl_try_it,
-                        style: TextStyle(
-                          color: Colors.blue[600],
-                          fontSize: isSmallScreen ? 10 : 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Helper to shorten prompt text for preview
-  String _shortenPrompt(String prompt) {
-    final words = prompt.split(' ');
-    if (words.length <= 4) return prompt;
-
-    return '${words.take(4).join(' ')}...';
-  }
-
   Widget _buildChatList() {
     return BlocConsumer<AiChatBloc, AiChatState>(
       listener: (context, state) {
@@ -697,7 +515,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
         // CASE 1: States that indicate we're actively sending a message
         if (state is MessageSending) {
-          bool hasMessages = state.messages.isNotEmpty;
           setState(() {
             // Always hide welcome screen when sending messages
             _showWelcomeScreen = false;
@@ -823,6 +640,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
         }
       },
       builder: (context, state) {
+        final theme = OneUITheme.of(context);
         // Use a more stable approach to determine what to render
         // This prevents flickering between different UI states
 
@@ -844,9 +662,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
         // Use improved virtualized message list with streaming support
         final isStreaming = state is MessageStreaming;
-        final streamingContent = isStreaming
-            ? (state as MessageStreaming).partialResponse
-            : '';
+        final streamingContent = isStreaming ? state.partialResponse : '';
 
         if (state is SessionLoading) {
           // When session is loading and we have a pending message, show it immediately
@@ -886,18 +702,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     height: 40,
                     child: CircularProgressIndicator(
                       strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.blue[600]!,
-                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     translation(context).msg_loading_conversation,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: theme.textSecondary,
                     ),
                   ),
                 ],
@@ -920,11 +734,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 48,
-                        color: Colors.red[600],
-                      ),
+                      Icon(Icons.error_outline, size: 48, color: theme.error),
                       const SizedBox(height: 16),
                       Text(
                         translation(context).msg_failed_to_send_message,
@@ -974,7 +784,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             icon: const Icon(Icons.refresh),
                             label: Text(translation(context).lbl_try_again),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[600],
+                              backgroundColor: theme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 24,
@@ -1031,16 +841,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Icon(
                     Icons.chat_bubble_outline,
                     size: 64,
-                    color: Colors.blue[600]!.withOpacity(0.5),
+                    color: theme.primary.withOpacity(0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Select a chat from the menu',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.black54,
+                      color: theme.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -1048,18 +858,18 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: theme.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.menu, size: 24, color: Colors.blue[600]),
+                    child: Icon(Icons.menu, size: 24, color: theme.primary),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Open the menu to start a new chat',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
-                      color: Colors.black38,
+                      color: theme.textSecondary.withOpacity(0.7),
                       fontStyle: FontStyle.italic,
                     ),
                     textAlign: TextAlign.center,
@@ -1145,10 +955,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = OneUITheme.of(context);
 
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: _getCurrentSessionTitle(),
         titleIcon: Icons.psychology_alt_rounded,
@@ -1158,7 +968,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           Navigator.pop(context);
         },
         actions: [
-          // History button - moved to right side
+          // History button - OneUI 8.5 style
           Builder(
             builder: (context) => IconButton(
               padding: EdgeInsets.zero,
@@ -1166,10 +976,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: theme.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.history, color: Colors.blue[600], size: 14),
+                child: Icon(Icons.history, color: theme.primary, size: 14),
               ),
               tooltip: 'Chat History',
               onPressed: () {
@@ -1178,7 +988,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               },
             ),
           ),
-          
+
           // New Chat button
           IconButton(
             padding: EdgeInsets.zero,
@@ -1186,10 +996,10 @@ class _AiChatScreenState extends State<AiChatScreen> {
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.add_circle, color: Colors.blue[600], size: 14),
+              child: Icon(Icons.add_circle, color: theme.primary, size: 14),
             ),
             tooltip: 'New Chat',
             onPressed: () {
@@ -1212,6 +1022,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           // Settings button (only visible when in a chat)
           BlocBuilder<AiChatBloc, AiChatState>(
             builder: (context, state) {
+              final theme = OneUITheme.of(context);
               if (state is SessionSelected ||
                   state is SessionUpdating ||
                   state is MessageSending ||
@@ -1219,16 +1030,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   state is MessageSent) {
                 return IconButton(
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                   icon: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: theme.primary.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.settings_outlined,
-                      color: Colors.blue[600],
+                      color: theme.primary,
                       size: 14,
                     ),
                   ),
@@ -1254,7 +1068,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 width: double.infinity,
-                color: Theme.of(context).cardColor,
+                color: theme.cardBackground,
                 child: Row(
                   children: [
                     ClipRRect(
@@ -1267,14 +1081,21 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Image attached',
-                        style: TextStyle(fontSize: 14),
+                        translation(context).lbl_image_attached,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: theme.textPrimary,
+                        ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 20),
+                      icon: Icon(
+                        Icons.close,
+                        size: 20,
+                        color: theme.textSecondary,
+                      ),
                       onPressed: _clearImage,
                     ),
                   ],
@@ -1318,13 +1139,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Widget _buildChatDrawer() {
-    final isDarkMode = appStore.isDarkMode;
+    final theme = OneUITheme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final topPadding = mediaQuery.padding.top + 8;
 
     return Drawer(
-      width: mediaQuery.size.width * 0.85, // Better width for drawer
-      backgroundColor: svGetScaffoldColor(),
+      width: mediaQuery.size.width * 0.85,
+      backgroundColor: theme.scaffoldBackground,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -1340,25 +1161,28 @@ class _AiChatScreenState extends State<AiChatScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Colors.blue.withOpacity(0.1), svGetScaffoldColor()],
+                colors: [
+                  theme.primary.withOpacity(0.1),
+                  theme.scaffoldBackground,
+                ],
               ),
             ),
             child: Row(
               children: [
-                // Profile image with better styling
+                // Profile image - OneUI 8.5 style
                 Container(
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue.withOpacity(0.1),
+                    color: theme.primary.withOpacity(0.1),
                     border: Border.all(
-                      color: Colors.blue.withOpacity(0.2),
+                      color: theme.primary.withOpacity(0.2),
                       width: 2,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
                       ),
@@ -1367,7 +1191,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   child: Center(
                     child: CustomImageView(
                       imagePath: '${AppData.imageUrl}${AppData.profile_pic}',
-                      color: isDarkMode ? Colors.white : Colors.blue[600],
+                      color: theme.isDark ? Colors.white : theme.primary,
                     ),
                   ),
                 ),
@@ -1382,7 +1206,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Poppins',
                           fontSize: 16,
-                          color: isDarkMode ? Colors.white : Colors.blue[800],
+                          color: theme.isDark ? Colors.white : theme.primary,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1391,33 +1215,29 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         AppData.specialty,
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: isDarkMode ? Colors.white60 : Colors.black54,
+                          color: theme.textSecondary,
                           fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Add close button for better UX
+                // Close button
                 IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    size: 20,
-                    color: isDarkMode ? Colors.white60 : Colors.black54,
-                  ),
+                  icon: Icon(Icons.close, size: 20, color: theme.textSecondary),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
           ),
 
-          // Divider with better padding
+          // Divider
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Divider(color: Colors.blue.withOpacity(0.2), height: 1),
+            child: Divider(color: theme.primary.withOpacity(0.2), height: 1),
           ),
 
-          // New Chat Button - More prominent styling
+          // New Chat Button - OneUI 8.5 style
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             child: ElevatedButton(
@@ -1459,7 +1279,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: Colors.blue[600],
+                backgroundColor: theme.primary,
                 padding: const EdgeInsets.symmetric(
                   vertical: 14,
                   horizontal: 16,
@@ -1475,8 +1295,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   const Icon(Icons.add, size: 20),
                   const SizedBox(width: 12),
                   Text(
-                    'New Chat',
-                    style: TextStyle(
+                    translation(context).lbl_new_chat,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
                       color: Colors.white,
@@ -1489,7 +1309,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             ),
           ),
 
-          // Recent chats header with better styling
+          // Recent chats header - OneUI 8.5 style
           Padding(
             padding: const EdgeInsets.only(
               left: 16,
@@ -1502,17 +1322,17 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 Icon(
                   Icons.history,
                   size: 16,
-                  color: Colors.blue[600]!.withOpacity(0.7),
+                  color: theme.primary.withOpacity(0.7),
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Recent Chats',
+                  translation(context).lbl_recent_chats,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                     letterSpacing: 0.2,
                     fontFamily: 'Poppins',
-                    color: Colors.blue[600]!.withOpacity(0.9),
+                    color: theme.primary.withOpacity(0.9),
                   ),
                 ),
                 const Spacer(),
@@ -1532,13 +1352,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '$count',
                         style: TextStyle(
-                          color: Colors.blue[600],
+                          color: theme.primary,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Poppins',
@@ -1609,9 +1429,9 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 if (sessions.isEmpty) {
                   return Center(
                     child: Text(
-                      'No chat history',
+                      translation(context).msg_no_chat_history,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDarkMode ? Colors.white54 : Colors.black38,
+                        color: theme.textSecondary,
                       ),
                     ),
                   );
@@ -1688,8 +1508,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                                 ? FontWeight.bold
                                 : FontWeight.normal,
                             color: isSelected
-                                ? Colors.blue[600]
-                                : Colors.black87,
+                                ? theme.primary
+                                : theme.textPrimary,
                             letterSpacing: isSelected ? 0.1 : 0,
                           ),
                         ),
@@ -1700,8 +1520,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             fontSize: 11,
                             fontFamily: 'Poppins',
                             color: isSelected
-                                ? Colors.blue[600]!.withOpacity(0.7)
-                                : Colors.grey[600],
+                                ? theme.primary.withOpacity(0.7)
+                                : theme.textSecondary,
                           ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
@@ -1716,15 +1536,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: isSelected
-                                ? Colors.blue.withOpacity(0.1)
-                                : Colors.grey.withOpacity(0.1),
+                                ? theme.primary.withOpacity(0.1)
+                                : theme.textSecondary.withOpacity(0.1),
                           ),
                           child: Icon(
                             Icons.chat_bubble_outline,
                             size: 16,
                             color: isSelected
-                                ? Colors.blue[600]
-                                : Colors.grey[600],
+                                ? theme.primary
+                                : theme.textSecondary,
                           ),
                         ),
                         trailing: IconButton(
@@ -1732,14 +1552,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                             padding: const EdgeInsets.all(5),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.grey.withOpacity(0.1),
+                              color: theme.textSecondary.withOpacity(0.1),
                             ),
                             child: Icon(
                               Icons.delete_outline,
                               size: 16,
                               color: isSelected
-                                  ? Colors.blue[600]
-                                  : Colors.grey[600],
+                                  ? theme.primary
+                                  : theme.textSecondary,
                             ),
                           ),
                           onPressed: () async {
@@ -1748,27 +1568,40 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
                             final shouldDelete = await showDialog<bool>(
                               context: context,
-                              builder: (BuildContext context) {
+                              builder: (BuildContext dialogContext) {
+                                final dialogTheme = OneUITheme.of(
+                                  dialogContext,
+                                );
                                 return AlertDialog(
-                                  title: const Text('Delete Conversation'),
+                                  backgroundColor: dialogTheme.cardBackground,
+                                  title: Text(
+                                    'Delete Conversation',
+                                    style: TextStyle(
+                                      color: dialogTheme.textPrimary,
+                                    ),
+                                  ),
                                   content: Text(
                                     'Are you sure you want to delete "${session.name}"?',
+                                    style: TextStyle(
+                                      color: dialogTheme.textSecondary,
+                                    ),
                                   ),
                                   actions: <Widget>[
                                     TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).pop(false),
+                                      onPressed: () => Navigator.of(
+                                        dialogContext,
+                                      ).pop(false),
                                       child: Text(
                                         'CANCEL',
                                         style: TextStyle(
-                                          color: Colors.blue[600],
+                                          color: dialogTheme.primary,
                                           fontFamily: 'Poppins',
                                         ),
                                       ),
                                     ),
                                     FilledButton(
                                       style: FilledButton.styleFrom(
-                                        backgroundColor: Colors.red,
+                                        backgroundColor: dialogTheme.error,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                             8,
@@ -1776,7 +1609,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                                         ),
                                       ),
                                       onPressed: () =>
-                                          Navigator.of(context).pop(true),
+                                          Navigator.of(dialogContext).pop(true),
                                       child: const Text('DELETE'),
                                     ),
                                   ],
@@ -1805,15 +1638,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           },
                         ),
                         selected: isSelected,
-                        selectedTileColor: Colors.blue.withOpacity(0.1),
+                        selectedTileColor: theme.primary.withOpacity(0.1),
                         onTap: () {
                           // First close the drawer
                           Navigator.pop(context);
 
                           // Check if this is already the selected session
                           if (state is SessionSelected &&
-                              (state as SessionSelected).selectedSession.id
-                                      .toString() ==
+                              state.selectedSession.id.toString() ==
                                   session.id.toString()) {
                             // Already selected, just clear welcome screen
                             setState(() {
@@ -1865,7 +1697,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
     );
   }
 
-  // Professional feature card matching ChatGPT design
+  // Professional feature card - OneUI 8.5 styled
   Widget _buildEnhancedFeatureCard({
     required String title,
     required String description,
@@ -1875,6 +1707,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
     required bool isSmallScreen,
     bool isVerySmallScreen = false,
   }) {
+    final theme = OneUITheme.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1885,15 +1719,15 @@ class _AiChatScreenState extends State<AiChatScreen> {
         borderRadius: BorderRadius.circular(20),
         child: Container(
           decoration: BoxDecoration(
-            color: appStore.isDarkMode ? Colors.grey[800] : Colors.white,
+            color: theme.cardBackground,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.blue.withOpacity(0.2),
+              color: theme.primary.withOpacity(0.15),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(theme.isDark ? 0.15 : 0.08),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -1903,28 +1737,24 @@ class _AiChatScreenState extends State<AiChatScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon matching ChatGPT style
+              // Icon - OneUI 8.5 style
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[600],
+                  color: theme.primary,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.4),
+                      color: theme.primary.withOpacity(0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: Icon(icon, color: Colors.white, size: 24),
               ),
               const SizedBox(height: 8),
-              
+
               // Title
               Text(
                 title,
@@ -1932,19 +1762,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
-                  color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                  color: theme.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
-              
+
               // Description
               Text(
                 description,
                 style: TextStyle(
                   fontSize: 11,
                   fontFamily: 'Poppins',
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),

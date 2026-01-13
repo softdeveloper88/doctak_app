@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
@@ -7,13 +8,22 @@ class ProfileShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final shimmerColor = isDark
+        ? theme.surfaceVariant.withOpacity(0.4)
+        : Colors.grey[200]!;
+    final baseColor = isDark
+        ? theme.surfaceVariant.withOpacity(0.3)
+        : Colors.grey[300]!;
+    final highlightColor = isDark
+        ? theme.surfaceVariant.withOpacity(0.5)
+        : Colors.grey[100]!;
+
     return Shimmer.fromColors(
-      baseColor: Theme.of(context).brightness == Brightness.dark
-          ? Colors.grey[800]!
-          : Colors.grey[300]!,
-      highlightColor: Theme.of(context).brightness == Brightness.dark
-          ? Colors.grey[700]!
-          : Colors.grey[100]!,
+      baseColor: baseColor,
+      highlightColor: highlightColor,
       period: const Duration(milliseconds: 1500),
       child: SingleChildScrollView(
         child: Column(
@@ -35,7 +45,7 @@ class ProfileShimmer extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.grey[200]!, Colors.grey[300]!],
+                          colors: [shimmerColor, shimmerColor],
                         ),
                       ),
                     ),
@@ -126,7 +136,7 @@ class ProfileShimmer extends StatelessWidget {
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.white, width: 4),
                               borderRadius: BorderRadius.circular(50),
-                              color: Colors.grey[200],
+                              color: shimmerColor,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -322,7 +332,7 @@ class ProfileShimmer extends StatelessWidget {
                             width: 18,
                             height: 18,
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: shimmerColor,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -331,7 +341,7 @@ class ProfileShimmer extends StatelessWidget {
                             width: 120,
                             height: 14,
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: shimmerColor,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -342,7 +352,7 @@ class ProfileShimmer extends StatelessWidget {
                         width: 60,
                         height: 18,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
+                          color: shimmerColor,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -380,7 +390,7 @@ class ProfileShimmer extends StatelessWidget {
                             width: 20,
                             height: 20,
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: shimmerColor,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -389,7 +399,7 @@ class ProfileShimmer extends StatelessWidget {
                             width: 60,
                             height: 14,
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: shimmerColor,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
@@ -421,7 +431,7 @@ class ProfileShimmer extends StatelessWidget {
                               width: 18,
                               height: 18,
                               decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                                color: shimmerColor,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -430,7 +440,7 @@ class ProfileShimmer extends StatelessWidget {
                               width: 50,
                               height: 14,
                               decoration: BoxDecoration(
-                                color: Colors.grey[200],
+                                color: shimmerColor,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -456,11 +466,11 @@ class ProfileShimmer extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       // Posts Stat
-                      _buildStatShimmer(),
+                      _buildStatShimmer(shimmerColor),
                       // Followers Stat
-                      _buildStatShimmer(),
+                      _buildStatShimmer(shimmerColor),
                       // Following Stat
-                      _buildStatShimmer(),
+                      _buildStatShimmer(shimmerColor),
                     ],
                   ),
                 ),
@@ -489,7 +499,7 @@ class ProfileShimmer extends StatelessWidget {
                       const SizedBox(height: 16),
                       // Post items
                       for (int i = 0; i < 3; i++) ...[
-                        _buildPostShimmer(),
+                        _buildPostShimmer(shimmerColor),
                         const SizedBox(height: 12),
                       ],
                     ],
@@ -503,7 +513,7 @@ class ProfileShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildStatShimmer() {
+  Widget _buildStatShimmer(Color shimmerColor) {
     return Column(
       children: [
         Row(
@@ -513,7 +523,7 @@ class ProfileShimmer extends StatelessWidget {
               width: 16,
               height: 16,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: shimmerColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -522,7 +532,7 @@ class ProfileShimmer extends StatelessWidget {
               width: 30,
               height: 16,
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: shimmerColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -533,7 +543,7 @@ class ProfileShimmer extends StatelessWidget {
           width: 60,
           height: 12,
           decoration: BoxDecoration(
-            color: Colors.grey[200],
+            color: shimmerColor,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -541,7 +551,7 @@ class ProfileShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildPostShimmer() {
+  Widget _buildPostShimmer(Color shimmerColor) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -566,7 +576,7 @@ class ProfileShimmer extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.grey[200],
+                  color: shimmerColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -579,7 +589,7 @@ class ProfileShimmer extends StatelessWidget {
                       width: 120,
                       height: 14,
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: shimmerColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -588,7 +598,7 @@ class ProfileShimmer extends StatelessWidget {
                       width: 80,
                       height: 12,
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: shimmerColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -603,7 +613,7 @@ class ProfileShimmer extends StatelessWidget {
             width: double.infinity,
             height: 14,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: shimmerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -612,7 +622,7 @@ class ProfileShimmer extends StatelessWidget {
             width: double.infinity,
             height: 14,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: shimmerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -621,7 +631,7 @@ class ProfileShimmer extends StatelessWidget {
             width: 200,
             height: 14,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: shimmerColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),

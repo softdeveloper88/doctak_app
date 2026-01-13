@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../localization/app_localization.dart';
-import '../../../../../theme/theme_helper.dart';
+import '../../../../../theme/one_ui_theme.dart';
 
 class MessageInput extends StatefulWidget {
   final Function(String message)? onSendMessage; // Make nullable
@@ -66,7 +66,7 @@ class _MessageInputState extends State<MessageInput> {
     if (widget.isWaitingForResponse) {
       return;
     }
-    
+
     final message = _controller.text.trim();
     if (message.isNotEmpty && widget.onSendMessage != null) {
       widget.onSendMessage!(message);
@@ -79,7 +79,7 @@ class _MessageInputState extends State<MessageInput> {
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = OneUITheme.of(context);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -89,12 +89,12 @@ class _MessageInputState extends State<MessageInput> {
           duration: const Duration(milliseconds: 200),
           height: _showAdvancedOptions ? 56 : 0,
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: theme.cardBackground,
             border: Border(
               top: BorderSide(
-                color: isDarkMode
+                color: theme.isDark
                     ? Colors.white.withOpacity(0.1)
-                    : appTheme.gray300.withOpacity(0.5),
+                    : Colors.grey.shade300.withOpacity(0.5),
                 width: 1,
               ),
             ),
@@ -109,25 +109,24 @@ class _MessageInputState extends State<MessageInput> {
                     value: widget.selectedModel,
                     underline: const SizedBox.shrink(),
                     isDense: true,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontFamily: 'Poppins',
-                      color: Colors.blue,
+                      color: theme.primary,
                       fontWeight: FontWeight.w500,
                     ),
-                    icon: Icon(
-                      Icons.arrow_drop_down,
-                      color: Colors.blue[600],
-                    ),
-                    items: ['gpt-4o', 'gpt-3.5-turbo', 'gpt-4-turbo'].map((model) {
+                    icon: Icon(Icons.arrow_drop_down, color: theme.primary),
+                    items: ['gpt-4o', 'gpt-3.5-turbo', 'gpt-4-turbo'].map((
+                      model,
+                    ) {
                       return DropdownMenuItem<String>(
                         value: model,
                         child: Text(
                           model,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontFamily: 'Poppins',
-                            color: Colors.blue,
+                            color: theme.primary,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -150,8 +149,8 @@ class _MessageInputState extends State<MessageInput> {
                         Icons.search,
                         size: 16,
                         color: widget.webSearchEnabled
-                            ? Colors.blue[600]
-                            : Colors.grey.shade600,
+                            ? theme.primary
+                            : theme.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -161,8 +160,8 @@ class _MessageInputState extends State<MessageInput> {
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                           color: widget.webSearchEnabled
-                            ? Colors.blue[600]
-                            : Colors.grey.shade700,
+                              ? theme.primary
+                              : theme.textSecondary,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -172,7 +171,7 @@ class _MessageInputState extends State<MessageInput> {
                         onChanged: widget.isWaitingForResponse
                             ? null
                             : widget.onWebSearchToggled,
-                        activeColor: Colors.blue[600],
+                        activeColor: theme.primary,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                     ],
@@ -185,11 +184,8 @@ class _MessageInputState extends State<MessageInput> {
                       value: widget.searchContextSize,
                       underline: const SizedBox.shrink(),
                       isDense: true,
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.blue[600],
-                      ),
-                      items: const [
+                      icon: Icon(Icons.arrow_drop_down, color: theme.primary),
+                      items: [
                         DropdownMenuItem<String>(
                           value: 'low',
                           child: Text(
@@ -197,7 +193,7 @@ class _MessageInputState extends State<MessageInput> {
                             style: TextStyle(
                               fontSize: 13,
                               fontFamily: 'Poppins',
-                              color: Colors.blue,
+                              color: theme.primary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -209,7 +205,7 @@ class _MessageInputState extends State<MessageInput> {
                             style: TextStyle(
                               fontSize: 13,
                               fontFamily: 'Poppins',
-                              color: Colors.blue,
+                              color: theme.primary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -221,7 +217,7 @@ class _MessageInputState extends State<MessageInput> {
                             style: TextStyle(
                               fontSize: 13,
                               fontFamily: 'Poppins',
-                              color: Colors.blue,
+                              color: theme.primary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -243,16 +239,21 @@ class _MessageInputState extends State<MessageInput> {
         // Input field and buttons - matching ChatGPT design
         Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: theme.cardBackground,
             boxShadow: [
               BoxShadow(
-                color: Colors.blue.withAlpha(13),
+                color: theme.primary.withAlpha(13),
                 offset: const Offset(0, -3),
                 blurRadius: 8,
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 8.0,
+            bottom: 8.0 + MediaQuery.of(context).padding.bottom,
+          ),
           child: Column(
             children: [
               Row(
@@ -262,17 +263,15 @@ class _MessageInputState extends State<MessageInput> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? Colors.blueGrey[800]
-                            : Colors.grey[100],
+                        color: theme.inputBackground,
                         borderRadius: BorderRadius.circular(24.0),
                         border: Border.all(
-                          color: Colors.blue.withOpacity(0.2),
+                          color: theme.primary.withOpacity(0.2),
                           width: 1.5,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.blue.withOpacity(0.05),
+                            color: theme.primary.withOpacity(0.05),
                             offset: const Offset(0, 2),
                             blurRadius: 8,
                             spreadRadius: 0,
@@ -291,26 +290,24 @@ class _MessageInputState extends State<MessageInput> {
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 16,
-                                color: isDarkMode 
-                                    ? Colors.white
-                                    : Colors.black87,
+                                color: theme.textPrimary,
                               ),
                               decoration: InputDecoration(
                                 hintStyle: TextStyle(
-                                  color: isDarkMode
-                                      ? Colors.white60
-                                      : Colors.black54,
+                                  color: theme.textSecondary,
                                   fontFamily: 'Poppins',
                                 ),
-                                hintText: widget.isWaitingForResponse ? 'Waiting for AI response...' : 'Ask anything...',
+                                hintText: widget.isWaitingForResponse
+                                    ? 'Waiting for AI response...'
+                                    : 'Ask anything...',
                                 border: InputBorder.none,
                                 contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0, 
-                                  vertical: 16.0
+                                  horizontal: 8.0,
+                                  vertical: 16.0,
                                 ),
                               ),
                               textCapitalization: TextCapitalization.sentences,
-                              cursorColor: Colors.blue[600],
+                              cursorColor: theme.primary,
                               textInputAction: TextInputAction.newline,
                             ),
                           ),
@@ -319,30 +316,40 @@ class _MessageInputState extends State<MessageInput> {
                             margin: const EdgeInsets.only(right: 8.0),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: _isComposing && !widget.isWaitingForResponse
-                                  ? Colors.blue[600]
-                                  : Colors.grey.withOpacity(0.3),
-                              boxShadow: _isComposing && !widget.isWaitingForResponse ? [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.3),
-                                  offset: const Offset(0, 2),
-                                  blurRadius: 8,
-                                  spreadRadius: 0,
-                                ),
-                              ] : [],
+                              color:
+                                  _isComposing && !widget.isWaitingForResponse
+                                  ? theme.primary
+                                  : theme.textSecondary.withOpacity(0.3),
+                              boxShadow:
+                                  _isComposing && !widget.isWaitingForResponse
+                                  ? [
+                                      BoxShadow(
+                                        color: theme.primary.withOpacity(0.3),
+                                        offset: const Offset(0, 2),
+                                        blurRadius: 8,
+                                        spreadRadius: 0,
+                                      ),
+                                    ]
+                                  : [],
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(30),
-                                onTap: (!widget.isWaitingForResponse && _isComposing) ? _handleSend : null,
+                                onTap:
+                                    (!widget.isWaitingForResponse &&
+                                        _isComposing)
+                                    ? _handleSend
+                                    : null,
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: Icon(
                                     Icons.send_rounded,
-                                    color: _isComposing && !widget.isWaitingForResponse
+                                    color:
+                                        _isComposing &&
+                                            !widget.isWaitingForResponse
                                         ? Colors.white
-                                        : Colors.grey.shade400,
+                                        : theme.textSecondary,
                                     size: 20,
                                   ),
                                 ),
@@ -362,7 +369,7 @@ class _MessageInputState extends State<MessageInput> {
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 11,
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,

@@ -6,7 +6,6 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
@@ -14,6 +13,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
@@ -194,25 +194,27 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
-        title: "AI Image Analysis",
+        title: translation(context).lbl_ai_image_analysis,
         titleIcon: Icons.image_search_rounded,
         actions: [
-          // History button
+          // History button - OneUI 8.5 style
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.history_rounded,
-                color: Colors.blue[600],
+                color: theme.primary,
                 size: 16,
               ),
             ),
@@ -247,7 +249,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               ).launch(context);
             },
           ),
-          // New Analysis button
+          // New Analysis button - OneUI 8.5 style
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: IconButton(
@@ -256,12 +258,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: theme.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.add_photo_alternate_rounded,
-                  color: Colors.blue[600],
+                  color: theme.primary,
                   size: 16,
                 ),
               ),
@@ -328,7 +330,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 if (isEmpty)
                   Expanded(
                     child: Container(
-                      color: svGetScaffoldColor(),
+                      color: theme.scaffoldBackground,
                       child: SafeArea(
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(16.0),
@@ -337,17 +339,17 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                             children: [
                               const SizedBox(height: 20),
 
-                              // Hero Icon - simplified
+                              // Hero Icon - OneUI 8.5 style
                               Container(
                                 width: 80,
                                 height: 80,
                                 margin: const EdgeInsets.only(bottom: 20),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue[600],
+                                  color: theme.primary,
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.blue.withOpacity(0.3),
+                                      color: theme.primary.withOpacity(0.3),
                                       spreadRadius: 2,
                                       blurRadius: 12,
                                       offset: const Offset(0, 4),
@@ -363,7 +365,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                 ),
                               ),
 
-                              // Welcome Text
+                              // Welcome Text - OneUI 8.5 style
                               Text(
                                 translation(context).lbl_welcome_doctor,
                                 style: TextStyle(
@@ -371,54 +373,54 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'Poppins',
                                   letterSpacing: 0.5,
-                                  color: appStore.isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
+                                  color: theme.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 12),
 
-                              // Description
+                              // Description - OneUI 8.5 style
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
                                 ),
                                 child: Text(
-                                  "Upload medical images for AI-powered analysis and insights",
+                                  translation(
+                                    context,
+                                  ).msg_upload_medical_images,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontFamily: 'Poppins',
                                     height: 1.5,
-                                    color: appStore.isDarkMode
-                                        ? Colors.white70
-                                        : Colors.black.withAlpha(179),
+                                    color: theme.textSecondary,
                                   ),
                                 ),
                               ),
                               const SizedBox(height: 20),
 
-                              // Upload Section
+                              // Upload Section - OneUI 8.5 style
                               Text(
-                                "Select Medical Image Type",
+                                translation(
+                                  context,
+                                ).lbl_select_medical_image_type,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Poppins',
-                                  color: Colors.blue[800],
+                                  color: theme.primary,
                                 ),
                               ),
                               const SizedBox(height: 16),
 
-                              // Upload Button - simplified
+                              // Upload Button - OneUI 8.5 style
                               Container(
                                 width: double.infinity,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(24),
-                                  color: Colors.blue[600],
+                                  color: theme.primary,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.blue.withOpacity(0.3),
+                                      color: theme.primary.withOpacity(0.3),
                                       offset: const Offset(0, 4),
                                       blurRadius: 12,
                                       spreadRadius: 0,
@@ -447,15 +449,19 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                         _showBeforeFileOptions();
                                         return;
                                       } catch (e) {
-                                        debugPrint('chat_gpt: picker failed, falling back to permission request: $e');
+                                        debugPrint(
+                                          'chat_gpt: picker failed, falling back to permission request: $e',
+                                        );
                                       }
 
                                       // If picker failed, request permission and then open options.
-                                      final granted = await PermissionUtils.ensurePhotoPermission();
+                                      final granted =
+                                          await PermissionUtils.ensurePhotoPermission();
                                       if (granted) {
                                         _showBeforeFileOptions();
                                       } else {
-                                        final status = await Permission.photos.status;
+                                        final status =
+                                            await Permission.photos.status;
                                         if (status.isPermanentlyDenied) {
                                           _permissionDialog();
                                         } else {
@@ -509,20 +515,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
                               const SizedBox(height: 20),
 
-                              // Info Container - simplified
+                              // Info Container - OneUI 8.5 style
                               Container(
                                 decoration: BoxDecoration(
-                                  color: appStore.isDarkMode
-                                      ? Colors.blue.withOpacity(0.1)
-                                      : Colors.blue.withOpacity(0.05),
+                                  color: theme.primary.withOpacity(
+                                    theme.isDark ? 0.15 : 0.08,
+                                  ),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
-                                    color: Colors.blue.withOpacity(0.2),
+                                    color: theme.primary.withOpacity(0.2),
                                     width: 1.5,
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.blue.withOpacity(0.05),
+                                      color: theme.primary.withOpacity(0.05),
                                       offset: const Offset(0, 2),
                                       blurRadius: 8,
                                       spreadRadius: 0,
@@ -535,12 +541,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                     Container(
                                       padding: const EdgeInsets.all(6),
                                       decoration: BoxDecoration(
-                                        color: Colors.amber.withOpacity(0.2),
+                                        color: theme.warning.withOpacity(0.2),
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
                                         Icons.lightbulb_rounded,
-                                        color: Colors.amber[700],
+                                        color: theme.warning,
                                         size: 16,
                                       ),
                                     ),
@@ -554,7 +560,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                           fontFamily: 'Poppins',
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.blue[800],
+                                          color: theme.primary,
                                         ),
                                       ),
                                     ),
@@ -570,7 +576,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 else
                   Expanded(
                     child: Container(
-                      color: svGetScaffoldColor(),
+                      color: theme.scaffoldBackground,
                       child: ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(12),
@@ -595,8 +601,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                           ? File(selectedImageFiles.last.path)
                                           : null
                                     : null,
-                                imageBytes1: index != 0 ? null : (message.imageBytes1 ?? imageBytes1),
-                                imageBytes2: index != 0 ? null : (message.imageBytes2 ?? imageBytes2),
+                                imageBytes1: index != 0
+                                    ? null
+                                    : (message.imageBytes1 ?? imageBytes1),
+                                imageBytes2: index != 0
+                                    ? null
+                                    : (message.imageBytes2 ?? imageBytes2),
                                 responseImageUrl1: index != 0
                                     ? ''
                                     : message.imageUrl1 ?? '',
@@ -670,10 +680,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 // Input Section - completely redesigned using drugs_list pattern
                 Container(
                   decoration: BoxDecoration(
-                    color: svGetScaffoldColor(),
+                    color: theme.scaffoldBackground,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.withAlpha(13),
+                        color: theme.primary.withOpacity(0.05),
                         offset: const Offset(0, -3),
                         blurRadius: 8,
                       ),
@@ -687,17 +697,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: appStore.isDarkMode
-                              ? Colors.blueGrey[800]
-                              : Colors.grey[100],
+                          color: theme.inputBackground,
                           borderRadius: BorderRadius.circular(24.0),
                           border: Border.all(
-                            color: Colors.blue.withOpacity(0.2),
+                            color: theme.primary.withOpacity(0.2),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.withOpacity(0.05),
+                              color: theme.primary.withOpacity(0.05),
                               offset: const Offset(0, 2),
                               blurRadius: 8,
                               spreadRadius: 0,
@@ -706,17 +714,17 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         ),
                         child: Row(
                           children: [
-                            // Attachment button
+                            // Attachment button - OneUI 8.5 style
                             IconButton(
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
+                                  color: theme.primary.withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.attach_file_rounded,
-                                  color: Colors.blue[600],
+                                  color: theme.primary,
                                   size: 20,
                                 ),
                               ),
@@ -724,7 +732,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                 if (isOneTimeImageUploaded) {
                                   toasty(
                                     context,
-                                    'Only allowed one time image in one session',
+                                    translation(
+                                      context,
+                                    ).lbl_only_one_image_allowed,
                                   );
                                 } else {
                                   final granted =
@@ -758,15 +768,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 16,
-                                  color: appStore.isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
+                                  color: theme.textPrimary,
                                 ),
                                 decoration: InputDecoration(
                                   hintStyle: TextStyle(
-                                    color: appStore.isDarkMode
-                                        ? Colors.white60
-                                        : Colors.black54,
+                                    color: theme.textSecondary,
                                     fontFamily: 'Poppins',
                                   ),
                                   hintText: translation(
@@ -786,10 +792,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                               margin: const EdgeInsets.only(right: 8.0),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.blue[600],
+                                color: theme.primary,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
+                                    color: theme.primary.withOpacity(0.3),
                                     offset: const Offset(0, 2),
                                     blurRadius: 8,
                                     spreadRadius: 0,
@@ -803,7 +809,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                   onTap: () async {
                                     // Dismiss keyboard reliably on both iOS and Android
                                     FocusScope.of(context).unfocus();
-                                    FocusManager.instance.primaryFocus?.unfocus();
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
 
                                     isError = true;
 
@@ -893,19 +900,49 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                       List<int>? outgoingBytes1;
                                       List<int>? outgoingBytes2;
                                       try {
-                                        final path1 = imageUploadBloc.imagefiles.first.path;
-                                        outgoingBytes1 = await compute(_readFileBytesIsolate, path1);
-                                        if (imageUploadBloc.imagefiles.length > 1) {
-                                          final path2 = imageUploadBloc.imagefiles.last.path;
-                                          outgoingBytes2 = await compute(_readFileBytesIsolate, path2);
+                                        final path1 = imageUploadBloc
+                                            .imagefiles
+                                            .first
+                                            .path;
+                                        outgoingBytes1 = await compute(
+                                          _readFileBytesIsolate,
+                                          path1,
+                                        );
+                                        if (imageUploadBloc.imagefiles.length >
+                                            1) {
+                                          final path2 = imageUploadBloc
+                                              .imagefiles
+                                              .last
+                                              .path;
+                                          outgoingBytes2 = await compute(
+                                            _readFileBytesIsolate,
+                                            path2,
+                                          );
                                         }
                                       } catch (e) {
                                         try {
-                                          final f1 = File(imageUploadBloc.imagefiles.first.path);
-                                          if (await f1.exists()) outgoingBytes1 = await f1.readAsBytes();
-                                          if (imageUploadBloc.imagefiles.length > 1) {
-                                            final f2 = File(imageUploadBloc.imagefiles.last.path);
-                                            if (await f2.exists()) outgoingBytes2 = await f2.readAsBytes();
+                                          final f1 = File(
+                                            imageUploadBloc
+                                                .imagefiles
+                                                .first
+                                                .path,
+                                          );
+                                          if (await f1.exists())
+                                            outgoingBytes1 = await f1
+                                                .readAsBytes();
+                                          if (imageUploadBloc
+                                                  .imagefiles
+                                                  .length >
+                                              1) {
+                                            final f2 = File(
+                                              imageUploadBloc
+                                                  .imagefiles
+                                                  .last
+                                                  .path,
+                                            );
+                                            if (await f2.exists())
+                                              outgoingBytes2 = await f2
+                                                  .readAsBytes();
                                           }
                                         } catch (_) {
                                           outgoingBytes1 = null;
@@ -915,26 +952,38 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
                                       var myMessage = Messages(
                                         id: -1,
-                                        gptSessionId: selectedSessionId.toString(),
+                                        gptSessionId: selectedSessionId
+                                            .toString(),
                                         question: question,
                                         response: translation(
                                           context,
                                         ).lbl_generating_response,
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1: imageUploadBloc.imagefiles.first.path,
-                                        imageUrl2: imageUploadBloc.imagefiles.length > 1
-                                            ? imageUploadBloc.imagefiles.last.path
-                                            : imageUploadBloc.imagefiles.first.path,
-                                        imageBytes1: outgoingBytes1 ?? imageBytes1,
-                                        imageBytes2: outgoingBytes2 ?? imageBytes2,
+                                        imageUrl1: imageUploadBloc
+                                            .imagefiles
+                                            .first
+                                            .path,
+                                        imageUrl2:
+                                            imageUploadBloc.imagefiles.length >
+                                                1
+                                            ? imageUploadBloc
+                                                  .imagefiles
+                                                  .last
+                                                  .path
+                                            : imageUploadBloc
+                                                  .imagefiles
+                                                  .first
+                                                  .path,
+                                        imageBytes1:
+                                            outgoingBytes1 ?? imageBytes1,
+                                        imageBytes2:
+                                            outgoingBytes2 ?? imageBytes2,
                                       );
 
                                       // Add the optimistic message and start the request
                                       state1.response1.messages!.add(myMessage);
-                                      BlocProvider.of<ChatGPTBloc>(
-                                        context,
-                                      ).add(
+                                      BlocProvider.of<ChatGPTBloc>(context).add(
                                         GetPost(
                                           sessionId: selectedSessionId
                                               .toString(),
@@ -995,7 +1044,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11,
-                          color: Colors.grey[600],
+                          color: theme.textSecondary,
                           fontStyle: FontStyle.italic,
                         ),
                         textAlign: TextAlign.center,
@@ -1100,6 +1149,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
   // Error State Widget - redesigned using drugs_list pattern
   Widget _buildErrorState(BuildContext context, String errorMessage) {
+    final errorTheme = OneUITheme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1110,19 +1160,19 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
             height: 60,
             margin: const EdgeInsets.only(bottom: 16),
             decoration: BoxDecoration(
-              color: Colors.red.withAlpha(26),
+              color: errorTheme.error.withAlpha(26),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.error_outline_rounded,
-              color: Colors.red[600],
+              color: errorTheme.error,
               size: 30,
             ),
           ),
           Text(
             translation(context).lbl_error,
             style: TextStyle(
-              color: Colors.red[700],
+              color: errorTheme.error,
               fontSize: 18,
               fontWeight: FontWeight.bold,
               fontFamily: 'Poppins',
@@ -1133,7 +1183,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
             errorMessage,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: appStore.isDarkMode ? Colors.white70 : Colors.black87,
+              color: errorTheme.textPrimary,
               fontSize: 14,
               fontWeight: FontWeight.w500,
               fontFamily: 'Poppins',
@@ -1145,7 +1195,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.blue.withAlpha(51),
+                  color: errorTheme.primary.withAlpha(51),
                   offset: const Offset(0, 4),
                   blurRadius: 8,
                   spreadRadius: 0,
@@ -1167,7 +1217,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
+                backgroundColor: errorTheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
@@ -1199,13 +1249,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
+        final sheetTheme = OneUITheme.of(context);
         return Container(
           decoration: BoxDecoration(
-            color: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
+            color: sheetTheme.cardBackground,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             boxShadow: [
               BoxShadow(
-                color: Colors.blue.withAlpha(26),
+                color: sheetTheme.primary.withAlpha(26),
                 blurRadius: 20,
                 offset: const Offset(0, -5),
               ),
@@ -1220,7 +1271,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: sheetTheme.textSecondary.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1232,7 +1283,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.blue[600],
+                        color: sheetTheme.primary,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -1252,9 +1303,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               fontFamily: 'Poppins',
-                              color: appStore.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black87,
+                              color: sheetTheme.textPrimary,
                             ),
                           ),
                           Text(
@@ -1262,7 +1311,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                             style: TextStyle(
                               fontSize: 12,
                               fontFamily: 'Poppins',
-                              color: Colors.grey[600],
+                              color: sheetTheme.textSecondary,
                             ),
                           ),
                         ],
@@ -1296,7 +1345,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         Expanded(
                           child: _buildAdvancedOption(
                             icon: Icons.medical_services,
-                            color: Colors.blue[600]!,
+                            color: sheetTheme.primary,
                             title: 'X-Ray',
                             subtitle: 'Radiograph scan',
                             onTap: () {
@@ -1314,7 +1363,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         Expanded(
                           child: _buildAdvancedOption(
                             icon: Icons.scanner,
-                            color: Colors.blue[600]!,
+                            color: sheetTheme.primary,
                             title: 'CT Scan',
                             subtitle: 'Tomography',
                             onTap: () {
@@ -1364,7 +1413,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     style: TextStyle(
                       fontSize: 12,
                       fontFamily: 'Poppins',
-                      color: Colors.grey[500],
+                      color: sheetTheme.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -1385,6 +1434,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
     required VoidCallback onTap,
     bool fullWidth = false,
   }) {
+    final optionTheme = OneUITheme.of(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1393,7 +1443,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: appStore.isDarkMode ? Colors.grey[800] : Colors.white,
+            color: optionTheme.cardBackground,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: color.withOpacity(0.2), width: 1),
             boxShadow: [
@@ -1429,7 +1479,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
-                  color: appStore.isDarkMode ? Colors.white : Colors.black87,
+                  color: optionTheme.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1439,7 +1489,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 style: TextStyle(
                   fontSize: 11,
                   fontFamily: 'Poppins',
-                  color: Colors.grey[600],
+                  color: optionTheme.textSecondary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1472,9 +1522,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
           maxChildSize: 0.95,
           expand: false,
           builder: (context, scrollController) {
+            final fileSheetTheme = OneUITheme.of(context);
             return Container(
               decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                color: fileSheetTheme.cardBackground,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(28),
                 ),
@@ -1501,7 +1552,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[400],
+                      color: fileSheetTheme.textSecondary.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -1515,11 +1566,13 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.blue[600],
+                                color: fileSheetTheme.primary,
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
+                                    color: fileSheetTheme.primary.withOpacity(
+                                      0.3,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -1542,9 +1595,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
                                       fontFamily: 'Poppins',
-                                      color: appStore.isDarkMode
-                                          ? Colors.white
-                                          : Colors.black87,
+                                      color: fileSheetTheme.textPrimary,
                                     ),
                                   ),
                                   Text(
@@ -1552,7 +1603,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontFamily: 'Poppins',
-                                      color: Colors.grey[600],
+                                      color: fileSheetTheme.textSecondary,
                                     ),
                                   ),
                                 ],
@@ -1564,10 +1615,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.08),
+                            color: fileSheetTheme.primary.withOpacity(0.08),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colors.blue.withOpacity(0.2),
+                              color: fileSheetTheme.primary.withOpacity(0.2),
                               width: 1,
                             ),
                           ),
@@ -1575,7 +1626,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                             children: [
                               Icon(
                                 Icons.info_outline,
-                                color: Colors.blue[700],
+                                color: fileSheetTheme.primary,
                                 size: 16,
                               ),
                               const SizedBox(width: 8),
@@ -1585,7 +1636,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontFamily: 'Poppins',
-                                    color: Colors.blue[700],
+                                    color: fileSheetTheme.primary,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -1605,12 +1656,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                              color: appStore.isDarkMode
-                                  ? Colors.grey[850]
-                                  : Colors.grey[50],
+                              color: fileSheetTheme.inputBackground,
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color: Colors.blue.withOpacity(0.15),
+                                color: fileSheetTheme.primary.withOpacity(0.15),
                                 width: 2,
                               ),
                             ),
@@ -1653,7 +1702,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
+        final dialogTheme = OneUITheme.of(context);
         return AlertDialog(
+          backgroundColor: dialogTheme.cardBackground,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -1662,35 +1713,35 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: dialogTheme.warning.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.photo_library_outlined,
-                  color: Colors.orange[700],
+                  color: dialogTheme.warning,
                   size: 24,
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Photo Access Required',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Poppins',
-                    color: Colors.black87,
+                    color: dialogTheme.textPrimary,
                   ),
                 ),
               ),
             ],
           ),
-          content: const Text(
+          content: Text(
             'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.',
             style: TextStyle(
               fontSize: 14,
               fontFamily: 'Poppins',
-              color: Colors.black54,
+              color: dialogTheme.textSecondary,
               height: 1.4,
             ),
           ),
@@ -1707,7 +1758,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
+                  color: dialogTheme.textSecondary,
                 ),
               ),
               onPressed: () {
@@ -1718,7 +1769,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               margin: const EdgeInsets.only(left: 8),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
+                  backgroundColor: dialogTheme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,

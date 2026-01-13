@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/interested_info_screen/interested_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/personal_info_screen/personal_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/privacy_info_screen/privacy_info_screen.dart';
@@ -25,7 +26,8 @@ class SVProfilePostsComponent extends StatefulWidget {
       _SVProfilePostsComponentState();
 }
 
-class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with SingleTickerProviderStateMixin {
+class _SVProfilePostsComponentState extends State<SVProfilePostsComponent>
+    with SingleTickerProviderStateMixin {
   int selectedIndex = 0;
 
   // Animation controller for tab transitions
@@ -43,10 +45,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     _animationController.forward();
@@ -60,29 +59,33 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Container(
-      decoration: BoxDecoration(
-        color: context.cardColor,
-      ),
+      decoration: BoxDecoration(color: theme.scaffoldBackground),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Improved tab selector
           Container(
-            color: svGetScaffoldColor(),
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            color: theme.scaffoldBackground,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.blue, width: 1.5),
-                color: Colors.white,
+                border: Border.all(color: theme.primary, width: 1.5),
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: theme.isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: theme.primary.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Row(
                 children: [
@@ -101,8 +104,8 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: selectedIndex == 0
-                              ? Colors.blue
-                              : Colors.white,
+                              ? theme.primary
+                              : theme.cardBackground,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -111,14 +114,18 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
                             Icon(
                               Icons.article_rounded,
                               size: 18,
-                              color: selectedIndex == 0 ? Colors.white : Colors.blue,
+                              color: selectedIndex == 0
+                                  ? Colors.white
+                                  : theme.primary,
                             ),
                             8.width,
                             Text(
                               translation(context).lbl_posts,
                               style: TextStyle(
                                 fontFamily: 'Poppins',
-                                color: selectedIndex == 0 ? Colors.white : Colors.blue,
+                                color: selectedIndex == 0
+                                    ? Colors.white
+                                    : theme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -144,8 +151,8 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: selectedIndex == 1
-                              ? Colors.blue
-                              : Colors.white,
+                              ? theme.primary
+                              : theme.cardBackground,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -154,14 +161,18 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
                             Icon(
                               Icons.person_rounded,
                               size: 18,
-                              color: selectedIndex == 1 ? Colors.white : Colors.blue,
+                              color: selectedIndex == 1
+                                  ? Colors.white
+                                  : theme.primary,
                             ),
                             8.width,
                             Text(
                               translation(context).lbl_about,
                               style: TextStyle(
                                 fontFamily: 'Poppins',
-                                color: selectedIndex == 1 ? Colors.white : Colors.blue,
+                                color: selectedIndex == 1
+                                    ? Colors.white
+                                    : theme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -182,7 +193,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent> with 
             child: selectedIndex == 0
                 ? MyPostComponent(widget.profileBloc)
                 : AboutWidget(profileBloc: widget.profileBloc),
-          )
+          ),
         ],
       ),
     );
@@ -256,16 +267,17 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
       const SizedBox(height: 12),
 
       // Privacy Information card
-    if(profileBloc.isMe)  _buildRowinterested(
-        onTap: () {
-          PrivacyInfoScreen(profileBloc: profileBloc).launch(context);
-        },
-        context,
-        imageOne: 'assets/icon/ic_privacy.svg',
-        interested: translation(context).lbl_privacy_information,
-        iconColor: Colors.red[700]!,
-        backgroundColor: Colors.red.withOpacity(0.08),
-      ),
+      if (profileBloc.isMe)
+        _buildRowinterested(
+          onTap: () {
+            PrivacyInfoScreen(profileBloc: profileBloc).launch(context);
+          },
+          context,
+          imageOne: 'assets/icon/ic_privacy.svg',
+          interested: translation(context).lbl_privacy_information,
+          iconColor: Colors.red[700]!,
+          backgroundColor: Colors.red.withOpacity(0.08),
+        ),
     ],
   );
 }
@@ -274,39 +286,38 @@ Widget _buildColumnlockone(BuildContext context, profileBloc) {
 Widget _buildScrollview(BuildContext context, profileBloc) {
   return Padding(
     padding: const EdgeInsets.all(16),
-    child: Column(
-      children: [_buildColumnlockone(context, profileBloc)],
-    ),
+    child: Column(children: [_buildColumnlockone(context, profileBloc)]),
   );
 }
 
 /// Common widget with improved styling
 Widget _buildRowinterested(
-    BuildContext context, {
-      required Function onTap,
-      required String imageOne,
-      required String interested,
-      required Color iconColor,
-      required Color backgroundColor,
-    }) {
+  BuildContext context, {
+  required Function onTap,
+  required String imageOne,
+  required String interested,
+  required Color iconColor,
+  required Color backgroundColor,
+}) {
+  final theme = OneUITheme.of(context);
   return GestureDetector(
     onTap: () => onTap(),
     child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 16,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: theme.border),
+        boxShadow: theme.isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -315,7 +326,9 @@ Widget _buildRowinterested(
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: backgroundColor,
+              color: theme.isDark
+                  ? backgroundColor.withOpacity(0.2)
+                  : backgroundColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: CustomImageView(
@@ -332,11 +345,11 @@ Widget _buildRowinterested(
               padding: const EdgeInsets.only(left: 16),
               child: Text(
                 interested,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: theme.textPrimary,
                 ),
               ),
             ),
@@ -346,15 +359,15 @@ Widget _buildRowinterested(
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.1),
+              color: theme.surfaceVariant,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Icons.arrow_forward_ios_rounded,
               size: 16,
-              color: Colors.grey[700],
+              color: theme.textSecondary,
             ),
-          )
+          ),
         ],
       ),
     ),

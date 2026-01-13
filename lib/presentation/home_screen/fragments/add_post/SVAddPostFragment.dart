@@ -6,23 +6,24 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../core/utils/app/AppData.dart';
 import '../../../../main.dart';
 import '../../utils/SVColors.dart';
-import '../../utils/SVCommon.dart';
 import 'bloc/add_post_bloc.dart';
 import 'components/SVPostOptionsComponent.dart';
 import 'components/SVPostTextComponent.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
-  SVAddPostFragment({required this.refresh, this.addPostBloc, Key? key}) : super(key: key);
+  SVAddPostFragment({required this.refresh, this.addPostBloc, Key? key})
+    : super(key: key);
   final Function refresh;
   final AddPostBloc? addPostBloc;
 
@@ -30,7 +31,8 @@ class SVAddPostFragment extends StatefulWidget {
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
 
-class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindingObserver {
+class _SVAddPostFragmentState extends State<SVAddPostFragment>
+    with WidgetsBindingObserver {
   String image = '';
 
   List<String> colorListHex = [
@@ -68,7 +70,6 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
 
   late final AddPostBloc searchPeopleBloc;
   late final bool _createdBloc;
-  final QuillController _controller = QuillController.basic();
   final TextEditingController _postTextController = TextEditingController();
 
   @override
@@ -97,7 +98,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     }
     super.dispose();
   }
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     print('SVAddPost: App lifecycle changed to: $state');
@@ -113,7 +114,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       if (mounted) {
         setState(() {
           // This will trigger a rebuild with updated images
-          print('SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files');
+          print(
+            'SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files',
+          );
         });
       }
     }
@@ -128,28 +131,31 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
   }
 
   void _showValidationError() {
+    final theme = OneUITheme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text(
           'Please add some content or select media to create a post',
           style: TextStyle(fontFamily: 'Poppins', color: Colors.white),
         ),
-        backgroundColor: Colors.orange[600],
+        backgroundColor: theme.warning,
         duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_new_post,
-        titleIcon: Icons.add_circle_outline_rounded,
+        titleIcon: CupertinoIcons.add_circled,
         toolbarHeight: 56,
         actions: [
           BlocListener<AddPostBloc, AddPostState>(
@@ -160,9 +166,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                 print("Response message: ${state.message}");
                 try {
                   Map<String, dynamic> jsonMap = json.decode(state.message);
-                  
+
                   // Helper function to extract message from response
-                  String extractMessage(dynamic messageData, String defaultMsg) {
+                  String extractMessage(
+                    dynamic messageData,
+                    String defaultMsg,
+                  ) {
                     if (messageData == null) return defaultMsg;
                     if (messageData is String) return messageData;
                     if (messageData is List && messageData.isNotEmpty) {
@@ -170,63 +179,64 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                     }
                     return defaultMsg;
                   }
-                  
+
                   if (jsonMap['success'] == true) {
-                    final message = extractMessage(jsonMap['message'], 'Post created successfully!');
+                    final message = extractMessage(
+                      jsonMap['message'],
+                      'Post created successfully!',
+                    );
                     showToast(message);
                     print('Success: $message');
-                    
-                    // Schedule clearing and navigation for next frame to avoid state conflicts
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!mounted) return;
-                      
-                      // Clear BLoC data
-                      searchPeopleBloc.selectedSearchPeopleData.clear();
-                      searchPeopleBloc.imagefiles.clear();
-                      searchPeopleBloc.title = '';
-                      searchPeopleBloc.feeling = '';
-                      searchPeopleBloc.backgroundColor = '';
-                      
-                      // Clear text field and reset color
-                      _postTextController.clear();
+
+                    // Clear data and switch to home tab
+                    // Clear BLoC data
+                    searchPeopleBloc.selectedSearchPeopleData.clear();
+                    searchPeopleBloc.imagefiles.clear();
+                    searchPeopleBloc.title = '';
+                    searchPeopleBloc.feeling = '';
+                    searchPeopleBloc.backgroundColor = '';
+
+                    // Clear text field and reset color
+                    _postTextController.clear();
+                    if (mounted) {
                       setState(() {
                         currentColor = SVDividerColor;
                         currentSetColor = '';
                       });
-                      
-                      // Navigate to home after clearing
-                      Future.delayed(const Duration(milliseconds: 300), () {
-                        if (mounted) {
-                          widget.refresh();
-                        }
-                      });
+                    }
+
+                    // Switch to home tab and refresh feed (no Navigator.pop needed - this is a tab fragment)
+                    Future.delayed(const Duration(milliseconds: 200), () {
+                      if (mounted) {
+                        widget.refresh();
+                      }
                     });
                   } else {
-                    final errorMsg = extractMessage(jsonMap['message'], 'Failed to create post');
+                    final errorMsg = extractMessage(
+                      jsonMap['message'],
+                      'Failed to create post',
+                    );
                     showToast(errorMsg);
                     print('Error: $errorMsg');
                   }
                 } catch (e) {
                   print('Error parsing response: $e');
                   showToast('Post created successfully!');
-                  
-                  // Schedule clearing and navigation for next frame to avoid state conflicts
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-                    
-                    // Clear form on success
-                    _postTextController.clear();
+
+                  // Clear form and switch to home tab
+                  _postTextController.clear();
+                  if (mounted) {
                     setState(() {
                       currentColor = SVDividerColor;
                       currentSetColor = '';
                     });
-                    
-                    // Fallback: assume success and refresh home
-                    Future.delayed(const Duration(milliseconds: 300), () {
-                      if (mounted) {
-                        widget.refresh();
-                      }
-                    });
+                  }
+
+                  // Fallback: assume success, switch to home tab and refresh
+                  Future.delayed(const Duration(milliseconds: 200), () {
+                    if (mounted) {
+                      widget.refresh();
+                    }
                   });
                 }
               } else if (state is DataError) {
@@ -246,24 +256,20 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
+                  backgroundColor: theme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                    horizontal: 20,
+                    vertical: 10,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                   elevation: 0,
                 ),
                 child: Text(
                   translation(context).lbl_post,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: theme.buttonText,
                 ),
               ),
             ),
@@ -282,39 +288,48 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                     child: Row(
                       children: [
                         Container(
-                          width: 42,
-                          height: 42,
+                          width: 48,
+                          height: 48,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.blue.withOpacity(0.2),
-                              width: 1.5,
+                              color: theme.avatarBorder,
+                              width: 2,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.primary.withOpacity(
+                                  theme.isDark ? 0.2 : 0.1,
+                                ),
+                                spreadRadius: 1,
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(21),
+                            borderRadius: BorderRadius.circular(24),
                             child: CachedNetworkImage(
                               imageUrl:
                                   "${AppData.imageUrl}${AppData.profile_pic.validate()}",
-                              height: 42,
-                              width: 42,
+                              height: 48,
+                              width: 48,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Colors.blue[50],
+                                color: theme.avatarBackground,
                                 child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.blue[400],
-                                    strokeWidth: 1.5,
+                                  child: CupertinoActivityIndicator(
+                                    color: theme.primary,
                                   ),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: Colors.blue[50],
+                                color: theme.avatarBackground,
                                 child: Center(
                                   child: Icon(
-                                    Icons.person,
-                                    color: Colors.blue[400],
-                                    size: 20,
+                                    CupertinoIcons.person_fill,
+                                    color: theme.avatarText,
+                                    size: 22,
                                   ),
                                 ),
                               ),
@@ -328,23 +343,14 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                             children: [
                               Text(
                                 AppData.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Poppins',
-                                  color: Colors.black87,
-                                ),
+                                style: theme.titleSmall,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 capitalizeWords(AppData.specialty),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                  fontFamily: 'Poppins',
-                                ),
+                                style: theme.bodySecondary,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -361,25 +367,21 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                     colorValue: currentColor,
                     searchPeopleBloc: searchPeopleBloc,
                   ),
-                  // Tag Friends Section
-                  Row(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(12, 6, 12, 4),
-                        child: OtherFeatureComponent(
-                          onColorChange: changeColor,
-                          colorValue: currentColor,
-                          searchPeopleBloc: searchPeopleBloc,
-                        ),
-                      ),
-                    ],
+                  // Tag Friends Section - Full Width
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: OtherFeatureComponent(
+                      onColorChange: changeColor,
+                      colorValue: currentColor,
+                      searchPeopleBloc: searchPeopleBloc,
+                    ),
                   ),
                   // Media Options Section
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(12, 4, 12, 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     child: SVPostOptionsComponent(searchPeopleBloc),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

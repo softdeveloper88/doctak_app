@@ -1,16 +1,10 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
-import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_req.dart';
 import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
@@ -91,42 +85,81 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         deviceId = androidInfo.id;
       } else {
         IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-        print('Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
+        print('Running on ${iosInfo.utsname.machine}');
         deviceType = "ios";
         deviceId = iosInfo.identifierForVendor.toString();
       }
-      // final response1 = await apiManager.register(
-      //     event.firstName,
-      //     event.lastName,
-      //     event.username,
-      //     event.password,
-      //     event.userType,event.deviceToken??"",deviceType,deviceId);
+
       Dio dio = Dio();
 
-      Response response1 = await dio.post(
-        '${AppData.remoteUrl2}/register',
-        // Add query parameters
-        data: FormData.fromMap({
-          'first_name': event.firstName,
-          'last_name': event.lastName,
-          'email': event.username,
-          'password': event.password,
-          'user_type': event.userType,
-          'device_token': event.deviceToken,
-          'device_type': deviceType,
-          'device_id': deviceId,
-        }),
-      );
+      Response response1;
+      try {
+        response1 = await dio.post(
+          '${AppData.remoteUrl2}/register',
+          data: FormData.fromMap({
+            'first_name': event.firstName,
+            'last_name': event.lastName,
+            'email': event.username,
+            'password': event.password,
+            'user_type': event.userType,
+            'device_token': event.deviceToken,
+            'device_type': deviceType,
+            'device_id': deviceId,
+          }),
+        );
+      } on DioException catch (dioError) {
+        // Handle DioException - check if response contains token (registration succeeded but email failed)
+        if (dioError.response != null && dioError.response!.data != null) {
+          final responseData = dioError.response!.data;
+          if (responseData is Map && responseData['token'] != null) {
+            // User was registered successfully, just email sending failed
+            print(
+              'Registration succeeded but email sending failed - bypassing email error',
+            );
+            response1 = Response(
+              requestOptions: dioError.requestOptions,
+              statusCode: 200,
+              data: responseData,
+            );
+          } else {
+            rethrow;
+          }
+        } else {
+          rethrow;
+        }
+      }
+
       PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(
         response1.data,
       );
       ProgressDialogUtils.hideProgressDialog();
       print('response ${response1.data}');
-      if (response1.statusCode == 200) {
-        if (response.success == true) {
+
+      // Check for email error but successful registration (bypass email sending exceptions)
+      final responseData = response1.data;
+      bool hasToken = response.token != null && response.token!.isNotEmpty;
+      bool hasEmailError =
+          responseData is Map &&
+          (responseData['email_error'] != null ||
+              responseData['message']?.toString().toLowerCase().contains(
+                    'email',
+                  ) ==
+                  true ||
+              responseData['message']?.toString().toLowerCase().contains(
+                    'smtp',
+                  ) ==
+                  true ||
+              responseData['message']?.toString().toLowerCase().contains(
+                    'mail',
+                  ) ==
+                  true);
+
+      // If we have a token, consider registration successful regardless of email errors
+      if (hasToken || response1.statusCode == 200 && response.success == true) {
+        if (hasToken || response.success == true) {
           final prefs = SecureStorageService.instance;
           await prefs.initialize();
-          await prefs.setString('device_token', event.deviceToken ?? '');
+          await prefs.setString('device_token', event.deviceToken);
           await prefs.setString('token', response.token ?? '');
           await prefs.setString(
             'email_verified_at',
@@ -200,12 +233,22 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
             AppData.city = city;
             AppData.currency = currency;
           }
+
+          // Mark response as success even if there was an email error
+          final emitData = Map<String, dynamic>.from(response1.data as Map);
+          emitData['success'] = true;
+          if (hasEmailError) {
+            print(
+              'Email sending failed but registration succeeded - continuing to dashboard',
+            );
+          }
+
           emit(
             DataLoaded(
               !(state as DataLoaded).isPasswordVisible,
               (state as DataLoaded).isDoctorRole,
               true,
-              response1.data,
+              emitData,
             ),
           );
           ProgressDialogUtils.hideProgressDialog();
@@ -223,10 +266,20 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         emit(DropdownError('An error occurred'));
       }
     } catch (e) {
-      print(e);
-      // emit(DropdownLoaded1(response: ));
-
+      print('Registration error: $e');
       ProgressDialogUtils.hideProgressDialog();
+
+      // Check if error message contains email-related keywords but might still have succeeded
+      String errorStr = e.toString().toLowerCase();
+      if (errorStr.contains('email') ||
+          errorStr.contains('smtp') ||
+          errorStr.contains('mail')) {
+        // This might be an email sending error after successful registration
+        // Try to check if user was actually registered by attempting to get token
+        print(
+          'Possible email error detected - registration may have succeeded',
+        );
+      }
 
       emit(DropdownError('An error occurred'));
     }
@@ -262,8 +315,8 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         final prefs = SecureStorageService.instance;
         await prefs.initialize();
         prefs.setString('specialty', event.specialty);
-        prefs.setString('country', event.country) ?? '';
-        prefs.setString('city', event.state) ?? '';
+        prefs.setString('country', event.country);
+        prefs.setString('city', event.state);
         ProgressDialogUtils.hideProgressDialog();
         emit(DataCompleteLoaded(response1.data));
         // emit(DropdownLoaded1(response: response.response.data));
@@ -303,7 +356,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       if (response.user!.userType != null) {
         final prefs = SecureStorageService.instance;
         await prefs.initialize();
-        await prefs.setString('device_token', event.deviceToken ?? '');
+        await prefs.setString('device_token', event.deviceToken);
         await prefs.setString('token', response.token ?? '');
         await prefs.setString('userId', response.user?.id ?? '');
         await prefs.setString(

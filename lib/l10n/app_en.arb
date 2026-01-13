@@ -100,6 +100,7 @@
  "msg_login_success": "Login successfully",
  "msg_login_failed": "Login failed please try again",
  "msg_something_wrong": "Something went wrong.",
+ "msg_google_signin_failed": "Google Sign-In failed. Please try again.",
  "msg_verification_link_sent": "Verification link sent successfully",
  "msg_validation_error": "Validation error or user email not found",
  "msg_user_already_verified": "User already verified",
@@ -208,6 +209,8 @@
 "lbl_disconnecting_in": "Disconnecting in",
 "lbl_seconds": "seconds",
 "lbl_waiting_for_answer": "Waiting for answer",
+"lbl_auto_connecting": "Auto-connecting...",
+"lbl_requesting_permissions": "Requesting permissions...",
 
  "@_SIGNUP_SCREEN": {},
  "lbl_signup_title": "Sign Up",

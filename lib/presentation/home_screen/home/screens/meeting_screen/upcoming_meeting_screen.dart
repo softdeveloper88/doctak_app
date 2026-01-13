@@ -3,6 +3,7 @@ import 'package:doctak_app/data/models/meeting_model/create_meeting_model.dart';
 import 'package:doctak_app/data/models/meeting_model/fetching_meeting_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -25,25 +26,39 @@ class _UpcomingMeetingScreenState extends State<UpcomingMeetingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return BlocBuilder<MeetingBloc, MeetingState>(
       bloc: meetingBloc,
       builder: (context, state) {
         if (state is MeetingsLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator(color: theme.primary));
         } else if (state is MeetingsError) {
-          return Center(child: Text(state.message));
+          return Center(
+            child: Text(
+              state.message,
+              style: TextStyle(color: theme.textSecondary),
+            ),
+          );
         } else if (state is MeetingsLoaded) {
-          return _buildMeetingList(context, meetingBloc.meetings!);
+          return _buildMeetingList(context, theme, meetingBloc.meetings!);
         }
         return Center(
-          child: Text(translation(context).msg_no_meetings_scheduled),
+          child: Text(
+            translation(context).msg_no_meetings_scheduled,
+            style: TextStyle(color: theme.textSecondary),
+          ),
         );
       },
     );
   }
 }
 
-Widget _buildMeetingList(BuildContext context, GetMeetingModel meetingsData) {
+Widget _buildMeetingList(
+  BuildContext context,
+  OneUITheme theme,
+  GetMeetingModel meetingsData,
+) {
   return ListView.builder(
     padding: EdgeInsets.only(
       left: 16,
@@ -60,16 +75,19 @@ Widget _buildMeetingList(BuildContext context, GetMeetingModel meetingsData) {
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.08),
+              color: theme.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.blue.withOpacity(0.2), width: 1),
+              border: Border.all(
+                color: theme.primary.withOpacity(0.2),
+                width: 1,
+              ),
             ),
             child: Row(
               children: [
                 Icon(
-                  Icons.calendar_today_outlined,
+                  Icons.calendar_today_rounded,
                   size: 16,
-                  color: Colors.blue[700],
+                  color: theme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -77,8 +95,7 @@ Widget _buildMeetingList(BuildContext context, GetMeetingModel meetingsData) {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Colors.blue[800],
-                    fontFamily: 'Poppins',
+                    color: theme.primary,
                   ),
                 ),
               ],
@@ -99,12 +116,13 @@ Widget _buildMeetingList(BuildContext context, GetMeetingModel meetingsData) {
                     content: Text(
                       '${translation(context).lbl_joining} ${session.title}',
                     ),
+                    backgroundColor: theme.primary,
                   ),
                 );
               },
             );
           }).toList(),
-          Divider(thickness: 1, height: 32, color: Colors.grey.shade200),
+          Divider(thickness: 1, height: 32, color: theme.surfaceVariant),
         ],
       );
     },
@@ -127,19 +145,27 @@ class MeetingItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            spreadRadius: 0,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(
+          color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
+          width: 1,
+        ),
+        boxShadow: theme.isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: theme.primary.withOpacity(0.05),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -149,7 +175,7 @@ class MeetingItem extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -157,8 +183,7 @@ class MeetingItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Colors.blue[700],
-                  fontFamily: 'Poppins',
+                  color: theme.primary,
                 ),
               ),
             ),
@@ -171,20 +196,19 @@ class MeetingItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      fontFamily: 'Poppins',
+                      color: theme.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(
-                        Icons.videocam_outlined,
+                        Icons.videocam_rounded,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: theme.textSecondary,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
@@ -192,8 +216,7 @@ class MeetingItem extends StatelessWidget {
                           "${translation(context).lbl_meeting_id}: $meetingId",
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
-                            fontFamily: 'Poppins',
+                            color: theme.textSecondary,
                           ),
                         ),
                       ),
@@ -207,12 +230,12 @@ class MeetingItem extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue[600]!, Colors.blue[700]!],
+                  colors: [theme.primary, theme.primary.withOpacity(0.8)],
                 ),
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: theme.primary.withOpacity(0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -243,7 +266,6 @@ class MeetingItem extends StatelessWidget {
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
-                            fontFamily: 'Poppins',
                           ),
                         ),
                       ],

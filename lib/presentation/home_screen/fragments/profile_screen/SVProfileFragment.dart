@@ -3,14 +3,14 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/profile_shimmer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 import '../../profile/components/SVProfileHeaderComponent.dart';
-import '../../utils/SVCommon.dart';
 import 'bloc/profile_state.dart';
 
 class SVProfileFragment extends StatefulWidget {
@@ -49,7 +49,9 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
       end: 1.0,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
-    setStatusBarColor(Colors.transparent);
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+    );
     super.initState();
   }
 
@@ -61,8 +63,10 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (BuildContext context, ProfileState state) {
           if (state is PaginationLoadedState) {
@@ -107,7 +111,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
             return Center(
               child: Text(
                 '${translation(context).lbl_unknown_state}: ${state.toString()}',
-                style: TextStyle(color: Colors.red[300]),
+                style: TextStyle(color: theme.error),
               ),
             );
           }

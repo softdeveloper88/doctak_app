@@ -1,8 +1,7 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -35,18 +34,17 @@ class ChatBubble extends StatefulWidget {
 }
 
 class _ChatBubbleState extends State<ChatBubble> {
-
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4.0,
-        horizontal: 12.0,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment:
-            widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: widget.isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           if (widget.isMe)
             Container(
@@ -55,10 +53,7 @@ class _ChatBubbleState extends State<ChatBubble> {
               ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    SVAppColorPrimary,
-                    SVAppColorPrimary.withOpacity(0.9),
-                  ],
+                  colors: [theme.primary, theme.primary.withOpacity(0.9)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -70,7 +65,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: SVAppColorPrimary.withOpacity(0.2),
+                    color: theme.primary.withOpacity(0.2),
                     blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
@@ -108,7 +103,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          timeAgo.format(DateTime.parse(widget.createAt.toString())),
+                          timeAgo.format(
+                            DateTime.parse(widget.createAt.toString()),
+                          ),
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 11.0,
@@ -139,10 +136,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                 maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
               decoration: BoxDecoration(
-                color: appStore.isDarkMode
-                    ? const Color(0xFF2A2A2A) // Slightly lighter dark gray
-                    : const Color(0xFFE8E8E8),
-                // Light gray for light mode
+                color: theme.surfaceVariant,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(18),
                   topRight: Radius.circular(18),
@@ -151,9 +145,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: appStore.isDarkMode
-                        ? Colors.black.withOpacity(0.3)
-                        : Colors.grey.withOpacity(0.15),
+                    color: theme.isDark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.grey.withOpacity(0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -172,9 +166,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       Text(
                         widget.message,
                         style: TextStyle(
-                          color: appStore.isDarkMode
-                              ? Colors.white
-                              : Colors.black87,
+                          color: theme.textPrimary,
                           fontSize: 15.0,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w400,
@@ -191,15 +183,15 @@ class _ChatBubbleState extends State<ChatBubble> {
                     const SizedBox(height: 4),
                     Text(
                       widget.createAt != null
-                          ? timeAgo.format(DateTime.parse(widget.createAt.toString()))
+                          ? timeAgo.format(
+                              DateTime.parse(widget.createAt.toString()),
+                            )
                           : '',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 11.0,
                         fontWeight: FontWeight.w400,
-                        color: appStore.isDarkMode
-                            ? Colors.white.withOpacity(0.5)
-                            : Colors.black.withOpacity(0.5),
+                        color: theme.textTertiary,
                       ),
                     ),
                   ],
@@ -220,6 +212,7 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   Widget _buildAttachment(BuildContext context) {
+    final theme = OneUITheme.of(context);
     try {
       // Null safety check
       if (widget.attachmentJson == null || widget.attachmentJson!.isEmpty) {
@@ -227,10 +220,13 @@ class _ChatBubbleState extends State<ChatBubble> {
         return const SizedBox.shrink();
       }
 
-      debugPrint('Building attachment: ${widget.attachmentJson}, type: ${widget.attachmentType}');
+      debugPrint(
+        'Building attachment: ${widget.attachmentJson}, type: ${widget.attachmentType}',
+      );
 
       // Check attachmentType first (more reliable than extension)
-      final attachmentType = widget.attachmentType?.toString().toLowerCase() ?? '';
+      final attachmentType =
+          widget.attachmentType?.toString().toLowerCase() ?? '';
 
       // Handle voice/audio messages
       if (attachmentType.contains('audio') ||
@@ -241,10 +237,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
         return VoiceMessagePrecacher(
           audioUrl: audioUrl,
-          child: CustomAudioPlayer(
-            audioUrl: audioUrl,
-            isMe: widget.isMe,
-          ),
+          child: CustomAudioPlayer(audioUrl: audioUrl, isMe: widget.isMe),
         );
       }
 
@@ -252,7 +245,8 @@ class _ChatBubbleState extends State<ChatBubble> {
       if (attachmentType.contains('video') || attachmentType == 'video') {
         debugPrint('Rendering video message');
         return VideoPlayerWidget(
-            videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
+          videoUrl: '${AppData.imageUrl}${widget.attachmentJson}',
+        );
       }
 
       // Fallback to extension-based detection if attachmentType is not available
@@ -263,7 +257,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         'aac',
         'ogg',
         'flac',
-        'amr'
+        'amr',
       ];
       final videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp'];
 
@@ -283,15 +277,13 @@ class _ChatBubbleState extends State<ChatBubble> {
         final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
         return VoiceMessagePrecacher(
           audioUrl: audioUrl,
-          child: CustomAudioPlayer(
-            audioUrl: audioUrl,
-            isMe: widget.isMe,
-          ),
+          child: CustomAudioPlayer(audioUrl: audioUrl, isMe: widget.isMe),
         );
       } else if (videoExtensions.contains(fileExtension)) {
         debugPrint('Rendering video by extension');
         return VideoPlayerWidget(
-            videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
+          videoUrl: '${AppData.imageUrl}${widget.attachmentJson}',
+        );
       } else {
         // Default to image
         debugPrint('Rendering as image (default)');
@@ -320,7 +312,9 @@ class _ChatBubbleState extends State<ChatBubble> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: theme.isDark
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black.withOpacity(0.08),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -338,7 +332,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withOpacity(0.4),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -361,29 +355,23 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   Widget _buildErrorAttachment() {
+    final theme = OneUITheme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: theme.error.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.red.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: theme.error.withOpacity(0.3), width: 1),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: 20,
-          ),
-          SizedBox(width: 8),
+          Icon(Icons.error_outline, color: theme.error, size: 20),
+          const SizedBox(width: 8),
           Text(
             'Unable to load attachment',
             style: TextStyle(
-              color: Colors.red,
+              color: theme.error,
               fontSize: 13,
               fontFamily: 'Poppins',
             ),
@@ -392,5 +380,4 @@ class _ChatBubbleState extends State<ChatBubble> {
       ),
     );
   }
-
 }

@@ -1,19 +1,22 @@
 // lib/presentation/call_module/widgets/connecting_view.dart
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 
 import '../models/call_state.dart';
 
-/// Widget that displays connecting state with animations
+/// Widget that displays connecting state with animations and OneUI 8.5 theming
+/// Note: Calling screens always use dark background for consistent experience
+/// Auto-reconnects when network becomes stable - no manual retry needed
 class ConnectingView extends StatelessWidget {
   final String contactName;
   final bool isIncoming;
   final bool isVideoCall;
-  final VoidCallback onRetry;
-  final bool showRetry;
-  final String? customMessage; // Add option for custom message
-  final CallEndReason? callEndReason; // Add call end reason for proper messaging
-  final int reconnectCountdown; // Add countdown for reconnect timer
+  final VoidCallback onRetry; // Kept for backward compatibility but not shown
+  final bool showRetry; // Deprecated - auto-reconnect is used instead
+  final String? customMessage;
+  final CallEndReason? callEndReason;
+  final int reconnectCountdown;
 
   const ConnectingView({
     Key? key,
@@ -22,13 +25,19 @@ class ConnectingView extends StatelessWidget {
     required this.isVideoCall,
     required this.onRetry,
     this.showRetry = false,
-    this.customMessage, // Optional custom message
+    this.customMessage,
     this.callEndReason,
     this.reconnectCountdown = 0,
   }) : super(key: key);
 
+  // Calling screen colors - always dark for consistent experience
+  static const _callBackgroundDark = Color(0xFF1A2332);
+  static const _callBackgroundLight = Color(0xFF243447);
+
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     // Determine the display message and icon based on state
     String displayMessage;
     IconData displayIcon;
@@ -36,61 +45,66 @@ class ConnectingView extends StatelessWidget {
     bool showSpinner = true;
 
     if (callEndReason != null && callEndReason != CallEndReason.none) {
-      // Call has ended with a reason - show appropriate message
       showSpinner = false;
       switch (callEndReason!) {
         case CallEndReason.remoteUserEnded:
           displayMessage = translation(context).lbl_call_ended;
-          displayIcon = Icons.call_end;
-          indicatorColor = Colors.red;
+          displayIcon = Icons.call_end_rounded;
+          indicatorColor = theme.error;
           break;
         case CallEndReason.remoteUserNoAnswer:
           displayMessage = translation(context).lbl_no_answer;
-          displayIcon = Icons.phone_missed;
-          indicatorColor = Colors.orange;
+          displayIcon = Icons.phone_missed_rounded;
+          indicatorColor = theme.warning;
           break;
         case CallEndReason.networkDisconnect:
           displayMessage = translation(context).lbl_connection_lost;
-          displayIcon = Icons.signal_wifi_off;
-          indicatorColor = Colors.orange;
+          displayIcon = Icons.signal_wifi_off_rounded;
+          indicatorColor = theme.warning;
           break;
         case CallEndReason.callFailed:
           displayMessage = translation(context).lbl_call_failed;
-          displayIcon = Icons.error_outline;
-          indicatorColor = Colors.red;
+          displayIcon = Icons.error_outline_rounded;
+          indicatorColor = theme.error;
           break;
         case CallEndReason.permissionDenied:
           displayMessage = translation(context).lbl_permission_denied;
-          displayIcon = Icons.block;
-          indicatorColor = Colors.red;
+          displayIcon = Icons.block_rounded;
+          indicatorColor = theme.error;
           break;
         default:
           displayMessage = translation(context).lbl_call_ended;
-          displayIcon = Icons.call_end;
-          indicatorColor = Colors.grey;
+          displayIcon = Icons.call_end_rounded;
+          indicatorColor = Colors.white70;
       }
     } else if (customMessage != null) {
       displayMessage = customMessage!;
-      displayIcon = isVideoCall ? Icons.videocam : Icons.phone;
-      indicatorColor = Colors.blue;
+      displayIcon = isVideoCall ? Icons.videocam_rounded : Icons.phone_rounded;
+      indicatorColor = theme.primary;
     } else {
       displayMessage = isIncoming
           ? translation(context).lbl_connecting
-          : "${translation(context).lbl_ringing} $contactName...";
-      displayIcon = isVideoCall ? Icons.videocam : Icons.phone;
-      indicatorColor = Colors.blue;
+          : "${translation(context).lbl_ringing}...";
+      displayIcon = isVideoCall ? Icons.videocam_rounded : Icons.phone_rounded;
+      indicatorColor = theme.primary;
     }
 
     return Container(
-      color: Colors.black87,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [_callBackgroundLight, _callBackgroundDark],
+        ),
+      ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Animated connecting indicator
             SizedBox(
-              width: 100,
-              height: 100,
+              width: 120,
+              height: 120,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -116,7 +130,6 @@ class ConnectingView extends StatelessWidget {
                         );
                       },
                       onEnd: () {
-                        // This causes the animation to rebuild and repeat
                         (context as Element).markNeedsBuild();
                       },
                     ),
@@ -124,10 +137,10 @@ class ConnectingView extends StatelessWidget {
                   // Static circle for ended state
                   if (!showSpinner)
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
-                        color: indicatorColor.withOpacity(0.2),
+                        color: indicatorColor.withOpacity(0.15),
                         shape: BoxShape.circle,
                         border: Border.all(color: indicatorColor, width: 2),
                       ),
@@ -135,34 +148,51 @@ class ConnectingView extends StatelessWidget {
 
                   // Main indicator (only when still connecting)
                   if (showSpinner)
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(indicatorColor),
-                      strokeWidth: 3,
+                    SizedBox(
+                      width: 80,
+                      height: 80,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          indicatorColor,
+                        ),
+                        strokeWidth: 3,
+                      ),
                     ),
 
                   // Center icon
-                  Icon(
-                    displayIcon,
-                    color: showSpinner ? Colors.white : indicatorColor,
-                    size: 30,
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: showSpinner
+                          ? indicatorColor
+                          : indicatorColor.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      displayIcon,
+                      color: showSpinner ? Colors.white : indicatorColor,
+                      size: 28,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 32),
 
-            // Contact name
+            // Contact name - WHITE text for visibility
             Text(
               contactName,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
                 fontFamily: 'Poppins',
+                letterSpacing: 0.5,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             // Status message
             Text(
@@ -170,7 +200,7 @@ class ConnectingView extends StatelessWidget {
               style: TextStyle(
                 color: showSpinner ? Colors.white70 : indicatorColor,
                 fontSize: 16,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w500,
                 fontFamily: 'Poppins',
               ),
               textAlign: TextAlign.center,
@@ -178,23 +208,26 @@ class ConnectingView extends StatelessWidget {
 
             // Reconnect countdown (if applicable)
             if (reconnectCountdown > 0) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.orange.withOpacity(0.5)),
+                  color: theme.warning.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: theme.warning.withOpacity(0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.timer, color: Colors.orange, size: 18),
+                    Icon(Icons.timer_rounded, color: theme.warning, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       '${translation(context).lbl_disconnecting_in} $reconnectCountdown ${translation(context).lbl_seconds}',
-                      style: const TextStyle(
-                        color: Colors.orange,
+                      style: TextStyle(
+                        color: theme.warning,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         fontFamily: 'Poppins',
@@ -205,23 +238,45 @@ class ConnectingView extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // Retry button (only show when appropriate)
-            if (showRetry && callEndReason == null)
-              ElevatedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
-                label: Text(translation(context).lbl_try_again),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+            // Auto-reconnect status indicator (replaces manual Try Again button)
+            // Shows when connection is being established or reconnecting
+            if (callEndReason == null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-              )
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          theme.primary.withOpacity(0.8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      translation(context).lbl_auto_connecting,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 13,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

@@ -1,19 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/app_export.dart';
-import '../../add_post/bloc/add_post_event.dart';
+import '../bloc/add_post_event.dart';
 
 class TagFriendsListBottomSheet extends StatefulWidget {
-  AddPostBloc searchPeopleBloc;
+  final AddPostBloc searchPeopleBloc;
 
-  TagFriendsListBottomSheet(this.searchPeopleBloc, {Key? key})
-      : super(key: key);
+  const TagFriendsListBottomSheet(this.searchPeopleBloc, {Key? key})
+    : super(key: key);
 
   @override
   State<TagFriendsListBottomSheet> createState() =>
@@ -21,113 +20,144 @@ class TagFriendsListBottomSheet extends StatefulWidget {
 }
 
 class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     widget.searchPeopleBloc.add(LoadPageEvent(page: 1, name: ''));
     super.initState();
-    afterBuildCreated(() {
-      setStatusBarColor(svGetScaffoldColor());
-    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
+      height: screenHeight * 0.85,
       decoration: BoxDecoration(
-        color: svGetScaffoldColor(),
+        color: theme.scaffoldBackground,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
         ),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Modern Handle Bar
+          // Handle Bar
           Center(
             child: Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: theme.textTertiary.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           // Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Tag Friends',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: Colors.blue[800],
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: theme.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    CupertinoIcons.person_2_fill,
+                    color: theme.primary,
+                    size: 22,
                   ),
                 ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      color: Colors.grey[700],
-                      size: 20,
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Tag Friends',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'Poppins',
+                          color: theme.textPrimary,
+                          letterSpacing: -0.3,
+                        ),
+                      ),
+                      Text(
+                        'Mention people in your post',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontFamily: 'Poppins',
+                          color: theme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Material(
+                  color: theme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).pop(),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        CupertinoIcons.xmark,
+                        color: theme.textSecondary,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          // Search Field
+          // Search Field - One UI 8.5 Style
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: appStore.isDarkMode
-                  ? Colors.grey[800]
-                  : Colors.grey[100],
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: Colors.blue.withOpacity(0.1),
-                width: 1,
-              ),
+              color: theme.inputBackground,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: theme.border, width: 0.5),
             ),
             child: Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.only(left: 14),
                   child: Icon(
-                    Icons.search_rounded,
-                    color: Colors.blue.withOpacity(0.6),
-                    size: 24,
+                    CupertinoIcons.search,
+                    color: theme.textTertiary,
+                    size: 20,
                   ),
                 ),
                 Expanded(
-                  child: AppTextField(
-                    textFieldType: TextFieldType.NAME,
-                    textStyle: TextStyle(
+                  child: TextField(
+                    controller: _searchController,
+                    style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: appStore.isDarkMode
-                          ? Colors.white
-                          : Colors.black87,
+                      fontSize: 15,
+                      color: theme.textPrimary,
                     ),
                     onChanged: (name) {
                       widget.searchPeopleBloc.add(
-                        LoadPageEvent(
-                          page: 1,
-                          name: name,
-                        ),
+                        LoadPageEvent(page: 1, name: name),
                       );
                     },
                     decoration: InputDecoration(
@@ -135,352 +165,508 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                       hintText: 'Search friends...',
                       hintStyle: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: Colors.grey[500],
+                        fontSize: 15,
+                        color: theme.textTertiary,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 14,
+                      ),
                     ),
                   ),
                 ),
+                if (_searchController.text.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () {
+                        _searchController.clear();
+                        widget.searchPeopleBloc.add(
+                          LoadPageEvent(page: 1, name: ''),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: theme.textTertiary.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          CupertinoIcons.xmark,
+                          size: 14,
+                          color: theme.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Selected Friends
-          BlocConsumer<AddPostBloc, AddPostState>(
+          // Selected Friends Section
+          BlocBuilder<AddPostBloc, AddPostState>(
             bloc: widget.searchPeopleBloc,
-            listener: (BuildContext context, AddPostState state) {},
             builder: (context, state) {
-              if (state is PaginationLoadedState &&
-                  widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
+              if (widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
                 return Container(
-                  height: 80,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: widget.searchPeopleBloc.selectedSearchPeopleData.length,
-                    itemBuilder: (context, index) {
-                      final person = widget.searchPeopleBloc.selectedSearchPeopleData[index];
-                      return Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Colors.blue.withOpacity(0.2),
-                            width: 1,
+                  margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.primary.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: theme.primary.withOpacity(0.15),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.checkmark_circle_fill,
+                            size: 16,
+                            color: theme.primary,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Avatar
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.blue[100],
-                                shape: BoxShape.circle,
-                              ),
-                              child: Center(
-                                child: Text(
-                                  person.firstName?.substring(0, 1).toUpperCase() ?? 'U',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                              ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Selected (${widget.searchPeopleBloc.selectedSearchPeopleData.length})',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              color: theme.primary,
                             ),
-                            const SizedBox(width: 8),
-                            // Name
-                            Text(
-                              '${person.firstName} ${person.lastName}',
-                              style: TextStyle(
-                                color: Colors.blue[900],
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Poppins',
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Remove Button
-                            GestureDetector(
-                              onTap: () {
-                                widget.searchPeopleBloc.add(
-                                  SelectFriendEvent(
-                                    userData: person,
-                                    isAdd: false,
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.close_rounded,
-                                color: Colors.blue[700],
-                                size: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: widget
+                            .searchPeopleBloc
+                            .selectedSearchPeopleData
+                            .map((person) {
+                              return _buildSelectedChip(person, theme);
+                            })
+                            .toList(),
+                      ),
+                    ],
                   ),
                 );
               }
               return const SizedBox();
             },
           ),
-          if (widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty)
-            Divider(
-              color: Colors.grey.withOpacity(0.2),
-              indent: 16,
-              endIndent: 16,
-            ),
+          // Divider
+          Container(
+            height: 0.5,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            color: theme.divider,
+          ),
           // Friends List
-          BlocConsumer<AddPostBloc, AddPostState>(
-            bloc: widget.searchPeopleBloc,
-            listener: (BuildContext context, AddPostState state) {},
-            builder: (context, state) {
-              if (state is PaginationLoadingState) {
-                return Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.blue[600],
-                      strokeWidth: 3,
+          Expanded(
+            child: BlocBuilder<AddPostBloc, AddPostState>(
+              bloc: widget.searchPeopleBloc,
+              builder: (context, state) {
+                if (state is PaginationLoadingState) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CupertinoActivityIndicator(
+                          color: theme.primary,
+                          radius: 14,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Loading friends...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.textSecondary,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                );
-              } else if (state is PaginationLoadedState) {
-                final bloc = widget.searchPeopleBloc;
-                return Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  );
+                } else if (state is PaginationLoadedState) {
+                  final bloc = widget.searchPeopleBloc;
+                  if (bloc.searchPeopleData.isEmpty) {
+                    return _buildEmptyState(theme);
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     itemCount: bloc.searchPeopleData.length,
                     itemBuilder: (context, index) {
                       if (bloc.pageNumber <= bloc.numberOfPage) {
                         if (index ==
-                            bloc.searchPeopleData.length - bloc.nextPageTrigger) {
+                            bloc.searchPeopleData.length -
+                                bloc.nextPageTrigger) {
                           bloc.add(CheckIfNeedMoreDataEvent(index: index));
                         }
                       }
-                      
+
                       if (bloc.numberOfPage != bloc.pageNumber - 1 &&
                           index >= bloc.searchPeopleData.length - 1) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.blue[600],
-                            strokeWidth: 3,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Center(
+                            child: CupertinoActivityIndicator(
+                              color: theme.primary,
+                            ),
                           ),
                         );
                       }
-                      
+
                       final person = bloc.searchPeopleData[index];
-                      return InkWell(
-                        onTap: () {
-                          bloc.add(SelectFriendEvent(
-                            userData: person,
-                            isAdd: true,
-                          ));
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: appStore.isDarkMode
-                                ? Colors.grey[900]
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.03),
-                                offset: const Offset(0, 2),
-                                blurRadius: 6,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              // Profile Picture
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.blue.withOpacity(0.2),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: person.profilePic?.isNotEmpty == true
-                                      ? CachedNetworkImage(
-                                          imageUrl: '${AppData.imageUrl}${person.profilePic}',
-                                          height: 48,
-                                          width: 48,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => Container(
-                                            color: Colors.blue[50],
-                                            child: Center(
-                                              child: CircularProgressIndicator(
-                                                color: Colors.blue[400],
-                                                strokeWidth: 2,
-                                              ),
-                                            ),
-                                          ),
-                                          errorWidget: (context, url, error) => Container(
-                                            color: Colors.blue[50],
-                                            child: Center(
-                                              child: Text(
-                                                person.firstName?.substring(0, 1).toUpperCase() ?? 'U',
-                                                style: TextStyle(
-                                                  color: Colors.blue[700],
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontFamily: 'Poppins',
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      : Container(
-                                          color: Colors.blue[50],
-                                          child: Center(
-                                            child: Text(
-                                              person.firstName?.substring(0, 1).toUpperCase() ?? 'U',
-                                              style: TextStyle(
-                                                color: Colors.blue[700],
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily: 'Poppins',
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              // Name and Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            '${person.firstName} ${person.lastName}',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: 'Poppins',
-                                              color: Colors.black87,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        // if (person.isVerified ?? false) ...[
-                                        //   const SizedBox(width: 6),
-                                        //   Container(
-                                        //     padding: const EdgeInsets.all(2),
-                                        //     decoration: BoxDecoration(
-                                        //       color: Colors.blue,
-                                        //       shape: BoxShape.circle,
-                                        //     ),
-                                        //     child: const Icon(
-                                        //       Icons.check,
-                                        //       size: 10,
-                                        //       color: Colors.white,
-                                        //     ),
-                                        //   ),
-                                        // ],
-                                      ],
-                                    ),
-                                    // if (person.specialty != null) ...[
-                                    //   const SizedBox(height: 2),
-                                    //   Text(
-                                    //     person.specialty!,
-                                    //     style: TextStyle(
-                                    //       fontSize: 13,
-                                    //       color: Colors.grey[600],
-                                    //       fontFamily: 'Poppins',
-                                    //     ),
-                                    //     overflow: TextOverflow.ellipsis,
-                                    //   ),
-                                    // ],
-                                  ],
-                                ),
-                              ),
-                              // Add Icon
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.add_rounded,
-                                  color: Colors.blue[700],
-                                  size: 20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      final isSelected = bloc.selectedSearchPeopleData.any(
+                        (p) => p.id == person.id,
                       );
+
+                      return _buildFriendListItem(person, isSelected, theme);
                     },
-                  ),
-                );
-              } else if (state is DataError) {
-                return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          state.errorMessage,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                            fontFamily: 'Poppins',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                  );
+                } else if (state is DataError) {
+                  return _buildErrorState(state.errorMessage, theme);
+                }
+                return _buildEmptyState(theme);
+              },
+            ),
+          ),
+          // Done Button
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              border: Border(top: BorderSide(color: theme.divider, width: 0.5)),
+            ),
+            child: SafeArea(
+              top: false,
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                );
-              } else {
-                return const Expanded(
-                  child: Center(
-                    child: Text(
-                      'Start typing to search friends',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontFamily: 'Poppins',
-                      ),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
                     ),
                   ),
-                );
-              }
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedChip(dynamic person, OneUITheme theme) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(4, 4, 10, 4),
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.primary.withOpacity(0.25), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [theme.primary, theme.primary.withOpacity(0.7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                person.firstName?.substring(0, 1).toUpperCase() ?? '?',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '${person.firstName ?? ''} ${person.lastName ?? ''}'.trim(),
+            style: TextStyle(
+              color: theme.textPrimary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () {
+              widget.searchPeopleBloc.add(
+                SelectFriendEvent(userData: person, isAdd: false),
+              );
             },
+            child: Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: theme.error.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(CupertinoIcons.xmark, size: 10, color: theme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFriendListItem(
+    dynamic person,
+    bool isSelected,
+    OneUITheme theme,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: isSelected
+            ? theme.primary.withOpacity(0.08)
+            : theme.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: () {
+            widget.searchPeopleBloc.add(
+              SelectFriendEvent(userData: person, isAdd: !isSelected),
+            );
+          },
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isSelected
+                    ? theme.primary.withOpacity(0.3)
+                    : theme.border,
+                width: isSelected ? 1.5 : 0.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                // Avatar
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: theme.primary.withOpacity(0.2),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.primary.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(25),
+                    child: person.profilePic?.isNotEmpty == true
+                        ? CachedNetworkImage(
+                            imageUrl: '${AppData.imageUrl}${person.profilePic}',
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: theme.avatarBackground,
+                              child: Center(
+                                child: CupertinoActivityIndicator(
+                                  color: theme.primary,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) =>
+                                _buildAvatarPlaceholder(person, theme),
+                          )
+                        : _buildAvatarPlaceholder(person, theme),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Name
+                Expanded(
+                  child: Text(
+                    '${person.firstName ?? ''} ${person.lastName ?? ''}'.trim(),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: theme.textPrimary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // Selection Indicator
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: isSelected ? theme.primary : theme.surfaceVariant,
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? null
+                        : Border.all(color: theme.border, width: 1.5),
+                  ),
+                  child: isSelected
+                      ? const Icon(
+                          CupertinoIcons.checkmark,
+                          color: Colors.white,
+                          size: 16,
+                        )
+                      : Icon(
+                          CupertinoIcons.plus,
+                          color: theme.textTertiary,
+                          size: 16,
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatarPlaceholder(dynamic person, OneUITheme theme) {
+    return Container(
+      color: theme.avatarBackground,
+      child: Center(
+        child: Text(
+          person.firstName?.substring(0, 1).toUpperCase() ?? '?',
+          style: TextStyle(
+            color: theme.primary,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(OneUITheme theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: theme.surfaceVariant,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              CupertinoIcons.person_2,
+              size: 40,
+              color: theme.textTertiary,
+            ),
           ),
           const SizedBox(height: 16),
+          Text(
+            'No friends found',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: theme.textPrimary,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Try a different search term',
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.textSecondary,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message, OneUITheme theme) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: theme.error.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              CupertinoIcons.exclamationmark_circle,
+              size: 40,
+              color: theme.error,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Something went wrong',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: theme.textPrimary,
+              fontFamily: 'Poppins',
+            ),
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              message,
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.textSecondary,
+                fontFamily: 'Poppins',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );

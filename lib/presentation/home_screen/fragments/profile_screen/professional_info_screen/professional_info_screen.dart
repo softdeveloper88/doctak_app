@@ -3,20 +3,19 @@ import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/one_ui_profile_components.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import '../../../../../core/app_export.dart';
-import '../../../utils/SVColors.dart';
-import '../../../utils/SVCommon.dart';
-import '../bloc/profile_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProfessionalInfoScreen extends StatefulWidget {
-  ProfileBloc profileBloc;
+  final ProfileBloc profileBloc;
 
-  ProfessionalInfoScreen({required this.profileBloc, super.key});
+  const ProfessionalInfoScreen({required this.profileBloc, super.key});
 
   @override
   State<ProfessionalInfoScreen> createState() => _ProfessionalInfoScreenState();
@@ -67,28 +66,17 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_professional_summary,
         titleIcon: Icons.medical_services_outlined,
         actions: [
           if (widget.profileBloc.isMe)
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isEditModeMap ? Icons.check : Icons.edit,
-                  color: isEditModeMap ? Colors.green[600] : Colors.blue[600],
-                  size: 16,
-                ),
-              ),
+            OneUIEditActionButton(
+              isEditMode: isEditModeMap,
               onPressed: () {
                 setState(() {
                   isEditModeMap = !isEditModeMap;
@@ -115,42 +103,19 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                 children: [
                   // Information card
                   if (!isEditModeMap)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 20),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.05),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Colors.blue[700],
-                            size: 24,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              translation(context).msg_professional_info_desc,
-                              style: TextStyle(
-                                color: Colors.blue[700],
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    OneUIInfoBanner(
+                      message: translation(context).msg_professional_info_desc,
+                      icon: Icons.info_outline,
+                      accentColor: theme.primary,
                     ),
 
                   // Specialty section
                   Card(
                     elevation: 0,
+                    color: theme.cardBackground,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade200),
+                      side: BorderSide(color: theme.border),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -214,14 +179,14 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                                               8,
                                             ),
                                             border: Border.all(
-                                              color: Colors.grey.shade300,
+                                              color: theme.border,
                                             ),
                                           ),
                                           child: CustomDropdownButtonFormField(
                                             itemBuilder: (item) => Text(
                                               item,
-                                              style: const TextStyle(
-                                                color: Colors.black,
+                                              style: TextStyle(
+                                                color: theme.textPrimary,
                                               ),
                                             ),
                                             items: state.specialtyDropdownValue,
@@ -294,9 +259,10 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                   // Workplace and experience card
                   Card(
                     elevation: 0,
+                    color: theme.cardBackground,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade200),
+                      side: BorderSide(color: theme.border),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -359,7 +325,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
 
                           if (!isEditModeMap)
                             Divider(
-                              color: Colors.grey[200],
+                              color: theme.border,
                               thickness: 1,
                               indent: 10,
                               endIndent: 10,
@@ -401,9 +367,10 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                   // Achievements and location card
                   Card(
                     elevation: 0,
+                    color: theme.cardBackground,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: Colors.grey.shade200),
+                      side: BorderSide(color: theme.border),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -472,7 +439,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
 
                           if (!isEditModeMap)
                             Divider(
-                              color: Colors.grey[200],
+                              color: theme.border,
                               thickness: 1,
                               indent: 10,
                               endIndent: 10,

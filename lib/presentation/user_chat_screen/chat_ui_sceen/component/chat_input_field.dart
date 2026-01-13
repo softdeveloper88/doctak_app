@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:doctak_app/main.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -73,6 +72,7 @@ class _ChatInputFieldState extends State<ChatInputField>
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     // Get proper padding for edge-to-edge support
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
     final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
@@ -82,10 +82,10 @@ class _ChatInputFieldState extends State<ChatInputField>
       children: [
         Container(
           decoration: BoxDecoration(
-            color: appStore.isDarkMode ? const Color(0xFF1A1A1A) : Colors.white,
+            color: theme.cardBackground,
             boxShadow: [
               BoxShadow(
-                color: appStore.isDarkMode
+                color: theme.isDark
                     ? Colors.black.withOpacity(0.3)
                     : Colors.grey.withOpacity(0.1),
                 blurRadius: 10,
@@ -111,16 +111,9 @@ class _ChatInputFieldState extends State<ChatInputField>
                     maxHeight: 120,
                   ),
                   decoration: BoxDecoration(
-                    color: appStore.isDarkMode
-                        ? const Color(0xFF262626)
-                        : const Color(0xFFF5F7FA),
+                    color: theme.inputBackground,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: appStore.isDarkMode
-                          ? Colors.white.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.2),
-                      width: 1,
-                    ),
+                    border: Border.all(color: theme.divider, width: 1),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
@@ -131,9 +124,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                           _showEmoji
                               ? Icons.keyboard
                               : Icons.emoji_emotions_outlined,
-                          color: appStore.isDarkMode
-                              ? Colors.white70
-                              : Colors.grey[600],
+                          color: theme.textSecondary,
                           size: 24,
                         ),
                         onPressed: _toggleEmoji,
@@ -149,9 +140,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                           minLines: 1,
                           style: TextStyle(
                             fontSize: 16,
-                            color: appStore.isDarkMode
-                                ? Colors.white
-                                : Colors.black87,
+                            color: theme.textPrimary,
                             fontFamily: 'Poppins',
                           ),
                           decoration: InputDecoration(
@@ -159,9 +148,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                               context,
                             ).lbl_type_message_here,
                             hintStyle: TextStyle(
-                              color: appStore.isDarkMode
-                                  ? Colors.white38
-                                  : Colors.grey[500],
+                              color: theme.textTertiary,
                               fontSize: 16,
                               fontFamily: 'Poppins',
                             ),
@@ -186,9 +173,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                       IconButton(
                         icon: Icon(
                           Icons.attach_file_rounded,
-                          color: appStore.isDarkMode
-                              ? Colors.white70
-                              : Colors.grey[600],
+                          color: theme.textSecondary,
                           size: 24,
                         ),
                         onPressed: widget.onAttachmentPressed,
@@ -244,15 +229,12 @@ class _ChatInputFieldState extends State<ChatInputField>
                     width: 48,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          SVAppColorPrimary,
-                          SVAppColorPrimary.withOpacity(0.8),
-                        ],
+                        colors: [theme.primary, theme.primary.withOpacity(0.8)],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: SVAppColorPrimary.withOpacity(0.3),
+                          color: theme.primary.withOpacity(0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),

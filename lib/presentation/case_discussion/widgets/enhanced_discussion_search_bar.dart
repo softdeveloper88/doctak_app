@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
 
@@ -43,17 +44,13 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: theme.cardBackground,
+        boxShadow: theme.cardShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -79,24 +76,24 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
+                        color: theme.border,
                       ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Colors.grey.shade300,
+                        color: theme.border,
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                        color: Theme.of(context).primaryColor,
+                        color: theme.primary,
                         width: 2,
                       ),
                     ),
                     filled: true,
-                    fillColor: Colors.grey.shade50,
+                    fillColor: theme.inputBackground,
                   ),
                   onChanged: widget.onSearch,
                   textInputAction: TextInputAction.search,
@@ -106,21 +103,21 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               Container(
                 decoration: BoxDecoration(
                   color: _isFilterExpanded
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey.shade100,
+                      ? theme.primary
+                      : theme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _isFilterExpanded
-                        ? Theme.of(context).primaryColor
-                        : Colors.grey.shade300,
+                        ? theme.primary
+                        : theme.border,
                   ),
                 ),
                 child: IconButton(
                   icon: Icon(
                     Icons.tune,
                     color: _isFilterExpanded
-                        ? Colors.white
-                        : Colors.grey.shade600,
+                        ? theme.cardBackground
+                        : theme.textSecondary,
                   ),
                   onPressed: () {
                     setState(() {
@@ -141,7 +138,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 16),
-                      _buildFiltersSection(),
+                      _buildFiltersSection(theme),
                     ],
                   )
                 : const SizedBox.shrink(),
@@ -150,21 +147,21 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
           // Active filters chips
           if (_hasActiveFilters()) ...[
             const SizedBox(height: 12),
-            _buildActiveFiltersChips(),
+            _buildActiveFiltersChips(theme),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildFiltersSection() {
+  Widget _buildFiltersSection(OneUITheme theme) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: theme.surfaceVariant,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: theme.border),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -172,14 +169,14 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
         children: [
           Row(
             children: [
-              Icon(Icons.filter_list, color: Theme.of(context).primaryColor),
+              Icon(Icons.filter_list, color: theme.primary),
               const SizedBox(width: 8),
               Text(
                 'Filters',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).primaryColor,
+                  color: theme.primary,
                 ),
               ),
               const Spacer(),
@@ -193,11 +190,11 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
           const SizedBox(height: 16),
 
           // Specialty filter
-          _buildSpecialtyFilter(),
+          _buildSpecialtyFilter(theme),
           const SizedBox(height: 12),
 
           // Country filter
-          _buildCountryFilter(),
+          _buildCountryFilter(theme),
           const SizedBox(height: 12),
 
           // Sort options
@@ -220,8 +217,8 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
+                backgroundColor: theme.primary,
+                foregroundColor: theme.cardBackground,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -235,7 +232,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
     );
   }
 
-  Widget _buildSpecialtyFilter() {
+  Widget _buildSpecialtyFilter(OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -267,7 +264,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               prefixIcon: Icon(
                 Icons.medical_services_outlined,
                 size: 16,
-                color: Colors.grey[600],
+                color: theme.textSecondary,
               ),
             ),
             items: [
@@ -286,7 +283,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: _getSpecialtyColor(specialty.name),
+                          color: _getSpecialtyColor(specialty.name, theme),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -315,23 +312,23 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
     );
   }
 
-  Color _getSpecialtyColor(String specialtyName) {
+  Color _getSpecialtyColor(String specialtyName, OneUITheme theme) {
     // This is a simple example; you might want to use a more sophisticated color mapping
     switch (specialtyName.toLowerCase()) {
       case 'cardiology':
-        return Colors.red;
+        return theme.error;
       case 'neurology':
-        return Colors.blue;
+        return theme.primary;
       case 'oncology':
-        return Colors.green;
+        return theme.success;
       case 'pediatrics':
-        return Colors.orange;
+        return theme.warning;
       default:
-        return Colors.grey;
+        return theme.textTertiary;
     }
   }
 
-  Widget _buildCountryFilter() {
+  Widget _buildCountryFilter(OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -363,7 +360,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               prefixIcon: Icon(
                 Icons.public,
                 size: 16,
-                color: Colors.grey[600],
+                color: theme.textSecondary,
               ),
             ),
             items: [
@@ -573,7 +570,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
     );
   }
 
-  Widget _buildActiveFiltersChips() {
+  Widget _buildActiveFiltersChips(OneUITheme theme) {
     return Wrap(
       spacing: 8,
       runSpacing: 4,
@@ -590,7 +587,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: theme.primary.withOpacity(0.1),
           ),
         if (_localFilters.selectedCountry != null)
           Chip(
@@ -611,7 +608,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: theme.primary.withOpacity(0.1),
           ),
         if (_localFilters.status != null)
           Chip(
@@ -625,7 +622,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: theme.primary.withOpacity(0.1),
           ),
         if (_localFilters.sortBy != null)
           Chip(
@@ -640,7 +637,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+            backgroundColor: theme.primary.withOpacity(0.1),
           ),
       ],
     );

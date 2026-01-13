@@ -13,7 +13,7 @@ import '../widgets/specialty_loading_shimmer.dart';
 import '../../../localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import '../../../core/utils/app/AppData.dart';
-import '../../home_screen/utils/SVCommon.dart';
+import '../../../theme/one_ui_theme.dart';
 
 class CreateDiscussionScreen extends StatefulWidget {
   final CaseDiscussion? existingCase; // For edit mode
@@ -208,49 +208,56 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   // File picker methods
   Future<void> _pickFile() async {
+    final theme = OneUITheme.of(context);
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.lbl_select_attachment,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue[800],
+      builder: (context) {
+        final innerTheme = OneUITheme.of(context);
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.lbl_select_attachment,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: innerTheme.primary,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildAttachmentOption(
-                  icon: Icons.camera_alt,
-                  label: AppLocalizations.of(context)!.lbl_camera,
-                  onTap: () => _pickImageFromCamera(),
-                ),
-                _buildAttachmentOption(
-                  icon: Icons.photo_library,
-                  label: AppLocalizations.of(context)!.lbl_gallery,
-                  onTap: () => _pickImageFromGallery(),
-                ),
-                _buildAttachmentOption(
-                  icon: Icons.attach_file,
-                  label: AppLocalizations.of(context)!.lbl_file,
-                  onTap: () => _pickDocument(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildAttachmentOption(
+                    icon: Icons.camera_alt,
+                    label: AppLocalizations.of(context)!.lbl_camera,
+                    onTap: () => _pickImageFromCamera(),
+                    theme: innerTheme,
+                  ),
+                  _buildAttachmentOption(
+                    icon: Icons.photo_library,
+                    label: AppLocalizations.of(context)!.lbl_gallery,
+                    onTap: () => _pickImageFromGallery(),
+                    theme: innerTheme,
+                  ),
+                  _buildAttachmentOption(
+                    icon: Icons.attach_file,
+                    label: AppLocalizations.of(context)!.lbl_file,
+                    onTap: () => _pickDocument(),
+                    theme: innerTheme,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -258,6 +265,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    required OneUITheme theme,
   }) {
     return GestureDetector(
       onTap: () {
@@ -267,20 +275,20 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
+          color: theme.primary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+          border: Border.all(color: theme.primary.withOpacity(0.3)),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Colors.blue[600]),
+            Icon(icon, size: 32, color: theme.primary),
             const SizedBox(height: 8),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.blue[800],
+                color: theme.primary,
               ),
             ),
           ],
@@ -442,12 +450,13 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
 
   void _submitForm() {
+    final theme = OneUITheme.of(context);
     if (_formKey.currentState!.validate()) {
       if (!_isAnonymized) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(AppLocalizations.of(context)!.msg_confirm_patient_info_removed),
-            backgroundColor: Colors.orange[600],
+            backgroundColor: theme.warning,
             duration: const Duration(seconds: 3),
           ),
         );
@@ -522,11 +531,12 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     // Initialize dropdown values with localized strings
     _selectedGender ??= AppLocalizations.of(context)!.lbl_male;
     _selectedEthnicity ??= AppLocalizations.of(context)!.lbl_not_specified;
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: widget.existingCase != null 
             ? translation(context).lbl_edit_case_discussion 
@@ -544,12 +554,12 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: theme.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.help_outline,
-                  color: Colors.blue[600],
+                  color: theme.primary,
                   size: 14,
                 ),
               ),
@@ -582,14 +592,14 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(Icons.check_circle, color: Colors.white),
+                    Icon(Icons.check_circle, color: theme.cardBackground),
                     const SizedBox(width: 12),
                     Text(state.isUpdate 
                         ? translation(context).msg_case_discussion_updated 
                         : AppLocalizations.of(context)!.msg_case_discussion_created),
                   ],
                 ),
-                backgroundColor: Colors.green[600],
+                backgroundColor: theme.success,
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -599,21 +609,21 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.white),
+                    Icon(Icons.error_outline, color: theme.cardBackground),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         '${AppLocalizations.of(context)!.msg_failed_to_create_discussion}: ${state.message}',
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: theme.cardBackground),
                       ),
                     ),
                   ],
                 ),
-                backgroundColor: Colors.red[600],
+                backgroundColor: theme.error,
                 duration: const Duration(seconds: 5),
                 action: SnackBarAction(
                   label: AppLocalizations.of(context)!.lbl_retry,
-                  textColor: Colors.white,
+                  textColor: theme.cardBackground,
                   onPressed: _submitForm,
                 ),
               ),
@@ -623,7 +633,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         child: Form(
           key: _formKey,
           child: Container(
-            color: svGetScaffoldColor(),
+            color: theme.cardBackground,
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -631,30 +641,30 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
+                    color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    border: Border.all(color: theme.primary.withOpacity(0.2)),
                   ),
                   child: AppTextField(
                     controller: _titleController,
                     textFieldType: TextFieldType.NAME,
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: theme.textPrimary,
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: '${AppLocalizations.of(context)!.lbl_case_title} *',
-                      hintStyle: const TextStyle(
+                      hintStyle: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
-                        color: Colors.black54,
+                        color: theme.textTertiary,
                       ),
                       contentPadding: const EdgeInsets.all(16),
                       prefixIcon: Icon(
                         Icons.title_rounded,
-                        color: Colors.blue.withOpacity(0.6),
+                        color: theme.primary.withOpacity(0.6),
                         size: 20,
                       ),
                     ),
@@ -671,31 +681,31 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
+                    color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    border: Border.all(color: theme.primary.withOpacity(0.2)),
                   ),
                   child: AppTextField(
                     controller: _descriptionController,
                     textFieldType: TextFieldType.MULTILINE,
                     maxLines: 5,
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
-                      color: Colors.black87,
+                      color: theme.textPrimary,
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: '${AppLocalizations.of(context)!.lbl_case_description} *',
-                      hintStyle: const TextStyle(
+                      hintStyle: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 14,
-                        color: Colors.black54,
+                        color: theme.textTertiary,
                       ),
                       contentPadding: const EdgeInsets.all(16),
                       prefixIcon: Icon(
                         Icons.description_rounded,
-                        color: Colors.blue.withOpacity(0.6),
+                        color: theme.primary.withOpacity(0.6),
                         size: 20,
                       ),
                     ),
@@ -713,28 +723,42 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    color: theme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: theme.primary.withOpacity(0.15)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.primary.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.person_outline,
-                            color: Colors.blue.withOpacity(0.6),
-                            size: 20,
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: theme.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.person_rounded,
+                              color: theme.primary,
+                              size: 20,
+                            ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.lbl_patient_demographics,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                              color: theme.textPrimary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -747,21 +771,29 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         child: AppTextField(
                           controller: _ageController,
                           textFieldType: TextFieldType.NUMBER,
-                          textStyle: const TextStyle(
+                          textStyle: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
-                            color: Colors.black87,
+                            color: theme.textPrimary,
                           ),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: theme.border),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: theme.border),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: theme.primary, width: 1.5),
                             ),
                             hintText: translation(context).lbl_age_years,
-                            hintStyle: const TextStyle(
+                            hintStyle: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
-                              color: Colors.black54,
+                              color: theme.textTertiary,
                             ),
                             contentPadding: const EdgeInsets.all(12),
                           ),
@@ -775,26 +807,22 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           Expanded(
                             child: Container(
                               margin: const EdgeInsets.only(right: 8, bottom: 12),
-                              child: DropdownButtonFormField<String>(
+                              child: OneUIDropdownFormField<String>(
                                 value: _selectedGender,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
-                                  ),
-                                  hintText: AppLocalizations.of(context)!.lbl_select_gender,
-                                  labelText: AppLocalizations.of(context)!.lbl_gender,
-                                  contentPadding: const EdgeInsets.all(12),
-                                ),
+                                showContainer: false,
+                                borderRadius: 8,
+                                contentPadding: const EdgeInsets.all(12),
+                                hintText: AppLocalizations.of(context)!.lbl_select_gender,
+                                labelText: AppLocalizations.of(context)!.lbl_gender,
                                 items: [AppLocalizations.of(context)!.lbl_male, AppLocalizations.of(context)!.lbl_female, AppLocalizations.of(context)!.lbl_other].map((gender) {
                                   return DropdownMenuItem<String>(
                                     value: gender,
                                     child: Text(
                                       gender,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 14,
-                                        color: Colors.black87,
+                                        color: theme.textPrimary,
                                       ),
                                     ),
                                   );
@@ -813,27 +841,22 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           Expanded(
                             child: Container(
                               margin: const EdgeInsets.only(left: 8, bottom: 12),
-                              child: DropdownButtonFormField<String>(
-                                isExpanded: true,
+                              child: OneUIDropdownFormField<String>(
                                 value: _selectedEthnicity,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(color: Colors.blue.withOpacity(0.3)),
-                                  ),
-                                  hintText: AppLocalizations.of(context)!.lbl_select_ethnicity,
-                                  labelText: AppLocalizations.of(context)!.lbl_ethnicity,
-                                  contentPadding: const EdgeInsets.all(12),
-                                ),
+                                showContainer: false,
+                                borderRadius: 8,
+                                contentPadding: const EdgeInsets.all(12),
+                                hintText: AppLocalizations.of(context)!.lbl_select_ethnicity,
+                                labelText: AppLocalizations.of(context)!.lbl_ethnicity,
                                 items: [AppLocalizations.of(context)!.lbl_not_specified, AppLocalizations.of(context)!.lbl_caucasian, AppLocalizations.of(context)!.lbl_african_american, AppLocalizations.of(context)!.lbl_asian, AppLocalizations.of(context)!.lbl_hispanic_latino, AppLocalizations.of(context)!.lbl_middle_eastern, AppLocalizations.of(context)!.lbl_other].map((ethnicity) {
                                   return DropdownMenuItem<String>(
                                     value: ethnicity,
                                     child: Text(
                                       ethnicity,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 14,
-                                        color: Colors.black87,
+                                        color: theme.textPrimary,
                                       ),
                                     ),
                                   );
@@ -861,39 +884,53 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    color: theme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: theme.warning.withOpacity(0.2)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.warning.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.local_offer_outlined,
-                            color: Colors.blue.withOpacity(0.6),
-                            size: 20,
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: theme.warning.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.sell_rounded,
+                              color: theme.warning,
+                              size: 20,
+                            ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.lbl_clinical_keywords,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                              color: theme.textPrimary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Text(
                         translation(context).msg_clinical_keywords_hint,
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 12,
-                          color: Colors.grey[600],
+                          color: theme.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -901,19 +938,19 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       // Tags input field
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardBackground,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                          border: Border.all(color: theme.border),
                         ),
                         child: AppTextField(
                           controller: _clinicalKeywordsController,
                           textFieldType: TextFieldType.MULTILINE,
                           maxLines: 2,
                           onChanged: _onTagsChanged,
-                          textStyle: const TextStyle(
+                          textStyle: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
-                            color: Colors.black87,
+                            color: theme.textPrimary,
                           ),
                           decoration: InputDecoration(
                             border: InputBorder.none,
@@ -921,7 +958,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                             hintStyle: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 14,
-                              color: Colors.grey[500],
+                              color: theme.textTertiary,
                             ),
                             contentPadding: const EdgeInsets.all(12),
                           ),
@@ -936,7 +973,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 12,
-                            color: Colors.grey[700],
+                            color: theme.textSecondary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -950,15 +987,10 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                             return Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.orange.withOpacity(0.15),
-                                    Colors.orange.withOpacity(0.1),
-                                  ],
-                                ),
+                                color: theme.warning.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: Colors.orange.withOpacity(0.3),
+                                  color: theme.warning.withOpacity(0.3),
                                 ),
                               ),
                               child: Row(
@@ -967,7 +999,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                   Text(
                                     tag,
                                     style: TextStyle(
-                                      color: Colors.orange[800],
+                                      color: theme.warning,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Poppins',
@@ -979,7 +1011,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                     child: Icon(
                                       Icons.close_rounded,
                                       size: 14,
-                                      color: Colors.orange[700],
+                                      color: theme.warning,
                                     ),
                                   ),
                                 ],
@@ -997,63 +1029,89 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                    color: theme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: theme.success.withOpacity(0.2)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.success.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.photo_library_outlined,
-                            color: Colors.blue.withOpacity(0.6),
-                            size: 20,
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: theme.success.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.photo_library_rounded,
+                              color: theme.success,
+                              size: 20,
+                            ),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.lbl_attach_medical_images,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                              color: theme.textPrimary,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 16),
                       
                       // Add Images Button
                       GestureDetector(
                         onTap: _pickFile,
                         child: Container(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                            gradient: LinearGradient(
+                              colors: [
+                                theme.success.withOpacity(0.15),
+                                theme.success.withOpacity(0.08),
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: Colors.blue.withOpacity(0.3),
-                              style: BorderStyle.solid,
+                              color: theme.success.withOpacity(0.3),
+                              width: 1.5,
                             ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.add_photo_alternate_outlined,
-                                color: Colors.blue[600],
-                                size: 24,
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: theme.success.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(
+                                  Icons.add_photo_alternate_rounded,
+                                  color: theme.success,
+                                  size: 22,
+                                ),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 12),
                               Text(
                                 AppLocalizations.of(context)!.lbl_add_medical_images,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 14,
-                                  color: Colors.blue[800],
-                                  fontWeight: FontWeight.w500,
+                                  color: theme.success,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
@@ -1071,15 +1129,15 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.green.withOpacity(0.1),
+                                color: theme.success.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: Colors.green.withOpacity(0.3)),
+                                border: Border.all(color: theme.success.withOpacity(0.3)),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.image_outlined,
-                                    color: Colors.green[600],
+                                    color: theme.success,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
@@ -1089,7 +1147,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 12,
-                                        color: Colors.green[800],
+                                        color: theme.success,
                                         fontWeight: FontWeight.w500,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -1099,7 +1157,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                     onPressed: () => _removeAttachment(index),
                                     icon: Icon(
                                       Icons.close_rounded,
-                                      color: Colors.red[600],
+                                      color: theme.error,
                                       size: 18,
                                     ),
                                     padding: EdgeInsets.zero,
@@ -1121,35 +1179,23 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                 // Specialty Dropdown
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue.withOpacity(0.2)),
-                  ),
                   child: _isLoadingSpecialties
                     ? const SpecialtyLoadingShimmer()
-                    : DropdownButtonFormField<String>(
+                    : OneUIDropdownFormField<String>(
                         value: _specialties.isNotEmpty ? _selectedSpecialtyId : null,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          hintText: translation(context).lbl_select_specialty,
-                          labelText: translation(context).lbl_medical_specialty,
-                          contentPadding: const EdgeInsets.all(16),
-                          prefixIcon: Icon(
-                            Icons.medical_services_rounded,
-                            color: Colors.blue.withOpacity(0.6),
-                            size: 20,
-                          ),
-                        ),
+                        hintText: translation(context).lbl_select_specialty,
+                        labelText: translation(context).lbl_medical_specialty,
+                        contentPadding: const EdgeInsets.all(16),
+                        prefixIcon: Icons.medical_services_rounded,
                         items: _specialties.map((specialty) {
                           return DropdownMenuItem<String>(
                             value: specialty.id.toString(),
                             child: Text(
                               specialty.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 14,
-                                color: Colors.black87,
+                                color: theme.textPrimary,
                               ),
                             ),
                           );
@@ -1180,29 +1226,16 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     Expanded(
                       child: Container(
                         margin: const EdgeInsets.only(right: 8, bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.withOpacity(0.2)),
-                        ),
-                        child: DropdownButtonFormField<String>(
-                          isExpanded: true,
+                        child: OneUIDropdownFormField<String>(
                           value: _selectedClinicalComplexity,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: AppLocalizations.of(context)!.lbl_select_clinical_complexity,
-                            labelText: AppLocalizations.of(context)!.lbl_clinical_complexity,
-                            contentPadding: const EdgeInsets.all(16),
-                            prefixIcon: Icon(
-                              Icons.assessment_outlined,
-                              color: Colors.blue.withOpacity(0.6),
-                              size: 20,
-                            ),
-                          ),
+                          hintText: AppLocalizations.of(context)!.lbl_select_clinical_complexity,
+                          labelText: AppLocalizations.of(context)!.lbl_clinical_complexity,
+                          contentPadding: const EdgeInsets.all(16),
+                          prefixIcon: Icons.assessment_outlined,
                           items: [
-                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
-                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
-                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
+                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
+                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -1218,29 +1251,16 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     Expanded(
                       child: Container(
                         margin: const EdgeInsets.only(left: 8, bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.blue.withOpacity(0.2)),
-                        ),
-                        child: DropdownButtonFormField<String>(
-                          isExpanded: true,
+                        child: OneUIDropdownFormField<String>(
                           value: _selectedTeachingValue,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: AppLocalizations.of(context)!.lbl_select_teaching_value,
-                            labelText: AppLocalizations.of(context)!.lbl_teaching_value,
-                            contentPadding: const EdgeInsets.all(16),
-                            prefixIcon: Icon(
-                              Icons.school_outlined,
-                              color: Colors.blue.withOpacity(0.6),
-                              size: 20,
-                            ),
-                          ),
+                          hintText: AppLocalizations.of(context)!.lbl_select_teaching_value,
+                          labelText: AppLocalizations.of(context)!.lbl_teaching_value,
+                          contentPadding: const EdgeInsets.all(16),
+                          prefixIcon: Icons.school_outlined,
                           items: [
-                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
-                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
-                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87))),
+                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
+                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
+                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -1255,26 +1275,37 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   ],
                 ),
 
-                // Anonymization Checkbox
+                // Anonymization Checkbox - One UI 8.5 Switch Style
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.orange.withOpacity(0.2)),
+                    gradient: LinearGradient(
+                      colors: [
+                        theme.warning.withOpacity(0.08),
+                        theme.warning.withOpacity(0.03),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: theme.warning.withOpacity(0.25)),
                   ),
                   child: Row(
                     children: [
-                      Checkbox(
-                        value: _isAnonymized,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAnonymized = value ?? false;
-                          });
-                        },
-                        activeColor: Colors.orange[600],
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: theme.warning.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.security_rounded,
+                          color: theme.warning,
+                          size: 22,
+                        ),
                       ),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
@@ -1287,10 +1318,25 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 13,
-                              color: Colors.orange[800],
+                              color: theme.warning,
                               fontWeight: FontWeight.w500,
+                              height: 1.4,
                             ),
                           ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Transform.scale(
+                        scale: 0.9,
+                        child: Switch(
+                          value: _isAnonymized,
+                          onChanged: (value) {
+                            setState(() {
+                              _isAnonymized = value;
+                            });
+                          },
+                          activeColor: theme.warning,
+                          activeTrackColor: theme.warning.withOpacity(0.4),
                         ),
                       ),
                     ],
@@ -1299,53 +1345,89 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
                 const SizedBox(height: 24),
 
-                // Submit Button
+                // Submit Button - One UI 8.5 Style
                 BlocBuilder<CreateDiscussionBloc, CreateDiscussionState>(
                   builder: (context, state) {
+                    final isDisabled = state is CreateDiscussionLoading || !_isAnonymized;
                     return Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 32),
-                      child: ElevatedButton(
-                        onPressed: (state is CreateDiscussionLoading || !_isAnonymized) ? null : _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue[600],
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: state is CreateDiscussionLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.send_rounded,
-                                    size: 18,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    widget.existingCase != null 
-                                        ? translation(context).lbl_update_case 
-                                        : AppLocalizations.of(context)!.lbl_submit_case,
-                                    style: const TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: isDisabled 
+                            ? null 
+                            : LinearGradient(
+                                colors: [
+                                  theme.primary,
+                                  theme.primary.withOpacity(0.85),
                                 ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
+                        color: isDisabled ? theme.surfaceVariant : null,
+                        boxShadow: isDisabled 
+                            ? null 
+                            : [
+                                BoxShadow(
+                                  color: theme.primary.withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: isDisabled ? null : _submitForm,
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: state is CreateDiscussionLoading
+                                ? Center(
+                                    child: SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.5,
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          isDisabled ? theme.textSecondary : theme.buttonPrimaryText,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: (isDisabled ? theme.textSecondary : Colors.white).withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Icon(
+                                          widget.existingCase != null 
+                                              ? Icons.update_rounded 
+                                              : Icons.send_rounded,
+                                          size: 18,
+                                          color: isDisabled ? theme.textSecondary : theme.buttonPrimaryText,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        widget.existingCase != null 
+                                            ? translation(context).lbl_update_case 
+                                            : AppLocalizations.of(context)!.lbl_submit_case,
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDisabled ? theme.textSecondary : theme.buttonPrimaryText,
+                                          letterSpacing: 0.3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
                       ),
                     );
                   },

@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- CallKit theme for Android 14+ compatibility -->
+    <!-- CallKit theme for Android 14+ compatibility with OneUI 8.5 style -->
     <style name="CallkitIncomingTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
+    
+    <!-- OneUI 8.5 Colors for CallKit -->
+    <color name="callkit_background">#1A2332</color>
+    <color name="callkit_primary">#0955fa</color>
+    <color name="callkit_accept">#4CAF50</color>
+    <color name="callkit_decline">#F44336</color>
+    <color name="callkit_text">#FFFFFF</color>
+    <color name="callkit_text_secondary">#B3FFFFFF</color>
 </resources>

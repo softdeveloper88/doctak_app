@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -7,9 +8,11 @@ class CaseDiscussionListShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return ListView.builder(
       itemCount: 6,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       itemBuilder: (context, index) {
         final bool hasPatientInfo = index % 3 == 0; // Show patient info on some cards
         final bool hasSymptoms = index % 2 == 0; // Show symptoms on some cards
@@ -17,39 +20,39 @@ class CaseDiscussionListShimmer extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: theme.divider,
+            highlightColor: theme.cardBackground,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header with author info
-                  _buildHeader(context),
+                  _buildHeader(context, theme),
                   const SizedBox(height: 12),
 
                   // Title
-                  _buildTitle(context),
+                  _buildTitle(context, theme),
                   const SizedBox(height: 8),
 
                   // Description preview
-                  _buildDescription(context),
+                  _buildDescription(context, theme),
                   const SizedBox(height: 12),
 
                   // Patient info if available
                   if (hasPatientInfo) ...[
-                    _buildPatientInfo(context),
+                    _buildPatientInfo(context, theme),
                     const SizedBox(height: 12),
                   ],
 
                   // Symptoms if available
                   if (hasSymptoms) ...[
-                    _buildSymptoms(context),
+                    _buildSymptoms(context, theme),
                     const SizedBox(height: 12),
                   ],
 
                   // Footer with stats and actions
-                  _buildFooter(context),
+                  _buildFooter(context, theme),
                 ],
               ),
             ),
@@ -60,15 +63,15 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Header with author info matching DiscussionCard
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, OneUITheme theme) {
     return Row(
       children: [
         // CircleAvatar with radius 20 (40x40)
         Container(
           width: 40,
           height: 40,
-          decoration: const BoxDecoration(
-            color: Colors.grey,
+          decoration: BoxDecoration(
+            color: theme.divider,
             shape: BoxShape.circle,
           ),
         ),
@@ -82,7 +85,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
                 width: 120,
                 height: 14,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -92,7 +95,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
                 width: 90,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -103,14 +106,14 @@ class CaseDiscussionListShimmer extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Container(
             width: 40,
             height: 10,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: theme.surfaceVariant,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -120,7 +123,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Title matching DiscussionCard (maxLines: 2)
-  Widget _buildTitle(BuildContext context) {
+  Widget _buildTitle(BuildContext context, OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -128,7 +131,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: double.infinity,
           height: 16,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -137,7 +140,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: MediaQuery.of(context).size.width * 0.7,
           height: 16,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -146,7 +149,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Description preview matching DiscussionCard (maxLines: 3)
-  Widget _buildDescription(BuildContext context) {
+  Widget _buildDescription(BuildContext context, OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -154,7 +157,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: double.infinity,
           height: 14,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -163,7 +166,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: double.infinity,
           height: 14,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -172,7 +175,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: MediaQuery.of(context).size.width * 0.6,
           height: 14,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -181,11 +184,11 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Patient info section matching DiscussionCard
-  Widget _buildPatientInfo(BuildContext context) {
+  Widget _buildPatientInfo(BuildContext context, OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.05),
+        color: theme.primary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -194,7 +197,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
             width: 16,
             height: 16,
             decoration: BoxDecoration(
-              color: Colors.grey,
+              color: theme.divider,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -203,7 +206,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
             width: 80,
             height: 12,
             decoration: BoxDecoration(
-              color: Colors.grey,
+              color: theme.divider,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -213,7 +216,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Symptoms section matching DiscussionCard
-  Widget _buildSymptoms(BuildContext context) {
+  Widget _buildSymptoms(BuildContext context, OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -223,14 +226,14 @@ class CaseDiscussionListShimmer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: theme.warning.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Container(
                 width: 40,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -239,14 +242,14 @@ class CaseDiscussionListShimmer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: theme.warning.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Container(
                 width: 50,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -255,14 +258,14 @@ class CaseDiscussionListShimmer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: theme.warning.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Container(
                 width: 35,
                 height: 10,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -275,7 +278,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: 80,
           height: 10,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -284,15 +287,15 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Footer with stats and time matching DiscussionCard
-  Widget _buildFooter(BuildContext context) {
+  Widget _buildFooter(BuildContext context, OneUITheme theme) {
     return Row(
       children: [
         // Stats: likes, comments, views
-        _buildStat(),
+        _buildStat(theme),
         const SizedBox(width: 16),
-        _buildStat(),
+        _buildStat(theme),
         const SizedBox(width: 16),
-        _buildStat(),
+        _buildStat(theme),
 
         const Spacer(),
 
@@ -301,7 +304,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: 50,
           height: 12,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -310,7 +313,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
   }
 
   // Individual stat (icon + count) matching DiscussionCard._buildStat
-  Widget _buildStat() {
+  Widget _buildStat(OneUITheme theme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -318,7 +321,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: 16,
           height: 16,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -327,7 +330,7 @@ class CaseDiscussionListShimmer extends StatelessWidget {
           width: 20,
           height: 12,
           decoration: BoxDecoration(
-            color: Colors.grey,
+            color: theme.divider,
             borderRadius: BorderRadius.circular(2),
           ),
         ),

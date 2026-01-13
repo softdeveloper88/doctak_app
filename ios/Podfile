@@ -38,9 +38,14 @@ target 'Runner' do
   end
 end
 
-# NOTE: BroadcastUploadExtension target removed to avoid build conflicts.
-# The screen sharing extension will be added manually in Xcode with proper
-# framework linking from the main app's Pods. See IOS_SCREEN_SHARING_COMPLETED.md
+# BroadcastUploadExtension target for iOS screen sharing
+# Note: This extension can only be built for devices, not simulator
+# The extension uses AgoraReplayKitExtension.xcframework which is manually linked
+# via Xcode's "Link Binary With Libraries" build phase
+target 'BroadcastUploadExtension' do
+  use_frameworks!
+  # No pods needed - framework is linked manually in Xcode
+end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -6,6 +7,13 @@ class ChatShimmerLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final baseColor = isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
+    final avatarColor = isDark ? theme.surfaceVariant : Colors.grey[300]!;
+    
     return ListView.builder(
       itemCount: 20, // Number of placeholders
       itemBuilder: (context, index) {
@@ -20,22 +28,22 @@ class ChatShimmerLoader extends StatelessWidget {
                 : MainAxisAlignment.start,
             children: [
               if (!isSent) ...[
-                CircleAvatar(radius: 16, backgroundColor: Colors.grey[300]),
-                SizedBox(width: 8),
+                CircleAvatar(radius: 16, backgroundColor: avatarColor),
+                const SizedBox(width: 8),
               ],
               Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
+                baseColor: baseColor,
+                highlightColor: highlightColor,
                 child: Container(
                   height: 30,
                   width: MediaQuery.of(context).size.width * 0.6,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: baseColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
               ),
-              if (isSent) SizedBox(width: 8),
+              if (isSent) const SizedBox(width: 8),
             ],
           ),
         );

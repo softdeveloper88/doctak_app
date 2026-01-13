@@ -4,10 +4,9 @@ import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-
-import '../../../main.dart';
 
 class FollowerWidget extends StatefulWidget {
   final dynamic element;
@@ -32,20 +31,22 @@ class _FollowerWidgetState extends State<FollowerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: appStore.isDarkMode ? Colors.grey[850] : Colors.white,
+          color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.blue.withAlpha(26),
+            color: theme.border,
             width: 1,
           ),
-          boxShadow: [
+          boxShadow: theme.isDark ? null : [
             BoxShadow(
-              color: Colors.blue.withAlpha(20),
+              color: theme.primary.withAlpha(20),
               offset: const Offset(0, 4),
               blurRadius: 12,
               spreadRadius: 0,
@@ -71,12 +72,12 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.blue.withAlpha(51),
+                        color: theme.primary.withAlpha(51),
                         width: 2,
                       ),
-                      boxShadow: [
+                      boxShadow: theme.isDark ? null : [
                         BoxShadow(
-                          color: Colors.blue.withAlpha(38),
+                          color: theme.primary.withAlpha(38),
                           offset: const Offset(0, 3),
                           blurRadius: 8,
                           spreadRadius: 0,
@@ -87,18 +88,11 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                       child: widget.element.profilePic == '' || widget.element.profilePic == null
                           ? Container(
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.blue[100]!,
-                                    Colors.blue[200]!,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
+                                color: theme.primary.withAlpha(40),
                               ),
                               child: Icon(
                                 Icons.person,
-                                color: Colors.blue[600],
+                                color: theme.primary,
                                 size: 28,
                               ),
                             )
@@ -107,35 +101,21 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.blue[100]!,
-                                      Colors.blue[200]!,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
+                                  color: theme.primary.withAlpha(40),
                                 ),
                                 child: Icon(
                                   Icons.person,
-                                  color: Colors.blue[600],
+                                  color: theme.primary,
                                   size: 28,
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.blue[100]!,
-                                      Colors.blue[200]!,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
+                                  color: theme.primary.withAlpha(40),
                                 ),
                                 child: Icon(
                                   Icons.person,
-                                  color: Colors.blue[600],
+                                  color: theme.primary,
                                   size: 28,
                                 ),
                               ),
@@ -160,9 +140,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Poppins',
-                                  color: appStore.isDarkMode 
-                                      ? Colors.white 
-                                      : Colors.black87,
+                                  color: theme.textPrimary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
@@ -172,10 +150,10 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                             Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                color: Colors.blue,
+                                color: theme.primary,
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.check,
                                 color: Colors.white,
                                 size: 12,
@@ -192,9 +170,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             fontFamily: 'Poppins',
-                            color: appStore.isDarkMode
-                                ? Colors.grey[400]
-                                : Colors.grey[600],
+                            color: theme.textSecondary,
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -214,7 +190,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.blue[600]!,
+                                theme.primary,
                               ),
                             ),
                           )
@@ -228,7 +204,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                                 side: BorderSide(
                                   color: widget.element.isCurrentlyFollow == true
                                       ? Colors.transparent
-                                      : Colors.blue.withAlpha(77),
+                                      : theme.primary.withAlpha(77),
                                   width: 1,
                                 ),
                               ),
@@ -251,7 +227,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                               },
                               elevation: 0,
                               color: widget.element.isCurrentlyFollow == true
-                                  ? Colors.blue[600]
+                                  ? theme.primary
                                   : Colors.transparent,
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -262,7 +238,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                                         : Icons.person_add_outlined,
                                     color: widget.element.isCurrentlyFollow == true
                                         ? Colors.white
-                                        : Colors.blue[600],
+                                        : theme.primary,
                                     size: 16,
                                   ),
                                   const SizedBox(width: 4),
@@ -273,7 +249,7 @@ class _FollowerWidgetState extends State<FollowerWidget> {
                                     style: TextStyle(
                                       color: widget.element.isCurrentlyFollow == true
                                           ? Colors.white
-                                          : Colors.blue[600],
+                                          : theme.primary,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Poppins',

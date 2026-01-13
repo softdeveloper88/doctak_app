@@ -1,6 +1,7 @@
 // lib/presentation/call_module/widgets/video_view.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import 'package:doctak_app/presentation/calling_module/providers/call_provider.d
 import 'package:doctak_app/presentation/calling_module/models/call_state.dart';
 import '../utils/platform_config.dart';
 
-/// Widget that manages video views (local and remote)
+/// Widget that manages video views (local and remote) with OneUI 8.5 theming
 class VideoView extends StatelessWidget {
   const VideoView({Key? key}) : super(key: key);
 
@@ -50,6 +51,7 @@ class LocalVideoMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final agoraEngine = Provider.of<CallProvider>(context).getAgoraEngine();
 
     if (agoraEngine == null) return const SizedBox.shrink();
@@ -61,7 +63,7 @@ class LocalVideoMainView extends StatelessWidget {
           controller: VideoViewController(
             rtcEngine: agoraEngine,
             canvas: const VideoCanvas(uid: 0),
-            useFlutterTexture: PlatformConfig.isIOS, // Use texture rendering on iOS
+            useFlutterTexture: PlatformConfig.isIOS,
             useAndroidSurfaceView: PlatformConfig.isAndroid,
           ),
         ),
@@ -79,7 +81,7 @@ class LocalVideoMainView extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.7),
+                  theme.scaffoldBackground.withOpacity(0.85),
                 ],
               ),
             ),
@@ -97,24 +99,24 @@ class LocalVideoMainView extends StatelessWidget {
                 width: 120,
                 height: 180,
                 decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
+                  color: theme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: isRemoteUserSpeaking
-                        ? Colors.green.withOpacity(0.7)
-                        : Colors.white30,
-                    width: isRemoteUserSpeaking ? 2 : 1,
+                        ? theme.success.withOpacity(0.8)
+                        : theme.divider,
+                    width: isRemoteUserSpeaking ? 2.5 : 1.5,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: 10,
+                      color: theme.scaffoldBackground.withOpacity(0.5),
+                      blurRadius: 12,
                       spreadRadius: 2,
                     ),
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(14),
                   child: AgoraVideoView(
                     controller: VideoViewController.remote(
                       rtcEngine: agoraEngine,
@@ -145,6 +147,7 @@ class RemoteVideoMainView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final agoraEngine = Provider.of<CallProvider>(context).getAgoraEngine();
 
     if (remoteUid == null || agoraEngine == null) {
@@ -177,7 +180,7 @@ class RemoteVideoMainView extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.7),
+                  theme.scaffoldBackground.withOpacity(0.85),
                 ],
               ),
             ),
@@ -197,7 +200,7 @@ class RemoteVideoMainView extends StatelessWidget {
                 end: Alignment.topCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.black.withOpacity(0.7),
+                  theme.scaffoldBackground.withOpacity(0.85),
                 ],
               ),
             ),
@@ -225,6 +228,7 @@ class LocalVideoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final agoraEngine = Provider.of<CallProvider>(context).getAgoraEngine();
 
     if (agoraEngine == null) return const SizedBox.shrink();
@@ -235,18 +239,18 @@ class LocalVideoPreview extends StatelessWidget {
         width: 120,
         height: 180,
         decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(12),
+          color: theme.surfaceVariant,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isUserSpeaking
-                ? Colors.green.withOpacity(0.7)
-                : Colors.white30,
-            width: isUserSpeaking ? 2 : 1,
+                ? theme.success.withOpacity(0.8)
+                : theme.divider,
+            width: isUserSpeaking ? 2.5 : 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.5),
-              blurRadius: 10,
+              color: theme.scaffoldBackground.withOpacity(0.5),
+              blurRadius: 12,
               spreadRadius: 2,
             ),
           ],
@@ -256,7 +260,7 @@ class LocalVideoPreview extends StatelessWidget {
           children: [
             // Video view or placeholder
             ClipRRect(
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(14),
               child: isEnabled
                   ? AgoraVideoView(
                 controller: VideoViewController(
@@ -267,12 +271,12 @@ class LocalVideoPreview extends StatelessWidget {
                 ),
               )
                   : Container(
-                color: Colors.black54,
-                child: const Center(
+                color: theme.surfaceVariant,
+                child: Center(
                   child: Icon(
-                    Icons.videocam_off,
-                    color: Colors.white70,
-                    size: 30,
+                    Icons.videocam_off_rounded,
+                    color: theme.textTertiary,
+                    size: 32,
                   ),
                 ),
               ),
@@ -283,14 +287,14 @@ class LocalVideoPreview extends StatelessWidget {
               bottom: 8,
               right: 8,
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(12),
+                  color: theme.surfaceVariant.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(
-                  isFrontCamera ? Icons.camera_front : Icons.camera_rear,
-                  color: Colors.white,
+                  isFrontCamera ? Icons.camera_front_rounded : Icons.camera_rear_rounded,
+                  color: theme.textSecondary,
                   size: 16,
                 ),
               ),
@@ -302,13 +306,13 @@ class LocalVideoPreview extends StatelessWidget {
                 top: 8,
                 left: 8,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(12),
+                    color: theme.success.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
-                    Icons.mic,
+                    Icons.mic_rounded,
                     color: Colors.white,
                     size: 16,
                   ),
@@ -321,81 +325,176 @@ class LocalVideoPreview extends StatelessWidget {
   }
 }
 
-/// Widget that displays waiting for remote user UI
+/// Widget that displays waiting for remote user UI with OneUI 8.5 theming
+/// Note: Calling screens always use dark background for consistent experience
 class WaitingForRemoteView extends StatelessWidget {
   const WaitingForRemoteView({Key? key}) : super(key: key);
 
+  // Fixed dark calling screen colors for consistent experience in both light/dark themes
+  static const _callBackgroundDark = Color(0xFF1A2332);
+  static const _callBackgroundLight = Color(0xFF243447);
+
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final callProvider = Provider.of<CallProvider>(context);
     final remoteUser = callProvider.remoteUser;
     final isVideoCall = callProvider.callState.callType == CallType.video;
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.blue.shade900, Colors.black],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            _callBackgroundLight,
+            _callBackgroundDark,
+          ],
         ),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 70,
-              backgroundColor: Colors.grey.shade800,
-              child: remoteUser.avatarUrl.isNotEmpty
-                  ? ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl: remoteUser.avatarUrl,
-                        width: 140,
-                        height: 140,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Icon(Icons.person, size: 70, color: Colors.white),
-                        errorWidget: (context, url, error) => const Icon(Icons.person, size: 70, color: Colors.white),
-                      ),
-                    )
-                  : const Icon(Icons.person, size: 70, color: Colors.white),
+            // Avatar with elegant border and glow effect
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.primary.withOpacity(0.6),
+                  width: 4,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primary.withOpacity(0.3),
+                    blurRadius: 30,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 75,
+                backgroundColor: Colors.white.withOpacity(0.15),
+                child: remoteUser.avatarUrl.isNotEmpty
+                    ? ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: remoteUser.avatarUrl,
+                          width: 150,
+                          height: 150,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Icon(
+                            Icons.person_rounded,
+                            size: 75,
+                            color: Colors.white70,
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.person_rounded,
+                            size: 75,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      )
+                    : _buildInitialsAvatar(remoteUser.name),
+              ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
+            
+            // Calling user name - WHITE text for visibility
             Text(
-              translation(context).lbl_calling_user(remoteUser.name),
+              remoteUser.name,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w500,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Poppins',
+                letterSpacing: 0.5,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
+            
+            // Call type badge with glassmorphism effect
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                isVideoCall ? translation(context).lbl_video_call : translation(context).lbl_audio_call,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.25),
+                  width: 1.5,
                 ),
               ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isVideoCall ? Icons.videocam_rounded : Icons.phone_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    translation(context).lbl_calling_status,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 40),
-            // Animated waiting indicator
-            const WaitingDots(),
+            const SizedBox(height: 48),
+            
+            // Animated waiting indicator using theme primary color
+            WaitingDots(dotColor: theme.primary),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds initials avatar when no image is available
+  Widget _buildInitialsAvatar(String name) {
+    final initials = name.isNotEmpty 
+        ? name.split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
+        : '?';
+    
+    return Container(
+      width: 150,
+      height: 150,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFFE91E63), // Pink
+            const Color(0xFFE91E63).withOpacity(0.8),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 48,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Poppins',
+          ),
         ),
       ),
     );
   }
 }
 
-/// Animated waiting dots
+/// Animated waiting dots with OneUI theming
 class WaitingDots extends StatefulWidget {
-  const WaitingDots({Key? key}) : super(key: key);
+  final Color? dotColor;
+  
+  const WaitingDots({Key? key, this.dotColor}) : super(key: key);
 
   @override
   State<WaitingDots> createState() => _WaitingDotsState();
@@ -418,7 +517,9 @@ class _WaitingDotsState extends State<WaitingDots> with TickerProviderStateMixin
     });
 
     _animations = _controllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      return Tween<double>(begin: 0.3, end: 1.0).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+      );
     }).toList();
 
     // Start the animations
@@ -437,9 +538,12 @@ class _WaitingDotsState extends State<WaitingDots> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final color = widget.dotColor ?? theme.primary;
+    
     return SizedBox(
-      width: 60,
-      height: 20,
+      width: 70,
+      height: 24,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(3, (index) {
@@ -447,12 +551,12 @@ class _WaitingDotsState extends State<WaitingDots> with TickerProviderStateMixin
             animation: _animations[index],
             builder: (context, child) {
               return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 3),
-                width: 10,
-                height: 10 * _animations[index].value,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: 12,
+                height: 12 * _animations[index].value,
                 decoration: BoxDecoration(
-                  color: Colors.white70,
-                  borderRadius: BorderRadius.circular(5),
+                  color: color.withOpacity(_animations[index].value),
+                  borderRadius: BorderRadius.circular(6),
                 ),
               );
             },

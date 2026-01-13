@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -26,13 +27,14 @@ class AiMessageBubble extends StatefulWidget {
   State<AiMessageBubble> createState() => _AiMessageBubbleState();
 }
 
-class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProviderStateMixin {
+class _AiMessageBubbleState extends State<AiMessageBubble>
+    with SingleTickerProviderStateMixin {
   bool _isExpanded = true;
   String _currentlyDisplayedText = '';
   bool _isTyping = true;
   Timer? _typingTimer;
   int _currentCharIndex = 0;
-  
+
   @override
   void initState() {
     super.initState();
@@ -46,13 +48,13 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
       _currentCharIndex = widget.message.content.length;
     }
   }
-  
+
   @override
   void dispose() {
     _typingTimer?.cancel();
     super.dispose();
   }
-  
+
   @override
   void didUpdateWidget(AiMessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -71,16 +73,19 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
       }
     }
   }
-  
+
   void _startTypingAnimation() {
     const typingSpeed = Duration(milliseconds: 20); // Adjust speed as needed
-    
+
     _typingTimer?.cancel();
     _typingTimer = Timer.periodic(typingSpeed, (timer) {
       if (_currentCharIndex < widget.message.content.length) {
         setState(() {
           _currentCharIndex++;
-          _currentlyDisplayedText = widget.message.content.substring(0, _currentCharIndex);
+          _currentlyDisplayedText = widget.message.content.substring(
+            0,
+            _currentCharIndex,
+          );
         });
       } else {
         setState(() {
@@ -93,7 +98,8 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    
+    final theme = OneUITheme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -104,25 +110,25 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Avatar
-              widget.showAvatar 
-                ? Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.blue.withOpacity(0.2),
-                        width: 1.5,
+              widget.showAvatar
+                  ? Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: theme.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: theme.primary.withOpacity(0.2),
+                          width: 1.5,
+                        ),
                       ),
-                    ),
-                    child: Icon(
-                      Icons.psychology_rounded,
-                      size: 18,
-                      color: Colors.blue[600],
-                    ),
-                  ) 
-                : const SizedBox(width: 36),
+                      child: Icon(
+                        Icons.psychology_rounded,
+                        size: 18,
+                        color: theme.primary,
+                      ),
+                    )
+                  : const SizedBox(width: 36),
 
               const SizedBox(width: 8),
 
@@ -130,15 +136,15 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: theme.cardBackground,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: theme.primary.withOpacity(0.1),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blue.withOpacity(0.05),
+                        color: theme.primary.withOpacity(0.05),
                         offset: const Offset(0, 2),
                         blurRadius: 8,
                         spreadRadius: 0,
@@ -150,20 +156,20 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Show animated typing or collapsed content based on state
-                      _isExpanded 
-                        ? _buildTypingMessageContent() 
-                        : Text(
-                            '${_currentlyDisplayedText.substring(0, math.min(100, _currentlyDisplayedText.length))}...',
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: Colors.black87,
+                      _isExpanded
+                          ? _buildTypingMessageContent(theme)
+                          : Text(
+                              '${_currentlyDisplayedText.substring(0, math.min(100, _currentlyDisplayedText.length))}...',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                color: theme.textPrimary,
+                              ),
                             ),
-                          ),
-                    
+
                       // File attachment (if any)
                       if (widget.message.filePath != null)
-                        _buildFileAttachment(),
+                        _buildFileAttachment(theme),
                     ],
                   ),
                 ),
@@ -180,6 +186,7 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                 Container(
                   margin: const EdgeInsets.only(right: 8),
                   child: _buildActionButton(
+                    theme: theme,
                     icon: _isExpanded ? Icons.compress : Icons.expand,
                     label: _isExpanded ? 'Collapse' : 'Expand',
                     onPressed: () {
@@ -187,12 +194,12 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                         _isExpanded = !_isExpanded;
                       });
                     },
-                    iconColor: Colors.blue[600]!,
                   ),
                 ),
 
                 // Button 2: Copy
                 _buildActionButton(
+                  theme: theme,
                   icon: Icons.copy_all,
                   label: 'Copy',
                   onPressed: () {
@@ -207,11 +214,10 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                         ),
                         behavior: SnackBarBehavior.floating,
                         duration: const Duration(seconds: 2),
-                        backgroundColor: Colors.blue[600],
+                        backgroundColor: theme.primary,
                       ),
                     );
                   },
-                  iconColor: Colors.blue[600]!,
                 ),
               ],
             ),
@@ -220,9 +226,8 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
       ),
     );
   }
-  
-  Widget _buildTypingMessageContent() {
-    
+
+  Widget _buildTypingMessageContent(OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -230,41 +235,43 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
         MarkdownBody(
           data: _currentlyDisplayedText,
           styleSheet: MarkdownStyleSheet(
-            p: const TextStyle(
+            p: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
-              color: Colors.black87,
+              color: theme.textPrimary,
               height: 1.5,
             ),
-            h1: const TextStyle(
+            h1: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: theme.textPrimary,
             ),
-            h2: const TextStyle(
+            h2: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: theme.textPrimary,
             ),
-            h3: const TextStyle(
+            h3: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: theme.textPrimary,
             ),
-            code: const TextStyle(
+            code: TextStyle(
               fontFamily: 'monospace',
               fontSize: 13,
-              backgroundColor: Colors.grey,
-              color: Colors.black87,
+              backgroundColor: theme.isDark
+                  ? Colors.grey[800]
+                  : Colors.grey[200],
+              color: theme.textPrimary,
             ),
             codeblockDecoration: BoxDecoration(
-              color: Colors.grey,
+              color: theme.isDark ? Colors.grey[800] : Colors.grey[200],
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Colors.blue,
+                color: theme.primary.withOpacity(0.3),
                 width: 1,
               ),
             ),
@@ -275,26 +282,26 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             }
           },
         ),
-        
+
         // Show typing indicator while typing
         if (_isTyping)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Row(
               children: [
-                _buildTypingDot(0),
+                _buildTypingDot(0, theme),
                 const SizedBox(width: 3),
-                _buildTypingDot(1),
+                _buildTypingDot(1, theme),
                 const SizedBox(width: 3),
-                _buildTypingDot(2),
+                _buildTypingDot(2, theme),
               ],
             ),
           ),
       ],
     );
   }
-  
-  Widget _buildTypingDot(int index) {
+
+  Widget _buildTypingDot(int index, OneUITheme theme) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
       duration: const Duration(milliseconds: 600),
@@ -306,7 +313,7 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: theme.primary,
               shape: BoxShape.circle,
             ),
           ),
@@ -314,25 +321,33 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
       },
     );
   }
-  
-  Widget _buildFileAttachment() {
+
+  Widget _buildFileAttachment(OneUITheme theme) {
     final mimeType = widget.message.mimeType ?? '';
-    
+    final errorPlaceholderColor = theme.isDark
+        ? Colors.grey[800]!
+        : Colors.grey.shade200;
+
     if (mimeType.startsWith('image/')) {
       // Validate image path before attempting to load
-      if (widget.message.filePath == null || widget.message.filePath!.trim().isEmpty) {
+      if (widget.message.filePath == null ||
+          widget.message.filePath!.trim().isEmpty) {
         return Container(
           height: 150,
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
+            color: errorPlaceholderColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Center(
-            child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+          child: Center(
+            child: Icon(
+              Icons.broken_image,
+              size: 48,
+              color: theme.textSecondary,
+            ),
           ),
         );
       }
-      
+
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: Image.network(
@@ -343,9 +358,13 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
           errorBuilder: (context, error, stackTrace) {
             return Container(
               height: 150,
-              color: Colors.grey.shade200,
-              child: const Center(
-                child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+              color: errorPlaceholderColor,
+              child: Center(
+                child: Icon(
+                  Icons.broken_image,
+                  size: 48,
+                  color: theme.textSecondary,
+                ),
               ),
             );
           },
@@ -355,8 +374,14 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
       return Container(
         margin: const EdgeInsets.only(top: 8),
         child: OutlinedButton.icon(
-          icon: const Icon(Icons.attach_file),
-          label: const Text('View Attachment'),
+          icon: Icon(Icons.attach_file, color: theme.primary),
+          label: Text(
+            'View Attachment',
+            style: TextStyle(color: theme.primary),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: theme.primary.withOpacity(0.5)),
+          ),
           onPressed: () {
             if (widget.message.filePath != null) {
               launchUrl(Uri.parse(widget.message.filePath!));
@@ -366,45 +391,32 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
       );
     }
   }
-  
+
   Widget _buildActionButton({
+    required OneUITheme theme,
     required IconData icon,
     required String label,
     required Function()? onPressed,
-    bool isActive = false,
-    Color? iconColor,
   }) {
-    final buttonColor = iconColor ?? Colors.blue[600]!;
-    
     return Container(
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.05),
+        color: theme.primary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.blue.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: theme.primary.withOpacity(0.1), width: 1),
       ),
       child: TextButton.icon(
-        icon: Icon(
-          icon,
-          size: 16,
-          color: buttonColor,
-        ),
+        icon: Icon(icon, size: 16, color: theme.primary),
         label: Text(
           label,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w500,
             fontFamily: 'Poppins',
-            color: buttonColor,
+            color: theme.primary,
           ),
         ),
         style: TextButton.styleFrom(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 8,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           minimumSize: Size.zero,
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           alignment: Alignment.center,

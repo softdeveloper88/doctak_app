@@ -1935,10 +1935,12 @@ import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart';
 import 'package:doctak_app/presentation/calling_module/services/pip_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/screen_share_service.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/search_user_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/seeting_host_control_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/meeting_join_reject_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -1953,6 +1955,7 @@ import 'package:doctak_app/core/utils/call_permission_handler.dart';
 import 'package:http/http.dart' as http;
 
 import 'meeting_chat_screen.dart';
+import 'meeting_chat_bottom_sheet.dart';
 import 'meeting_info_screen.dart';
 
 const defaultChannel = 'doctak';
@@ -1992,19 +1995,24 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   bool _isFrontCamera = false;
   bool _showControls = true;
   bool _isLocalVideoEnabled = false;
+  bool _isHandRaised = false; // Track hand raise status
   double _localVideoScale = 1.0;
-  Offset _localVideoPosition = const Offset(20, 20);
-  int _callDuration = 0;
+  Offset _localVideoPosition = const Offset(20, 120); // Below top controls
+  final ValueNotifier<int> _callDurationNotifier = ValueNotifier<int>(0);
   Timer? _callTimer;
   int? _networkQuality;
   String channelName = '';
   bool _isLogin = false;
   bool _showFloatingOptions = true;
   int? _selectedUserId;
-  
+
   // PiP service for Picture-in-Picture support
   final PiPService _pipService = PiPService();
   bool _isPiPEnabled = false;
+  StreamSubscription<PiPServiceStatus>? _pipStatusSubscription;
+
+  // Screen share service for iOS ReplayKit integration
+  final ScreenShareService _screenShareService = ScreenShareService();
 
   // Audio indication variables
   Map<int, int> _userSpeakingLevels = {}; // Maps user ID to audio level
@@ -2043,6 +2051,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     // Add lifecycle observer
     WidgetsBinding.instance.addObserver(this);
 
+    // NOTE: PiP is NOT allowed here - only when actually joined the meeting
+    // _pipService.allowPiP() will be called in onJoinChannelSuccess callback
+
     // Keep screen awake during video call
     _enableWakelock();
 
@@ -2077,7 +2088,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     _initializeAgora();
     _generateDefaultPositions();
     _startCallTimer();
-    
+
     // Initialize PiP for background support
     _initializePiP();
 
@@ -2124,86 +2135,128 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       debugPrint('VideoCallScreen: Error disabling wakelock: $e');
     }
   }
-  
-  // Initialize Picture-in-Picture for meetings
+
+  // Initialize Picture-in-Picture subscription for meetings (don't enable yet)
   Future<void> _initializePiP() async {
     try {
+      // Cancel any existing subscription first
+      await _pipStatusSubscription?.cancel();
+      _pipStatusSubscription = null;
+
       final available = await _pipService.isAvailable();
-      if (available && Platform.isAndroid) {
-        // Enable auto-PiP when background for Android
-        await _pipService.enableAutoPiP(isVideoCall: true);
-        debugPrint('📺 VideoCallScreen: PiP initialized');
+      debugPrint(
+        '📺 VideoCallScreen: PiP available = $available on ${Platform.operatingSystem}',
+      );
+      if (available && mounted) {
+        // Subscribe to PiP status changes using our stream
+        _pipStatusSubscription = _pipService.statusStream.listen((status) {
+          if (mounted) {
+            final isInPiP = status == PiPServiceStatus.enabled;
+            if (_isPiPEnabled != isInPiP) {
+              setState(() {
+                _isPiPEnabled = isInPiP;
+              });
+              debugPrint('📺 VideoCallScreen: PiP status changed to $status');
+            }
+          }
+        });
+
+        debugPrint(
+          '📺 VideoCallScreen: PiP subscription ready (waiting for join)',
+        );
       }
     } catch (e) {
       debugPrint('📺 VideoCallScreen: Error initializing PiP: $e');
     }
   }
 
+  // Track if we're pending PiP start (to handle brief inactive states)
+  Timer? _pipDelayTimer;
+  
   // Handle app lifecycle changes
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
+        // Cancel any pending PiP start FIRST
+        _pipDelayTimer?.cancel();
+        _pipDelayTimer = null;
+        
+        // IMMEDIATELY tell PiP service app resumed - don't delay!
+        // This must happen before any pending PiP start can execute
+        _pipService.setResumeGracePeriod(true);
+        
         // Re-enable wakelock when app returns to foreground
         _enableWakelock();
-        // Disable PiP when returning to foreground (with delay for smooth transition)
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) {
-            _disablePiPMode();
-          }
-        });
-        debugPrint('App resumed - Re-enabling wakelock');
-        break;
-      case AppLifecycleState.paused:
-        // App going to background - enable PiP
-        debugPrint('App paused');
-        if (_isJoined) {
-          _enablePiPMode();
+        // Call full onAppResumed handler (which also sets grace period)
+        unawaited(_pipService.onAppResumed());
+        // Reset PiP flag when returning to foreground
+        if (_isPiPEnabled && mounted) {
+          setState(() {
+            _isPiPEnabled = false;
+          });
         }
+        debugPrint('📺 VideoCallScreen: App resumed');
         break;
+
       case AppLifecycleState.inactive:
-        // Don't enable PiP on inactive - wait for paused state
-        debugPrint('App inactive');
+        // On iOS, delay PiP start to handle brief inactive states (control center, etc.)
+        // PiP will only start if app stays inactive/hidden for 300ms
+        if (Platform.isIOS) {
+          debugPrint('📺 VideoCallScreen: App inactive - scheduling iOS PiP (300ms delay)');
+          _pipDelayTimer?.cancel();
+          _pipDelayTimer = Timer(const Duration(milliseconds: 300), () {
+            // Double-check: only start PiP if timer wasn't cancelled and not in grace period
+            if (mounted && !_pipService.isInResumeGracePeriod) {
+              debugPrint('📺 VideoCallScreen: PiP delay elapsed - starting PiP');
+              _pipService.onAppPaused();
+            } else {
+              debugPrint('📺 VideoCallScreen: PiP delay elapsed but blocked (grace period or unmounted)');
+            }
+          });
+        }
+        debugPrint('📺 VideoCallScreen: App inactive');
         break;
+
+      case AppLifecycleState.paused:
+        // For Android, trigger PiP when fully paused (Android handles this better)
+        if (Platform.isAndroid) {
+          _pipService.onAppPaused();
+        }
+        debugPrint('📺 VideoCallScreen: App paused');
+        break;
+
       case AppLifecycleState.detached:
-        debugPrint('App detached');
+        debugPrint('📺 VideoCallScreen: App detached');
         break;
+
       case AppLifecycleState.hidden:
-        debugPrint('App hidden');
+        debugPrint('📺 VideoCallScreen: App hidden');
         break;
     }
   }
-  
+
   // Enable PiP mode for meetings
   Future<void> _enablePiPMode() async {
-    if (_isPiPEnabled) return;
-    
+    // Use the PiP service API
     try {
       final result = await _pipService.enablePiP(
-        contactName: 'Meeting',
         isVideoCall: true,
+        context: mounted ? context : null,
       );
-      setState(() {
-        _isPiPEnabled = result;
-      });
-      debugPrint('📺 VideoCallScreen: PiP enabled = $result');
+      debugPrint('📺 VideoCallScreen: PiP enable = $result');
     } catch (e) {
       debugPrint('📺 VideoCallScreen: Error enabling PiP: $e');
     }
   }
-  
+
   // Disable PiP mode
   Future<void> _disablePiPMode() async {
-    if (!_isPiPEnabled) return;
-    
     try {
-      await _pipService.disablePiP();
-      setState(() {
-        _isPiPEnabled = false;
-      });
-      debugPrint('📺 VideoCallScreen: PiP disabled');
+      _pipService.resetPiPFlag();
+      debugPrint('📺 VideoCallScreen: PiP stopped');
     } catch (e) {
       debugPrint('📺 VideoCallScreen: Error disabling PiP: $e');
     }
@@ -2240,17 +2293,21 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
   // Authorizer method for Pusher - required to prevent iOS crash
   Future<dynamic>? onAuthorizer(
-      String channelName, String socketId, dynamic options) async {
+    String channelName,
+    String socketId,
+    dynamic options,
+  ) async {
     debugPrint(
-        "onAuthorizer called for channel: $channelName, socketId: $socketId");
-    
+      "onAuthorizer called for channel: $channelName, socketId: $socketId",
+    );
+
     // For public channels (not starting with 'private-' or 'presence-'),
     // return null
     if (!channelName.startsWith('private-') &&
         !channelName.startsWith('presence-')) {
       return null;
     }
-    
+
     return null;
   }
 
@@ -2399,23 +2456,73 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               break;
             case 'meeting-status':
               // IMPROVED: Handling meeting status updates more efficiently
-              final String userId = jsonMap['user_id'].toString();
+              // Handle both 'userId' and 'user_id' field names from Pusher
+              final String oderId =
+                  (jsonMap['userId'] ?? jsonMap['user_id'] ?? '').toString();
               final String action = jsonMap['action'].toString();
-              final bool status = jsonMap['status'] == true;
+
+              // Parse status correctly - handle bool, string, int formats
+              final dynamic rawStatus = jsonMap['status'];
+              final bool status;
+              if (rawStatus is bool) {
+                status = rawStatus;
+              } else if (rawStatus is String) {
+                status = rawStatus.toLowerCase() == 'true' || rawStatus == '1';
+              } else if (rawStatus is int) {
+                status = rawStatus == 1;
+              } else {
+                status = rawStatus == true;
+              }
+
+              debugPrint(
+                '📢 Meeting status update: user=$oderId, action=$action, rawStatus=$rawStatus (${rawStatus.runtimeType}), parsedStatus=$status',
+              );
 
               // Update meeting details model
-              if (_updateMeetingDetailsForStatus(userId, action, status)) {
+              if (_updateMeetingDetailsForStatus(oderId, action, status)) {
                 // Find all remote videos that might need UI updates
-                _updateRemoteVideosForUser(userId);
+                _updateRemoteVideosForUser(oderId);
 
                 // Force UI refresh
                 if (mounted) setState(() {});
-              }
 
-              // Show toast for debugging
-              toast(
-                "Meeting status changed: $action for user $userId to $status",
-              );
+                // Show user-friendly notification for hand raise (like Zoom/Meet)
+                debugPrint(
+                  '🖐️ Hand check: action="$action", oderId="$oderId", myId="${AppData.logInUserId}", isNotMe=${oderId != AppData.logInUserId}, status=$status',
+                );
+                if (action == 'hand') {
+                  debugPrint('🖐️ Action is hand! Checking if not me...');
+                  if (oderId != AppData.logInUserId) {
+                    debugPrint('🖐️ Not me! Checking status: $status');
+                    // Find the user's name
+                    final user = widget.meetingDetailsModel?.data?.users
+                        ?.firstWhere(
+                          (u) => u.id == oderId,
+                          orElse: () => Users(),
+                        );
+                    final userName =
+                        '${user?.firstName ?? ''} ${user?.lastName ?? ''}'
+                            .trim();
+                    if (status) {
+                      debugPrint(
+                        '🖐️ Status is TRUE - showing raised hand message',
+                      );
+                      _showSystemMessage(
+                        '✋ ${userName.isNotEmpty ? userName : 'A participant'} raised their hand',
+                      );
+                    } else {
+                      debugPrint(
+                        '🖐️ Status is FALSE - showing lowered hand message',
+                      );
+                      _showSystemMessage(
+                        '${userName.isNotEmpty ? userName : 'A participant'} lowered their hand',
+                      );
+                    }
+                  } else {
+                    debugPrint('🖐️ Skipping - this is my own hand event');
+                  }
+                }
+              }
               break;
             default:
               break;
@@ -2483,16 +2590,56 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   }
 
   // Update remote user state in our tracking map
-  void _updateRemoteUserState(String userId, String action, bool status) {
-    final uidValue = int.tryParse(userId) ?? 0;
-    if (uidValue <= 0) return;
+  void _updateRemoteUserState(String oderId, String action, bool status) {
+    // Use the userIdToUidMap to find the Agora UID for this user ID
+    final int? uidValue = _userIdToUidMap[oderId];
 
+    debugPrint(
+      '📝 Updating remote user state: userId=$oderId, action=$action, status=$status, agoraUid=$uidValue',
+    );
+
+    // Check if this is the local user (UID 0 is valid for local user)
+    if (oderId == AppData.logInUserId) {
+      debugPrint('📝 This is the local user, updating local state');
+      // For local user, update local state flags directly
+      if (action == 'screen') {
+        setState(() {
+          _isScreenSharing = status;
+        });
+      } else if (action == 'cam') {
+        setState(() {
+          _isLocalVideoEnabled = status;
+        });
+      }
+      // Also update the state map for consistency
+      _updateRemoteUserStateByUid(0, action, status);
+      return;
+    }
+
+    if (uidValue == null) {
+      // Try to find by iterating through remote videos
+      for (var video in _remoteVideos) {
+        if (video.joinUser?.id == oderId) {
+          final uid = video.uid;
+          _updateRemoteUserStateByUid(uid, action, status);
+          return;
+        }
+      }
+      debugPrint('Could not find Agora UID for user: $oderId');
+      return;
+    }
+
+    _updateRemoteUserStateByUid(uidValue, action, status);
+  }
+
+  // Update remote user state by Agora UID
+  void _updateRemoteUserStateByUid(int uid, String action, bool status) {
     // Create or update user state
     final userState =
-        _remoteUserStates[uidValue] ??
+        _remoteUserStates[uid] ??
         RemoteUserState(
-          userId: userId,
-          userData: Users(id: userId),
+          userId: _uidToUserIdMap[uid] ?? '',
+          userData: Users(id: _uidToUserIdMap[uid]),
         );
 
     // Update the state based on action
@@ -2508,11 +2655,12 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         break;
       case 'hand':
         userState.isHandUp = status;
+        debugPrint('✋ Hand status updated for UID $uid: $status');
         break;
     }
 
     // Update the state map
-    _remoteUserStates[uidValue] = userState;
+    _remoteUserStates[uid] = userState;
   }
 
   // Update UI components for a specific user
@@ -2679,6 +2827,35 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   void _setupEventHandlers() {
     _agoraEngine.registerEventHandler(
       RtcEngineEventHandler(
+        onLocalVideoStateChanged: (source, state, reason) {
+          // Track local video state changes including screen share
+          debugPrint(
+            '📹 Local video state changed: source=$source, state=$state, reason=$reason',
+          );
+
+          // Check if screen capture started or failed (check both source types)
+          if (source == VideoSourceType.videoSourceScreen ||
+              source == VideoSourceType.videoSourceScreenPrimary ||
+              source == VideoSourceType.videoSourceScreenSecondary) {
+            if (state == LocalVideoStreamState.localVideoStreamStateCapturing ||
+                state == LocalVideoStreamState.localVideoStreamStateEncoding) {
+              debugPrint('📹 Screen capture is now active');
+              if (!_isScreenSharing && mounted) {
+                setState(() => _isScreenSharing = true);
+              }
+            } else if (state ==
+                LocalVideoStreamState.localVideoStreamStateFailed) {
+              debugPrint('📹 Screen capture FAILED: reason=$reason');
+              if (mounted) {
+                setState(() => _isScreenSharing = false);
+                _showSystemMessage('Screen sharing failed. Please try again.');
+              }
+            } else if (state ==
+                LocalVideoStreamState.localVideoStreamStateStopped) {
+              debugPrint('📹 Screen capture stopped');
+            }
+          }
+        },
         onVideoPublishStateChanged: (source, oldState, newState, newState2, extra) {
           // Handle video publish state changes - for debugging only
           debugPrint(
@@ -3126,6 +3303,26 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           setState(() => _isJoined = true);
           _updateParticipantCount();
 
+          // NOW enable PiP since user has actually joined the meeting
+          // Allow PiP and enable auto-enter when app goes to background
+          _pipService.allowPiP();
+          _pipService.enableAutoPiP(
+            isVideoCall: true,
+            context: mounted ? context : null,
+          );
+
+          // IMPORTANT: Pre-setup PiP so it's ready before backgrounding (especially for iOS)
+          // This ensures the PiP controller is fully initialized before we need it
+          if (Platform.isIOS) {
+            _pipService.setup().then((_) {
+              debugPrint('📺 VideoCallScreen: iOS PiP pre-setup complete');
+            });
+          }
+
+          debugPrint(
+            '📺 VideoCallScreen: Joined meeting - PiP service notified',
+          );
+
           // Start audio volume detection
           _agoraEngine.enableAudioVolumeIndication(
             interval: 500, // Check every 500ms
@@ -3319,6 +3516,16 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       _userIdToUidMap[AppData.logInUserId] = 0; // Local user has UID 0
       _uidToUserIdMap[0] = AppData.logInUserId;
 
+      // Save channel config for iOS screen share extension
+      if (Platform.isIOS) {
+        await _screenShareService.saveChannelConfig(
+          appId: appId,
+          channelName: channelName,
+          token: token.isNotEmpty ? token : null,
+          uid: 0,
+        );
+      }
+
       // Join with optimized options - camera OFF by default
       await _agoraEngine.joinChannelWithUserAccount(
         token: '',
@@ -3500,7 +3707,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
   void _startCallTimer() {
     _callTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() => _callDuration++);
+      _callDurationNotifier.value++;
     });
   }
 
@@ -3523,30 +3730,48 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           widget.isHost == true) {
         // When currently screen sharing, revert to normal camera video.
         if (_isScreenSharing) {
-          // Stop the screen capture.
-          await _agoraEngine.stopScreenCapture();
-          // Update channel media options to disable screen sharing tracks
-          // and re-enable the camera and microphone tracks.
-          await _agoraEngine.updateChannelMediaOptions(
-            const ChannelMediaOptions(
-              publishScreenTrack: false,
-              publishScreenCaptureAudio: false,
-              publishScreenCaptureVideo: false,
-              publishCameraTrack: true,
-              publishMicrophoneTrack: true,
-              // Keep other options as needed.
-              publishMediaPlayerAudioTrack: true,
-              autoSubscribeAudio: true,
-              clientRoleType: ClientRoleType.clientRoleBroadcaster,
-            ),
-          );
-          // Update meeting status for camera being active.
+          if (Platform.isIOS) {
+            // iOS: Stop in-app screen capture
+            await _agoraEngine.stopScreenCapture();
+            debugPrint('iOS: Screen capture stopped');
+
+            // Update channel media options to disable screen sharing tracks
+            await _agoraEngine.updateChannelMediaOptions(
+              ChannelMediaOptions(
+                publishScreenTrack: false,
+                publishScreenCaptureVideo: false,
+                publishCameraTrack: _isLocalVideoEnabled,
+                publishMicrophoneTrack: true,
+                autoSubscribeAudio: true,
+                clientRoleType: ClientRoleType.clientRoleBroadcaster,
+              ),
+            );
+          } else {
+            // Android: Stop screen capture in main app
+            await _agoraEngine.stopScreenCapture();
+            debugPrint('Android: Screen capture stopped');
+
+            // Update channel media options to disable screen sharing tracks
+            await _agoraEngine.updateChannelMediaOptions(
+              ChannelMediaOptions(
+                publishScreenTrack: false,
+                publishScreenCaptureAudio: false,
+                publishScreenCaptureVideo: false,
+                publishCameraTrack: _isLocalVideoEnabled,
+                publishMicrophoneTrack: true,
+                publishMediaPlayerAudioTrack: true,
+                autoSubscribeAudio: true,
+                clientRoleType: ClientRoleType.clientRoleBroadcaster,
+              ),
+            );
+          }
+          // Update meeting status for camera (based on whether video was enabled)
           await changeMeetingStatus(
                 context,
                 widget.meetingDetailsModel?.data?.meeting?.id,
                 AppData.logInUserId,
                 'cam',
-                true,
+                _isLocalVideoEnabled,
               )
               .then((resp) {
                 debugPrint("Change status (camera) response: $resp");
@@ -3579,65 +3804,127 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         }
         // Otherwise, switch to screen sharing mode.
         else {
-          debugPrint('Starting screen share...');
-          
+          debugPrint('🖥️ Starting screen share...');
+
           // Stop the camera preview.
           await _agoraEngine.stopPreview();
-          
+
           // Platform-specific screen capture configuration
           if (Platform.isIOS) {
-            // iOS: Use in-app screen capture (works for app content)
-            // For system-wide screen sharing, the Broadcast Extension is needed
-            debugPrint('iOS: Starting in-app screen capture');
-            
-            // Start screen capture with iOS-specific parameters
-            await _agoraEngine.startScreenCapture(
-              const ScreenCaptureParameters2(
-                captureVideo: true,
-                captureAudio: false, // iOS doesn't support app audio capture in-app
-                videoParams: ScreenVideoParameters(
-                  dimensions: VideoDimensions(width: 1280, height: 720),
-                  frameRate: 15,
-                  contentHint: VideoContentHint.contentHintDetails,
-                  bitrate: 2000,
+            // iOS: Use Broadcast Extension for screen sharing
+            // First prepare Agora, then show the system broadcast picker
+            debugPrint('🖥️ iOS: Starting screen share setup');
+
+            try {
+              await _agoraEngine.startScreenCapture(
+                const ScreenCaptureParameters2(
+                  captureVideo: true,
+                  captureAudio:
+                      false, // iOS doesn't support audio capture in-app
+                  videoParams: ScreenVideoParameters(
+                    dimensions: VideoDimensions(width: 1280, height: 720),
+                    frameRate: 15,
+                    contentHint: VideoContentHint.contentHintDetails,
+                    bitrate: 2000,
+                  ),
                 ),
-              ),
-            );
-            debugPrint('iOS startScreenCapture completed');
+              );
+              debugPrint('🖥️ iOS: startScreenCapture completed');
+            } catch (e) {
+              debugPrint('🖥️ iOS: startScreenCapture FAILED: $e');
+              _showSystemMessage('Failed to start screen capture');
+              return;
+            }
+
+            // Start preview with screen capture source to initialize video pipeline
+            try {
+              await _agoraEngine.startPreview(
+                sourceType: VideoSourceType.videoSourceScreen,
+              );
+              debugPrint('🖥️ iOS: startPreview for screen source completed');
+            } catch (e) {
+              debugPrint('🖥️ iOS: startPreview for screen FAILED: $e');
+            }
+
+            // Small delay to allow preview to initialize
+            await Future.delayed(const Duration(milliseconds: 200));
+
+            // Update channel media options for iOS screen sharing
+            try {
+              await _agoraEngine.updateChannelMediaOptions(
+                const ChannelMediaOptions(
+                  publishScreenTrack: true,
+                  publishScreenCaptureVideo: true,
+                  publishSecondaryScreenTrack: true, // Also try secondary track
+                  // Disable camera track while screen sharing
+                  publishCameraTrack: false,
+                  publishMicrophoneTrack: true,
+                  autoSubscribeAudio: true,
+                  autoSubscribeVideo: true,
+                  clientRoleType: ClientRoleType.clientRoleBroadcaster,
+                ),
+              );
+              debugPrint('🖥️ iOS: updateChannelMediaOptions completed');
+            } catch (e) {
+              debugPrint('🖥️ iOS: updateChannelMediaOptions FAILED: $e');
+            }
+
+            // Now show the system broadcast picker to let user start the extension
+            try {
+              const screenShareChannel = MethodChannel('com.doctak.app/screen_share');
+              await screenShareChannel.invokeMethod('startBroadcast');
+              debugPrint('🖥️ iOS: Broadcast picker shown');
+            } catch (e) {
+              debugPrint('🖥️ iOS: Failed to show broadcast picker: $e');
+            }
+
+            debugPrint('🖥️ iOS: Screen share setup completed');
           } else {
             // Android: Standard screen capture
-            debugPrint('Android: Starting screen capture');
-            await _agoraEngine.startScreenCapture(
-              const ScreenCaptureParameters2(
-                captureVideo: true,
-                captureAudio: true,
-                videoParams: ScreenVideoParameters(
-                  dimensions: VideoDimensions(width: 1280, height: 720),
-                  frameRate: 15,
-                  contentHint: VideoContentHint.contentHintMotion,
-                  bitrate: 2000,
+            debugPrint('🖥️ Android: Starting screen capture');
+            try {
+              await _agoraEngine.startScreenCapture(
+                const ScreenCaptureParameters2(
+                  captureVideo: true,
+                  captureAudio: true,
+                  videoParams: ScreenVideoParameters(
+                    dimensions: VideoDimensions(width: 1280, height: 720),
+                    frameRate: 15,
+                    contentHint: VideoContentHint.contentHintMotion,
+                    bitrate: 2000,
+                  ),
                 ),
-              ),
-            );
+              );
+              debugPrint('🖥️ Android: startScreenCapture completed');
+            } catch (e) {
+              debugPrint('🖥️ Android: startScreenCapture FAILED: $e');
+              _showSystemMessage('Failed to start screen capture');
+              return;
+            }
+
+            // Update channel media options to disable camera track and enable screen sharing.
+            try {
+              await _agoraEngine.updateChannelMediaOptions(
+                const ChannelMediaOptions(
+                  publishScreenTrack: true,
+                  publishScreenCaptureAudio: true,
+                  publishScreenCaptureVideo: true,
+                  // Disable camera track while screen sharing.
+                  publishCameraTrack: false,
+                  publishMicrophoneTrack: true,
+                  publishMediaPlayerAudioTrack: true,
+                  autoSubscribeAudio: true,
+                  clientRoleType: ClientRoleType.clientRoleBroadcaster,
+                ),
+              );
+              debugPrint('🖥️ Android: updateChannelMediaOptions completed');
+            } catch (e) {
+              debugPrint('🖥️ Android: updateChannelMediaOptions FAILED: $e');
+            }
           }
-          
-          // Update channel media options to disable camera track and enable screen sharing.
-          await _agoraEngine.updateChannelMediaOptions(
-            const ChannelMediaOptions(
-              publishScreenTrack: true,
-              publishScreenCaptureAudio: true,
-              publishScreenCaptureVideo: true,
-              // Disable camera track while screen sharing.
-              publishCameraTrack: false,
-              publishMicrophoneTrack: true,
-              publishMediaPlayerAudioTrack: true,
-              autoSubscribeAudio: true,
-              clientRoleType: ClientRoleType.clientRoleBroadcaster,
-            ),
-          );
-          
-          debugPrint('Screen share channel options updated');
-          
+
+          debugPrint('🖥️ Screen share started');
+
           // Update the meeting status accordingly:
           // Indicate that the camera is off.
           await changeMeetingStatus(
@@ -3669,7 +3956,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               });
           // Set the state to reflect that screen sharing is now active.
           setState(() => _isScreenSharing = true);
-          
+
           _showSystemMessage('Screen sharing started');
         }
       } else {
@@ -3739,12 +4026,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     // PiP windows are typically very small (< 400 pixels in either dimension)
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isSmallWindow = constraints.maxWidth < 400 || constraints.maxHeight < 400;
-        
-        // Use PiP design if either:
-        // 1. _isPiPEnabled flag is true (set by PiP service)
-        // 2. Window dimensions are small (indicating PiP mode via fl_pip)
-        if (_isPiPEnabled || isSmallWindow) {
+        // ONLY use _isPiPEnabled flag - remove isSmallWindow check
+        // The isSmallWindow check was causing false positives on some devices
+        if (_isPiPEnabled) {
           return _buildPipModeView();
         } else {
           return _buildNormalModeView();
@@ -3752,26 +4036,55 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       },
     );
   }
-  
+
   /// OLD design for normal/expanded mode
+  // One UI 8.5 Color Palette
+  static const Color _oneUIBackground = Color(
+    0xFF0D1B2A,
+  ); // Deep navy background
+  static const Color _oneUISurface = Color(0xFF1B2838); // Card surface
+  static const Color _oneUIFloatingBg = Color(
+    0xFF2D3E50,
+  ); // Floating button background
+  static const Color _oneUIAccent = Color(0xFF4DA3FF); // Accent blue
+  static const Color _oneUINavBar = Color(0xFF152232); // Bottom nav bar
+
   Widget _buildNormalModeView() {
+    // Calculate bottom nav bar height for positioning
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final navBarHeight = 85 + (bottomPadding > 0 ? bottomPadding : 12);
+
     return WillPopScope(
       onWillPop: () async {
         _confirmEndCall();
         return false; // Prevent default back behavior
       },
       child: Scaffold(
+        backgroundColor: _oneUIBackground,
+        extendBody: true,
         body: Stack(
           fit: StackFit.loose,
           children: [
             // Main video area that adapts based on number of participants
-            Positioned.fill(top: 30, child: _buildMainVideoArea()),
+            // Add bottom margin to not cover the bottom navigation bar
+            Positioned(
+              top: 30,
+              left: 0,
+              right: 0,
+              bottom:
+                  0, // Let it extend to bottom, bottomNavigationBar handles spacing
+              child: _buildMainVideoArea(),
+            ),
 
             // Local video preview
             if (_isJoined) _buildLocalPreview(),
 
-            // Floating control options
-            Positioned(bottom: 95, right: 20, child: _buildFloatingControls()),
+            // Floating control options - positioned above bottom nav bar
+            Positioned(
+              bottom: navBarHeight + 16,
+              right: 16,
+              child: _buildFloatingControls(),
+            ),
 
             // Top right Popup Menu
             Positioned(top: 50, right: 20, child: _buildPopupMenu()),
@@ -3785,20 +4098,39 @@ class _VideoCallScreenState extends State<VideoCallScreen>
               left: 70,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+                  horizontal: 14,
+                  vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(16),
+                  color: _oneUISurface.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.timer, color: Colors.white, size: 16),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDuration(_callDuration),
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    const Icon(
+                      Icons.timer_outlined,
+                      color: Colors.white70,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    ValueListenableBuilder<int>(
+                      valueListenable: _callDurationNotifier,
+                      builder: (context, duration, child) => Text(
+                        _formatDuration(duration),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -3813,7 +4145,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CircularProgressIndicator(),
+                      const CircularProgressIndicator(color: _oneUIAccent),
                       const SizedBox(height: 20),
                       Text(
                         'Reconnecting... (Attempt $_reconnectionAttempts)',
@@ -3832,7 +4164,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       ),
     );
   }
-  
+
   /// NEW responsive design for PiP/floating widget mode
   Widget _buildPipModeView() {
     return WillPopScope(
@@ -3846,15 +4178,15 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           builder: (context, constraints) {
             final totalHeight = constraints.maxHeight;
             final totalWidth = constraints.maxWidth;
-            
+
             // For very small PiP windows, use minimal controls
             final isVerySmall = totalHeight < 150 || totalWidth < 200;
-            
+
             // Control bar height - smaller for tiny windows
-            final controlBarHeight = isVerySmall 
+            final controlBarHeight = isVerySmall
                 ? (totalHeight * 0.30).clamp(24.0, 40.0)
                 : (totalHeight * 0.25).clamp(32.0, 50.0);
-            
+
             return ClipRect(
               child: Column(
                 children: [
@@ -3866,7 +4198,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                         children: [
                           // Video content - clipped
                           ClipRect(child: _buildPipVideoArea()),
-                          
+
                           // Compact call timer in PiP mode
                           if (!isVerySmall)
                             Positioned(
@@ -3885,17 +4217,21 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     const Icon(
-                                      Icons.timer, 
-                                      color: Colors.white, 
+                                      Icons.timer,
+                                      color: Colors.white,
                                       size: 8,
                                     ),
                                     const SizedBox(width: 2),
-                                    Text(
-                                      _formatDuration(_callDuration),
-                                      style: const TextStyle(
-                                        color: Colors.white, 
-                                        fontSize: 7,
-                                      ),
+                                    ValueListenableBuilder<int>(
+                                      valueListenable: _callDurationNotifier,
+                                      builder: (context, duration, child) =>
+                                          Text(
+                                            _formatDuration(duration),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 7,
+                                            ),
+                                          ),
                                     ),
                                   ],
                                 ),
@@ -3911,7 +4247,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                                   child: SizedBox(
                                     width: 12,
                                     height: 12,
-                                    child: CircularProgressIndicator(strokeWidth: 1.5),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 1.5,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -3933,19 +4271,69 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       ),
     );
   }
-  
+
   /// Simplified video area for PiP mode - no center/column that can overflow
   Widget _buildPipVideoArea() {
     if (_remoteVideos.isEmpty) {
-      // No remote videos - show simple icon only, no text
+      // No remote videos - show local video (user's own camera) in PiP
       return Container(
         color: const Color(0xFF1a1a2e),
-        child: const Center(
-          child: Icon(
-            Icons.videocam_off,
-            size: 24,
-            color: Colors.grey,
-          ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Show local video or avatar
+            if (_isLocalVideoEnabled)
+              AgoraVideoView(
+                controller: VideoViewController(
+                  useAndroidSurfaceView: true,
+                  useFlutterTexture: true,
+                  rtcEngine: _agoraEngine,
+                  canvas: const VideoCanvas(uid: 0),
+                ),
+              )
+            else
+              Center(
+                child: AppData.profile_pic.isNotEmpty
+                    ? CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.grey.shade700,
+                        backgroundImage: NetworkImage(
+                          '${AppData.imageUrl}${AppData.profile_pic}',
+                        ),
+                        onBackgroundImageError: (_, __) {},
+                      )
+                    : CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.blueGrey.shade600,
+                        child: Text(
+                          AppData.name.isNotEmpty
+                              ? AppData.name[0].toUpperCase()
+                              : 'U',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+              ),
+            // Label showing "You"
+            Positioned(
+              bottom: 4,
+              left: 4,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'You',
+                  style: TextStyle(color: Colors.white, fontSize: 8),
+                ),
+              ),
+            ),
+          ],
         ),
       );
     } else if (_remoteVideos.length == 1) {
@@ -3960,7 +4348,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   Widget _buildMainVideoArea() {
     // Only use PiP design when actually in PiP mode
     final isPipMode = _isPiPEnabled;
-    
+
     if (_remoteVideos.isEmpty) {
       // No remote videos, show waiting message or local preview fullscreen
       if (isPipMode) {
@@ -3974,18 +4362,11 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.people, 
-                    size: 24, 
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.people, size: 24, color: Colors.grey),
                   const SizedBox(height: 4),
                   const Text(
                     'Waiting...',
-                    style: TextStyle(
-                      fontSize: 10, 
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
               ),
@@ -4174,6 +4555,16 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     final bool isMicOn =
         remoteState?.isMicOn ??
         (videoData.joinUser?.meetingDetails?.single.isMicOn == 1);
+    final bool isHandUp =
+        remoteState?.isHandUp ??
+        (videoData.joinUser?.meetingDetails?.single.isHandUp == 1);
+
+    // Debug log hand status
+    if (isHandUp) {
+      debugPrint(
+        '✋ Building video window with hand raised for ${videoData.joinUser?.firstName} (uid: ${videoData.uid})',
+      );
+    }
 
     // Get user name for display
     final String firstName = videoData.joinUser?.firstName ?? "";
@@ -4347,6 +4738,51 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                   ),
                 ),
               ),
+
+            // Show hand raised indicator - prominent like Zoom/Google Meet
+            if (isHandUp)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.withOpacity(0.4),
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.hand_raised_fill,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      if (isFocused) ...[
+                        const SizedBox(width: 4),
+                        const Text(
+                          'Hand Raised',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -4354,97 +4790,95 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   }
 
   Widget _buildFloatingControls() {
-    return Column(
-      children: [
-        FloatingActionButton(
-          heroTag: "more_fab_tag_${UniqueKey()}",
-          elevation: 0,
-          backgroundColor: Colors.blueGrey.withOpacity(0.4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          onPressed: () {
-            setState(() {
-              _showFloatingOptions = !_showFloatingOptions;
-            });
-          },
-          child: Icon(
-            _showFloatingOptions
-                ? CupertinoIcons.chevron_down
-                : CupertinoIcons.chevron_up,
-          ),
-        ),
-        if (_showFloatingOptions) ...[
-          FloatingActionButton(
-            heroTag: "hand_fab_tag_${UniqueKey()}",
-            elevation: 0,
-            backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            onPressed: () {
-              // Implement any hand-raise functionality if needed.
-            },
-            child: const Icon(CupertinoIcons.hand_raised),
-          ),
-          FloatingActionButton(
-            heroTag: "audio_fab_tag_${UniqueKey()}",
-            elevation: 0,
-            backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            onPressed: _toggleAudio,
-            child: Icon(
-              _isMuted ? CupertinoIcons.mic_off : CupertinoIcons.mic,
-              color: Colors.white,
-            ),
-          ),
-          FloatingActionButton(
-            heroTag: "camera_fab_tag_${UniqueKey()}",
-            elevation: 0,
-            backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            onPressed: _toggleVideo,
-            child: Icon(
-              _isLocalVideoEnabled ? Icons.videocam : Icons.videocam_off,
-              color: Colors.white,
-            ),
-          ),
-
-          FloatingActionButton(
-            heroTag: "switch_camera_fab_tag_${UniqueKey()}",
-            elevation: 0,
-            backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            onPressed: _switchCamera,
-            child: Icon(
-              _isFrontCamera
-                  ? CupertinoIcons.camera_rotate
-                  : CupertinoIcons.camera_rotate_fill,
-              color: Colors.white,
-            ),
-          ),
-          FloatingActionButton(
-            heroTag: "wifi_fab_tag_${UniqueKey()}",
-            elevation: 0,
-            backgroundColor: const Color(0xFF3D4D55).withOpacity(0.9),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-            ),
-            onPressed: () {},
-            child: Icon(
-              Icons.network_check,
-              color: _getNetworkQualityColor(),
-              size: 18,
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        color: _oneUISurface.withOpacity(0.95),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
-      ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildOneUIFloatingButton(
+            icon: _showFloatingOptions
+                ? CupertinoIcons.chevron_down
+                : CupertinoIcons.chevron_up,
+            onPressed: () {
+              setState(() {
+                _showFloatingOptions = !_showFloatingOptions;
+              });
+            },
+            isToggle: true,
+          ),
+          if (_showFloatingOptions) ...[
+            const SizedBox(height: 8),
+            _buildOneUIFloatingButton(
+              icon: CupertinoIcons.hand_raised,
+              onPressed: _toggleHandRaise,
+              isActive: _isHandRaised,
+              activeColor: const Color(0xFFFF9500),
+            ),
+            const SizedBox(height: 8),
+            _buildOneUIFloatingButton(
+              icon: _isMuted ? CupertinoIcons.mic_off : CupertinoIcons.mic,
+              onPressed: _toggleAudio,
+              isActive: !_isMuted,
+            ),
+            const SizedBox(height: 8),
+            _buildOneUIFloatingButton(
+              icon: _isLocalVideoEnabled ? Icons.videocam : Icons.videocam_off,
+              onPressed: _toggleVideo,
+              isActive: _isLocalVideoEnabled,
+            ),
+            const SizedBox(height: 8),
+            _buildOneUIFloatingButton(
+              icon: CupertinoIcons.camera_rotate,
+              onPressed: _switchCamera,
+            ),
+            const SizedBox(height: 8),
+            _buildOneUIFloatingButton(
+              icon: Icons.network_check,
+              onPressed: () {},
+              iconColor: _getNetworkQualityColor(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOneUIFloatingButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    bool isActive = false,
+    bool isToggle = false,
+    Color? activeColor,
+    Color? iconColor,
+  }) {
+    final bgColor = isActive ? (activeColor ?? _oneUIAccent) : _oneUIFloatingBg;
+    final fgColor =
+        iconColor ?? (isActive ? Colors.white : Colors.white.withOpacity(0.9));
+
+    return Material(
+      color: bgColor,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          width: 44,
+          height: 44,
+          alignment: Alignment.center,
+          child: Icon(icon, color: fgColor, size: 22),
+        ),
+      ),
     );
   }
 
@@ -4452,23 +4886,24 @@ class _VideoCallScreenState extends State<VideoCallScreen>
     return PopupMenuButton<int>(
       offset: const Offset(0, 50),
       icon: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.blueGrey.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(50),
+          color: _oneUISurface.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: const Icon(Icons.more_vert, color: Colors.white),
+        child: const Icon(Icons.more_vert, color: Colors.white, size: 22),
       ),
-      color: const Color(0xFF263238),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: _oneUISurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       itemBuilder: (context) => [
         PopupMenuItem(
-          onTap: () {
-            MeetingInfoScreen().launch(
-              context,
-              pageRouteAnimation: PageRouteAnimation.Slide,
-            );
-          },
           value: 1,
           child: ListTile(
             trailing: const Icon(Icons.info, color: Colors.white),
@@ -4479,15 +4914,6 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           ),
         ),
         PopupMenuItem(
-          onTap: () async {
-            var update = await SettingsHostControlsScreen(
-              widget.meetingDetailsModel?.data?.settings,
-              widget.meetingDetailsModel?.data?.meeting?.id ?? "",
-            ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
-            if (update) {
-              _refreshMeetingDetails();
-            }
-          },
           value: 2,
           child: ListTile(
             trailing: const Icon(Icons.settings, color: Colors.white),
@@ -4508,11 +4934,6 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           ),
         ),
         PopupMenuItem(
-          onTap: () {
-            SearchUserScreen(
-              channel: channelName,
-            ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
-          },
           value: 4,
           child: ListTile(
             trailing: const Icon(Icons.link, color: Colors.white),
@@ -4523,33 +4944,74 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           ),
         ),
       ],
-      onSelected: (value) {
-        if (value == 3) {
-          Clipboard.setData(ClipboardData(text: channelName));
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(translation(context).msg_meeting_code_copied),
-            ),
-          );
-        }
+      onSelected: (value) async {
+        // Use addPostFrameCallback to ensure navigation happens after popup is closed
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          switch (value) {
+            case 1:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => MeetingInfoScreen()),
+              );
+              break;
+            case 2:
+              final update = await Navigator.push<bool>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SettingsHostControlsScreen(
+                    widget.meetingDetailsModel?.data?.settings,
+                    widget.meetingDetailsModel?.data?.meeting?.id ?? "",
+                  ),
+                ),
+              );
+              if (update == true) {
+                _refreshMeetingDetails();
+              }
+              break;
+            case 3:
+              Clipboard.setData(ClipboardData(text: channelName));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(translation(context).msg_meeting_code_copied),
+                ),
+              );
+              break;
+            case 4:
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SearchUserScreen(channel: channelName),
+                ),
+              );
+              break;
+          }
+        });
       },
     );
   }
 
   Widget _buildBackButton() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child:
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.blueGrey.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(50),
-            ),
-            child: const Icon(CupertinoIcons.back, color: Colors.white),
-          ).onTap(() {
-            _confirmEndCall();
-          }),
+    return Material(
+      color: _oneUISurface.withOpacity(0.9),
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        onTap: () => _confirmEndCall(),
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Icon(CupertinoIcons.back, color: Colors.white, size: 22),
+        ),
+      ),
     );
   }
 
@@ -4672,7 +5134,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                                     radius: 40,
                                     backgroundColor: Colors.blueGrey.shade600,
                                     child: Text(
-                                      AppData.name.isNotEmpty 
+                                      AppData.name.isNotEmpty
                                           ? AppData.name[0].toUpperCase()
                                           : 'U',
                                       style: const TextStyle(
@@ -4688,6 +5150,8 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                           controller: VideoViewController(
                             rtcEngine: _agoraEngine,
                             canvas: const VideoCanvas(uid: 0),
+                            useAndroidSurfaceView: true,
+                            useFlutterTexture: true,
                           ),
                         ),
                 ),
@@ -4732,7 +5196,9 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                               _isLocalVideoEnabled
                                   ? CupertinoIcons.video_camera
                                   : CupertinoIcons.video_camera_solid,
-                              color: _isLocalVideoEnabled ? Colors.white : Colors.red,
+                              color: _isLocalVideoEnabled
+                                  ? Colors.white
+                                  : Colors.red,
                               size: 14,
                             ),
                             const SizedBox(width: 4),
@@ -4781,119 +5247,132 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   }
 
   Widget _buildControlBar() {
-    // Use LayoutBuilder to detect if we're in a small window (PiP mode)
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isSmallWindow = constraints.maxWidth < 400 || constraints.maxHeight < 100;
-        
-        // Use PiP design if either flag is set OR window is small
-        if (_isPiPEnabled || isSmallWindow) {
-          return _buildPipControlBar();
-        } else {
-          return _buildNormalControlBar();
-        }
-      },
-    );
+    // Only use PiP control bar when actually in PiP mode
+    // Don't use LayoutBuilder here as bottomNavigationBar constraints can be unreliable
+    if (_isPiPEnabled) {
+      return _buildPipControlBar();
+    } else {
+      return _buildNormalControlBar();
+    }
   }
-  
-  /// OLD design for normal/expanded mode
+
+  /// One UI 8.5 style bottom control bar
   Widget _buildNormalControlBar() {
+    // Get the bottom safe area padding for proper spacing
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Container(
       width: 100.w,
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
-        top: 10,
-        bottom: MediaQuery.of(context).padding.bottom + 10,
+        top: 16,
+        bottom: bottomPadding > 0 ? bottomPadding + 8 : 16,
       ),
-      decoration: const BoxDecoration(color: Color(0xFF263238)),
+      decoration: BoxDecoration(
+        color: _oneUINavBar,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // Chat button
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MaterialButton(
-                color: const Color(0xFF3D4D55),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                onPressed: () {
-                  MeetingChatScreen(
-                    channelId:
-                        widget.meetingDetailsModel?.data?.meeting?.id ?? "",
-                  ).launch(
-                    context,
-                    pageRouteAnimation: PageRouteAnimation.Slide,
-                  );
-                },
-                child: SvgPicture.asset(icChat, color: Colors.white),
-              ),
-              Text(
-                translation(context).lbl_chat,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          _buildOneUIControlButton(
+            icon: icChat,
+            label: translation(context).lbl_chat,
+            onPressed: () {
+              showMeetingChatBottomSheet(
+                context: context,
+                channelId: widget.meetingDetailsModel?.data?.meeting?.id ?? "",
+              );
+            },
+            useSvg: true,
           ),
           // Screen share button
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MaterialButton(
-                color: _isScreenSharing ? Colors.blue : const Color(0xFF3D4D55),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                onPressed: _toggleScreenSharing,
-                child: Icon(
-                  _isScreenSharing
-                      ? Icons.stop_screen_share
-                      : Icons.screen_share,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                translation(context).lbl_share,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          _buildOneUIControlButton(
+            icon: _isScreenSharing
+                ? Icons.stop_screen_share
+                : Icons.screen_share,
+            label: translation(context).lbl_share,
+            isActive: _isScreenSharing,
+            onPressed: _toggleScreenSharing,
           ),
           // End meeting button
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MaterialButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: Colors.red,
-                onPressed: _confirmEndCall,
-                child: const Icon(Icons.call_end, color: Colors.white),
-              ),
-              Text(
-                translation(context).lbl_end_meeting,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          _buildOneUIControlButton(
+            icon: Icons.call_end,
+            label: translation(context).lbl_end_meeting,
+            isEndCall: true,
+            onPressed: _confirmEndCall,
           ),
         ],
       ),
     );
   }
-  
+
+  /// One UI 8.5 style control button
+  Widget _buildOneUIControlButton({
+    required dynamic icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool useSvg = false,
+    bool isEndCall = false,
+    bool isActive = false,
+  }) {
+    final bgColor = isEndCall
+        ? const Color(0xFFFF3B30)
+        : isActive
+        ? _oneUIAccent
+        : _oneUIFloatingBg;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+          elevation: 0,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: isEndCall ? 28 : 22,
+                vertical: 14,
+              ),
+              child: useSvg
+                  ? SvgPicture.asset(
+                      icon as String,
+                      colorFilter: const ColorFilter.mode(
+                        Colors.white,
+                        BlendMode.srcIn,
+                      ),
+                      width: 24,
+                      height: 24,
+                    )
+                  : Icon(icon as IconData, color: Colors.white, size: 24),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withOpacity(0.85),
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.2,
+          ),
+        ),
+      ],
+    );
+  }
+
   /// NEW ultra-compact design for PiP/floating widget mode - icons only, no labels
   Widget _buildPipControlBar() {
     return LayoutBuilder(
@@ -4901,11 +5380,10 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         // Calculate sizes based on available width
         final availableWidth = constraints.maxWidth;
         // Use very small button size that scales with PiP window
-        final buttonSize = (availableWidth / 5).clamp(24.0, 40.0);
-        final iconSize = (buttonSize * 0.5).clamp(12.0, 20.0);
-        final spacing = (availableWidth / 20).clamp(4.0, 12.0);
-        final padding = (availableWidth / 30).clamp(2.0, 8.0);
-        
+        final buttonSize = (availableWidth / 6).clamp(20.0, 36.0);
+        final iconSize = (buttonSize * 0.5).clamp(10.0, 18.0);
+        final padding = (availableWidth / 30).clamp(2.0, 6.0);
+
         return Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(
@@ -4922,18 +5400,15 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                 icon: Icons.chat_bubble_outline,
                 color: const Color(0xFF3D4D55),
                 onPressed: () {
-                  MeetingChatScreen(
+                  showMeetingChatBottomSheet(
+                    context: context,
                     channelId:
                         widget.meetingDetailsModel?.data?.meeting?.id ?? "",
-                  ).launch(
-                    context,
-                    pageRouteAnimation: PageRouteAnimation.Slide,
                   );
                 },
                 buttonSize: buttonSize,
                 iconSize: iconSize,
               ),
-              SizedBox(width: spacing),
               // Screen share button - icon only
               _buildPipIconButton(
                 icon: _isScreenSharing
@@ -4944,7 +5419,6 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                 buttonSize: buttonSize,
                 iconSize: iconSize,
               ),
-              SizedBox(width: spacing),
               // End meeting button - icon only
               _buildPipIconButton(
                 icon: Icons.call_end,
@@ -4959,7 +5433,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
       },
     );
   }
-  
+
   /// Ultra-compact icon-only button for PiP mode
   Widget _buildPipIconButton({
     required IconData icon,
@@ -4979,11 +5453,7 @@ class _VideoCallScreenState extends State<VideoCallScreen>
           borderRadius: BorderRadius.circular(buttonSize / 3),
         ),
         onPressed: onPressed,
-        child: Icon(
-          icon,
-          color: Colors.white,
-          size: iconSize,
-        ),
+        child: Icon(icon, color: Colors.white, size: iconSize),
       ),
     );
   }
@@ -4991,6 +5461,38 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   // --------------------
   // Audio & Video Toggle Functions
   // --------------------
+
+  /// Toggle hand raise status and notify other users via API
+  Future<void> _toggleHandRaise() async {
+    try {
+      final newHandState = !_isHandRaised;
+      setState(() => _isHandRaised = newHandState);
+
+      // Call API with action="hand" to notify other users
+      await changeMeetingStatus(
+        context,
+        widget.meetingDetailsModel?.data?.meeting?.id,
+        AppData.logInUserId,
+        'hand', // action for hand raise
+        newHandState,
+      ).then((resp) {
+        debugPrint("Change hand status response: ${resp}");
+
+        if (newHandState) {
+          _showSystemMessage('Hand raised');
+        } else {
+          _showSystemMessage('Hand lowered');
+        }
+      });
+    } catch (e) {
+      debugPrint('Error toggling hand raise: $e');
+      // Revert the state if there was an error
+      if (mounted) {
+        setState(() => _isHandRaised = !_isHandRaised);
+      }
+    }
+  }
+
   Future<void> _toggleAudio() async {
     if (widget.meetingDetailsModel?.data?.settings?.toggleMicrophone == 1 ||
         widget.isHost == true) {
@@ -5024,31 +5526,78 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   Future<void> _toggleVideo() async {
     if (widget.meetingDetailsModel?.data?.settings?.toggleVideo == 1 ||
         widget.isHost == true) {
-      setState(() => _isLocalVideoEnabled = !_isLocalVideoEnabled);
-      await _agoraEngine.muteLocalVideoStream(!_isLocalVideoEnabled);
-      await _agoraEngine.enableLocalVideo(_isLocalVideoEnabled);
+      // Safety check - make sure we're joined before manipulating video
+      if (!_isJoined) {
+        debugPrint('Cannot toggle video - not joined to channel yet');
+        return;
+      }
 
-      // Update meeting status
-      await changeMeetingStatus(
-        context,
-        widget.meetingDetailsModel?.data?.meeting?.id,
-        AppData.logInUserId,
-        'cam',
-        _isLocalVideoEnabled,
-      ).then((resp) {
-        debugPrint("Change cam status response: ${resp}");
+      // Don't toggle camera while screen sharing - need to stop screen share first
+      if (_isScreenSharing) {
+        _showSystemMessage('Stop screen sharing first to enable camera');
+        return;
+      }
 
-        // Update local model to stay in sync
-        final currentUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
-          (user) => user.id == AppData.logInUserId,
-          orElse: () => Users(),
+      try {
+        final newVideoState = !_isLocalVideoEnabled;
+        setState(() => _isLocalVideoEnabled = newVideoState);
+
+        // CRITICAL: Update channel media options to publish/unpublish camera track
+        // This is what makes the video visible to remote users!
+        await _agoraEngine.updateChannelMediaOptions(
+          ChannelMediaOptions(
+            publishCameraTrack: newVideoState,
+            publishMicrophoneTrack: true,
+            autoSubscribeAudio: true,
+            autoSubscribeVideo: true,
+            clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          ),
         );
-        if (currentUser?.meetingDetails?.isNotEmpty ?? false) {
-          currentUser!.meetingDetails!.single.isVideoOn = _isLocalVideoEnabled
-              ? 1
-              : 0;
+
+        // Enable/disable local video
+        await _agoraEngine.enableLocalVideo(newVideoState);
+        await _agoraEngine.muteLocalVideoStream(!newVideoState);
+
+        // Start or stop preview based on video state
+        if (newVideoState) {
+          await _agoraEngine.startPreview();
+          debugPrint('📹 Camera enabled - track published to remote users');
+        } else {
+          await _agoraEngine.stopPreview();
+          debugPrint(
+            '📹 Camera disabled - track unpublished from remote users',
+          );
         }
-      });
+
+        // Update meeting status to sync with remote users via API
+        await changeMeetingStatus(
+          context,
+          widget.meetingDetailsModel?.data?.meeting?.id,
+          AppData.logInUserId,
+          'cam',
+          newVideoState,
+        ).then((resp) {
+          debugPrint("Change cam status response: ${resp}");
+
+          // Update local model to stay in sync
+          final currentUser = widget.meetingDetailsModel?.data?.users
+              ?.firstWhere(
+                (user) => user.id == AppData.logInUserId,
+                orElse: () => Users(),
+              );
+          if (currentUser?.meetingDetails?.isNotEmpty ?? false) {
+            currentUser!.meetingDetails!.single.isVideoOn = newVideoState
+                ? 1
+                : 0;
+          }
+        });
+      } catch (e) {
+        debugPrint('Error toggling video: $e');
+        // Revert the state if there was an error
+        if (mounted) {
+          setState(() => _isLocalVideoEnabled = !_isLocalVideoEnabled);
+        }
+      }
     } else {
       _showSystemMessage("You don't have permission to enable video");
     }
@@ -5061,25 +5610,101 @@ class _VideoCallScreenState extends State<VideoCallScreen>
 
   // End call confirmation dialog
   void _confirmEndCall() {
+    final theme = OneUITheme.of(context);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Meeting"),
-        content: Text(translation(context).msg_confirm_end_call),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(translation(context).lbl_cancel),
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: theme.cardBackground,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close dialog first
-              await _endMeetingProperly();
-            },
-            child: const Text(
-              'End meeting',
-              style: TextStyle(color: Colors.red),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: theme.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.call_end_rounded, color: theme.error, size: 22),
             ),
+            const SizedBox(width: 12),
+            Text(
+              translation(context).lbl_meeting,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          translation(context).msg_confirm_end_call,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            color: theme.textSecondary,
+            height: 1.4,
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: theme.border),
+                    ),
+                  ),
+                  child: Text(
+                    translation(context).lbl_cancel,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(dialogContext); // Close dialog first
+                    await _endMeetingProperly();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.error,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    translation(context).lbl_end_meeting,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -5090,12 +5715,34 @@ class _VideoCallScreenState extends State<VideoCallScreen>
   void dispose() {
     // Remove lifecycle observer
     WidgetsBinding.instance.removeObserver(this);
-    
-    // Disable PiP when disposing
-    _pipService.disablePiP();
+
+    // Cancel PiP delay timer
+    _pipDelayTimer?.cancel();
+    _pipDelayTimer = null;
+
+    // Cancel PiP status subscription safely
+    try {
+      _pipStatusSubscription?.cancel();
+      _pipStatusSubscription = null;
+    } catch (e) {
+      debugPrint('VideoCallScreen: Error cancelling PiP subscription: $e');
+    }
+
+    // Notify PiP service that meeting has ended
+    try {
+      _pipService.disablePiP();
+    } catch (e) {
+      debugPrint('VideoCallScreen: Error disabling PiP: $e');
+    }
+
+    // Clear screen share config for iOS
+    if (Platform.isIOS) {
+      _screenShareService.clearChannelConfig();
+    }
 
     // Clean up all timers
     _callTimer?.cancel();
+    _callDurationNotifier.dispose();
     _meetingRefreshDebouncer?.cancel();
     _localUserSpeakingTimer?.cancel();
     _speakingTimers.forEach((_, timer) => timer.cancel());

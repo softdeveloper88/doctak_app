@@ -1,7 +1,6 @@
-import 'package:doctak_app/core/utils/image_constant.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sizer/sizer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
@@ -17,8 +16,8 @@ class ProfileHeaderWidget extends StatelessWidget {
     Key? key,
     required this.profilePicUrl,
     required this.userName,
-     this.createdAt,
-     this.specialty,
+    this.createdAt,
+    this.specialty,
     required this.onProfileTap,
     required this.onDeleteTap,
     required this.isCurrentUser,
@@ -26,8 +25,10 @@ class ProfileHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -37,21 +38,20 @@ class ProfileHeaderWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Row(
                 children: [
-                  // Modern Profile Picture
+                  // One UI 8.5 Profile Picture
                   Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.blue.withOpacity(0.2),
-                        width: 2,
-                      ),
+                      border: Border.all(color: theme.avatarBorder, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.blue.withOpacity(0.1),
+                          color: theme.primary.withOpacity(
+                            theme.isDark ? 0.2 : 0.1,
+                          ),
                           spreadRadius: 1,
-                          blurRadius: 4,
+                          blurRadius: 6,
                           offset: const Offset(0, 2),
                         ),
                       ],
@@ -65,21 +65,22 @@ class ProfileHeaderWidget extends StatelessWidget {
                               width: 48,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Colors.blue[50],
+                                color: theme.avatarBackground,
                                 child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: Colors.blue[400],
-                                    strokeWidth: 2,
+                                  child: CupertinoActivityIndicator(
+                                    color: theme.primary,
                                   ),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: Colors.blue[50],
+                                color: theme.avatarBackground,
                                 child: Center(
                                   child: Text(
-                                    userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                    userName.isNotEmpty
+                                        ? userName[0].toUpperCase()
+                                        : 'U',
                                     style: TextStyle(
-                                      color: Colors.blue[700],
+                                      color: theme.avatarText,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Poppins',
@@ -89,12 +90,14 @@ class ProfileHeaderWidget extends StatelessWidget {
                               ),
                             )
                           : Container(
-                              color: Colors.blue[50],
+                              color: theme.avatarBackground,
                               child: Center(
                                 child: Text(
-                                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                  userName.isNotEmpty
+                                      ? userName[0].toUpperCase()
+                                      : 'U',
                                   style: TextStyle(
-                                    color: Colors.blue[700],
+                                    color: theme.avatarText,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'Poppins',
@@ -105,13 +108,13 @@ class ProfileHeaderWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // User Info
+                  // User Info with One UI 8.5 styling
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // Name and Verification
+                        // Name and Verification Badge
                         Row(
                           children: [
                             Flexible(
@@ -119,23 +122,37 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 userName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 15,
                                   fontFamily: 'Poppins',
-                                  color: Colors.black87,
+                                  color: theme.textPrimary,
+                                  letterSpacing: -0.2,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 6),
+                            // One UI 8.5 Verification Badge
                             Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                color: Colors.blue,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    theme.verifiedBadge,
+                                    theme.verifiedBadge.withOpacity(0.8),
+                                  ],
+                                ),
                                 shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.verifiedBadge.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
                               ),
                               child: const Icon(
-                                Icons.check,
+                                CupertinoIcons.checkmark_alt,
                                 size: 10,
                                 color: Colors.white,
                               ),
@@ -148,9 +165,9 @@ class ProfileHeaderWidget extends StatelessWidget {
                           Row(
                             children: [
                               Icon(
-                                Icons.medical_services_outlined,
+                                CupertinoIcons.heart_circle,
                                 size: 14,
-                                color: Colors.grey[600],
+                                color: theme.textSecondary,
                               ),
                               const SizedBox(width: 6),
                               Flexible(
@@ -161,7 +178,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.grey[600],
+                                    color: theme.textSecondary,
                                     fontFamily: 'Poppins',
                                   ),
                                 ),
@@ -171,29 +188,36 @@ class ProfileHeaderWidget extends StatelessWidget {
                         else
                           Row(
                             children: [
+                              Icon(
+                                CupertinoIcons.time,
+                                size: 12,
+                                color: theme.textSecondary,
+                              ),
+                              const SizedBox(width: 4),
                               Text(
                                 createdAt ?? '',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: theme.textSecondary,
                                   fontFamily: 'Poppins',
                                 ),
                               ),
-                              if (createdAt != null && createdAt!.isNotEmpty) ...[  
-                                const SizedBox(width: 4),
+                              if (createdAt != null &&
+                                  createdAt!.isNotEmpty) ...[
+                                const SizedBox(width: 6),
                                 Container(
                                   width: 3,
                                   height: 3,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[400],
+                                    color: theme.textSecondary,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 6),
                                 Icon(
-                                  Icons.public_rounded,
+                                  CupertinoIcons.globe,
                                   size: 12,
-                                  color: Colors.grey[600],
+                                  color: theme.textSecondary,
                                 ),
                               ],
                             ],
@@ -205,38 +229,40 @@ class ProfileHeaderWidget extends StatelessWidget {
               ),
             ),
           ),
-          // More Options Button
+          // One UI 8.5 More Options Button
           if (isCurrentUser)
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: theme.moreButtonBg,
                 shape: BoxShape.circle,
               ),
               child: PopupMenuButton<String>(
                 icon: Icon(
-                  Icons.more_vert_rounded,
-                  color: Colors.grey[700],
-                  size: 20,
+                  CupertinoIcons.ellipsis_vertical,
+                  color: theme.iconColor,
+                  size: 18,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 4,
+                color: theme.cardBackground,
+                elevation: 8,
+                shadowColor: Colors.black.withOpacity(0.2),
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: 'Delete',
                     child: Row(
                       children: [
                         Icon(
-                          Icons.delete_outline_rounded,
-                          color: Colors.red[600],
+                          CupertinoIcons.trash,
+                          color: theme.deleteRed,
                           size: 20,
                         ),
                         const SizedBox(width: 12),
                         Text(
                           'Delete',
                           style: TextStyle(
-                            color: Colors.red[600],
+                            color: theme.deleteRed,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
                           ),

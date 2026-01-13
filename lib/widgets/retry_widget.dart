@@ -1,8 +1,7 @@
 // retry_widget.dart
-import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/material.dart';
 
 class RetryWidget extends StatelessWidget {
   final String errorMessage;
@@ -16,6 +15,8 @@ class RetryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -24,58 +25,42 @@ class RetryWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.redAccent,
-              size: 64,
-            ),
+            Icon(Icons.error_outline, color: theme.error, size: 64),
             const SizedBox(height: 16),
             Text(
               errorMessage,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
-                color: Colors.redAccent,
+                color: theme.error,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            MaterialButton(
+            FilledButton(
               onPressed: onRetry,
-              color: appButtonBackgroundColorGlobal,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 36,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                elevation: 0,
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 36,
-                vertical: 12,
-              ),
-              elevation: 5,
               child: Text(
                 translation(context).lbl_retry,
                 style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            // GestureDetector(
-            //   onTap: () {
-            //     // launchUrl(Url'https://example.com/help'); // Navigate to a help page
-            //   },
-            //   child: Text(
-            //     'Need Help?',
-            //     style: TextStyle(
-            //       color: Colors.blueAccent,
-            //       fontSize: 14,
-            //       decoration: TextDecoration.underline,
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),

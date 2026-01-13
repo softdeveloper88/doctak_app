@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/base_button.dart';
+import 'package:flutter/material.dart';
 
+/// OneUI 8.5 styled elevated button
 class CustomElevatedButton extends BaseButton {
   const CustomElevatedButton({
     super.key,
@@ -18,52 +19,69 @@ class CustomElevatedButton extends BaseButton {
     double? width,
     required String text,
   }) : super(
-          text: text,
-          onPressed: onPressed,
-          buttonStyle: buttonStyle,
-          isDisabled: isDisabled,
-          buttonTextStyle: buttonTextStyle,
-          height: height,
-          width: width,
-          alignment: alignment,
-          margin: margin,
-        );
+         text: text,
+         onPressed: onPressed,
+         buttonStyle: buttonStyle,
+         isDisabled: isDisabled,
+         buttonTextStyle: buttonTextStyle,
+         height: height,
+         width: width,
+         alignment: alignment,
+         margin: margin,
+       );
 
   final BoxDecoration? decoration;
-
   final Widget? leftIcon;
-
   final Widget? rightIcon;
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return alignment != null
         ? Align(
             alignment: alignment ?? Alignment.center,
-            child: buildElevatedButtonWidget,
+            child: _buildButton(context, theme),
           )
-        : buildElevatedButtonWidget;
+        : _buildButton(context, theme);
   }
 
-  Widget get buildElevatedButtonWidget => Container(
-        height: height ?? 56,
-        width: width ?? double.maxFinite,
-        margin: margin,
-        decoration: decoration,
-        child: ElevatedButton(
-          onPressed: isDisabled ?? false ? null : onPressed ?? () {},
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              leftIcon ?? const SizedBox.shrink(),
-              Text(
-                text,
-                style: buttonTextStyle ?? CustomTextStyles.titleMediumWhiteA700,
+  Widget _buildButton(BuildContext context, OneUITheme theme) {
+    return Container(
+      height: height ?? 52,
+      width: width ?? double.maxFinite,
+      margin: margin,
+      decoration: decoration,
+      child: FilledButton(
+        onPressed: isDisabled ?? false ? null : onPressed ?? () {},
+        style:
+            buttonStyle ??
+            FilledButton.styleFrom(
+              backgroundColor: theme.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: theme.surfaceVariant,
+              disabledForegroundColor: theme.textTertiary,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(26),
               ),
-              rightIcon ?? const SizedBox.shrink(),
-            ],
-          ),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+            ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (leftIcon != null) ...[leftIcon!, const SizedBox(width: 8)],
+            Text(
+              text,
+              style:
+                  buttonTextStyle ??
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            if (rightIcon != null) ...[const SizedBox(width: 8), rightIcon!],
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

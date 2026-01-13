@@ -1,13 +1,12 @@
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/case_discussion/models/case_discussion_models.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,8 +19,8 @@ import '../user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'bloc/notification_event.dart';
 
 class NotificationScreen extends StatefulWidget {
-  NotificationScreen(this.notificationBloc, {Key? key}) : super(key: key);
-  NotificationBloc notificationBloc;
+  const NotificationScreen(this.notificationBloc, {Key? key}) : super(key: key);
+  final NotificationBloc notificationBloc;
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -47,37 +46,32 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_notifications,
         titleIcon: Icons.notifications_rounded,
         onBackPressed: () {
-          widget.notificationBloc.add(
-            NotificationLoadPageEvent(
-              page: 1,
-            ),
-          );
+          widget.notificationBloc.add(NotificationLoadPageEvent(page: 1));
           Navigator.pop(context);
         },
         actions: [
           // Filter icon button
           IconButton(
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.filter_list_rounded,
-                color: Colors.blue[600],
+                color: theme.primary,
                 size: 14,
               ),
             ),
@@ -94,124 +88,133 @@ class _NotificationScreenState extends State<NotificationScreen> {
         children: [
           // Filter toggle buttons
           Container(
-            color: svGetScaffoldColor(),
+            color: theme.scaffoldBackground,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               height: isFilterShow ? 66 : 0,
               child: SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
                 child: isFilterShow
-                  ? Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedFilterIndex = 0;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: selectedFilterIndex == 0 
-                                    ? Colors.blue
-                                    : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      if (selectedFilterIndex == 0)
-                                        Container(
-                                          padding: const EdgeInsets.all(4),
-                                          margin: const EdgeInsets.only(right: 8),
-                                          decoration: const BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
+                    ? Container(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16.0,
+                          vertical: 8.0,
+                        ),
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: theme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedFilterIndex = 0;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: selectedFilterIndex == 0
+                                        ? theme.primary
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (selectedFilterIndex == 0)
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            margin: const EdgeInsets.only(
+                                              right: 8,
+                                            ),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.all_inclusive,
+                                              size: 14,
+                                              color: theme.primary,
+                                            ),
                                           ),
-                                          child: const Icon(
-                                            Icons.all_inclusive,
-                                            size: 14,
-                                            color: Colors.blue,
+                                        Text(
+                                          'All',
+                                          style: TextStyle(
+                                            color: selectedFilterIndex == 0
+                                                ? Colors.white
+                                                : theme.textSecondary,
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                      Text(
-                                        'All',
-                                        style: TextStyle(
-                                          color: selectedFilterIndex == 0 
-                                            ? Colors.white
-                                            : Colors.black87,
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  selectedFilterIndex = 1;
-                                });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: selectedFilterIndex == 1 
-                                    ? Colors.blue
-                                    : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      if (selectedFilterIndex == 1)
-                                        Container(
-                                          padding: const EdgeInsets.all(4),
-                                          margin: const EdgeInsets.only(right: 8),
-                                          decoration: const BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedFilterIndex = 1;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: selectedFilterIndex == 1
+                                        ? theme.primary
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (selectedFilterIndex == 1)
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            margin: const EdgeInsets.only(
+                                              right: 8,
+                                            ),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.mark_email_unread,
+                                              size: 14,
+                                              color: theme.primary,
+                                            ),
                                           ),
-                                          child: const Icon(
-                                            Icons.mark_email_unread,
-                                            size: 14,
-                                            color: Colors.blue,
+                                        Text(
+                                          'Unread',
+                                          style: TextStyle(
+                                            color: selectedFilterIndex == 1
+                                                ? Colors.white
+                                                : theme.textSecondary,
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
-                                      Text(
-                                        'Unread',
-                                        style: TextStyle(
-                                          color: selectedFilterIndex == 1 
-                                            ? Colors.white
-                                            : Colors.black87,
-                                          fontSize: 14,
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : const SizedBox(),
+                          ],
+                        ),
+                      )
+                    : const SizedBox(),
               ),
             ),
           ),
@@ -237,24 +240,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   // print(state.drugsModel.length);
                   return _buildPostList(context);
                 } else if (state is DataError) {
-                  return Center(
-                    child: Text(state.errorMessage),
-                  );
+                  return Center(child: Text(state.errorMessage));
                 } else {
-                  return Center(child: Text(translation(context).msg_notification_error));
+                  return Center(
+                    child: Text(translation(context).msg_notification_error),
+                  );
                 }
               },
             ),
           ),
-          if (widget.notificationBloc.totalNotifications > 0 && widget.notificationBloc.notificationsList.any((n) => n.isRead != 1))
+          if (widget.notificationBloc.totalNotifications > 0 &&
+              widget.notificationBloc.notificationsList.any(
+                (n) => n.isRead != 1,
+              ))
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: svGetScaffoldColor(),
+                color: theme.scaffoldBackground,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(theme.isDark ? 0.3 : 0.05),
                     offset: const Offset(0, -2),
                     blurRadius: 10,
                   ),
@@ -264,12 +270,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 onPressed: () {
                   if (widget.notificationBloc.totalNotifications > 0) {
                     widget.notificationBloc.add(
-                      NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'),
+                      NotificationLoadPageEvent(
+                        page: 1,
+                        readStatus: 'mark-read',
+                      ),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: theme.primary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
@@ -279,11 +288,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.done_all,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    const Icon(Icons.done_all, color: Colors.white, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       translation(context).lbl_mark_all_read,
@@ -298,20 +303,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
               ),
             ),
-          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
         ],
       ),
     );
   }
 
   Widget _buildPostList(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final bloc = widget.notificationBloc;
     if (bloc.notificationsList.isNotEmpty) {
       // Filter notifications based on selectedFilterIndex
-      final filteredList = selectedFilterIndex == 0 
-          ? bloc.notificationsList 
-          : bloc.notificationsList.where((notification) => notification.isRead != 1).toList();
-      
+      final filteredList = selectedFilterIndex == 0
+          ? bloc.notificationsList
+          : bloc.notificationsList
+                .where((notification) => notification.isRead != 1)
+                .toList();
+
       if (filteredList.isEmpty && selectedFilterIndex == 1) {
         // Show empty state for unread filter when no unread notifications
         return Center(
@@ -321,13 +329,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: theme.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.mark_email_read,
                   size: 48,
-                  color: Colors.blue[600],
+                  color: theme.primary,
                 ),
               ),
               const SizedBox(height: 16),
@@ -337,48 +345,55 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   fontFamily: 'Poppins',
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                 ),
               ),
             ],
           ),
         );
       }
-      
+
       return ListView.builder(
-        padding: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: MediaQuery.of(context).padding.bottom + 8),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 8,
+          bottom: MediaQuery.of(context).padding.bottom + 8,
+        ),
         itemCount: filteredList.length,
         itemBuilder: (context, index) {
           final notification = filteredList[index];
           final originalIndex = bloc.notificationsList.indexOf(notification);
-          
+
           if (bloc.pageNumber <= bloc.numberOfPage) {
-            if (originalIndex == bloc.notificationsList.length - bloc.nextPageTrigger) {
-              bloc.add(NotificationCheckIfNeedMoreDataEvent(index: originalIndex));
+            if (originalIndex ==
+                bloc.notificationsList.length - bloc.nextPageTrigger) {
+              bloc.add(
+                NotificationCheckIfNeedMoreDataEvent(index: originalIndex),
+              );
             }
           }
           if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-              index >= filteredList.length - 1 && selectedFilterIndex == 0) {
+              index >= filteredList.length - 1 &&
+              selectedFilterIndex == 0) {
             return const SizedBox(height: 200, child: NotificationShimmer());
           } else {
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: notification.isRead == 1
-                    ? (Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey[850]
-                        : Colors.white)
-                    : Colors.blue.withOpacity(0.08),
+                    ? theme.cardBackground
+                    : theme.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: notification.isRead == 1
-                      ? Colors.grey.withOpacity(0.1)
-                      : Colors.blue.withOpacity(0.2),
+                      ? theme.divider
+                      : theme.primary.withOpacity(0.2),
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withOpacity(theme.isDark ? 0.2 : 0.04),
                     offset: const Offset(0, 2),
                     blurRadius: 8,
                     spreadRadius: 0,
@@ -390,12 +405,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () {
-                    bloc.add(ReadNotificationEvent(
-                        notificationId:
-                            notification.id.toString()));
+                    bloc.add(
+                      ReadNotificationEvent(
+                        notificationId: notification.id.toString(),
+                      ),
+                    );
                     notification.isRead = 1;
-                    var typeNotification =
-                        notification.type;
+                    var typeNotification = notification.type;
                     if (typeNotification == 'message') {
                       ChatRoomScreen(
                         username:
@@ -414,23 +430,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         id: '${notification.fromUserId}',
                         roomId: '',
                       ).launch(context);
-                    } else if (typeNotification == 'discuss_case_comment_like') {
+                    } else if (typeNotification ==
+                        'discuss_case_comment_like') {
                       // CaseDiscussion().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);
                     } else if (typeNotification == 'follow_request' ||
                         typeNotification == 'friend_request' ||
                         typeNotification == 'follower_notification' ||
                         typeNotification == 'un_follower_notification') {
                       SVProfileFragment(
-                              userId:
-                                  notification.fromUserId)
-                          .launch(context);
-                    } else if (typeNotification == 'comments_on_posts' || typeNotification == 'reply_to_comment' ||
+                        userId: notification.fromUserId,
+                      ).launch(context);
+                    } else if (typeNotification == 'comments_on_posts' ||
+                        typeNotification == 'reply_to_comment' ||
                         typeNotification == 'like_comment_on_post' ||
                         typeNotification == 'like_comments') {
                       PostDetailsScreen(
-                              commentId: notification.postId
-                                  .toInt())
-                          .launch(context);
+                        commentId: notification.postId.toInt(),
+                      ).launch(context);
                       // SVCommentScreen(
                       //   id: notification.postId.toInt(), homeBloc: HomeBloc(),)
                       //     .launch(context);
@@ -439,16 +455,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         typeNotification == 'likes_on_posts' ||
                         typeNotification == 'post_liked') {
                       PostDetailsScreen(
-                              postId: notification.postId
-                                  .toInt())
-                          .launch(context);
+                        postId: notification.postId.toInt(),
+                      ).launch(context);
                     } else if (typeNotification == 'new_job_posted' ||
                         typeNotification == 'job_post_notification' ||
                         typeNotification == 'job_update') {
                       JobsDetailsScreen(
-                              jobId: notification.postId ??
-                                  '')
-                          .launch(context);
+                        jobId: notification.postId ?? '',
+                      ).launch(context);
                     }
                     // Add your onTap functionality here
                   },
@@ -462,9 +476,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             InkWell(
                               onTap: () {
                                 SVProfileFragment(
-                                        userId:
-                                            notification.fromUserId)
-                                    .launch(context);
+                                  userId: notification.fromUserId,
+                                ).launch(context);
                               },
                               borderRadius: BorderRadius.circular(25),
                               child: Container(
@@ -473,7 +486,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: Colors.blue.withOpacity(0.2),
+                                    color: theme.primary.withOpacity(0.2),
                                     width: 2,
                                   ),
                                 ),
@@ -496,7 +509,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(3),
                                 decoration: BoxDecoration(
-                                  color: _getNotificationColor(notification.type),
+                                  color: _getNotificationColor(
+                                    notification.type,
+                                  ),
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                     color: Colors.white,
@@ -521,12 +536,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               // Title
                               RichText(
                                 text: TextSpan(
-                                  text: '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''} ',
+                                  text:
+                                      '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''} ',
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
-                                    color: Theme.of(context).brightness == Brightness.dark
-                                        ? Colors.white
-                                        : Colors.black87,
+                                    color: theme.textPrimary,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -537,9 +551,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         fontFamily: 'Poppins',
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
-                                        color: Theme.of(context).brightness == Brightness.dark
-                                            ? Colors.white70
-                                            : Colors.black54,
+                                        color: theme.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -554,15 +566,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   Icon(
                                     Icons.access_time,
                                     size: 14,
-                                    color: Colors.grey[500],
+                                    color: theme.textTertiary,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    timeAgo.format(DateTime.parse(
-                                        notification.createdAt ?? "")),
+                                    timeAgo.format(
+                                      DateTime.parse(
+                                        notification.createdAt ?? "",
+                                      ),
+                                    ),
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
-                                      color: Colors.grey[500],
+                                      color: theme.textTertiary,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -575,12 +590,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
+                            color: theme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.arrow_forward_ios_rounded,
-                            color: Colors.blue[600],
+                            color: theme.primary,
                             size: 14,
                           ),
                         ),
@@ -601,13 +616,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.notifications_off_outlined,
                 size: 48,
-                color: Colors.blue[600],
+                color: theme.primary,
               ),
             ),
             const SizedBox(height: 16),
@@ -617,7 +632,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 fontFamily: 'Poppins',
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[600],
+                color: theme.textSecondary,
               ),
             ),
           ],

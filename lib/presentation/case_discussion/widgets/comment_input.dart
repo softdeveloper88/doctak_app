@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -45,18 +46,13 @@ class _CommentInputState extends State<CommentInput> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.1),
-            offset: const Offset(0, -2),
-            blurRadius: 12,
-            spreadRadius: 0,
-          ),
-        ],
+        color: theme.cardBackground,
+        boxShadow: theme.cardShadow,
       ),
       child: SafeArea(
         child: Column(
@@ -65,12 +61,12 @@ class _CommentInputState extends State<CommentInput> {
             // Comment composition area
             Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.05),
+                color: theme.inputBackground,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: widget.focusNode.hasFocus
-                      ? Colors.blue.withOpacity(0.3)
-                      : Colors.blue.withOpacity(0.1),
+                      ? theme.focusBorder
+                      : theme.inputBorder,
                   width: widget.focusNode.hasFocus ? 2 : 1,
                 ),
               ),
@@ -84,17 +80,17 @@ class _CommentInputState extends State<CommentInput> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.blue.withOpacity(0.2),
+                          color: theme.avatarBorder,
                           width: 2,
                         ),
                       ),
                       child: CircleAvatar(
                         radius: 16,
-                        backgroundColor: Colors.blue.withOpacity(0.1),
+                        backgroundColor: theme.avatarBackground,
                         child: Icon(
                           Icons.person_rounded,
                           size: 18,
-                          color: Colors.blue[600],
+                          color: theme.primary,
                         ),
                       ),
                     ),
@@ -106,15 +102,15 @@ class _CommentInputState extends State<CommentInput> {
                     child: TextField(
                       controller: widget.controller,
                       focusNode: widget.focusNode,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Poppins',
-                        color: Colors.black87,
+                        color: theme.textPrimary,
                       ),
                       decoration: InputDecoration(
                         hintText: 'Share your medical insights...',
                         hintStyle: TextStyle(
-                          color: Colors.grey[600],
+                          color: theme.textTertiary,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                         ),
@@ -143,13 +139,13 @@ class _CommentInputState extends State<CommentInput> {
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: widget.isLoading || !_hasText
-                              ? Colors.grey.withOpacity(0.3)
-                              : Colors.blue[600],
+                              ? theme.surfaceVariant
+                              : theme.primary,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: _hasText && !widget.isLoading
                               ? [
                                   BoxShadow(
-                                    color: Colors.blue.withOpacity(0.3),
+                                    color: theme.primary.withOpacity(0.3),
                                     offset: const Offset(0, 2),
                                     blurRadius: 6,
                                     spreadRadius: 0,
@@ -164,14 +160,14 @@ class _CommentInputState extends State<CommentInput> {
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.blue[800]!,
+                                    theme.buttonPrimaryText,
                                   ),
                                 ),
                               )
                             : Icon(
                                 Icons.send_rounded,
                                 size: 16,
-                                color: _hasText ? Colors.white : Colors.grey[600],
+                                color: _hasText ? theme.buttonPrimaryText : theme.textTertiary,
                               ),
                       ),
                     ),
@@ -190,7 +186,7 @@ class _CommentInputState extends State<CommentInput> {
                     Icon(
                       Icons.info_outline_rounded,
                       size: 12,
-                      color: Colors.blue[600],
+                      color: theme.primary,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
@@ -199,7 +195,7 @@ class _CommentInputState extends State<CommentInput> {
                         style: TextStyle(
                           fontSize: 11,
                           fontFamily: 'Poppins',
-                          color: Colors.blue[700],
+                          color: theme.primary,
                         ),
                       ),
                     ),

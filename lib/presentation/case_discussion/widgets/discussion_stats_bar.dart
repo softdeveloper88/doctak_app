@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
 
@@ -15,9 +16,12 @@ class DiscussionStatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     if (isLoading) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: theme.cardBackground,
         child: Row(
           children: [
             SizedBox(
@@ -25,9 +29,7 @@ class DiscussionStatsBar extends StatelessWidget {
               height: 16,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).primaryColor,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
               ),
             ),
             const SizedBox(width: 8),
@@ -35,7 +37,8 @@ class DiscussionStatsBar extends StatelessWidget {
               'Loading discussions...',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
               ),
             ),
           ],
@@ -50,12 +53,9 @@ class DiscussionStatsBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: theme.cardBackground,
         border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade200,
-            width: 1,
-          ),
+          bottom: BorderSide(color: theme.divider, width: 1),
         ),
       ),
       child: Column(
@@ -63,26 +63,23 @@ class DiscussionStatsBar extends StatelessWidget {
           // Results count and filter info
           Row(
             children: [
-              Icon(
-                Icons.analytics_outlined,
-                size: 16,
-                color: Theme.of(context).primaryColor,
-              ),
+              Icon(Icons.analytics_outlined, size: 16, color: theme.primary),
               const SizedBox(width: 8),
               Text(
                 '${discussions.length} discussions found',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).primaryColor,
+                  fontFamily: 'Poppins',
+                  color: theme.primary,
                 ),
               ),
               if (_hasActiveFilters()) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                    color: theme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -90,26 +87,26 @@ class DiscussionStatsBar extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w500,
-                      color: Theme.of(context).primaryColor,
+                      fontFamily: 'Poppins',
+                      color: theme.primary,
                     ),
                   ),
                 ),
               ],
               const Spacer(),
-              // Show active specialty/country info
               if (currentFilters.selectedSpecialty != null) ...[
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: theme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     currentFilters.selectedSpecialty!.name,
                     style: TextStyle(
                       fontSize: 10,
-                      color: Colors.blue[700],
+                      fontFamily: 'Poppins',
+                      color: theme.primary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -129,7 +126,8 @@ class DiscussionStatsBar extends StatelessWidget {
                       currentFilters.selectedCountry!.name,
                       style: TextStyle(
                         fontSize: 10,
-                        color: Colors.grey[600],
+                        fontFamily: 'Poppins',
+                        color: theme.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -139,29 +137,27 @@ class DiscussionStatsBar extends StatelessWidget {
               ],
               if (discussions.isNotEmpty)
                 PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_vert,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
+                  icon: Icon(Icons.more_vert, size: 16, color: theme.iconColor),
+                  color: theme.cardBackground,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'export',
                       child: Row(
                         children: [
-                          Icon(Icons.download, size: 16),
-                          SizedBox(width: 8),
-                          Text('Export Results'),
+                          Icon(Icons.download, size: 16, color: theme.textPrimary),
+                          const SizedBox(width: 8),
+                          Text('Export Results', style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins')),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'share',
                       child: Row(
                         children: [
-                          Icon(Icons.share, size: 16),
-                          SizedBox(width: 8),
-                          Text('Share Filters'),
+                          Icon(Icons.share, size: 16, color: theme.textPrimary),
+                          const SizedBox(width: 8),
+                          Text('Share Filters', style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins')),
                         ],
                       ),
                     ),
@@ -189,26 +185,29 @@ class DiscussionStatsBar extends StatelessWidget {
                   icon: Icons.thumb_up_outlined,
                   label: 'Total Likes',
                   value: _formatNumber(totalLikes),
-                  color: Colors.blue,
+                  color: theme.primary,
+                  theme: theme,
                 ),
                 const SizedBox(width: 16),
                 _buildStatItem(
                   icon: Icons.comment_outlined,
                   label: 'Total Comments',
                   value: _formatNumber(totalComments),
-                  color: Colors.green,
+                  color: theme.success,
+                  theme: theme,
                 ),
                 const SizedBox(width: 16),
                 _buildStatItem(
                   icon: Icons.visibility_outlined,
                   label: 'Total Views',
                   value: _formatNumber(totalViews),
-                  color: Colors.orange,
+                  color: theme.warning,
+                  theme: theme,
                 ),
                 const Spacer(),
                 if (_hasActiveFilters())
                   TextButton(
-                    onPressed: () => _showFilterSummary(context),
+                    onPressed: () => _showFilterSummary(context, theme),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       minimumSize: Size.zero,
@@ -217,7 +216,8 @@ class DiscussionStatsBar extends StatelessWidget {
                       'View Filters',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).primaryColor,
+                        fontFamily: 'Poppins',
+                        color: theme.primary,
                       ),
                     ),
                   ),
@@ -234,14 +234,11 @@ class DiscussionStatsBar extends StatelessWidget {
     required String label,
     required String value,
     required Color color,
+    required OneUITheme theme,
   }) {
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: color,
-        ),
+        Icon(icon, size: 14, color: color),
         const SizedBox(width: 4),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,6 +248,7 @@ class DiscussionStatsBar extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
                 color: color,
               ),
             ),
@@ -258,7 +256,8 @@ class DiscussionStatsBar extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.grey[600],
+                fontFamily: 'Poppins',
+                color: theme.textTertiary,
               ),
             ),
           ],
@@ -287,52 +286,60 @@ class DiscussionStatsBar extends StatelessWidget {
 
   void _exportResults(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Export functionality will be implemented'),
-      ),
+      const SnackBar(content: Text('Export functionality will be implemented')),
     );
   }
 
   void _shareFilters(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Share filters functionality will be implemented'),
-      ),
+      const SnackBar(content: Text('Share filters functionality will be implemented')),
     );
   }
 
-  void _showFilterSummary(BuildContext context) {
+  void _showFilterSummary(BuildContext context, OneUITheme theme) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Active Filters'),
+        backgroundColor: theme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Active Filters',
+          style: TextStyle(
+            color: theme.textPrimary,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (currentFilters.searchQuery != null && currentFilters.searchQuery!.isNotEmpty)
-              _buildFilterItem('Search', currentFilters.searchQuery!),
+              _buildFilterItem('Search', currentFilters.searchQuery!, theme),
             if (currentFilters.selectedSpecialty != null)
-              _buildFilterItem('Specialty', currentFilters.selectedSpecialty!.name),
+              _buildFilterItem('Specialty', currentFilters.selectedSpecialty!.name, theme),
             if (currentFilters.selectedCountry != null)
-              _buildFilterItem('Country', '${currentFilters.selectedCountry!.flag} ${currentFilters.selectedCountry!.name}'),
+              _buildFilterItem('Country', '${currentFilters.selectedCountry!.flag} ${currentFilters.selectedCountry!.name}', theme),
             if (currentFilters.status != null)
-              _buildFilterItem('Status', currentFilters.status!.value.toUpperCase()),
+              _buildFilterItem('Status', currentFilters.status!.value.toUpperCase(), theme),
             if (currentFilters.sortBy != null)
-              _buildFilterItem('Sort', '${currentFilters.sortBy} (${currentFilters.sortOrder ?? 'desc'})'),
+              _buildFilterItem('Sort', '${currentFilters.sortBy} (${currentFilters.sortOrder ?? 'desc'})', theme),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(
+              'Close',
+              style: TextStyle(color: theme.primary, fontFamily: 'Poppins'),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterItem(String label, String value) {
+  Widget _buildFilterItem(String label, String value, OneUITheme theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -342,16 +349,22 @@ class DiscussionStatsBar extends StatelessWidget {
             width: 80,
             child: Text(
               '$label:',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
+                fontFamily: 'Poppins',
+                color: theme.textPrimary,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 14),
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+              ),
             ),
           ),
         ],

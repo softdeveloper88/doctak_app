@@ -16,6 +16,7 @@ import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/component
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/gestures.dart';
@@ -38,12 +39,13 @@ import 'package:video_player/video_player.dart';
 import '../../calling_module/screens/call_screen.dart';
 import '../../calling_module/utils/start_outgoing_call.dart';
 import '../../home_screen/home/screens/meeting_screen/video_api.dart';
-import '../../home_screen/utils/SVColors.dart';
 import 'call_loading_screen.dart';
 import 'component/chat_bubble.dart';
 import 'component/optimized_message_list.dart';
 import 'component/chat_input_field.dart';
 import 'component/whatsapp_voice_recorder.dart';
+import 'component/enhanced_chat_input_field.dart';
+import 'component/animated_voice_recorder.dart';
 import 'component/audio_cache_manager.dart';
 import 'component/attachment_bottom_sheet.dart';
 import 'component/attachment_preview_screen.dart';
@@ -109,7 +111,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   @override
   void dispose() {
     // Ensure we don't leak global pointer routes.
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(
+      _handleGlobalPointerEvent,
+    );
     _timer?.cancel();
     _ampTimer?.cancel();
     _timerChat?.cancel();
@@ -133,28 +137,30 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     super.initState();
     // Capture finger release globally while recording.
     // This fixes cases where the mic button widget is replaced before it receives onLongPressEnd.
-    GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(
+      _handleGlobalPointerEvent,
+    );
     setStatusBarColor(svGetScaffoldColor());
     _scrollController.addListener(_checkScrollPosition);
     _initRecorder();
     // Handle completion
     // seenSenderMessage(1);
     _isRecording = false;
-    chatBloc.add(LoadRoomMessageEvent(
+    chatBloc.add(
+      LoadRoomMessageEvent(
         page: 1,
         userId: widget.id,
         roomId: widget.roomId,
-        isFirstLoading: isDataLoaded));
-    chatBloc.add(ChatReadStatusEvent(
-      userId: widget.id,
-      roomId: widget.roomId,
-    ));
+        isFirstLoading: isDataLoaded,
+      ),
+    );
+    chatBloc.add(ChatReadStatusEvent(userId: widget.id, roomId: widget.roomId));
     ConnectPusher();
     print("my id ${AppData.logInUserId}");
     print("sender id ${widget.id}");
     print("room id ${widget.roomId}");
     _startTimerForChat();
-    
+
     // Clean old cache files on startup
     _cleanOldAudioCache();
 
@@ -177,7 +183,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
     }
   }
-  
+
   Future<void> _cleanOldAudioCache() async {
     try {
       final cacheManager = AudioCacheManager();
@@ -221,7 +227,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
 
       final tempDir = await getTemporaryDirectory();
-      _recordingPath = '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _recordingPath =
+          '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       await _audioRecorder.start(
         const RecordConfig(
@@ -249,13 +256,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
     debugPrint(_recordingPath);
     setState(() => _isRecording = false);
-    chatBloc.add(SendMessageEvent(
+    chatBloc.add(
+      SendMessageEvent(
         userId: AppData.logInUserId,
         roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
         receiverId: widget.id,
         attachmentType: 'voice',
         file: _recordingPath,
-        message: ''));
+        message: '',
+      ),
+    );
     scrollToBottom();
   }
 
@@ -329,18 +339,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // Create the Pusher client
     try {
       await pusher.init(
-          apiKey: PusherConfig.key,
-          cluster: PusherConfig.cluster,
-          useTLS: false,
-          onSubscriptionSucceeded: onSubscriptionSucceeded,
-          onSubscriptionError: onSubscriptionError,
-          onMemberAdded: onMemberAdded,
-          onMemberRemoved: onMemberRemoved,
-          onEvent: onEvent,
-          onDecryptionFailure: onDecryptionFailure,
-          onError: onError,
-          onSubscriptionCount: onSubscriptionCount,
-          onAuthorizer: onAuthorizer);
+        apiKey: PusherConfig.key,
+        cluster: PusherConfig.cluster,
+        useTLS: false,
+        onSubscriptionSucceeded: onSubscriptionSucceeded,
+        onSubscriptionError: onSubscriptionError,
+        onMemberAdded: onMemberAdded,
+        onMemberRemoved: onMemberRemoved,
+        onEvent: onEvent,
+        onDecryptionFailure: onDecryptionFailure,
+        onError: onError,
+        onSubscriptionCount: onSubscriptionCount,
+        onAuthorizer: onAuthorizer,
+      );
 
       pusher.connect();
 
@@ -386,10 +397,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   final messageDiv = document.querySelector('.message');
                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
 
-// Split the textMessageWithTime by the "time ago" portion
+                  // Split the textMessageWithTime by the "time ago" portion
                   final parts = textMessageWithTime.split('1 second ago');
-                  textMessage =
-                      parts.first.trim(); // Take the first part (the message)
+                  textMessage = parts.first
+                      .trim(); // Take the first part (the message)
                 }
                 if (status == "api") {
                   var message = messageData['message'];
@@ -420,37 +431,37 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               // case 'client-seen':
               // var textMessage = "";
               // var messageData = event.data;
-//                 messageData = json.decode(messageData);
-//                 var status = messageData['status'];
-//                 if (status == "web") {
-//                   final htmlMessage = event.data;
-//                   var message = json.decode(htmlMessage);
-//
-//                   // Use the html package to parse the HTML and extract text content
-//                   final document = htmlParser.parse(message['message']);
-//
-//                   final messageDiv = document.querySelector('.message');
-//                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
-//
-// // Split the textMessageWithTime by the "time ago" portion
-//                   final parts = textMessageWithTime.split('1 second ago');
-//                   textMessage =
-//                       parts.first.trim(); // Take the first part (the message)
-//
-//                 }
-//                 if (status == "api") {
-//                   var message = messageData['message'];
-//
-//                   textMessage = message['message'];
-//                   print(textMessage);
-//
-//                 }
-//                 print(textMessage);
-//                 // setState(() {
-//                 typingTimer = Timer(const Duration(seconds: 2), () {
-//                   chatBloc.add(ChatReadStatusEvent(
-//                       userId: widget.id,
-//                       roomId: widget.roomId,));
+              //                 messageData = json.decode(messageData);
+              //                 var status = messageData['status'];
+              //                 if (status == "web") {
+              //                   final htmlMessage = event.data;
+              //                   var message = json.decode(htmlMessage);
+              //
+              //                   // Use the html package to parse the HTML and extract text content
+              //                   final document = htmlParser.parse(message['message']);
+              //
+              //                   final messageDiv = document.querySelector('.message');
+              //                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
+              //
+              // // Split the textMessageWithTime by the "time ago" portion
+              //                   final parts = textMessageWithTime.split('1 second ago');
+              //                   textMessage =
+              //                       parts.first.trim(); // Take the first part (the message)
+              //
+              //                 }
+              //                 if (status == "api") {
+              //                   var message = messageData['message'];
+              //
+              //                   textMessage = message['message'];
+              //                   print(textMessage);
+              //
+              //                 }
+              //                 print(textMessage);
+              //                 // setState(() {
+              //                 typingTimer = Timer(const Duration(seconds: 2), () {
+              //                   chatBloc.add(ChatReadStatusEvent(
+              //                       userId: widget.id,
+              //                       roomId: widget.roomId,));
               // chatBloc.add(LoadRoomMessageEvent(
               //     page: 0, userId: widget.id, roomId: widget.roomId));
               // });
@@ -606,7 +617,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   void onTextFieldFocused(bool typingStatus) async {
     String eventName = "client-typing"; // Replace with your event name
-// String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
+    // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
     Map<String, dynamic> eventData = {
       "from_id": AppData.logInUserId,
       "to_id": widget.id,
@@ -633,7 +644,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   void seenSenderMessage(int seenStatus) async {
     String eventName = "client-seen"; // Replace with your event name
-// String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
+    // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
     Map<String, dynamic> eventData = {
       "from_id": AppData.logInUserId,
       "to_id": widget.id,
@@ -654,123 +665,124 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       print(e);
     }
   }
-// Complete implementation of the startOutgoingCall function
-//   Future<void> startOutgoingCall(String userId, String username, String profilePic, bool isVideoCall) async {
-//     // Show calling screen immediately
-//     NavigatorService.navigatorKey.currentState?.push(
-//       MaterialPageRoute(
-//         builder: (context) => CallLoadingScreen(
-//           contactName: username,
-//           contactAvatar: "${AppData.imageUrl}$profilePic",
-//           isVideoCall: isVideoCall,
-//           onCancel: () {
-//             // Pop the loading screen
-//             Navigator.of(context).pop();
-//             // Cancel any pending call setup
-//             CallKitService().endAllCalls();
-//           },
-//         ),
-//       ),
-//     );
-//
-//     try {
-//       // Initialize call in the background with proper error handling
-//       Map<String, dynamic> callData;
-//
-//       try {
-//         final response = await CallKitService().startOutgoingCall(
-//             userId: userId,
-//             calleeName: username,
-//             avatar: "${AppData.imageUrl}$profilePic",
-//             hasVideo: isVideoCall
-//         );
-//
-//         // Ensure we have proper Map<String, dynamic>
-//         if (response is Map<String, dynamic>) {
-//           callData = response;
-//         } else {
-//           // Convert to Map<String, dynamic> if needed
-//           callData = {};
-//           if (response is Map) {
-//             response.forEach((key, value) {
-//               if (key is String) {
-//                 callData[key] = value;
-//               }
-//             });
-//           } else {
-//             throw Exception('Invalid response format from CallKitService');
-//           }
-//         }
-//       } catch (e) {
-//         print('Error calling CallKitService.startOutgoingCall: $e');
-//         throw e;
-//       }
-//
-//       // Handle success - replace loading screen with call screen
-//       if (callData['success'] == true &&
-//           callData['callId'] != null &&
-//           NavigatorService.navigatorKey.currentState != null) {
-//
-//         final callId = callData['callId'].toString();
-//
-//         // Verify call was created successfully by checking with the API
-//         bool isCallActive = true;
-//         try {
-//           isCallActive = await CallKitService().checkCallIsActive(callId);
-//         } catch (e) {
-//           print('Error verifying call is active: $e');
-//           // Continue anyway since we just created it
-//         }
-//
-//         if (!isCallActive) {
-//           // This is unusual - the call we just created isn't active
-//           print('Call API reports call not active immediately after creation');
-//           NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
-//           _showCallError("Could not establish call. Please try again.");
-//           return;
-//         }
-//
-//         NavigatorService.navigatorKey.currentState!.pushReplacement(
-//           MaterialPageRoute(
-//             settings: const RouteSettings(name: '/call'),
-//             builder: (context) => CallScreen(
-//               callId: callId,
-//               contactId: userId,
-//               contactName: username,
-//               contactAvatar: "${AppData.imageUrl}$profilePic",
-//               isIncoming: false,
-//               isVideoCall: isVideoCall,
-//               token: callData['token']?.toString() ?? '',
-//             ),
-//           ),
-//         );
-//       } else {
-//         // Handle API error
-//         NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
-//         _showCallError("Failed to establish call. Please try again.");
-//       }
-//     } catch (error) {
-//       print('Error starting outgoing call: $error');
-//
-//       NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
-//       _showCallError("Error starting call. Please try again.");
-//
-//       // Make sure any partial call state is cleaned up
-//       try {
-//         await CallKitService().endAllCalls();
-//       } catch (e) {
-//         print('Error cleaning up after failed call: $e');
-//       }
-//     }
-//   }
+  // Complete implementation of the startOutgoingCall function
+  //   Future<void> startOutgoingCall(String userId, String username, String profilePic, bool isVideoCall) async {
+  //     // Show calling screen immediately
+  //     NavigatorService.navigatorKey.currentState?.push(
+  //       MaterialPageRoute(
+  //         builder: (context) => CallLoadingScreen(
+  //           contactName: username,
+  //           contactAvatar: "${AppData.imageUrl}$profilePic",
+  //           isVideoCall: isVideoCall,
+  //           onCancel: () {
+  //             // Pop the loading screen
+  //             Navigator.of(context).pop();
+  //             // Cancel any pending call setup
+  //             CallKitService().endAllCalls();
+  //           },
+  //         ),
+  //       ),
+  //     );
+  //
+  //     try {
+  //       // Initialize call in the background with proper error handling
+  //       Map<String, dynamic> callData;
+  //
+  //       try {
+  //         final response = await CallKitService().startOutgoingCall(
+  //             userId: userId,
+  //             calleeName: username,
+  //             avatar: "${AppData.imageUrl}$profilePic",
+  //             hasVideo: isVideoCall
+  //         );
+  //
+  //         // Ensure we have proper Map<String, dynamic>
+  //         if (response is Map<String, dynamic>) {
+  //           callData = response;
+  //         } else {
+  //           // Convert to Map<String, dynamic> if needed
+  //           callData = {};
+  //           if (response is Map) {
+  //             response.forEach((key, value) {
+  //               if (key is String) {
+  //                 callData[key] = value;
+  //               }
+  //             });
+  //           } else {
+  //             throw Exception('Invalid response format from CallKitService');
+  //           }
+  //         }
+  //       } catch (e) {
+  //         print('Error calling CallKitService.startOutgoingCall: $e');
+  //         throw e;
+  //       }
+  //
+  //       // Handle success - replace loading screen with call screen
+  //       if (callData['success'] == true &&
+  //           callData['callId'] != null &&
+  //           NavigatorService.navigatorKey.currentState != null) {
+  //
+  //         final callId = callData['callId'].toString();
+  //
+  //         // Verify call was created successfully by checking with the API
+  //         bool isCallActive = true;
+  //         try {
+  //           isCallActive = await CallKitService().checkCallIsActive(callId);
+  //         } catch (e) {
+  //           print('Error verifying call is active: $e');
+  //           // Continue anyway since we just created it
+  //         }
+  //
+  //         if (!isCallActive) {
+  //           // This is unusual - the call we just created isn't active
+  //           print('Call API reports call not active immediately after creation');
+  //           NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+  //           _showCallError("Could not establish call. Please try again.");
+  //           return;
+  //         }
+  //
+  //         NavigatorService.navigatorKey.currentState!.pushReplacement(
+  //           MaterialPageRoute(
+  //             settings: const RouteSettings(name: '/call'),
+  //             builder: (context) => CallScreen(
+  //               callId: callId,
+  //               contactId: userId,
+  //               contactName: username,
+  //               contactAvatar: "${AppData.imageUrl}$profilePic",
+  //               isIncoming: false,
+  //               isVideoCall: isVideoCall,
+  //               token: callData['token']?.toString() ?? '',
+  //             ),
+  //           ),
+  //         );
+  //       } else {
+  //         // Handle API error
+  //         NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+  //         _showCallError("Failed to establish call. Please try again.");
+  //       }
+  //     } catch (error) {
+  //       print('Error starting outgoing call: $error');
+  //
+  //       NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+  //       _showCallError("Error starting call. Please try again.");
+  //
+  //       // Make sure any partial call state is cleaned up
+  //       try {
+  //         await CallKitService().endAllCalls();
+  //       } catch (e) {
+  //         print('Error cleaning up after failed call: $e');
+  //       }
+  //     }
+  //   }
 
-// Simple loading screen for calls
+  // Simple loading screen for calls
   void scrollToBottom() {
     // Future.delayed(const Duration(milliseconds: 100), () {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         0.0, // Scroll to the start of the list
-        duration: const Duration(milliseconds: 500), curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
       );
     }
     // });
@@ -778,416 +790,225 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   @override
   Widget build(BuildContext context) {
-    // final themeProvider = Provider.of<ThemeProvider>(context);
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-        backgroundColor: appStore.isDarkMode ? const Color(0xFF0A0A0A) : const Color(0xFFF8F9FA),
-        appBar: AppBar(
-          backgroundColor: svGetScaffoldColor(),
-          iconTheme: IconThemeData(color: context.iconColor),
-          elevation: 0,
-          toolbarHeight: 70,
-          surfaceTintColor: svGetScaffoldColor(),
-          centerTitle: false,
-          leading: IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: Colors.blue[600],
-                size: 16,
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            }
-          ),
-          title: InkWell(
-            onTap: () {
-              SVProfileFragment(userId: widget.id).launch(context);
-            },
-            child: Row(
+      backgroundColor: theme.scaffoldBackground,
+      appBar: _buildAppBar(context, theme),
+      body: BlocConsumer<ChatBloc, ChatState>(
+        bloc: chatBloc,
+        listener: (BuildContext context, ChatState state) {
+          if (state is DataError) {
+            showDialog(
+              context: context,
+              builder: (context) =>
+                  AlertDialog(content: Text(state.errorMessage)),
+            );
+          } else if (state is PaginationLoadedState) {
+            setState(() {
+              _isFileUploading = false;
+            });
+          } else if (state is FileUploadingState) {
+            setState(() {
+              _isFileUploading = true;
+            });
+            // Optional: Show a brief toast for file uploads
+            // showToast('Uploading file...');
+          } else if (state is FileUploadedState) {
+            setState(() {
+              _isFileUploading = false;
+            });
+          }
+        },
+        builder: (context, state) {
+          if (state is PaginationLoadingState) {
+            return ChatShimmerLoader();
+          } else if (state is PaginationLoadedState ||
+              state is FileUploadingState ||
+              state is FileUploadedState ||
+              state is DataInitial ||
+              state is PaginationInitialState) {
+            isDataLoaded = false;
+            var bloc = chatBloc;
+            return Column(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blue.withOpacity(0.1),
-                    border: Border.all(
-                      color: Colors.blue.withOpacity(0.2),
-                      width: 1.5,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: widget.profilePic == ''
-                        ? Center(
-                            child: Icon(
-                              Icons.person,
-                              color: Colors.blue[600],
-                              size: 22,
-                            ),
-                          )
-                        : CustomImageView(
-                            imagePath: '${AppData.imageUrl}${widget.profilePic.validate()}',
-                            height: 40,
-                            width: 40,
-                            fit: BoxFit.cover,
-                          ),
-                  ),
-                ),
-                const SizedBox(width: 10),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        widget.username,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins',
-                          color: Colors.blue[800],
-                        ),
-                      ),
-                      if (isSomeoneTyping && FromId == widget.id)
-                        Text(
-                          translation(context).lbl_typing,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.blue[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                    ],
+                  child: OptimizedMessageList(
+                    chatBloc: bloc,
+                    userId: AppData.logInUserId,
+                    roomId: widget.roomId.isEmpty
+                        ? (chatBloc.roomId ?? '')
+                        : widget.roomId,
+                    profilePic: widget.profilePic,
+                    scrollController: _scrollController,
+                    isSomeoneTyping: isSomeoneTyping,
+                    fromId: FromId,
                   ),
                 ),
-              ],
-            ),
-          ),
-          actions: [
-            // Voice Call Button
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.phone_outlined,
-                  color: Colors.blue[600],
-                  size: 18,
-                ),
-              ),
-              onPressed: () async {
-                startOutgoingCall(
-                  widget.id,
-                  widget.username,
-                  widget.profilePic,
-                  false,
-                );
-              },
-            ),
-            const SizedBox(width: 4),
-            // Video Call Button
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.videocam_outlined,
-                  color: Colors.blue[600],
-                  size: 18,
-                ),
-              ),
-              onPressed: () async {
-                startOutgoingCall(
-                  widget.id,
-                  widget.username,
-                  widget.profilePic,
-                  true,
-                );
-              },
-            ),
-            // More Options Menu
-            PopupMenuButton<String>(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                child: Icon(
-                  Icons.more_vert,
-                  color: Colors.blue[600],
-                  size: 20,
-                ),
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 8,
-              offset: const Offset(0, 50),
-              onSelected: (value) {
-                // Handle menu selection
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'media',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.photo_library_outlined,
-                        size: 20,
-                        color: Colors.blue[600],
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        translation(context).lbl_media,
-                        style: TextStyle(
-                          color: appStore.isDarkMode ? Colors.white : Colors.black87,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.delete_outline,
-                        size: 20,
-                        color: Colors.red.shade400,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        translation(context).lbl_delete_chat,
-                        style: TextStyle(
-                          color: Colors.red.shade400,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: BlocConsumer<ChatBloc, ChatState>(
-          bloc: chatBloc,
-          listener: (BuildContext context, ChatState state) {
-            if (state is DataError) {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  content: Text(state.errorMessage),
-                ),
-              );
-            } else if (state is PaginationLoadedState) {
-              setState(() {
-                _isFileUploading = false;
-              });
-            } else if (state is FileUploadingState) {
-              setState(() {
-                _isFileUploading = true;
-              });
-              // Optional: Show a brief toast for file uploads
-              // showToast('Uploading file...');
-            } else if (state is FileUploadedState) {
-              setState(() {
-                _isFileUploading = false;
-              });
-            }
-          },
-          builder: (context, state) {
-            if (state is PaginationLoadingState) {
-              return ChatShimmerLoader();
-            } else if (state is PaginationLoadedState ||
-                state is FileUploadingState ||
-                state is FileUploadedState ||
-                state is DataInitial ||
-                state is PaginationInitialState) {
-              isDataLoaded = false;
-              var bloc = chatBloc;
-              return Column(
-                children: [
-                  Expanded(
-                    child: OptimizedMessageList(
-                      chatBloc: bloc,
-                      userId: AppData.logInUserId,
-                      roomId: widget.roomId.isEmpty ? (chatBloc.roomId ?? '') : widget.roomId,
-                      profilePic: widget.profilePic,
-                      scrollController: _scrollController,
-                      isSomeoneTyping: isSomeoneTyping,
-                      fromId: FromId,
-                    ),
-                  ),
-                  isRecording
-                      ? WhatsAppVoiceRecorder(
-                          shouldStopAndSend: _shouldStopRecording,
-                          onStop: (path) {
-                            print('📨 onStop called with path: $path');
-                            chatBloc.add(SendMessageEvent(
+                isRecording
+                    ? AnimatedVoiceRecorder(
+                        shouldStopAndSend: _shouldStopRecording,
+                        initialPointerPosition: _recordingPointerPosition,
+                        onStop: (path) {
+                          print('📨 onStop called with path: $path');
+                          chatBloc.add(
+                            SendMessageEvent(
                               userId: AppData.logInUserId,
-                              roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
+                              roomId: widget.roomId == ''
+                                  ? chatBloc.roomId
+                                  : widget.roomId,
                               receiverId: widget.id,
                               attachmentType: 'voice',
                               file: path,
                               message: '',
-                            ));
-                            setState(() {
-                              print('✅ Message sent, hiding recorder');
-                              isRecording = false;
-                              _shouldStopRecording = false;
-                            });
-                            scrollToBottom();
-                          },
-                          onCancel: () {
-                            print('❌ Recording cancelled');
-                            setState(() {
-                              isRecording = false;
-                              _shouldStopRecording = false;
-                            });
-                          },
-                        )
-                      : ChatInputField(
-                          controller: textController,
-                          onSubmitted: (message) {
-                            setState(() {
-                              isTextTyping = false;
-                            });
-                            chatBloc.add(SendMessageEvent(
-                                userId: AppData.logInUserId,
-                                roomId: widget.roomId == ''
-                                    ? chatBloc.roomId
-                                    : widget.roomId,
-                                receiverId: widget.id,
-                                attachmentType: 'text',
-                                file: '',
-                                message: message));
-                            textController.clear();
-                            scrollToBottom();
-                          },
-                          onAttachmentPressed: () async {
-                            const permission = Permission.storage;
-                            const permission1 = Permission.photos;
-                            var status = await permission.status;
-                            print(status);
-                            if (await permission1.isGranted) {
+                            ),
+                          );
+                          setState(() {
+                            print('✅ Message sent, hiding recorder');
+                            isRecording = false;
+                            _shouldStopRecording = false;
+                            _recordingPointerPosition = null;
+                          });
+                          scrollToBottom();
+                        },
+                        onCancel: () {
+                          print('❌ Recording cancelled');
+                          setState(() {
+                            isRecording = false;
+                            _shouldStopRecording = false;
+                            _recordingPointerPosition = null;
+                          });
+                        },
+                      )
+                    : EnhancedChatInputField(
+                        controller: textController,
+                        onSubmitted: (message) {
+                          setState(() {
+                            isTextTyping = false;
+                          });
+                          chatBloc.add(
+                            SendMessageEvent(
+                              userId: AppData.logInUserId,
+                              roomId: widget.roomId == ''
+                                  ? chatBloc.roomId
+                                  : widget.roomId,
+                              receiverId: widget.id,
+                              attachmentType: 'text',
+                              file: '',
+                              message: message,
+                            ),
+                          );
+                          textController.clear();
+                          scrollToBottom();
+                        },
+                        onAttachmentPressed: () async {
+                          const permission = Permission.storage;
+                          const permission1 = Permission.photos;
+                          var status = await permission.status;
+                          print(status);
+                          if (await permission1.isGranted) {
+                            _showFileOptions();
+                          } else if (await permission1.isDenied) {
+                            final result = await permission1.request();
+                            if (status.isGranted) {
                               _showFileOptions();
-                            } else if (await permission1.isDenied) {
-                              final result = await permission1.request();
-                              if (status.isGranted) {
-                                _showFileOptions();
-                                print("isGranted");
-                              } else if (result.isGranted) {
-                                _showFileOptions();
-                                print("isGranted");
-                              } else if (result.isDenied) {
-                                final result = await permission.request();
-                                print("isDenied");
-                              } else if (result.isPermanentlyDenied) {
-                                print("isPermanentlyDenied");
-                              }
-                            } else if (await permission.isPermanentlyDenied) {
+                              print("isGranted");
+                            } else if (result.isGranted) {
+                              _showFileOptions();
+                              print("isGranted");
+                            } else if (result.isDenied) {
+                              final result = await permission.request();
+                              print("isDenied");
+                            } else if (result.isPermanentlyDenied) {
                               print("isPermanentlyDenied");
                             }
-                          },
-                          onRecordStateChanged: (recording) {
-                            print('🎤 Record state changed: $recording');
-                            setState(() {
-                              if (recording) {
-                                // Start recording
-                                print('▶️ Starting recording...');
-                                isRecording = true;
-                                _shouldStopRecording = false;
-                              } else {
-                                // User released - trigger stop and send
-                                print('⏹️ User released - triggering stop and send');
-                                _shouldStopRecording = true;
-                              }
-                            });
-                          },
-                          onVoiceRecorded: (path) {
-                            // This is handled by WhatsAppVoiceRecorder
-                          },
-                          isRecording: isRecording,
-                          isLoading: _isFileUploading || isLoading,
-                          onTyping: (text) {
-                            if (text.isNotEmpty) {
-                              isTextTyping = true;
+                          } else if (await permission.isPermanentlyDenied) {
+                            print("isPermanentlyDenied");
+                          }
+                        },
+                        onRecordStateChanged: (recording, {Offset? pointerPosition}) {
+                          print(
+                            '🎤 Record state changed: $recording, pointer: $pointerPosition',
+                          );
+                          setState(() {
+                            if (recording) {
+                              // Start recording
+                              print('▶️ Starting recording...');
+                              isRecording = true;
+                              _shouldStopRecording = false;
+                              _recordingPointerPosition = pointerPosition;
                             } else {
-                              isTextTyping = false;
+                              // User released - trigger stop and send
+                              print(
+                                '⏹️ User released - triggering stop and send',
+                              );
+                              _shouldStopRecording = true;
                             }
-                            onTextFieldFocused(true);
-                            
-                            // Add typing indicator logic
-                            _typingTimer?.cancel();
-                            _typingTimer = Timer(const Duration(seconds: 1), () {
-                              isTextTyping = false;
-                            });
-                            // Use existing typing event
-                            setState(() {});
-                          },
-                        ),
-                  Offstage(
-                    offstage: !_emojiShowing,
-                    child: EmojiPicker(
-                      textEditingController: textController,
-                      // scrollController: _scrollController,
-                      config: Config(
-                        height: 256,
-                        checkPlatformCompatibility: true,
-                        viewOrderConfig: const ViewOrderConfig(),
-                        emojiViewConfig: EmojiViewConfig(
-                          // Issue: https://github.com/flutter/flutter/issues/28894
-                          emojiSizeMax: 28 *
-                              (foundation.defaultTargetPlatform ==
-                                      TargetPlatform.iOS
-                                  ? 1.2
-                                  : 1.0),
-                        ),
-                        skinToneConfig: const SkinToneConfig(),
-                        categoryViewConfig: const CategoryViewConfig(),
-                        bottomActionBarConfig: const BottomActionBarConfig(),
-                        searchViewConfig: const SearchViewConfig(),
+                          });
+                        },
+                        onVoiceRecorded: (path) {
+                          // This is handled by AnimatedVoiceRecorder
+                        },
+                        isRecording: isRecording,
+                        isLoading: _isFileUploading || isLoading,
+                        onTyping: (text) {
+                          if (text.isNotEmpty) {
+                            isTextTyping = true;
+                          } else {
+                            isTextTyping = false;
+                          }
+                          onTextFieldFocused(true);
+
+                          // Add typing indicator logic
+                          _typingTimer?.cancel();
+                          _typingTimer = Timer(const Duration(seconds: 1), () {
+                            isTextTyping = false;
+                          });
+                          // Use existing typing event
+                          setState(() {});
+                        },
                       ),
+                Offstage(
+                  offstage: !_emojiShowing,
+                  child: EmojiPicker(
+                    textEditingController: textController,
+                    // scrollController: _scrollController,
+                    config: Config(
+                      height: 256,
+                      checkPlatformCompatibility: true,
+                      viewOrderConfig: const ViewOrderConfig(),
+                      emojiViewConfig: EmojiViewConfig(
+                        // Issue: https://github.com/flutter/flutter/issues/28894
+                        emojiSizeMax:
+                            28 *
+                            (foundation.defaultTargetPlatform ==
+                                    TargetPlatform.iOS
+                                ? 1.2
+                                : 1.0),
+                      ),
+                      skinToneConfig: const SkinToneConfig(),
+                      categoryViewConfig: const CategoryViewConfig(),
+                      bottomActionBarConfig: const BottomActionBarConfig(),
+                      searchViewConfig: const SearchViewConfig(),
                     ),
                   ),
-                ],
-              );
-            } else if (state is DataError) {
-              return Center(
-                child: Text(state.errorMessage),
-              );
-            } else {
-              return const Center(child: Text('Something went wrong'));
-            }
-          },
-        ));
+                ),
+              ],
+            );
+          } else if (state is DataError) {
+            return Center(child: Text(state.errorMessage));
+          } else {
+            return const Center(child: Text('Something went wrong'));
+          }
+        },
+      ),
+    );
   }
 
   bool isPlayingMsg = false, isRecording = false, isSending = false;
   bool _shouldStopRecording = false; // Flag to trigger stop and send
+  Offset?
+  _recordingPointerPosition; // Track where user pressed to start recording
 
   Future<bool> checkPermission() async {
     if (!await Permission.microphone.isGranted) {
@@ -1234,13 +1055,16 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       await _audioRecorder.stop();
       // recordFilePath is already set from startRecord()
       // if (!await FlutterSoundRecord().isPaused()) {
-      chatBloc.add(SendMessageEvent(
+      chatBloc.add(
+        SendMessageEvent(
           userId: AppData.logInUserId,
           roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
           receiverId: widget.id,
           attachmentType: 'file',
           file: recordFilePath,
-          message: ''));
+          message: '',
+        ),
+      );
       scrollToBottom();
       // }
     } catch (e) {
@@ -1276,7 +1100,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void _showFileOptions() {
     final BuildContext currentContext = context; // Store context reference
     NavigatorState? bottomSheetNavigator;
-    
+
     showModalBottomSheet(
       context: currentContext,
       isScrollControlled: true,
@@ -1284,12 +1108,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       builder: (BuildContext bottomSheetContext) {
         // Store the navigator reference
         bottomSheetNavigator = Navigator.of(bottomSheetContext);
-        
+
         return AttachmentBottomSheet(
           onFileSelected: (File file, String type) {
             // Safely close bottom sheet
             try {
-              if (bottomSheetNavigator != null && bottomSheetNavigator!.mounted) {
+              if (bottomSheetNavigator != null &&
+                  bottomSheetNavigator!.mounted) {
                 bottomSheetNavigator!.pop();
               } else if (bottomSheetContext.mounted) {
                 Navigator.of(bottomSheetContext).pop();
@@ -1297,7 +1122,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             } catch (e) {
               print('Error closing bottom sheet: $e');
             }
-            
+
             // Schedule the navigation to happen after the bottom sheet is completely closed
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Future.delayed(const Duration(milliseconds: 300), () {
@@ -1313,21 +1138,25 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           if (Navigator.of(context).canPop()) {
                             Navigator.of(context).pop(); // Close preview screen
                           }
-                           print("sendFile $sendFile");
+                          print("sendFile $sendFile");
                           if (mounted) {
                             // All file attachments (images, videos, documents) use 'file' type
                             // Only voice recordings use 'voice' type
                             String attachmentType = 'file';
-                            
-                            chatBloc.add(SendMessageEvent(
-                              userId: AppData.logInUserId,
-                              roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
-                              receiverId: widget.id,
-                              attachmentType: attachmentType,
-                              file: sendFile.path,
-                              message: caption,
-                            ));
-                            
+
+                            chatBloc.add(
+                              SendMessageEvent(
+                                userId: AppData.logInUserId,
+                                roomId: widget.roomId == ''
+                                    ? chatBloc.roomId
+                                    : widget.roomId,
+                                receiverId: widget.id,
+                                attachmentType: attachmentType,
+                                file: sendFile.path,
+                                message: caption,
+                              ),
+                            );
+
                             scrollToBottom();
                           }
                         },
@@ -1343,22 +1172,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     );
   }
 
-
   onSubscriptionCount(String channelName, int subscriptionCount) {}
 
   Future<void> _permissionDialog(context) async {
     return showDialog(
-      context: context, barrierDismissible: false, // user must tap button!
+      context: context,
+      barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           // <-- SEE HERE
           title: Text(
             translation(context).lbl_want_to_join_meeting,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(fontSize: 14.sp, fontFamily: 'Poppins'),
           ),
           // content: const SingleChildScrollView(
           //   child: ListBody(
@@ -1386,9 +1212,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       },
     );
   }
-// Replace your current outgoing call implementation with this
+
+  // Replace your current outgoing call implementation with this
   Future<dynamic> onAuthorizer(
-      String channelName, String socketId, dynamic options) async {
+    String channelName,
+    String socketId,
+    dynamic options,
+  ) async {
     try {
       final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
 
@@ -1415,39 +1245,47 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         // Pusher expects a Map<String, dynamic> with 'auth' and optionally 'channel_data'
         if (decoded is Map) {
           // Convert to Map<String, dynamic> to ensure type safety
-          final Map<String, dynamic> authData = Map<String, dynamic>.from(decoded);
+          final Map<String, dynamic> authData = Map<String, dynamic>.from(
+            decoded,
+          );
 
           debugPrint('Pusher auth successful for channel: $channelName');
           debugPrint('Auth data keys: ${authData.keys}');
 
           return authData;
         } else {
-          debugPrint('Pusher auth response is not a Map: ${decoded.runtimeType}');
-          throw Exception('Invalid auth response format - expected Map but got ${decoded.runtimeType}');
+          debugPrint(
+            'Pusher auth response is not a Map: ${decoded.runtimeType}',
+          );
+          throw Exception(
+            'Invalid auth response format - expected Map but got ${decoded.runtimeType}',
+          );
         }
       } else {
-        debugPrint('Pusher auth failed with status code: ${response.statusCode}');
+        debugPrint(
+          'Pusher auth failed with status code: ${response.statusCode}',
+        );
         debugPrint('Response body: ${response.body}');
-        throw Exception('Failed to fetch Pusher auth data: ${response.statusCode}');
+        throw Exception(
+          'Failed to fetch Pusher auth data: ${response.statusCode}',
+        );
       }
     } catch (e, stackTrace) {
       debugPrint('Error in onAuthorizer: $e');
       debugPrint('Stack trace: $stackTrace');
       // Return a properly typed error response
-      return <String, dynamic>{
-        'error': e.toString(),
-      };
+      return <String, dynamic>{'error': e.toString()};
     }
   }
 
-// Handle typing events
+  // Handle typing events
   void handleTypingEvent(Map<String, dynamic> eventData) {
     final fromId = eventData['from_id'];
     final typingStatus = eventData['typing'];
     // Handle typing event here
   }
 
-// Handle message events
+  // Handle message events
   void handleMessageEvent(Map<String, dynamic> eventData) {
     final fromId = eventData['from_id'];
     final message = eventData['message'];
@@ -1464,8 +1302,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     setState(() {
       isSomeoneTyping = false;
     });
-    chatBloc.add(LoadRoomMessageEvent(
-        page: 0, userId: widget.id, roomId: widget.roomId));
+    chatBloc.add(
+      LoadRoomMessageEvent(page: 0, userId: widget.id, roomId: widget.roomId),
+    );
   }
 
   void _startTimerForChat() {
@@ -1473,24 +1312,224 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       if (!isDataLoaded) {
         if (isBottom ?? true) {
           print('bottom');
-          chatBloc.add(LoadRoomMessageEvent(
-              page: 0, userId: widget.id, roomId: widget.roomId));
+          chatBloc.add(
+            LoadRoomMessageEvent(
+              page: 0,
+              userId: widget.id,
+              roomId: widget.roomId,
+            ),
+          );
         }
       }
     });
   }
 
-// List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
-//   List<RtmAttribute> rtmAttributes = [];
-//
-//   attributes.forEach((key, value) {
-//     if (value is String) {
-//       rtmAttributes.add(RtmAttribute(key, value));
-//     }
-//   });
-//
-//   return rtmAttributes;
-// }
+  AppBar _buildAppBar(BuildContext context, OneUITheme theme) {
+    return AppBar(
+      backgroundColor: theme.cardBackground,
+      iconTheme: IconThemeData(color: theme.textPrimary),
+      elevation: 0,
+      toolbarHeight: 70,
+      surfaceTintColor: theme.cardBackground,
+      centerTitle: false,
+      leading: IconButton(
+        icon: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: theme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: theme.primary,
+            size: 16,
+          ),
+        ),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+      ),
+      title: InkWell(
+        onTap: () {
+          SVProfileFragment(userId: widget.id).launch(context);
+        },
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.primary.withOpacity(0.1),
+                border: Border.all(
+                  color: theme.primary.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: widget.profilePic == ''
+                    ? Center(
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: theme.primary,
+                          size: 22,
+                        ),
+                      )
+                    : CustomImageView(
+                        imagePath:
+                            '${AppData.imageUrl}${widget.profilePic.validate()}',
+                        height: 40,
+                        width: 40,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    widget.username,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: theme.textPrimary,
+                    ),
+                  ),
+                  if (isSomeoneTyping && FromId == widget.id)
+                    Text(
+                      translation(context).lbl_typing,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        // Voice Call Button
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.phone_outlined, color: theme.primary, size: 18),
+          ),
+          onPressed: () async {
+            startOutgoingCall(
+              widget.id,
+              widget.username,
+              widget.profilePic,
+              false,
+            );
+          },
+        ),
+        const SizedBox(width: 4),
+        // Video Call Button
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: theme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.videocam_outlined,
+              color: theme.primary,
+              size: 18,
+            ),
+          ),
+          onPressed: () async {
+            startOutgoingCall(
+              widget.id,
+              widget.username,
+              widget.profilePic,
+              true,
+            );
+          },
+        ),
+        // More Options Menu
+        PopupMenuButton<String>(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            child: Icon(Icons.more_vert, color: theme.primary, size: 20),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          color: theme.cardBackground,
+          elevation: 8,
+          offset: const Offset(0, 50),
+          onSelected: (value) {
+            // Handle menu selection
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'media',
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.photo_library_outlined,
+                    size: 20,
+                    color: theme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    translation(context).lbl_media,
+                    style: TextStyle(
+                      color: theme.textPrimary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete_outline, size: 20, color: theme.error),
+                  const SizedBox(width: 12),
+                  Text(
+                    translation(context).lbl_delete_chat,
+                    style: TextStyle(color: theme.error, fontFamily: 'Poppins'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  // List<RtmAttribute> convertToRtmAttributes(Map<String, dynamic> attributes) {
+  //   List<RtmAttribute> rtmAttributes = [];
+  //
+  //   attributes.forEach((key, value) {
+  //     if (value is String) {
+  //       rtmAttributes.add(RtmAttribute(key, value));
+  //     }
+  //   });
+  //
+  //   return rtmAttributes;
+  // }
 }
 
 class PusherConnectionState {
@@ -1504,6 +1543,8 @@ class TypingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
       child: chatItem.ChatBubble(
@@ -1511,8 +1552,7 @@ class TypingIndicator extends StatelessWidget {
         elevation: 0,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
         clipper: ChatBubbleClipper5(type: BubbleType.receiverBubble),
-        backGroundColor: const Color(0xffE7E7ED),
-        // margin: EdgeInsets.only(top: 20),
+        backGroundColor: theme.surfaceVariant,
         child: Align(
           alignment: Alignment.centerLeft,
           child: Column(
@@ -1520,14 +1560,12 @@ class TypingIndicator extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Container(
-                color: Colors.blue,
-                child: Text(
-                  translation(context).lbl_typing,
-                  style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w400),
+              Text(
+                translation(context).lbl_typing,
+                style: TextStyle(
+                  color: theme.textSecondary,
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -1544,7 +1582,7 @@ class FullScreenVideoPage extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
 
   const FullScreenVideoPage({Key? key, required this.videoPlayerController})
-      : super(key: key);
+    : super(key: key);
 
   @override
   _FullScreenVideoPageState createState() => _FullScreenVideoPageState();
@@ -1567,20 +1605,18 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetBodyColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: svGetBodyColor(),
+        backgroundColor: theme.scaffoldBackground,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: Icon(Icons.close, color: theme.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Center(
-        child: Chewie(
-          controller: _chewieController,
-        ),
-      ),
+      body: Center(child: Chewie(controller: _chewieController)),
     );
   }
 
@@ -1594,12 +1630,14 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
 
 class _ControlsOverlay extends StatelessWidget {
   const _ControlsOverlay({Key? key, required this.controller})
-      : super(key: key);
+    : super(key: key);
 
   final VideoPlayerController controller;
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Stack(
       children: <Widget>[
         AnimatedSwitcher(
@@ -1608,11 +1646,11 @@ class _ControlsOverlay extends StatelessWidget {
           child: controller.value.isPlaying
               ? const SizedBox.shrink()
               : Container(
-                  color: svGetBodyColor(),
-                  child: const Center(
+                  color: theme.surfaceVariant,
+                  child: Center(
                     child: Icon(
                       Icons.play_arrow,
-                      color: Colors.white,
+                      color: theme.primary,
                       size: 35.0,
                       semanticLabel: 'Play',
                     ),
@@ -1626,10 +1664,12 @@ class _ControlsOverlay extends StatelessWidget {
             } else {
               // controller.play();
               // Navigate to full screen video page
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) =>
-                    FullScreenVideoPage(videoPlayerController: controller),
-              ));
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      FullScreenVideoPage(videoPlayerController: controller),
+                ),
+              );
             }
           },
         ),
@@ -1642,10 +1682,8 @@ class VoiceRecordingPainter extends CustomPainter {
   final Animation<double> animation;
   final Color color;
 
-  VoiceRecordingPainter({
-    required this.animation,
-    required this.color,
-  }) : super(repaint: animation);
+  VoiceRecordingPainter({required this.animation, required this.color})
+    : super(repaint: animation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1680,10 +1718,8 @@ class VoiceRecordingPainter extends CustomPainter {
 // Helper function to show error message
 void _showCallError(String message) {
   if (NavigatorService.navigatorKey.currentContext != null) {
-    ScaffoldMessenger
-        .of(NavigatorService.navigatorKey.currentContext!)
-        .showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      NavigatorService.navigatorKey.currentContext!,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }

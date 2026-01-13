@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sizer/sizer.dart';
@@ -16,55 +17,74 @@ class JobDetailsShimmer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Top action buttons shimmer
-            _buildActionButtonsShimmer(),
+            _buildActionButtonsShimmer(context),
 
             // Hero Card - Job Header shimmer
-            _buildJobHeaderCardShimmer(),
+            _buildJobHeaderCardShimmer(context),
 
             const SizedBox(height: 16),
 
             // Job Info Card shimmer
-            _buildJobInfoCardShimmer(),
+            _buildJobInfoCardShimmer(context),
 
             const SizedBox(height: 16),
 
             // Job Statistics Card shimmer
-            _buildJobStatsCardShimmer(),
+            _buildJobStatsCardShimmer(context),
 
             const SizedBox(height: 16),
 
             // Specialties Card shimmer
-            _buildSpecialtiesCardShimmer(),
+            _buildSpecialtiesCardShimmer(context),
 
             const SizedBox(height: 16),
 
             // Description Card shimmer
-            _buildDescriptionCardShimmer(),
+            _buildDescriptionCardShimmer(context),
 
             const SizedBox(height: 16),
 
             // User Info Card shimmer
-            _buildUserInfoCardShimmer(),
+            _buildUserInfoCardShimmer(context),
 
             const SizedBox(height: 16),
 
             // Action Buttons Card shimmer
-            _buildActionButtonsCardShimmer(),
+            _buildActionButtonsCardShimmer(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildActionButtonsShimmer() {
+  Color _getBaseColor(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
+  }
+
+  Color _getHighlightColor(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
+  }
+
+  // ignore: unused_element
+  Color _getShimmerColor(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? theme.surfaceVariant.withOpacity(0.4) : Colors.grey[300]!;
+  }
+
+  Widget _buildActionButtonsShimmer(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: _getBaseColor(context),
+            highlightColor: _getHighlightColor(context),
             child: Container(
               width: 80,
               height: 32,
@@ -79,7 +99,7 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildJobHeaderCardShimmer() {
+  Widget _buildJobHeaderCardShimmer(context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -272,13 +292,13 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildJobInfoCardShimmer() {
+  Widget _buildJobInfoCardShimmer(context) {
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: _getBaseColor(context),
+        highlightColor: _getHighlightColor(context),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -454,13 +474,13 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildJobStatsCardShimmer() {
+  Widget _buildJobStatsCardShimmer(context) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: _getBaseColor(context),
+        highlightColor: _getHighlightColor(context),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -566,13 +586,13 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildSpecialtiesCardShimmer() {
+  Widget _buildSpecialtiesCardShimmer(context) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: _getBaseColor(context),
+        highlightColor: _getHighlightColor(context),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -652,13 +672,13 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildDescriptionCardShimmer() {
+  Widget _buildDescriptionCardShimmer(context) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: _getBaseColor(context),
+        highlightColor: _getHighlightColor(context),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -797,13 +817,13 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildUserInfoCardShimmer() {
+  Widget _buildUserInfoCardShimmer(context) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: _getBaseColor(context),
+        highlightColor: _getHighlightColor(context),
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -899,13 +919,13 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtonsCardShimmer() {
+  Widget _buildActionButtonsCardShimmer(context) {
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
+        baseColor: _getBaseColor(context),
+        highlightColor: _getHighlightColor(context),
         child: Container(
           padding: const EdgeInsets.all(20.0),
           child: Column(

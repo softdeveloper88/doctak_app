@@ -2,17 +2,14 @@ import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/one_ui_profile_components.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
-import 'package:doctak_app/widgets/custom_image_view.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-
-import '../../../utils/SVColors.dart';
-import '../../../utils/SVCommon.dart';
 
 class InterestedInfoScreen extends StatefulWidget {
-  ProfileBloc profileBloc;
+  final ProfileBloc profileBloc;
 
   InterestedInfoScreen({required this.profileBloc, super.key});
 
@@ -22,7 +19,8 @@ class InterestedInfoScreen extends StatefulWidget {
 
 bool isEditModeMap = false;
 
-class _InterestedInfoScreenState extends State<InterestedInfoScreen> with SingleTickerProviderStateMixin {
+class _InterestedInfoScreenState extends State<InterestedInfoScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -38,10 +36,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     _animationController.forward();
@@ -57,31 +52,17 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_interest_information,
         titleIcon: Icons.lightbulb_outline,
         actions: [
           if (widget.profileBloc.isMe)
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isEditModeMap ? Icons.check : Icons.edit,
-                  color: isEditModeMap ? Colors.green[600] : Colors.blue[600],
-                  size: 16,
-                ),
-              ),
+            OneUIEditActionButton(
+              isEditMode: isEditModeMap,
               onPressed: () {
                 setState(() {
                   isEditModeMap = !isEditModeMap;
@@ -99,88 +80,40 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: widget.profileBloc.interestList!.isEmpty
-              ? _buildEmptyState()
+              ? _buildEmptyState(theme)
               : SingleChildScrollView(
-            child: Column(
-              children: [
-                // Information header
-                if (!isEditModeMap)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.purple.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.lightbulb_outline,
-                          color: Colors.purple[700],
-                          size: 24,
+                  child: Column(
+                    children: [
+                      // Information header
+                      if (!isEditModeMap)
+                        OneUIInfoBanner(
+                          message: translation(context).msg_interests_info_desc,
+                          icon: Icons.lightbulb_outline,
+                          accentColor: Colors.purple,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            translation(context).msg_interests_info_desc,
-                            style: TextStyle(
-                              color: Colors.purple[700],
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                            ),
-                          ),
+
+                      _buildInterestedInfoFields(theme),
+
+                      const SizedBox(height: 24),
+
+                      // Update button
+                      if (isEditModeMap)
+                        OneUIProfilePrimaryButton(
+                          label: translation(context).lbl_update,
+                          icon: Icons.check_circle,
+                          color: theme.primary,
+                          onPressed: _saveChanges,
                         ),
-                      ],
-                    ),
+                    ],
                   ),
-
-                _buildInterestedInfoFields(),
-
-                const SizedBox(height: 24),
-
-                // Update button
-                if (isEditModeMap)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: ElevatedButton(
-                      onPressed: _saveChanges,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Text(
-                            translation(context).lbl_update,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+                ),
         ),
       ),
     );
   }
 
   // Empty state with illustration and add button
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(OneUITheme theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -194,20 +127,13 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
           const SizedBox(height: 24),
           Text(
             translation(context).lbl_no_interest_added,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[700],
-            ),
+            style: theme.titleMedium,
           ),
           const SizedBox(height: 16),
           Text(
             translation(context).msg_add_interests,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: theme.bodySecondary,
           ),
           const SizedBox(height: 32),
           if (widget.profileBloc.isMe)
@@ -220,12 +146,13 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
               icon: const Icon(Icons.add),
               label: Text(translation(context).lbl_add_interests),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
+                backgroundColor: theme.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
                 ),
+                shape: RoundedRectangleBorder(borderRadius: theme.radiusFull),
               ),
             ),
         ],
@@ -233,7 +160,7 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
     );
   }
 
-  Widget _buildInterestedInfoFields() {
+  Widget _buildInterestedInfoFields(OneUITheme theme) {
     return Form(
       key: _formKey,
       child: Column(
@@ -243,7 +170,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
             title: translation(context).lbl_areas_of_interest,
             index: 0,
             icon: Icons.medical_information,
-            color: Colors.blue,
+            color: theme.primary,
+            theme: theme,
           ),
 
           const SizedBox(height: 16),
@@ -253,7 +181,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
             title: translation(context).lbl_conferences_participation,
             index: 1,
             icon: Icons.event_note,
-            color: Colors.orange,
+            color: theme.warning,
+            theme: theme,
           ),
 
           const SizedBox(height: 16),
@@ -263,7 +192,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
             title: translation(context).lbl_research_projects,
             index: 3,
             icon: Icons.science,
-            color: Colors.green,
+            color: theme.success,
+            theme: theme,
           ),
         ],
       ),
@@ -276,17 +206,14 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
     required int index,
     required IconData icon,
     required Color color,
+    required OneUITheme theme,
   }) {
     if (widget.profileBloc.interestList!.length <= index) {
       return const SizedBox.shrink();
     }
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+    return Container(
+      decoration: theme.cardDecoration,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -299,13 +226,9 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: theme.radiusM,
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 18,
-                  ),
+                  child: Icon(icon, color: color, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -323,53 +246,56 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
             const SizedBox(height: 16),
 
             if (isEditModeMap)
-            // Edit mode - text field
+              // Edit mode - text field
               TextFieldEditWidget(
                 isEditModeMap: true,
                 icon: icon,
                 index: 2,
                 hints: _getPlaceholderForIndex(index, context),
                 label: translation(context).lbl_interest_details,
-                value: widget.profileBloc.interestList?[index].interestDetails ?? "",
-                onSave: (value) => widget.profileBloc.interestList?[index].interestDetails = value,
+                value:
+                    widget.profileBloc.interestList?[index].interestDetails ??
+                    "",
+                onSave: (value) =>
+                    widget.profileBloc.interestList?[index].interestDetails =
+                        value,
                 maxLines: 3,
               )
             else
             // View mode - display text
-              if (widget.profileBloc.interestList?[index].interestDetails != null &&
-                  widget.profileBloc.interestList![index].interestDetails!.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            if (widget.profileBloc.interestList?[index].interestDetails !=
+                    null &&
+                widget
+                    .profileBloc
+                    .interestList![index]
+                    .interestDetails!
+                    .isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.05),
+                  borderRadius: theme.radiusM,
+                ),
+                child: Text(
+                  widget.profileBloc.interestList![index].interestDetails!,
+                  style: TextStyle(color: theme.textPrimary, height: 1.5),
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.surfaceVariant,
+                  borderRadius: theme.radiusM,
+                  border: Border.all(color: theme.border),
+                ),
+                child: Center(
                   child: Text(
-                    widget.profileBloc.interestList![index].interestDetails!,
-                    style: TextStyle(
-                      color: Colors.grey[800],
-                      height: 1.5,
-                    ),
-                  ),
-                )
-              else
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Center(
-                    child: Text(
-                      translation(context).msg_no_details_added,
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
+                    translation(context).msg_no_details_added,
+                    style: theme.caption.copyWith(fontStyle: FontStyle.italic),
                   ),
                 ),
+              ),
           ],
         ),
       ),
@@ -395,7 +321,8 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
       _formKey.currentState!.save();
     }
 
-    widget.profileBloc.add(UpdateAddHobbiesInterestEvent(
+    widget.profileBloc.add(
+      UpdateAddHobbiesInterestEvent(
         '',
         widget.profileBloc.interestList!.isEmpty
             ? ''
@@ -408,18 +335,17 @@ class _InterestedInfoScreenState extends State<InterestedInfoScreen> with Single
             : '',
         '',
         '',
-        ''
-    ));
+        '',
+      ),
+    );
 
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(translation(context).msg_interests_updated),
-        backgroundColor: Colors.green,
+        backgroundColor: OneUITheme.of(context).success,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

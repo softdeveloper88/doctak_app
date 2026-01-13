@@ -1,12 +1,26 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 /// Shimmer loader that exactly matches MemoryOptimizedConferenceItem structure
 class ConferencesShimmerLoader extends StatelessWidget {
   const ConferencesShimmerLoader({Key? key}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final baseColor = isDark
+        ? theme.surfaceVariant.withOpacity(0.3)
+        : Colors.grey[300]!;
+    final highlightColor = isDark
+        ? theme.surfaceVariant.withOpacity(0.5)
+        : Colors.grey[100]!;
+    final shimmerColor = isDark
+        ? theme.surfaceVariant.withOpacity(0.4)
+        : Colors.grey[200]!;
+
     return ListView.builder(
       itemCount: 5,
       itemBuilder: (context, index) {
@@ -14,43 +28,47 @@ class ConferencesShimmerLoader extends StatelessWidget {
         final bool hasLongTitle = index % 3 == 0;
         final bool hasDescription = index % 4 != 0;
         final bool hasRegistration = index % 5 != 0;
-        
+
         return Container(
           margin: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: 0,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: theme.cardBackground,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(16),
             child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
+              baseColor: baseColor,
+              highlightColor: highlightColor,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Conference image
-                  _buildConferenceImageOrPlaceholder(hasImage),
-                  
-                  // Conference header with title and dates
-                  _buildConferenceHeader(context, hasLongTitle),
-                  
-                  // Conference description
-                  if (hasDescription) _buildConferenceDescription(context),
-                  
-                  // Conference details (city, venue, etc.)
-                  _buildConferenceDetails(context, index),
-                  
-                  // Register button and actions
-                  _buildActionRow(context, hasRegistration),
+                  _buildConferenceImageOrPlaceholder(hasImage, shimmerColor),
+                  _buildConferenceHeader(
+                    context,
+                    hasLongTitle,
+                    shimmerColor,
+                    theme,
+                  ),
+                  if (hasDescription)
+                    _buildConferenceDescription(context, shimmerColor, theme),
+                  _buildConferenceDetails(context, index, shimmerColor, theme),
+                  _buildActionRow(
+                    context,
+                    hasRegistration,
+                    shimmerColor,
+                    theme,
+                  ),
                 ],
               ),
             ),
@@ -60,39 +78,34 @@ class ConferencesShimmerLoader extends StatelessWidget {
     );
   }
 
-  // Conference image or placeholder matching MemoryOptimizedConferenceItem
-  Widget _buildConferenceImageOrPlaceholder(bool hasImage) {
+  Widget _buildConferenceImageOrPlaceholder(bool hasImage, Color shimmerColor) {
     if (hasImage) {
-      // With image: 180px height
       return Container(
         height: 180,
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-        ),
+        decoration: BoxDecoration(color: shimmerColor),
         child: Center(
           child: Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: shimmerColor.withOpacity(0.7),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),
       );
     } else {
-      // Without image: 100px height with event icon
       return Container(
         height: 100,
         width: double.infinity,
-        color: Colors.grey[200],
+        color: shimmerColor,
         child: Center(
           child: Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: shimmerColor.withOpacity(0.7),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
@@ -101,117 +114,67 @@ class ConferencesShimmerLoader extends StatelessWidget {
     }
   }
 
-  // Conference header matching MemoryOptimizedConferenceItem
-  Widget _buildConferenceHeader(BuildContext context, bool hasLongTitle) {
+  Widget _buildConferenceHeader(
+    BuildContext context,
+    bool hasLongTitle,
+    Color shimmerColor,
+    OneUITheme theme,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Event icon container (padding: 15, borderRadius: 12)
           Container(
-            padding: const EdgeInsets.all(15),
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: shimmerColor,
               borderRadius: BorderRadius.circular(12),
-            ),
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(4),
-              ),
             ),
           ),
           const SizedBox(width: 12),
-          
-          // Title, dates, and organizer
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Conference title
                 Container(
-                  width: hasLongTitle 
-                      ? double.infinity 
-                      : MediaQuery.of(context).size.width * 0.6,
                   height: 16,
+                  width: hasLongTitle
+                      ? double.infinity
+                      : MediaQuery.of(context).size.width * 0.6,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+                    color: shimmerColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 12,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    color: shimmerColor,
+                    borderRadius: BorderRadius.circular(4),
                   ),
                 ),
                 const SizedBox(height: 4),
-                
-                // Start date - end date with calendar icon
-                Row(
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Container(
-                        height: 14,
-                        width: MediaQuery.of(context).size.width * 0.4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                
-                // Organizer with person icon (conditional)
-                Row(
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Container(
-                        height: 14,
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ],
+                Container(
+                  height: 12,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: shimmerColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ],
             ),
           ),
-          
-          // Share button (circular with blue background)
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: shimmerColor,
               shape: BoxShape.circle,
-            ),
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
             ),
           ),
         ],
@@ -219,30 +182,22 @@ class ConferencesShimmerLoader extends StatelessWidget {
     );
   }
 
-  // Conference description matching MemoryOptimizedConferenceItem
-  Widget _buildConferenceDescription(BuildContext context) {
+  Widget _buildConferenceDescription(
+    BuildContext context,
+    Color shimmerColor,
+    OneUITheme theme,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // "Description" label
           Container(
-            height: 14,
+            height: 12,
             width: 80,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 4),
-          // Description text (maxLines: 3)
-          Container(
-            height: 14,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
+              color: shimmerColor,
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
           const SizedBox(height: 4),
@@ -250,17 +205,26 @@ class ConferencesShimmerLoader extends StatelessWidget {
             height: 14,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
+              color: shimmerColor,
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
           const SizedBox(height: 4),
           Container(
             height: 14,
-            width: MediaQuery.of(context).size.width * 0.7,
+            width: MediaQuery.of(context).size.width * 0.8,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
+              color: shimmerColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            height: 14,
+            width: MediaQuery.of(context).size.width * 0.6,
+            decoration: BoxDecoration(
+              color: shimmerColor,
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
         ],
@@ -268,82 +232,53 @@ class ConferencesShimmerLoader extends StatelessWidget {
     );
   }
 
-  // Conference details matching MemoryOptimizedConferenceItem
-  Widget _buildConferenceDetails(BuildContext context, int index) {
+  Widget _buildConferenceDetails(
+    BuildContext context,
+    int index,
+    Color shimmerColor,
+    OneUITheme theme,
+  ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
+        color: theme.surfaceVariant.withOpacity(0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: theme.divider.withOpacity(0.5), width: 1),
       ),
       child: Column(
         children: [
-          // Location (always present)
-          _buildDetailRow(
-            Colors.green[700]!,
-            MediaQuery.of(context).size.width * 0.4,
-          ),
-          // Venue (conditional)
-          if (index % 3 != 0)
-            _buildDetailRow(
-              Colors.orange[700]!,
-              MediaQuery.of(context).size.width * 0.3,
-            ),
-          // Credits (conditional)
-          if (index % 2 == 0)
-            _buildDetailRow(
-              Colors.purple[700]!,
-              MediaQuery.of(context).size.width * 0.5,
-            ),
-          // Specialties (conditional)
-          if (index % 4 == 0)
-            _buildDetailRow(
-              Colors.blue[700]!,
-              MediaQuery.of(context).size.width * 0.6,
-            ),
+          _buildDetailRow(shimmerColor, 100),
+          const SizedBox(height: 8),
+          _buildDetailRow(shimmerColor, 120),
+          const SizedBox(height: 8),
+          _buildDetailRow(shimmerColor, 80),
         ],
       ),
     );
   }
 
-  // Helper method to build a detail row matching MemoryOptimizedConferenceItem._buildDetailRow
-  Widget _buildDetailRow(Color color, double textWidth) {
+  Widget _buildDetailRow(Color shimmerColor, double textWidth) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Icon container with colored background (6px padding, 8px borderRadius)
           Container(
-            padding: const EdgeInsets.all(6),
+            width: 20,
+            height: 20,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
+              color: shimmerColor,
+              shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 12),
-          // Detail text
-          Expanded(
-            child: Container(
-              height: 14,
-              width: textWidth,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
+          Container(
+            height: 14,
+            width: textWidth,
+            decoration: BoxDecoration(
+              color: shimmerColor,
+              borderRadius: BorderRadius.circular(4),
             ),
           ),
         ],
@@ -351,59 +286,35 @@ class ConferencesShimmerLoader extends StatelessWidget {
     );
   }
 
-  // Register button and actions matching MemoryOptimizedConferenceItem
-  Widget _buildActionRow(BuildContext context, bool hasRegistration) {
+  Widget _buildActionRow(
+    BuildContext context,
+    bool hasRegistration,
+    Color shimmerColor,
+    OneUITheme theme,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
+          top: BorderSide(color: theme.divider.withOpacity(0.5), width: 1),
         ),
       ),
       child: hasRegistration
-          ? // ElevatedButton with icon and text
-            Container(
-              height: 40, // Height from padding vertical: 12
+          ? Container(
+              height: 44,
+              width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Registration icon
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // "Register Now" text
-                  Container(
-                    height: 14,
-                    width: 90,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ],
+                color: shimmerColor,
+                borderRadius: BorderRadius.circular(22),
               ),
             )
-          : // "Registration unavailable" text (centered)
-            Center(
+          : Center(
               child: Container(
                 height: 14,
-                width: 150,
+                width: 140,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+                  color: shimmerColor,
+                  borderRadius: BorderRadius.circular(4),
                 ),
               ),
             ),

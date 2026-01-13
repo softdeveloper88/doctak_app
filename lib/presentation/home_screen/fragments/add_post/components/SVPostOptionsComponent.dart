@@ -6,16 +6,16 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/robust_image_picker.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/display_video.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../../main.dart';
-
 class SVPostOptionsComponent extends StatefulWidget {
-  AddPostBloc searchPeopleBloc;
+  final AddPostBloc searchPeopleBloc;
 
-  SVPostOptionsComponent(this.searchPeopleBloc, {super.key});
+  const SVPostOptionsComponent(this.searchPeopleBloc, {super.key});
 
   @override
   State<SVPostOptionsComponent> createState() => _SVPostOptionsComponentState();
@@ -33,15 +33,21 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     print('SVPostOptions: Setting up BLoC stream listener');
     // Sync local imagefiles with BLoC whenever state changes
     addPostSubscription = widget.searchPeopleBloc.stream.listen((state) {
-      print('SVPostOptions: *** BLoC STREAM EVENT *** state: ${state.runtimeType}');
+      print(
+        'SVPostOptions: *** BLoC STREAM EVENT *** state: ${state.runtimeType}',
+      );
       if (state is PaginationLoadedState) {
-        print('SVPostOptions: PaginationLoadedState - BLoC has ${widget.searchPeopleBloc.imagefiles.length} files');
+        print(
+          'SVPostOptions: PaginationLoadedState - BLoC has ${widget.searchPeopleBloc.imagefiles.length} files',
+        );
         if (mounted) {
           setState(() {
             imagefiles = List.from(widget.searchPeopleBloc.imagefiles);
           });
         }
-        print('SVPostOptions: Local imagefiles synced to ${imagefiles.length} files');
+        print(
+          'SVPostOptions: Local imagefiles synced to ${imagefiles.length} files',
+        );
       }
     });
   }
@@ -60,49 +66,62 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      debugPrint("SVPostOptions: *** OPENING GALLERY with RobustImagePicker ***");
+      debugPrint(
+        "SVPostOptions: *** OPENING GALLERY with RobustImagePicker ***",
+      );
 
-      // Use RobustImagePicker which handles limited access + has photo_manager fallback
       List<XFile> pickedfiles = [];
 
-      // First try showing the photo_manager picker directly (most reliable for limited access)
       try {
-        debugPrint("SVPostOptions: Using RobustImagePicker.showPhotoManagerPicker...");
+        debugPrint(
+          "SVPostOptions: Using RobustImagePicker.showPhotoManagerPicker...",
+        );
         pickedfiles = await RobustImagePicker.showPhotoManagerPicker(
           context,
           title: 'Select Photos',
         );
-        debugPrint("SVPostOptions: showPhotoManagerPicker returned ${pickedfiles.length} files");
+        debugPrint(
+          "SVPostOptions: showPhotoManagerPicker returned ${pickedfiles.length} files",
+        );
       } catch (e) {
-        debugPrint("SVPostOptions: showPhotoManagerPicker failed: $e, trying fallback...");
+        debugPrint(
+          "SVPostOptions: showPhotoManagerPicker failed: $e, trying fallback...",
+        );
 
-        // Fallback to standard image picker
         try {
           pickedfiles = await RobustImagePicker.pickMultipleImages();
-          debugPrint("SVPostOptions: Fallback pickMultipleImages returned ${pickedfiles.length} files");
+          debugPrint(
+            "SVPostOptions: Fallback pickMultipleImages returned ${pickedfiles.length} files",
+          );
         } catch (e2) {
           debugPrint("SVPostOptions: All pickers failed: $e2");
         }
       }
 
       if (pickedfiles.isNotEmpty) {
-        debugPrint("SVPostOptions: Processing ${pickedfiles.length} selected files");
-        // Filter supported formats
+        debugPrint(
+          "SVPostOptions: Processing ${pickedfiles.length} selected files",
+        );
         List<XFile> validFiles = [];
         for (var element in pickedfiles) {
           final srcPath = element.path;
           final srcName = element.name;
-          final isValid = _isValidMediaFile(srcPath) || _isValidMediaFile(srcName);
+          final isValid =
+              _isValidMediaFile(srcPath) || _isValidMediaFile(srcName);
           if (isValid) {
             validFiles.add(element);
             debugPrint("SVPostOptions: Valid file added: ${element.path}");
           } else {
-            debugPrint("SVPostOptions: Invalid file skipped: ${element.path} (name: ${element.name})");
+            debugPrint(
+              "SVPostOptions: Invalid file skipped: ${element.path} (name: ${element.name})",
+            );
           }
         }
 
         if (validFiles.isNotEmpty) {
-          debugPrint("SVPostOptions: Adding ${validFiles.length} valid files to BLoC");
+          debugPrint(
+            "SVPostOptions: Adding ${validFiles.length} valid files to BLoC",
+          );
           for (var element in validFiles) {
             imagefiles.add(element);
             debugPrint("SVPostOptions: Adding file to BLoC: ${element.path}");
@@ -111,10 +130,14 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             );
             debugPrint("SVPostOptions: SelectedFiles event sent to BLoC");
           }
-          debugPrint("SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now");
+          debugPrint(
+            "SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now",
+          );
           setState(() {});
           debugPrint("SVPostOptions: setState() called - UI should refresh");
-          debugPrint("SVPostOptions: Local imagefiles has ${imagefiles.length} total files");
+          debugPrint(
+            "SVPostOptions: Local imagefiles has ${imagefiles.length} total files",
+          );
         } else {
           _showErrorMessage(
             "No valid image files selected. Please select JPG, PNG, WebP, or GIF files.",
@@ -137,21 +160,23 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   bool _isValidMediaFile(String path) {
     if (path.isEmpty) return false;
     final lowercasePath = path.toLowerCase();
-    // Accept Android content URIs (limited access) as valid media
     if (lowercasePath.startsWith('content://')) return true;
     return lowercasePath.endsWith('.jpg') ||
-      lowercasePath.endsWith('.jpeg') ||
-      lowercasePath.endsWith('.png') ||
-      lowercasePath.endsWith('.webp') ||
-      lowercasePath.endsWith('.gif') ||
-      lowercasePath.endsWith('.heic');
+        lowercasePath.endsWith('.jpeg') ||
+        lowercasePath.endsWith('.png') ||
+        lowercasePath.endsWith('.webp') ||
+        lowercasePath.endsWith('.gif') ||
+        lowercasePath.endsWith('.heic');
   }
 
   void _showErrorMessage(String message) {
+    final theme = OneUITheme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
+        content: Text(message, style: const TextStyle(fontFamily: 'Poppins')),
+        backgroundColor: theme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -165,8 +190,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      // Check camera and microphone permissions using professional handler
-      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(
+        context,
+      );
       if (!cameraGranted) {
         setState(() {
           _isPickingMedia = false;
@@ -174,7 +200,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         return;
       }
 
-      final microphoneGranted = await PermissionUtils.ensureMicrophonePermission();
+      final microphoneGranted =
+          await PermissionUtils.ensureMicrophonePermission();
       if (!microphoneGranted) {
         _showErrorMessage("Microphone access is required for video recording.");
         setState(() {
@@ -214,8 +241,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      // Check camera permission using professional handler
-      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(
+        context,
+      );
       if (!cameraGranted) {
         setState(() {
           _isPickingMedia = false;
@@ -248,51 +276,63 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            offset: const Offset(0, 2),
-            blurRadius: 6,
-            spreadRadius: 0,
-          ),
-        ],
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.border, width: 0.5),
+        boxShadow: theme.cardShadow,
       ),
       child: Column(
         children: [
-          // Selected Media Preview - Show if any media selected
+          // Selected Media Preview
           BlocBuilder<AddPostBloc, AddPostState>(
             bloc: widget.searchPeopleBloc,
             builder: (context, state) {
-              print('SVPostOptions: BlocBuilder state: ${state.runtimeType}, BLoC files: ${widget.searchPeopleBloc.imagefiles.length}');
+              print(
+                'SVPostOptions: BlocBuilder state: ${state.runtimeType}, BLoC files: ${widget.searchPeopleBloc.imagefiles.length}',
+              );
               if (state is PaginationLoadedState &&
                   widget.searchPeopleBloc.imagefiles.isNotEmpty) {
-                print('SVPostOptions: Rendering ${widget.searchPeopleBloc.imagefiles.length} images in UI');
+                print(
+                  'SVPostOptions: Rendering ${widget.searchPeopleBloc.imagefiles.length} images in UI',
+                );
                 return Container(
-                  margin: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(8),
+                    color: theme.surfaceVariant,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.border, width: 0.5),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Media (${widget.searchPeopleBloc.imagefiles.length})',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins',
-                        ),
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.photo_on_rectangle,
+                            size: 16,
+                            color: theme.primary,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Media (${widget.searchPeopleBloc.imagefiles.length})',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              color: theme.textPrimary,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 10),
                       SizedBox(
-                        height: 50,
+                        height: 56,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: widget.searchPeopleBloc.imagefiles.length,
@@ -300,29 +340,37 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                             final imageone =
                                 widget.searchPeopleBloc.imagefiles[index];
                             return Container(
-                              margin: const EdgeInsets.only(right: 6),
+                              margin: const EdgeInsets.only(right: 8),
                               child: Stack(
                                 children: [
                                   Container(
-                                    width: 50,
-                                    height: 50,
+                                    width: 56,
+                                    height: 56,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
-                                        color: Colors.grey.withOpacity(0.3),
+                                        color: theme.border,
                                         width: 1,
                                       ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.08),
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(10),
                                       child: buildMediaItem(
                                         File(imageone.path),
+                                        theme,
                                       ),
                                     ),
                                   ),
                                   Positioned(
-                                    top: 2,
-                                    right: 2,
+                                    top: -2,
+                                    right: -2,
                                     child: GestureDetector(
                                       onTap: () {
                                         setState(() {});
@@ -335,13 +383,26 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                                         );
                                       },
                                       child: Container(
-                                        padding: const EdgeInsets.all(2),
-                                        decoration: const BoxDecoration(
-                                          color: Colors.red,
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: theme.error,
                                           shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: theme.cardBackground,
+                                            width: 2,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: theme.error.withOpacity(
+                                                0.3,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
                                         ),
                                         child: const Icon(
-                                          Icons.close,
+                                          CupertinoIcons.xmark,
                                           color: Colors.white,
                                           size: 10,
                                         ),
@@ -361,22 +422,69 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
               return const SizedBox();
             },
           ),
-          // Media Options - Compact grid layout for side-by-side display
-          Container(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Media Options Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Row(
               children: [
-                const Text(
+                Icon(
+                  CupertinoIcons.photo_camera,
+                  size: 18,
+                  color: theme.textSecondary,
+                ),
+                const SizedBox(width: 8),
+                Text(
                   'Add Media',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     fontFamily: 'Poppins',
+                    color: theme.textPrimary,
                   ),
                 ),
-                const SizedBox(height: 8),
-                _buildCompactMediaOptions(context),
+              ],
+            ),
+          ),
+          // Media Options Grid - One UI 8.5 Style
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildMediaOptionCard(
+                    context: context,
+                    theme: theme,
+                    icon: CupertinoIcons.photo_on_rectangle,
+                    title: 'Gallery',
+                    color: const Color(0xFF0A84FF),
+                    onTap: _isPickingMedia ? null : openImages,
+                    isLoading: _isPickingMedia,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildMediaOptionCard(
+                    context: context,
+                    theme: theme,
+                    icon: CupertinoIcons.videocam_fill,
+                    title: 'Video',
+                    color: const Color(0xFFAF52DE),
+                    onTap: _isPickingMedia ? null : openVideo,
+                    isLoading: false,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _buildMediaOptionCard(
+                    context: context,
+                    theme: theme,
+                    icon: CupertinoIcons.camera_fill,
+                    title: 'Camera',
+                    color: const Color(0xFF34C759),
+                    onTap: _isPickingMedia ? null : openCamera,
+                    isLoading: false,
+                  ),
+                ),
               ],
             ),
           ),
@@ -385,299 +493,94 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     );
   }
 
-  List<Widget> _buildMediaOptions(BuildContext context, bool isTablet) {
-    return [
-      _buildMediaOption(
-        context: context,
-        icon: Icons.photo_library_outlined,
-        title: translation(context).lbl_from_gallery,
-        subtitle: _isPickingMedia ? 'Loading...' : 'Choose photos or videos',
-        color: Colors.blue[700]!,
-        onTap: _isPickingMedia
-            ? null
-            : () {
-                openImages();
-              },
-        isLoading: _isPickingMedia,
-        isTablet: false,
-      ),
-      const SizedBox(height: 8),
-      _buildMediaOption(
-        context: context,
-        icon: Icons.videocam_outlined,
-        title: translation(context).lbl_take_video,
-        subtitle: 'Record a new video',
-        color: Colors.purple[700]!,
-        onTap: _isPickingMedia
-            ? null
-            : () {
-                openVideo();
-              },
-        isLoading: false,
-        isTablet: false,
-      ),
-      const SizedBox(height: 8),
-      _buildMediaOption(
-        context: context,
-        icon: Icons.camera_alt_outlined,
-        title: translation(context).lbl_take_picture,
-        subtitle: 'Capture a new photo',
-        color: Colors.green[700]!,
-        onTap: _isPickingMedia
-            ? null
-            : () {
-                openCamera();
-              },
-        isLoading: false,
-        isTablet: false,
-      ),
-      const SizedBox(height: 16), // Bottom padding
-    ];
-  }
-
-  Widget _buildCompactMediaOptions(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildCompactMediaOption(
-            context: context,
-            icon: Icons.photo_library_outlined,
-            title: 'Gallery',
-            color: Colors.blue[700]!,
-            onTap: _isPickingMedia
-                ? null
-                : () {
-                    openImages();
-                  },
-            isLoading: _isPickingMedia,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildCompactMediaOption(
-            context: context,
-            icon: Icons.videocam_outlined,
-            title: 'Video',
-            color: Colors.purple[700]!,
-            onTap: _isPickingMedia
-                ? null
-                : () {
-                    openVideo();
-                  },
-            isLoading: false,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _buildCompactMediaOption(
-            context: context,
-            icon: Icons.camera_alt_outlined,
-            title: 'Camera',
-            color: Colors.green[700]!,
-            onTap: _isPickingMedia
-                ? null
-                : () {
-                    openCamera();
-                  },
-            isLoading: false,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCompactMediaOption({
+  Widget _buildMediaOptionCard({
     required BuildContext context,
+    required OneUITheme theme,
     required IconData icon,
     required String title,
     required Color color,
     required VoidCallback? onTap,
     required bool isLoading,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color.withOpacity(0.25), width: 1.2),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                shape: BoxShape.circle,
-              ),
-              child: isLoading
-                  ? Center(
-                      child: SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(color),
-                        ),
-                      ),
-                    )
-                  : Icon(icon, size: 20, color: color),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: onTap == null ? Colors.grey[400] : Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMediaOption({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color color,
-    required VoidCallback? onTap,
-    required bool isLoading,
-    required bool isTablet,
-  }) {
-    return Container(
-      margin: EdgeInsets.symmetric(
-        horizontal: isTablet ? 4 : 0,
-        vertical: isTablet ? 0 : 1,
-      ),
+    return Material(
+      color: theme.cardBackground,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: color.withOpacity(0.2),
+              width: 1.5,
+            ),
+            gradient: LinearGradient(
+              colors: [
+                color.withOpacity(theme.isDark ? 0.12 : 0.06),
+                color.withOpacity(theme.isDark ? 0.05 : 0.02),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
-          child: isTablet
-              ? Column(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  color,
-                                ),
-                              ),
-                            )
-                          : Icon(icon, size: 24, color: color),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins',
-                        color: onTap == null
-                            ? Colors.grey[400]
-                            : Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  color,
-                                ),
-                              ),
-                            )
-                          : Icon(icon, size: 22, color: color),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                              color: onTap == null
-                                  ? Colors.grey[400]
-                                  : Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      color: Colors.grey[400],
-                      size: 20,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(theme.isDark ? 0.2 : 0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withOpacity(0.15),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
+                child: isLoading
+                    ? Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(color),
+                          ),
+                        ),
+                      )
+                    : Icon(icon, size: 24, color: color),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  color: onTap == null ? theme.textTertiary : theme.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget buildMediaItem(File file) {
+  Widget buildMediaItem(File file, OneUITheme theme) {
     final path = file.path;
-    // First check for common video extensions
     final lower = path.toLowerCase();
     if (lower.endsWith('.mp4') ||
         lower.endsWith('.mov') ||
         lower.endsWith('.avi') ||
         lower.endsWith('.mkv') ||
         lower.endsWith('.webm')) {
-      // Display video with play icon overlay
       return Stack(
         children: [
           AspectRatio(aspectRatio: 1, child: DisplayVideo(selectedByte: file)),
@@ -685,13 +588,20 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
               ),
-              child: const Center(
-                child: Icon(
-                  Icons.play_circle_fill_rounded,
-                  color: Colors.white,
-                  size: 24,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    CupertinoIcons.play_fill,
+                    color: theme.primary,
+                    size: 14,
+                  ),
                 ),
               ),
             ),
@@ -700,8 +610,8 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
       );
     }
 
-    // Determine if it looks like an image (by extension) or is a content URI
-    final looksLikeImage = lower.endsWith('.jpg') ||
+    final looksLikeImage =
+        lower.endsWith('.jpg') ||
         lower.endsWith('.jpeg') ||
         lower.endsWith('.png') ||
         lower.endsWith('.webp') ||
@@ -709,101 +619,61 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         lower.endsWith('.heic') ||
         lower.endsWith('.heif');
 
-    if (looksLikeImage || path.startsWith('content://') || path.startsWith('/data/')) {
-      // Try to read bytes and render as image; this handles content URIs and files without extension
+    if (looksLikeImage ||
+        path.startsWith('content://') ||
+        path.startsWith('/data/')) {
       return FutureBuilder<List<int>>(
         future: XFile(path).readAsBytes(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
-              color: Colors.grey[200],
-              child: const Center(
+              color: theme.surfaceVariant,
+              child: Center(
                 child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+                  ),
                 ),
               ),
             );
           }
-          if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+          if (snapshot.hasError ||
+              snapshot.data == null ||
+              snapshot.data!.isEmpty) {
             debugPrint('buildMediaItem error: ${snapshot.error}');
-            return Container(
-              color: Colors.grey[200],
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.insert_drive_file_outlined,
-                    color: Colors.grey[600],
-                    size: 20,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Unsupported file',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 8,
-                      fontFamily: 'Poppins',
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
+            return _buildUnsupportedFileWidget(theme);
           }
 
-          // Render image from bytes with a fallback if decoding fails
           return Image.memory(
             Uint8List.fromList(snapshot.data!),
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
               debugPrint('Image.memory error: $error');
-              return Container(
-                color: Colors.grey[200],
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.insert_drive_file_outlined,
-                      color: Colors.grey[600],
-                      size: 20,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Unsupported file',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 8,
-                        fontFamily: 'Poppins',
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              );
+              return _buildUnsupportedFileWidget(theme);
             },
           );
         },
       );
     }
 
-    // Fallback: unknown file type -> show generic file icon
+    return _buildUnsupportedFileWidget(theme);
+  }
+
+  Widget _buildUnsupportedFileWidget(OneUITheme theme) {
     return Container(
-      color: Colors.grey[200],
+      color: theme.surfaceVariant,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.insert_drive_file_outlined,
-            color: Colors.grey[600],
-            size: 20,
-          ),
-          const SizedBox(height: 4),
+          Icon(CupertinoIcons.doc, color: theme.textTertiary, size: 18),
+          const SizedBox(height: 2),
           Text(
-            'Unsupported file',
+            'File',
             style: TextStyle(
-              color: Colors.grey[600],
+              color: theme.textTertiary,
               fontSize: 8,
               fontFamily: 'Poppins',
             ),

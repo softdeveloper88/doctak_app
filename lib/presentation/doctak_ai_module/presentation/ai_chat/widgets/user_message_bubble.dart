@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 
 import '../../../data/models/ai_chat_model/ai_chat_message_model.dart';
-
 
 class UserMessageBubble extends StatelessWidget {
   final AiChatMessageModel message;
@@ -18,7 +18,8 @@ class UserMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
+    final theme = OneUITheme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -33,7 +34,7 @@ class UserMessageBubble extends StatelessWidget {
                 Flexible(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.blue[600],
+                      color: theme.primary,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.all(16),
@@ -50,10 +51,10 @@ class UserMessageBubble extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-                        
+
                         // File attachment (if any)
-                        if (message.filePath != null) 
-                          _buildFileAttachment(context),
+                        if (message.filePath != null)
+                          _buildFileAttachment(context, theme),
                       ],
                     ),
                   ),
@@ -61,31 +62,32 @@ class UserMessageBubble extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const SizedBox(width: 8),
-          
+
           // Avatar
-          showAvatar ? Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person,
-              size: 18,
-              color: Colors.blue[600],
-            ),
-          ) : const SizedBox(width: 36),
+          showAvatar
+              ? Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: theme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.person, size: 18, color: theme.primary),
+                )
+              : const SizedBox(width: 36),
         ],
       ),
     );
   }
-  
-  Widget _buildFileAttachment(BuildContext context) {
+
+  Widget _buildFileAttachment(BuildContext context, OneUITheme theme) {
     final mimeType = message.mimeType ?? '';
-    
+    final errorPlaceholderColor = theme.isDark
+        ? Colors.grey[800]!
+        : Colors.grey.shade200;
+
     if (mimeType.startsWith('image/')) {
       // Priority 1: Use fileBytes if available (most reliable)
       if (message.fileBytes != null && message.fileBytes!.isNotEmpty) {
@@ -101,9 +103,13 @@ class UserMessageBubble extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   height: 150,
-                  color: Colors.grey.shade200,
-                  child: const Center(
-                    child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                  color: errorPlaceholderColor,
+                  child: Center(
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 48,
+                      color: theme.textSecondary,
+                    ),
                   ),
                 );
               },
@@ -111,26 +117,31 @@ class UserMessageBubble extends StatelessWidget {
           ),
         );
       }
-      
+
       // Priority 2: Validate and use filePath
       if (message.filePath == null || message.filePath!.trim().isEmpty) {
         return Container(
           margin: const EdgeInsets.only(top: 8),
           height: 150,
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
+            color: errorPlaceholderColor,
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Center(
-            child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+          child: Center(
+            child: Icon(
+              Icons.broken_image,
+              size: 48,
+              color: theme.textSecondary,
+            ),
           ),
         );
       }
-      
+
       // Check if path is a local file or URL
-      final isLocalFile = !message.filePath!.startsWith('http://') && 
-                          !message.filePath!.startsWith('https://');
-      
+      final isLocalFile =
+          !message.filePath!.startsWith('http://') &&
+          !message.filePath!.startsWith('https://');
+
       return Container(
         margin: const EdgeInsets.only(top: 8),
         child: ClipRRect(
@@ -144,9 +155,13 @@ class UserMessageBubble extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 150,
-                      color: Colors.grey.shade200,
-                      child: const Center(
-                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                      color: errorPlaceholderColor,
+                      child: Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: theme.textSecondary,
+                        ),
                       ),
                     );
                   },
@@ -159,9 +174,13 @@ class UserMessageBubble extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 150,
-                      color: Colors.grey.shade200,
-                      child: const Center(
-                        child: Icon(Icons.broken_image, size: 48, color: Colors.grey),
+                      color: errorPlaceholderColor,
+                      child: Center(
+                        child: Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: theme.textSecondary,
+                        ),
                       ),
                     );
                   },

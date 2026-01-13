@@ -1,82 +1,71 @@
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebPageScreen extends StatefulWidget {
-  String url;
-  String page_name;
-  String htmlString;
-  bool hasHeaders;
-  bool isHtml;
+  final String url;
+  final String pageName;
+  final String htmlString;
+  final bool hasHeaders;
+  final bool isHtml;
 
-  WebPageScreen({
-    Key? key,
+  const WebPageScreen({
+    super.key,
     this.url = '',
-    this.page_name = '',
+    this.pageName = '',
     this.htmlString = '',
     this.hasHeaders = false,
     this.isHtml = false,
-  }) : super(key: key);
+  });
 
   @override
   State<WebPageScreen> createState() => _WebPageScreenState();
 }
 
 class _WebPageScreenState extends State<WebPageScreen> {
-  WebViewController? _webViewController = WebViewController();
-  bool isDownloadingQRCode = false;
-  bool isHomeIcon = false;
+  WebViewController? _webViewController;
+  bool _isLoading = true;
+  double _loadingProgress = 0;
 
   @override
   void initState() {
-    webViewRequest();
     super.initState();
+    _initWebView();
   }
 
-  webViewRequest() {
+  void _initWebView() {
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
+      ..setBackgroundColor(Colors.transparent)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
-            // Update loading bar.
+            setState(() {
+              _loadingProgress = progress / 100;
+              if (progress == 100) {
+                _isLoading = false;
+              }
+            });
           },
-          onPageStarted: (String url) async {
-            // var urlPayment= url.contains('bypass_payment');
-            // print('onPageStarted $url');
-            // if (url=='${AppConfig.BASE_URL}/api/ipay88/response') {
-            //   setState(() {
-            //     isHomeIcon=true;
-            //   });
-            //   //  https://carkee.my/api/v2/ipay-webview/7/bypass_payment
-            // }else if (urlPayment) {
-            //   setState(() {
-            //     isHomeIcon=true;
-            //   });
-            // }
-            // if(url=='${AppConfig.BASE_URL}/api/ipay88/response'){
-            //   await getApiResponse(url);
-            //   // Navigator.push(
-            //   //   context,
-            //   //   MaterialPageRoute(
-            //   //     builder: (context) => const MainScreen(),
-            //   //   ),
-            //   // );
-            // }
+          onPageStarted: (String url) {
+            setState(() {
+              _isLoading = true;
+            });
           },
           onPageFinished: (String url) {
-            print('onPageFinished $url');
+            setState(() {
+              _isLoading = false;
+            });
           },
           onWebResourceError: (WebResourceError error) {
-            print('onWebResourceError $error');
+            debugPrint('WebView error: ${error.description}');
           },
           onNavigationRequest: (NavigationRequest request) {
             if (request.url.startsWith('https://www.youtube.com/')) {
               return NavigationDecision.prevent;
             }
-
             return NavigationDecision.navigate;
           },
         ),
@@ -86,50 +75,84 @@ class _WebPageScreenState extends State<WebPageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackground,
         appBar: DoctakAppBar(
-          title: widget.page_name,
+          title: widget.pageName,
           titleIcon: Icons.web_rounded,
         ),
-        body: buildBody(),
+        body: _buildBody(theme),
       ),
     );
   }
 
-  buildBody() {
+  Widget _buildBody(OneUITheme theme) {
     if (_webViewController != null) {
-      return SizedBox.expand(
-        child: WebViewWidget(
-          controller: _webViewController!,
-        ),
+      return Stack(
+        children: [
+          // WebView
+          Container(
+            color: theme.cardBackground,
+            child: WebViewWidget(controller: _webViewController!),
+          ),
+
+          // Loading indicator
+          if (_isLoading)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Column(
+                children: [
+                  LinearProgressIndicator(
+                    value: _loadingProgress,
+                    backgroundColor: theme.surfaceVariant,
+                    valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+                    minHeight: 3,
+                  ),
+                ],
+              ),
+            ),
+        ],
       );
     } else {
-       SizedBox.expand(
+      return Container(
+        color: theme.cardBackground,
         child: Center(
-          child: Text(
-            translation(context).msg_webview_error,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme.error.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 48,
+                  color: theme.error,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                translation(context).msg_webview_error,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: theme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       );
     }
-  }
-
-  AppBar buildAppBar(BuildContext context) {
-    return AppBar(
-      // backgrou   ndColor: Colors.white,
-      // centerTitle: true,
-      leading: Builder(
-        builder: (context) => const BackButton(),
-      ),
-      title: Text(
-        widget.page_name,
-        // style: TextStyle(fontSize: 16, color: MyTheme.accent_color),
-      ),
-      elevation: 0.0,
-      titleSpacing: 0,
-    );
   }
 }

@@ -6,8 +6,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/job_details_shimmer.dart';
@@ -68,9 +67,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     if (_invalidJobId) {
       return Scaffold(
-        backgroundColor: svGetScaffoldColor(),
+        backgroundColor: theme.scaffoldBackground,
         appBar: DoctakAppBar(
           title: translation(context).lbl_job_detail,
           titleIcon: Icons.work_outline_rounded,
@@ -83,13 +84,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           },
         ),
         body: Center(
-          child: Text('This job is no longer available'),
+          child: Text(
+            'This job is no longer available',
+            style: TextStyle(color: theme.textSecondary),
+          ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_job_detail,
         titleIcon: Icons.work_outline_rounded,
@@ -107,12 +111,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withAlpha(25),
+                  color: theme.primary.withAlpha(25),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.share_outlined,
-                  color: Colors.blue[600],
+                  color: theme.primary,
                   size: 16,
                 ),
               ),
@@ -249,6 +253,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     required IconData icon,
     bool isExpired = false,
   }) {
+    final theme = OneUITheme.of(context);
     String formattedDate = date != null
         ? DateFormat('MMM dd, yyyy').format(DateTime.parse(date))
         : translation(context).lbl_not_available;
@@ -258,10 +263,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
-            color: Colors.grey,
+            color: theme.textSecondary,
           ),
         ),
         const SizedBox(height: 4),
@@ -271,14 +276,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: isExpired
-                    ? Colors.red.withOpacity(0.1)
-                    : Colors.blue.withOpacity(0.1),
+                    ? theme.error.withOpacity(0.1)
+                    : theme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 14,
-                color: isExpired ? Colors.red : Colors.blue,
+                color: isExpired ? theme.error : theme.primary,
               ),
             ),
             const SizedBox(width: 8),
@@ -289,7 +294,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   fontFamily: 'Poppins',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: isExpired ? Colors.red : null,
+                  color: isExpired ? theme.error : theme.textPrimary,
                 ),
               ),
             ),
@@ -304,16 +309,17 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     required String title,
     required String value,
   }) {
+    final theme = OneUITheme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: theme.primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: Colors.blue, size: 16),
+          child: Icon(icon, color: theme.primary, size: 16),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -322,20 +328,21 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
-                  color: Colors.grey,
+                  color: theme.textSecondary,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   height: 1.4,
+                  color: theme.textPrimary,
                 ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -348,19 +355,34 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   }
 
   Future<bool?> _showConfirmDialog() async {
+    final theme = OneUITheme.of(context);
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(translation(context).lbl_leave_app),
-        content: Text(translation(context).msg_open_link_confirm),
+        backgroundColor: theme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          translation(context).lbl_leave_app,
+          style: TextStyle(color: theme.textPrimary),
+        ),
+        content: Text(
+          translation(context).msg_open_link_confirm,
+          style: TextStyle(color: theme.textSecondary),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(translation(context).lbl_no_answer),
+            child: Text(
+              translation(context).lbl_no_answer,
+              style: TextStyle(color: theme.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(translation(context).lbl_yes),
+            child: Text(
+              translation(context).lbl_yes,
+              style: TextStyle(color: theme.primary),
+            ),
           ),
         ],
       ),
@@ -383,21 +405,24 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   // New Card Building Methods
   Widget _buildJobHeaderCard(job) {
+    final theme = OneUITheme.of(context);
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Colors.blue[600]!, Colors.blue[800]!],
+          colors: [theme.primary, theme.primary.withOpacity(0.8)],
         ),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: theme.isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: theme.primary.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -425,7 +450,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.amber,
+                      color: theme.warning,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -541,10 +566,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   }
 
   Widget _buildJobInfoCard(job) {
+    final theme = OneUITheme.of(context);
     return Card(
-      elevation: 1,
+      elevation: theme.isDark ? 0 : 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: context.cardColor,
+      color: theme.cardBackground,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -552,10 +578,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           children: [
             Text(
               translation(context).lbl_job_detail,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: theme.textPrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -579,14 +606,15 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               value: job.noOfJobs ?? translation(context).lbl_not_available,
             ),
             const SizedBox(height: 20),
-            const Divider(),
+            Divider(color: theme.divider),
             const SizedBox(height: 20),
             Text(
               translation(context).lbl_apply_date,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
+                color: theme.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -621,21 +649,23 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   }
 
   Widget _buildJobStatsCard(job) {
+    final theme = OneUITheme.of(context);
     return Card(
-      elevation: 1,
+      elevation: theme.isDark ? 0 : 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: context.cardColor,
+      color: theme.cardBackground,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "Job Statistics",
               style: TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: theme.textPrimary,
               ),
             ),
             const SizedBox(height: 20),
@@ -646,7 +676,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     icon: Icons.visibility,
                     label: "Views",
                     value: "${job.views ?? 0}",
-                    color: Colors.blue,
+                    color: theme.primary,
                   ),
                 ),
                 Expanded(
@@ -654,7 +684,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     icon: Icons.mouse,
                     label: "Clicks",
                     value: "${job.clicks ?? 0}",
-                    color: Colors.green,
+                    color: theme.success,
                   ),
                 ),
                 Expanded(
@@ -662,7 +692,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     icon: Icons.people,
                     label: "Applicants",
                     value: "${jobsBloc.jobDetailModel.totalApplicants ?? 0}",
-                    color: Colors.orange,
+                    color: theme.warning,
                   ),
                 ),
               ],
@@ -719,10 +749,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   }
 
   Widget _buildSpecialtiesCard(job) {
+    final theme = OneUITheme.of(context);
+    final accentColor = const Color(0xFF9C27B0); // Purple accent
     return Card(
-      elevation: 1,
+      elevation: theme.isDark ? 0 : 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: context.cardColor,
+      color: theme.cardBackground,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -733,22 +765,23 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1),
+                    color: accentColor.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.medical_services,
-                    color: Colors.purple,
+                    color: accentColor,
                     size: 20,
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   "Medical Specialties",
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
                   ),
                 ),
               ],
@@ -769,16 +802,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.purple.withOpacity(0.1),
+                    color: accentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.purple.withOpacity(0.3)),
+                    border: Border.all(color: accentColor.withOpacity(0.3)),
                   ),
                   child: Text(
                     displayText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
-                      color: Colors.purple,
+                      color: accentColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -792,10 +825,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   }
 
   Widget _buildDescriptionCard(job) {
+    final theme = OneUITheme.of(context);
+    final accentColor = const Color(0xFF009688); // Teal accent
     return Card(
-      elevation: 1,
+      elevation: theme.isDark ? 0 : 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: context.cardColor,
+      color: theme.cardBackground,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -806,22 +841,19 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.teal.withOpacity(0.1),
+                    color: accentColor.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.description,
-                    color: Colors.teal,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.description, color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   translation(context).lbl_description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
                   ),
                 ),
               ],
@@ -838,10 +870,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     : const NeverScrollableScrollPhysics(),
                 child: HtmlWidget(
                   job.description ?? "",
-                  textStyle: const TextStyle(
+                  textStyle: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     height: 1.5,
+                    color: theme.textPrimary,
                   ),
                 ),
               ),
@@ -856,14 +889,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 _isDescriptionExpanded
                     ? Icons.keyboard_arrow_up
                     : Icons.keyboard_arrow_down,
-                color: Colors.teal,
+                color: accentColor,
               ),
               label: Text(
                 _isDescriptionExpanded
                     ? translation(context).lbl_show_less
                     : translation(context).lbl_show_more,
-                style: const TextStyle(
-                  color: Colors.teal,
+                style: TextStyle(
+                  color: accentColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -875,10 +908,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   }
 
   Widget _buildUserInfoCard(user) {
+    final theme = OneUITheme.of(context);
+    final accentColor = const Color(0xFF3F51B5); // Indigo accent
     return Card(
-      elevation: 1,
+      elevation: theme.isDark ? 0 : 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: context.cardColor,
+      color: theme.cardBackground,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -889,22 +924,19 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.indigo.withOpacity(0.1),
+                    color: accentColor.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.person,
-                    color: Colors.indigo,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.person, color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   "Posted By",
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
                   ),
                 ),
               ],
@@ -918,7 +950,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.indigo.withOpacity(0.3),
+                      color: accentColor.withOpacity(0.3),
                       width: 2,
                     ),
                   ),
@@ -928,16 +960,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         ? CustomImageView(
                             imagePath: '${AppData.imageUrl}${user.profilePic!}',
                             fit: BoxFit.cover,
-                            // errorBuilder: (context, error, stackTrace) => Container(
-                            //   color: Colors.indigo.withOpacity(0.1),
-                            //   child: const Icon(Icons.person, color: Colors.indigo, size: 30),
-                            // ),
                           )
                         : Container(
-                            color: Colors.indigo.withOpacity(0.1),
-                            child: const Icon(
+                            color: accentColor.withOpacity(0.1),
+                            child: Icon(
                               Icons.person,
-                              color: Colors.indigo,
+                              color: accentColor,
                               size: 30,
                             ),
                           ),
@@ -950,10 +978,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     children: [
                       Text(
                         user.name ?? "Anonymous User",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
+                          color: theme.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -962,7 +991,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: theme.textSecondary,
                         ),
                       ),
                     ],
@@ -978,10 +1007,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   // Action buttons card matching job list item design
   Widget _buildActionButtonsCard(job) {
+    final theme = OneUITheme.of(context);
     return Card(
-      elevation: 1,
+      elevation: theme.isDark ? 0 : 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: context.cardColor,
+      color: theme.cardBackground,
       child: Container(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -992,22 +1022,19 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: theme.success.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.touch_app,
-                    color: Colors.green,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.touch_app, color: theme.success, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   translation(context).lbl_actions,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: theme.textPrimary,
                   ),
                 ),
               ],
@@ -1030,6 +1057,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   // Main action row with proper flex handling
   Widget _buildMainActionRow(job) {
+    final theme = OneUITheme.of(context);
     bool hasApplied = jobsBloc.jobDetailModel.hasApplied ?? false;
     bool hasLink = job.link != null && job.link!.isNotEmpty;
     bool isJobOwner = job.user?.id == AppData.logInUserId;
@@ -1050,7 +1078,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[600],
+                backgroundColor: theme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -1097,7 +1125,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red[600],
+                backgroundColor: theme.error,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -1139,9 +1167,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 }
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.blue[600],
+                foregroundColor: theme.primary,
                 side: BorderSide(
-                  color: Colors.blue.withOpacity(0.3),
+                  color: theme.primary.withOpacity(0.3),
                   width: 1.5,
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -1172,6 +1200,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   // View applicants button
   Widget _buildViewApplicantsButton() {
+    final theme = OneUITheme.of(context);
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
@@ -1179,7 +1208,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           JobApplicantScreen(widget.jobId, jobsBloc).launch(context);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green[600],
+          backgroundColor: theme.success,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(

@@ -1,16 +1,13 @@
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart' as http;
-
-import '../../../utils/SVCommon.dart';
 
 class AppSettingScreen extends StatefulWidget {
   const AppSettingScreen({super.key});
@@ -22,103 +19,156 @@ class AppSettingScreen extends StatefulWidget {
 class _AppSettingScreenState extends State<AppSettingScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_app_settings,
         titleIcon: Icons.settings_rounded,
       ),
       body: Container(
-        color: appStore.isDarkMode ? Colors.black : Colors.grey[50],
+        color: theme.scaffoldBackground,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: <Widget>[
             // Theme Setting Card
-            Container(
+            Observer(
+              builder: (_) => Container(
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ],
+                border: Border.all(
+                  color: theme.isDark
+                      ? theme.surfaceVariant
+                      : Colors.transparent,
+                ),
+                boxShadow: theme.isDark ? [] : theme.cardShadow,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        appStore.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                        color: Colors.blue[700],
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            translation(context).lbl_theme_appearance,
-                            style: const TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: theme.primary.withOpacity(0.1),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            appStore.isDarkMode ? 'Dark mode enabled' : 'Light mode enabled',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                            ),
+                          child: Icon(
+                            appStore.isUsingSystemTheme
+                                ? Icons.brightness_auto_rounded
+                                : (appStore.isDarkMode
+                                    ? Icons.dark_mode_rounded
+                                    : Icons.light_mode_rounded),
+                            color: theme.primary,
+                            size: 24,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                translation(context).lbl_theme_appearance,
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                appStore.isUsingSystemTheme
+                                    ? 'Using system theme'
+                                    : (appStore.isDarkMode
+                                        ? 'Dark mode'
+                                        : 'Light mode'),
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 13,
+                                  color: theme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    Switch(
-                      onChanged: (val) {
-                        appStore.toggleDarkMode(value: val);
-                      },
-                      value: appStore.isDarkMode,
-                      activeColor: Colors.blue,
-                      activeTrackColor: Colors.blue.withOpacity(0.3),
-                      inactiveThumbColor: Colors.grey[400],
-                      inactiveTrackColor: Colors.grey[300],
+                    const SizedBox(height: 16),
+                    // Theme Selection Options
+                    Row(
+                      children: [
+                        // System Theme Option
+                        Expanded(
+                          child: _buildThemeOption(
+                            context: context,
+                            theme: theme,
+                            icon: Icons.brightness_auto_rounded,
+                            label: 'System',
+                            isSelected: appStore.isUsingSystemTheme,
+                            onTap: () {
+                              appStore.useSystemTheme();
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Light Theme Option
+                        Expanded(
+                          child: _buildThemeOption(
+                            context: context,
+                            theme: theme,
+                            icon: Icons.light_mode_rounded,
+                            label: 'Light',
+                            isSelected: !appStore.isUsingSystemTheme && !appStore.isDarkMode,
+                            onTap: () {
+                              appStore.toggleDarkMode(value: false);
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Dark Theme Option
+                        Expanded(
+                          child: _buildThemeOption(
+                            context: context,
+                            theme: theme,
+                            icon: Icons.dark_mode_rounded,
+                            label: 'Dark',
+                            isSelected: !appStore.isUsingSystemTheme && appStore.isDarkMode,
+                            onTap: () {
+                              appStore.toggleDarkMode(value: true);
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
+            ),
             // Language Setting Card
             Container(
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ],
+                border: Border.all(
+                  color: theme.isDark
+                      ? theme.surfaceVariant
+                      : Colors.transparent,
+                ),
+                boxShadow: theme.isDark ? [] : theme.cardShadow,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -131,9 +181,9 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                         color: Colors.green.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.translate_rounded,
-                        color: Colors.green[700],
+                        color: Colors.green,
                         size: 24,
                       ),
                     ),
@@ -144,11 +194,11 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                         children: [
                           Text(
                             translation(context).lbl_app_language,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                              color: theme.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -157,7 +207,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 13,
-                              color: Colors.grey[600],
+                              color: theme.textSecondary,
                             ),
                           ),
                         ],
@@ -172,21 +222,25 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        color: theme.cardBackground,
                         elevation: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          child: Row(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: const Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 Icons.language_rounded,
-                                color: Colors.green[700],
+                                color: Colors.green,
                                 size: 20,
                               ),
-                              const SizedBox(width: 8),
+                              SizedBox(width: 8),
                               Icon(
                                 Icons.arrow_drop_down_rounded,
-                                color: Colors.green[700],
+                                color: Colors.green,
                                 size: 20,
                               ),
                             ],
@@ -198,13 +252,17 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               value: 'en',
                               child: Row(
                                 children: [
-                                  const Text('🇺🇸', style: TextStyle(fontSize: 18)),
+                                  const Text(
+                                    '🇺🇸',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     translation(context).lbl_english_language,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
+                                      color: theme.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -214,13 +272,17 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               value: 'ar',
                               child: Row(
                                 children: [
-                                  const Text('🇸🇦', style: TextStyle(fontSize: 18)),
+                                  const Text(
+                                    '🇸🇦',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     translation(context).lbl_arabic_language,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
+                                      color: theme.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -230,13 +292,17 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               value: 'fa',
                               child: Row(
                                 children: [
-                                  const Text('🇮🇷', style: TextStyle(fontSize: 18)),
+                                  const Text(
+                                    '🇮🇷',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     translation(context).lbl_farsi_language,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
+                                      color: theme.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -246,13 +312,17 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               value: 'fr',
                               child: Row(
                                 children: [
-                                  const Text('🇫🇷', style: TextStyle(fontSize: 18)),
+                                  const Text(
+                                    '🇫🇷',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     translation(context).lbl_french_language,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
+                                      color: theme.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -262,13 +332,17 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               value: 'es',
                               child: Row(
                                 children: [
-                                  const Text('🇪🇸', style: TextStyle(fontSize: 18)),
+                                  const Text(
+                                    '🇪🇸',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     translation(context).lbl_spanish_language,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
+                                      color: theme.textPrimary,
                                     ),
                                   ),
                                 ],
@@ -278,41 +352,27 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               value: 'de',
                               child: Row(
                                 children: [
-                                  const Text('🇩🇪', style: TextStyle(fontSize: 18)),
+                                  const Text(
+                                    '🇩🇪',
+                                    style: TextStyle(fontSize: 18),
+                                  ),
                                   const SizedBox(width: 12),
                                   Text(
                                     translation(context).lbl_german_language,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 14,
+                                      color: theme.textPrimary,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            // PopupMenuItem(
-                            //   value: 'ur',
-                            //   child: Row(
-                            //     children: [
-                            //       const Text('🇵🇰', style: TextStyle(fontSize: 18)),
-                            //       const SizedBox(width: 12),
-                            //       Text(
-                            //         translation(context).lbl_urdu_language,
-                            //         style: const TextStyle(
-                            //           fontFamily: 'Poppins',
-                            //           fontSize: 14,
-                            //         ),
-                            //       ),
-                            //     ],
-                            //   ),
-                            // ),
                           ];
                         },
                         onSelected: (value) async {
-                          if (value != null) {
-                            Locale _locale = await setLocale(value);
-                            MyApp.setLocale(context, _locale);
-                          }
+                          Locale newLocale = await setLocale(value);
+                          MyApp.setLocale(context, newLocale);
                         },
                       ),
                     ),
@@ -323,23 +383,25 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
             // Delete Account Card
             Container(
               decoration: BoxDecoration(
-                color: appStore.isDarkMode ? Colors.grey[900] : Colors.white,
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Colors.red.withOpacity(0.2),
+                  color: Colors.red.withOpacity(0.3),
                   width: 1,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.red.withOpacity(0.05),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ],
+                boxShadow: theme.isDark
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.05),
+                          offset: const Offset(0, 2),
+                          blurRadius: 8,
+                          spreadRadius: 0,
+                        ),
+                      ],
               ),
               child: InkWell(
-                onTap: () => deleteAccount(context),
+                onTap: () => _deleteAccount(context, theme),
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -352,9 +414,9 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                           color: Colors.red.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.delete_outline_rounded,
-                          color: Colors.red[600],
+                          color: Colors.red,
                           size: 24,
                         ),
                       ),
@@ -365,11 +427,11 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                           children: [
                             Text(
                               translation(context).lbl_delete_account,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.red[600],
+                                color: Colors.red,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -378,15 +440,15 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 13,
-                                color: Colors.grey[600],
+                                color: theme.textSecondary,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Icon(
+                      const Icon(
                         Icons.chevron_right_rounded,
-                        color: Colors.red[400],
+                        color: Colors.red,
                         size: 24,
                       ),
                     ],
@@ -401,91 +463,111 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
     );
   }
 
-  deleteAccount(BuildContext context) async {
-    return showDialog(
+  void _deleteAccount(BuildContext context, OneUITheme theme) {
+    showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext ctx) {
         return AlertDialog(
+          backgroundColor: theme.cardBackground,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
           ),
-          title: Row(
+          title: Column(
             children: [
-              Icon(
-                Icons.warning_rounded,
-                color: Colors.red[600],
-                size: 24,
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.warning_rounded,
+                  color: Colors.red,
+                  size: 28,
+                ),
               ),
-              const SizedBox(width: 12),
-              Flexible(
-                child: Text(
-                  translation(context).lbl_delete_account_confirmation,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+              const SizedBox(height: 16),
+              Text(
+                translation(context).lbl_delete_account_confirmation,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: theme.textPrimary,
                 ),
               ),
             ],
           ),
           content: Text(
             translation(context).msg_delete_account_warning,
-            style: const TextStyle(
+            textAlign: TextAlign.center,
+            style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
+              color: theme.textSecondary,
             ),
           ),
+          actionsAlignment: MainAxisAlignment.center,
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: theme.surfaceVariant),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      translation(context).lbl_cancel,
+                      style: TextStyle(
+                        color: theme.textSecondary,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      var result = await _deleteUserAccount();
+                      if (result) {
+                        AppSharedPreferences().clearSharedPreferencesData(
+                          context,
+                        );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      translation(context).lbl_delete,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: Text(
-                translation(context).lbl_cancel,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                var result = await deleteUserAccount();
-                if (result) {
-                  AppSharedPreferences().clearSharedPreferencesData(context);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                translation(context).lbl_delete,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              ],
             ),
           ],
         );
@@ -493,7 +575,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
     );
   }
 
-  Future<bool> deleteUserAccount() async {
+  Future<bool> _deleteUserAccount() async {
     final apiUrl = Uri.parse('${AppData.remoteUrl}/delete-account');
     try {
       final response = await http.get(
@@ -502,18 +584,59 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
           'Authorization': 'Bearer ${AppData.userToken!}',
         },
       );
-      // Response received
       if (response.statusCode == 200) {
-        // Handle successful account deletion
         return true;
       } else {
         return false;
-        throw Exception('Failed to delete account');
       }
     } catch (error) {
       return false;
-      // throw Exception('Error: $error');
     }
-    return false;
+  }
+
+  Widget _buildThemeOption({
+    required BuildContext context,
+    required dynamic theme,
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.primary.withOpacity(0.15)
+              : theme.surfaceVariant.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? theme.primary : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? theme.primary : theme.textSecondary,
+              size: 24,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? theme.primary : theme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

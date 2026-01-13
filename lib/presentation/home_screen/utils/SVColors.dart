@@ -15,8 +15,8 @@ const SVBodyDark = Color(0xFFF5F5F5);
 const SVDividerColor = Color(0xFFE1E5EF);
 const defaultBgColor = Color(0xFFFFFFFF);
 
-const appBackgroundColorDark = Color(0xFF121212);
-const cardBackgroundBlackDark = Color(0xFF1F1F1F);
+const appBackgroundColorDark = Color(0xFF0D1B2A);  // One UI 8.5 dark background
+const cardBackgroundBlackDark = Color(0xFF1B2838);  // One UI 8.5 dark card
 const color_primary_black = Color(0xFF131d25);
 const appColorPrimaryDarkLight = Color(0xFFF9FAFF);
 const iconColorPrimaryDark = Color(0xFF212121);

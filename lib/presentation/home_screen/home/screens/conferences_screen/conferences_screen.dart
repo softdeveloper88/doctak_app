@@ -1,23 +1,18 @@
-import 'dart:async';
-
-import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/virtualized_conferences_list.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/conferences_shimmer_loader.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-import '../../../../../main.dart' show appStore;
 import 'bloc/conference_bloc.dart';
 import 'bloc/conference_event.dart';
 import 'bloc/conference_state.dart';
@@ -34,35 +29,45 @@ class ConferencesScreen extends StatefulWidget {
 class _ConferencesScreenState extends State<ConferencesScreen> {
   final ScrollController _scrollController = ScrollController();
   final ConferenceBloc conferenceBloc = ConferenceBloc();
-  Timer? _debounce;
+  SplashBloc? _splashBloc;
   bool isSearchShow = true;
   TextEditingController searchController = TextEditingController();
+  bool _isInitialized = false;
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _scrollController.dispose();
     searchController.dispose();
     super.dispose();
   }
 
   @override
-  void initState() {
-    conferenceBloc.add(LoadPageEvent(
-      page: 1,
-      countryName: 'all',
-      searchTerm: '',
-    ));
-    BlocProvider.of<SplashBloc>(context).add(
-      LoadDropdownData1('', ''),
-    );
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      _splashBloc = BlocProvider.of<SplashBloc>(context);
+      _splashBloc?.add(LoadDropdownData1('', ''));
+      conferenceBloc.add(
+        LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
+    // Return loading indicator if bloc is not yet initialized
+    if (_splashBloc == null) {
+      return Scaffold(
+        backgroundColor: theme.scaffoldBackground,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_conference,
         titleIcon: Icons.event,
@@ -76,97 +81,200 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
         actions: [
           // Country dropdown and search actions moved here
           BlocConsumer<SplashBloc, SplashState>(
-            bloc: SplashBloc()..add(
-              LoadDropdownData1('', ''),
-            ),
+            bloc: _splashBloc!,
             listener: (_, __) {},
             builder: (context, state) {
               if (state is CountriesDataLoaded1) {
                 List<dynamic> list = state.countriesModelList;
+                // Get the selected country name or default to "All"
+                String selectedCountryName = state.countryName.isEmpty
+                    ? 'All'
+                    : state.countryName;
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Country flag selector
+                    // Country selector
                     Container(
                       margin: const EdgeInsets.only(right: 2),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
+                        color: theme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: PopupMenuButton<dynamic>(
-                        tooltip: 'Select Country',
+                      child: PopupMenuButton<String>(
+                        tooltip: translation(context).lbl_all_countries,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        offset: const Offset(0, 32),
+                        offset: const Offset(0, 40),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0,
+                            vertical: 6.0,
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                list.first.toString(),
-                                style: const TextStyle(fontSize: 11),
+                              Icon(
+                                Icons.public_rounded,
+                                size: 16,
+                                color: theme.primary,
                               ),
-                              const Icon(Icons.arrow_drop_down, size: 12),
+                              const SizedBox(width: 4),
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 80),
+                                child: Text(
+                                  selectedCountryName,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: theme.textPrimary,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_drop_down_rounded,
+                                size: 18,
+                                color: theme.primary,
+                              ),
                             ],
                           ),
                         ),
                         itemBuilder: (context) {
-                          return list.map((dynamic item) {
-                            return PopupMenuItem<dynamic>(
-                              value: item,
-                              child: Text(
-                                item.toString(),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black87,
+                          // Add "All" option at the beginning
+                          List<PopupMenuEntry<String>> items = [
+                            PopupMenuItem<String>(
+                              value: 'all',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.public_rounded,
+                                    size: 18,
+                                    color: theme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    translation(context).lbl_all_countries,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: selectedCountryName == 'All'
+                                          ? FontWeight.w600
+                                          : FontWeight.normal,
+                                      color: theme.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuDivider(),
+                          ];
+                          // Add country items - handle both Map and String formats
+                          for (final item in list) {
+                            String countryName;
+                            if (item is Map) {
+                              countryName = item['name']?.toString() ?? '';
+                            } else {
+                              countryName = item?.toString() ?? '';
+                            }
+                            if (countryName.isEmpty) continue;
+
+                            final bool isSelected =
+                                countryName == selectedCountryName;
+                            items.add(
+                              PopupMenuItem<String>(
+                                value: countryName,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_on_rounded,
+                                      size: 18,
+                                      color: isSelected
+                                          ? theme.primary
+                                          : theme.textSecondary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      countryName,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                        color: theme.textPrimary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
-                          }).toList();
+                          }
+                          return items;
                         },
-                        onSelected: (dynamic newValue) {
+                        onSelected: (String newValue) {
+                          final String displayName = newValue == 'all'
+                              ? ''
+                              : newValue;
                           conferenceBloc.add(
                             LoadPageEvent(
                               page: 1,
-                              countryName: newValue.toString(),
-                              searchTerm: state.searchTerms!,
+                              countryName: newValue,
+                              searchTerm: state.searchTerms ?? '',
                             ),
                           );
-                          BlocProvider.of<SplashBloc>(context).add(
-                            LoadDropdownData1(newValue.toString(), state.searchTerms ?? ''),
+                          _splashBloc?.add(
+                            LoadDropdownData1(
+                              displayName,
+                              state.searchTerms ?? '',
+                            ),
                           );
                         },
                       ),
                     ),
+                    const SizedBox(width: 4),
                     // Search button
-                    InkWell(
+                    DoctakSearchToggleButton(
+                      isSearching: isSearchShow,
                       onTap: () {
                         setState(() {
                           isSearchShow = !isSearchShow;
                         });
                       },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isSearchShow ? Icons.close : Icons.search,
-                          color: Colors.blue[600],
-                          size: 18,
-                        ),
-                      ),
                     ),
                     const SizedBox(width: 8),
                   ],
                 );
               } else if (state is CountriesDataError) {
-                return const SizedBox.shrink();
+                // Still show search button even on error
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DoctakSearchToggleButton(
+                      isSearching: isSearchShow,
+                      onTap: () {
+                        setState(() {
+                          isSearchShow = !isSearchShow;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                );
               } else {
-                return const SizedBox.shrink();
+                // Loading state - show search button
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DoctakSearchToggleButton(
+                      isSearching: isSearchShow,
+                      onTap: () {
+                        setState(() {
+                          isSearchShow = !isSearchShow;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                );
               }
             },
           ),
@@ -174,7 +282,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
       ),
       body: Column(
         children: [
-          _buildSearchField(),
+          _buildSearchField(theme),
           _buildConferenceList(),
           // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
@@ -182,155 +290,86 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
     );
   }
 
-
   // Build search field
-  Widget _buildSearchField() {
+  Widget _buildSearchField(OneUITheme theme) {
     return BlocConsumer<SplashBloc, SplashState>(
+      bloc: _splashBloc!,
       listener: (_, __) {},
       builder: (context, state) {
         if (state is CountriesDataLoaded1) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: isSearchShow ? 70 : 0,
-            child: isSearchShow
-              ? Container(
-                  color: svGetScaffoldColor(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: appStore.isDarkMode
-                          ? Colors.blueGrey[800]
-                          : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(24.0),
-                      border: Border.all(
-                        color: Colors.blue.withOpacity(0.2),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.05),
-                          offset: const Offset(0, 2),
-                          blurRadius: 6,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24.0),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Icon(
-                              Icons.search_rounded,
-                              color: Colors.blue.withOpacity(0.6),
-                              size: 24,
-                            ),
-                          ),
-                          Expanded(
-                            child: AppTextField(
-                              controller: searchController,
-                              textFieldType: TextFieldType.NAME,
-                              textStyle: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                color: appStore.isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
-                              ),
-                              onChanged: (searchTxt) async {
-                                if (_debounce?.isActive ?? false) {
-                                  _debounce?.cancel();
-                                }
-                                _debounce = Timer(
-                                  const Duration(milliseconds: 500), () {
-                                    conferenceBloc.add(
-                                      LoadPageEvent(
-                                        page: 1,
-                                        countryName: state.countryName,
-                                        searchTerm: searchTxt,
-                                      ),
-                                    );
-                                    BlocProvider.of<SplashBloc>(context)
-                                      .add(LoadDropdownData1(
-                                        state.countryName,
-                                        searchTxt,
-                                      ));
-                                  },
-                                );
-                              },
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: translation(context).lbl_search_conferences,
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: appStore.isDarkMode
-                                      ? Colors.white60
-                                      : Colors.black54,
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              // Clear the search text but keep search field visible
-                              searchController.clear();
-                              // Update search results
-                              conferenceBloc.add(LoadPageEvent(
-                                page: 1,
-                                countryName: state.countryName,
-                                searchTerm: '',
-                              ));
-                            },
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(24),
-                              bottomRight: Radius.circular(24),
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                borderRadius: const BorderRadius.only(
-                                  topRight: Radius.circular(24),
-                                  bottomRight: Radius.circular(24),
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.clear,
-                                color: Colors.blue.withOpacity(0.6),
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : const SizedBox(),
+          return DoctakCollapsibleSearchField(
+            isVisible: isSearchShow,
+            hintText: translation(context).lbl_search_conferences,
+            controller: searchController,
+            height: 72,
+            margin: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
+            onChanged: (searchTxt) {
+              conferenceBloc.add(
+                LoadPageEvent(
+                  page: 1,
+                  countryName: state.countryName,
+                  searchTerm: searchTxt,
+                ),
+              );
+              _splashBloc?.add(LoadDropdownData1(state.countryName, searchTxt));
+            },
+            onClear: () {
+              conferenceBloc.add(
+                LoadPageEvent(
+                  page: 1,
+                  countryName: state.countryName,
+                  searchTerm: '',
+                ),
+              );
+            },
           );
         } else if (state is DataError) {
-          BlocProvider.of<SplashBloc>(context).add(
-            LoadDropdownData1('', ''),
-          );
+          _splashBloc?.add(LoadDropdownData1('', ''));
           return RetryWidget(
             errorMessage: translation(context).msg_something_went_wrong_retry,
             onRetry: () {
               try {
-                conferenceBloc.add(LoadPageEvent(
-                  page: 1,
-                  countryName: 'all',
-                  searchTerm: '',
-                ));
+                conferenceBloc.add(
+                  LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''),
+                );
               } catch (e) {
                 debugPrint(e.toString());
               }
             },
           );
         } else {
-          return const Center();
+          // Loading state - still show search field
+          return DoctakCollapsibleSearchField(
+            isVisible: isSearchShow,
+            hintText: translation(context).lbl_search_conferences,
+            controller: searchController,
+            height: 72,
+            margin: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
+            ),
+            onChanged: (searchTxt) {
+              conferenceBloc.add(
+                LoadPageEvent(
+                  page: 1,
+                  countryName: 'all',
+                  searchTerm: searchTxt,
+                ),
+              );
+            },
+            onClear: () {
+              conferenceBloc.add(
+                LoadPageEvent(
+                  page: 1,
+                  countryName: 'all',
+                  searchTerm: '',
+                ),
+              );
+            },
+          );
         }
       },
     );
@@ -344,17 +383,14 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
         if (state is DataError) {
           showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-              content: Text(state.errorMessage),
-            ),
+            builder: (context) =>
+                AlertDialog(content: Text(state.errorMessage)),
           );
         }
       },
       builder: (context, state) {
         if (state is PaginationLoadingState) {
-          return Expanded(
-            child: ConferencesShimmerLoader(),
-          );
+          return Expanded(child: ConferencesShimmerLoader());
         } else if (state is PaginationLoadedState) {
           return Expanded(
             child: VirtualizedConferencesList(
@@ -367,11 +403,9 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
             errorMessage: translation(context).msg_something_went_wrong_retry,
             onRetry: () {
               try {
-                conferenceBloc.add(LoadPageEvent(
-                  page: 1,
-                  countryName: 'all',
-                  searchTerm: '',
-                ));
+                conferenceBloc.add(
+                  LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''),
+                );
               } catch (e) {
                 debugPrint(e.toString());
               }

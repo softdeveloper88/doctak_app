@@ -3,7 +3,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/b
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/improved_reply_comment_list_widget.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/virtualized_comment_list.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
 import 'package:flutter/material.dart';
@@ -38,9 +38,9 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = OneUITheme.of(context);
     final systemUiOverlayStyle =
-        (isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+        (theme.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
             .copyWith(
               statusBarColor: Colors.transparent,
               systemNavigationBarColor: Colors.transparent,
@@ -49,7 +49,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: systemUiOverlayStyle,
       child: Scaffold(
-        backgroundColor: svGetBgColor(),
+        backgroundColor: theme.scaffoldBackground,
         appBar: DoctakAppBar(
           title: translation(context).lbl_comments,
           titleIcon: Icons.chat_bubble_outline_rounded,
@@ -101,7 +101,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
           ),
         ),
         bottomSheet: Container(
-          color: svGetBgColor(),
+          color: theme.cardBackground,
           padding: EdgeInsets.only(
             left: 12,
             right: 12,

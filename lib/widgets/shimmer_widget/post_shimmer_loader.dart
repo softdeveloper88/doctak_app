@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -11,8 +12,11 @@ class PostShimmerLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = Colors.grey[300]!;
-    final highlightColor = Colors.grey[100]!;
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final baseColor = isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
     
     return ListView.builder(
       shrinkWrap: true,
@@ -22,21 +26,21 @@ class PostShimmerLoader extends StatelessWidget {
         return Shimmer.fromColors(
           baseColor: baseColor,
           highlightColor: highlightColor,
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.zero,
             child: Column(
               children: [
                 ListTile(
                   leading: CircleAvatar(
                     radius: 20,
-                    backgroundColor: Colors.white,
+                    backgroundColor: baseColor,
                   ),
-                  title: _ShimmerBox(height: 10),
-                  subtitle: _ShimmerBox(height: 10),
+                  title: _ShimmerBox(height: 10, color: baseColor),
+                  subtitle: _ShimmerBox(height: 10, color: baseColor),
                 ),
-                SizedBox(height: 8.0),
-                _ShimmerBox(height: 300),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
+                _ShimmerBox(height: 300, color: baseColor),
+                const SizedBox(height: 16.0),
               ],
             ),
           ),
@@ -48,8 +52,9 @@ class PostShimmerLoader extends StatelessWidget {
 
 class _ShimmerBox extends StatelessWidget {
   final double height;
+  final Color color;
   
-  const _ShimmerBox({required this.height});
+  const _ShimmerBox({required this.height, required this.color});
   
   @override
   Widget build(BuildContext context) {
@@ -57,7 +62,7 @@ class _ShimmerBox extends StatelessWidget {
       width: double.infinity,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: color,
         borderRadius: BorderRadius.circular(4.0),
       ),
     );

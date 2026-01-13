@@ -1,6 +1,7 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:doctak_app/core/app_export.dart';
 
+/// OneUI 8.5 styled icon button
 class CustomIconButton extends StatelessWidget {
   const CustomIconButton({
     Key? key,
@@ -11,71 +12,72 @@ class CustomIconButton extends StatelessWidget {
     this.decoration,
     this.child,
     this.onTap,
-  }) : super(
-          key: key,
-        );
+  }) : super(key: key);
 
   final Alignment? alignment;
-
   final double? height;
-
   final double? width;
-
   final EdgeInsetsGeometry? padding;
-
   final BoxDecoration? decoration;
-
   final Widget? child;
-
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return alignment != null
         ? Align(
             alignment: alignment ?? Alignment.center,
-            child: iconButtonWidget,
+            child: _buildButton(theme),
           )
-        : iconButtonWidget;
+        : _buildButton(theme);
   }
 
-  Widget get iconButtonWidget => SizedBox(
-        height: height ?? 0,
-        width: width ?? 0,
-        child: IconButton(
-          padding: EdgeInsets.zero,
-          icon: Container(
-            height: height ?? 0,
-            width: width ?? 0,
-            padding: padding ?? EdgeInsets.zero,
-            decoration: decoration ??
-                BoxDecoration(
-                  color: appTheme.gray500,
-                  borderRadius: BorderRadius.circular(26),
-                ),
-            child: child,
-          ),
-          onPressed: onTap,
+  Widget _buildButton(OneUITheme theme) {
+    return SizedBox(
+      height: height ?? 44,
+      width: width ?? 44,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        icon: Container(
+          height: height ?? 44,
+          width: width ?? 44,
+          padding: padding ?? EdgeInsets.zero,
+          decoration:
+              decoration ??
+              BoxDecoration(
+                color: theme.surfaceVariant,
+                borderRadius: BorderRadius.circular(22),
+              ),
+          child: child,
         ),
-      );
+        onPressed: onTap,
+      ),
+    );
+  }
 }
 
-/// Extension on [CustomIconButton] to facilitate inclusion of all types of border style etc
+/// Extension on [CustomIconButton] to facilitate inclusion of all types of border style
 extension IconButtonStyleHelper on CustomIconButton {
-  static BoxDecoration get fillOnErrorContainer => BoxDecoration(
-        color: theme.colorScheme.onErrorContainer,
-        borderRadius: BorderRadius.circular(8),
-      );
-  static BoxDecoration get fillOnErrorContainerTL18 => BoxDecoration(
-        color: theme.colorScheme.onErrorContainer,
-        borderRadius: BorderRadius.circular(18),
-      );
-  static BoxDecoration get fillRed => BoxDecoration(
-        color: appTheme.red700,
-        borderRadius: BorderRadius.circular(26),
-      );
-  static BoxDecoration get fillWhiteA => BoxDecoration(
-        color: appTheme.whiteA700,
-        borderRadius: BorderRadius.circular(12),
-      );
+  static BoxDecoration fillPrimary(OneUITheme theme) => BoxDecoration(
+    color: theme.primary,
+    borderRadius: BorderRadius.circular(22),
+  );
+
+  static BoxDecoration fillSurface(OneUITheme theme) => BoxDecoration(
+    color: theme.surfaceVariant,
+    borderRadius: BorderRadius.circular(22),
+  );
+
+  static BoxDecoration fillError(OneUITheme theme) => BoxDecoration(
+    color: theme.error,
+    borderRadius: BorderRadius.circular(22),
+  );
+
+  static BoxDecoration outlined(OneUITheme theme) => BoxDecoration(
+    color: Colors.transparent,
+    borderRadius: BorderRadius.circular(22),
+    border: Border.all(color: theme.divider, width: 1),
+  );
 }
