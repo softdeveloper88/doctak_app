@@ -111,6 +111,7 @@
   "msg_login_success": "تم تسجيل الدخول بنجاح",
   "msg_login_failed": "فشل تسجيل الدخول يرجى المحاولة مرة أخرى",
   "msg_something_wrong": "هناك خطأ ما.",
+  "msg_google_signin_failed": "فشل تسجيل الدخول بحساب جوجل. يرجى المحاولة مرة أخرى.",
   "msg_verification_link_sent": "تم إرسال رابط التحقق بنجاح",
   "msg_validation_error": "خطأ في التحقق أو لم يتم العثور على البريد الإلكتروني للمستخدم",
   "msg_user_already_verified": "تم التحقق من المستخدم بالفعل",
@@ -850,6 +851,8 @@
   "lbl_disconnecting_in": "قطع الاتصال خلال",
   "lbl_seconds": "ثانية",
   "lbl_waiting_for_answer": "بانتظار الرد",
+  "lbl_auto_connecting": "اتصال تلقائي...",
+  "lbl_requesting_permissions": "جاري طلب الأذونات...",
 
   "@_COMPLETE_PROFILE": {},
   "lbl_complete_your_profile": "أكمل ملفك الشخصي",

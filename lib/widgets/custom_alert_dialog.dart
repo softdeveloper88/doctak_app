@@ -1,9 +1,8 @@
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/material.dart';
 
+/// OneUI 8.5 styled confirmation dialog
 class CustomAlertDialog extends StatelessWidget {
   final VoidCallback callback;
   final VoidCallback? callbackNegative;
@@ -12,165 +11,135 @@ class CustomAlertDialog extends StatelessWidget {
   final String? yesButtonText;
   final String? mainTitle;
 
-   const CustomAlertDialog(
-      {Key? key, required this.title, required this.callback,this.callbackNegative,this.yesButtonText,this.noButtonText,this.mainTitle})
-      : super(key: key);
+  const CustomAlertDialog({
+    Key? key,
+    required this.title,
+    required this.callback,
+    this.callbackNegative,
+    this.yesButtonText,
+    this.noButtonText,
+    this.mainTitle,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       elevation: 0,
-      backgroundColor: Colors.transparent,
-      child: confirmationCustomAlertDialog(
-        context,
-        title,
-        callback,
-        yesButtonText ?? translation(context).lbl_delete,
-        mainTitle ?? translation(context).lbl_delete_with_question,
-        callbackNegative,
-        noButtonText,
+      backgroundColor: theme.cardBackground,
+      child: _buildDialogContent(context, theme),
+    );
+  }
+
+  Widget _buildDialogContent(BuildContext context, OneUITheme theme) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Title
+          Text(
+            mainTitle ?? translation(context).lbl_delete_with_question,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 18,
+              color: theme.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Description
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: theme.textSecondary,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Buttons
+          Row(
+            children: [
+              // Cancel button
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
+                    callbackNegative?.call();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: theme.textPrimary,
+                    side: BorderSide(color: theme.divider),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: Text(
+                    noButtonText ?? translation(context).lbl_cancel,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Confirm/Delete button
+              Expanded(
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
+                    callback();
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.error,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: Text(
+                    yesButtonText ?? translation(context).lbl_delete,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-confirmationCustomAlertDialog(
-    BuildContext context, String title, VoidCallback callBack,String yesButtonText,String mainTitle,VoidCallback? callbackNegative,noButtonText) {
-  return Center(
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 80.w,
-          child: StatefulBuilder(
-            builder: (context, snapshot) {
-              return Card(
-                color: context.cardColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 20.0, bottom: 10.0, left: 40.0, right: 40.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Text(mainTitle,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: svGetBodyColor(),
-                                        fontWeight: FontWeight.w500)),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                      child: RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            style: TextStyle(
-                                fontSize: 13.sp, color: textPrimaryColor),
-                            children: <TextSpan>[
-                              // TextSpan(text: title),
-                              TextSpan(
-                                  text: title,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        spacing: 10,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              width: 30.w,
-                              height: 10.w,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: MaterialButton(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context, rootNavigator: true).pop('dialog');
-                                  callbackNegative?.call();
-                                },
-                                child: Center(
-                                  child: Text(
-                                    noButtonText??translation(context).lbl_cancel,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                      fontSize: 14.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          Expanded(
-                            child: Container(
-                              width: 30.w,
-                              height: 10.w,
-                              decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(6.0),
-                              ),
-                              child: MaterialButton(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context, rootNavigator: true).pop('dialog');
-                                  callBack();
-                                },
-                                child: Center(
-                                  child: Text(
-                                    yesButtonText,
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.red,
-                                      fontSize: 14.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    ),
+/// Legacy function for backward compatibility - now uses OneUI 8.5 styling
+Widget confirmationCustomAlertDialog(
+  BuildContext context,
+  String title,
+  VoidCallback callBack,
+  String yesButtonText,
+  String mainTitle,
+  VoidCallback? callbackNegative,
+  String? noButtonText,
+) {
+  return CustomAlertDialog(
+    title: title,
+    callback: callBack,
+    yesButtonText: yesButtonText,
+    mainTitle: mainTitle,
+    callbackNegative: callbackNegative,
+    noButtonText: noButtonText,
   );
 }

@@ -1,9 +1,11 @@
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/memory_optimized_drug_item.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/shimmer_widget/drugs_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -35,22 +37,40 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
   @override
   Widget build(BuildContext context) {
     final bloc = widget.drugsBloc;
+    final theme = OneUITheme.of(context);
 
     return bloc.drugsData.isEmpty
-        ? _buildEmptyState(context)
+        ? _buildEmptyState(context, theme)
         : _buildVirtualizedDrugsList();
   }
 
   // Empty state widget
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, OneUITheme theme) {
     return Center(
-      child: Text(
-        'No drugs found',
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 16,
-          color: Colors.grey[600],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.medication_outlined, size: 64, color: theme.textTertiary),
+          const SizedBox(height: 16),
+          Text(
+            translation(context).msg_no_drugs_found,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: theme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            translation(context).msg_try_adjusting_filters,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: theme.textTertiary,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
 
@@ -15,19 +16,14 @@ class CommentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.08),
-            offset: const Offset(0, 2),
-            blurRadius: 12,
-            spreadRadius: 0,
-          ),
-        ],
+        boxShadow: theme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,13 +35,13 @@ class CommentCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.blue.withOpacity(0.2),
+                    color: theme.avatarBorder,
                     width: 2,
                   ),
                 ),
                 child: CircleAvatar(
                   radius: 20,
-                  backgroundColor: Colors.blue.withOpacity(0.1),
+                  backgroundColor: theme.avatarBackground,
                   backgroundImage: comment.author.profilePic != null
                       ? NetworkImage(comment.author.profilePic!)
                       : null,
@@ -55,7 +51,7 @@ class CommentCard extends StatelessWidget {
                               ? comment.author.name[0].toUpperCase()
                               : '?',
                           style: TextStyle(
-                            color: Colors.blue[700],
+                            color: theme.primary,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                             fontFamily: 'Poppins',
@@ -75,7 +71,7 @@ class CommentCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontSize: 15,
                         fontFamily: 'Poppins',
-                        color: Colors.blue[800],
+                        color: theme.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -83,7 +79,7 @@ class CommentCard extends StatelessWidget {
                       Text(
                         comment.author.specialty,
                         style: TextStyle(
-                          color: Colors.blue[600],
+                          color: theme.primary,
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -95,13 +91,13 @@ class CommentCard extends StatelessWidget {
                         Icon(
                           Icons.access_time_rounded,
                           size: 12,
-                          color: Colors.grey[500],
+                          color: theme.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formatTime(comment.createdAt),
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: theme.textSecondary,
                             fontSize: 11,
                             fontFamily: 'Poppins',
                           ),
@@ -113,14 +109,16 @@ class CommentCard extends StatelessWidget {
               ),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: theme.moreButtonBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: PopupMenuButton<String>(
                   padding: EdgeInsets.zero,
+                  color: theme.cardBackground,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   icon: Icon(
                     Icons.more_vert_rounded,
-                    color: Colors.grey[600],
+                    color: theme.iconColor,
                     size: 18,
                   ),
                   itemBuilder: (context) => [
@@ -130,14 +128,14 @@ class CommentCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.delete_outline_rounded,
-                            color: Colors.red[600],
+                            color: theme.error,
                             size: 18,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'Delete',
                             style: TextStyle(
-                              color: Colors.red[600],
+                              color: theme.error,
                               fontFamily: 'Poppins',
                               fontSize: 14,
                             ),
@@ -161,18 +159,18 @@ class CommentCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
+              color: theme.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.border,
               ),
             ),
             child: Text(
               comment.comment,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
-                color: Colors.black87,
+                color: theme.textPrimary,
                 height: 1.5,
               ),
             ),
@@ -191,15 +189,10 @@ class CommentCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.blue.withOpacity(0.1),
-                        Colors.blue.withOpacity(0.05),
-                      ],
-                    ),
+                    color: theme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: Colors.blue.withOpacity(0.3),
+                      color: theme.primary.withOpacity(0.3),
                     ),
                   ),
                   child: Row(
@@ -208,13 +201,13 @@ class CommentCard extends StatelessWidget {
                       Icon(
                         Icons.local_offer_rounded,
                         size: 12,
-                        color: Colors.blue[700],
+                        color: theme.primary,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         tag.trim(),
                         style: TextStyle(
-                          color: Colors.blue[800],
+                          color: theme.primary,
                           fontSize: 11,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -233,7 +226,7 @@ class CommentCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.03),
+              color: theme.surfaceVariant.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -244,12 +237,12 @@ class CommentCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: comment.isLiked == true
-                          ? Colors.blue.withOpacity(0.1)
+                          ? theme.likeColor.withOpacity(0.1)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: comment.isLiked == true
-                            ? Colors.blue.withOpacity(0.3)
+                            ? theme.likeColor.withOpacity(0.3)
                             : Colors.transparent,
                       ),
                     ),
@@ -262,16 +255,16 @@ class CommentCard extends StatelessWidget {
                               : Icons.thumb_up_outlined,
                           size: 16,
                           color: comment.isLiked == true
-                              ? Colors.blue[600]
-                              : Colors.grey[600],
+                              ? theme.likeColor
+                              : theme.iconColor,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           comment.likes.toString(),
                           style: TextStyle(
                             color: comment.isLiked == true
-                                ? Colors.blue[700]
-                                : Colors.grey[600],
+                                ? theme.likeColor
+                                : theme.textSecondary,
                             fontSize: 12,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
@@ -293,13 +286,13 @@ class CommentCard extends StatelessWidget {
                       Icon(
                         Icons.thumb_down_outlined,
                         size: 16,
-                        color: Colors.grey[600],
+                        color: theme.iconColor,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         comment.dislikes.toString(),
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: theme.textSecondary,
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
@@ -313,7 +306,7 @@ class CommentCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.05),
+                      color: theme.primary.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -322,13 +315,13 @@ class CommentCard extends StatelessWidget {
                         Icon(
                           Icons.chat_bubble_outline_rounded,
                           size: 14,
-                          color: Colors.blue[600],
+                          color: theme.primary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           '${comment.repliesCount} replies',
                           style: TextStyle(
-                            color: Colors.blue[700],
+                            color: theme.primary,
                             fontSize: 11,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,

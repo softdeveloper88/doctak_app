@@ -2,12 +2,12 @@ import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../core/utils/app/AppData.dart';
 import '../../localization/app_localization.dart';
-import '../../main.dart' show appStore;
 import 'fragments/add_post/SVAddPostFragment.dart';
 import 'fragments/add_post/bloc/add_post_bloc.dart';
 import 'fragments/home_main_screen/SVHomeFragment.dart';
@@ -112,88 +112,23 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
   }
 
   Widget _buildModernBottomNavigationBar() {
-    final isDark = appStore.isDarkMode;
+    final theme = OneUITheme.of(context);
     final isRTL = Directionality.of(context) == TextDirection.rtl;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
+    // One UI 8.5 styled bottom navigation
     return Container(
-      // height: 120 + bottomPadding, // Adjust for safe area and improved text layout
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : const Color(0xFFFAFAFA),
-        boxShadow: [
-          // Primary shadow for depth
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.6)
-                : Colors.black.withOpacity(0.12),
-            blurRadius: 32,
-            spreadRadius: 0,
-            offset: const Offset(0, -12),
-          ),
-          // Secondary shadow for subtle elevation
-          BoxShadow(
-            color: isDark
-                ? Colors.black.withOpacity(0.4)
-                : Colors.black.withOpacity(0.06),
-            blurRadius: 16,
-            spreadRadius: -4,
-            offset: const Offset(0, -6),
-          ),
-          // Inner light effect for glass morphism
-          BoxShadow(
-            color: isDark
-                ? Colors.white.withOpacity(0.02)
-                : Colors.white.withOpacity(0.8),
-            blurRadius: 8,
-            spreadRadius: -8,
-            offset: const Offset(0, -1),
-          ),
-        ],
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
-        ),
-        // Subtle gradient overlay for premium feel
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: isDark
-              ? [const Color(0xFF1C1C1E), const Color(0xFF1A1A1C)]
-              : [const Color(0xFFFBFBFB), const Color(0xFFF8F8F8)],
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(32),
-          topRight: Radius.circular(32),
-        ),
+      decoration: theme.navBarDecoration,
+      child: SafeArea(
+        top: false,
         child: Container(
-          padding: EdgeInsets.only(
-            left: 4,
-            right: 4,
-            top: 8,
-            bottom: bottomPadding > 0 ? bottomPadding : 8,
-          ),
-          decoration: BoxDecoration(
-            // Glass morphism effect
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.black.withOpacity(0.04),
-              width: 0.5,
-            ),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: isRTL
-                    ? _buildRTLNavigationItems()
-                    : _buildLTRNavigationItems(),
-              );
-            },
+          height: 64,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: isRTL
+                ? _buildRTLNavigationItems()
+                : _buildLTRNavigationItems(),
           ),
         ),
       ),
@@ -204,13 +139,13 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     return [
       _buildNavItem(
         0,
-        Icons.home_rounded,
-        Icons.home_outlined,
+        CupertinoIcons.house_fill,
+        CupertinoIcons.house,
         translation(context).lbl_home,
       ),
       _buildNavItem(
         1,
-        CupertinoIcons.search,
+        CupertinoIcons.search_circle_fill,
         CupertinoIcons.search,
         translation(context).lbl_search,
       ),
@@ -227,14 +162,14 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       _buildAddButton(),
       _buildNavItem(
         1,
-        CupertinoIcons.search,
+        CupertinoIcons.search_circle_fill,
         CupertinoIcons.search,
         translation(context).lbl_search,
       ),
       _buildNavItem(
         0,
-        Icons.home_rounded,
-        Icons.home_outlined,
+        CupertinoIcons.house_fill,
+        CupertinoIcons.house,
         translation(context).lbl_home,
       ),
     ];
@@ -247,10 +182,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     String label,
   ) {
     final isSelected = selectedIndex == index;
-    final isDark = appStore.isDarkMode;
+    final theme = OneUITheme.of(context);
 
-    return Flexible(
+    return Expanded(
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           if (selectedIndex != index) {
             setState(() => selectedIndex = index);
@@ -260,126 +196,55 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           }
           FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 60,
-            maxHeight: 70,
-            minWidth: 50,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // Enhanced icon container with sophisticated design
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                width: isSelected ? 42 : 38,
-                height: isSelected ? 42 : 38,
-                decoration: BoxDecoration(
-                  // Sophisticated background with multiple layers
-                  color: isSelected
-                      ? Colors.blue.withOpacity(0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(isSelected ? 18 : 16),
-                  border: isSelected
-                      ? Border.all(
-                          color: Colors.blue.withOpacity(0.25),
-                          width: 1.5,
-                        )
-                      : null,
-                  boxShadow: isSelected
-                      ? [
-                          // Primary glow effect
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.2),
-                            blurRadius: 12,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          ),
-                          // Inner light for premium feel
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.1),
-                            blurRadius: 6,
-                            spreadRadius: -2,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                  // Subtle gradient background for selected state
-                  gradient: isSelected
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.blue.withOpacity(0.18),
-                            Colors.blue.withOpacity(0.12),
-                            Colors.blue.withOpacity(0.08),
-                          ],
-                        )
-                      : null,
-                ),
-                child: Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (child, animation) {
-                      return ScaleTransition(
-                        scale: animation,
-                        child: RotationTransition(
-                          turns: animation,
-                          child: child,
-                        ),
-                      );
-                    },
-                    child: Icon(
-                      isSelected ? activeIcon : inactiveIcon,
-                      key: ValueKey(isSelected),
-                      size: isSelected ? 24 : 22,
-                      color: isSelected
-                          ? Colors.blue[700]
-                          : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                    ),
-                  ),
-                ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // One UI 8.5 styled icon with pill indicator
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: EdgeInsets.symmetric(
+                horizontal: isSelected ? 20 : 12,
+                vertical: 6,
               ),
-
-              const SizedBox(height: 4),
-
-              // Enhanced label with proper text overflow handling
-              Container(
-                constraints: const BoxConstraints(maxWidth: 60),
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOutCubic,
-                  style: TextStyle(
-                    fontSize: isSelected ? 10.5 : 9.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected
-                        ? Colors.blue[700]
-                        : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                    fontFamily: 'Poppins',
-                    letterSpacing: isSelected ? 0.2 : 0.1,
-                    height: 1.1,
-                  ),
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    softWrap: false,
-                  ),
-                ),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? theme.primary.withOpacity(0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
               ),
-            ],
-          ),
+              child: Icon(
+                isSelected ? activeIcon : inactiveIcon,
+                size: 24,
+                color: isSelected ? theme.primary : theme.iconInactive,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // One UI 8.5 label
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? theme.primary : theme.iconInactive,
+                letterSpacing: 0.1,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildAddButton() {
-    return Flexible(
+    final theme = OneUITheme.of(context);
+
+    return Expanded(
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           _fragments[2].launch(context);
           _animationController.forward().then(
@@ -387,74 +252,40 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           );
           FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 60,
-            maxHeight: 70,
-            minWidth: 50,
-          ),
-          child: AnimatedBuilder(
-            animation: _scaleAnimation,
-            builder: (context, child) {
-              return Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Refined Add button container
-                    Container(
-                      width: 52,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.blue[500]!, Colors.blue[700]!],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.3),
-                            blurRadius: 12,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.add_rounded,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    // Simple text label with proper overflow handling
-                    // Flexible(
-                    //   child: Container(
-                    //     constraints: const BoxConstraints(maxWidth: 60),
-                    //     child: const Text(
-                    //       'Create',
-                    //       style: TextStyle(
-                    //         color: Colors.blue,
-                    //         fontSize: 9.0,
-                    //         fontWeight: FontWeight.w700,
-                    //         fontFamily: 'Poppins',
-                    //         letterSpacing: 0.2,
-                    //         height: 0.9,
-                    //       ),
-                    //       maxLines: 1,
-                    //       overflow: TextOverflow.ellipsis,
-                    //       textAlign: TextAlign.center,
-                    //       softWrap: false,
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // One UI 8.5 styled add button
+            Container(
+              width: 48,
+              height: 32,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [theme.primary, theme.primary.withOpacity(0.8)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-              );
-            },
-          ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                CupertinoIcons.plus,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Empty space to align with other items
+            const SizedBox(height: 13),
+          ],
         ),
       ),
     );
@@ -462,10 +293,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
   Widget _buildProfileNavItem() {
     final isSelected = selectedIndex == 3;
-    final isDark = appStore.isDarkMode;
+    final theme = OneUITheme.of(context);
 
-    return Flexible(
+    return Expanded(
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           if (selectedIndex != 3) {
             setState(() => selectedIndex = 3);
@@ -475,139 +307,74 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           }
           FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 60,
-            maxHeight: 70,
-            minWidth: 50,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // Enhanced profile avatar container
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOutCubic,
-                width: isSelected ? 42 : 38,
-                height: isSelected ? 42 : 38,
-                padding: EdgeInsets.all(isSelected ? 3 : 2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // One UI 8.5 styled profile with pill indicator
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: EdgeInsets.symmetric(
+                horizontal: isSelected ? 16 : 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? theme.primary.withOpacity(0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.blue.withOpacity(0.15)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(24),
-                  border: isSelected
-                      ? Border.all(
-                          color: Colors.blue.withOpacity(0.25),
-                          width: 1.5,
-                        )
-                      : null,
-                  boxShadow: isSelected
-                      ? [
-                          // Primary glow effect
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.2),
-                            blurRadius: 12,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 4),
-                          ),
-                          // Inner light for premium feel
-                          BoxShadow(
-                            color: Colors.blue.withOpacity(0.1),
-                            blurRadius: 6,
-                            spreadRadius: -2,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                  // Subtle gradient background for selected state
-                  gradient: isSelected
-                      ? LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Colors.blue.withOpacity(0.18),
-                            Colors.blue.withOpacity(0.12),
-                            Colors.blue.withOpacity(0.08),
-                          ],
-                        )
-                      : null,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? theme.primary : theme.iconInactive,
+                    width: 2,
+                  ),
                 ),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: isSelected
-                          ? Colors.blue.withOpacity(0.4)
-                          : Colors.transparent,
-                      width: 1.5,
-                    ),
-                    boxShadow: [
-                      if (isSelected)
-                        BoxShadow(
-                          color: Colors.blue.withOpacity(0.3),
-                          blurRadius: 8,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 2),
+                child: ClipOval(
+                  child:
+                      (AppData.profile_pic.trim().isNotEmpty &&
+                          AppData.profile_pic.toLowerCase() != 'null')
+                      ? AppCachedNetworkImage(
+                          imageUrl: AppData.imageUrl + AppData.profile_pic,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          'assets/images/person.png',
+                          fit: BoxFit.cover,
                         ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: isSelected ? 18 : 16,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage:
-                        (AppData.profile_pic.trim().isNotEmpty &&
-                            AppData.profile_pic.toLowerCase() != 'null')
-                        ? AppCachedNetworkImageProvider(
-                            AppData.imageUrl + AppData.profile_pic,
-                          )
-                        : const AssetImage('assets/images/person.png')
-                              as ImageProvider,
-                  ),
                 ),
               ),
-
-              const SizedBox(height: 4),
-
-              // Enhanced label with proper text overflow handling
-              Container(
-                constraints: const BoxConstraints(maxWidth: 60),
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeInOutCubic,
-                  style: TextStyle(
-                    fontSize: isSelected ? 10.5 : 9.5,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected
-                        ? Colors.blue[700]
-                        : (isDark ? Colors.grey[400] : Colors.grey[500]),
-                    fontFamily: 'Poppins',
-                    letterSpacing: isSelected ? 0.2 : 0.1,
-                    height: 1.1,
-                  ),
-                  child: Text(
-                    translation(context).lbl_profile,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    softWrap: false,
-                  ),
-                ),
+            ),
+            const SizedBox(height: 4),
+            // One UI 8.5 label
+            Text(
+              translation(context).lbl_profile,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? theme.primary : theme.iconInactive,
+                letterSpacing: 0.1,
               ),
-            ],
-          ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildAINavItem() {
-    final isDark = appStore.isDarkMode;
+    final theme = OneUITheme.of(context);
 
-    return Flexible(
+    return Expanded(
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           ChatGptWithImageScreen(isFromMainScreen: true).launch(context);
           _animationController.forward().then(
@@ -615,63 +382,36 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           );
           FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 60,
-            maxHeight: 70,
-            minWidth: 50,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // AI icon container
-              Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Image.asset(
-                      'assets/images/docktak_ai_light.png',
-                      width: 22,
-                      height: 22,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // One UI 8.5 styled AI icon
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Image.asset(
+                theme.isDark
+                    ? 'assets/images/docktak_ai_light.png'
+                    : 'assets/images/docktak_ai_light.png',
+                width: 24,
+                height: 24,
+                fit: BoxFit.contain,
               ),
-
-              const SizedBox(height: 4),
-
-              // Label
-              Container(
-                constraints: const BoxConstraints(maxWidth: 60),
-                child: Text(
-                  translation(context).lbl_ai,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  softWrap: false,
-                  style: TextStyle(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.grey[400] : Colors.grey[500],
-                    fontFamily: 'Poppins',
-                    letterSpacing: 0.1,
-                    height: 1.1,
-                  ),
-                ),
+            ),
+            const SizedBox(height: 4),
+            // One UI 8.5 label
+            Text(
+              translation(context).lbl_ai,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: theme.iconInactive,
+                letterSpacing: 0.1,
               ),
-            ],
-          ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

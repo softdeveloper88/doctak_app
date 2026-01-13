@@ -1,7 +1,8 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-/// Default App Button
+/// OneUI 8.5 styled App Button with optional scale animation
 class AppButton extends StatefulWidget {
   final Function? onTap;
   final String? text;
@@ -23,7 +24,7 @@ class AppButton extends StatefulWidget {
   final bool? enableScaleAnimation;
   final Color? disabledTextColor;
 
-  AppButton({
+  const AppButton({
     this.onTap,
     this.text,
     this.width,
@@ -57,18 +58,20 @@ class _AppButtonState extends State<AppButton>
 
   @override
   void initState() {
-    if (widget.enableScaleAnimation
-        .validate(value: enableAppButtonScaleAnimationGlobal)) {
-      _controller = AnimationController(
-        vsync: this,
-        duration: Duration(
-          milliseconds: appButtonScaleAnimationDurationGlobal ?? 50,
-        ),
-        lowerBound: 0.0,
-        upperBound: 0.1,
-      )..addListener(() {
-          setState(() {});
-        });
+    if (widget.enableScaleAnimation.validate(
+      value: enableAppButtonScaleAnimationGlobal,
+    )) {
+      _controller =
+          AnimationController(
+            vsync: this,
+            duration: Duration(
+              milliseconds: appButtonScaleAnimationDurationGlobal ?? 50,
+            ),
+            lowerBound: 0.0,
+            upperBound: 0.1,
+          )..addListener(() {
+            setState(() {});
+          });
     }
     super.initState();
   }
@@ -85,8 +88,9 @@ class _AppButtonState extends State<AppButton>
       _scale = 1 - _controller!.value;
     }
 
-    if (widget.enableScaleAnimation
-        .validate(value: enableAppButtonScaleAnimationGlobal)) {
+    if (widget.enableScaleAnimation.validate(
+      value: enableAppButtonScaleAnimationGlobal,
+    )) {
       return Listener(
         onPointerDown: (details) {
           _controller?.forward();
@@ -94,45 +98,50 @@ class _AppButtonState extends State<AppButton>
         onPointerUp: (details) {
           _controller?.reverse();
         },
-        child: Transform.scale(
-          scale: _scale,
-          child: buildButton(),
-        ),
+        child: Transform.scale(scale: _scale, child: _buildButton(context)),
       );
     } else {
-      return buildButton();
+      return _buildButton(context);
     }
   }
 
-  Widget buildButton() {
+  Widget _buildButton(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Padding(
       padding: widget.margin ?? EdgeInsets.zero,
-      child: MaterialButton(
-        minWidth: widget.width,
-        padding: widget.padding ?? dynamicAppButtonPadding(context),
+      child: FilledButton(
         onPressed: widget.enabled
             ? widget.onTap != null
-                ? widget.onTap as void Function()?
-                : null
+                  ? widget.onTap as void Function()?
+                  : null
             : null,
-        color: widget.color ?? appButtonBackgroundColorGlobal,
-        child: widget.child ??
+        style: FilledButton.styleFrom(
+          backgroundColor: widget.color ?? theme.primary,
+          foregroundColor: widget.textColor ?? Colors.white,
+          disabledBackgroundColor: widget.disabledColor ?? theme.surfaceVariant,
+          disabledForegroundColor:
+              widget.disabledTextColor ?? theme.textTertiary,
+          minimumSize: Size(
+            widget.width ?? double.infinity,
+            widget.height ?? 52,
+          ),
+          padding:
+              widget.padding ??
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          elevation: widget.elevation ?? 0,
+          shape:
+              widget.shapeBorder as OutlinedBorder? ??
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+        ),
+        child:
+            widget.child ??
             Text(
               widget.text.validate(),
-              style: widget.textStyle ??
-                  boldTextStyle(
-                    color: widget.textColor ?? defaultAppButtonTextColorGlobal,
-                  ),
+              style:
+                  widget.textStyle ??
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
-        shape: widget.shapeBorder ?? defaultAppButtonShapeBorder,
-        elevation: widget.elevation ?? defaultAppButtonElevation,
-        animationDuration: Duration(milliseconds: 300),
-        height: widget.height,
-        disabledColor: widget.disabledColor,
-        focusColor: widget.focusColor,
-        hoverColor: widget.hoverColor,
-        splashColor: widget.splashColor,
-        disabledTextColor: widget.disabledTextColor,
       ),
     );
   }

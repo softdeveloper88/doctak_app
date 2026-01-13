@@ -1294,11 +1294,13 @@ class SharedApiService {
   /// Search conferences
   Future<ApiResponse<SearchConferenceModel>> searchConferences({
     required String page,
-    required String keyword,
+    String? keyword,
+    String? country,
   }) async {
     return await _searchService.searchConferences(
       page: page,
       keyword: keyword,
+      country: country,
     );
   }
 

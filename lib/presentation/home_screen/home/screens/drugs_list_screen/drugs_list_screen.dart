@@ -1,18 +1,15 @@
-import 'dart:async';
-
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/virtualized_drugs_list.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
 
-import '../../../../../main.dart';
 import '../../../../../widgets/shimmer_widget/drugs_shimmer_loader.dart';
 import 'bloc/drugs_event.dart';
 import 'bloc/drugs_state.dart';
@@ -25,8 +22,6 @@ class DrugsListScreen extends StatefulWidget {
 }
 
 class _DrugsListScreenState extends State<DrugsListScreen> {
-  Timer? _debounce;
-
   final ScrollController _scrollController = ScrollController();
   DrugsBloc drugsBloc = DrugsBloc();
   bool isSearchShow = false;
@@ -43,7 +38,6 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
   @override
   void dispose() {
     searchController.dispose();
-    _debounce?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -54,8 +48,9 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       body: Column(
         children: [
           BlocBuilder<SplashBloc, SplashState>(
@@ -84,25 +79,9 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                       titleIcon: Icons.medication_rounded,
                       actions: [
                         // Search toggle button
-                        IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 36,
-                            minHeight: 36,
-                          ),
-                          icon: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              isSearchShow ? Icons.close : Icons.search,
-                              color: Colors.blue[600],
-                              size: 16,
-                            ),
-                          ),
-                          onPressed: () {
+                        DoctakSearchToggleButton(
+                          isSearching: isSearchShow,
+                          onTap: () {
                             setState(() {
                               isSearchShow = !isSearchShow;
                               if (!isSearchShow) {
@@ -121,22 +100,22 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               }
                             });
                           },
-                        ), // Country dropdown
-                        Container(
-                          margin: const EdgeInsets.only(right: 16),
-                          child: PopupMenuButton<Countries>(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            offset: const Offset(0, 50),
-                            tooltip: 'Select Country',
-                            elevation: 8,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
+                        ),
+                        const SizedBox(width: 4),
+                        // Country dropdown
+                        PopupMenuButton<Countries>(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          offset: const Offset(0, 50),
+                          tooltip: 'Select Country',
+                          elevation: 8,
+                          color: theme.cardBackground,
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: theme.iconButtonDecoration(),
+                            child: Center(
                               child: Text(
                                 state.countryFlag != ''
                                     ? state.countriesModel.countries!
@@ -157,9 +136,10 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                               .first
                                               .flag ??
                                           '',
-                                style: const TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 18),
                               ),
                             ),
+                          ),
                             itemBuilder: (BuildContext context) {
                               return state.countriesModel.countries?.map((
                                     Countries item,
@@ -179,8 +159,8 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                             Expanded(
                                               child: Text(
                                                 item.countryName ?? '',
-                                                style: const TextStyle(
-                                                  color: Colors.black87,
+                                                style: TextStyle(
+                                                  color: theme.textPrimary,
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w500,
                                                   fontSize: 16,
@@ -221,187 +201,55 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               );
                             },
                           ),
-                        ),
+                        const SizedBox(width: 8),
                       ],
                     ),
                     Container(
-                      color: svGetScaffoldColor(),
+                      color: theme.scaffoldBackground,
                       child: Column(
                         children: [
                           // Search field with animated visibility
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            height: isSearchShow ? 80 : 0,
-                            child: SingleChildScrollView(
-                              physics: const NeverScrollableScrollPhysics(),
-                              child: isSearchShow
-                                  ? Container(
-                                      margin: const EdgeInsets.symmetric(
-                                        horizontal: 16.0,
-                                        vertical: 16.0,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: appStore.isDarkMode
-                                            ? Colors.blueGrey[800]
-                                            : Colors.grey[100],
-                                        borderRadius: BorderRadius.circular(
-                                          24.0,
-                                        ),
-                                        border: Border.all(
-                                          color: Colors.blue.withOpacity(0.2),
-                                          width: 1.5,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.blue.withOpacity(
-                                              0.05,
-                                            ),
-                                            offset: const Offset(0, 2),
-                                            blurRadius: 6,
-                                            spreadRadius: 0,
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                          24.0,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 12.0,
-                                                  ),
-                                              child: Icon(
-                                                Icons.search_rounded,
-                                                color: Colors.blue.withOpacity(
-                                                  0.6,
-                                                ),
-                                                size: 24,
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: AppTextField(
-                                                controller: searchController,
-                                                textFieldType:
-                                                    TextFieldType.NAME,
-                                                textStyle: TextStyle(
-                                                  fontFamily: 'Poppins',
-                                                  fontSize: 14,
-                                                  color: appStore.isDarkMode
-                                                      ? Colors.white
-                                                      : Colors.black87,
-                                                ),
-                                                onChanged: (searchTxt) async {
-                                                  if (_debounce?.isActive ??
-                                                      false)
-                                                    _debounce?.cancel();
-                                                  _debounce = Timer(
-                                                    const Duration(
-                                                      milliseconds: 500,
-                                                    ),
-                                                    () {
-                                                      BlocProvider.of<
-                                                            SplashBloc
-                                                          >(context)
-                                                          .add(
-                                                            LoadDropdownData(
-                                                              state.countryFlag,
-                                                              state.typeValue,
-                                                              searchTxt ?? '',
-                                                              '',
-                                                            ),
-                                                          );
-                                                      drugsBloc.add(
-                                                        LoadPageEvent(
-                                                          page: 1,
-                                                          countryId:
-                                                              state.countryFlag !=
-                                                                  ''
-                                                              ? state
-                                                                    .countryFlag
-                                                              : '${state.countriesModel.countries?.first.id ?? 1}',
-                                                          searchTerm: searchTxt,
-                                                          type: state.typeValue,
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                  hintText: translation(
-                                                    context,
-                                                  ).lbl_search,
-                                                  hintStyle: TextStyle(
-                                                    fontFamily: 'Poppins',
-                                                    fontSize: 14,
-                                                    color: appStore.isDarkMode
-                                                        ? Colors.white60
-                                                        : Colors.black54,
-                                                  ),
-                                                  contentPadding:
-                                                      const EdgeInsets.symmetric(
-                                                        vertical: 14.0,
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
-                                            InkWell(
-                                              onTap: () {
-                                                // Clear the search text but keep search field visible
-                                                searchController.clear();
-                                                // Update search results
-                                                drugsBloc.add(
-                                                  LoadPageEvent(
-                                                    page: 1,
-                                                    countryId:
-                                                        state.countryFlag != ''
-                                                        ? state.countryFlag
-                                                        : '${state.countriesModel.countries?.first.id ?? 1}',
-                                                    searchTerm: '',
-                                                    type: state.typeValue,
-                                                  ),
-                                                );
-                                              },
-                                              borderRadius:
-                                                  const BorderRadius.only(
-                                                    topRight: Radius.circular(
-                                                      24,
-                                                    ),
-                                                    bottomRight:
-                                                        Radius.circular(24),
-                                                  ),
-                                              child: Container(
-                                                padding: const EdgeInsets.all(
-                                                  10,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.blue
-                                                      .withOpacity(0.1),
-                                                  borderRadius:
-                                                      const BorderRadius.only(
-                                                        topRight:
-                                                            Radius.circular(24),
-                                                        bottomRight:
-                                                            Radius.circular(24),
-                                                      ),
-                                                ),
-                                                child: Icon(
-                                                  Icons.clear,
-                                                  color: Colors.blue
-                                                      .withOpacity(0.6),
-                                                  size: 24,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  : const SizedBox(),
+                          DoctakCollapsibleSearchField(
+                            isVisible: isSearchShow,
+                            hintText: translation(context).lbl_search,
+                            controller: searchController,
+                            height: 72,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 12.0,
                             ),
+                            onChanged: (searchTxt) {
+                              BlocProvider.of<SplashBloc>(context).add(
+                                LoadDropdownData(
+                                  state.countryFlag,
+                                  state.typeValue,
+                                  searchTxt,
+                                  '',
+                                ),
+                              );
+                              drugsBloc.add(
+                                LoadPageEvent(
+                                  page: 1,
+                                  countryId: state.countryFlag != ''
+                                      ? state.countryFlag
+                                      : '${state.countriesModel.countries?.first.id ?? 1}',
+                                  searchTerm: searchTxt,
+                                  type: state.typeValue,
+                                ),
+                              );
+                            },
+                            onClear: () {
+                              drugsBloc.add(
+                                LoadPageEvent(
+                                  page: 1,
+                                  countryId: state.countryFlag != ''
+                                      ? state.countryFlag
+                                      : '${state.countriesModel.countries?.first.id ?? 1}',
+                                  searchTerm: '',
+                                  type: state.typeValue,
+                                ),
+                              );
+                            },
                           ),
                           // Padding(
                           //   padding: const EdgeInsets.all(16.0),
@@ -445,7 +293,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             ),
                             height: 48,
                             decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: theme.surfaceVariant,
                               borderRadius: BorderRadius.circular(25),
                             ),
                             child: Row(
@@ -478,7 +326,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: selectedIndex == 0
-                                            ? Colors.blue
+                                            ? theme.primary
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(25),
                                       ),
@@ -496,22 +344,22 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                                   right: 8,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.white,
+                                                  color: theme.cardBackground,
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: Icon(
                                                   Icons
                                                       .medical_services_outlined,
                                                   size: 14,
-                                                  color: Colors.blue,
+                                                  color: theme.primary,
                                                 ),
                                               ),
                                             Text(
                                               translation(context).lbl_brand,
                                               style: TextStyle(
                                                 color: selectedIndex == 0
-                                                    ? Colors.white
-                                                    : Colors.black87,
+                                                    ? theme.cardBackground
+                                                    : theme.textPrimary,
                                                 fontSize: 14,
                                                 fontFamily: 'Poppins',
                                                 fontWeight: FontWeight.w600,
@@ -551,7 +399,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: selectedIndex == 1
-                                            ? Colors.blue
+                                            ? theme.primary
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(25),
                                       ),
@@ -569,21 +417,21 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                                   right: 8,
                                                 ),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.white,
+                                                  color: theme.cardBackground,
                                                   shape: BoxShape.circle,
                                                 ),
                                                 child: Icon(
                                                   Icons.local_pharmacy_outlined,
                                                   size: 14,
-                                                  color: Colors.blue,
+                                                  color: theme.primary,
                                                 ),
                                               ),
                                             Text(
                                               translation(context).lbl_generic,
                                               style: TextStyle(
                                                 color: selectedIndex == 1
-                                                    ? Colors.white
-                                                    : Colors.black87,
+                                                    ? theme.cardBackground
+                                                    : theme.textPrimary,
                                                 fontSize: 14,
                                                 fontFamily: 'Poppins',
                                                 fontWeight: FontWeight.w600,

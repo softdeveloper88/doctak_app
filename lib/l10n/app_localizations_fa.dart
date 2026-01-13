@@ -21,10 +21,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_skip => 'رد کردن';
 
   @override
-  String get msg_consult_only_with => 'فقط با پزشکی که به او اعتماد دارید مشورت کنید';
+  String get msg_consult_only_with =>
+      'فقط با پزشکی که به او اعتماد دارید مشورت کنید';
 
   @override
-  String get msg_find_a_lot_of_specialist => 'پزشکان متخصص زیادی را در یک مکان پیدا کنید';
+  String get msg_find_a_lot_of_specialist =>
+      'پزشکان متخصص زیادی را در یک مکان پیدا کنید';
 
   @override
   String get msg_get_connect_our => 'به مشاوره آنلاین ما متصل شوید';
@@ -33,7 +35,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_let_s_get_started => 'بیایید شروع کنیم!';
 
   @override
-  String get msg_login_to_enjoy_the => 'برای لذت بردن از امکاناتی که ارائه داده‌ایم وارد شوید و سالم بمانید!';
+  String get msg_login_to_enjoy_the =>
+      'برای لذت بردن از امکاناتی که ارائه داده‌ایم وارد شوید و سالم بمانید!';
 
   @override
   String get lbl_login => 'ورود';
@@ -75,7 +78,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_already_have_an => 'قبلاً حساب کاربری دارید؟';
 
   @override
-  String get msg_i_agree_to_the_medidoc => 'من با شرایط خدمات و سیاست حفظ حریم خصوصی مدیداک موافقم';
+  String get msg_i_agree_to_the_medidoc =>
+      'من با شرایط خدمات و سیاست حفظ حریم خصوصی مدیداک موافقم';
 
   @override
   String get lbl_go_to_home => 'رفتن به خانه';
@@ -117,10 +121,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_didn_t_receive_the => 'کد را دریافت نکردید؟';
 
   @override
-  String get msg_enter_code_that => 'کدی که به شماره 08528188*** ارسال کرده‌ایم را وارد کنید';
+  String get msg_enter_code_that =>
+      'کدی که به شماره 08528188*** ارسال کرده‌ایم را وارد کنید';
 
   @override
-  String get msg_enter_code_that2 => 'کدی که به شماره شما ارسال کرده‌ایم را وارد کنید';
+  String get msg_enter_code_that2 =>
+      'کدی که به شماره شما ارسال کرده‌ایم را وارد کنید';
 
   @override
   String get msg_enter_verification => 'کد تأیید را وارد کنید';
@@ -147,19 +153,22 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_network_err => 'خطای شبکه';
 
   @override
-  String get msg_something_went_wrong => 'مشکلی پیش آمد. لطفاً دوباره تلاش کنید...';
+  String get msg_something_went_wrong =>
+      'مشکلی پیش آمد. لطفاً دوباره تلاش کنید...';
 
   @override
   String get err_msg_please_enter_valid_email => 'لطفاً ایمیل معتبر وارد کنید';
 
   @override
-  String get err_msg_please_enter_valid_password => 'رمز عبور باید شامل (8-16 حرف، با حروف بزرگ، کوچک، عدد و کاراکتر ویژه) باشد.';
+  String get err_msg_please_enter_valid_password =>
+      'رمز عبور باید شامل (8-16 حرف، با حروف بزرگ، کوچک، عدد و کاراکتر ویژه) باشد.';
 
   @override
   String get err_msg_please_enter_valid_text => 'لطفاً متن معتبر وارد کنید';
 
   @override
-  String get err_msg_please_enter_valid_phone_number => 'لطفاً شماره تلفن معتبر وارد کنید';
+  String get err_msg_please_enter_valid_phone_number =>
+      'لطفاً شماره تلفن معتبر وارد کنید';
 
   @override
   String get auction_product_screen_ => 'شما باید وارد شوید';
@@ -267,6 +276,10 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_something_wrong => 'مشکلی پیش آمد.';
 
   @override
+  String get msg_google_signin_failed =>
+      'ورود با گوگل ناموفق بود. لطفاً دوباره امتحان کنید.';
+
+  @override
   String get msg_verification_link_sent => 'لینک تأیید با موفقیت ارسال شد';
 
   @override
@@ -297,7 +310,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_forgot_password_title => 'فراموشی رمز عبور';
 
   @override
-  String get msg_enter_email_to_reset => 'برای بازنشانی رمز عبور، ایمیل خود را وارد کنید';
+  String get msg_enter_email_to_reset =>
+      'برای بازنشانی رمز عبور، ایمیل خود را وارد کنید';
 
   @override
   String get lbl_send_button => 'ارسال';
@@ -309,16 +323,20 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_welcome_doctor => 'خوش آمدید، دکتر!';
 
   @override
-  String get msg_ai_assistant_intro => 'دستیار شخصی و پزشکی شما با قدرت هوش مصنوعی';
+  String get msg_ai_assistant_intro =>
+      'دستیار شخصی و پزشکی شما با قدرت هوش مصنوعی';
 
   @override
-  String get msg_upload_images_prompt => 'لطفاً تصاویر پزشکی را برای تشخیص و تحلیل احتمالی آپلود کنید';
+  String get msg_upload_images_prompt =>
+      'لطفاً تصاویر پزشکی را برای تشخیص و تحلیل احتمالی آپلود کنید';
 
   @override
-  String get msg_clinical_summary_hint => 'خلاصه بالینی مانند سن، جنسیت، سابقه پزشکی';
+  String get msg_clinical_summary_hint =>
+      'خلاصه بالینی مانند سن، جنسیت، سابقه پزشکی';
 
   @override
-  String get msg_ai_disclaimer => 'هوش مصنوعی ممکن است اشتباه کند. بررسی اطلاعات مهم را در نظر بگیرید.';
+  String get msg_ai_disclaimer =>
+      'هوش مصنوعی ممکن است اشتباه کند. بررسی اطلاعات مهم را در نظر بگیرید.';
 
   @override
   String get lbl_error => 'خطا';
@@ -336,7 +354,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_analyse_image => 'تحلیل تصویر';
 
   @override
-  String get lbl_only_one_image_allowed => 'فقط یک بار مجاز به ارسال تصویر در یک جلسه هستید';
+  String get lbl_only_one_image_allowed =>
+      'فقط یک بار مجاز به ارسال تصویر در یک جلسه هستید';
 
   @override
   String get lbl_dermatological_assessment => 'ارزیابی پوستی';
@@ -366,16 +385,20 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_next_session => 'جلسه بعدی';
 
   @override
-  String get lbl_code_detection_question => 'تشخیص کد: شناسایی کدهای CPT یا ICD';
+  String get lbl_code_detection_question =>
+      'تشخیص کد: شناسایی کدهای CPT یا ICD';
 
   @override
-  String get lbl_diagnostic_suggestions_question => 'پیشنهادات تشخیصی: درخواست پیشنهاد بر اساس علائم';
+  String get lbl_diagnostic_suggestions_question =>
+      'پیشنهادات تشخیصی: درخواست پیشنهاد بر اساس علائم';
 
   @override
-  String get lbl_medication_review_question => 'بررسی دارو: بررسی تداخل‌ها و دوز';
+  String get lbl_medication_review_question =>
+      'بررسی دارو: بررسی تداخل‌ها و دوز';
 
   @override
-  String get lbl_ready_to_start => 'آماده شروع هستید؟ سوال خود را در زیر تایپ کنید یا یک موضوع پیشنهادی را انتخاب کنید';
+  String get lbl_ready_to_start =>
+      'آماده شروع هستید؟ سوال خود را در زیر تایپ کنید یا یک موضوع پیشنهادی را انتخاب کنید';
 
   @override
   String get lbl_code_detection => 'تشخیص کد';
@@ -399,13 +422,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_ask_medical_ai => 'از هوش مصنوعی پزشکی بپرسید';
 
   @override
-  String get msg_something_went_wrong_try_again => 'مشکلی پیش آمده است. لطفاً دوباره تلاش کنید...';
+  String get msg_something_went_wrong_try_again =>
+      'مشکلی پیش آمده است. لطفاً دوباره تلاش کنید...';
 
   @override
   String get lbl_delete_chat => 'حذف گفتگو؟';
 
   @override
-  String get msg_confirm_delete_chat => 'آیا مطمئن هستید که می‌خواهید این گفتگو را حذف کنید';
+  String get msg_confirm_delete_chat =>
+      'آیا مطمئن هستید که می‌خواهید این گفتگو را حذف کنید';
 
   @override
   String get lbl_cancel_caps => 'لغو';
@@ -449,10 +474,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_initializing_call => 'در حال آماده‌سازی تماس...';
 
   @override
-  String get lbl_call_permission_error => 'تماس بدون دسترسی‌های لازم نمی‌تواند شروع شود';
+  String get lbl_call_permission_error =>
+      'تماس بدون دسترسی‌های لازم نمی‌تواند شروع شود';
 
   @override
-  String get lbl_end_call_confirmation => 'آیا مطمئن هستید که می‌خواهید این تماس را پایان دهید؟';
+  String get lbl_end_call_confirmation =>
+      'آیا مطمئن هستید که می‌خواهید این تماس را پایان دهید؟';
 
   @override
   String get lbl_cancel => 'انصراف';
@@ -535,10 +562,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_call_accepted => 'تماس پذیرفته شد';
 
   @override
-  String get lbl_failed_to_establish_call => 'برقراری تماس ناموفق بود. لطفاً دوباره تلاش کنید.';
+  String get lbl_failed_to_establish_call =>
+      'برقراری تماس ناموفق بود. لطفاً دوباره تلاش کنید.';
 
   @override
-  String get lbl_error_starting_call => 'خطا در شروع تماس. لطفاً دوباره تلاش کنید.';
+  String get lbl_error_starting_call =>
+      'خطا در شروع تماس. لطفاً دوباره تلاش کنید.';
 
   @override
   String get lbl_call_ended => 'تماس پایان یافت';
@@ -562,10 +591,17 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_waiting_for_answer => 'در انتظار پاسخ';
 
   @override
+  String get lbl_auto_connecting => 'اتصال خودکار...';
+
+  @override
+  String get lbl_requesting_permissions => 'درخواست مجوز...';
+
+  @override
   String get lbl_signup_title => 'ثبت‌نام';
 
   @override
-  String get msg_register_account => 'لطفاً حساب کاربری خود را برای ادامه ثبت کنید';
+  String get msg_register_account =>
+      'لطفاً حساب کاربری خود را برای ادامه ثبت کنید';
 
   @override
   String get lbl_enter_first_name => 'نام کوچک خود را وارد کنید:';
@@ -643,7 +679,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_location_info => 'اطلاعات مکان';
 
   @override
-  String get msg_personal_info_desc => 'این اطلاعات برای شخصی‌سازی تجربه شما و ارتباط شما با متخصصان مربوطه استفاده خواهد شد.';
+  String get msg_personal_info_desc =>
+      'این اطلاعات برای شخصی‌سازی تجربه شما و ارتباط شما با متخصصان مربوطه استفاده خواهد شد.';
 
   @override
   String get msg_profile_updated => 'پروفایل با موفقیت به‌روزرسانی شد';
@@ -667,7 +704,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_add_experience => 'افزودن تجربه';
 
   @override
-  String get msg_add_experience => 'تجربه حرفه‌ای خود را اضافه کنید تا تخصص و پیشرفت شغلی خود را نمایش دهید.';
+  String get msg_add_experience =>
+      'تجربه حرفه‌ای خود را اضافه کنید تا تخصص و پیشرفت شغلی خود را نمایش دهید.';
 
   @override
   String get lbl_rotate => 'چرخش';
@@ -679,7 +717,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_check_out_profile => 'این پروفایل را بررسی کنید!';
 
   @override
-  String get msg_interests_info_desc => 'علایق حرفه‌ای و دستاوردهای علمی خود را به نمایش بگذارید تا با همکاران همفکر و فرصت‌ها ارتباط برقرار کنید.';
+  String get msg_interests_info_desc =>
+      'علایق حرفه‌ای و دستاوردهای علمی خود را به نمایش بگذارید تا با همکاران همفکر و فرصت‌ها ارتباط برقرار کنید.';
 
   @override
   String get lbl_app_settings => 'تنظیمات برنامه';
@@ -691,10 +730,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_app_language => 'زبان برنامه';
 
   @override
-  String get lbl_delete_account_confirmation => 'حساب کاربری خود را حذف می‌کنید؟';
+  String get lbl_delete_account_confirmation =>
+      'حساب کاربری خود را حذف می‌کنید؟';
 
   @override
-  String get msg_delete_account_warning => 'اگر حذف را انتخاب کنید، حساب کاربری شما را از سرور حذف خواهیم کرد.\n\nداده‌های برنامه شما نیز حذف خواهد شد و قادر به بازیابی آن نخواهید بود.\n\nاز آنجا که این عملیات حساس امنیتی است، ممکن است قبل از حذف حساب کاربری از شما خواسته شود که وارد شوید.';
+  String get msg_delete_account_warning =>
+      'اگر حذف را انتخاب کنید، حساب کاربری شما را از سرور حذف خواهیم کرد.\n\nداده‌های برنامه شما نیز حذف خواهد شد و قادر به بازیابی آن نخواهید بود.\n\nاز آنجا که این عملیات حساس امنیتی است، ممکن است قبل از حذف حساب کاربری از شما خواسته شود که وارد شوید.';
 
   @override
   String get lbl_delete => 'حذف';
@@ -734,7 +775,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_no_chats => 'هیچ گفتگویی یافت نشد';
 
   @override
-  String get msg_no_internet => 'اتصال اینترنتی وجود ندارد، لطفاً اتصال اینترنت را بررسی کنید';
+  String get msg_no_internet =>
+      'اتصال اینترنتی وجود ندارد، لطفاً اتصال اینترنت را بررسی کنید';
 
   @override
   String get msg_chat_error => 'مشکلی پیش آمد، لطفاً دوباره تلاش کنید';
@@ -743,7 +785,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_welcome_title => 'سلام و خوش آمدید';
 
   @override
-  String get msg_account_created => 'حساب کاربری شما با موفقیت ایجاد شده است. لطفاً ایمیل خود را برای تأیید حساب بررسی کنید.';
+  String get msg_account_created =>
+      'حساب کاربری شما با موفقیت ایجاد شده است. لطفاً ایمیل خود را برای تأیید حساب بررسی کنید.';
 
   @override
   String get lbl_send_email_again => 'ارسال مجدد ایمیل';
@@ -755,7 +798,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_oops => 'اوه!....';
 
   @override
-  String get msg_no_internet_connection => 'اتصال اینترنت وجود ندارد، لطفاً به اینترنت متصل شوید';
+  String get msg_no_internet_connection =>
+      'اتصال اینترنت وجود ندارد، لطفاً به اینترنت متصل شوید';
 
   @override
   String get lbl_meeting_detail => 'جزئیات جلسه';
@@ -794,7 +838,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_end_meeting => 'پایان جلسه';
 
   @override
-  String get msg_confirm_end_call => 'آیا مطمئن هستید که می‌خواهید این تماس را پایان دهید؟';
+  String get msg_confirm_end_call =>
+      'آیا مطمئن هستید که می‌خواهید این تماس را پایان دهید؟';
 
   @override
   String get msg_meeting_code_copied => 'کد جلسه در کلیپ‌بورد کپی شد';
@@ -815,7 +860,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_want_to_join_meeting => 'می‌خواهد به جلسه بپیوندد؟';
 
   @override
-  String get lbl_you_want_enable_permission => 'آیا می‌خواهید مجوز را فعال کنید؟';
+  String get lbl_you_want_enable_permission =>
+      'آیا می‌خواهید مجوز را فعال کنید؟';
 
   @override
   String get lbl_camera => 'دوربین';
@@ -836,13 +882,16 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_key_features => 'ویژگی‌های اصلی';
 
   @override
-  String get msg_enter_meeting_code_description => 'کد جلسه ارائه شده توسط میزبان را برای پیوستن به جلسه موجود وارد کنید.';
+  String get msg_enter_meeting_code_description =>
+      'کد جلسه ارائه شده توسط میزبان را برای پیوستن به جلسه موجود وارد کنید.';
 
   @override
-  String get msg_create_new_meeting_description => 'جلسه جدیدی ایجاد کنید و از شرکت‌کنندگان برای پیوستن دعوت کنید.';
+  String get msg_create_new_meeting_description =>
+      'جلسه جدیدی ایجاد کنید و از شرکت‌کنندگان برای پیوستن دعوت کنید.';
 
   @override
-  String get msg_qr_code_scan_implementation => 'اسکن کد QR در اینجا پیاده‌سازی خواهد شد';
+  String get msg_qr_code_scan_implementation =>
+      'اسکن کد QR در اینجا پیاده‌سازی خواهد شد';
 
   @override
   String get lbl_hd_video => 'ویدیو با کیفیت بالا';
@@ -854,13 +903,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_unlimited_participants => 'شرکت‌کنندگان نامحدود';
 
   @override
-  String get desc_unlimited_participants => 'میزبانی جلسات با هر تعداد شرکت‌کننده';
+  String get desc_unlimited_participants =>
+      'میزبانی جلسات با هر تعداد شرکت‌کننده';
 
   @override
   String get lbl_screen_sharing => 'اشتراک‌گذاری صفحه';
 
   @override
-  String get desc_screen_sharing => 'صفحه خود را با شرکت‌کنندگان جلسه به اشتراک بگذارید';
+  String get desc_screen_sharing =>
+      'صفحه خود را با شرکت‌کنندگان جلسه به اشتراک بگذارید';
 
   @override
   String get lbl_group_chat => 'گفتگوی گروهی';
@@ -926,7 +977,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_better_health_solutions => 'راه‌حل‌های بهتر سلامتی';
 
   @override
-  String get msg_health_mission => 'ماموریت ما ارائه مراقبت‌های بهداشتی قابل دسترس و مقرون به صرفه برای همه است.';
+  String get msg_health_mission =>
+      'ماموریت ما ارائه مراقبت‌های بهداشتی قابل دسترس و مقرون به صرفه برای همه است.';
 
   @override
   String get lbl_our_mission => 'ماموریت ما';
@@ -947,7 +999,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_our_values => 'ارزش‌های ما';
 
   @override
-  String get lbl_ai_diagnostic => 'چگونه هوش مصنوعی از تشخیص افتراقی پشتیبانی می‌کند';
+  String get lbl_ai_diagnostic =>
+      'چگونه هوش مصنوعی از تشخیص افتراقی پشتیبانی می‌کند';
 
   @override
   String get lbl_join_us => 'به ما بپیوندید';
@@ -977,34 +1030,43 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_cme_full => 'آموزش مداوم پزشکی (CME)';
 
   @override
-  String get lbl_moh_updates_notifications => 'بروزرسانی‌ها و اعلان‌های وزارت بهداشت';
+  String get lbl_moh_updates_notifications =>
+      'بروزرسانی‌ها و اعلان‌های وزارت بهداشت';
 
   @override
   String get lbl_differential_diagnosis => 'تشخیص افتراقی';
 
   @override
-  String get html_our_mission => '<p align=\'center\'>در داکتاک، مأموریت ما ایجاد یک شبکه اجتماعی جامع و نوآورانه برای پزشکان و دانشجویان پزشکی در سراسر جهان است. ما تلاش می‌کنیم متخصصان پزشکی را به هم متصل کنیم، منابع ارزشمند فراهم کنیم و همکاری و اشتراک دانش را در جامعه مراقبت‌های بهداشتی تسریع کنیم.</p>';
+  String get html_our_mission =>
+      '<p align=\'center\'>در داکتاک، مأموریت ما ایجاد یک شبکه اجتماعی جامع و نوآورانه برای پزشکان و دانشجویان پزشکی در سراسر جهان است. ما تلاش می‌کنیم متخصصان پزشکی را به هم متصل کنیم، منابع ارزشمند فراهم کنیم و همکاری و اشتراک دانش را در جامعه مراقبت‌های بهداشتی تسریع کنیم.</p>';
 
   @override
-  String get html_who_we_are => '<p align=\'center\'>داکتاک.نت یک پلتفرم پیشرفته است که مخصوصاً برای پزشکان طراحی شده است. تیم ما متشکل از متخصصان مراقبت‌های بهداشتی، علاقه‌مندان به فناوری و کارشناسان صنعت است که مشتاق انقلاب در نحوه تعامل پزشکان و دسترسی به اطلاعات هستند.</p>';
+  String get html_who_we_are =>
+      '<p align=\'center\'>داکتاک.نت یک پلتفرم پیشرفته است که مخصوصاً برای پزشکان طراحی شده است. تیم ما متشکل از متخصصان مراقبت‌های بهداشتی، علاقه‌مندان به فناوری و کارشناسان صنعت است که مشتاق انقلاب در نحوه تعامل پزشکان و دسترسی به اطلاعات هستند.</p>';
 
   @override
-  String get html_what_we_offer => '<h4 align=\'center\'>فرصت‌های شغلی</h4><p align=\'center\'>جدیدترین فرصت‌های شغلی در خاورمیانه و هند را کاوش کنید، با برنامه‌هایی برای گسترش جهانی.</p><h4 align=\'center\'>شبکه‌سازی حرفه‌ای</h4><p align=\'center\'>با همکاران ارتباط برقرار کنید، گروه‌ها تشکیل دهید و موارد پزشکی را بحث کنید.</p><h4 align=\'center\'>لیست داروهای مخصوص هر کشور</h4><p align=\'center\'>به اطلاعات جامع دارویی متناسب با هر کشور دسترسی داشته باشید.</p><h4 align=\'center\'>کنفرانس‌های پزشکی</h4><p align=\'center\'>از کنفرانس‌های سراسر جهان مطلع شوید و هرگز یک رویداد مهم را از دست ندهید.</p><h4 align=\'center\'>دستورالعمل‌های پزشکی</h4><p align=\'center\'>به جدیدترین دستورالعمل‌های پزشکی دسترسی داشته باشید تا از بهترین شیوه‌ها و پروتکل‌های درمانی آگاه باشید.</p><h4 align=\'center\'>ویژگی‌های مبتنی بر هوش مصنوعی</h4><p align=\'center\'>از آخرین فناوری هوش مصنوعی برای تقویت عملکرد پزشکی خود استفاده کنید.</p><h4 align=\'center\'>آموزش مداوم پزشکی (CME)</h4><p align=\'center\'>امتیازات CME کسب کنید و دانش خود را به‌روز نگه دارید.</p><h4 align=\'center\'>بروزرسانی‌ها و اعلان‌های وزارت بهداشت</h4><p align=\'center\'>به‌موقع بروزرسانی‌ها و اعلان‌های وزارت بهداشت کشور مورد نظر خود را دریافت کنید.</p><h4 align=\'center\'>تشخیص افتراقی</h4><p align=\'center\'>از هوش مصنوعی پیشرفته برای کمک به تشخیص افتراقی دقیق استفاده کنید و دقت و کارایی تشخیص را افزایش دهید.</p>';
+  String get html_what_we_offer =>
+      '<h4 align=\'center\'>فرصت‌های شغلی</h4><p align=\'center\'>جدیدترین فرصت‌های شغلی در خاورمیانه و هند را کاوش کنید، با برنامه‌هایی برای گسترش جهانی.</p><h4 align=\'center\'>شبکه‌سازی حرفه‌ای</h4><p align=\'center\'>با همکاران ارتباط برقرار کنید، گروه‌ها تشکیل دهید و موارد پزشکی را بحث کنید.</p><h4 align=\'center\'>لیست داروهای مخصوص هر کشور</h4><p align=\'center\'>به اطلاعات جامع دارویی متناسب با هر کشور دسترسی داشته باشید.</p><h4 align=\'center\'>کنفرانس‌های پزشکی</h4><p align=\'center\'>از کنفرانس‌های سراسر جهان مطلع شوید و هرگز یک رویداد مهم را از دست ندهید.</p><h4 align=\'center\'>دستورالعمل‌های پزشکی</h4><p align=\'center\'>به جدیدترین دستورالعمل‌های پزشکی دسترسی داشته باشید تا از بهترین شیوه‌ها و پروتکل‌های درمانی آگاه باشید.</p><h4 align=\'center\'>ویژگی‌های مبتنی بر هوش مصنوعی</h4><p align=\'center\'>از آخرین فناوری هوش مصنوعی برای تقویت عملکرد پزشکی خود استفاده کنید.</p><h4 align=\'center\'>آموزش مداوم پزشکی (CME)</h4><p align=\'center\'>امتیازات CME کسب کنید و دانش خود را به‌روز نگه دارید.</p><h4 align=\'center\'>بروزرسانی‌ها و اعلان‌های وزارت بهداشت</h4><p align=\'center\'>به‌موقع بروزرسانی‌ها و اعلان‌های وزارت بهداشت کشور مورد نظر خود را دریافت کنید.</p><h4 align=\'center\'>تشخیص افتراقی</h4><p align=\'center\'>از هوش مصنوعی پیشرفته برای کمک به تشخیص افتراقی دقیق استفاده کنید و دقت و کارایی تشخیص را افزایش دهید.</p>';
 
   @override
-  String get html_our_vision => '<p align=\'center\'>ما جهانی را تصور می‌کنیم که در آن پزشکان به‌طور یکپارچه متصل هستند، با آخرین فناوری‌ها تجهیز شده‌اند و به مجموعه‌ای از منابع دسترسی دارند که رشد حرفه‌ای آنها و بهبود مراقبت از بیمار را پشتیبانی می‌کند.</p>';
+  String get html_our_vision =>
+      '<p align=\'center\'>ما جهانی را تصور می‌کنیم که در آن پزشکان به‌طور یکپارچه متصل هستند، با آخرین فناوری‌ها تجهیز شده‌اند و به مجموعه‌ای از منابع دسترسی دارند که رشد حرفه‌ای آنها و بهبود مراقبت از بیمار را پشتیبانی می‌کند.</p>';
 
   @override
-  String get html_case_discussion => '<p align=\'center\'>در بحث‌های عمیق درباره موارد پزشکی با همکاران خود شرکت کنید و با استفاده از بینش‌های هوش مصنوعی به صورت مشارکتی تشخیص‌های افتراقی و استراتژی‌های درمانی را کاوش کنید.</p>';
+  String get html_case_discussion =>
+      '<p align=\'center\'>در بحث‌های عمیق درباره موارد پزشکی با همکاران خود شرکت کنید و با استفاده از بینش‌های هوش مصنوعی به صورت مشارکتی تشخیص‌های افتراقی و استراتژی‌های درمانی را کاوش کنید.</p>';
 
   @override
-  String get html_our_values => '<p align=\'center\'>ما متعهد به رعایت اخلاق حرفه‌ای و ارائه مراقبت‌های بهداشتی با کیفیت بالا هستیم.</p>';
+  String get html_our_values =>
+      '<p align=\'center\'>ما متعهد به رعایت اخلاق حرفه‌ای و ارائه مراقبت‌های بهداشتی با کیفیت بالا هستیم.</p>';
 
   @override
-  String get html_ai_diagnostic => '<p align=\'center\'>در داکتاک، ما از فناوری‌های پیشرفته هوش مصنوعی برای پشتیبانی از پزشکان در انجام تشخیص‌های افتراقی دقیق و به‌موقع استفاده می‌کنیم. الگوریتم‌های هوش مصنوعی ما داده‌های بیمار، علائم و سوابق پزشکی را تحلیل می‌کنند تا بینش‌هایی را ایجاد و تشخیص‌های احتمالی را پیشنهاد دهند. این به متخصصان مراقبت‌های بهداشتی کمک می‌کند تا تصمیمات آگاهانه بگیرند و نتایج مراقبت از بیمار را بهبود بخشند.</p>';
+  String get html_ai_diagnostic =>
+      '<p align=\'center\'>در داکتاک، ما از فناوری‌های پیشرفته هوش مصنوعی برای پشتیبانی از پزشکان در انجام تشخیص‌های افتراقی دقیق و به‌موقع استفاده می‌کنیم. الگوریتم‌های هوش مصنوعی ما داده‌های بیمار، علائم و سوابق پزشکی را تحلیل می‌کنند تا بینش‌هایی را ایجاد و تشخیص‌های احتمالی را پیشنهاد دهند. این به متخصصان مراقبت‌های بهداشتی کمک می‌کند تا تصمیمات آگاهانه بگیرند و نتایج مراقبت از بیمار را بهبود بخشند.</p>';
 
   @override
-  String get html_join_us => '<p align=\'center\'>بخشی از جامعه داکتاک باشید و عصر جدیدی از شبکه‌سازی و منابع پزشکی را تجربه کنید. با هم می‌توانیم در زمینه پزشکی پیشرفت کنیم و نتایج مراقبت‌های بهداشتی را در سراسر جهان بهبود بخشیم. از انتخاب داکتاک.نت متشکریم!</p>';
+  String get html_join_us =>
+      '<p align=\'center\'>بخشی از جامعه داکتاک باشید و عصر جدیدی از شبکه‌سازی و منابع پزشکی را تجربه کنید. با هم می‌توانیم در زمینه پزشکی پیشرفت کنیم و نتایج مراقبت‌های بهداشتی را در سراسر جهان بهبود بخشیم. از انتخاب داکتاک.نت متشکریم!</p>';
 
   @override
   String get lbl_name => 'نام';
@@ -1040,7 +1102,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_connect_on_whatsapp => ' از طریق واتساپ متصل شوید';
 
   @override
-  String get msg_open_whatsapp_confirm => 'آیا می‌خواهید واتساپ را برای ارسال پیام باز کنید؟';
+  String get msg_open_whatsapp_confirm =>
+      'آیا می‌خواهید واتساپ را برای ارسال پیام باز کنید؟';
 
   @override
   String get lbl_bbc_news => 'اخبار BBC';
@@ -1118,7 +1181,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_no_search_results => 'نتایج جستجوی شما هیچ دارویی را نیافت';
 
   @override
-  String get err_drug_load_failed => 'بارگیری لیست داروها ناموفق بود. لطفا دوباره تلاش کنید';
+  String get err_drug_load_failed =>
+      'بارگیری لیست داروها ناموفق بود. لطفا دوباره تلاش کنید';
 
   @override
   String get lbl_search_conferences => 'جستجوی کنفرانس‌ها';
@@ -1151,7 +1215,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_registration_unavailable => 'ثبت نام در دسترس نیست';
 
   @override
-  String get msg_something_went_wrong_retry => 'مشکلی پیش آمد لطفا دوباره تلاش کنید';
+  String get msg_something_went_wrong_retry =>
+      'مشکلی پیش آمد لطفا دوباره تلاش کنید';
 
   @override
   String get msg_no_conference_found => 'هیچ کنفرانسی یافت نشد';
@@ -1226,7 +1291,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_no_posts => 'هیچ پستی یافت نشد';
 
   @override
-  String get msg_confirm_delete_post => 'آیا مطمئن هستید که می‌خواهید این پست را حذف کنید؟';
+  String get msg_confirm_delete_post =>
+      'آیا مطمئن هستید که می‌خواهید این پست را حذف کنید؟';
 
   @override
   String get lbl_search_post => 'جستجوی پست';
@@ -1262,10 +1328,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_unsupported_file => 'نوع فایل پشتیبانی نمی‌شود';
 
   @override
-  String get msg_verification_link_sent_success => 'لینک تأیید با موفقیت ارسال شد';
+  String get msg_verification_link_sent_success =>
+      'لینک تأیید با موفقیت ارسال شد';
 
   @override
-  String get msg_verify_email_continue => 'لطفاً ایمیل خود را برای ادامه تأیید کنید';
+  String get msg_verify_email_continue =>
+      'لطفاً ایمیل خود را برای ادامه تأیید کنید';
 
   @override
   String get lbl_verify_email => 'تأیید ایمیل';
@@ -1289,7 +1357,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_complete_profile => 'تکمیل پروفایل';
 
   @override
-  String get msg_confirm_delete_comment => 'آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟';
+  String get msg_confirm_delete_comment =>
+      'آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟';
 
   @override
   String get lbl_no_name => 'بدون نام';
@@ -1406,7 +1475,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_end_date => 'تاریخ پایان';
 
   @override
-  String get msg_confirm_delete_info => 'آیا مطمئن هستید که می‌خواهید اطلاعات را حذف کنید؟';
+  String get msg_confirm_delete_info =>
+      'آیا مطمئن هستید که می‌خواهید اطلاعات را حذف کنید؟';
 
   @override
   String get lbl_no_interest_added => 'هیچ علاقه‌مندی اضافه نشده است';
@@ -1433,7 +1503,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_research_projects => 'پروژه‌های تحقیقاتی';
 
   @override
-  String get hint_areas_of_interest => 'زمینه‌های مورد علاقه (زمینه‌های خاص پزشکی، علایق تحقیقاتی)';
+  String get hint_areas_of_interest =>
+      'زمینه‌های مورد علاقه (زمینه‌های خاص پزشکی، علایق تحقیقاتی)';
 
   @override
   String get hint_publications => 'انتشارات (مقالات تحقیقی، مقالات)';
@@ -1475,7 +1546,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_add_interests => 'افزودن علایق';
 
   @override
-  String get msg_add_interests => 'علایق خود را اضافه کنید تا تمرکز حرفه‌ای خود را نشان دهید و با همکاران در زمینه‌های مشابه ارتباط برقرار کنید.';
+  String get msg_add_interests =>
+      'علایق خود را اضافه کنید تا تمرکز حرفه‌ای خود را نشان دهید و با همکاران در زمینه‌های مشابه ارتباط برقرار کنید.';
 
   @override
   String get msg_no_details_added => 'هیچ جزئیاتی اضافه نشده است';
@@ -1484,7 +1556,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_interests_updated => 'علایق با موفقیت به‌روزرسانی شد';
 
   @override
-  String get msg_privacy_info_desc => 'مدیریت کنید که چه کسی اطلاعات پروفایل شما را ببیند. تنظیمات حریم خصوصی شما به کنترل نمایان بودن اطلاعات شخصی‌تان کمک می‌کند.';
+  String get msg_privacy_info_desc =>
+      'مدیریت کنید که چه کسی اطلاعات پروفایل شما را ببیند. تنظیمات حریم خصوصی شما به کنترل نمایان بودن اطلاعات شخصی‌تان کمک می‌کند.';
 
   @override
   String get lbl_personal_info_privacy => 'حریم خصوصی اطلاعات شخصی';
@@ -1499,7 +1572,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_other_info_privacy => 'حریم خصوصی سایر اطلاعات';
 
   @override
-  String get msg_privacy_settings_updated => 'تنظیمات حریم خصوصی با موفقیت به‌روزرسانی شد';
+  String get msg_privacy_settings_updated =>
+      'تنظیمات حریم خصوصی با موفقیت به‌روزرسانی شد';
 
   @override
   String get lbl_specialty_info => 'اطلاعات تخصص';
@@ -1511,7 +1585,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_achievements_and_location => 'دستاوردها و موقعیت';
 
   @override
-  String get msg_professional_info_desc => 'این اطلاعات به نمایش تخصص حرفه‌ای شما و اتصال شما به فرصت‌های مرتبط در زمینه‌تان کمک می‌کند.';
+  String get msg_professional_info_desc =>
+      'این اطلاعات به نمایش تخصص حرفه‌ای شما و اتصال شما به فرصت‌های مرتبط در زمینه‌تان کمک می‌کند.';
 
   @override
   String get lbl_add_experience_details => 'افزودن جزئیات تجربه';
@@ -1685,43 +1760,55 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_meeting_privacy_settings => 'تنظیمات حریم خصوصی جلسه';
 
   @override
-  String get desc_start_stop_meeting => 'مالک جلسه می‌تواند جلسه را شروع یا متوقف کند';
+  String get desc_start_stop_meeting =>
+      'مالک جلسه می‌تواند جلسه را شروع یا متوقف کند';
 
   @override
-  String get desc_mute_all_participants => 'مالک جلسه نمی‌تواند همه شرکت‌کنندگان را بی‌صدا کند';
+  String get desc_mute_all_participants =>
+      'مالک جلسه نمی‌تواند همه شرکت‌کنندگان را بی‌صدا کند';
 
   @override
-  String get desc_unmute_all_participants => 'مالک جلسه نمی‌تواند همه شرکت‌کنندگان را باصدا کند';
+  String get desc_unmute_all_participants =>
+      'مالک جلسه نمی‌تواند همه شرکت‌کنندگان را باصدا کند';
 
   @override
-  String get desc_add_remove_host => 'مالک جلسه می‌تواند میزبان‌ها را اضافه یا حذف کند';
+  String get desc_add_remove_host =>
+      'مالک جلسه می‌تواند میزبان‌ها را اضافه یا حذف کند';
 
   @override
-  String get desc_share_screen => 'مالک جلسه می‌تواند صفحه خود را به اشتراک بگذارد';
+  String get desc_share_screen =>
+      'مالک جلسه می‌تواند صفحه خود را به اشتراک بگذارد';
 
   @override
   String get desc_raise_hand => 'شرکت‌کننده جلسه می‌تواند دست خود را بالا ببرد';
 
   @override
-  String get desc_send_reactions => 'شرکت‌کننده جلسه می‌تواند واکنش‌ها را ارسال کند';
+  String get desc_send_reactions =>
+      'شرکت‌کننده جلسه می‌تواند واکنش‌ها را ارسال کند';
 
   @override
-  String get desc_toggle_microphone => 'شرکت‌کننده جلسه می‌تواند میکروفون خود را تغییر وضعیت دهد';
+  String get desc_toggle_microphone =>
+      'شرکت‌کننده جلسه می‌تواند میکروفون خود را تغییر وضعیت دهد';
 
   @override
-  String get desc_toggle_video => 'شرکت‌کننده جلسه می‌تواند ویدیو خود را تغییر وضعیت دهد';
+  String get desc_toggle_video =>
+      'شرکت‌کننده جلسه می‌تواند ویدیو خود را تغییر وضعیت دهد';
 
   @override
-  String get desc_enable_waiting_room => 'مالک جلسه می‌تواند اتاق انتظار را فعال یا غیرفعال کند\nدرخواست پیوستن به جلسه';
+  String get desc_enable_waiting_room =>
+      'مالک جلسه می‌تواند اتاق انتظار را فعال یا غیرفعال کند\nدرخواست پیوستن به جلسه';
 
   @override
-  String get desc_host_management => 'کنترل‌هایی برای مدیریت میزبان‌های جلسه، شامل اضافه کردن، حذف و اختصاص امتیازات میزبان.';
+  String get desc_host_management =>
+      'کنترل‌هایی برای مدیریت میزبان‌های جلسه، شامل اضافه کردن، حذف و اختصاص امتیازات میزبان.';
 
   @override
-  String get desc_participant_controls => 'کنترل‌هایی برای شرکت‌کنندگان جهت تعامل در طول جلسه، شامل اشتراک‌گذاری صفحه، ارسال واکنش‌ها، روشن/خاموش کردن میکروفون یا ویدیو و غیره.';
+  String get desc_participant_controls =>
+      'کنترل‌هایی برای شرکت‌کنندگان جهت تعامل در طول جلسه، شامل اشتراک‌گذاری صفحه، ارسال واکنش‌ها، روشن/خاموش کردن میکروفون یا ویدیو و غیره.';
 
   @override
-  String get desc_meeting_privacy_settings => 'کنترل‌هایی برای مدیریت حریم خصوصی و امنیت جلسه، شامل محدود کردن دسترسی، فعال کردن اتاق انتظار، درخواست رمز عبور و غیره.';
+  String get desc_meeting_privacy_settings =>
+      'کنترل‌هایی برای مدیریت حریم خصوصی و امنیت جلسه، شامل محدود کردن دسترسی، فعال کردن اتاق انتظار، درخواست رمز عبور و غیره.';
 
   @override
   String get lbl_add_case => 'افزودن مورد';
@@ -1897,7 +1984,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_tap_for_details => 'برای جزئیات ضربه بزنید';
 
   @override
-  String get lbl_select_option_to_learn => 'برای یادگیری بیشتر گزینه‌ای را انتخاب کنید';
+  String get lbl_select_option_to_learn =>
+      'برای یادگیری بیشتر گزینه‌ای را انتخاب کنید';
 
   @override
   String get lbl_step1_info => 'مرحله 1: اطلاعات پایه 1 - 4';
@@ -1927,13 +2015,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_error_exclamation => 'خطا!';
 
   @override
-  String get msg_group_create_error => 'هنگام ایجاد گروه خطایی رخ داد. لطفاً به بخش اطلاعات پایه بروید و اطلاعات صحیح را وارد کنید';
+  String get msg_group_create_error =>
+      'هنگام ایجاد گروه خطایی رخ داد. لطفاً به بخش اطلاعات پایه بروید و اطلاعات صحیح را وارد کنید';
 
   @override
   String get lbl_complete_your_profile => 'تکمیل پروفایل شما';
 
   @override
-  String get msg_unlock_personalized_features => 'برای فعال‌سازی ویژگی‌های شخصی‌سازی شده با ارائه اطلاعات کشور، شهر و حرفه خود';
+  String get msg_unlock_personalized_features =>
+      'برای فعال‌سازی ویژگی‌های شخصی‌سازی شده با ارائه اطلاعات کشور، شهر و حرفه خود';
 
   @override
   String get msg_please_select_country => 'لطفاً کشور را انتخاب کنید';
@@ -1945,10 +2035,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_please_select_specialty => 'لطفاً یک تخصص انتخاب کنید';
 
   @override
-  String get msg_wait_fields_loading => 'لطفاً صبر کنید، فیلدهای بیشتری در حال بارگذاری هستند...';
+  String get msg_wait_fields_loading =>
+      'لطفاً صبر کنید، فیلدهای بیشتری در حال بارگذاری هستند...';
 
   @override
-  String get msg_account_update_success => 'حساب کاربری با موفقیت به‌روزرسانی شد';
+  String get msg_account_update_success =>
+      'حساب کاربری با موفقیت به‌روزرسانی شد';
 
   @override
   String get lbl_unfollow => 'لغو دنبال کردن';
@@ -1957,7 +2049,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_verify_your_account => 'تایید حساب کاربری';
 
   @override
-  String get msg_verify_email_description => 'برای استفاده از تمام امکانات، لطفا ایمیل خود را تایید کنید. یک لینک تایید به صندوق ورودی شما ارسال خواهد شد.';
+  String get msg_verify_email_description =>
+      'برای استفاده از تمام امکانات، لطفا ایمیل خود را تایید کنید. یک لینک تایید به صندوق ورودی شما ارسال خواهد شد.';
 
   @override
   String get lbl_resend_link => 'ارسال مجدد لینک';
@@ -1984,7 +2077,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_sending_verification_link => 'ارسال لینک تایید';
 
   @override
-  String get msg_verification_email_wait => 'لطفاً صبر کنید تا یک لینک تایید به ایمیل شما ارسال شود.';
+  String get msg_verification_email_wait =>
+      'لطفاً صبر کنید تا یک لینک تایید به ایمیل شما ارسال شود.';
 
   @override
   String get lbl_media => 'رسانه';
@@ -1993,7 +2087,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_recording_start => 'ضبط شروع شد..';
 
   @override
-  String get msg_confirm_delete_message => 'آیا مطمئن هستید که می‌خواهید پیام را حذف کنید؟';
+  String get msg_confirm_delete_message =>
+      'آیا مطمئن هستید که می‌خواهید پیام را حذف کنید؟';
 
   @override
   String get msg_no_image_selected => 'هیچ تصویری انتخاب نشده است.';
@@ -2005,7 +2100,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_invalid_string => 'رشته نامعتبر';
 
   @override
-  String get msg_pusher_auth_failed => 'دریافت اطلاعات احراز هویت Pusher انجام نشد';
+  String get msg_pusher_auth_failed =>
+      'دریافت اطلاعات احراز هویت Pusher انجام نشد';
 
   @override
   String get lbl_no => 'نه';
@@ -2017,13 +2113,15 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_search_contacts => 'جستجوی مخاطبین';
 
   @override
-  String get msg_screen_share_permission_denied => 'اجازه اشتراک‌گذاری صفحه از طرف میزبان داده نشده است';
+  String get msg_screen_share_permission_denied =>
+      'اجازه اشتراک‌گذاری صفحه از طرف میزبان داده نشده است';
 
   @override
   String get msg_audio_permission_denied => 'شما اجازه فعال کردن صدا را ندارید';
 
   @override
-  String get msg_video_permission_denied => 'شما اجازه فعال کردن ویدیو را ندارید';
+  String get msg_video_permission_denied =>
+      'شما اجازه فعال کردن ویدیو را ندارید';
 
   @override
   String get lbl_screen_share_error => 'خطای اشتراک‌گذاری صفحه';
@@ -2071,7 +2169,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_withdraw => 'لغو';
 
   @override
-  String get msg_confirm_withdraw => 'آیا مطمئن هستید که می‌خواهید درخواست خود را لغو کنید؟';
+  String get msg_confirm_withdraw =>
+      'آیا مطمئن هستید که می‌خواهید درخواست خود را لغو کنید؟';
 
   @override
   String get lbl_view_applicants => 'مشاهده متقاضیان';
@@ -2104,7 +2203,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_submit_case => 'ارسال مورد';
 
   @override
-  String get msg_confirm_patient_info_removed_checkbox => 'تأیید می‌کنم که اطلاعات بیمار ناشناس خواهد شد';
+  String get msg_confirm_patient_info_removed_checkbox =>
+      'تأیید می‌کنم که اطلاعات بیمار ناشناس خواهد شد';
 
   @override
   String get lbl_create_case_discussion => 'ایجاد بحث مورد';
@@ -2215,7 +2315,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_specialty_required => 'لطفاً تخصص را انتخاب کنید';
 
   @override
-  String get msg_create_case_discussion_description => 'با ارائه تمام جزئیات لازم برای جامعه پزشکی، یک بحث مورد پزشکی جدید ایجاد کنید.';
+  String get msg_create_case_discussion_description =>
+      'با ارائه تمام جزئیات لازم برای جامعه پزشکی، یک بحث مورد پزشکی جدید ایجاد کنید.';
 
   @override
   String get lbl_got_it => 'متوجه شدم';
@@ -2266,7 +2367,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_please_enter_description => 'لطفاً توضیحات وارد کنید';
 
   @override
-  String get msg_confirm_patient_info_removed => 'اطلاعات بیمار از این مورد برای حفاظت از حریم خصوصی حذف خواهد شد';
+  String get msg_confirm_patient_info_removed =>
+      'اطلاعات بیمار از این مورد برای حفاظت از حریم خصوصی حذف خواهد شد';
 
   @override
   String get lbl_french_language => 'فرانسوی';
@@ -2281,16 +2383,19 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_edit_case_discussion => 'ویرایش بحث مورد';
 
   @override
-  String get msg_case_discussion_updated => 'بحث مورد با موفقیت به‌روزرسانی شد!';
+  String get msg_case_discussion_updated =>
+      'بحث مورد با موفقیت به‌روزرسانی شد!';
 
   @override
   String get lbl_age_years => 'سن (سال)';
 
   @override
-  String get msg_clinical_keywords_hint => 'کلیدواژه‌های بالینی را با کاما جدا کنید (مثال: تب، سردرد، خستگی)';
+  String get msg_clinical_keywords_hint =>
+      'کلیدواژه‌های بالینی را با کاما جدا کنید (مثال: تب، سردرد، خستگی)';
 
   @override
-  String get msg_clinical_keywords_example => 'تب، سردرد، درد قفسه سینه، تنگی نفس...';
+  String get msg_clinical_keywords_example =>
+      'تب، سردرد، درد قفسه سینه، تنگی نفس...';
 
   @override
   String get lbl_current_tags => 'برچسب‌های فعلی:';
@@ -2329,19 +2434,23 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_no_discussions_found => 'هیچ بحثی یافت نشد';
 
   @override
-  String get msg_try_adjusting_filters => 'تنظیم فیلترها یا عبارات جستجو را امتحان کنید';
+  String get msg_try_adjusting_filters =>
+      'تنظیم فیلترها یا عبارات جستجو را امتحان کنید';
 
   @override
-  String get msg_be_first_to_start_discussion => 'اولین کسی باشید که بحثی شروع می‌کند';
+  String get msg_be_first_to_start_discussion =>
+      'اولین کسی باشید که بحثی شروع می‌کند';
 
   @override
   String get lbl_clear_filters => 'پاک کردن فیلترها';
 
   @override
-  String get msg_wait_for_ai_response => 'لطفاً منتظر پاسخ هوش مصنوعی باشید قبل از ارسال پیام دیگری';
+  String get msg_wait_for_ai_response =>
+      'لطفاً منتظر پاسخ هوش مصنوعی باشید قبل از ارسال پیام دیگری';
 
   @override
-  String get msg_cannot_access_session_settings => 'در حال حاضر نمی‌توان به تنظیمات جلسه دسترسی داشت';
+  String get msg_cannot_access_session_settings =>
+      'در حال حاضر نمی‌توان به تنظیمات جلسه دسترسی داشت';
 
   @override
   String get lbl_doctak_ai_assistant => 'دستیار هوش مصنوعی دکتاک';
@@ -2359,7 +2468,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_clinical_decision_assistance => 'کمک در تصمیم‌گیری بالینی';
 
   @override
-  String get msg_diagnosis_support_prompt => 'چه بیماری‌هایی را باید برای بیماری با درد قفسه سینه و تنگی نفس در نظر بگیرم؟';
+  String get msg_diagnosis_support_prompt =>
+      'چه بیماری‌هایی را باید برای بیماری با درد قفسه سینه و تنگی نفس در نظر بگیرم؟';
 
   @override
   String get lbl_drug_information => 'اطلاعات دارو';
@@ -2368,7 +2478,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_medication_safety_interactions => 'ایمنی دارو و تداخلات';
 
   @override
-  String get msg_drug_information_prompt => 'آیا تداخلی بین وارفارین و آسپرین وجود دارد؟';
+  String get msg_drug_information_prompt =>
+      'آیا تداخلی بین وارفارین و آسپرین وجود دارد؟';
 
   @override
   String get lbl_treatment_plans => 'طرح‌های درمانی';
@@ -2377,7 +2488,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_evidence_based_protocols => 'پروتکل‌های مبتنی بر شواهد';
 
   @override
-  String get msg_treatment_plans_prompt => 'پروتکل درمانی فعلی برای انفارکتوس حاد میوکارد چیست؟';
+  String get msg_treatment_plans_prompt =>
+      'پروتکل درمانی فعلی برای انفارکتوس حاد میوکارد چیست؟';
 
   @override
   String get lbl_medical_codes => 'کدهای پزشکی';
@@ -2386,7 +2498,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_icd_cpt_code_lookup => 'جستجوی کدهای ICD-10 و CPT';
 
   @override
-  String get msg_medical_codes_prompt => 'چه کد ICD-10 باید برای دیابت نوع 2 با عوارض استفاده کنم؟';
+  String get msg_medical_codes_prompt =>
+      'چه کد ICD-10 باید برای دیابت نوع 2 با عوارض استفاده کنم؟';
 
   @override
   String get lbl_try_it => 'امتحان کنید';
@@ -2404,7 +2517,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_select_chat_from_menu => 'از منو چت انتخاب کنید';
 
   @override
-  String get msg_open_menu_to_start_new_chat => 'منو را باز کنید تا چت جدید شروع کنید';
+  String get msg_open_menu_to_start_new_chat =>
+      'منو را باز کنید تا چت جدید شروع کنید';
 
   @override
   String get lbl_just_now => 'همین الان';
@@ -2419,7 +2533,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_image_attached => 'تصویر ضمیمه شده';
 
   @override
-  String get msg_session_creation_timeout => 'ایجاد جلسه منقضی شد. لطفاً دوباره تلاش کنید.';
+  String get msg_session_creation_timeout =>
+      'ایجاد جلسه منقضی شد. لطفاً دوباره تلاش کنید.';
 
   @override
   String get lbl_recent_chats => 'چت‌های اخیر';
@@ -2444,7 +2559,8 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get msg_session_loading_timeout => 'بارگیری جلسه منقضی شد. لطفاً دوباره تلاش کنید.';
+  String get msg_session_loading_timeout =>
+      'بارگیری جلسه منقضی شد. لطفاً دوباره تلاش کنید.';
 
   @override
   String get lbl_web_search => 'جستجوی وب';
@@ -2474,7 +2590,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get hint_enter_session_name => 'نام جلسه را وارد کنید';
 
   @override
-  String get msg_session_name_length_limit => 'نام جلسه باید 50 کاراکتر یا کمتر باشد';
+  String get msg_session_name_length_limit =>
+      'نام جلسه باید 50 کاراکتر یا کمتر باشد';
 
   @override
   String msg_renaming_session(Object newName) {
@@ -2552,7 +2669,8 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get msg_ai_assistant_ready => 'دستیار پزشکی هوش مصنوعی شما آماده کمک در تشخیص، درمان و بینش‌های پزشکی است.';
+  String get msg_ai_assistant_ready =>
+      'دستیار پزشکی هوش مصنوعی شما آماده کمک در تشخیص، درمان و بینش‌های پزشکی است.';
 
   @override
   String get lbl_identify_cpt_icd_codes => 'شناسایی کدهای CPT یا ICD';
@@ -2564,22 +2682,26 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_based_on_symptoms => 'بر اساس علائم';
 
   @override
-  String get msg_diagnostic_suggestions_prompt => 'پیشنهادات تشخیصی: درخواست پیشنهادات بر اساس علائم';
+  String get msg_diagnostic_suggestions_prompt =>
+      'پیشنهادات تشخیصی: درخواست پیشنهادات بر اساس علائم';
 
   @override
   String get lbl_dosage_interactions => 'دوز و تداخلات';
 
   @override
-  String get msg_drug_information_prompt_2 => 'اطلاعات دارو: ارائه جزئیات دوز و تداخل';
+  String get msg_drug_information_prompt_2 =>
+      'اطلاعات دارو: ارائه جزئیات دوز و تداخل';
 
   @override
   String get lbl_evidence_based_care => 'مراقبت مبتنی بر شواهد';
 
   @override
-  String get msg_treatment_plans_prompt_2 => 'طرح‌های درمان: پیشنهاد گزینه‌های درمانی مبتنی بر شواهد';
+  String get msg_treatment_plans_prompt_2 =>
+      'طرح‌های درمان: پیشنهاد گزینه‌های درمانی مبتنی بر شواهد';
 
   @override
-  String get msg_ready_to_start => 'آماده شروع؟ سؤال خود را در زیر تایپ کنید یا موضوع پیشنهادی انتخاب کنید.';
+  String get msg_ready_to_start =>
+      'آماده شروع؟ سؤال خود را در زیر تایپ کنید یا موضوع پیشنهادی انتخاب کنید.';
 
   @override
   String get msg_generating_response_2 => 'در حال تولید پاسخ...';
@@ -2597,16 +2719,19 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_ai_image_analysis => 'تجزیه و تحلیل تصاویر با هوش مصنوعی';
 
   @override
-  String get msg_upload_medical_images => 'تصاویر پزشکی را برای تجزیه و تحلیل و بینش‌های هوش مصنوعی بارگذاری کنید';
+  String get msg_upload_medical_images =>
+      'تصاویر پزشکی را برای تجزیه و تحلیل و بینش‌های هوش مصنوعی بارگذاری کنید';
 
   @override
   String get lbl_select_medical_image_type => 'نوع تصویر پزشکی را انتخاب کنید';
 
   @override
-  String get msg_only_one_image_per_session => 'در هر جلسه فقط یک تصویر مجاز است';
+  String get msg_only_one_image_per_session =>
+      'در هر جلسه فقط یک تصویر مجاز است';
 
   @override
-  String get msg_choose_medical_image_type => 'نوع تصویر پزشکی را برای تجزیه و تحلیل با هوش مصنوعی انتخاب کنید';
+  String get msg_choose_medical_image_type =>
+      'نوع تصویر پزشکی را برای تجزیه و تحلیل با هوش مصنوعی انتخاب کنید';
 
   @override
   String get lbl_dermatological => 'پوستی';
@@ -2639,7 +2764,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_breast_tissue_analysis => 'تجزیه و تحلیل بافت پستان';
 
   @override
-  String get msg_ai_powered_medical_image_analysis => 'تجزیه و تحلیل تصویر پزشکی با هوش مصنوعی';
+  String get msg_ai_powered_medical_image_analysis =>
+      'تجزیه و تحلیل تصویر پزشکی با هوش مصنوعی';
 
   @override
   String lbl_upload_image_type(Object imageType) {
@@ -2652,13 +2778,15 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
-  String get msg_high_quality_images_better_analysis => 'تصاویر با کیفیت بالا نتایج بهتری از تجزیه و تحلیل هوش مصنوعی ارائه می‌دهند';
+  String get msg_high_quality_images_better_analysis =>
+      'تصاویر با کیفیت بالا نتایج بهتری از تجزیه و تحلیل هوش مصنوعی ارائه می‌دهند';
 
   @override
   String get lbl_photo_access_required => 'دسترسی به تصاویر لازم است';
 
   @override
-  String get msg_photo_permission_needed => 'دکتاک هوش مصنوعی برای تجزیه و تحلیل تصاویر پزشکی نیاز به دسترسی به عکس‌های شما دارد. لطفاً مجوزهای عکس را در تنظیمات دستگاه خود فعال کنید.';
+  String get msg_photo_permission_needed =>
+      'دکتاک هوش مصنوعی برای تجزیه و تحلیل تصاویر پزشکی نیاز به دسترسی به عکس‌های شما دارد. لطفاً مجوزهای عکس را در تنظیمات دستگاه خود فعال کنید.';
 
   @override
   String get lbl_open_settings => 'باز کردن تنظیمات';
@@ -2667,7 +2795,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_comment_added_successfully => 'نظر با موفقیت اضافه شد!';
 
   @override
-  String get msg_share_functionality_coming_soon => 'قابلیت اشتراک‌گذاری به‌زودی';
+  String get msg_share_functionality_coming_soon =>
+      'قابلیت اشتراک‌گذاری به‌زودی';
 
   @override
   String get msg_error_loading_discussion => 'خطا در بارگیری بحث';
@@ -2681,7 +2810,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_no_comments_yet => 'هنوز نظری وجود ندارد';
 
   @override
-  String get msg_be_first_to_share_insights => 'اولین کسی باشید که بینش‌های پزشکی خود را در مورد این مورد به اشتراک می‌گذارید.';
+  String get msg_be_first_to_share_insights =>
+      'اولین کسی باشید که بینش‌های پزشکی خود را در مورد این مورد به اشتراک می‌گذارید.';
 
   @override
   String get lbl_related_cases => 'موارد مرتبط';
@@ -2713,10 +2843,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_time_just_now => 'همین الان';
 
   @override
-  String get hint_share_medical_insights => 'بینش‌های پزشکی خود را به اشتراک بگذارید...';
+  String get hint_share_medical_insights =>
+      'بینش‌های پزشکی خود را به اشتراک بگذارید...';
 
   @override
-  String get msg_share_professional_insights => 'بینش‌های حرفه‌ای را به اشتراک بگذارید و اخلاق پزشکی را حفظ کنید';
+  String get msg_share_professional_insights =>
+      'بینش‌های حرفه‌ای را به اشتراک بگذارید و اخلاق پزشکی را حفظ کنید';
 
   @override
   String get lbl_medical_professional => 'متخصص پزشکی';
@@ -2733,7 +2865,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_delete_discussion => 'حذف بحث';
 
   @override
-  String get msg_delete_discussion_confirm => 'آیا مطمئن هستید که می‌خواهید این بحث مورد را حذف کنید؟ این عمل قابل بازگشت نیست.';
+  String get msg_delete_discussion_confirm =>
+      'آیا مطمئن هستید که می‌خواهید این بحث مورد را حذف کنید؟ این عمل قابل بازگشت نیست.';
 
   @override
   String get lbl_patient_information => 'اطلاعات بیمار';
@@ -2875,7 +3008,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_export_functionality => 'قابلیت صادرات پیاده‌سازی خواهد شد';
 
   @override
-  String get msg_share_filters_functionality => 'قابلیت اشتراک فیلترها پیاده‌سازی خواهد شد';
+  String get msg_share_filters_functionality =>
+      'قابلیت اشتراک فیلترها پیاده‌سازی خواهد شد';
 
   @override
   String get lbl_active_filters => 'فیلترهای فعال';
@@ -2946,34 +3080,42 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_delete_comment => 'حذف نظر';
 
   @override
-  String get msg_confirm_delete_discussion => 'آیا مطمئن هستید که می‌خواهید این بحث را حذف کنید؟';
+  String get msg_confirm_delete_discussion =>
+      'آیا مطمئن هستید که می‌خواهید این بحث را حذف کنید؟';
 
   @override
-  String get msg_upload_medical_images_description => 'تصاویر پزشکی را برای تجزیه و تحلیل و بینش‌های مدعوم به هوش مصنوعی آپلود کنید';
+  String get msg_upload_medical_images_description =>
+      'تصاویر پزشکی را برای تجزیه و تحلیل و بینش‌های مدعوم به هوش مصنوعی آپلود کنید';
 
   @override
   String get lbl_x_ray => 'اشعه ایکس';
 
   @override
-  String get msg_ai_powered_medical_analysis => 'تجزیه و تحلیل تصاویر پزشکی مدعوم به هوش مصنوعی';
+  String get msg_ai_powered_medical_analysis =>
+      'تجزیه و تحلیل تصاویر پزشکی مدعوم به هوش مصنوعی';
 
   @override
-  String get msg_high_quality_images_better_results => 'تصاویر با کیفیت بالا نتایج بهتری از تجزیه و تحلیل هوش مصنوعی ارائه می‌دهند';
+  String get msg_high_quality_images_better_results =>
+      'تصاویر با کیفیت بالا نتایج بهتری از تجزیه و تحلیل هوش مصنوعی ارائه می‌دهند';
 
   @override
-  String get msg_photo_permission_explanation => 'دکتک هوش مصنوعی به دسترسی به تصاویر شما برای تجزیه و تحلیل تصاویر پزشکی نیاز دارد. لطفاً مجوز تصاویر را در تنظیمات دستگاه خود فعال کنید.';
+  String get msg_photo_permission_explanation =>
+      'دکتک هوش مصنوعی به دسترسی به تصاویر شما برای تجزیه و تحلیل تصاویر پزشکی نیاز دارد. لطفاً مجوز تصاویر را در تنظیمات دستگاه خود فعال کنید.';
 
   @override
-  String get msg_ai_assistant_description => 'دستیار پزشکی مدعوم به هوش مصنوعی شما آماده کمک در تشخیص، درمان و بینش‌های پزشکی است.';
+  String get msg_ai_assistant_description =>
+      'دستیار پزشکی مدعوم به هوش مصنوعی شما آماده کمک در تشخیص، درمان و بینش‌های پزشکی است.';
 
   @override
-  String get msg_ready_to_start_instruction => 'آماده شروع هستید؟ سوال خود را در زیر تایپ کنید یا موضوع پیشنهادی انتخاب کنید.';
+  String get msg_ready_to_start_instruction =>
+      'آماده شروع هستید؟ سوال خود را در زیر تایپ کنید یا موضوع پیشنهادی انتخاب کنید.';
 
   @override
   String get msg_open_menu_new_chat => 'منو را باز کنید تا چت جدید شروع کنید';
 
   @override
-  String get msg_confirm_delete_conversation => 'آیا مطمئن هستید که می‌خواهید این مکالمه را حذف کنید؟';
+  String get msg_confirm_delete_conversation =>
+      'آیا مطمئن هستید که می‌خواهید این مکالمه را حذف کنید؟';
 
   @override
   String get lbl_cancel_uppercase => 'انصراف';
@@ -2982,8 +3124,10 @@ class AppLocalizationsFa extends AppLocalizations {
   String get lbl_delete_uppercase => 'حذف';
 
   @override
-  String get msg_session_name_max_length => 'نام جلسه باید 50 کاراکتر یا کمتر باشد';
+  String get msg_session_name_max_length =>
+      'نام جلسه باید 50 کاراکتر یا کمتر باشد';
 
   @override
-  String get msg_be_first_to_comment => 'اولین نفری باشید که بینش‌های پزشکی خود را درباره این مورد به اشتراک بگذارد.';
+  String get msg_be_first_to_comment =>
+      'اولین نفری باشید که بینش‌های پزشکی خود را درباره این مورد به اشتراک بگذارد.';
 }

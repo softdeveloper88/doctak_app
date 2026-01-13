@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../../theme/one_ui_theme.dart';
 
 /// Shimmer loader for specialty dropdown loading in create discussion screen
 class SpecialtyLoadingShimmer extends StatelessWidget {
@@ -7,15 +8,16 @@ class SpecialtyLoadingShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: theme.divider,
+      highlightColor: theme.cardBackground,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.05),
+          color: theme.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.blue.withOpacity(0.2)),
+          border: Border.all(color: theme.primary.withOpacity(0.2)),
         ),
         child: Row(
           children: [
@@ -23,8 +25,8 @@ class SpecialtyLoadingShimmer extends StatelessWidget {
             Container(
               width: 20,
               height: 20,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
+              decoration: BoxDecoration(
+                color: theme.divider,
                 shape: BoxShape.circle,
               ),
             ),
@@ -33,7 +35,7 @@ class SpecialtyLoadingShimmer extends StatelessWidget {
             Expanded(
               child: Container(
                 height: 14,
-                color: Colors.grey,
+                color: theme.divider,
               ),
             ),
             const SizedBox(width: 12),
@@ -41,8 +43,8 @@ class SpecialtyLoadingShimmer extends StatelessWidget {
             Container(
               width: 16,
               height: 16,
-              decoration: const BoxDecoration(
-                color: Colors.grey,
+              decoration: BoxDecoration(
+                color: theme.divider,
                 shape: BoxShape.circle,
               ),
             ),

@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 /// Memory-optimized drug item widget with performance improvements
 class MemoryOptimizedDrugItem extends StatefulWidget {
@@ -39,24 +39,18 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return RepaintBoundary(
       child: GestureDetector(
         onTap: () {
           _showDialog(context, widget.drug.genericName ?? '');
         },
         child: Container(
-          margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: context.cardColor,
+            color: theme.cardBackground,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: 0,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            boxShadow: theme.cardShadow,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -64,13 +58,13 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Drug Header
-                _buildDrugHeader(),
+                _buildDrugHeader(theme),
 
                 // Drug Info
-                _buildDrugInfo(),
+                _buildDrugInfo(theme),
 
                 // Action Row
-                _buildActionRow(),
+                _buildActionRow(theme),
               ],
             ),
           ),
@@ -80,25 +74,25 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   }
 
   // Drug header section
-  Widget _buildDrugHeader() {
+  Widget _buildDrugHeader(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(color: Colors.white),
+      decoration: BoxDecoration(color: theme.cardBackground),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 50,
-            height: 50,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: theme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Image.asset(
-                'assets/images/docktak_ai_light.png',
-                height: 30,
-                width: 30,
+              child: Icon(
+                Icons.medication_rounded,
+                size: 24,
+                color: theme.primary,
               ),
             ),
           ),
@@ -110,8 +104,8 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                 Text(
                   widget.drug.genericName ?? "",
                   style: TextStyle(
-                    color: Colors.blue[800],
-                    fontSize: 16,
+                    color: theme.primary,
+                    fontSize: 15,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                   ),
@@ -122,8 +116,8 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                 Text(
                   widget.drug.tradeName ??
                       translation(context).lbl_not_available,
-                  style: const TextStyle(
-                    color: Colors.black87,
+                  style: TextStyle(
+                    color: theme.textPrimary,
                     fontSize: 14,
                     fontFamily: 'Poppins',
                   ),
@@ -141,13 +135,13 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         widget.drug.strength ?? '',
                         style: TextStyle(
-                          color: Colors.blue[700],
+                          color: theme.primary,
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -161,13 +155,13 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: theme.success.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         widget.drug.packageSize ?? '',
                         style: TextStyle(
-                          color: Colors.green[700],
+                          color: theme.success,
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -186,14 +180,12 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   }
 
   // Drug info section
-  Widget _buildDrugInfo() {
+  Widget _buildDrugInfo(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
-        border: Border(
-          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
-        ),
+        color: theme.surfaceVariant,
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
       child: Row(
         children: [
@@ -205,7 +197,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                 Icon(
                   Icons.business_outlined,
                   size: 20,
-                  color: Colors.grey[600],
+                  color: theme.textTertiary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -215,7 +207,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                       Text(
                         translation(context).lbl_manufacturer_name,
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: theme.textTertiary,
                           fontSize: 12,
                           fontFamily: 'Poppins',
                         ),
@@ -225,7 +217,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         style: TextStyle(
-                          color: Colors.black87,
+                          color: theme.textPrimary,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -242,14 +234,17 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: theme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.blue.withOpacity(0.3), width: 1),
+              border: Border.all(
+                color: theme.primary.withOpacity(0.3),
+                width: 1,
+              ),
             ),
             child: Text(
               _formatPrice(widget.drug.mrp ?? '0'),
               style: TextStyle(
-                color: Colors.blue[700],
+                color: theme.primary,
                 fontSize: 14,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
@@ -262,14 +257,12 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   }
 
   // Action row section
-  Widget _buildActionRow() {
+  Widget _buildActionRow(OneUITheme theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
-        ),
+        color: theme.cardBackground,
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -277,17 +270,13 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
           Text(
             translation(context).lbl_tap_for_details,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: theme.textTertiary,
               fontSize: 12,
               fontFamily: 'Poppins',
             ),
           ),
           const SizedBox(width: 8),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 14,
-            color: Colors.blue[600],
-          ),
+          Icon(Icons.arrow_forward_ios_rounded, size: 14, color: theme.primary),
         ],
       ),
     );
@@ -298,41 +287,39 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return _buildDialog(context, genericName);
+        final theme = OneUITheme.of(context);
+        return _buildDialog(context, genericName, theme);
       },
     );
   }
 
   // Build dialog widget
-  Widget _buildDialog(BuildContext context, String genericName) {
+  Widget _buildDialog(
+    BuildContext context,
+    String genericName,
+    OneUITheme theme,
+  ) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       elevation: 10,
       backgroundColor: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardBackground,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 15,
-              spreadRadius: 0,
-              offset: const Offset(0, 5),
-            ),
-          ],
+          boxShadow: theme.cardShadow,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Dialog Header
-            _buildDialogHeader(context, genericName),
+            _buildDialogHeader(context, genericName, theme),
 
             // Dialog Content
-            _buildDialogContent(context, genericName),
+            _buildDialogContent(context, genericName, theme),
 
             // Dialog Footer
-            _buildDialogFooter(context),
+            _buildDialogFooter(context, theme),
           ],
         ),
       ),
@@ -340,11 +327,15 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   }
 
   // Dialog header
-  Widget _buildDialogHeader(BuildContext context, String genericName) {
+  Widget _buildDialogHeader(
+    BuildContext context,
+    String genericName,
+    OneUITheme theme,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue[700],
+        color: theme.primary,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -354,13 +345,13 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.medication_outlined,
-              color: Colors.blue[700],
+              color: theme.primary,
               size: 24,
             ),
           ),
@@ -368,8 +359,8 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
           Expanded(
             child: Text(
               genericName,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: theme.cardBackground,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
@@ -382,7 +373,11 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   }
 
   // Dialog content
-  Widget _buildDialogContent(BuildContext context, String genericName) {
+  Widget _buildDialogContent(
+    BuildContext context,
+    String genericName,
+    OneUITheme theme,
+  ) {
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.6,
@@ -396,7 +391,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
               style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
-                color: Colors.grey[600],
+                color: theme.textSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -470,26 +465,24 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
   }
 
   // Dialog footer
-  Widget _buildDialogFooter(BuildContext context) {
+  Widget _buildDialogFooter(BuildContext context, OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
+        color: theme.surfaceVariant,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(20),
           bottomRight: Radius.circular(20),
         ),
-        border: Border(
-          top: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
-        ),
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
       child: ElevatedButton(
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop('dialog');
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue[700],
-          foregroundColor: Colors.white,
+          backgroundColor: theme.primary,
+          foregroundColor: theme.cardBackground,
           padding: const EdgeInsets.symmetric(vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -499,14 +492,15 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.close, size: 18),
+            Icon(Icons.close, size: 18, color: theme.cardBackground),
             const SizedBox(width: 8),
             Text(
               translation(context).lbl_close,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
+                color: theme.cardBackground,
               ),
             ),
           ],
@@ -525,6 +519,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
     Color iconColor, {
     bool clickable = false,
   }) {
+    final theme = OneUITheme.of(context);
     return GestureDetector(
       onTap: clickable
           ? () {
@@ -532,28 +527,18 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
             }
           : null,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              spreadRadius: 0,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: theme.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: theme.cardShadow,
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(16),
           child: Material(
             color: Colors.transparent,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 16.0,
-              ),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 border: Border(left: BorderSide(color: iconColor, width: 4)),
               ),
@@ -571,9 +556,9 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                   Expanded(
                     child: Text(
                       question,
-                      style: const TextStyle(
-                        fontSize: 15.0,
-                        color: Colors.black87,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: theme.textPrimary,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
                       ),
@@ -587,7 +572,7 @@ class _MemoryOptimizedDrugItemState extends State<MemoryOptimizedDrugItem> {
                     ),
                     child: Icon(
                       Icons.arrow_forward_rounded,
-                      size: 16.0,
+                      size: 16,
                       color: iconColor,
                     ),
                   ),

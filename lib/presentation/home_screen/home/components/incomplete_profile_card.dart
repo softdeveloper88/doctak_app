@@ -2,245 +2,352 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/common_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:doctak_app/l10n/app_localizations.dart';
 
+/// OneUI 8.5 styled incomplete profile and email verification cards
+/// Compact, modern design with proper theming support
 class IncompleteProfileCard extends StatelessWidget {
-   IncompleteProfileCard(this.isEmailVerified,this.isInCompleteProfile,{Key? key}) : super(key: key);
-  bool isEmailVerified;
-   bool isInCompleteProfile;
-   Future<void> sendVerificationLink(String email, BuildContext context) async {
-     showLoadingDialog(context);
-     // Show the loading dialog
-     // showDialog(
-     //   context: context,
-     //   barrierDismissible: false, // Disallow dismissing while loading
-     //   builder: (BuildContext context) {
-     //     return SimpleDialog(
-     //       title: const Text('Sending Verification Link'),
-     //       children: [
-     //         Center(
-     //           child: CircularProgressIndicator(
-     //             color: svGetBodyColor(),
-     //           ),
-     //         ),
-     //       ],
-     //     );
-     //   },
-     // );
-     try {
-       final response = await http.post(
-         Uri.parse('${AppData.remoteUrl}/send-verification-link'),
-         body: {'email': email},
-       );
+  IncompleteProfileCard(
+    this.isEmailVerified,
+    this.isInCompleteProfile, {
+    Key? key,
+  }) : super(key: key);
 
-       // Close the loading dialog
-       Navigator.of(context).pop();
+  final bool isEmailVerified;
+  final bool isInCompleteProfile;
 
-       if (response.statusCode == 200) {
-         // Successful API call, handle the response if needed
-         // Show success Snackbar
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-             content: Text(translation(context).msg_verification_link_sent_success),
-             duration: const Duration(seconds: 2),
-           ),
-         );
-       } else if (response.statusCode == 422) {
-         // Validation error or user email not found
-         // Show error Snackbar
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-             content: Text(translation(context).msg_validation_error),
-             duration: const Duration(seconds: 2),
-           ),
-         );
-       } else if (response.statusCode == 404) {
-         // User already verified
-         // Show info Snackbar
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-             content: Text(translation(context).msg_user_already_verified),
-             duration: const Duration(seconds: 2),
-           ),
-         );
-       } else {
-         // Something went wrong
-         // Show error Snackbar
-         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-             content: Text(translation(context).msg_something_went_wrong),
-             duration: const Duration(seconds: 2),
-           ),
-         );
-       }
-     } catch (e) {
-       // Handle network errors or other exceptions
-       // Close the loading dialog
-       Navigator.of(context).pop();
+  Future<void> sendVerificationLink(String email, BuildContext context) async {
+    showLoadingDialog(context);
+    try {
+      final response = await http.post(
+        Uri.parse('${AppData.remoteUrl}/send-verification-link'),
+        body: {'email': email},
+      );
 
-       ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-           content: Text(translation(context).msg_something_went_wrong),
-           duration: const Duration(seconds: 2),
-         ),
-       );
-     }
-   }
+      Navigator.of(context).pop();
 
-   @override
-  Widget build(BuildContext context) {
-    return  Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-
-        children: [
-          // Email Verification Card
-         if(isEmailVerified)_buildEmailVerificationCard(context),
-          // Complete Profile Card
-        if(isInCompleteProfile)_buildCompleteProfileCard(context),
-        ],
-    );
-  }
-  Widget _buildEmailVerificationCard(context) {
-    return Card(
-      elevation: 1,
-      margin: const EdgeInsets.only(top: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              'assets/images/ic_mail.svg', // Replace with your SVG path
-              height: 80,
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              translation(context).msg_verification_link_sent_success,
             ),
-            const SizedBox(height: 16),
-            Text(
-              translation(context).msg_verify_email_continue,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                backgroundColor: Colors.blue,
-              ),
-              onPressed: () {
-                sendVerificationLink(AppData.email,context);
-              },
-              child: Text(
-                translation(context).lbl_verify_email,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 422) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(translation(context).msg_validation_error),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 404) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(translation(context).msg_user_already_verified),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(translation(context).msg_something_went_wrong),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(translation(context).msg_something_went_wrong),
+          duration: const Duration(seconds: 2),
         ),
-      ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (isEmailVerified) _buildEmailVerificationCard(context),
+        if (isInCompleteProfile) _buildCompleteProfileCard(context),
+      ],
     );
   }
 
-  Widget _buildCompleteProfileCard(context) {
-    return Card(
-      margin: const EdgeInsets.only(top: 8),
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
+  Widget _buildEmailVerificationCard(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: EdgeInsets.only(
+        top: 8,
+        left: 8,
+        right: 8,
+        bottom: isInCompleteProfile ? 0 : 12,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              translation(context).msg_profile_incomplete,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.border, width: 0.5),
+        boxShadow: theme.cardShadow,
+      ),
+      child: Row(
+        children: [
+          // Email icon with gradient background and shadow
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.primary.withOpacity(isDark ? 0.25 : 0.15),
+                  theme.primary.withOpacity(isDark ? 0.15 : 0.08),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              translation(context).msg_complete_following,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildIconWithText('assets/images/ic_country.svg', translation(context).lbl_set_country),
-                _buildIconWithText('assets/images/ic_state.svg', translation(context).lbl_set_state),
-                _buildIconWithText('assets/images/ic_specialty.svg', translation(context).lbl_set_specialty),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                backgroundColor: Colors.blue,
+            child: Center(
+              child: SvgPicture.asset(
+                'assets/images/ic_mail.svg',
+                height: 24,
+                width: 24,
+                colorFilter: ColorFilter.mode(theme.primary, BlendMode.srcIn),
               ),
-              onPressed: () {
-
-                launchScreen(context, const CompleteProfileScreen(),);
-
-              },
-              child: Text(
-                translation(context).lbl_complete_profile,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Text content
+          Expanded(
+            child: Text(
+              translation(context).msg_verify_email_continue,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
+                color: theme.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Verify button
+          Material(
+            color: theme.primary,
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              onTap: () => sendVerificationLink(AppData.email, context),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Text(
+                  translation(context).lbl_verify_email,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildIconWithText(String iconPath, String label) {
-    return Column(
-      children: [
-        SvgPicture.asset(
-          iconPath, // Replace with your SVG path
-          height: 40,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
+  Widget _buildCompleteProfileCard(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: EdgeInsets.only(
+        top: isEmailVerified ? 8 : 8,
+        left: 8,
+        right: 8,
+        bottom: 12,
+      ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.border, width: 0.5),
+        boxShadow: theme.cardShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row with title and button
+          Row(
+            children: [
+              // Profile icon with shadow
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.warning.withOpacity(isDark ? 0.25 : 0.15),
+                      theme.warning.withOpacity(isDark ? 0.15 : 0.08),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.warning.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  color: theme.warning,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+              // Title
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      translation(context).msg_profile_incomplete,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                        color: theme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      translation(context).msg_complete_following,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontFamily: 'Poppins',
+                        color: theme.textSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // Complete button
+              Material(
+                color: theme.primary,
+                borderRadius: BorderRadius.circular(20),
+                child: InkWell(
+                  onTap: () =>
+                      launchScreen(context, const CompleteProfileScreen()),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    child: Text(
+                      translation(context).lbl_complete_profile,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          // Icons row - compact
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildIconChip(
+                context,
+                'assets/images/ic_country.svg',
+                translation(context).lbl_set_country,
+                theme,
+              ),
+              _buildIconChip(
+                context,
+                'assets/images/ic_state.svg',
+                translation(context).lbl_set_state,
+                theme,
+              ),
+              _buildIconChip(
+                context,
+                'assets/images/ic_specialty.svg',
+                translation(context).lbl_set_specialty,
+                theme,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconChip(
+    BuildContext context,
+    String iconPath,
+    String label,
+    OneUITheme theme,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            iconPath,
+            height: 16,
+            width: 16,
+            colorFilter: ColorFilter.mode(theme.textSecondary, BlendMode.srcIn),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+              color: theme.textSecondary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

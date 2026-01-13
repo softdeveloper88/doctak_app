@@ -1,7 +1,6 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 import '../bloc/discussion_detail_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../widgets/comment_card.dart';
@@ -10,8 +9,6 @@ import '../widgets/discussion_header.dart';
 import '../widgets/case_discussion_shimmer.dart';
 import '../../../localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import '../../home_screen/utils/SVColors.dart';
-import '../../home_screen/utils/SVCommon.dart';
 
 class DiscussionDetailScreen extends StatefulWidget {
   final int caseId;
@@ -73,8 +70,10 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
@@ -89,7 +88,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.green[600],
+                      color: theme.success,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -98,7 +97,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                         Icon(
                           Icons.chat_bubble,
                           size: 12,
-                          color: Colors.white,
+                          color: theme.buttonPrimaryText,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -107,7 +106,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Poppins',
-                            color: Colors.white,
+                            color: theme.buttonPrimaryText,
                           ),
                         ),
                       ],
@@ -125,12 +124,12 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     icon: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.share_rounded,
-                        color: Colors.blue[600],
+                        color: theme.primary,
                         size: 14,
                       ),
                     ),
@@ -148,7 +147,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
         ),
       ),
       body: Container(
-        color: svGetScaffoldColor(),
+        color: theme.cardBackground,
         child: BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
           builder: (context, state) {
             if (state is DiscussionDetailLoading) {
@@ -164,13 +163,13 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: theme.error.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.error_outline_rounded,
                         size: 48,
-                        color: Colors.red[600],
+                        color: theme.error,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -180,7 +179,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                         fontSize: 18,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
-                        color: Colors.red[800],
+                        color: theme.error,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -189,7 +188,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'Poppins',
-                        color: Colors.black54,
+                        color: theme.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -200,8 +199,8 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                             .add(LoadDiscussionDetail(widget.caseId));
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[600],
-                        foregroundColor: Colors.white,
+                        backgroundColor: theme.primary,
+                        foregroundColor: theme.buttonPrimaryText,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
@@ -246,7 +245,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                         context.read<DiscussionDetailBloc>()
                             .add(LoadDiscussionDetail(widget.caseId));
                       },
-                      color: Colors.blue[600],
+                      color: theme.primary,
                       child: CustomScrollView(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -268,22 +267,17 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                               margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.green.withOpacity(0.1),
-                                    Colors.green.withOpacity(0.05),
-                                  ],
-                                ),
+                                color: theme.success.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: Colors.green.withOpacity(0.2),
+                                  color: theme.success.withOpacity(0.2),
                                 ),
                               ),
                               child: Row(
                                 children: [
                                   Icon(
                                     Icons.chat_bubble_outline_rounded,
-                                    color: Colors.green[600],
+                                    color: theme.success,
                                     size: 24,
                                   ),
                                   const SizedBox(width: 12),
@@ -293,14 +287,14 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
                                       fontFamily: 'Poppins',
-                                      color: Colors.green[800],
+                                      color: theme.success,
                                     ),
                                   ),
                                   const Spacer(),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: Colors.green.withOpacity(0.2),
+                                      color: theme.success.withOpacity(0.2),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     child: Text(
@@ -308,7 +302,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontFamily: 'Poppins',
-                                        color: Colors.green[800],
+                                        color: theme.success,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -342,10 +336,10 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                     margin: const EdgeInsets.all(32),
                                     padding: const EdgeInsets.all(32),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.withOpacity(0.05),
+                                      color: theme.surfaceVariant,
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
-                                        color: Colors.grey.withOpacity(0.2),
+                                        color: theme.border,
                                       ),
                                     ),
                                     child: Column(
@@ -354,7 +348,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                         Icon(
                                           Icons.chat_bubble_outline_rounded,
                                           size: 48,
-                                          color: Colors.grey[400],
+                                          color: theme.textTertiary,
                                         ),
                                         const SizedBox(height: 16),
                                         Text(
@@ -363,7 +357,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                             fontSize: 18,
                                             fontWeight: FontWeight.w600,
                                             fontFamily: 'Poppins',
-                                            color: Colors.grey[600],
+                                            color: theme.textSecondary,
                                           ),
                                         ),
                                         const SizedBox(height: 8),
@@ -372,7 +366,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontFamily: 'Poppins',
-                                            color: Colors.grey[500],
+                                            color: theme.textTertiary,
                                           ),
                                           textAlign: TextAlign.center,
                                         ),
@@ -389,22 +383,17 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                 margin: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.blue.withOpacity(0.1),
-                                      Colors.blue.withOpacity(0.05),
-                                    ],
-                                  ),
+                                  color: theme.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: Colors.blue.withOpacity(0.2),
+                                    color: theme.primary.withOpacity(0.2),
                                   ),
                                 ),
                                 child: Row(
                                   children: [
                                     Icon(
                                       Icons.link_rounded,
-                                      color: Colors.blue[600],
+                                      color: theme.primary,
                                       size: 24,
                                     ),
                                     const SizedBox(width: 12),
@@ -414,14 +403,14 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                         fontSize: 18,
                                         fontWeight: FontWeight.w700,
                                         fontFamily: 'Poppins',
-                                        color: Colors.blue[800],
+                                        color: theme.primary,
                                       ),
                                     ),
                                     const Spacer(),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.2),
+                                        color: theme.primary.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: Text(
@@ -429,7 +418,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontFamily: 'Poppins',
-                                          color: Colors.blue[800],
+                                          color: theme.primary,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -461,19 +450,12 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                       child: Container(
                                         padding: const EdgeInsets.all(16),
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color: theme.cardBackground,
                                           borderRadius: BorderRadius.circular(12),
                                           border: Border.all(
-                                            color: Colors.blue.withOpacity(0.1),
+                                            color: theme.primary.withOpacity(0.1),
                                           ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.blue.withOpacity(0.05),
-                                              offset: const Offset(0, 2),
-                                              blurRadius: 8,
-                                              spreadRadius: 0,
-                                            ),
-                                          ],
+                                          boxShadow: theme.cardShadow,
                                         ),
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,7 +467,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w600,
                                                 fontFamily: 'Poppins',
-                                                color: Colors.blue[900],
+                                                color: theme.textPrimary,
                                               ),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
@@ -495,10 +477,10 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                             // Description
                                             Text(
                                               relatedCase.description,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 14,
                                                 fontFamily: 'Poppins',
-                                                color: Colors.black87,
+                                                color: theme.textSecondary,
                                                 height: 1.5,
                                               ),
                                               maxLines: 3,
@@ -518,10 +500,10 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                                       vertical: 4,
                                                     ),
                                                     decoration: BoxDecoration(
-                                                      color: Colors.blue.withOpacity(0.1),
+                                                      color: theme.primary.withOpacity(0.1),
                                                       borderRadius: BorderRadius.circular(12),
                                                       border: Border.all(
-                                                        color: Colors.blue.withOpacity(0.3),
+                                                        color: theme.primary.withOpacity(0.3),
                                                       ),
                                                     ),
                                                     child: Text(
@@ -529,7 +511,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                                       style: TextStyle(
                                                         fontSize: 11,
                                                         fontFamily: 'Poppins',
-                                                        color: Colors.blue[700],
+                                                        color: theme.primary,
                                                         fontWeight: FontWeight.w500,
                                                       ),
                                                     ),
@@ -543,29 +525,29 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                                             // Stats row
                                             Row(
                                               children: [
-                                                Icon(Icons.thumb_up_outlined, size: 16, color: Colors.grey[600]),
+                                                Icon(Icons.thumb_up_outlined, size: 16, color: theme.textTertiary),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   relatedCase.likes.toString(),
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     fontFamily: 'Poppins',
-                                                    color: Colors.grey[600],
+                                                    color: theme.textTertiary,
                                                   ),
                                                 ),
                                                 const SizedBox(width: 16),
-                                                Icon(Icons.visibility_outlined, size: 16, color: Colors.grey[600]),
+                                                Icon(Icons.visibility_outlined, size: 16, color: theme.textTertiary),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   relatedCase.views.toString(),
                                                   style: TextStyle(
                                                     fontSize: 12,
                                                     fontFamily: 'Poppins',
-                                                    color: Colors.grey[600],
+                                                    color: theme.textTertiary,
                                                   ),
                                                 ),
                                                 const Spacer(),
-                                                Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.blue[600]),
+                                                Icon(Icons.arrow_forward_ios_rounded, size: 14, color: theme.primary),
                                               ],
                                             ),
                                           ],
@@ -589,10 +571,10 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardBackground,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: theme.divider,
                           offset: const Offset(0, -2),
                           blurRadius: 8,
                           spreadRadius: 0,
@@ -698,22 +680,16 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   Widget _buildListItem(BuildContext context, int index, DiscussionDetailLoaded state) {
     print('🏗️ Building item at index: $index');
     int currentIndex = 0;
+    final theme = OneUITheme.of(context);
     
     // Discussion header
     if (index == currentIndex) {
       return Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.blue.withOpacity(0.1),
-              offset: const Offset(0, 2),
-              blurRadius: 8,
-              spreadRadius: 0,
-            ),
-          ],
+          boxShadow: theme.cardShadow,
         ),
         child: DiscussionHeader(
           discussion: state.discussion,
@@ -729,22 +705,17 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
         margin: const EdgeInsets.only(top: 8, bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.green.withOpacity(0.1),
-              Colors.green.withOpacity(0.05),
-            ],
-          ),
+          color: theme.success.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.green.withOpacity(0.2),
+            color: theme.success.withOpacity(0.2),
           ),
         ),
         child: Row(
           children: [
             Icon(
               Icons.chat_bubble_outline_rounded,
-              color: Colors.green[600],
+              color: theme.success,
               size: 24,
             ),
             const SizedBox(width: 12),
@@ -754,14 +725,14 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Poppins',
-                color: Colors.green[800],
+                color: theme.success,
               ),
             ),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.2),
+                color: theme.success.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
@@ -769,7 +740,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
-                  color: Colors.green[800],
+                  color: theme.success,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -793,16 +764,9 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardBackground,
             borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                offset: const Offset(0, 1),
-                blurRadius: 4,
-                spreadRadius: 0,
-              ),
-            ],
+            boxShadow: theme.cardShadow,
           ),
           child: CommentCard(
             comment: comment,
@@ -821,10 +785,10 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: Colors.grey.withOpacity(0.05),
+            color: theme.surfaceVariant,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.grey.withOpacity(0.2),
+              color: theme.border,
             ),
           ),
           child: Column(
@@ -832,7 +796,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               Icon(
                 Icons.chat_bubble_outline_rounded,
                 size: 48,
-                color: Colors.grey[400],
+                color: theme.textTertiary,
               ),
               const SizedBox(height: 16),
               Text(
@@ -841,7 +805,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                 ),
               ),
               const SizedBox(height: 8),
@@ -850,7 +814,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
-                  color: Colors.grey[500],
+                  color: theme.textTertiary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -873,7 +837,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
+                valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
               ),
             ),
             const SizedBox(width: 12),
@@ -882,7 +846,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
-                color: Colors.blue[600],
+                color: theme.primary,
               ),
             ),
           ],
@@ -895,7 +859,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
     if (state.discussion.relatedCases != null && state.discussion.relatedCases!.isNotEmpty) {
       if (index == currentIndex) {
         // Related cases header
-        return _buildRelatedCasesHeader();
+        return _buildRelatedCasesHeader(theme);
       }
       currentIndex++;
 
@@ -903,7 +867,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
       if (index < currentIndex + state.discussion.relatedCases!.length) {
         final relatedCaseIndex = index - currentIndex;
         final relatedCase = state.discussion.relatedCases![relatedCaseIndex];
-        return _buildRelatedCaseItem(relatedCase);
+        return _buildRelatedCaseItem(relatedCase, theme);
       }
     }
 
@@ -915,27 +879,22 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
     return const SizedBox.shrink();
   }
 
-  Widget _buildRelatedCasesHeader() {
+  Widget _buildRelatedCasesHeader(OneUITheme theme) {
     return Container(
       margin: const EdgeInsets.only(top: 24, bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.blue.withOpacity(0.1),
-            Colors.blue.withOpacity(0.05),
-          ],
-        ),
+        color: theme.primary.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.blue.withOpacity(0.2),
+          color: theme.primary.withOpacity(0.2),
         ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.link_rounded,
-            color: Colors.blue[600],
+            color: theme.primary,
             size: 24,
           ),
           const SizedBox(width: 12),
@@ -945,7 +904,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               fontSize: 18,
               fontWeight: FontWeight.w700,
               fontFamily: 'Poppins',
-              color: Colors.blue[800],
+              color: theme.primary,
             ),
           ),
           const Spacer(),
@@ -954,7 +913,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
             style: TextStyle(
               fontSize: 12,
               fontFamily: 'Poppins',
-              color: Colors.blue[600],
+              color: theme.primary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -963,20 +922,13 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
     );
   }
 
-  Widget _buildRelatedCaseItem(RelatedCase relatedCase) {
+  Widget _buildRelatedCaseItem(RelatedCase relatedCase, OneUITheme theme) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardBackground,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            offset: const Offset(0, 1),
-            blurRadius: 4,
-            spreadRadius: 0,
-          ),
-        ],
+        boxShadow: theme.cardShadow,
       ),
       child: InkWell(
         onTap: () {
@@ -995,11 +947,11 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
             children: [
               Text(
                 relatedCase.title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
-                  color: Colors.black87,
+                  color: theme.textPrimary,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -1010,7 +962,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                   height: 1.4,
                 ),
                 maxLines: 3,
@@ -1027,7 +979,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -1035,7 +987,7 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                         style: TextStyle(
                           fontSize: 10,
                           fontFamily: 'Poppins',
-                          color: Colors.blue[700],
+                          color: theme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -1048,29 +1000,29 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               // Stats
               Row(
                 children: [
-                  Icon(Icons.thumb_up_outlined, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.thumb_up_outlined, size: 16, color: theme.textTertiary),
                   const SizedBox(width: 4),
                   Text(
                     relatedCase.likes.toString(),
                     style: TextStyle(
                       fontSize: 12,
                       fontFamily: 'Poppins',
-                      color: Colors.grey[600],
+                      color: theme.textTertiary,
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Icon(Icons.visibility_outlined, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.visibility_outlined, size: 16, color: theme.textTertiary),
                   const SizedBox(width: 4),
                   Text(
                     relatedCase.views.toString(),
                     style: TextStyle(
                       fontSize: 12,
                       fontFamily: 'Poppins',
-                      color: Colors.grey[600],
+                      color: theme.textTertiary,
                     ),
                   ),
                   const Spacer(),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.blue[600]),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 14, color: theme.primary),
                 ],
               ),
             ],

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../models/case_discussion_models.dart';
@@ -15,53 +16,61 @@ class DiscussionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.withOpacity(0.08),
-            offset: const Offset(0, 2),
-            blurRadius: 12,
-            spreadRadius: 0,
-          ),
-        ],
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: theme.cardShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Author info with enhanced styling
+          // Author info with enhanced One UI styling
           Row(
             children: [
+              // Avatar with gradient border
               Container(
+                padding: const EdgeInsets.all(3),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.blue.withOpacity(0.3),
-                    width: 3,
+                  gradient: LinearGradient(
+                    colors: [
+                      theme.primary,
+                      theme.primary.withOpacity(0.5),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                child: CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.blue.withOpacity(0.1),
-                  backgroundImage: discussion.author.profilePic != null
-                      ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}")
-                      : null,
-                  child: discussion.author.profilePic == null
-                      ? Text(
-                          discussion.author.name.isNotEmpty
-                              ? discussion.author.name[0].toUpperCase()
-                              : '?',
-                          style: TextStyle(
-                            color: Colors.blue[700],
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20,
-                            fontFamily: 'Poppins',
-                          ),
-                        )
-                      : null,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.cardBackground,
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundColor: theme.avatarBackground,
+                    backgroundImage: discussion.author.profilePic != null
+                        ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}")
+                        : null,
+                    child: discussion.author.profilePic == null
+                        ? Text(
+                            discussion.author.name.isNotEmpty
+                                ? discussion.author.name[0].toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: theme.primary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 22,
+                              fontFamily: 'Poppins',
+                            ),
+                          )
+                        : null,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -75,57 +84,55 @@ class DiscussionHeader extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         fontSize: 18,
                         fontFamily: 'Poppins',
-                        color: Colors.blue[800],
+                        color: theme.textPrimary,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Row(
                       children: [
                         Icon(
-                          Icons.access_time_rounded,
+                          Icons.schedule_rounded,
                           size: 14,
-                          color: Colors.grey[600],
+                          color: theme.textTertiary,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           _formatTime(discussion.createdAt),
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: theme.textTertiary,
                             fontSize: 12,
                             fontFamily: 'Poppins',
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
+                    // Specialty badge - One UI pill style
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
+                        horizontal: 14,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            _getSpecialtyColor(discussion.specialty).withOpacity(0.1),
-                            _getSpecialtyColor(discussion.specialty).withOpacity(0.05),
+                            _getSpecialtyColor(discussion.specialty, theme),
+                            _getSpecialtyColor(discussion.specialty, theme).withOpacity(0.7),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: _getSpecialtyColor(discussion.specialty).withOpacity(0.3),
-                        ),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         discussion.specialty.toUpperCase(),
                         style: TextStyle(
-                          color: _getSpecialtyColor(discussion.specialty).withOpacity(0.8),
+                          color: theme.cardBackground,
                           fontSize: 10,
                           fontWeight: FontWeight.w700,
                           fontFamily: 'Poppins',
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.5,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -136,38 +143,31 @@ class DiscussionHeader extends StatelessWidget {
               ),
             ],
           ),
-            const SizedBox(height: 20),
+          
+          const SizedBox(height: 24),
 
-            // Combined Title and Description with better typography
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.withOpacity(0.2),
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    offset: const Offset(0, 2),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ],
+          // Title and Description Card - One UI style
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: theme.surfaceVariant.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.border,
+                width: 1,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title section
-                  Text(
-                    discussion.title,
-                    style: const TextStyle(
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title section
+                Text(
+                  discussion.title,
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black87,
+                      color: theme.textPrimary,
                       height: 1.3,
                     ),
                   ),
@@ -178,7 +178,7 @@ class DiscussionHeader extends StatelessWidget {
                     discussion.description,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: theme.textSecondary,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
                     ),
@@ -193,9 +193,9 @@ class DiscussionHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.05),
+                  color: theme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                  border: Border.all(color: theme.primary.withOpacity(0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,14 +204,14 @@ class DiscussionHeader extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.person,
-                          color: Colors.blue[700],
+                          color: theme.primary,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Patient Information',
                           style: TextStyle(
-                            color: Colors.blue[700],
+                            color: theme.primary,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -221,13 +221,13 @@ class DiscussionHeader extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       '${discussion.patientInfo!.gender.toUpperCase()}, ${discussion.patientInfo!.age} years old',
-                      style: const TextStyle(fontWeight: FontWeight.w500),
+                      style: TextStyle(fontWeight: FontWeight.w500, color: theme.textPrimary),
                     ),
                     if (discussion.patientInfo!.medicalHistory.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(
                         'Medical History: ${discussion.patientInfo!.medicalHistory}',
-                        style: TextStyle(color: Colors.grey[700]),
+                        style: TextStyle(color: theme.textSecondary),
                       ),
                     ],
                   ],
@@ -236,15 +236,15 @@ class DiscussionHeader extends StatelessWidget {
               const SizedBox(height: 16),
             ],
 
-            // Tags/Symptoms Section with compact styling
+            // Tags/Symptoms Section with One UI styling
             if (discussion.symptoms != null && discussion.symptoms!.isNotEmpty) ...[
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
+                  color: theme.warning.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: Colors.orange.withOpacity(0.2),
+                    color: theme.warning.withOpacity(0.2),
                     width: 1,
                   ),
                 ),
@@ -253,46 +253,51 @@ class DiscussionHeader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.local_offer_rounded,
-                          color: Colors.orange[700],
-                          size: 18,
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: theme.warning.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.local_offer_rounded,
+                            color: theme.warning,
+                            size: 20,
+                          ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 12),
                         Text(
                           'Clinical Tags',
                           style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: Colors.orange[800],
+                            fontWeight: FontWeight.w700,
+                            fontSize: 17,
+                            fontFamily: 'Poppins',
+                            color: theme.warning,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 16),
                     Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
+                      spacing: 10,
+                      runSpacing: 10,
                       children: discussion.symptoms!.map((symptom) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
+                            horizontal: 14,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: Colors.orange.withOpacity(0.3),
-                              width: 0.5,
-                            ),
+                            color: theme.warning.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             symptom,
                             style: TextStyle(
-                              color: Colors.orange[700],
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
+                              color: theme.warning,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
                             ),
                           ),
                         );
@@ -309,15 +314,10 @@ class DiscussionHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.purple.withOpacity(0.08),
-                      Colors.purple.withOpacity(0.03),
-                    ],
-                  ),
+                  color: theme.secondary.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Colors.purple.withOpacity(0.2),
+                    color: theme.secondary.withOpacity(0.2),
                   ),
                 ),
                 child: Column(
@@ -327,7 +327,7 @@ class DiscussionHeader extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.attach_file_rounded,
-                          color: Colors.purple[700],
+                          color: theme.secondary,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -337,14 +337,14 @@ class DiscussionHeader extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             fontFamily: 'Poppins',
-                            color: Colors.purple[800],
+                            color: theme.secondary,
                           ),
                         ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.purple.withOpacity(0.2),
+                            color: theme.secondary.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -352,7 +352,7 @@ class DiscussionHeader extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontFamily: 'Poppins',
-                              color: Colors.purple[800],
+                              color: theme.secondary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -370,10 +370,10 @@ class DiscussionHeader extends StatelessWidget {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardBackground,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: Colors.purple.withOpacity(0.2),
+                            color: theme.secondary.withOpacity(0.2),
                           ),
                         ),
                         child: Row(
@@ -382,7 +382,7 @@ class DiscussionHeader extends StatelessWidget {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: Colors.purple.withOpacity(0.1),
+                                color: theme.secondary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: isImage
@@ -395,19 +395,19 @@ class DiscussionHeader extends StatelessWidget {
                                         fit: BoxFit.cover,
                                         placeholder: (context, url) => Icon(
                                           Icons.image_rounded,
-                                          color: Colors.purple[600],
+                                          color: theme.secondary,
                                           size: 20,
                                         ),
                                         errorWidget: (context, url, error) => Icon(
                                           Icons.broken_image_rounded,
-                                          color: Colors.purple[600],
+                                          color: theme.secondary,
                                           size: 20,
                                         ),
                                       ),
                                     )
                                   : Icon(
                                       Icons.description_rounded,
-                                      color: Colors.purple[600],
+                                      color: theme.secondary,
                                       size: 20,
                                     ),
                             ),
@@ -424,7 +424,7 @@ class DiscussionHeader extends StatelessWidget {
                                       fontSize: 14,
                                       fontFamily: 'Poppins',
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.purple[800],
+                                      color: theme.textPrimary,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -435,7 +435,7 @@ class DiscussionHeader extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontFamily: 'Poppins',
-                                      color: Colors.purple[600],
+                                      color: theme.secondary,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -444,7 +444,7 @@ class DiscussionHeader extends StatelessWidget {
                             ),
                             Icon(
                               Icons.open_in_new_rounded,
-                              color: Colors.purple[600],
+                              color: theme.secondary,
                               size: 16,
                             ),
                           ],
@@ -459,47 +459,7 @@ class DiscussionHeader extends StatelessWidget {
 
             // Patient Demographics from CaseMetadata
             if (discussion.caseMetadata?.parsedPatientDemographics != null) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.teal.withOpacity(0.08),
-                      Colors.teal.withOpacity(0.03),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.teal.withOpacity(0.2),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.person_outline_rounded,
-                          color: Colors.teal[700],
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Patient Demographics',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            color: Colors.teal[800],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ..._buildPatientDemographics(discussion.caseMetadata!.parsedPatientDemographics!),
-                  ],
-                ),
-              ),
+              _buildPatientDemographicsSection(context, theme),
               const SizedBox(height: 16),
             ],
 
@@ -508,142 +468,13 @@ class DiscussionHeader extends StatelessWidget {
                 (discussion.caseMetadata!.clinicalComplexity != null || 
                  discussion.caseMetadata!.teachingValue != null ||
                  discussion.caseMetadata!.isAnonymized != null)) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.indigo.withOpacity(0.08),
-                      Colors.indigo.withOpacity(0.03),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.indigo.withOpacity(0.2),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.analytics_rounded,
-                          color: Colors.indigo[700],
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Clinical Information',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            color: Colors.indigo[800],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    ..._buildClinicalMetadataFromModel(discussion.caseMetadata!),
-                  ],
-                ),
-              ),
+              _buildClinicalInfoSection(context, theme),
               const SizedBox(height: 16),
             ],
 
             // Clinical Keywords from CaseMetadata
             if (discussion.caseMetadata?.parsedClinicalKeywords != null && discussion.caseMetadata!.parsedClinicalKeywords!.isNotEmpty) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.cyan.withOpacity(0.08),
-                      Colors.cyan.withOpacity(0.03),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.cyan.withOpacity(0.2),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.key_rounded,
-                          color: Colors.cyan[700],
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Clinical Keywords',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            color: Colors.cyan[800],
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.cyan.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '${discussion.caseMetadata!.parsedClinicalKeywords!.length}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              color: Colors.cyan[800],
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: discussion.caseMetadata!.parsedClinicalKeywords!.map((keyword) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.cyan.withOpacity(0.15),
-                                Colors.cyan.withOpacity(0.1),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: Colors.cyan.withOpacity(0.3),
-                            ),
-                          ),
-                          child: Text(
-                            keyword,
-                            style: TextStyle(
-                              color: Colors.cyan[800],
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
-              ),
+              _buildClinicalKeywordsSection(context, theme),
               const SizedBox(height: 16),
             ],
 
@@ -652,8 +483,9 @@ class DiscussionHeader extends StatelessWidget {
               _buildInfoSection(
                 'Working Diagnosis',
                 discussion.diagnosis!,
-                Colors.green,
-                Icons.local_hospital,
+                theme.success,
+                Icons.local_hospital_rounded,
+                theme,
               ),
               const SizedBox(height: 12),
             ],
@@ -663,160 +495,64 @@ class DiscussionHeader extends StatelessWidget {
               _buildInfoSection(
                 'Treatment Plan',
                 discussion.treatmentPlan!,
-                Colors.purple,
-                Icons.healing,
+                theme.secondary,
+                Icons.healing_rounded,
+                theme,
               ),
               const SizedBox(height: 12),
             ],
 
             // AI Summary with enhanced display
             if (discussion.aiSummary != null) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.indigo.withOpacity(0.08),
-                      Colors.indigo.withOpacity(0.03),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: Colors.indigo.withOpacity(0.2),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.indigo.withOpacity(0.1),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.psychology_rounded,
-                          color: Colors.indigo[700],
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'AI Clinical Summary',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                              color: Colors.indigo[800],
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.indigo.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'v${discussion.aiSummary!.version ?? 1}',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontFamily: 'Poppins',
-                              color: Colors.indigo[700],
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      discussion.aiSummary!.summary,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontFamily: 'Poppins',
-                        color: Colors.black87,
-                        height: 1.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time_rounded,
-                          size: 14,
-                          color: Colors.indigo[600],
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Generated ${_formatTime(discussion.aiSummary!.generatedAt)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                            color: Colors.indigo[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+              _buildAISummarySection(context, theme),
               const SizedBox(height: 16),
             ],
 
-            // Stats with enhanced styling
+            // Stats with One UI 8.5 styling
             Container(
               margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.withOpacity(0.03),
-                    Colors.blue.withOpacity(0.01),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.blue.withOpacity(0.1),
-                ),
+                color: theme.surfaceVariant.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildLikeStat(Icons.thumb_up_outlined, discussion.stats.likes, 'Likes'),
+                    child: _buildLikeStat(Icons.thumb_up_rounded, discussion.stats.likes, 'Likes', theme),
                   ),
                   Container(
                     width: 1,
-                    height: 24,
-                    color: Colors.grey.withOpacity(0.3),
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: theme.divider,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
                   ),
                   Expanded(
-                    child: _buildStat(Icons.comment_outlined, discussion.stats.commentsCount, 'Comments'),
+                    child: _buildStat(Icons.chat_bubble_rounded, discussion.stats.commentsCount, 'Comments', theme),
                   ),
                   Container(
                     width: 1,
-                    height: 24,
-                    color: Colors.grey.withOpacity(0.3),
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: theme.divider,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
                   ),
                   Expanded(
-                    child: _buildStat(Icons.visibility_outlined, discussion.stats.views, 'Views'),
+                    child: _buildStat(Icons.remove_red_eye_rounded, discussion.stats.views, 'Views', theme),
                   ),
                   Container(
                     width: 1,
-                    height: 24,
-                    color: Colors.grey.withOpacity(0.3),
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: theme.divider,
+                      borderRadius: BorderRadius.circular(1),
+                    ),
                   ),
                   Expanded(
-                    child: _buildStat(Icons.people_outlined, discussion.followersCount ?? discussion.stats.followersCount, 'Followers'),
+                    child: _buildStat(Icons.people_rounded, discussion.followersCount ?? discussion.stats.followersCount, 'Followers', theme),
                   ),
                 ],
               ),
@@ -826,12 +562,284 @@ class DiscussionHeader extends StatelessWidget {
       );
   }
 
-  Widget _buildInfoSection(String title, String content, Color color, IconData icon) {
+  Widget _buildPatientDemographicsSection(BuildContext context, OneUITheme theme) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
+        color: theme.success.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.success.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.success.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  color: theme.success,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Patient Demographics',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                  fontFamily: 'Poppins',
+                  color: theme.success,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ..._buildPatientDemographics(discussion.caseMetadata!.parsedPatientDemographics!, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClinicalInfoSection(BuildContext context, OneUITheme theme) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: theme.border,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with icon
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: theme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.analytics_rounded,
+                  color: theme.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Clinical Information',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 17,
+                  fontFamily: 'Poppins',
+                  color: theme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Clinical metadata items as cards
+          ..._buildClinicalMetadataFromModel(discussion.caseMetadata!, theme),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClinicalKeywordsSection(BuildContext context, OneUITheme theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.primary.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.key_rounded,
+                color: theme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Clinical Keywords',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontFamily: 'Poppins',
+                  color: theme.primary,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.primary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${discussion.caseMetadata!.parsedClinicalKeywords!.length}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                    color: theme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: discussion.caseMetadata!.parsedClinicalKeywords!.map((keyword) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: theme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: theme.primary.withOpacity(0.3),
+                  ),
+                ),
+                child: Text(
+                  keyword,
+                  style: TextStyle(
+                    color: theme.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAISummarySection(BuildContext context, OneUITheme theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.primary.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.primary.withOpacity(0.2),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primary.withOpacity(0.1),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.psychology_rounded,
+                color: theme.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'AI Clinical Summary',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Poppins',
+                    color: theme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.primary.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'v${discussion.aiSummary!.version ?? 1}',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontFamily: 'Poppins',
+                    color: theme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            discussion.aiSummary!.summary,
+            style: TextStyle(
+              fontSize: 15,
+              fontFamily: 'Poppins',
+              color: theme.textPrimary,
+              height: 1.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(
+                Icons.access_time_rounded,
+                size: 14,
+                color: theme.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Generated ${_formatTime(discussion.aiSummary!.generatedAt)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  color: theme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(String title, String content, Color color, IconData icon, OneUITheme theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Column(
@@ -839,47 +847,60 @@ class DiscussionHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 18),
+              ),
+              const SizedBox(width: 12),
               Text(
                 title,
                 style: TextStyle(
                   color: color,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  fontFamily: 'Poppins',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             content,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(
+              fontSize: 14, 
+              color: theme.textPrimary,
+              height: 1.5,
+              fontFamily: 'Poppins',
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAISummary(AISummary aiSummary) {
+  Widget _buildAISummary(AISummary aiSummary, OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.indigo.withOpacity(0.05),
+        color: theme.primary.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.indigo.withOpacity(0.2)),
+        border: Border.all(color: theme.primary.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.psychology, color: Colors.indigo[700], size: 18),
+              Icon(Icons.psychology, color: theme.primary, size: 18),
               const SizedBox(width: 8),
               Text(
                 'AI Summary',
                 style: TextStyle(
-                  color: Colors.indigo[700],
+                  color: theme.primary,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                 ),
@@ -888,13 +909,13 @@ class DiscussionHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.withOpacity(0.1),
+                  color: theme.primary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   '${(aiSummary.confidenceScore * 100).toInt()}% confidence',
                   style: TextStyle(
-                    color: Colors.indigo[700],
+                    color: theme.primary,
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -905,7 +926,7 @@ class DiscussionHeader extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             aiSummary.summary,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14, color: theme.textPrimary),
           ),
           if (aiSummary.keyPoints != null && aiSummary.keyPoints!.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -919,14 +940,14 @@ class DiscussionHeader extends StatelessWidget {
                     height: 4,
                     margin: const EdgeInsets.only(top: 6, right: 8),
                     decoration: BoxDecoration(
-                      color: Colors.indigo[700],
+                      color: theme.primary,
                       shape: BoxShape.circle,
                     ),
                   ),
                   Expanded(
                     child: Text(
                       point,
-                      style: const TextStyle(fontSize: 12),
+                      style: TextStyle(fontSize: 12, color: theme.textSecondary),
                     ),
                   ),
                 ],
@@ -938,7 +959,7 @@ class DiscussionHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildLikeStat(IconData icon, int count, String label) {
+  Widget _buildLikeStat(IconData icon, int count, String label, OneUITheme theme) {
     return GestureDetector(
       onTap: onLike,
       child: Container(
@@ -948,13 +969,13 @@ class DiscussionHeader extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: onLike != null ? Colors.blue[600] : Colors.grey[600],
+              color: onLike != null ? theme.likeColor : theme.iconColor,
             ),
             const SizedBox(height: 4),
             Text(
               count.toString(),
               style: TextStyle(
-                color: onLike != null ? Colors.blue[700] : Colors.grey[700],
+                color: onLike != null ? theme.likeColor : theme.textSecondary,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 fontFamily: 'Poppins',
@@ -963,7 +984,7 @@ class DiscussionHeader extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: onLike != null ? Colors.blue[600] : Colors.grey[600],
+                color: onLike != null ? theme.likeColor : theme.textSecondary,
                 fontSize: 10,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500,
@@ -975,7 +996,7 @@ class DiscussionHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildStat(IconData icon, int count, String label) {
+  Widget _buildStat(IconData icon, int count, String label, OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -983,13 +1004,13 @@ class DiscussionHeader extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: Colors.grey[600],
+            color: theme.iconColor,
           ),
           const SizedBox(height: 4),
           Text(
             count.toString(),
             style: TextStyle(
-              color: Colors.grey[700],
+              color: theme.textSecondary,
               fontSize: 14,
               fontWeight: FontWeight.w700,
               fontFamily: 'Poppins',
@@ -998,7 +1019,7 @@ class DiscussionHeader extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: theme.textSecondary,
               fontSize: 10,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w500,
@@ -1009,40 +1030,40 @@ class DiscussionHeader extends StatelessWidget {
     );
   }
 
-  Color _getSpecialtyColor(String specialty) {
+  Color _getSpecialtyColor(String specialty, OneUITheme theme) {
     switch (specialty.toLowerCase()) {
       case 'cardiology':
-        return Colors.red;
+        return theme.error;
       case 'neurology':
-        return Colors.purple;
+        return theme.secondary;
       case 'orthopedics':
-        return Colors.blue;
+        return theme.primary;
       case 'pediatrics':
-        return Colors.green;
+        return theme.success;
       default:
-        return Colors.grey;
+        return theme.textSecondary;
     }
   }
 
-  List<Widget> _buildPatientDemographics(dynamic demographics) {
+  List<Widget> _buildPatientDemographics(dynamic demographics, OneUITheme theme) {
     final List<Widget> widgets = [];
     
     if (demographics is Map<String, dynamic>) {
       if (demographics['age'] != null) {
-        widgets.add(_buildDemographicItem('Age', '${demographics['age']} years', Icons.cake_rounded));
+        widgets.add(_buildDemographicItem('Age', '${demographics['age']} years', Icons.cake_rounded, theme));
       }
       if (demographics['gender'] != null) {
-        widgets.add(_buildDemographicItem('Gender', demographics['gender'].toString(), Icons.person_rounded));
+        widgets.add(_buildDemographicItem('Gender', demographics['gender'].toString(), Icons.person_rounded, theme));
       }
       if (demographics['ethnicity'] != null) {
-        widgets.add(_buildDemographicItem('Ethnicity', demographics['ethnicity'].toString(), Icons.public_rounded));
+        widgets.add(_buildDemographicItem('Ethnicity', demographics['ethnicity'].toString(), Icons.public_rounded, theme));
       }
     }
     
     return widgets;
   }
 
-  List<Widget> _buildClinicalMetadata(Map<String, dynamic> metadata) {
+  List<Widget> _buildClinicalMetadata(Map<String, dynamic> metadata, OneUITheme theme) {
     final List<Widget> widgets = [];
     
     if (metadata['clinical_complexity'] != null) {
@@ -1050,8 +1071,9 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Clinical Complexity', 
         complexity.toUpperCase(), 
-        _getComplexityColor(complexity),
-        Icons.timeline_rounded
+        _getComplexityColor(complexity, theme),
+        Icons.timeline_rounded,
+        theme
       ));
     }
     
@@ -1060,8 +1082,9 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Teaching Value', 
         teachingValue.toUpperCase(), 
-        _getTeachingValueColor(teachingValue),
-        Icons.school_rounded
+        _getTeachingValueColor(teachingValue, theme),
+        Icons.school_rounded,
+        theme
       ));
     }
     
@@ -1070,15 +1093,16 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Patient Privacy', 
         isAnonymized ? 'ANONYMIZED' : 'IDENTIFIED', 
-        isAnonymized ? Colors.green : Colors.orange,
-        isAnonymized ? Icons.security_rounded : Icons.visibility_rounded
+        isAnonymized ? theme.success : theme.warning,
+        isAnonymized ? Icons.security_rounded : Icons.visibility_rounded,
+        theme
       ));
     }
     
     return widgets;
   }
 
-  List<Widget> _buildClinicalMetadataFromModel(CaseMetadata metadata) {
+  List<Widget> _buildClinicalMetadataFromModel(CaseMetadata metadata, OneUITheme theme) {
     final List<Widget> widgets = [];
     
     if (metadata.clinicalComplexity != null) {
@@ -1086,8 +1110,9 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Clinical Complexity', 
         complexity.toUpperCase(), 
-        _getComplexityColor(complexity),
-        Icons.timeline_rounded
+        _getComplexityColor(complexity, theme),
+        Icons.timeline_rounded,
+        theme
       ));
     }
     
@@ -1096,8 +1121,9 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Teaching Value', 
         teachingValue.toUpperCase(), 
-        _getTeachingValueColor(teachingValue),
-        Icons.school_rounded
+        _getTeachingValueColor(teachingValue, theme),
+        Icons.school_rounded,
+        theme
       ));
     }
     
@@ -1106,8 +1132,9 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Patient Privacy', 
         isAnonymized ? 'ANONYMIZED' : 'IDENTIFIED', 
-        isAnonymized ? Colors.green : Colors.orange,
-        isAnonymized ? Icons.security_rounded : Icons.visibility_rounded
+        isAnonymized ? theme.success : theme.warning,
+        isAnonymized ? Icons.security_rounded : Icons.visibility_rounded,
+        theme
       ));
     }
     
@@ -1115,33 +1142,41 @@ class DiscussionHeader extends StatelessWidget {
       widgets.add(_buildMetadataItem(
         'Evidence Level', 
         metadata.evidenceLevel!.toUpperCase(), 
-        Colors.purple,
-        Icons.science_rounded
+        theme.secondary,
+        Icons.science_rounded,
+        theme
       ));
     }
     
     return widgets;
   }
 
-  Widget _buildDemographicItem(String label, String value, IconData icon) {
+  Widget _buildDemographicItem(String label, String value, IconData icon, OneUITheme theme) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.teal.withOpacity(0.2),
+          color: theme.success.withOpacity(0.2),
         ),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: Colors.teal[600],
-            size: 18,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: theme.success.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color: theme.success,
+              size: 18,
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1151,7 +1186,7 @@ class DiscussionHeader extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontFamily: 'Poppins',
-                    color: Colors.teal[600],
+                    color: theme.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1159,10 +1194,10 @@ class DiscussionHeader extends StatelessWidget {
                 Text(
                   value,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
-                    color: Colors.teal[800],
+                    color: theme.textPrimary,
                   ),
                 ),
               ],
@@ -1173,25 +1208,41 @@ class DiscussionHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildMetadataItem(String label, String value, Color color, IconData icon) {
+  Widget _buildMetadataItem(String label, String value, Color color, IconData icon, OneUITheme theme) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withOpacity(0.25),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 18,
+          // Icon container with color background
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 22,
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1199,20 +1250,21 @@ class DiscussionHeader extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     fontFamily: 'Poppins',
-                    color: color.withOpacity(0.8),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
                     color: color,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                    letterSpacing: 0.3,
                   ),
                 ),
               ],
@@ -1223,29 +1275,29 @@ class DiscussionHeader extends StatelessWidget {
     );
   }
 
-  Color _getComplexityColor(String complexity) {
+  Color _getComplexityColor(String complexity, OneUITheme theme) {
     switch (complexity.toLowerCase()) {
       case 'low':
-        return Colors.green;
+        return theme.success;
       case 'medium':
-        return Colors.orange;
+        return theme.warning;
       case 'high':
-        return Colors.red;
+        return theme.error;
       default:
-        return Colors.grey;
+        return theme.textSecondary;
     }
   }
 
-  Color _getTeachingValueColor(String teachingValue) {
+  Color _getTeachingValueColor(String teachingValue, OneUITheme theme) {
     switch (teachingValue.toLowerCase()) {
       case 'low':
-        return Colors.grey;
+        return theme.textSecondary;
       case 'medium':
-        return Colors.blue;
+        return theme.primary;
       case 'high':
-        return Colors.purple;
+        return theme.secondary;
       default:
-        return Colors.grey;
+        return theme.textSecondary;
     }
   }
 

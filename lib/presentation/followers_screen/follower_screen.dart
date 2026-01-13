@@ -2,13 +2,12 @@ import 'dart:async';
 
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-import '../home_screen/utils/SVCommon.dart';
-import '../../main.dart';
 import 'bloc/followers_bloc.dart';
 import 'component/follower_widget.dart';
 
@@ -40,9 +39,6 @@ class _FollowerScreenState extends State<FollowerScreen> {
       FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId),
     );
     super.initState();
-    afterBuildCreated(() {
-      setStatusBarColor(svGetScaffoldColor());
-    });
   }
 
   @override
@@ -68,8 +64,10 @@ class _FollowerScreenState extends State<FollowerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       body: Column(
         children: [
           // Custom AppBar with DoctakAppBar
@@ -88,12 +86,12 @@ class _FollowerScreenState extends State<FollowerScreen> {
                 icon: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: theme.primary.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     isSearchShow ? Icons.close : Icons.search,
-                    color: Colors.blue[600],
+                    color: theme.primary,
                     size: 16,
                   ),
                 ),
@@ -121,7 +119,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             height: isSearchShow ? 72 : 0,
-            color: svGetScaffoldColor(),
+            color: theme.scaffoldBackground,
             child: SingleChildScrollView(
               physics: const NeverScrollableScrollPhysics(),
               child: isSearchShow
@@ -131,17 +129,15 @@ class _FollowerScreenState extends State<FollowerScreen> {
                         vertical: 12.0,
                       ),
                       decoration: BoxDecoration(
-                        color: appStore.isDarkMode
-                            ? Colors.blueGrey[800]
-                            : Colors.grey[100],
+                        color: theme.surfaceVariant,
                         borderRadius: BorderRadius.circular(24.0),
                         border: Border.all(
-                          color: Colors.blue.withAlpha(51),
+                          color: theme.border,
                           width: 1.5,
                         ),
-                        boxShadow: [
+                        boxShadow: theme.isDark ? null : [
                           BoxShadow(
-                            color: Colors.blue.withAlpha(13),
+                            color: theme.primary.withAlpha(13),
                             offset: const Offset(0, 2),
                             blurRadius: 6,
                             spreadRadius: 0,
@@ -158,7 +154,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                               ),
                               child: Icon(
                                 Icons.search_rounded,
-                                color: Colors.blue.withAlpha(153),
+                                color: theme.textSecondary,
                                 size: 24,
                               ),
                             ),
@@ -169,9 +165,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                                 textStyle: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 14,
-                                  color: appStore.isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
+                                  color: theme.textPrimary,
                                 ),
                                 onChanged: _onSearchChanged,
                                 decoration: InputDecoration(
@@ -182,9 +176,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                                   hintStyle: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 14,
-                                    color: appStore.isDarkMode
-                                        ? Colors.white60
-                                        : Colors.black54,
+                                    color: theme.textTertiary,
                                   ),
                                   contentPadding: const EdgeInsets.symmetric(
                                     vertical: 14.0,
@@ -210,7 +202,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withAlpha(26),
+                                  color: theme.primary.withAlpha(26),
                                   borderRadius: const BorderRadius.only(
                                     topRight: Radius.circular(24),
                                     bottomRight: Radius.circular(24),
@@ -218,7 +210,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                                 ),
                                 child: Icon(
                                   Icons.clear,
-                                  color: Colors.blue.withAlpha(153),
+                                  color: theme.textSecondary,
                                   size: 24,
                                 ),
                               ),
@@ -257,7 +249,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                           Container(
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: Colors.blue.withAlpha(26),
+                              color: theme.primary.withAlpha(26),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -265,7 +257,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                                   ? Icons.people_outline_rounded
                                   : Icons.person_add_disabled_rounded,
                               size: 48,
-                              color: Colors.blue[600],
+                              color: theme.primary,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -277,7 +269,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
                               fontFamily: 'Poppins',
-                              color: Colors.blue[800],
+                              color: theme.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -288,7 +280,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                             style: TextStyle(
                               fontSize: 14,
                               fontFamily: 'Poppins',
-                              color: Colors.grey[600],
+                              color: theme.textSecondary,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -414,10 +406,10 @@ class _FollowerScreenState extends State<FollowerScreen> {
                             color: Colors.red.withAlpha(26),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.error_outline_rounded,
                             size: 48,
-                            color: Colors.red[600],
+                            color: Colors.red,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -427,7 +419,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins',
-                            color: Colors.red[800],
+                            color: theme.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -436,7 +428,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontFamily: 'Poppins',
-                            color: Colors.grey[600],
+                            color: theme.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -453,7 +445,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
                           icon: const Icon(Icons.refresh),
                           label: const Text('Retry'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue[600],
+                            backgroundColor: theme.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),

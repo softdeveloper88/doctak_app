@@ -174,11 +174,8 @@ class SearchApiService {
     String? specialty,
   }) async {
     try {
-      final request = {
-        'keyword': keyword,
-        'page': page,
-      };
-      
+      final request = {'keyword': keyword, 'page': page};
+
       if (contentTypes != null && contentTypes.isNotEmpty) {
         request['content_types'] = contentTypes.join(',');
       }
@@ -220,7 +217,9 @@ class SearchApiService {
         ),
       );
       final List<dynamic> suggestionsData = response as List<dynamic>;
-      final suggestions = suggestionsData.map((item) => item.toString()).toList();
+      final suggestions = suggestionsData
+          .map((item) => item.toString())
+          .toList();
       return ApiResponse.success(suggestions);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -258,7 +257,9 @@ class SearchApiService {
         ),
       );
       final List<dynamic> historyData = response as List<dynamic>;
-      final history = historyData.map((item) => Map<String, dynamic>.from(item)).toList();
+      final history = historyData
+          .map((item) => Map<String, dynamic>.from(item))
+          .toList();
       return ApiResponse.success(history);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -294,10 +295,7 @@ class SearchApiService {
         await networkUtils.buildHttpResponse(
           '/search/history/save',
           method: networkUtils.HttpMethod.POST,
-          request: {
-            'query': query,
-            if (category != null) 'category': category,
-          },
+          request: {'query': query, if (category != null) 'category': category},
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -414,12 +412,20 @@ class SearchApiService {
   /// Search conferences (backward compatibility)
   Future<ApiResponse<SearchConferenceModel>> searchConferences({
     required String page,
-    required String keyword,
+    String? keyword,
+    String? country,
   }) async {
     try {
+      String queryParams = 'page=$page';
+      if (country != null && country.isNotEmpty && country != 'all') {
+        queryParams += '&country=$country';
+      }
+      if (keyword != null && keyword.isNotEmpty) {
+        queryParams += '&search_term=$keyword';
+      }
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
-          '/search-conferences?page=$page&keyword=$keyword',
+          '/search-conferences?$queryParams',
           method: networkUtils.HttpMethod.GET,
         ),
       );

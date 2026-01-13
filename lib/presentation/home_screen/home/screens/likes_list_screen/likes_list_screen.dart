@@ -3,9 +3,9 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import '../../../utils/SVCommon.dart';
 import 'bloc/likes_bloc.dart';
 
 class LikesListScreen extends StatefulWidget {
@@ -24,21 +24,19 @@ class _LikesListScreenState extends State<LikesListScreen> {
   void initState() {
     likesBloc.add(LoadPageEvent(postId: widget.id));
     super.initState();
-    afterBuildCreated(() {
-      setStatusBarColor(context.cardColor);
-    });
   }
 
   @override
   void dispose() {
-    // setStatusBarColor(appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_people_who_likes,
         titleIcon: Icons.favorite_rounded,
@@ -50,7 +48,11 @@ class _LikesListScreenState extends State<LikesListScreen> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                content: Text(state.errorMessage),
+                backgroundColor: theme.cardBackground,
+                content: Text(
+                  state.errorMessage,
+                  style: TextStyle(color: theme.textPrimary),
+                ),
               ),
             );
           }
@@ -67,13 +69,13 @@ class _LikesListScreenState extends State<LikesListScreen> {
                         Icon(
                           Icons.favorite_border_rounded,
                           size: 64,
-                          color: Colors.blue.withOpacity(0.3),
+                          color: theme.primary.withOpacity(0.3),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           translation(context).msg_no_likes,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: theme.textSecondary,
                             fontSize: 16,
                             fontFamily: 'Poppins',
                           ),
@@ -94,16 +96,10 @@ class _LikesListScreenState extends State<LikesListScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: context.cardColor,
+                          color: theme.cardBackground,
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              spreadRadius: 1,
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          border: Border.all(color: theme.border, width: 0.5),
+                          boxShadow: theme.cardShadow,
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(
@@ -112,17 +108,22 @@ class _LikesListScreenState extends State<LikesListScreen> {
                           ),
                           leading: GestureDetector(
                             onTap: () {
-                              SVProfileFragment(userId: user.id)
-                                  .launch(context);
+                              SVProfileFragment(
+                                userId: user.id,
+                              ).launch(context);
                             },
                             child: Container(
                               width: 50,
                               height: 50,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: theme.primary.withOpacity(0.2),
+                                  width: 2,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
+                                    color: theme.primary.withOpacity(0.1),
                                     spreadRadius: 1,
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
@@ -138,21 +139,26 @@ class _LikesListScreenState extends State<LikesListScreen> {
                                       imageUrl: user.profilePic!,
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) => Container(
-                                        color: Colors.grey[300],
+                                        color: theme.surfaceVariant,
                                       ),
                                       errorWidget: (context, url, error) =>
-                                          const Icon(Icons.error),
+                                          Icon(Icons.error, color: theme.error),
                                     ).cornerRadiusWithClipRRect(25),
                             ),
                           ),
                           title: Text(
                             user.name.validate(),
                             style: TextStyle(
-                              color: svGetBodyColor(),
+                              color: theme.textPrimary,
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
                               fontFamily: 'Poppins',
                             ),
+                          ),
+                          trailing: Icon(
+                            Icons.favorite,
+                            color: theme.likeColor,
+                            size: 20,
                           ),
                         ),
                       );

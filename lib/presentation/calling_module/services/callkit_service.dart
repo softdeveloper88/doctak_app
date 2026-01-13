@@ -122,7 +122,7 @@ class CallKitService {
       nameCaller: callerName,
       appName: 'Doctak.net',
       avatar: avatar,
-      handle: callerId,
+      handle: '', // Hide the call ID/handle
       type: hasVideo ? 1 : 0,
       textAccept: 'Accept',
       textDecline: 'Decline',
@@ -135,13 +135,16 @@ class CallKitService {
       },
       android: AndroidParams(
         isCustomNotification: true,
-        isShowLogo: true,
+        isShowLogo: false, // Hide logo to show avatar only
         ringtonePath: 'system_ringtone_default',
-        backgroundColor: '#0955fa',
-        actionColor: '#4CAF50',
+        backgroundColor: '#1A2332', // OneUI 8.5 dark background
+        actionColor: '#0955fa', // OneUI primary blue
         textColor: '#ffffff',
-        isShowCallID: false,
+        incomingCallNotificationChannelName: 'Doctak.net Calls',
+        missedCallNotificationChannelName: 'Doctak.net Missed Calls',
+        isShowCallID: false, // Hide call ID
         isShowFullLockedScreen: true,
+        isImportant: true,
       ),
       ios: IOSParams(
         iconName: 'CallKitLogo',
@@ -592,11 +595,12 @@ class CallKitService {
       // Save call info for potential resuming
       await _saveCallInfo(callId, userId, calleeName, avatar, hasVideo);
       //
-      // Show the outgoing call UI with CallKit
+      // Show the outgoing call UI with CallKit - OneUI 8.5 style
       final params = CallKitParams(
         id: callId,
         nameCaller: calleeName,
-        handle: userId,
+        appName: 'Doctak.net',
+        handle: '', // Hide call ID
         type: hasVideo ? 1 : 0,
         extra: {
           'userId': userId,
@@ -605,14 +609,20 @@ class CallKitService {
           'avatar': avatar,
         },
         ios: IOSParams(
+          iconName: 'CallKitLogo',
           handleType: 'generic',
           supportsVideo: true,
           ringtonePath: 'system_ringtone_default',
         ),
         android: AndroidParams(
-          isCustomNotification: false,
-          isShowLogo: true,
+          isCustomNotification: true,
+          isShowLogo: false,
           ringtonePath: 'system_ringtone_default',
+          backgroundColor: '#1A2332', // OneUI 8.5 dark background
+          actionColor: '#0955fa', // OneUI primary blue
+          textColor: '#ffffff',
+          incomingCallNotificationChannelName: 'Doctak.net Calls',
+          isShowCallID: false,
           isShowFullLockedScreen: true,
         ),
       );
@@ -803,7 +813,8 @@ class CallKitService {
         final params = CallKitParams(
           id: callId,
           nameCaller: callerName,
-          handle: callerId,
+          appName: 'Doctak.net',
+          handle: '', // Hide call ID
           type: hasVideo ? 1 : 0,
           extra: {
             'userId': callerId,
@@ -811,6 +822,11 @@ class CallKitService {
             'callerName': callerName,
             'avatar': avatar,
           },
+          ios: IOSParams(
+            iconName: 'CallKitLogo',
+            handleType: 'generic',
+            supportsVideo: true,
+          ),
         );
         //
         try {

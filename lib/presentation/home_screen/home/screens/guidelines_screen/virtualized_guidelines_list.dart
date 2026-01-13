@@ -4,6 +4,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/memory_optimized_guideline_item.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/shimmer_widget/guidelines_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -42,20 +43,41 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
         : _buildVirtualizedGuidelinesList();
   }
 
-  // Empty state widget
+  // Empty state widget with One UI 8.5 styling
   Widget _buildEmptyState(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_outlined, size: 48, color: Colors.grey[400]),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  theme.primary.withOpacity(0.15),
+                  theme.primary.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              Icons.search_off_rounded,
+              size: 48,
+              color: theme.primary,
+            ),
+          ),
           const SizedBox(height: 16),
           Text(
-            "No guidelines found",
+            translation(context).msg_no_data_found,
             style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 16,
-              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+              color: theme.textSecondary,
             ),
           ),
         ],

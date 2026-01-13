@@ -8,9 +8,9 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
 import androidx.core.view.WindowCompat
-import fl.pip.FlPiPActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-class MainActivity : FlPiPActivity() {
+class MainActivity : FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Enable edge-to-edge display for Android 15+ compatibility
         WindowCompat.setDecorFitsSystemWindows(window, false)

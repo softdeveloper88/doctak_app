@@ -1,10 +1,9 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
 
 class TextFieldEditWidget extends StatefulWidget {
@@ -81,6 +80,8 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     // Edit mode with form field
     if (widget.isEditModeMap ?? false) {
       return Column(
@@ -92,10 +93,11 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
             children: [
               Text(
                 widget.label ?? '',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
+                  color: theme.textPrimary,
                 ),
               ),
               if (widget.required)
@@ -104,7 +106,7 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red[700],
+                    color: theme.error,
                   ),
                 ),
             ],
@@ -114,15 +116,15 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
           Container(
             margin: const EdgeInsets.only(top: 8, bottom: 16),
             child: CustomTextField(
-              isReadOnly: !widget.editable, // Fix: readOnly should be opposite of editable
+              isReadOnly: !widget.editable,
               textInputAction: widget.textInputAction,
-              hintText: widget.hints ?? widget.label, // Add fallback hint
+              hintText: widget.hints ?? widget.label,
               filled: true,
               minLines: 1,
               focusNode: widget.focusNode,
-              fillColor: widget.editable ? AppDecoration.fillGray.color : Colors.grey.shade100,
+              fillColor: widget.editable ? theme.inputBackground : theme.surfaceVariant,
               textInputType: widget.textInputType ?? TextInputType.text,
-              autofocus: false, // Fix: don't auto-focus to avoid unwanted behavior
+              autofocus: false,
               prefix: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -131,13 +133,13 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                       padding: const EdgeInsets.all(8),
                       margin: const EdgeInsets.only(left: 8, right: 8),
                       decoration: BoxDecoration(
-                        color: (widget.iconColor ?? Colors.blue).withOpacity(0.1),
+                        color: (widget.iconColor ?? theme.primary).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Icon(
                         widget.icon,
                         size: 16,
-                        color: widget.iconColor ?? Colors.blue,
+                        color: widget.iconColor ?? theme.primary,
                       ),
                     ),
                 ],
@@ -147,7 +149,7 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                   ? IconButton(
                 icon: Icon(
                   _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                   size: 20,
                 ),
                 onPressed: () {
@@ -164,19 +166,16 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
               controller: _controller,
               maxLines: widget.maxLines,
               onChanged: (value) {
-                // Fix: Real-time updates as user types
                 if (widget.onSave != null) {
                   widget.onSave!(value);
                 }
               },
               onSaved: (value) {
-                // Fix: Ensure onSave is called and value is updated
                 if (widget.onSave != null) {
                   widget.onSave!(value ?? '');
                 }
               },
               onFieldSubmitted: (value) {
-                // Fix: Ensure onFieldSubmitted works properly
                 if (widget.onFieldSubmitted != null) {
                   widget.onFieldSubmitted!(value ?? '');
                 }
@@ -204,8 +203,8 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          color: theme.cardBackground,
+          borderRadius: theme.radiusL,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
@@ -224,13 +223,13 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                 height: 36,
                 margin: const EdgeInsets.only(right: 12),
                 decoration: BoxDecoration(
-                  color: (widget.iconColor ?? Colors.blue).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
+                  color: (widget.iconColor ?? theme.primary).withOpacity(0.1),
+                  borderRadius: theme.radiusM,
                 ),
                 child: Icon(
                   widget.icon,
                   size: 18,
-                  color: widget.iconColor ?? Colors.blue[600],
+                  color: widget.iconColor ?? theme.primary,
                 ),
               ),
 
@@ -245,7 +244,7 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                       capitalizeWords(widget.label ?? ''),
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        color: Colors.grey[700],
+                        color: theme.textSecondary,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -265,8 +264,8 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         color: widget.value != null && widget.value!.isNotEmpty
-                            ? Colors.grey[900]
-                            : Colors.grey[500],
+                            ? theme.textPrimary
+                            : theme.textTertiary,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         fontStyle: widget.value != null && widget.value!.isNotEmpty

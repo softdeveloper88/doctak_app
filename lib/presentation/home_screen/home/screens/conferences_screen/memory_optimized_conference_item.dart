@@ -1,13 +1,10 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/post_utils.dart';
-import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-/// Memory-optimized conference item widget with performance improvements
+/// Memory-optimized conference item widget with One UI 8.5 styling
 class MemoryOptimizedConferenceItem extends StatefulWidget {
   final Data conference;
   final Function(BuildContext, Data)? onItemTap;
@@ -19,12 +16,16 @@ class MemoryOptimizedConferenceItem extends StatefulWidget {
   });
 
   @override
-  State<MemoryOptimizedConferenceItem> createState() => _MemoryOptimizedConferenceItemState();
+  State<MemoryOptimizedConferenceItem> createState() =>
+      _MemoryOptimizedConferenceItemState();
 }
 
-class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenceItem> {
+class _MemoryOptimizedConferenceItemState
+    extends State<MemoryOptimizedConferenceItem> {
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return RepaintBoundary(
       child: GestureDetector(
         onTap: () {
@@ -33,38 +34,31 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
           }
         },
         child: Container(
-          margin: const EdgeInsets.all(10.0),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: context.cardColor,
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: 0,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: theme.cardBackground,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: theme.cardShadow,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Conference image
-                _buildConferenceImageOrPlaceholder(),
-                
+                _buildConferenceImageOrPlaceholder(theme),
+
                 // Conference header with title and dates
-                _buildConferenceHeader(),
-                
+                _buildConferenceHeader(theme),
+
                 // Conference description
-                _buildConferenceDescription(),
-                
+                _buildConferenceDescription(theme),
+
                 // Conference details (city, venue, etc.)
-                _buildConferenceDetails(),
-                
+                _buildConferenceDetails(theme),
+
                 // Register button and actions
-                _buildActionRow(),
+                _buildActionRow(theme),
               ],
             ),
           ),
@@ -74,26 +68,36 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
   }
 
   // Conference image or placeholder
-  Widget _buildConferenceImageOrPlaceholder() {
-    if (widget.conference.thumbnail != null && widget.conference.thumbnail!.isNotEmpty) {
+  Widget _buildConferenceImageOrPlaceholder(OneUITheme theme) {
+    if (widget.conference.thumbnail != null &&
+        widget.conference.thumbnail!.isNotEmpty) {
       return Container(
         height: 180,
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-        ),
+        decoration: BoxDecoration(color: theme.surfaceVariant),
         child: Image.network(
           widget.conference.thumbnail!,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return Center(
-              child: Text(
-                translation(context).msg_image_not_available,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                  fontFamily: 'Poppins',
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.image_not_supported_rounded,
+                    color: theme.textTertiary,
+                    size: 32,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    translation(context).msg_image_not_available,
+                    style: TextStyle(
+                      color: theme.textTertiary,
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
               ),
             );
           },
@@ -102,11 +106,11 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
             return Center(
               child: CircularProgressIndicator(
                 value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded / 
-                      loadingProgress.expectedTotalBytes!
+                    ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
                     : null,
                 strokeWidth: 2,
-                color: Colors.blue,
+                color: theme.primary,
               ),
             );
           },
@@ -116,12 +120,24 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
       return Container(
         height: 100,
         width: double.infinity,
-        color: Colors.grey.shade200,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              theme.primary.withOpacity(0.1),
+              theme.primary.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Center(
-          child: Icon(
-            Icons.event,
-            size: 40,
-            color: Colors.grey[400],
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(Icons.event_rounded, size: 36, color: theme.primary),
           ),
         ),
       );
@@ -129,76 +145,104 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
   }
 
   // Conference header with title and organizer
-  Widget _buildConferenceHeader() {
+  Widget _buildConferenceHeader(OneUITheme theme) {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Event icon container
           Container(
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [theme.primary, theme.primary.withOpacity(0.8)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.primary.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
-            child: Icon(
-              Icons.event,
-              color: Colors.blue[700],
-              size: 24,
+            child: const Icon(
+              Icons.event_rounded,
+              color: Colors.white,
+              size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.conference.title ?? translation(context).lbl_not_available,
+                  widget.conference.title ??
+                      translation(context).lbl_not_available,
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                     fontSize: 16,
-                    color: Colors.blue[800],
+                    color: theme.textPrimary,
+                    height: 1.3,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 14,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        '${widget.conference.startDate ?? ''} - ${widget.conference.endDate ?? ''}',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 6),
+                // Date row with chip style
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.success.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_rounded,
+                        size: 12,
+                        color: theme.success,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          '${widget.conference.startDate ?? ''} - ${widget.conference.endDate ?? ''}',
+                          style: TextStyle(
+                            color: theme.success,
+                            fontSize: 11,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 4),
-                if (widget.conference.organizer != null && widget.conference.organizer!.isNotEmpty)
+                const SizedBox(height: 6),
+                if (widget.conference.organizer != null &&
+                    widget.conference.organizer!.isNotEmpty)
                   Row(
                     children: [
                       Icon(
-                        Icons.person_outline,
+                        Icons.person_rounded,
                         size: 14,
-                        color: Colors.grey[600],
+                        color: theme.textSecondary,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           widget.conference.organizer ?? '',
                           style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
+                            color: theme.textSecondary,
+                            fontSize: 13,
                             fontFamily: 'Poppins',
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -209,21 +253,22 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
               ],
             ),
           ),
-          InkWell(
-            onTap: () {
-              _shareConference();
-            },
-            borderRadius: BorderRadius.circular(30),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.share_outlined,
-                color: Colors.blue[700],
-                size: 20,
+          // Share button - One UI style
+          Material(
+            color: theme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () {
+                _shareConference();
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Icon(
+                  Icons.share_rounded,
+                  color: theme.primary,
+                  size: 20,
+                ),
               ),
             ),
           ),
@@ -233,32 +278,52 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
   }
 
   // Conference description
-  Widget _buildConferenceDescription() {
-    if (widget.conference.description == null || widget.conference.description!.isEmpty) {
+  Widget _buildConferenceDescription(OneUITheme theme) {
+    if (widget.conference.description == null ||
+        widget.conference.description!.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            translation(context).lbl_description,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: Colors.grey[800],
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: theme.secondary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.description_rounded,
+                  size: 14,
+                  color: theme.secondary,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                translation(context).lbl_description,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: theme.textPrimary,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
           Text(
-            widget.conference.description ?? translation(context).msg_no_description,
+            widget.conference.description ??
+                translation(context).msg_no_description,
             style: TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 14,
-              color: Colors.grey[600],
+              fontSize: 13,
+              color: theme.textSecondary,
+              height: 1.4,
             ),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
@@ -269,75 +334,83 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
   }
 
   // Conference details (location, credits, etc.)
-  Widget _buildConferenceDetails() {
+  Widget _buildConferenceDetails(OneUITheme theme) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.withOpacity(0.1),
-          width: 1,
-        ),
+        color: theme.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.border, width: 0.5),
       ),
       child: Column(
         children: [
           _buildDetailRow(
-            Icons.location_on_outlined,
-            Colors.green[700]!,
+            Icons.location_on_rounded,
+            theme.success,
             '${widget.conference.city ?? ''}, ${widget.conference.country ?? ''}',
+            theme,
           ),
-          if (widget.conference.venue != null && widget.conference.venue!.isNotEmpty)
+          if (widget.conference.venue != null &&
+              widget.conference.venue!.isNotEmpty)
             _buildDetailRow(
-              Icons.meeting_room_outlined,
-              Colors.orange[700]!,
+              Icons.meeting_room_rounded,
+              theme.warning,
               widget.conference.venue!,
+              theme,
             ),
-          if (widget.conference.cmeCredits != null || widget.conference.mocCredits != null)
+          if (widget.conference.cmeCredits != null ||
+              widget.conference.mocCredits != null)
             _buildDetailRow(
-              Icons.school_outlined,
-              Colors.purple[700]!,
+              Icons.school_rounded,
+              theme.secondary,
               'CME: ${widget.conference.cmeCredits ?? 'N/A'}, MOC: ${widget.conference.mocCredits ?? 'N/A'}',
+              theme,
             ),
-          if (widget.conference.specialtiesTargeted != null && widget.conference.specialtiesTargeted!.isNotEmpty)
+          if (widget.conference.specialtiesTargeted != null &&
+              widget.conference.specialtiesTargeted!.isNotEmpty)
             _buildDetailRow(
-              Icons.medical_services_outlined,
-              Colors.blue[700]!,
+              Icons.medical_services_rounded,
+              theme.primary,
               widget.conference.specialtiesTargeted!,
+              theme,
             ),
         ],
       ),
     );
   }
 
-  // Helper method to build a detail row
-  Widget _buildDetailRow(IconData icon, Color color, String text) {
+  // Helper method to build a detail row - One UI 8.5 style
+  Widget _buildDetailRow(
+    IconData icon,
+    Color color,
+    String text,
+    OneUITheme theme,
+  ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 16,
-              color: color,
-            ),
+            child: Icon(icon, size: 16, color: color),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: Colors.grey[700],
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 13,
+                  color: theme.textSecondary,
+                ),
               ),
             ),
           ),
@@ -346,54 +419,97 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
     );
   }
 
-  // Register button and actions
-  Widget _buildActionRow() {
+  // Register button and actions - One UI 8.5 style
+  Widget _buildActionRow(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
-      child: widget.conference.registrationLink != null && 
-            widget.conference.registrationLink!.isNotEmpty
-          ? ElevatedButton(
-              onPressed: () => _launchRegistrationLink(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[700],
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+      child:
+          widget.conference.registrationLink != null &&
+              widget.conference.registrationLink!.isNotEmpty
+          ? Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [theme.primary, theme.primary.withOpacity(0.85)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.primary.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _launchRegistrationLink(),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.app_registration_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          translation(context).lbl_register_now,
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Colors.white,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : Container(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: theme.surfaceVariant,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.app_registration, size: 18),
+                  Icon(
+                    Icons.info_outline_rounded,
+                    size: 16,
+                    color: theme.textTertiary,
+                  ),
                   const SizedBox(width: 8),
                   Text(
-                    translation(context).lbl_register_now,
-                    style: const TextStyle(
+                    translation(context).lbl_registration_unavailable,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      fontSize: 13,
+                      color: theme.textTertiary,
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
                 ],
-              ),
-            )
-          : Text(
-              translation(context).lbl_registration_unavailable,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
               ),
             ),
     );
@@ -409,11 +525,15 @@ class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenc
   }
 
   // Launch registration link
-  void _launchRegistrationLink() {
-    if (widget.conference.registrationLink != null && 
+  void _launchRegistrationLink() async {
+    if (widget.conference.registrationLink != null &&
         widget.conference.registrationLink!.isNotEmpty) {
-      Uri registrationUri = Uri.parse(widget.conference.registrationLink!);
-      PostUtils.launchURL(context, registrationUri.toString());
+      final Uri registrationUri = Uri.parse(
+        widget.conference.registrationLink!,
+      );
+      if (await canLaunchUrl(registrationUri)) {
+        await launchUrl(registrationUri, mode: LaunchMode.externalApplication);
+      }
     }
   }
 }

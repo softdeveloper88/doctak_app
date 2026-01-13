@@ -12,6 +12,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/pro
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
@@ -38,6 +39,7 @@ class StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -47,18 +49,14 @@ class StatItem extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  icon,
-                  size: 16,
-                  color: Colors.blue[600],
-                ),
+                Icon(icon, size: 16, color: theme.primary),
                 const SizedBox(width: 6),
                 Text(
                   count,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[700],
+                    color: theme.primary,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -69,7 +67,7 @@ class StatItem extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey[600],
+                color: theme.textSecondary,
                 fontWeight: FontWeight.w500,
                 fontFamily: 'Poppins',
               ),
@@ -86,9 +84,12 @@ class SVProfileHeaderComponent extends StatefulWidget {
   ProfileBloc? profileBoc;
   bool? isMe;
 
-  SVProfileHeaderComponent(
-      {this.userProfile, this.profileBoc, this.isMe, Key? key})
-      : super(key: key);
+  SVProfileHeaderComponent({
+    this.userProfile,
+    this.profileBoc,
+    this.isMe,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<SVProfileHeaderComponent> createState() =>
@@ -97,11 +98,13 @@ class SVProfileHeaderComponent extends StatefulWidget {
 
 // Points card with improved design
 Widget _buildPointsCard(BuildContext context) {
+  final theme = OneUITheme.of(context);
   return Card(
-    elevation: 2.0,
+    elevation: theme.isDark ? 0 : 2.0,
+    color: theme.cardBackground,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: Colors.blue.withOpacity(0.2), width: 1),
+      side: BorderSide(color: theme.primary.withOpacity(0.2), width: 1),
     ),
     child: Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
@@ -110,19 +113,26 @@ Widget _buildPointsCard(BuildContext context) {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.star_rounded, color: Colors.amber, size: 18),
+              const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
               const SizedBox(width: 4),
               Text(
                 translation(context).lbl_your_earned_points,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textPrimary,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             '300',
             style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.primary,
+            ),
           ),
         ],
       ),
@@ -158,25 +168,17 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
       vsync: this,
     );
 
-    _profileImageAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.elasticOut,
-      ),
-    );
+    _profileImageAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
     _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _headerController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _headerController, curve: Curves.easeInOut),
     );
 
     _headerScaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _headerController,
-        curve: Curves.easeOutBack,
-      ),
+      CurvedAnimation(parent: _headerController, curve: Curves.easeOutBack),
     );
 
     // Add scroll listener for smooth header effects
@@ -204,6 +206,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight + 80),
       child: Column(
@@ -213,55 +216,55 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             children: [
               // Background Image with gradient overlay
               InkWell(
-                  onTap: () {
-                    ProfileImageScreen(
-                      imageUrl: '${widget.userProfile?.coverPicture}',
-                    ).launch(context);
-                  },
-                  child: Container(
-                    height: 260,
-                    width: double.maxFinite,
-                    decoration: BoxDecoration(
-                      // color: Colors.black,
-                    ),
-                    child: Stack(
-                      children: [
-                        // Cover image
-                        widget.userProfile?.coverPicture == null ||
-                            widget.userProfile?.coverPicture ==
-                                'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
-                            ? Image.asset(
-                          'assets/images/img_cover.png',
-                          width: double.maxFinite,
-                          height: 260,
-                          fit: BoxFit.cover,
-                        )
-                            : CustomImageView(
-                          imagePath: widget.userProfile?.coverPicture ?? '',
-                          height: 260,
-                          width: double.maxFinite,
-                          fit: BoxFit.cover,
-                          placeHolder: 'assets/images/img_cover.png',
-                        ),
-
-                        // Gradient overlay
-                        Container(
-                          width: double.maxFinite,
-                          height: 260,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.1),
-                                Colors.black.withOpacity(0.5),
-                              ],
+                onTap: () {
+                  ProfileImageScreen(
+                    imageUrl: '${widget.userProfile?.coverPicture}',
+                  ).launch(context);
+                },
+                child: Container(
+                  height: 260,
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    // color: Colors.black,
+                  ),
+                  child: Stack(
+                    children: [
+                      // Cover image
+                      widget.userProfile?.coverPicture == null ||
+                              widget.userProfile?.coverPicture ==
+                                  'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
+                          ? Image.asset(
+                              'assets/images/img_cover.png',
+                              width: double.maxFinite,
+                              height: 260,
+                              fit: BoxFit.cover,
+                            )
+                          : CustomImageView(
+                              imagePath: widget.userProfile?.coverPicture ?? '',
+                              height: 260,
+                              width: double.maxFinite,
+                              fit: BoxFit.cover,
+                              placeHolder: 'assets/images/img_cover.png',
                             ),
+
+                      // Gradient overlay
+                      Container(
+                        width: double.maxFinite,
+                        height: 260,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.1),
+                              Colors.black.withOpacity(0.5),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  )
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
               // Back button with improved styling
@@ -273,24 +276,28 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(40),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                          )
-                        ]
+                      color: theme.cardBackground,
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(color: theme.border, width: 1),
+                      boxShadow: theme.isDark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                              ),
+                            ],
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back_ios,
                         size: 18,
+                        color: theme.textPrimary,
                       ),
                     ),
                   ),
@@ -304,10 +311,11 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   child: IconButton(
                     onPressed: () async {
                       // Use PermissionUtils for proper permission handling on both iOS and Android
-                      final hasPermission = await PermissionUtils.requestGalleryPermissionWithUI(
-                        context,
-                        showRationale: false,
-                      );
+                      final hasPermission =
+                          await PermissionUtils.requestGalleryPermissionWithUI(
+                            context,
+                            showRationale: false,
+                          );
 
                       if (hasPermission) {
                         _showFileOptions(false);
@@ -317,16 +325,21 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
-                          color: Colors.blue,
-                          border: Border.all(color: Colors.white, width: 2),
-                          borderRadius: BorderRadius.circular(25),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              spreadRadius: 0,
-                            )
-                          ]
+                        color: theme.primary,
+                        border: Border.all(
+                          color: theme.scaffoldBackground,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: theme.isDark
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 10,
+                                  spreadRadius: 0,
+                                ),
+                              ],
                       ),
                       child: const Icon(
                         Icons.camera_alt_outlined,
@@ -339,32 +352,34 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
 
               // Curved top for profile content
               Positioned(
-                  top: 230,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                          color: context.cardColor,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(30),
-                            topRight: Radius.circular(30),
-                          ),
-                          boxShadow: [
+                top: 230,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: theme.scaffoldBackground,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                    boxShadow: theme.isDark
+                        ? null
+                        : [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.05),
                               blurRadius: 10,
                               spreadRadius: 0,
-                              offset: Offset(0, -2),
-                            )
-                          ]
-                      )
-                  )
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                  ),
+                ),
               ),
 
               // Profile picture with animated scale effect
               Positioned(
-                right: (100.w/2)-60,
+                right: (100.w / 2) - 60,
                 top: 180,
                 child: ScaleTransition(
                   scale: _profileImageAnimation,
@@ -376,34 +391,42 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                         height: 100,
                         width: 100,
                         decoration: BoxDecoration(
-                            border: Border.all(color: Colors.white, width: 4),
-                            borderRadius: BorderRadius.circular(50),
-                            color: Colors.grey.shade200,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 10,
-                                spreadRadius: 0,
-                              )
-                            ]
+                          border: Border.all(
+                            color: theme.scaffoldBackground,
+                            width: 4,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                          color: theme.surfaceVariant,
+                          boxShadow: theme.isDark
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 10,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
                         ),
                         child: Hero(
                           tag: 'profile-image',
                           child: ClipOval(
                             child: widget.userProfile?.profilePicture == null
                                 ? Image.asset(
-                              'images/socialv/faces/face_5.png',
-                              height: 100,
-                              width: 100,
-                              fit: BoxFit.cover,
-                            )
+                                    'images/socialv/faces/face_5.png',
+                                    height: 100,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                  )
                                 : CustomImageView(
-                              imagePath: widget.userProfile?.profilePicture ?? '',
-                              height: 100,
-                              width: 100,
-                              fit: BoxFit.cover,
-                              placeHolder: 'images/socialv/faces/face_5.png',
-                            ),
+                                    imagePath:
+                                        widget.userProfile?.profilePicture ??
+                                        '',
+                                    height: 100,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                    placeHolder:
+                                        'images/socialv/faces/face_5.png',
+                                  ),
                           ),
                         ),
                       ).onTap(() async {
@@ -422,10 +445,11 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                             child: InkWell(
                               onTap: () async {
                                 // Use PermissionUtils for proper permission handling on both iOS and Android
-                                final hasPermission = await PermissionUtils.requestGalleryPermissionWithUI(
-                                  context,
-                                  showRationale: false,
-                                );
+                                final hasPermission =
+                                    await PermissionUtils.requestGalleryPermissionWithUI(
+                                      context,
+                                      showRationale: false,
+                                    );
 
                                 if (hasPermission) {
                                   _showFileOptions(true);
@@ -436,16 +460,23 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                                 height: 36,
                                 width: 36,
                                 decoration: BoxDecoration(
-                                    color: Colors.blue,
-                                    border: Border.all(color: Colors.white, width: 2),
-                                    borderRadius: BorderRadius.circular(18),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 5,
-                                        spreadRadius: 0,
-                                      )
-                                    ]
+                                  color: theme.primary,
+                                  border: Border.all(
+                                    color: theme.scaffoldBackground,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                  boxShadow: theme.isDark
+                                      ? null
+                                      : [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(
+                                              0.2,
+                                            ),
+                                            blurRadius: 5,
+                                            spreadRadius: 0,
+                                          ),
+                                        ],
                                 ),
                                 child: const Icon(
                                   Icons.camera_alt_outlined,
@@ -473,14 +504,20 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                      '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
-                      style: TextStyle(
-                          color: svGetBodyColor(),
-                          fontSize: 20, // Increased font size
-                          fontWeight: FontWeight.w600)), // Made font bolder
+                    '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
+                    style: TextStyle(
+                      color: svGetBodyColor(),
+                      fontSize: 20, // Increased font size
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ), // Made font bolder
                   8.width, // More spacing
-                  Image.asset('images/socialv/icons/ic_TickSquare.png',
-                      height: 16, width: 16, fit: BoxFit.cover),
+                  Image.asset(
+                    'images/socialv/icons/ic_TickSquare.png',
+                    height: 16,
+                    width: 16,
+                    fit: BoxFit.cover,
+                  ),
                 ],
               ),
 
@@ -490,40 +527,45 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.location_on, size: 14, color: Colors.blue[300]),
+                    Icon(Icons.location_on, size: 14, color: theme.primary),
                     4.width,
                     Text(
-                        '${widget.userProfile?.user?.state ?? ''} ${widget.userProfile?.user?.state != null ? ',' : ''}${widget.userProfile?.user?.country ?? ''}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.black87,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500, // Made font bolder
-                        )
+                      '${widget.userProfile?.user?.state ?? ''} ${widget.userProfile?.user?.state != null ? ',' : ''}${widget.userProfile?.user?.country ?? ''}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: theme.textSecondary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500, // Made font bolder
+                      ),
                     ),
                   ],
                 ),
               ),
 
               // Specialty
-              if (widget.userProfile?.user?.specialty != null && widget.userProfile!.user!.specialty!.isNotEmpty)
+              if (widget.userProfile?.user?.specialty != null &&
+                  widget.userProfile!.user!.specialty!.isNotEmpty)
                 SizedBox(
                   width: 80.w,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.medical_services_outlined, size: 14, color: Colors.blue[300]),
+                      Icon(
+                        Icons.medical_services_outlined,
+                        size: 14,
+                        color: theme.primary,
+                      ),
                       4.width,
                       Flexible(
                         child: Text(
-                            widget.userProfile?.user?.specialty ?? '',
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: svGetBodyColor(),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            )
+                          widget.userProfile?.user?.specialty ?? '',
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: svGetBodyColor(),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -531,19 +573,20 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 ),
 
               // About me text
-              if (widget.userProfile?.profile?.aboutMe != null && widget.userProfile!.profile!.aboutMe!.isNotEmpty)
+              if (widget.userProfile?.profile?.aboutMe != null &&
+                  widget.userProfile!.profile!.aboutMe!.isNotEmpty)
                 Container(
                   width: 90.w,
                   margin: const EdgeInsets.only(top: 8, bottom: 4),
                   child: Text(
-                      widget.userProfile?.profile?.aboutMe ?? '',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: svGetBodyColor(),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        height: 1.4,
-                      )
+                    widget.userProfile?.profile?.aboutMe ?? '',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: svGetBodyColor(),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      height: 1.4,
+                    ),
                   ),
                 ),
 
@@ -566,33 +609,38 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                         onTap: () {
                           ChatRoomScreen(
                             username:
-                            '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
+                                '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
                             profilePic:
-                            '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                                '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
                             id: '${widget.userProfile?.user?.id}',
                             roomId: '',
                           ).launch(context);
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.blue),
+                            color: theme.cardBackground,
+                            border: Border.all(color: theme.primary),
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.1),
-                                blurRadius: 5,
-                                offset: Offset(0, 2),
-                              )
-                            ],
+                            boxShadow: theme.isDark
+                                ? null
+                                : [
+                                    BoxShadow(
+                                      color: theme.primary.withOpacity(0.1),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               SvgPicture.asset(
                                 'assets/icon/ic_message.svg',
-                                color: Colors.blue,
+                                color: theme.primary,
                                 width: 20,
                                 height: 20,
                               ),
@@ -600,7 +648,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                               Text(
                                 translation(context).lbl_message,
                                 style: TextStyle(
-                                  color: Colors.blue,
+                                  color: theme.primary,
                                   fontWeight: FontWeight.w600,
                                   fontSize: 14,
                                 ),
@@ -616,28 +664,34 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                       MaterialButton(
                         height: 40.0,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20)
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         minWidth: 110,
                         onPressed: () {
                           if (widget.userProfile!.isFollowing ?? false) {
-                            widget.profileBoc?.add(SetUserFollow(
+                            widget.profileBoc?.add(
+                              SetUserFollow(
                                 widget.userProfile?.user?.id ?? '',
-                                'unfollow'));
+                                'unfollow',
+                              ),
+                            );
 
                             widget.userProfile!.isFollowing = false;
                           } else {
-                            widget.profileBoc?.add(SetUserFollow(
+                            widget.profileBoc?.add(
+                              SetUserFollow(
                                 widget.userProfile?.user?.id ?? '',
-                                'follow'));
+                                'follow',
+                              ),
+                            );
 
                             widget.userProfile!.isFollowing = true;
                           }
                           setState(() {});
                         },
-                        elevation: 2,
+                        elevation: theme.isDark ? 0 : 2,
                         color: widget.userProfile?.isFollowing ?? false
-                            ? Colors.grey[200]
+                            ? theme.surfaceVariant
                             : SVAppColorPrimary,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -647,22 +701,22 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                                   ? Icons.check
                                   : Icons.person_add_alt_1_rounded,
                               color: widget.userProfile?.isFollowing ?? false
-                                  ? Colors.black54
+                                  ? theme.textSecondary
                                   : Colors.white,
                               size: 18,
                             ),
                             6.width,
                             Text(
-                                widget.userProfile?.isFollowing ?? false
-                                    ? translation(context).lbl_following
-                                    : translation(context).lbl_follow,
-                                style: TextStyle(
-                                  color: widget.userProfile?.isFollowing ?? false
-                                      ? Colors.black54
-                                      : Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                )
+                              widget.userProfile?.isFollowing ?? false
+                                  ? translation(context).lbl_following
+                                  : translation(context).lbl_follow,
+                              style: TextStyle(
+                                color: widget.userProfile?.isFollowing ?? false
+                                    ? theme.textSecondary
+                                    : Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -677,8 +731,8 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
                   border: Border(
-                    top: BorderSide(color: Colors.grey.shade200, width: 1),
-                    bottom: BorderSide(color: Colors.grey.shade200, width: 1),
+                    top: BorderSide(color: theme.border, width: 1),
+                    bottom: BorderSide(color: theme.border, width: 1),
                   ),
                 ),
                 child: Row(
@@ -711,7 +765,9 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                         }
                       },
                       child: StatItem(
-                        count: widget.userProfile?.totalFollows?.totalFollowings ?? '',
+                        count:
+                            widget.userProfile?.totalFollows?.totalFollowings ??
+                            '',
                         label: translation(context).lbl_followers,
                         onTap: () {
                           if (!(widget.isMe ?? false)) {
@@ -746,7 +802,9 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                         }
                       },
                       child: StatItem(
-                        count: widget.userProfile?.totalFollows?.totalFollowers ?? '',
+                        count:
+                            widget.userProfile?.totalFollows?.totalFollowers ??
+                            '',
                         label: translation(context).lbl_followings,
                         onTap: () {
                           if (!(widget.isMe ?? false)) {
@@ -763,20 +821,15 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                         },
                         icon: Icons.person_add_rounded,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
 
-              Container(
-                color: svGetBgColor(),
-                height: 10,
-              ),
+              Container(color: svGetBgColor(), height: 10),
 
               // Profile posts component
-              SVProfilePostsComponent(
-                widget.profileBoc!,
-              ),
+              SVProfilePostsComponent(widget.profileBoc!),
             ],
           ),
         ],
@@ -788,20 +841,30 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
 
   // Improved file picker bottom sheet
   void _showFileOptions(bool isProfilePic) {
+    final theme = OneUITheme.of(context);
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: theme.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
         ),
       ),
-      builder: (BuildContext context) {
+      builder: (BuildContext sheetContext) {
+        // Use parent context's theme to ensure consistency
+        final sheetTheme = OneUITheme.of(sheetContext);
         // Get bottom padding for system navigation bars
-        final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
+        final bottomPadding = MediaQuery.of(sheetContext).viewPadding.bottom;
 
         return Container(
+          decoration: BoxDecoration(
+            color: sheetTheme.cardBackground,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
           padding: EdgeInsets.only(
             left: 24.0,
             right: 24.0,
@@ -815,12 +878,12 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             children: <Widget>[
               Text(
                 isProfilePic
-                    ? translation(context).lbl_update_profile_picture
-                    : translation(context).lbl_update_cover_photo,
-                style: const TextStyle(
+                    ? translation(sheetContext).lbl_update_profile_picture
+                    : translation(sheetContext).lbl_update_cover_photo,
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: sheetTheme.textPrimary,
                 ),
               ),
               const SizedBox(height: 20),
@@ -828,25 +891,30 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 leading: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
+                    color: sheetTheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.photo_library, color: Colors.blue),
+                  child: Icon(Icons.photo_library, color: sheetTheme.primary),
                 ),
                 title: Text(
-                  translation(context).lbl_choose_from_gallery,
-                  style: const TextStyle(
+                  translation(sheetContext).lbl_choose_from_gallery,
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
+                    color: sheetTheme.textPrimary,
                   ),
                 ),
                 onTap: () async {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
                   File? file = await _pickFile(ImageSource.gallery);
                   if (file != null) {
                     setState(() {
                       _selectedFile = file;
-                      widget.profileBoc!.add(UpdateProfilePicEvent(
-                          filePath: file.path, isProfilePicture: isProfilePic));
+                      widget.profileBoc!.add(
+                        UpdateProfilePicEvent(
+                          filePath: file.path,
+                          isProfilePicture: isProfilePic,
+                        ),
+                      );
                     });
                   }
                 },
@@ -862,24 +930,32 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   child: const Icon(Icons.camera_alt, color: Colors.green),
                 ),
                 title: Text(
-                  translation(context).lbl_take_a_picture,
-                  style: const TextStyle(
+                  translation(sheetContext).lbl_take_a_picture,
+                  style: TextStyle(
                     fontWeight: FontWeight.w500,
+                    color: sheetTheme.textPrimary,
                   ),
                 ),
                 onTap: () async {
-                  Navigator.pop(context);
+                  Navigator.pop(sheetContext);
 
                   // Request camera permission before opening camera
-                  final hasCameraPermission = await PermissionUtils.requestCameraPermissionWithUI(context);
+                  final hasCameraPermission =
+                      await PermissionUtils.requestCameraPermissionWithUI(
+                        context,
+                      );
 
                   if (hasCameraPermission) {
                     File? file = await _pickFile(ImageSource.camera);
                     if (file != null) {
                       setState(() {
                         _selectedFile = file;
-                        widget.profileBoc!.add(UpdateProfilePicEvent(
-                            filePath: file.path, isProfilePicture: isProfilePic));
+                        widget.profileBoc!.add(
+                          UpdateProfilePicEvent(
+                            filePath: file.path,
+                            isProfilePicture: isProfilePic,
+                          ),
+                        );
                       });
                     }
                   }

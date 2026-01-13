@@ -1,11 +1,14 @@
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/chat_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/post_api_service.dart';
+import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/data/models/chat_model/search_contacts_model.dart';
 import 'package:doctak_app/data/models/post_model/post_likes_model.dart';
+import 'package:doctak_app/data/models/search_user_tag_model/search_user_tag_model.dart'
+    as tag_model;
 
 /// ApiServiceManager - Central hub for all API services
 ///
@@ -898,18 +901,14 @@ class ApiServiceManager {
   /// Get conference countries (backward compatibility)
   Future<dynamic> getConferenceCountries(String token) async {
     try {
-      // Mock response for conference countries
-      return MockHttpResponse(
-        response: MockResponse(
-          data: {
-            'countries': [
-              {'id': 1, 'name': 'United States'},
-              {'id': 2, 'name': 'Canada'},
-              {'id': 3, 'name': 'United Kingdom'},
-            ],
-          },
-          statusCode: 200,
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/conference-countries',
+          method: networkUtils.HttpMethod.GET,
         ),
+      );
+      return MockHttpResponse(
+        response: MockResponse(data: response, statusCode: 200),
       );
     } catch (e) {
       throw e;
@@ -1078,33 +1077,33 @@ class ApiServiceManager {
     String search,
   ) async {
     try {
-      // Use the actual SharedApiService conference endpoint
+      // Use the shared API service with country filter
       final response = await sharedApi.searchConferences(
         page: page,
         keyword: search,
+        country: country,
       );
-      if (response.success) {
+      if (response.success && response.data != null) {
         return response.data!;
-      } else {
-        // Return empty SearchConferenceModel if no data found
-        return SearchConferenceModel.fromJson({
-          'conferences': {
-            'current_page': int.parse(page),
-            'last_page': 1,
-            'data': [],
-            'total': 0,
-            'per_page': 10,
-            'from': 1,
-            'to': 0,
-            'first_page_url': null,
-            'last_page_url': null,
-            'next_page_url': null,
-            'prev_page_url': null,
-            'path': null,
-            'links': [],
-          },
-        });
       }
+      // Return empty SearchConferenceModel if no data
+      return SearchConferenceModel.fromJson({
+        'conferences': {
+          'current_page': int.parse(page),
+          'last_page': 1,
+          'data': [],
+          'total': 0,
+          'per_page': 10,
+          'from': 1,
+          'to': 0,
+          'first_page_url': null,
+          'last_page_url': null,
+          'next_page_url': null,
+          'prev_page_url': null,
+          'path': null,
+          'links': [],
+        },
+      });
     } catch (e) {
       // Return empty SearchConferenceModel on error to prevent type casting issues
       return SearchConferenceModel.fromJson({
@@ -1266,7 +1265,7 @@ class ApiServiceManager {
   // ================================== ADDITIONAL MISSING METHODS ==================================
 
   /// Search tag friend
-  Future<dynamic> searchTagFriend(
+  Future<tag_model.SearchUserTagModel> searchTagFriend(
     String token,
     String page,
     String name,
@@ -1277,7 +1276,41 @@ class ApiServiceManager {
         searchTerm: name,
       );
       if (response.success) {
-        return response.data;
+        // Convert SearchPeopleModel to SearchUserTagModel format
+        final searchPeopleModel = response.data!;
+
+        // Convert Data objects to UserData objects
+        final userDataList =
+            searchPeopleModel.data
+                ?.map(
+                  (data) => tag_model.UserData(
+                    id: data.id,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    profilePic: data.profilePic,
+                  ),
+                )
+                .toList() ??
+            [];
+
+        // Create the SearchUserTagModel with proper structure
+        return tag_model.SearchUserTagModel(
+          success: true,
+          data: tag_model.Data(
+            currentPage: searchPeopleModel.currentPage,
+            data: userDataList,
+            firstPageUrl: searchPeopleModel.firstPageUrl,
+            from: searchPeopleModel.from,
+            lastPage: searchPeopleModel.lastPage,
+            lastPageUrl: searchPeopleModel.lastPageUrl,
+            nextPageUrl: searchPeopleModel.nextPageUrl,
+            path: searchPeopleModel.path,
+            perPage: searchPeopleModel.perPage,
+            prevPageUrl: searchPeopleModel.prevPageUrl,
+            to: searchPeopleModel.to,
+            total: searchPeopleModel.total,
+          ),
+        );
       } else {
         throw Exception(response.message);
       }

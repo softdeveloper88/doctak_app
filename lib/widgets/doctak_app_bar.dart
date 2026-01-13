@@ -1,8 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import '../presentation/home_screen/utils/SVCommon.dart';
+import '../theme/one_ui_theme.dart';
 
-/// A reusable DocTak app bar widget that provides consistent styling across the app
+/// A reusable DocTak app bar widget that provides consistent One UI 8.5 styling
 class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final IconData? titleIcon;
@@ -42,59 +42,64 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
   }) : super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(
-      toolbarHeight + (bottom?.preferredSize.height ?? 0.0)
-  );
+  Size get preferredSize =>
+      Size.fromHeight(toolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      toolbarHeight: toolbarHeight,
-      backgroundColor: backgroundColor ?? svGetScaffoldColor(),
-      surfaceTintColor: backgroundColor ?? svGetScaffoldColor(),
-      iconTheme: IconThemeData(color: context.iconColor),
-      elevation: elevation,
-      centerTitle: false,
-      automaticallyImplyLeading: automaticallyImplyLeading,
-      leading: automaticallyImplyLeading
-          ? customLeading ?? (showBackButton ? _buildBackButton(context) : null)
-          : null,
-      title: _buildTitle(context),
-      actions: actions,
-      bottom: bottom,
+    final theme = OneUITheme.of(context);
+
+    return Container(
+      decoration: theme.appBarDecoration.copyWith(
+        color: backgroundColor ?? theme.appBarBackground,
+      ),
+      child: AppBar(
+        toolbarHeight: toolbarHeight,
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        iconTheme: IconThemeData(color: theme.iconColor),
+        elevation: 0,
+        centerTitle: false,
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        leading: automaticallyImplyLeading
+            ? customLeading ??
+                  (showBackButton ? _buildBackButton(context, theme) : null)
+            : null,
+        title: _buildTitle(context, theme),
+        actions: actions,
+        bottom: bottom,
+      ),
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
-    return IconButton(
-      icon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: Colors.blue[600],
-          size: 16,
+  Widget _buildBackButton(BuildContext context, OneUITheme theme) {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onBackPressed ?? () => Navigator.pop(context),
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: theme.iconButtonDecoration(),
+            child: Icon(CupertinoIcons.back, color: theme.primary, size: 18),
+          ),
         ),
       ),
-      onPressed: onBackPressed ?? () => Navigator.pop(context),
     );
   }
 
-  Widget _buildTitle(BuildContext context) {
+  Widget _buildTitle(BuildContext context, OneUITheme theme) {
+    final effectiveTitleColor = titleColor ?? theme.primary;
+
     if (titleIcon != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon(
-          //   titleIcon,
-          //   color: titleColor ?? Colors.blue[600],
-          //   size: 24,
-          // ),
-          // const SizedBox(width: 10),
           Flexible(
             child: Text(
               title,
@@ -102,7 +107,8 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
                 fontSize: titleFontSize,
                 fontWeight: titleFontWeight,
                 fontFamily: titleFontFamily,
-                color: titleColor ?? Colors.blue[800],
+                color: effectiveTitleColor,
+                letterSpacing: -0.2,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -111,14 +117,15 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
       );
     }
-    
+
     return Text(
       title,
       style: TextStyle(
         fontSize: titleFontSize,
         fontWeight: titleFontWeight,
         fontFamily: titleFontFamily,
-        color: titleColor ?? Colors.blue[800],
+        color: effectiveTitleColor,
+        letterSpacing: -0.2,
       ),
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
@@ -126,7 +133,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// A custom sliver app bar for screens that need scrollable content
+/// A custom sliver app bar for screens that need scrollable content with One UI 8.5 styling
 class DoctakSliverAppBar extends StatelessWidget {
   final String title;
   final IconData? titleIcon;
@@ -175,55 +182,57 @@ class DoctakSliverAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return SliverAppBar(
       expandedHeight: expandedHeight,
       floating: floating,
       pinned: pinned,
       snap: snap,
       collapsedHeight: collapsedHeight,
-      backgroundColor: backgroundColor ?? svGetScaffoldColor(),
-      surfaceTintColor: backgroundColor ?? svGetScaffoldColor(),
-      iconTheme: IconThemeData(color: context.iconColor),
+      backgroundColor: backgroundColor ?? theme.appBarBackground,
+      surfaceTintColor: backgroundColor ?? theme.appBarBackground,
+      iconTheme: IconThemeData(color: theme.iconColor),
       elevation: elevation,
       centerTitle: centerTitle,
-      leading: customLeading ?? (showBackButton ? _buildBackButton(context) : null),
-      title: _buildTitle(context),
+      leading:
+          customLeading ??
+          (showBackButton ? _buildBackButton(context, theme) : null),
+      title: _buildTitle(context, theme),
       actions: actions,
       bottom: bottom,
       flexibleSpace: flexibleSpace,
     );
   }
 
-  Widget _buildBackButton(BuildContext context) {
-    return IconButton(
-      icon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: Colors.blue[600],
-          size: 16,
+  Widget _buildBackButton(BuildContext context, OneUITheme theme) {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onBackPressed ?? () => Navigator.pop(context),
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: theme.iconButtonDecoration(),
+            child: Icon(CupertinoIcons.back, color: theme.primary, size: 18),
+          ),
         ),
       ),
-      onPressed: onBackPressed ?? () => Navigator.pop(context),
     );
   }
 
-  Widget _buildTitle(BuildContext context) {
+  Widget _buildTitle(BuildContext context, OneUITheme theme) {
+    final effectiveTitleColor = titleColor ?? theme.primary;
+
     if (titleIcon != null) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Icon(
-          //   titleIcon,
-          //   color: titleColor ?? Colors.blue[600],
-          //   size: 24,
-          // ),
-          // const SizedBox(width: 10),
           Flexible(
             child: Text(
               title,
@@ -231,7 +240,8 @@ class DoctakSliverAppBar extends StatelessWidget {
                 fontSize: titleFontSize,
                 fontWeight: titleFontWeight,
                 fontFamily: titleFontFamily,
-                color: titleColor ?? Colors.blue[800],
+                color: effectiveTitleColor,
+                letterSpacing: -0.2,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -240,14 +250,15 @@ class DoctakSliverAppBar extends StatelessWidget {
         ],
       );
     }
-    
+
     return Text(
       title,
       style: TextStyle(
         fontSize: titleFontSize,
         fontWeight: titleFontWeight,
         fontFamily: titleFontFamily,
-        color: titleColor ?? Colors.blue[800],
+        color: effectiveTitleColor,
+        letterSpacing: -0.2,
       ),
       overflow: TextOverflow.ellipsis,
       maxLines: 1,

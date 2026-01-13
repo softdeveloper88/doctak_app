@@ -5,7 +5,8 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -41,7 +42,7 @@ class PostItemWidget extends StatefulWidget {
   final VoidCallback onViewLikesTap;
   final VoidCallback onViewCommentsTap;
   final Function(String value) onAddComment;
-   dynamic postData;
+  dynamic postData;
 
   PostItemWidget({
     Key? key,
@@ -103,13 +104,16 @@ class _PostItemWidgetState extends State<PostItemWidget> {
         return GestureDetector(
           onLongPress: () {
             Clipboard.setData(
-                ClipboardData(text: parseHtmlString(widget.title??'')));
+              ClipboardData(text: parseHtmlString(widget.title ?? '')),
+            );
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(translation(context).lbl_text_copied)),);
+              SnackBar(content: Text(translation(context).lbl_text_copied)),
+            );
           },
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: (widget.image?.isNotEmpty == true ||
+              color:
+                  (widget.image?.isNotEmpty == true ||
                       widget.media?.isNotEmpty == true)
                   ? Colors.transparent
                   : bgColor,
@@ -126,31 +130,28 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                     if (isHtml(textToShow))
                       Center(
                         child: HtmlWidget(
-                            textStyle: const TextStyle(
-
-                            ),
-                            textToShow, onTapUrl: (link) async {
-                          print('link $link');
-                          if (link.contains('doctak/jobs-detail')) {
-                            String jobID = Uri.parse(link).pathSegments.last;
-                            JobsDetailsScreen(
-                              jobId: jobID,
-                            ).launch(context);
-                          } else {
-                            PostUtils.launchURL(context, link);
-                          }
-                          return true;
-                        }),
+                          textStyle: const TextStyle(),
+                          textToShow,
+                          onTapUrl: (link) async {
+                            print('link $link');
+                            if (link.contains('doctak/jobs-detail')) {
+                              String jobID = Uri.parse(link).pathSegments.last;
+                              JobsDetailsScreen(jobId: jobID).launch(context);
+                            } else {
+                              PostUtils.launchURL(context, link);
+                            }
+                            return true;
+                          },
+                        ),
                       )
                     else
                       Linkify(
                         onOpen: (link) {
                           if (link.url.contains('doctak/jobs-detail')) {
-                            String jobID =
-                                Uri.parse(link.url).pathSegments.last;
-                            JobsDetailsScreen(
-                              jobId: jobID,
-                            ).launch(context);
+                            String jobID = Uri.parse(
+                              link.url,
+                            ).pathSegments.last;
+                            JobsDetailsScreen(jobId: jobID).launch(context);
                           } else {
                             PostUtils.launchURL(context, link.url);
                           }
@@ -158,35 +159,27 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                         text: textToShow,
                         style: TextStyle(
                           fontSize: 14.0,
-                          color: (widget.image?.isNotEmpty == true ||
-                                  widget.media?.isNotEmpty == true)
-                              ? svGetBodyColor()
-                              : svGetBodyColor(),
+                          color: OneUITheme.of(context).textPrimary,
                           fontWeight: FontWeight.bold,
                         ),
-                        linkStyle: const TextStyle(
-                          color: Colors.blue,
-                        ),
+                        linkStyle: const TextStyle(color: Colors.blue),
                         textAlign: TextAlign.center,
                       )
                   else if (isHtml(textToShow))
                     Container(
                       constraints: BoxConstraints(
-                          minHeight: textToShow.length < 25 ? 200 : 0),
+                        minHeight: textToShow.length < 25 ? 200 : 0,
+                      ),
                       child: Center(
                         child: HtmlWidget(
-                          textStyle: const TextStyle(
-
-                          ),
+                          textStyle: const TextStyle(),
                           enableCaching: true,
                           '<div style="text-align: center;">$textToShow</div>',
                           onTapUrl: (link) async {
                             print(link);
                             if (link.contains('doctak/jobs-detail')) {
                               String jobID = Uri.parse(link).pathSegments.last;
-                              JobsDetailsScreen(
-                                jobId: jobID,
-                              ).launch(context);
+                              JobsDetailsScreen(jobId: jobID).launch(context);
                             } else {
                               PostUtils.launchURL(context, link);
                             }
@@ -198,30 +191,27 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                   else
                     Container(
                       constraints: BoxConstraints(
-                          minHeight: textToShow.length < 25 ? 200 : 0),
+                        minHeight: textToShow.length < 25 ? 200 : 0,
+                      ),
                       child: Center(
                         child: Linkify(
                           onOpen: (link) {
                             if (link.url.contains('doctak/jobs-detail')) {
-                              String jobID =
-                                  Uri.parse(link.url).pathSegments.last;
-                              JobsDetailsScreen(
-                                jobId: jobID,
-                              ).launch(context);
+                              String jobID = Uri.parse(
+                                link.url,
+                              ).pathSegments.last;
+                              JobsDetailsScreen(jobId: jobID).launch(context);
                             } else {
                               PostUtils.launchURL(context, link.url);
                             }
                           },
                           text: textToShow,
                           style: TextStyle(
-
                             fontSize: 14.0,
                             color: textColor,
                             fontWeight: FontWeight.bold,
                           ),
-                          linkStyle: const TextStyle(
-                            color: Colors.blue,
-                          ),
+                          linkStyle: const TextStyle(color: Colors.blue),
                           textAlign: TextAlign.left,
                         ),
                       ),
@@ -240,17 +230,12 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                         });
                       },
                       child: Text(
-                        isExpanded ? translation(context).lbl_show_less : translation(context).lbl_show_more,
+                        isExpanded
+                            ? translation(context).lbl_show_less
+                            : translation(context).lbl_show_more,
                         style: TextStyle(
-
-                          color: svGetBodyColor(),
-                          shadows: const [
-                            Shadow(
-                              offset: Offset(1.0, 1.0),
-                              blurRadius: 3.0,
-                              color: Color.fromARGB(255, 0, 0, 0),
-                            ),
-                          ],
+                          color: OneUITheme.of(context).primary,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -262,154 +247,141 @@ class _PostItemWidgetState extends State<PostItemWidget> {
       },
     );
   }
+
   Widget _buildMediaContent(BuildContext context) {
     return PostMediaWidget(
       mediaList: widget.media ?? [],
       imageUrlBase: AppData.imageUrl,
       onImageTap: (url) {
-        showFullScreenImage(
-          context,
-          1,
-          url,
-          widget.postData,
-          [],
-        );
+        showFullScreenImage(context, 1, url, widget.postData, []);
       },
       onVideoTap: (url) {
         // Handle video tap
       },
       onExpandImageUrls: (mediaUrls) {
-        showFullScreenImage(
-          context,
-          2,
-          '',
-          widget.postData,
-          mediaUrls,
-        );
+        showFullScreenImage(context, 2, '', widget.postData, mediaUrls);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return RepaintBoundary(
       child: Container(
-      padding: const EdgeInsets.only(top: 8),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: Theme.of(context).cardColor,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ProfileHeaderWidget(
-            profilePicUrl: widget.profilePicUrl,
-            userName: widget.userName,
-            createdAt: widget.createdAt,
-            onProfileTap: ()=>widget.onProfileTap(),
-            onDeleteTap:()=>widget.onDeleteTap(),
-            isCurrentUser:widget.isCurrentUser, // Adjust based on your logic
-          ),
-          _buildPlaceholderWithoutFile(context),
-          // Media Content
-          _buildMediaContent(context),
-          InteractionRowWidget(isLiked:widget.isLiked,onLikeTap:widget.onLikeTap,onToggleComment:widget.onToggleComment, onShareTap: widget.onShareTap,onViewLikesTap: widget.onViewLikesTap,onViewCommentsTap: widget.onViewCommentsTap,likes: widget.likes?.length??0,comments: widget.comments?.length??0,),
-          // const Divider(color: Colors.grey, thickness: 0.2),
-          //
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     InkWell(
-          //       splashColor: Colors.transparent,
-          //       highlightColor: Colors.transparent,
-          //       onTap: widget.onLikeTap,
-          //       child: Column(
-          //         children: [
-          //           widget.isLiked
-          //               ? Image.asset(
-          //                   'images/socialv/icons/ic_HeartFilled.png',
-          //                   height: 20,
-          //                   width: 22,
-          //                   fit: BoxFit.fill,
-          //                 )
-          //               : Image.asset(
-          //                   'images/socialv/icons/ic_Heart.png',
-          //                   height: 22,
-          //                   width: 22,
-          //                   fit: BoxFit.cover,
-          //                   color: context.iconColor,
-          //                 ),
-          //           Text(
-          //             'Like',
-          //             style: TextStyle(
-          //
-          //               color: Theme.of(context).textTheme.bodyMedium!.color,
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //     InkWell(
-          //       splashColor: Colors.grey,
-          //       highlightColor: Colors.grey,
-          //       onTap: widget.onToggleComment,
-          //       child: Column(
-          //         children: [
-          //           Image.asset(
-          //             'images/socialv/icons/ic_Chat.png',
-          //             height: 22,
-          //             width: 22,
-          //             fit: BoxFit.cover,
-          //             color: context.iconColor,
-          //           ),
-          //           Text(
-          //             'Comment',
-          //             style: TextStyle(
-          //
-          //               color: Theme.of(context).textTheme.bodyMedium!.color,
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //     InkWell(
-          //       splashColor: Colors.transparent,
-          //       highlightColor: Colors.transparent,
-          //       onTap: widget.onShareTap,
-          //       child: Column(
-          //         children: [
-          //           const Icon(
-          //             Icons.share_sharp,
-          //             size: 22,
-          //             color: Colors.grey,
-          //           ),
-          //           Text(
-          //             'Share',
-          //             style: TextStyle(
-          //
-          //               color: Theme.of(context).textTheme.bodyMedium!.color,
-          //             ),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ],
-          // ).paddingSymmetric(horizontal: 16, vertical: 10),
-          // Comments Section
-          if (widget.isShowComment)
-            SVCommentReplyComponent(
-              CommentBloc(),
-              widget.postId,
-              (value) {
-                if (value.isNotEmpty) {
-                  widget.onAddComment(value);
-                }
-              },
+        padding: const EdgeInsets.only(top: 12),
+        margin: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
+        decoration: theme.cardDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ProfileHeaderWidget(
+              profilePicUrl: widget.profilePicUrl,
+              userName: widget.userName,
+              createdAt: widget.createdAt,
+              onProfileTap: () => widget.onProfileTap(),
+              onDeleteTap: () => widget.onDeleteTap(),
+              isCurrentUser: widget.isCurrentUser, // Adjust based on your logic
             ),
-        ],
+            _buildPlaceholderWithoutFile(context),
+            // Media Content
+            _buildMediaContent(context),
+            InteractionRowWidget(
+              isLiked: widget.isLiked,
+              onLikeTap: widget.onLikeTap,
+              onToggleComment: widget.onToggleComment,
+              onShareTap: widget.onShareTap,
+              onViewLikesTap: widget.onViewLikesTap,
+              onViewCommentsTap: widget.onViewCommentsTap,
+              likes: widget.likes?.length ?? 0,
+              comments: widget.comments?.length ?? 0,
+            ),
+            // const Divider(color: Colors.grey, thickness: 0.2),
+            //
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     InkWell(
+            //       splashColor: Colors.transparent,
+            //       highlightColor: Colors.transparent,
+            //       onTap: widget.onLikeTap,
+            //       child: Column(
+            //         children: [
+            //           widget.isLiked
+            //               ? Image.asset(
+            //                   'images/socialv/icons/ic_HeartFilled.png',
+            //                   height: 20,
+            //                   width: 22,
+            //                   fit: BoxFit.fill,
+            //                 )
+            //               : Image.asset(
+            //                   'images/socialv/icons/ic_Heart.png',
+            //                   height: 22,
+            //                   width: 22,
+            //                   fit: BoxFit.cover,
+            //                   color: context.iconColor,
+            //                 ),
+            //           Text(
+            //             'Like',
+            //             style: TextStyle(
+            //
+            //               color: Theme.of(context).textTheme.bodyMedium!.color,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //     InkWell(
+            //       splashColor: Colors.grey,
+            //       highlightColor: Colors.grey,
+            //       onTap: widget.onToggleComment,
+            //       child: Column(
+            //         children: [
+            //           Image.asset(
+            //             'images/socialv/icons/ic_Chat.png',
+            //             height: 22,
+            //             width: 22,
+            //             fit: BoxFit.cover,
+            //             color: context.iconColor,
+            //           ),
+            //           Text(
+            //             'Comment',
+            //             style: TextStyle(
+            //
+            //               color: Theme.of(context).textTheme.bodyMedium!.color,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //     InkWell(
+            //       splashColor: Colors.transparent,
+            //       highlightColor: Colors.transparent,
+            //       onTap: widget.onShareTap,
+            //       child: Column(
+            //         children: [
+            //           const Icon(
+            //             Icons.share_sharp,
+            //             size: 22,
+            //             color: Colors.grey,
+            //           ),
+            //           Text(
+            //             'Share',
+            //             style: TextStyle(
+            //
+            //               color: Theme.of(context).textTheme.bodyMedium!.color,
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ],
+            // ).paddingSymmetric(horizontal: 16, vertical: 10),
+            // Comments Section - Now handled by bottom sheet
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -438,121 +410,99 @@ class InteractionRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Column(
       children: [
+        // Likes and Comments Count Row
         Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
                 onTap: onViewLikesTap,
-                child: Text(
-                  AppLocalizations.of(context)!.lbl_likes_count(likes),
-                  style: TextStyle(
-
-                    color: Theme.of(context).textTheme.bodyMedium!.color,
-                  ),
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.heart_fill,
+                      size: 14,
+                      color: likes > 0 ? theme.likeColor : theme.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppLocalizations.of(context)!.lbl_likes_count(likes),
+                      style: theme.bodySecondary,
+                    ),
+                  ],
                 ),
               ),
               InkWell(
                 onTap: onViewCommentsTap,
-                child: Text(
-                  AppLocalizations.of(context)!.lbl_comments_count(comments),
-                  style: TextStyle(
-
-                    color: Theme.of(context).textTheme.bodyMedium!.color,
-                  ),
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.chat_bubble_fill,
+                      size: 14,
+                      color: theme.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.lbl_comments_count(comments),
+                      style: theme.bodySecondary,
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-        const Divider(color: Color(0x339E9E9E), thickness: 0.2),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            InkWell(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: onLikeTap,
-              child: Column(
-                children: [
-                  isLiked
-                      ? Image.asset(
-                    'images/socialv/icons/ic_HeartFilled.png',
-                    height: 20,
-                    width: 22,
-                    fit: BoxFit.fill,
-                  )
-                      : Image.asset(
-                    'images/socialv/icons/ic_Heart.png',
-                    height: 22,
-                    width: 22,
-                    fit: BoxFit.cover,
-                    color: context.iconColor,
-                  ),
-                  Text(
-                    translation(context).lbl_like,
-                    style: TextStyle(
-
-                      color: Theme.of(context).textTheme.bodyMedium!.color,
-                    ),
-                  ),
-                ],
+        const SizedBox(height: 12),
+        // One UI 8.5 Divider
+        theme.buildDivider(indent: 12, endIndent: 12),
+        // Action Buttons Row
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              // Like Button
+              Expanded(
+                child: theme.buildActionButton(
+                  icon: isLiked
+                      ? CupertinoIcons.heart_fill
+                      : CupertinoIcons.heart,
+                  label: translation(context).lbl_like,
+                  onTap: onLikeTap,
+                  isActive: isLiked,
+                  activeColor: theme.likeColor,
+                ),
               ),
-            ),
-            InkWell(
-              splashColor: Colors.grey,
-              highlightColor: Colors.grey,
-              onTap: onToggleComment,
-              child: Column(
-                children: [
-                  Image.asset(
-                    'images/socialv/icons/ic_Chat.png',
-                    height: 22,
-                    width: 22,
-                    fit: BoxFit.cover,
-                    color: context.iconColor,
-                  ),
-                  Text(
-                    translation(context).lbl_comment,
-                    style: TextStyle(
-
-                      color: Theme.of(context).textTheme.bodyMedium!.color,
-                    ),
-                  ),
-                ],
+              // Vertical Divider
+              theme.buildVerticalDivider(),
+              // Comment Button
+              Expanded(
+                child: theme.buildActionButton(
+                  icon: CupertinoIcons.chat_bubble,
+                  label: translation(context).lbl_comment,
+                  onTap: onToggleComment,
+                ),
               ),
-            ),
-            InkWell(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-              onTap: onShareTap,
-              child: Column(
-                children: [
-                  Image.asset(
-                    'images/socialv/icons/ic_Send.png',
-                    height: 22,
-                    width: 22,
-                    fit: BoxFit.cover,
-                    color: context.iconColor,
-                  ),
-                  Text(
-                    translation(context).lbl_send,
-                    style: TextStyle(
-
-                      color: Theme.of(context).textTheme.bodyMedium!.color,
-                    ),
-                  ),
-                ],
+              // Vertical Divider
+              theme.buildVerticalDivider(),
+              // Send/Share Button
+              Expanded(
+                child: theme.buildActionButton(
+                  icon: CupertinoIcons.paperplane,
+                  label: translation(context).lbl_send,
+                  onTap: onShareTap,
+                ),
               ),
-            ),
-          ],
-        ).paddingSymmetric(horizontal: 16, vertical: 10),
+            ],
+          ),
+        ),
       ],
     );
   }
 }
-
-

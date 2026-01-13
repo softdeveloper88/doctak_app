@@ -1,9 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
+
 import '../core/network/custom_cache_manager.dart';
 
-/// A wrapper around CachedNetworkImage that uses our custom cache manager
-/// with certificate bypass for release mode compatibility.
+/// A wrapper around CachedNetworkImage with OneUI 8.5 theming and custom cache manager
 class AppCachedNetworkImage extends StatelessWidget {
   final String imageUrl;
   final double? width;
@@ -24,6 +25,7 @@ class AppCachedNetworkImage extends StatelessWidget {
   final ImageRepeat repeat;
   final bool matchTextDirection;
   final FilterQuality filterQuality;
+  final BorderRadius? borderRadius;
 
   const AppCachedNetworkImage({
     super.key,
@@ -46,6 +48,7 @@ class AppCachedNetworkImage extends StatelessWidget {
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
     this.filterQuality = FilterQuality.low,
+    this.borderRadius,
   });
 
   static const Map<String, String> defaultHeaders = {
@@ -57,10 +60,17 @@ class AppCachedNetworkImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final safeUrl = imageUrl.trim();
+
     // Avoid throwing/stream errors for empty or obviously invalid URLs.
     if (safeUrl.isEmpty || safeUrl.toLowerCase() == 'null') {
-      return (errorWidget ?? _defaultErrorWidget)(context, safeUrl, 'Empty/invalid image url');
+      return (errorWidget ??
+          (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme))(
+        context,
+        safeUrl,
+        'Empty/invalid image url',
+      );
     }
 
     return CachedNetworkImage(
@@ -72,8 +82,11 @@ class AppCachedNetworkImage extends StatelessWidget {
       colorBlendMode: colorBlendMode,
       cacheManager: CustomCacheManager(),
       httpHeaders: httpHeaders ?? defaultHeaders,
-      placeholder: placeholder ?? _defaultPlaceholder,
-      errorWidget: errorWidget ?? _defaultErrorWidget,
+      placeholder:
+          placeholder ?? (ctx, url) => _defaultPlaceholder(ctx, url, theme),
+      errorWidget:
+          errorWidget ??
+          (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme),
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
       imageBuilder: imageBuilder,
@@ -87,32 +100,51 @@ class AppCachedNetworkImage extends StatelessWidget {
     );
   }
 
-  Widget _defaultPlaceholder(BuildContext context, String url) {
+  Widget _defaultPlaceholder(
+    BuildContext context,
+    String url,
+    OneUITheme theme,
+  ) {
     return Container(
       width: width,
       height: height,
-      color: Colors.grey[200],
-      child: const Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          color: Colors.grey,
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant,
+        borderRadius: borderRadius ?? BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+          ),
         ),
       ),
     );
   }
 
-  Widget _defaultErrorWidget(BuildContext context, String url, dynamic error) {
-    debugPrint('🚨 AppCachedNetworkImage error for URL: $url');
-    debugPrint('🚨 Error: $error');
-    
+  Widget _defaultErrorWidget(
+    BuildContext context,
+    String url,
+    dynamic error,
+    OneUITheme theme,
+  ) {
+    debugPrint('\ud83d\udea8 AppCachedNetworkImage error for URL: $url');
+    debugPrint('\ud83d\udea8 Error: $error');
+
     return Container(
       width: width,
       height: height,
-      color: Colors.grey[200],
-      child: const Center(
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant,
+        borderRadius: borderRadius ?? BorderRadius.circular(8),
+      ),
+      child: Center(
         child: Icon(
           Icons.broken_image_rounded,
-          color: Colors.grey,
+          color: theme.textTertiary,
           size: 32,
         ),
       ),
@@ -128,10 +160,10 @@ class AppCachedNetworkImageProvider extends CachedNetworkImageProvider {
     int? maxWidth,
     int? maxHeight,
   }) : super(
-          url.trim(),
-          headers: headers ?? AppCachedNetworkImage.defaultHeaders,
-          cacheManager: CustomCacheManager(),
-          maxWidth: maxWidth,
-          maxHeight: maxHeight,
-        );
+         url.trim(),
+         headers: headers ?? AppCachedNetworkImage.defaultHeaders,
+         cacheManager: CustomCacheManager(),
+         maxWidth: maxWidth,
+         maxHeight: maxHeight,
+       );
 }

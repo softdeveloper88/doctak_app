@@ -1973,8 +1973,15 @@ Future<void> main() async {
       debugPrint('Error initializing AdMob: $e');
     }
 
-    // Set app theme
-    appStore.toggleDarkMode(value: false);
+    // Load saved theme preference (dark/light mode)
+    try {
+      await appStore.initialize();
+      debugPrint('AppStore initialized with saved theme');
+    } catch (e) {
+      debugPrint('Error initializing AppStore: $e');
+      // Default to light mode if loading fails
+      appStore.toggleDarkMode(value: false, save: false);
+    }
 
     // Initialize system settings and start the app
     try {
@@ -2060,6 +2067,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _connectivitySubscription.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    // Listen for system theme changes and update app theme if following system
+    debugPrint('System brightness changed');
+    appStore.updateFromSystemTheme();
+    super.didChangePlatformBrightness();
   }
 
   @override

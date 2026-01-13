@@ -4,21 +4,18 @@ import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/one_ui_profile_components.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
-
-import '../../../../../core/app_export.dart';
-import '../../../utils/SVCommon.dart';
-import '../bloc/profile_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PersonalInfoScreen extends StatefulWidget {
-  ProfileBloc profileBloc;
+  final ProfileBloc profileBloc;
 
   PersonalInfoScreen({required this.profileBloc, super.key});
 
@@ -49,28 +46,17 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_personal_information,
         titleIcon: Icons.person_rounded,
         actions: [
           if (widget.profileBloc.isMe)
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isEditModeMap ? Icons.check : Icons.edit,
-                  color: isEditModeMap ? Colors.green[600] : Colors.blue[600],
-                  size: 16,
-                ),
-              ),
+            OneUIEditActionButton(
+              isEditMode: isEditModeMap,
               onPressed: () {
                 setState(() {
                   isEditModeMap = !isEditModeMap;
@@ -89,76 +75,20 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
               children: [
                 // Header card
                 if (!isEditModeMap)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.blue[700],
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            translation(context).msg_personal_info_desc,
-                            style: TextStyle(
-                              color: Colors.blue[700],
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  OneUIInfoBanner(
+                    message: translation(context).msg_personal_info_desc,
+                    icon: Icons.info_outline,
+                    accentColor: theme.primary,
                   ),
 
                 // Main info card
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(16),
+                OneUIProfileSection(
+                  title: translation(context).lbl_basic_info,
+                  icon: Icons.person_rounded,
+                  iconColor: theme.primary,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!isEditModeMap)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.person_rounded,
-                                color: Colors.blue,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                translation(context).lbl_basic_info,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
                       // First name field
                       TextFieldEditWidget(
                         isEditModeMap: isEditModeMap,
@@ -174,8 +104,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       ),
                       if (!isEditModeMap)
                         Divider(
-                          color: Colors.grey[200],
-                          thickness: 1.5,
+                          color: theme.divider,
+                          thickness: 1,
                           indent: 10,
                           endIndent: 10,
                         ),
@@ -195,8 +125,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                       ),
                       if (!isEditModeMap)
                         Divider(
-                          color: Colors.grey[200],
-                          thickness: 1.5,
+                          color: theme.divider,
+                          thickness: 1,
                           indent: 10,
                           endIndent: 10,
                         ),
@@ -211,12 +141,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           value:
                               widget.profileBloc.userProfile?.user?.phone ?? '',
                           onSave: (value) =>
-                              widget.profileBloc.userProfile?.user?.phone = value,
+                              widget.profileBloc.userProfile?.user?.phone =
+                                  value,
                         ),
                       if (!isEditModeMap && widget.profileBloc.isMe)
                         Divider(
-                          color: Colors.grey[200],
-                          thickness: 1.5,
+                          color: theme.divider,
+                          thickness: 1,
                           indent: 10,
                           endIndent: 10,
                         ),
@@ -227,7 +158,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           isEditModeMap: isEditModeMap,
                           index: 0,
                           label: translation(context).lbl_date_of_birth,
-                          value: widget.profileBloc.userProfile?.user?.dob ?? '',
+                          value:
+                              widget.profileBloc.userProfile?.user?.dob ?? '',
                           onSave: (value) {
                             setState(() {
                               widget.profileBloc.userProfile?.user?.dob = value;
@@ -238,52 +170,21 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
 
                 // License info card
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(16),
+                OneUIProfileSection(
+                  title: translation(context).lbl_license_info,
+                  icon: Icons.badge_rounded,
+                  iconColor: theme.success,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (!isEditModeMap)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.badge_rounded,
-                                color: Colors.green,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                translation(context).lbl_license_info,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
                       // License number field
                       TextFieldEditWidget(
                         isEditModeMap: isEditModeMap,
                         icon: Icons.numbers_rounded,
+                        iconColor: theme.success,
                         index: 0,
                         label: translation(context).lbl_license_no,
                         value:
@@ -297,388 +198,279 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 8),
 
                 // Location info card
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (!isEditModeMap)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_rounded,
-                                color: Colors.orange,
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                translation(context).lbl_location_info,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                      // Country field
-                      if (!isEditModeMap)
-                        TextFieldEditWidget(
-                          index: 0,
-                          label: translation(context).lbl_country,
-                          value:
-                              widget.profileBloc.userProfile?.user?.country ??
-                              '',
-                          onSave: (value) =>
-                              widget.profileBloc.userProfile?.user?.country =
-                                  value,
-                        ),
-                      if (!isEditModeMap)
-                        Divider(
-                          color: Colors.grey[200],
-                          thickness: 1.5,
-                          indent: 10,
-                          endIndent: 10,
-                        ),
-
-                      // State field
-                      if (!isEditModeMap)
-                        TextFieldEditWidget(
-                          index: 0,
-                          label: translation(context).lbl_state,
-                          value:
-                              widget.profileBloc.userProfile?.user?.state ?? '',
-                          onSave: (value) =>
-                              widget.profileBloc.userProfile?.user?.state =
-                                  value,
-                        ),
-
-                      // Country and State dropdown fields in edit mode
-                      if (isEditModeMap)
-                        BlocBuilder<ProfileBloc, ProfileState>(
-                          bloc: widget.profileBloc,
-                          builder: (context, state) {
-                            if (state is PaginationLoadedState) {
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    translation(context).lbl_country,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Country dropdown
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.grey.shade300,
-                                      ),
-                                    ),
-                                    child: CustomDropdownButtonFormField(
-                                      itemBuilder: (item) => Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              item.countryName ?? '',
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          Text(item.flag ?? ''),
-                                        ],
-                                      ),
-                                      selectedItemBuilder: (context) =>
-                                          state.firstDropdownValues.map((item) {
-                                            return Container(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                item.countryName ?? '',
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            );
-                                          }).toList(),
-                                      items: state.firstDropdownValues,
-                                      value: findModelByNameOrDefault(
-                                        state.firstDropdownValues,
-                                        state.selectedFirstDropdownValue ?? '',
-                                        state.firstDropdownValues.first,
-                                      ),
-                                      width: double.infinity,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 14,
-                                          ),
-                                      onChanged: (newValue) {
-                                        widget.profileBloc.country =
-                                            newValue?.countryName ?? '';
-                                        widget
-                                                .profileBloc
-                                                .userProfile
-                                                ?.user
-                                                ?.country =
-                                            newValue?.countryName ?? '';
-                                        widget.profileBloc.add(
-                                          UpdateSecondDropdownValues(
-                                            newValue?.countryName ?? "",
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 16),
-
-                                  // State dropdown
-                                  Text(
-                                    translation(context).lbl_state,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: Colors.grey.shade300,
-                                      ),
-                                    ),
-                                    child: CustomDropdownButtonFormField(
-                                      itemBuilder: (item) => Text(
-                                        item ?? '',
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      selectedItemBuilder: (context) => state
-                                          .secondDropdownValues
-                                          .map((item) {
-                                            return Container(
-                                              alignment: Alignment.centerLeft,
-                                              child: Text(
-                                                item ?? '',
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w500,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                            );
-                                          })
-                                          .toList(),
-                                      items: state.secondDropdownValues,
-                                      value: state.selectedSecondDropdownValue,
-                                      width: double.infinity,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 14,
-                                          ),
-                                      onChanged: (String? newValue) {
-                                        widget.profileBloc.stateName =
-                                            newValue!;
-                                        widget
-                                                .profileBloc
-                                                .userProfile
-                                                ?.user
-                                                ?.state =
-                                            newValue;
-                                        widget.profileBloc.add(
-                                          UpdateSpecialtyDropdownValue(
-                                            state.selectedSecondDropdownValue,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-
-                                  // Specialty dropdown for doctors
-                                  if (AppData.userType == "doctor")
-                                    const SizedBox(height: 16),
-                                  if (AppData.userType == "doctor")
-                                    Text(
-                                      translation(context).lbl_specialty,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  if (AppData.userType == "doctor")
-                                    const SizedBox(height: 8),
-                                  if (AppData.userType == "doctor")
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
-                                        ),
-                                      ),
-                                      child: CustomDropdownButtonFormField(
-                                        itemBuilder: (item) => Text(
-                                          item ?? '',
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        selectedItemBuilder: (context) => state
-                                            .specialtyDropdownValue
-                                            .map((item) {
-                                              return Container(
-                                                alignment: Alignment.centerLeft,
-                                                child: Text(
-                                                  item ?? '',
-                                                  style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              );
-                                            })
-                                            .toList(),
-                                        items: state.specialtyDropdownValue,
-                                        value: state
-                                            .selectedSpecialtyDropdownValue,
-                                        width: double.infinity,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 14,
-                                            ),
-                                        onChanged: (String? newValue) {
-                                          widget.profileBloc.specialtyName =
-                                              newValue!;
-                                          widget.profileBloc.add(
-                                            UpdateSpecialtyDropdownValue(
-                                              newValue,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                ],
-                              );
-                            } else {
-                              return Text(
-                                translation(context).msg_something_wrong,
-                              );
-                            }
-                          },
-                        ),
-                    ],
-                  ),
+                OneUIProfileSection(
+                  title: translation(context).lbl_location_info,
+                  icon: Icons.location_on_rounded,
+                  iconColor: theme.warning,
+                  child: _buildLocationFields(theme),
                 ),
 
                 const SizedBox(height: 24),
 
                 // Update button
                 if (isEditModeMap)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          isEditModeMap = false;
-                        });
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                        }
+                  OneUIProfilePrimaryButton(
+                    label: translation(context).lbl_update,
+                    icon: Icons.check_circle,
+                    color: theme.primary,
+                    onPressed: () {
+                      setState(() {
+                        isEditModeMap = false;
+                      });
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
+                      }
 
-                        widget.profileBloc.add(
-                          UpdateProfileEvent(
-                            updateProfileSection: 1,
-                            userProfile: widget.profileBloc.userProfile,
-                            userProfilePrivacyModel: UserProfilePrivacyModel(),
-                          ),
-                        );
-
-                        // Show success message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              translation(context).msg_profile_updated,
-                            ),
-                            backgroundColor: Colors.green,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                      widget.profileBloc.add(
+                        UpdateProfileEvent(
+                          updateProfileSection: 1,
+                          userProfile: widget.profileBloc.userProfile,
+                          userProfilePrivacyModel: UserProfilePrivacyModel(),
                         ),
-                        elevation: 2,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Text(
-                            translation(context).lbl_update,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                      );
+
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            translation(context).msg_profile_updated,
                           ),
-                        ],
-                      ),
-                    ),
+                          backgroundColor: theme.success,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      );
+                    },
                   ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildLocationFields(OneUITheme theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Country and State in view mode
+        if (!isEditModeMap) ...[
+          OneUIProfileInfoRow(
+            icon: Icons.public,
+            label: translation(context).lbl_country,
+            value: widget.profileBloc.userProfile?.user?.country ?? '',
+          ),
+          Divider(
+            color: theme.divider,
+            thickness: 1,
+            indent: 10,
+            endIndent: 10,
+          ),
+          OneUIProfileInfoRow(
+            icon: Icons.location_city,
+            label: translation(context).lbl_state,
+            value: widget.profileBloc.userProfile?.user?.state ?? '',
+          ),
+        ],
+
+        // Country and State dropdown fields in edit mode
+        if (isEditModeMap)
+          BlocBuilder<ProfileBloc, ProfileState>(
+            bloc: widget.profileBloc,
+            builder: (context, state) {
+              if (state is PaginationLoadedState) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Country dropdown
+                    Text(
+                      translation(context).lbl_country,
+                      style: theme.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: theme.radiusM,
+                        border: Border.all(color: theme.border),
+                      ),
+                      child: CustomDropdownButtonFormField(
+                        itemBuilder: (item) => Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.countryName ?? '',
+                                style: TextStyle(color: theme.textPrimary),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(item.flag ?? ''),
+                          ],
+                        ),
+                        selectedItemBuilder: (context) =>
+                            state.firstDropdownValues.map((item) {
+                              return Container(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  item.countryName ?? '',
+                                  style: TextStyle(
+                                    color: theme.textPrimary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                        items: state.firstDropdownValues,
+                        value: findModelByNameOrDefault(
+                          state.firstDropdownValues,
+                          state.selectedFirstDropdownValue ?? '',
+                          state.firstDropdownValues.first,
+                        ),
+                        width: double.infinity,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        onChanged: (newValue) {
+                          widget.profileBloc.country =
+                              newValue?.countryName ?? '';
+                          widget.profileBloc.userProfile?.user?.country =
+                              newValue?.countryName ?? '';
+                          widget.profileBloc.add(
+                            UpdateSecondDropdownValues(
+                              newValue?.countryName ?? "",
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // State dropdown
+                    Text(
+                      translation(context).lbl_state,
+                      style: theme.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: theme.radiusM,
+                        border: Border.all(color: theme.border),
+                      ),
+                      child: CustomDropdownButtonFormField(
+                        itemBuilder: (item) => Text(
+                          item ?? '',
+                          style: TextStyle(color: theme.textPrimary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        selectedItemBuilder: (context) =>
+                            state.secondDropdownValues.map((item) {
+                              return Container(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  item ?? '',
+                                  style: TextStyle(
+                                    color: theme.textPrimary,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                        items: state.secondDropdownValues,
+                        value: state.selectedSecondDropdownValue,
+                        width: double.infinity,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        onChanged: (String? newValue) {
+                          widget.profileBloc.stateName = newValue!;
+                          widget.profileBloc.userProfile?.user?.state =
+                              newValue;
+                          widget.profileBloc.add(
+                            UpdateSpecialtyDropdownValue(
+                              state.selectedSecondDropdownValue,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    // Specialty dropdown for doctors
+                    if (AppData.userType == "doctor") ...[
+                      const SizedBox(height: 16),
+                      Text(
+                        translation(context).lbl_specialty,
+                        style: theme.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: theme.radiusM,
+                          border: Border.all(color: theme.border),
+                        ),
+                        child: CustomDropdownButtonFormField(
+                          itemBuilder: (item) => Text(
+                            item ?? '',
+                            style: TextStyle(color: theme.textPrimary),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          selectedItemBuilder: (context) =>
+                              state.specialtyDropdownValue.map((item) {
+                                return Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    item ?? '',
+                                    style: TextStyle(
+                                      color: theme.textPrimary,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                          items: state.specialtyDropdownValue,
+                          value: state.selectedSpecialtyDropdownValue,
+                          width: double.infinity,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          onChanged: (String? newValue) {
+                            widget.profileBloc.specialtyName = newValue!;
+                            widget.profileBloc.add(
+                              UpdateSpecialtyDropdownValue(newValue),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                );
+              } else {
+                return Text(translation(context).msg_something_wrong);
+              }
+            },
+          ),
+      ],
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVP
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/improved_reply_comment_list_widget.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
@@ -35,37 +36,31 @@ class _MemoryOptimizedCommentItemState
     extends State<MemoryOptimizedCommentItem> {
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return RepaintBoundary(
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         decoration: BoxDecoration(
-          color: context.cardColor,
+          color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              spreadRadius: 0,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: theme.cardShadow,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildCommentContent()],
+          children: [_buildCommentContent(theme)],
         ),
       ),
     );
   }
 
-  Widget _buildCommentContent() {
+  Widget _buildCommentContent(OneUITheme theme) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // User Avatar
-          _buildAvatarSection(),
+          _buildAvatarSection(theme),
 
           const SizedBox(width: 12),
 
@@ -75,17 +70,18 @@ class _MemoryOptimizedCommentItemState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // User Info and Actions Row
-                _buildUserInfoRow(),
+                _buildUserInfoRow(theme),
 
                 const SizedBox(height: 8),
 
                 // Comment Text
                 Text(
                   widget.comment.comment ?? '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.normal,
+                    color: theme.textPrimary,
                   ),
                 ),
 
@@ -96,7 +92,7 @@ class _MemoryOptimizedCommentItemState
                   timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: theme.textTertiary,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -104,7 +100,7 @@ class _MemoryOptimizedCommentItemState
                 const SizedBox(height: 8),
 
                 // Actions Row (Reply & Like)
-                _buildActionRow(),
+                _buildActionRow(theme),
               ],
             ),
           ),
@@ -113,7 +109,7 @@ class _MemoryOptimizedCommentItemState
     );
   }
 
-  Widget _buildAvatarSection() {
+  Widget _buildAvatarSection(OneUITheme theme) {
     return InkWell(
       onTap: () {
         SVProfileFragment(
@@ -127,7 +123,7 @@ class _MemoryOptimizedCommentItemState
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(0.1),
+            color: theme.primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child:
@@ -144,7 +140,7 @@ class _MemoryOptimizedCommentItemState
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
+                          color: theme.primary,
                         ),
                       ),
                     );
@@ -157,7 +153,7 @@ class _MemoryOptimizedCommentItemState
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue[800],
+                      color: theme.primary,
                     ),
                   ),
                 ),
@@ -166,7 +162,7 @@ class _MemoryOptimizedCommentItemState
     );
   }
 
-  Widget _buildUserInfoRow() {
+  Widget _buildUserInfoRow(OneUITheme theme) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -185,7 +181,7 @@ class _MemoryOptimizedCommentItemState
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: Colors.blue[800],
+                    color: theme.primary,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -206,7 +202,7 @@ class _MemoryOptimizedCommentItemState
         // Delete menu (only for own comments)
         if (widget.comment.commenter?.id == AppData.logInUserId)
           PopupMenuButton(
-            icon: Icon(Icons.more_vert, color: Colors.grey[700], size: 18),
+            icon: Icon(Icons.more_vert, color: theme.textSecondary, size: 18),
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -217,17 +213,14 @@ class _MemoryOptimizedCommentItemState
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.delete_outline,
-                        color: Colors.red[400],
-                        size: 18,
-                      ),
+                      Icon(Icons.delete_outline, color: theme.error, size: 18),
                       const SizedBox(width: 8),
                       Text(
                         translation(context).lbl_delete,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontFamily: 'Poppins',
+                          color: theme.textPrimary,
                         ),
                       ),
                     ],
@@ -260,7 +253,7 @@ class _MemoryOptimizedCommentItemState
     );
   }
 
-  Widget _buildActionRow() {
+  Widget _buildActionRow(OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,13 +267,13 @@ class _MemoryOptimizedCommentItemState
               icon: Icon(
                 Icons.reply_outlined,
                 size: 16,
-                color: Colors.grey[700],
+                color: theme.textSecondary,
               ),
               label: Text(
                 '${widget.comment.replyCount} ${translation(context).lbl_reply}',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.grey[700],
+                  color: theme.textSecondary,
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -320,8 +313,8 @@ class _MemoryOptimizedCommentItemState
                     : Icons.favorite_border_outlined,
                 size: 16,
                 color: widget.comment.userHasLiked ?? false
-                    ? Colors.red[400]
-                    : Colors.grey[700],
+                    ? theme.likeColor
+                    : theme.textSecondary,
               ),
               label: Text(
                 widget.comment.userHasLiked ?? false
@@ -330,8 +323,8 @@ class _MemoryOptimizedCommentItemState
                 style: TextStyle(
                   fontSize: 13,
                   color: widget.comment.userHasLiked ?? false
-                      ? Colors.red[400]
-                      : Colors.grey[700],
+                      ? theme.likeColor
+                      : theme.textSecondary,
                   fontFamily: 'Poppins',
                 ),
               ),
@@ -349,9 +342,9 @@ class _MemoryOptimizedCommentItemState
           Container(
             margin: const EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.05),
+              color: theme.surfaceVariant.withOpacity(0.5),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.withOpacity(0.1), width: 1),
+              border: Border.all(color: theme.border, width: 1),
             ),
             child: ImprovedReplyCommentListWidget(
               commentBloc: widget.commentBloc,

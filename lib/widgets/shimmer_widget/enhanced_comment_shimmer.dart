@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -7,6 +8,13 @@ class EnhancedCommentShimmer extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    final baseColor = isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
+    final shimmerColor = isDark ? theme.surfaceVariant.withOpacity(0.4) : Colors.grey[400]!;
+    
     return ListView.builder(
       itemCount: 6, // Number of shimmer cards to show
       padding: const EdgeInsets.all(8.0),
@@ -19,14 +27,14 @@ class EnhancedCommentShimmer extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12.0),
           child: Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
+            baseColor: baseColor,
+            highlightColor: highlightColor,
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
+                boxShadow: isDark ? null : [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 10,
@@ -49,7 +57,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.grey[400],
+                            color: shimmerColor,
                             shape: BoxShape.circle,
                           ),
                         ),
@@ -68,7 +76,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: hasLongName ? 120 : 90,
                                     height: 16,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
@@ -78,7 +86,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: 14,
                                     height: 14,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -89,7 +97,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                       width: 20,
                                       height: 20,
                                       decoration: BoxDecoration(
-                                        color: Colors.grey[400],
+                                        color: shimmerColor,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -103,7 +111,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                 width: double.infinity,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[400],
+                                  color: shimmerColor,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -114,7 +122,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                   : MediaQuery.of(context).size.width * 0.5,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[400],
+                                  color: shimmerColor,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -124,7 +132,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                   width: MediaQuery.of(context).size.width * 0.6,
                                   height: 14,
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[400],
+                                    color: shimmerColor,
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                 ),
@@ -137,7 +145,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                 width: 80,
                                 height: 12,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[400],
+                                  color: shimmerColor,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -152,7 +160,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: 70,
                                     height: 24,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
@@ -163,7 +171,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: 60,
                                     height: 24,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
@@ -188,7 +196,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: Colors.grey[400],
+                                color: shimmerColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -204,7 +212,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: 80,
                                     height: 14,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
@@ -216,7 +224,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: double.infinity,
                                     height: 12,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
@@ -225,7 +233,7 @@ class EnhancedCommentShimmer extends StatelessWidget {
                                     width: MediaQuery.of(context).size.width * 0.4,
                                     height: 12,
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[400],
+                                      color: shimmerColor,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),

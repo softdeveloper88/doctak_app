@@ -2,6 +2,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/memory_optimized_comment_item.dart';
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -46,6 +47,43 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
   // Virtualized list implementation
   Widget _buildVirtualizedCommentList() {
     final bloc = widget.commentBloc;
+    final theme = OneUITheme.of(context);
+
+    // Show empty state if no comments
+    if (bloc.postList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 64,
+              color: theme.textTertiary,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              translation(context).msg_no_comments_yet,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: theme.textSecondary,
+                fontFamily: 'Poppins',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              translation(context).msg_be_first_to_comment,
+              style: TextStyle(
+                fontSize: 14,
+                color: theme.textTertiary,
+                fontFamily: 'Poppins',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
 
     return ListView.builder(
       controller: widget.scrollController,

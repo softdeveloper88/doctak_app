@@ -1,13 +1,10 @@
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/presentation/about_us/about_us_screen.dart';
-import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
-import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/app_setting_screen/app_setting_screen.dart';
 import 'package:doctak_app/presentation/case_discussion/screens/discussion_list_screen.dart';
 import 'package:doctak_app/presentation/case_discussion/bloc/discussion_list_bloc.dart';
@@ -17,11 +14,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/conferences_scr
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/guidelines_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/news_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/suggestion_screen.dart';
-import 'package:doctak_app/presentation/home_screen/models/SVCommonModels.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/web_screen/web_page_screen.dart';
 import 'package:flutter/material.dart';
@@ -30,18 +23,14 @@ import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
-import 'package:sizer/sizer.dart';
-import 'dart:ui';
 import 'dart:math' as math;
 
 import '../../../../localization/app_localization.dart';
-import '../../../case_discussion/screens/discussion_list_screen.dart';
 import '../../../doctak_ai_module/presentation/ai_chat_screen.dart';
-import '../../../group_screen/my_groups_screen.dart';
 import '../screens/meeting_screen/manage_meeting_screen.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
-  const SVHomeDrawerComponent({Key? key}) : super(key: key);
+  const SVHomeDrawerComponent({super.key});
 
   @override
   State<SVHomeDrawerComponent> createState() => _SVHomeDrawerComponentState();
@@ -53,6 +42,22 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
   bool _isDisposed = false;
+
+  // One UI 8.5 Color System
+  static const Color _oneUIPrimary = Color(0xFF0A84FF);
+  static const Color _oneUIBackgroundDark = Color(0xFF0D1B2A);
+  static const Color _oneUISurfaceDark = Color(0xFF1B2838);
+  static const Color _oneUISurfaceVariantDark = Color(0xFF2D3E50);
+  static const Color _oneUIBackgroundLight = Color(0xFFF7F7F7);
+  static const Color _oneUISurfaceLight = Color(0xFFFFFFFF);
+  static const Color _oneUISurfaceVariantLight = Color(0xFFF0F0F0);
+  static const Color _oneUITextPrimaryDark = Color(0xFFFFFFFF);
+  static const Color _oneUITextSecondaryDark = Color(0xB3FFFFFF);
+  static const Color _oneUITextPrimaryLight = Color(0xFF1C1C1E);
+  static const Color _oneUITextSecondaryLight = Color(0xFF8E8E93);
+
+  // Helper to check dark mode
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   // Updated menu items with localization keys
   static List<MenuItemData> getMenuItems(BuildContext context) {
@@ -174,36 +179,231 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
       child: Drawer(
         key: const ValueKey('main_drawer'),
         elevation: 0,
-        width: math.max(
-          280,
-          MediaQuery.of(context).size.width * 0.75,
-        ), // Responsive width with minimum
+        backgroundColor: Colors.transparent,
+        width: math.max(280, MediaQuery.of(context).size.width * 0.78),
         child: Container(
           decoration: BoxDecoration(
-            // Brighter, cleaner background
+            // Beautiful gradient background - colorful but One UI refined
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Colors.white,
-                Colors.blue.shade50,
-                Colors.blue.shade100.withOpacity(0.5),
-                Colors.blue.shade200.withOpacity(0.3),
-              ],
-              stops: [0.0, 0.3, 0.7, 1.0],
+              colors: _isDark
+                  ? [
+                      const Color(0xFF0D1B2A),
+                      const Color(0xFF1B2838),
+                      const Color(0xFF152232),
+                    ]
+                  : [
+                      Colors.white,
+                      Colors.blue.shade50,
+                      Colors.blue.shade100.withOpacity(0.5),
+                    ],
             ),
           ),
           child: Column(
             children: [
-              // Compact Professional Header
-              _buildCompactHeader(),
+              // Colorful Professional Header with One UI 8.5 refinements
+              _buildColorfulHeader(),
 
               // Optimized Menu Content
               Expanded(child: _buildOptimizedMenuContent()),
 
-              // Compact Footer
-              _buildCompactFooter(l10n, isRtl),
+              // Colorful Footer with One UI 8.5 style
+              _buildColorfulFooter(l10n, isRtl),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Colorful header with gradient and decorative elements + One UI 8.5 refinements
+  Widget _buildColorfulHeader() {
+    final topPadding = MediaQuery.of(context).padding.top;
+    // Compact header height - avatar and name in one row
+    final headerHeight = topPadding + 90;
+
+    return SizedBox(
+      key: const ValueKey('drawer_header'),
+      height: headerHeight,
+      width: double.infinity,
+      child: Stack(
+        children: [
+          // Beautiful gradient background
+          Container(
+            height: headerHeight,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: _isDark
+                    ? [const Color(0xFF1B2838), const Color(0xFF0D1B2A)]
+                    : [
+                        Colors.white,
+                        Colors.blue.shade50,
+                        Colors.blue.shade100.withOpacity(0.5),
+                      ],
+              ),
+            ),
+          ),
+
+          // Decorative curved elements
+          Positioned(
+            top: -60,
+            right: -40,
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: _isDark
+                      ? [
+                          _oneUIPrimary.withOpacity(0.15),
+                          _oneUIPrimary.withOpacity(0.05),
+                          Colors.transparent,
+                        ]
+                      : [
+                          Colors.white.withOpacity(0.3),
+                          Colors.white.withOpacity(0.1),
+                          Colors.transparent,
+                        ],
+                ),
+              ),
+            ),
+          ),
+
+          // Profile content - horizontal layout, centered vertically
+          Positioned.fill(
+            top: topPadding,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  // Profile avatar
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF4285F4),
+                          Color(0xFF1A73E8),
+                          Color(0xFF1557B0),
+                        ],
+                      ),
+                      border: Border.all(color: Colors.white, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF4285F4).withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(26),
+                      child: AppCachedNetworkImage(
+                        imageUrl: AppData.imageUrl + AppData.profile_pic,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            _buildColorfulInitialsAvatar(),
+                        errorWidget: (context, url, error) =>
+                            _buildColorfulInitialsAvatar(),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Name and specialty - vertical stack
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // User name - single line with ellipsis
+                        Text(
+                          AppData.userType == 'doctor'
+                              ? 'Dr. ${capitalizeWords(AppData.name)}'
+                              : capitalizeWords(AppData.name),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: _isDark
+                                ? Colors.white
+                                : const Color(0xFF1A365D),
+                            letterSpacing: 0.2,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        // Specialty pill
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _isDark
+                                ? Colors.white.withOpacity(0.1)
+                                : Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _oneUIPrimary.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            AppData.userType == 'doctor'
+                                ? AppData.specialty
+                                : AppData.userType == 'student'
+                                ? '${AppData.university} ${translation(context).lbl_student}'
+                                : AppData.specialty,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: _oneUIPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Colorful initials avatar
+  Widget _buildColorfulInitialsAvatar() {
+    return Container(
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+        ),
+      ),
+      child: Center(
+        child: Text(
+          _getInitials(AppData.name),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            letterSpacing: 1.0,
           ),
         ),
       ),
@@ -491,24 +691,18 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             opacity: _slideAnimation.value,
             child: Container(
               key: const ValueKey('menu_content'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 2,
-              ), // Further reduced padding for mobile
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // Get screen width for responsive adjustments
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  final drawerWidth = constraints.maxWidth;
-
                   return ListView.builder(
                     key: const ValueKey('menu_list'),
                     padding: EdgeInsets.zero,
-                    physics:
-                        const BouncingScrollPhysics(), // Better scroll physics
+                    physics: const BouncingScrollPhysics(),
                     itemCount: getMenuItems(context).length,
                     itemBuilder: (context, index) {
-                      return _buildMenuItem(getMenuItems(context)[index]);
+                      return _buildColorfulMenuItem(
+                        getMenuItems(context)[index],
+                      );
                     },
                   );
                 },
@@ -517,6 +711,132 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           ),
         );
       },
+    );
+  }
+
+  // Colorful menu item with One UI 8.5 refinements
+  Widget _buildColorfulMenuItem(MenuItemData item) {
+    bool isSelected = selectedIndex == item.index;
+
+    return Container(
+      key: ValueKey('menu_item_${item.index}'),
+      margin: const EdgeInsets.only(bottom: 6),
+      height: 56,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => _handleMenuTap(item.index),
+          borderRadius: BorderRadius.circular(16),
+          splashColor: _oneUIPrimary.withOpacity(0.1),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              // Colorful card background
+              color: isSelected
+                  ? (_isDark
+                        ? _oneUIPrimary.withOpacity(0.15)
+                        : Colors.blue.withOpacity(0.12))
+                  : (_isDark ? Colors.white.withOpacity(0.08) : Colors.white),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: isSelected
+                    ? _oneUIPrimary.withOpacity(0.4)
+                    : (_isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : _oneUIPrimary.withOpacity(0.3)),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(_isDark ? 0.2 : 0.06),
+                  offset: const Offset(0, 2),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                // Colorful icon container
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? _oneUIPrimary.withOpacity(0.2)
+                        : (_isDark
+                              ? _oneUIPrimary.withOpacity(0.15)
+                              : _oneUIPrimary.withOpacity(0.1)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    item.icon,
+                    size: 18,
+                    color: isSelected
+                        ? _oneUIPrimary
+                        : (_isDark ? Colors.blue[300] : _oneUIPrimary),
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                // Text content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          color: _isDark ? Colors.white : Colors.black87,
+                          letterSpacing: 0.1,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        item.subtitle,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w400,
+                          color: _isDark ? Colors.white70 : Colors.black54,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 6),
+
+                // Colorful arrow container
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: _isDark
+                        ? _oneUIPrimary.withOpacity(0.15)
+                        : _oneUIPrimary.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: _isDark ? Colors.blue[300] : _oneUIPrimary,
+                    size: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -654,6 +974,409 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // Colorful footer with One UI 8.5 refinements
+  Widget _buildColorfulFooter(AppLocalizations l10n, bool isRtl) {
+    return Container(
+      key: const ValueKey('drawer_footer'),
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: _isDark
+            ? Colors.white.withOpacity(0.08)
+            : Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: _isDark
+              ? Colors.white.withOpacity(0.1)
+              : Colors.white.withOpacity(0.5),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(_isDark ? 0.3 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+          if (!_isDark)
+            BoxShadow(
+              color: Colors.white.withOpacity(0.8),
+              blurRadius: 6,
+              offset: const Offset(0, -1),
+            ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Main button row
+            Row(
+              children: [
+                // Version info with colorful styling
+                Expanded(
+                  child: FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      return Container(
+                        height: 42,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: _isDark
+                                ? [
+                                    _oneUIPrimary.withOpacity(0.2),
+                                    _oneUIPrimary.withOpacity(0.1),
+                                  ]
+                                : [
+                                    _oneUIPrimary.withOpacity(0.1),
+                                    _oneUIPrimary.withOpacity(0.05),
+                                  ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _oneUIPrimary.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              size: 16,
+                              color: _oneUIPrimary,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              snapshot.hasData
+                                  ? "v${snapshot.data!.version}"
+                                  : "DocTak",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _oneUIPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                // Home button with beautiful gradient
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF4285F4).withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        if (mounted && !_isDisposed) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Icon(
+                        Icons.home_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
+                // Logout button with colorful styling
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: _isDark
+                        ? Colors.red.withOpacity(0.15)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red.withOpacity(_isDark ? 0.4 : 0.3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => logoutAccount(context),
+                      borderRadius: BorderRadius.circular(14),
+                      child: Icon(
+                        Icons.logout_rounded,
+                        color: Colors.red.shade600,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Labels row
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    translation(context).lbl_version,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: _isDark ? Colors.white60 : const Color(0xFF64748B),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    l10n.lbl_home,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: _oneUIPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    l10n.lbl_logout,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red.shade600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // One UI 8.5 styled footer (kept for reference)
+  Widget _buildOneUIFooter(AppLocalizations l10n, bool isRtl) {
+    return Container(
+      key: const ValueKey('drawer_footer'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _isDark ? _oneUISurfaceDark : _oneUISurfaceLight,
+        border: Border(
+          top: BorderSide(
+            color: _isDark
+                ? Colors.white.withOpacity(0.08)
+                : Colors.black.withOpacity(0.06),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Button row
+            Row(
+              children: [
+                // Version info
+                Expanded(
+                  child: FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      return Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: _isDark
+                              ? _oneUISurfaceVariantDark
+                              : _oneUISurfaceVariantLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              size: 16,
+                              color: _isDark
+                                  ? _oneUITextSecondaryDark
+                                  : _oneUITextSecondaryLight,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              snapshot.hasData
+                                  ? "v${snapshot.data!.version}"
+                                  : "DocTak",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: _isDark
+                                    ? _oneUITextPrimaryDark
+                                    : _oneUITextPrimaryLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Home button
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0A84FF), Color(0xFF0066CC)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _oneUIPrimary.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        if (mounted && !_isDisposed) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Icon(
+                        Icons.home_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Logout button
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _isDark
+                        ? const Color(0xFFFF3B30).withOpacity(0.15)
+                        : const Color(0xFFFF3B30).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFFF3B30).withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => logoutAccount(context),
+                      borderRadius: BorderRadius.circular(12),
+                      child: const Icon(
+                        Icons.logout_rounded,
+                        color: Color(0xFFFF3B30),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // Labels row
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    translation(context).lbl_version,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: _isDark
+                          ? _oneUITextSecondaryDark
+                          : _oneUITextSecondaryLight,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    l10n.lbl_home,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: _oneUIPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    l10n.lbl_logout,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFFFF3B30),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -925,14 +1648,14 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             context,
             MaterialPageRoute(
               builder: (context) => WebPageScreen(
-                page_name: AppLocalizations.of(context)!.lbl_privacy_policy,
+                pageName: AppLocalizations.of(context)!.lbl_privacy_policy,
                 url: '${AppData.base}privacy-policy',
               ),
             ),
           );
           break;
         case 10:
-          AboutUsScreen().launch(context);
+          const AboutUsScreen().launch(context);
           break;
       }
     });
@@ -942,57 +1665,179 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
     if (!mounted || _isDisposed) return;
 
     final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // OneUI 8.5 color palette
+    final backgroundColor = isDark ? const Color(0xFF1B2838) : Colors.white;
+    final textPrimary = isDark ? Colors.white : const Color(0xFF1A1A1A);
+    final textSecondary = isDark ? Colors.white70 : const Color(0xFF666666);
+    final destructive = isDark
+        ? const Color(0xFFFF6B6B)
+        : const Color(0xFFE53935);
+    final buttonBackground = isDark
+        ? const Color(0xFF2A3A4A)
+        : const Color(0xFFF5F5F5);
+
     return showDialog(
       context: context,
+      barrierColor: Colors.black54,
       builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          title: Text(l10n.lbl_logout),
-          content: Text(l10n.msg_confirm_logout),
-          actions: [
-            TextButton(
-              child: Text(l10n.lbl_cancel),
-              onPressed: () => Navigator.of(dialogContext).pop(),
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(maxWidth: 340),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
             ),
-            TextButton(
-              child: Text(
-                l10n.lbl_yes,
-                style: const TextStyle(color: Colors.red),
-              ),
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-
-                DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-                String deviceId = '';
-
-                if (isAndroid) {
-                  AndroidDeviceInfo androidInfo =
-                      await deviceInfoPlugin.androidInfo;
-                  deviceId = androidInfo.id;
-                } else {
-                  IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-                  deviceId = iosInfo.identifierForVendor.toString();
-                }
-
-                final prefs = SecureStorageService.instance;
-                await prefs.initialize();
-                var result = await logoutUserAccount(deviceId);
-
-                if (mounted && !_isDisposed) {
-                  AppSharedPreferences().clearSharedPreferencesData(context);
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LoginScreen(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 24),
+                // Logout icon
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: destructive.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.logout_rounded,
+                    color: destructive,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Title
+                Text(
+                  l10n.lbl_logout,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Message
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    l10n.msg_confirm_logout,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'Poppins',
+                      color: textSecondary,
+                      height: 1.4,
                     ),
-                    (route) => false,
-                  );
-                }
-              },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Buttons
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      // Cancel button
+                      Expanded(
+                        child: Material(
+                          color: buttonBackground,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            onTap: () => Navigator.of(dialogContext).pop(),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Text(
+                                l10n.lbl_cancel,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: textPrimary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Logout button
+                      Expanded(
+                        child: Material(
+                          color: destructive,
+                          borderRadius: BorderRadius.circular(12),
+                          child: InkWell(
+                            onTap: () async {
+                              Navigator.of(dialogContext).pop();
+
+                              DeviceInfoPlugin deviceInfoPlugin =
+                                  DeviceInfoPlugin();
+                              String deviceId = '';
+
+                              if (isAndroid) {
+                                AndroidDeviceInfo androidInfo =
+                                    await deviceInfoPlugin.androidInfo;
+                                deviceId = androidInfo.id;
+                              } else {
+                                IosDeviceInfo iosInfo =
+                                    await deviceInfoPlugin.iosInfo;
+                                deviceId = iosInfo.identifierForVendor
+                                    .toString();
+                              }
+
+                              final prefs = SecureStorageService.instance;
+                              await prefs.initialize();
+                              await logoutUserAccount(deviceId);
+
+                              if (mounted && !_isDisposed) {
+                                AppSharedPreferences()
+                                    .clearSharedPreferencesData(context);
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                  (route) => false,
+                                );
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              child: Text(
+                                l10n.lbl_yes,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -1064,10 +1909,14 @@ class HeaderPatternPainter extends CustomPainter {
 
 // Curved element painter for splash screen style decorations
 class CurvedElementPainter extends CustomPainter {
+  final bool isDark;
+
+  CurvedElementPainter({this.isDark = false});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF4285F4).withOpacity(0.08)
+      ..color = const Color(0xFF4285F4).withOpacity(isDark ? 0.15 : 0.08)
       ..style = PaintingStyle.fill;
 
     final path = Path();
@@ -1094,7 +1943,9 @@ class CurvedElementPainter extends CustomPainter {
 
     // Add another subtle curved layer
     final paint2 = Paint()
-      ..color = Colors.white.withOpacity(0.5)
+      ..color = (isDark ? Colors.white : Colors.white).withOpacity(
+        isDark ? 0.1 : 0.5,
+      )
       ..style = PaintingStyle.fill;
 
     final path2 = Path();
@@ -1119,5 +1970,6 @@ class CurvedElementPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CurvedElementPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }

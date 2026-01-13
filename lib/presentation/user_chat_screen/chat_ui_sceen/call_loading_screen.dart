@@ -1,16 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 
-enum CallStatus {
-  calling,
-  ringing,
-  busy,
-  offline,
-  rejected,
-  timeout,
-  accepted
-}
+enum CallStatus { calling, ringing, busy, offline, rejected, timeout, accepted }
 
 class CallLoadingScreen extends StatefulWidget {
   final String contactName;
@@ -30,7 +23,8 @@ class CallLoadingScreen extends StatefulWidget {
   CallLoadingScreenState createState() => CallLoadingScreenState();
 }
 
-class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerProviderStateMixin {
+class CallLoadingScreenState extends State<CallLoadingScreen>
+    with SingleTickerProviderStateMixin {
   CallStatus _status = CallStatus.calling;
   late AnimationController _animationController;
 
@@ -62,7 +56,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
 
   String get statusText {
     switch (_status) {
-       case CallStatus.calling:
+      case CallStatus.calling:
         return translation(context).lbl_calling_status;
       case CallStatus.ringing:
         return translation(context).lbl_ringing;
@@ -79,25 +73,30 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
     }
   }
 
-  Color get statusColor {
+  Color _getStatusColor(OneUITheme theme) {
     switch (_status) {
       case CallStatus.ringing:
       case CallStatus.accepted:
-        return Colors.green;
+        return theme.success;
       case CallStatus.busy:
       case CallStatus.offline:
       case CallStatus.rejected:
       case CallStatus.timeout:
-        return Colors.red;
+        return theme.error;
       default:
-        return Colors.white;
+        return theme.textPrimary;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final statusColor = _getStatusColor(theme);
+
     return Scaffold(
-      backgroundColor: Colors.black87,
+      backgroundColor: theme.isDark
+          ? const Color(0xFF0D1B2A)
+          : const Color(0xFF1B2838),
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
@@ -105,7 +104,11 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
             // Background blur effect
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(color: Colors.black.withOpacity(0.6)),
+              child: Container(
+                color: theme.isDark
+                    ? const Color(0xFF0D1B2A).withOpacity(0.8)
+                    : const Color(0xFF1B2838).withOpacity(0.8),
+              ),
             ),
 
             // Main content
@@ -115,17 +118,18 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
                 const Spacer(flex: 1),
 
                 // User avatar with animation
-                _buildUserAvatar(),
+                _buildUserAvatar(theme),
 
                 const SizedBox(height: 24),
 
                 // User name
                 Text(
                   widget.contactName,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: theme.textPrimary,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
+                    fontFamily: 'Poppins',
                   ),
                 ),
 
@@ -133,16 +137,21 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
 
                 // Call status indicator
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.black45,
+                    color: theme.surfaceVariant.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        widget.isVideoCall ? Icons.videocam : Icons.phone,
+                        widget.isVideoCall
+                            ? Icons.videocam_rounded
+                            : Icons.phone_rounded,
                         color: statusColor,
                         size: 18,
                       ),
@@ -153,6 +162,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
                           color: statusColor,
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
+                          fontFamily: 'Poppins',
                         ),
                       ),
                     ],
@@ -162,34 +172,12 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
                 const SizedBox(height: 50),
 
                 // Status-specific indicators
-                _buildStatusIndicator(),
+                _buildStatusIndicator(theme),
 
                 const Spacer(flex: 2),
 
                 // End call button
-                GestureDetector(
-                  onTap: widget.onCancel,
-                  child: Container(
-                    width: 70,
-                    height: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.5),
-                          blurRadius: 8,
-                          spreadRadius: 1,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.call_end,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ),
+                _buildEndCallButton(theme),
 
                 const SizedBox(height: 50),
               ],
@@ -200,7 +188,37 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
     );
   }
 
-  Widget _buildUserAvatar() {
+  Widget _buildEndCallButton(OneUITheme theme) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: widget.onCancel,
+        borderRadius: BorderRadius.circular(35),
+        child: Container(
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            color: theme.error,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: theme.error.withOpacity(0.4),
+                blurRadius: 12,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.call_end_rounded,
+            color: Colors.white,
+            size: 30,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserAvatar(OneUITheme theme) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -217,7 +235,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.green.withOpacity(
+                      color: theme.success.withOpacity(
                         (1 - _animationController.value) * 0.2,
                       ),
                     ),
@@ -238,7 +256,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.blue.withOpacity(
+                    color: theme.primary.withOpacity(
                       0.3 + _animationController.value * 0.5,
                     ),
                     width: 3,
@@ -249,68 +267,75 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
           ),
 
         // Main avatar
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: Colors.grey.shade800,
-          backgroundImage: widget.contactAvatar.isNotEmpty
-              ? NetworkImage(widget.contactAvatar)
-              : null,
-          child: widget.contactAvatar.isEmpty
-              ? const Icon(Icons.person, size: 60, color: Colors.white)
-              : null,
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: theme.surfaceVariant,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: widget.contactAvatar.isNotEmpty
+                ? Image.network(
+                    widget.contactAvatar,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.person_rounded,
+                      size: 60,
+                      color: theme.textSecondary,
+                    ),
+                  )
+                : Icon(
+                    Icons.person_rounded,
+                    size: 60,
+                    color: theme.textSecondary,
+                  ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatusIndicator() {
+  Widget _buildStatusIndicator(OneUITheme theme) {
     switch (_status) {
       case CallStatus.calling:
-        return const CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+        return CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+          strokeWidth: 3,
         );
 
       case CallStatus.ringing:
-        return _buildRingingDots();
+        return _buildRingingDots(theme);
 
       case CallStatus.accepted:
-        return const Icon(
-          Icons.check_circle,
-          color: Colors.green,
-          size: 40,
-        );
+        return Icon(Icons.check_circle_rounded, color: theme.success, size: 40);
 
       case CallStatus.busy:
-        return  const Icon(
-          Icons.phone_disabled,
-          color: Colors.red,
-          size: 40,
-        );
+        return Icon(Icons.phone_disabled_rounded, color: theme.error, size: 40);
 
       case CallStatus.offline:
-        return const Icon(
-          Icons.signal_wifi_off,
-          color: Colors.red,
+        return Icon(
+          Icons.signal_wifi_off_rounded,
+          color: theme.error,
           size: 40,
         );
 
       case CallStatus.rejected:
-        return const Icon(
-          Icons.call_end,
-          color: Colors.red,
-          size: 40,
-        );
+        return Icon(Icons.call_end_rounded, color: theme.error, size: 40);
 
       case CallStatus.timeout:
-        return const Icon(
-          Icons.access_time,
-          color: Colors.red,
-          size: 40,
-        );
+        return Icon(Icons.access_time_rounded, color: theme.error, size: 40);
     }
   }
 
-  Widget _buildRingingDots() {
+  Widget _buildRingingDots(OneUITheme theme) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(3, (index) {
@@ -327,7 +352,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerP
               height: size,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(opacity),
+                color: theme.success.withOpacity(opacity),
                 shape: BoxShape.circle,
               ),
             );

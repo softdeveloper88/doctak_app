@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -6,7 +7,6 @@ import 'package:shimmer/shimmer.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../../../localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import '../../home_screen/utils/SVCommon.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../bloc/discussion_list_bloc.dart';
 import '../models/case_discussion_models.dart';
@@ -92,8 +92,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Scaffold(
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: translation(context).lbl_case_discussions,
         titleIcon: Icons.medical_information_rounded,
@@ -105,12 +107,12 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: theme.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 isSearchShow ? Icons.close : Icons.search,
-                color: Colors.blue[600],
+                color: theme.primary,
                 size: 16,
               ),
             ),
@@ -133,12 +135,12 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: theme.success.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.add_rounded,
-                  color: Colors.green[600],
+                  color: theme.success,
                   size: 16,
                 ),
               ),
@@ -150,7 +152,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
       body: Column(
         children: [
           Container(
-            color: svGetScaffoldColor(),
+            color: theme.cardBackground,
             child: Column(
               children: [
                 // Search field with animated visibility
@@ -166,22 +168,13 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                               vertical: 16.0,
                             ),
                             decoration: BoxDecoration(
-                              color: AppData.isShowGoogleBannerAds ?? false
-                                  ? Colors.blueGrey[800]
-                                  : Colors.grey[100],
+                              color: theme.inputBackground,
                               borderRadius: BorderRadius.circular(24.0),
                               border: Border.all(
-                                color: Colors.blue.withOpacity(0.2),
+                                color: theme.inputBorder,
                                 width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blue.withOpacity(0.05),
-                                  offset: const Offset(0, 2),
-                                  blurRadius: 6,
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                              boxShadow: theme.cardShadow,
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(24.0),
@@ -193,7 +186,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     ),
                                     child: Icon(
                                       Icons.search_rounded,
-                                      color: Colors.blue.withOpacity(0.6),
+                                      color: theme.primary.withOpacity(0.6),
                                       size: 24,
                                     ),
                                   ),
@@ -204,11 +197,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                       textStyle: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 14,
-                                        color:
-                                            AppData.isShowGoogleBannerAds ??
-                                                false
-                                            ? Colors.white
-                                            : Colors.black87,
+                                        color: theme.textPrimary,
                                       ),
                                       onChanged: (searchTxt) async {
                                         if (_debounce?.isActive ?? false)
@@ -228,11 +217,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         hintStyle: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14,
-                                          color:
-                                              AppData.isShowGoogleBannerAds ??
-                                                  false
-                                              ? Colors.white60
-                                              : Colors.black54,
+                                          color: theme.textTertiary,
                                         ),
                                         contentPadding:
                                             const EdgeInsets.symmetric(
@@ -253,7 +238,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.1),
+                                        color: theme.primary.withOpacity(0.1),
                                         borderRadius: const BorderRadius.only(
                                           topRight: Radius.circular(24),
                                           bottomRight: Radius.circular(24),
@@ -261,7 +246,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                       ),
                                       child: Icon(
                                         Icons.clear,
-                                        color: Colors.blue.withOpacity(0.6),
+                                        color: theme.primary.withOpacity(0.6),
                                         size: 24,
                                       ),
                                     ),
@@ -289,16 +274,17 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                               child: Container(
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.withOpacity(0.1),
+                                  color: theme.surfaceVariant,
                                   borderRadius: BorderRadius.circular(20),
                                   border: Border.all(
-                                    color: Colors.blue.withOpacity(0.2),
+                                    color: theme.border,
                                   ),
                                 ),
                                 child: PopupMenuButton<SpecialtyFilter>(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
+                                  color: theme.cardBackground,
                                   offset: const Offset(0, 45),
                                   tooltip: translation(
                                     context,
@@ -316,7 +302,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         Icon(
                                           Icons.medical_services_outlined,
                                           size: 16,
-                                          color: Colors.blue[600],
+                                          color: theme.primary,
                                         ),
                                         const SizedBox(width: 6),
                                         Expanded(
@@ -328,10 +314,11 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                                 translation(
                                                   context,
                                                 ).lbl_all_specialties,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 12,
                                               fontFamily: 'Poppins',
                                               fontWeight: FontWeight.w500,
+                                              color: theme.textPrimary,
                                             ),
                                             overflow: TextOverflow.ellipsis,
                                           ),
@@ -339,7 +326,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         Icon(
                                           Icons.arrow_drop_down,
                                           size: 16,
-                                          color: Colors.blue[600],
+                                          color: theme.primary,
                                         ),
                                       ],
                                     ),
@@ -371,8 +358,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                                         .currentFilters
                                                         .selectedSpecialty ==
                                                     null
-                                                ? Colors.blue[800]
-                                                : Colors.black87,
+                                                ? theme.primary
+                                                : theme.textPrimary,
                                             fontWeight:
                                                 state
                                                         .currentFilters
@@ -402,8 +389,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                                           .selectedSpecialty
                                                           ?.id ==
                                                       specialty.id
-                                                  ? Colors.blue[800]
-                                                  : Colors.black87,
+                                                  ? theme.primary
+                                                  : theme.textPrimary,
                                               fontWeight:
                                                   state
                                                           .currentFilters
@@ -444,10 +431,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                             //   child: Container(
                             //     height: 40,
                             //     decoration: BoxDecoration(
-                            //       color: Colors.grey.withOpacity(0.1),
+                            //       color: theme.surfaceVariant,
                             //       borderRadius: BorderRadius.circular(20),
                             //       border: Border.all(
-                            //         color: Colors.blue.withOpacity(0.2),
+                            //         color: theme.border,
                             //       ),
                             //     ),
                             //     child: PopupMenuButton<CountryFilter>(
@@ -565,10 +552,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                             Container(
                               height: 40,
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.1),
+                                color: theme.surfaceVariant,
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: Colors.blue.withOpacity(0.2),
+                                  color: theme.primary.withOpacity(0.2),
                                 ),
                               ),
                               child: PopupMenuButton<String>(
@@ -589,13 +576,13 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                       Icon(
                                         Icons.sort_rounded,
                                         size: 16,
-                                        color: Colors.blue[600],
+                                        color: theme.primary,
                                       ),
                                       const SizedBox(width: 4),
                                       Icon(
                                         Icons.arrow_drop_down,
                                         size: 16,
-                                        color: Colors.blue[600],
+                                        color: theme.primary,
                                       ),
                                     ],
                                   ),
@@ -610,7 +597,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           Icon(
                                             Icons.schedule,
                                             size: 16,
-                                            color: Colors.blue[600],
+                                            color: theme.primary,
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
@@ -623,8 +610,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                               color:
                                                   state.currentFilters.sortBy ==
                                                       'newest'
-                                                  ? Colors.blue[800]
-                                                  : Colors.black87,
+                                                  ? theme.primary
+                                                  : theme.textPrimary,
                                               fontWeight:
                                                   state.currentFilters.sortBy ==
                                                       'newest'
@@ -643,7 +630,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           Icon(
                                             Icons.trending_up,
                                             size: 16,
-                                            color: Colors.blue[600],
+                                            color: theme.primary,
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
@@ -656,8 +643,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                               color:
                                                   state.currentFilters.sortBy ==
                                                       'popular'
-                                                  ? Colors.blue[800]
-                                                  : Colors.black87,
+                                                  ? theme.primary
+                                                  : theme.textPrimary,
                                               fontWeight:
                                                   state.currentFilters.sortBy ==
                                                       'popular'
@@ -676,7 +663,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                           Icon(
                                             Icons.comment_outlined,
                                             size: 16,
-                                            color: Colors.blue[600],
+                                            color: theme.primary,
                                           ),
                                           const SizedBox(width: 8),
                                           Text(
@@ -689,8 +676,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                               color:
                                                   state.currentFilters.sortBy ==
                                                       'comments'
-                                                  ? Colors.blue[800]
-                                                  : Colors.black87,
+                                                  ? theme.primary
+                                                  : theme.textPrimary,
                                               fontWeight:
                                                   state.currentFilters.sortBy ==
                                                       'comments'
@@ -785,7 +772,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                     Icon(
                                       Icons.chat_bubble_outline,
                                       size: 48,
-                                      color: Colors.grey.shade400,
+                                      color: theme.textTertiary,
                                     ),
                                     const SizedBox(height: 16),
                                     Text(
@@ -795,7 +782,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.w500,
-                                        color: Colors.grey.shade600,
+                                        color: theme.textSecondary,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -808,7 +795,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                               context,
                                             ).msg_be_first_to_start_discussion,
                                       style: TextStyle(
-                                        color: Colors.grey.shade500,
+                                        color: theme.textTertiary,
                                         fontSize: 14,
                                       ),
                                       textAlign: TextAlign.center,
@@ -827,6 +814,10 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                                 ),
                                               );
                                         },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: theme.primary,
+                                          foregroundColor: theme.buttonPrimaryText,
+                                        ),
                                         child: Text(
                                           translation(
                                             context,
@@ -839,12 +830,13 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                               )
                             : RefreshIndicator(
                                 onRefresh: () async => _onRefresh(),
+                                color: theme.primary,
                                 child: ListView.builder(
                                   controller: _scrollController,
                                   padding: EdgeInsets.only(
-                                    left: 16,
-                                    right: 16,
-                                    top: 16,
+                                    left: 0,
+                                    right: 0,
+                                    top: 8,
                                     bottom:
                                         MediaQuery.of(context).padding.bottom +
                                         16,
@@ -859,11 +851,11 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                                         margin: const EdgeInsets.all(16),
                                         height: 80,
                                         child: Shimmer.fromColors(
-                                          baseColor: Colors.grey[300]!,
-                                          highlightColor: Colors.grey[100]!,
+                                          baseColor: theme.divider,
+                                          highlightColor: theme.cardBackground,
                                           child: Container(
                                             decoration: BoxDecoration(
-                                              color: Colors.white,
+                                              color: theme.cardBackground,
                                               borderRadius:
                                                   BorderRadius.circular(12),
                                             ),

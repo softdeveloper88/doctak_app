@@ -1,24 +1,19 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
-import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
+import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/one_ui_profile_components.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-
-import '../../../../../core/app_export.dart';
-import '../../../utils/SVColors.dart';
-import '../../../utils/SVCommon.dart';
-import '../bloc/profile_state.dart';
 
 class PrivacyInfoScreen extends StatefulWidget {
-  ProfileBloc profileBloc;
+  final ProfileBloc profileBloc;
 
-  PrivacyInfoScreen({required this.profileBloc, super.key});
+  const PrivacyInfoScreen({required this.profileBloc, super.key});
 
   @override
   State<PrivacyInfoScreen> createState() => _PrivacyInfoScreenState();
@@ -58,28 +53,17 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
         title: "Privacy Settings",
         titleIcon: Icons.privacy_tip_rounded,
         actions: [
           if (widget.profileBloc.isMe)
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isEditModeMap ? Icons.check : Icons.edit,
-                  color: isEditModeMap ? Colors.green[600] : Colors.blue[600],
-                  size: 16,
-                ),
-              ),
+            OneUIEditActionButton(
+              isEditMode: isEditModeMap,
               onPressed: () {
                 setState(() {
                   isEditModeMap = !isEditModeMap;
@@ -105,34 +89,10 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
               children: [
                 // Privacy information header
                 if (!isEditModeMap)
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 20),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.purple.withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.shield_outlined,
-                          color: Colors.purple[700],
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            translation(context).msg_privacy_info_desc,
-                            style: TextStyle(
-                              color: Colors.purple[700],
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  OneUIInfoBanner(
+                    message: translation(context).msg_privacy_info_desc,
+                    icon: Icons.shield_outlined,
+                    accentColor: Colors.purple,
                   ),
 
                 // Privacy settings
@@ -142,35 +102,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
 
                 // Update button
                 if (isEditModeMap)
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    child: ElevatedButton(
-                      onPressed: _saveChanges,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.purple,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.check_circle, color: Colors.white),
-                          const SizedBox(width: 10),
-                          Text(
-                            translation(context).lbl_update,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  OneUIProfilePrimaryButton(
+                    label: translation(context).lbl_update,
+                    icon: Icons.check_circle,
+                    color: theme.primary,
+                    onPressed: _saveChanges,
                   ),
               ],
             ),
@@ -181,6 +117,8 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
   }
 
   Widget _buildPrivacyInfoFields() {
+    final theme = OneUITheme.of(context);
+
     // Group privacy settings by category
     final personalSettings = widget.profileBloc.userProfile!.privacySetting!
         .where(
@@ -234,8 +172,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
         _buildPrivacyCategory(
           title: translation(context).lbl_personal_info_privacy,
           icon: Icons.person_outline,
-          iconColor: Colors.blue,
+          iconColor: theme.primary,
           settings: personalSettings,
+          theme: theme,
         ),
 
         const SizedBox(height: 16),
@@ -244,8 +183,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
         _buildPrivacyCategory(
           title: translation(context).lbl_professional_info_privacy,
           icon: Icons.work_outline,
-          iconColor: Colors.green,
+          iconColor: theme.success,
           settings: professionalSettings,
+          theme: theme,
         ),
 
         const SizedBox(height: 16),
@@ -254,8 +194,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
         _buildPrivacyCategory(
           title: translation(context).lbl_location_info_privacy,
           icon: Icons.location_on_outlined,
-          iconColor: Colors.orange,
+          iconColor: theme.warning,
           settings: locationSettings,
+          theme: theme,
         ),
 
         // Other privacy settings
@@ -265,8 +206,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
           _buildPrivacyCategory(
             title: translation(context).lbl_other_info_privacy,
             icon: Icons.more_horiz,
-            iconColor: Colors.purple,
+            iconColor: theme.secondary,
             settings: otherSettings,
+            theme: theme,
           ),
       ],
     );
@@ -278,15 +220,12 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
     required IconData icon,
     required Color iconColor,
     required List<PrivacySetting> settings,
+    required OneUITheme theme,
   }) {
     if (settings.isEmpty) return const SizedBox.shrink();
 
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
-      ),
+    return Container(
+      decoration: theme.cardDecoration,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -299,7 +238,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: iconColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: theme.radiusM,
                   ),
                   child: Icon(icon, color: iconColor, size: 18),
                 ),
@@ -349,6 +288,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
                   translation(context).lbl_public,
                 ],
                 colorScheme: _getColorForPrivacyLevel(selectValue),
+                theme: theme,
               );
             }).toList(),
           ],
@@ -421,6 +361,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
     void Function(String)? onSave,
     required List<String> options,
     required ColorScheme colorScheme,
+    required OneUITheme theme,
   }) {
     options = options
         .where((opt) => opt.isNotEmpty && opt.trim().isNotEmpty)
@@ -440,14 +381,14 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey[800],
+                      color: theme.textPrimary,
                     ),
                   ),
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: theme.radiusM,
+                    border: Border.all(color: theme.border),
                   ),
                   child: CustomDropdownButtonFormField(
                     items: options,
@@ -479,7 +420,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(item, style: const TextStyle(color: Colors.black)),
+                        Text(item, style: TextStyle(color: theme.textPrimary)),
                       ],
                     ),
                     onChanged: (String? selectedValue) {
@@ -496,7 +437,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              border: Border(bottom: BorderSide(color: theme.divider)),
             ),
             child: Row(
               children: [
@@ -505,7 +446,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
                   child: Text(
                     capitalizeWords(label),
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: theme.textSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -564,7 +505,7 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(translation(context).msg_privacy_settings_updated),
-        backgroundColor: Colors.green,
+        backgroundColor: OneUITheme.of(context).success,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),

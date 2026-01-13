@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,141 +25,115 @@ class _UserChatComponentState extends State<UserChatComponent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return BlocBuilder<ChatBloc, ChatState>(
-        bloc: chatBloc,
-        builder: (context, state) {
-          print("state $state");
-          if (state is PaginationLoadedState) {
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  // Column(
-                  //   children: [
-                  //     Container(
-                  //       margin: const EdgeInsets.symmetric(horizontal: 16),
-                  //       height: 60,
-                  //       width: 60,
-                  //       decoration: BoxDecoration(
-                  //         color: SVAppColorPrimary,
-                  //         borderRadius: radius(SVAppCommonRadius),
-                  //       ),
-                  //       child: IconButton(
-                  //           icon: const Icon(Icons.add, color: Colors.white),
-                  //           onPressed: () async {
-                  //
-                  //           }),
-                  //     ),
-                  //     10.height,
-                  //     Text('Recent chat',
-                  //         style: secondaryTextStyle(
-                  //             size: 12,
-                  //             color: context.iconColor,
-                  //             weight: FontWeight.w500)),
-                  //   ],
-                  // ),
-                  HorizontalList(
-                    spacing: 16,
-                    itemCount: chatBloc.contactsList.length,
-                    itemBuilder: (context, index) {
-                      return Column(
+      bloc: chatBloc,
+      builder: (context, state) {
+        if (state is PaginationLoadedState) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              children: [
+                HorizontalList(
+                  spacing: 12,
+                  itemCount: chatBloc.contactsList.length,
+                  itemBuilder: (context, index) {
+                    final contact = chatBloc.contactsList[index];
+                    final hasProfilePic =
+                        contact.profilePic?.isNotEmpty == true;
+
+                    return GestureDetector(
+                      onTap: () {
+                        SVProfileFragment(userId: contact.id).launch(context);
+                      },
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Avatar with gradient border
                           Container(
-                            width: 50,
-                            height: 50,
+                            width: 60,
+                            height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                const BoxShadow(
-                                  color: Color(0x4D9E9E9E),
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  theme.primary,
+                                  theme.primary.withOpacity(0.6),
+                                ],
+                              ),
+                              boxShadow: theme.isDark
+                                  ? []
+                                  : [
+                                      BoxShadow(
+                                        color: theme.primary.withOpacity(0.25),
+                                        spreadRadius: 1,
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                             ),
-                            child: chatBloc
-                                    .contactsList[index].profilePic!.isEmpty
-                                ? Image.asset('images/socialv/faces/face_5.png',
-                                        height: 56,
-                                        width: 56,
-                                        fit: BoxFit.cover)
-                                    .cornerRadiusWithClipRRect(8)
-                                    .cornerRadiusWithClipRRect(8)
-                                : AppCachedNetworkImage(
-                                    imageUrl:
-                                      '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
-                                    height: 56,
-                                    width: 56,
-                                    fit: BoxFit.cover)
-                                    .cornerRadiusWithClipRRect(30),
-                          ).onTap(() {
-                            print(chatBloc.contactsList[index].id);
-                            // ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
-                            SVProfileFragment(
-                                    userId: chatBloc.contactsList[index].id)
-                                .launch(context);
-
-                            // SVStoryScreen(story: storyList[index])
-                            //     .launch(context);
-                          }),
-                          // ),
-                          // Container(
-                          //   decoration: BoxDecoration(
-                          //     // border: Border.all(
-                          //     //     color: SVAppColorPrimary, width: 2),
-                          //     borderRadius: radius(100),
-                          //   ),
-                          //   child: chatBloc.contactsList[index].profilePic
-                          //               ?.isEmpty ??
-                          //           true
-                          //       ? Image.asset(
-                          //           'images/socialv/faces/face_2.png',
-                          //           height: 58,
-                          //           width: 58,
-                          //           fit: BoxFit.cover,
-                          //         ).cornerRadiusWithClipRRect(SVAppCommonRadius)
-                          //       : CircleAvatar(
-                          //         child: CachedNetworkImage(
-                          //             imageUrl:
-                          //                 '${AppData.imageUrl}${chatBloc.contactsList[index].profilePic}',
-                          //             height: 58,
-                          //             width: 58,
-                          //             fit: BoxFit.cover,
-                          //           ).cornerRadiusWithClipRRect(
-                          //             SVAppCommonRadius),
-                          //       ),
-                          // ).onTap(() {
-                          //   print(chatBloc.contactsList[index].id);
-                          //   // ChatRoomScreen(username: '${chatBloc.contactsList[index].firstName} ${chatBloc.contactsList[index].lastName}',profilePic: '${chatBloc.contactsList[index].profilePic}',id: '',roomId: '${chatBloc.contactsList[index].roomId}',).launch(context);
-                          //   SVProfileFragment(
-                          //           userId: chatBloc.contactsList[index].id)
-                          //       .launch(context);
-                          //
-                          //   // SVStoryScreen(story: storyList[index])
-                          //   //     .launch(context);
-                          // }),
-                          10.height,
+                            padding: const EdgeInsets.all(2.5),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: theme.scaffoldBackground,
+                              ),
+                              padding: const EdgeInsets.all(2),
+                              child: ClipOval(
+                                child: hasProfilePic
+                                    ? AppCachedNetworkImage(
+                                        imageUrl:
+                                            '${AppData.imageUrl}${contact.profilePic}',
+                                        height: 50,
+                                        width: 50,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Container(
+                                        width: 50,
+                                        height: 50,
+                                        color: theme.surfaceVariant,
+                                        child: Icon(
+                                          Icons.person_rounded,
+                                          size: 28,
+                                          color: theme.textSecondary,
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Name
                           SizedBox(
-                            width: 60,
+                            width: 64,
                             child: Text(
-                                overflow: TextOverflow.ellipsis,
-                                '${chatBloc.contactsList[index].firstName.validate()} ${chatBloc.contactsList[index].lastName.validate()}',
-                                style: secondaryTextStyle(
-                                    size: 12,
-                                    color: context.iconColor,
-                                    weight: FontWeight.w500)),
+                              '${contact.firstName.validate()} ${contact.lastName.validate()}',
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                                color: theme.textSecondary,
+                              ),
+                            ),
                           ),
                         ],
-                      );
-                    },
-                  )
-                ],
-              ),
-            );
-          } else {
-            return const SizedBox.shrink();
-          }
-        });
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const SizedBox.shrink();
+        }
+      },
+    );
   }
 }

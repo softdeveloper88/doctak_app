@@ -4,10 +4,10 @@ import 'dart:isolate';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/incomplete_profile_card.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -121,13 +121,14 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final bool showIncompleteProfile =
         emailVerified == '' || isInCompleteProfile;
 
     return Scaffold(
       // resizeToAvoidBottomInset: false,
       key: scaffoldKey,
-      backgroundColor: svGetBgColor(),
+      backgroundColor: theme.scaffoldBackground,
       appBar: _buildModernAppBar(context),
       body: GestureDetector(
         onTap: () {
@@ -154,57 +155,25 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   }
 
   PreferredSizeWidget _buildModernAppBar(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = OneUITheme.of(context);
 
     return PreferredSize(
       preferredSize: const Size.fromHeight(70),
       child: Container(
-        decoration: BoxDecoration(
-          // Exact same background as bottom navigation bar
-          color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-          boxShadow: [
-            // Primary shadow for depth (matching bottom nav)
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withOpacity(0.6)
-                  : Colors.black.withOpacity(0.12),
-              blurRadius: 32,
-              spreadRadius: 0,
-              offset: const Offset(0, 12),
-            ),
-            // Secondary shadow for subtle elevation
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withOpacity(0.4)
-                  : Colors.black.withOpacity(0.06),
-              blurRadius: 16,
-              spreadRadius: -4,
-              offset: const Offset(0, 6),
-            ),
-            // Inner light effect for glass morphism
-            BoxShadow(
-              color: isDark
-                  ? Colors.white.withOpacity(0.02)
-                  : Colors.white.withOpacity(0.8),
-              blurRadius: 8,
-              spreadRadius: -8,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
+        decoration: theme.appBarDecoration,
         child: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           toolbarHeight: 70,
           leading: Container(
             margin: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
-            child: _buildModernIconButton(
+            child: theme.buildIconButton(
               child: Image.asset(
                 'images/socialv/icons/ic_More.png',
                 width: 16,
                 height: 16,
                 fit: BoxFit.cover,
-                color: context.iconColor,
+                color: theme.iconColor,
               ),
               onPressed: () {
                 widget.openDrawer();
@@ -216,24 +185,18 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               translation(context).lbl_home,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'Poppins',
-                color: Colors.blue[600],
-                letterSpacing: 0.5,
-              ),
+              style: theme.appBarTitle,
             ),
           ),
           actions: [
-            _buildNotificationButton(context),
+            _buildNotificationButton(context, theme),
             const SizedBox(width: 8),
-            _buildModernIconButton(
+            theme.buildIconButton(
               child: SvgPicture.asset(
                 height: 24,
                 width: 24,
                 icChat,
-                color: context.iconColor,
+                color: theme.iconColor,
               ),
               onPressed: () async {
                 FocusManager.instance.primaryFocus?.unfocus();
@@ -247,60 +210,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     );
   }
 
-  Widget _buildModernIconButton({
-    required Widget child,
-    required VoidCallback onPressed,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.blue.withOpacity(0.04),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.blue.withOpacity(0.4),
-                width: 0.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.blue.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Center(child: child),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationButton(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+  Widget _buildNotificationButton(BuildContext context, OneUITheme theme) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        shape: const CircleBorder(),
         child: InkWell(
           onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();
@@ -310,39 +225,18 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               ),
             );
           },
-          borderRadius: BorderRadius.circular(12),
+          customBorder: const CircleBorder(),
           child: Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? Colors.white.withOpacity(0.08)
-                  : Colors.blue.withOpacity(0.04),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.blue.withOpacity(0.4),
-                width: 0.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.blue.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
+            decoration: theme.iconButtonDecoration(),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(CupertinoIcons.bell, size: 24, color: context.iconColor),
+                Icon(CupertinoIcons.bell, size: 22, color: theme.iconColor),
                 Positioned(
-                  right: 8,
-                  top: 8,
+                  right: 6,
+                  top: 6,
                   child: BlocBuilder<NotificationBloc, NotificationState>(
                     bloc: notificationBloc,
                     buildWhen: (previous, current) =>
@@ -350,44 +244,8 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                     builder: (context, state) {
                       if (state is PaginationLoadedState) {
                         return notificationBloc.totalNotifications > 0
-                            ? Container(
-                                height: 18,
-                                width: 18,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.red[400]!,
-                                      Colors.red[600]!,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: svGetScaffoldColor(),
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.red.withOpacity(0.3),
-                                      blurRadius: 6,
-                                      spreadRadius: 0,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    '${notificationBloc.totalNotifications > 99 ? '99+' : notificationBloc.totalNotifications}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Poppins',
-                                      color: Colors.white,
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.0,
-                                    ),
-                                  ),
-                                ),
+                            ? theme.buildBadge(
+                                notificationBloc.totalNotifications,
                               )
                             : const SizedBox.shrink();
                       } else {

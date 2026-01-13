@@ -1,10 +1,10 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../widgets/retry_widget.dart';
-import '../../../utils/SVCommon.dart';
 import '../../components/improved_reply_comment_component.dart';
 import '../../components/SVCommentReplyComponent.dart';
 import 'bloc/comment_bloc.dart';
@@ -44,6 +44,7 @@ class _ImprovedReplyCommentListWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Column(
@@ -57,7 +58,7 @@ class _ImprovedReplyCommentListWidgetState
                 Icon(
                   Icons.subdirectory_arrow_right_rounded,
                   size: 16,
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -65,7 +66,7 @@ class _ImprovedReplyCommentListWidgetState
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
+                    color: theme.textSecondary,
                     fontFamily: 'Poppins',
                   ),
                 ),
@@ -86,11 +87,13 @@ class _ImprovedReplyCommentListWidgetState
                 return Container(
                   height: 150,
                   padding: const EdgeInsets.all(8.0),
-                  child: const Center(child: CircularProgressIndicator()),
+                  child: Center(
+                    child: CircularProgressIndicator(color: theme.primary),
+                  ),
                 );
               } else if (state is PaginationLoadedState) {
                 if (commentBloc.replyCommentList.isNotEmpty) {
-                  return _buildReplyList();
+                  return _buildReplyList(theme);
                 } else {
                   return const SizedBox.shrink();
                 }
@@ -133,7 +136,7 @@ class _ImprovedReplyCommentListWidgetState
   }
 
   // Build the list of replies
-  Widget _buildReplyList() {
+  Widget _buildReplyList(OneUITheme theme) {
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -161,9 +164,9 @@ class _ImprovedReplyCommentListWidgetState
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.05),
+              color: theme.primary.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.blue.withOpacity(0.1)),
+              border: Border.all(color: theme.primary.withOpacity(0.1)),
             ),
             // Using LayoutBuilder to get available width constraints
             child: LayoutBuilder(
@@ -178,7 +181,7 @@ class _ImprovedReplyCommentListWidgetState
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue[700],
+                        color: theme.primary,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -255,19 +258,14 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withOpacity(0.15), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: theme.border, width: 1),
+        boxShadow: theme.cardShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment
@@ -276,12 +274,8 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
           // User Avatar (small)
           CircleAvatar(
             radius: 18,
-            backgroundColor: Colors.blue.withOpacity(0.08),
-            child: Icon(
-              Icons.person_rounded,
-              size: 20,
-              color: Colors.blue[600],
-            ),
+            backgroundColor: theme.primary.withOpacity(0.08),
+            child: Icon(Icons.person_rounded, size: 20, color: theme.primary),
           ),
 
           const SizedBox(width: 14),
@@ -300,17 +294,17 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
                   hintStyle: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 15,
-                    color: Colors.grey[500],
+                    color: theme.textTertiary,
                     fontWeight: FontWeight.w400,
                   ),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 15,
-                  color: Colors.black87,
+                  color: theme.textPrimary,
                   fontWeight: FontWeight.w400,
                 ),
                 // Allow text to wrap to new lines, but limit with ConstrainedBox
@@ -329,9 +323,13 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
             margin: const EdgeInsets.only(bottom: 2.0),
             child: IconButton(
               onPressed: () => _submitReply(_replyController.text),
-              icon: Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              icon: const Icon(
+                Icons.send_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
               style: IconButton.styleFrom(
-                backgroundColor: Colors.blue[600],
+                backgroundColor: theme.primary,
                 padding: const EdgeInsets.all(10),
                 shape: const CircleBorder(),
               ),
@@ -408,15 +406,16 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         // Text field with container to prevent overflow
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardBackground,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            border: Border.all(color: theme.border),
           ),
           // Use ConstrainedBox to prevent TextField from expanding too much
           child: ConstrainedBox(
@@ -437,12 +436,16 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
                 hintStyle: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
-                  color: Colors.grey[500],
+                  color: theme.textTertiary,
                 ),
                 // Make sure there's no excess padding causing overflow
                 isDense: true,
               ),
-              style: const TextStyle(fontFamily: 'Poppins', fontSize: 14),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                color: theme.textPrimary,
+              ),
             ),
           ),
         ),
@@ -469,7 +472,7 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
                 child: Text(
                   translation(context).lbl_cancel,
                   style: TextStyle(
-                    color: Colors.grey[700],
+                    color: theme.textSecondary,
                     fontSize: 14,
                     fontFamily: 'Poppins',
                   ),
@@ -480,7 +483,7 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
               TextButton(
                 onPressed: () => widget.onSubmit(_controller.text),
                 style: TextButton.styleFrom(
-                  backgroundColor: Colors.blue.withOpacity(0.1),
+                  backgroundColor: theme.primary.withOpacity(0.1),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -492,7 +495,7 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
                 child: Text(
                   translation(context).lbl_update,
                   style: TextStyle(
-                    color: Colors.blue[700],
+                    color: theme.primary,
                     fontSize: 14,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,

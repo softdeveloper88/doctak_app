@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -7,9 +8,11 @@ class CaseDiscussionShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: theme.divider,
+      highlightColor: theme.cardBackground,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -19,7 +22,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -32,8 +35,8 @@ class CaseDiscussionShimmer extends StatelessWidget {
                       Container(
                         width: 48,
                         height: 48,
-                        decoration: const BoxDecoration(
-                          color: Colors.grey,
+                        decoration: BoxDecoration(
+                          color: theme.divider,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -46,14 +49,14 @@ class CaseDiscussionShimmer extends StatelessWidget {
                             Container(
                               width: 120,
                               height: 16,
-                              color: Colors.grey,
+                              color: theme.divider,
                             ),
                             const SizedBox(height: 4),
                             // Author specialty
                             Container(
                               width: 80,
                               height: 12,
-                              color: Colors.grey,
+                              color: theme.divider,
                             ),
                           ],
                         ),
@@ -63,7 +66,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                         width: 80,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: theme.divider,
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -75,13 +78,13 @@ class CaseDiscussionShimmer extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     height: 20,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const SizedBox(height: 8),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.7,
                     height: 20,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const SizedBox(height: 16),
                   
@@ -89,19 +92,19 @@ class CaseDiscussionShimmer extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     height: 14,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const SizedBox(height: 6),
                   Container(
                     width: double.infinity,
                     height: 14,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const SizedBox(height: 6),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.8,
                     height: 14,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const SizedBox(height: 16),
                   
@@ -112,7 +115,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                         width: 60,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: theme.divider,
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -121,7 +124,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                         width: 80,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: theme.divider,
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -137,7 +140,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                         width: 60,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: theme.divider,
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -147,7 +150,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                         width: 60,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: Colors.grey,
+                          color: theme.divider,
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -156,7 +159,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                       Container(
                         width: 80,
                         height: 12,
-                        color: Colors.grey,
+                        color: theme.divider,
                       ),
                     ],
                   ),
@@ -170,7 +173,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardBackground,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -178,20 +181,20 @@ class CaseDiscussionShimmer extends StatelessWidget {
                   Container(
                     width: 24,
                     height: 24,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const SizedBox(width: 12),
                   Container(
                     width: 100,
                     height: 18,
-                    color: Colors.grey,
+                    color: theme.divider,
                   ),
                   const Spacer(),
                   Container(
                     width: 30,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: Colors.grey,
+                      color: theme.divider,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -202,19 +205,19 @@ class CaseDiscussionShimmer extends StatelessWidget {
             const SizedBox(height: 16),
             
             // Comments shimmer
-            ...List.generate(3, (index) => _buildCommentShimmer(context)),
+            ...List.generate(3, (index) => _buildCommentShimmer(context, theme)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildCommentShimmer(BuildContext context) {
+  Widget _buildCommentShimmer(BuildContext context, OneUITheme theme) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardBackground,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -227,8 +230,8 @@ class CaseDiscussionShimmer extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
-                  color: Colors.grey,
+                decoration: BoxDecoration(
+                  color: theme.divider,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -241,14 +244,14 @@ class CaseDiscussionShimmer extends StatelessWidget {
                     Container(
                       width: 100,
                       height: 15,
-                      color: Colors.grey,
+                      color: theme.divider,
                     ),
                     const SizedBox(height: 4),
                     // Specialty
                     Container(
                       width: 80,
                       height: 12,
-                      color: Colors.grey,
+                      color: theme.divider,
                     ),
                   ],
                 ),
@@ -257,7 +260,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
               Container(
                 width: 60,
                 height: 12,
-                color: Colors.grey,
+                color: theme.divider,
               ),
             ],
           ),
@@ -267,13 +270,13 @@ class CaseDiscussionShimmer extends StatelessWidget {
           Container(
             width: double.infinity,
             height: 14,
-            color: Colors.grey,
+            color: theme.divider,
           ),
           const SizedBox(height: 6),
           Container(
             width: MediaQuery.of(context).size.width * 0.6,
             height: 14,
-            color: Colors.grey,
+            color: theme.divider,
           ),
           const SizedBox(height: 16),
           
@@ -284,7 +287,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                 width: 50,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -293,7 +296,7 @@ class CaseDiscussionShimmer extends StatelessWidget {
                 width: 50,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: Colors.grey,
+                  color: theme.divider,
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),

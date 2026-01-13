@@ -1,12 +1,12 @@
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
-import 'package:nb_utils/nb_utils.dart';
 
-/// Enhanced memory-optimized job item widget with modern design
+/// Enhanced memory-optimized job item widget with One UI 8.5 design
 class MemoryOptimizedJobItem extends StatefulWidget {
-  final dynamic jobData; // Replace with your specific job model type
+  final dynamic jobData;
   final VoidCallback onJobTap;
   final VoidCallback onShareTap;
   final Function(String) onApplyTap;
@@ -27,42 +27,26 @@ class MemoryOptimizedJobItem extends StatefulWidget {
 
 class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
   bool _isDescriptionExpanded = false;
-  
+
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return RepaintBoundary(
       child: GestureDetector(
         onTap: widget.onJobTap,
         child: Container(
           margin: const EdgeInsets.only(bottom: 12, left: 16, right: 16),
-          decoration: BoxDecoration(
-            color: context.cardColor,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                spreadRadius: 0,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+          decoration: theme.cardDecoration,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: theme.radiusL,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Job Header
-                _buildJobHeader(),
-                
-                // Job Content
-                _buildJobContent(),
-                
-                // Job Details
-                _buildJobDetails(),
-                
-                // Action Row
-                _buildActionRow(),
+                _buildJobHeader(theme),
+                _buildJobContent(theme),
+                _buildJobDetails(theme),
+                _buildActionRow(theme),
               ],
             ),
           ),
@@ -71,13 +55,10 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
     );
   }
 
-  // Job header section with company logo and actions
-  Widget _buildJobHeader() {
+  Widget _buildJobHeader(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-      ),
+      color: theme.cardBackground,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -86,77 +67,75 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  theme.primary.withOpacity(0.15),
+                  theme.secondary.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: theme.radiusM,
             ),
             child: Center(
               child: Icon(
                 Icons.work_outline_rounded,
-                color: Colors.blue[600],
+                color: theme.primary,
                 size: 28,
               ),
             ),
           ),
           const SizedBox(width: 12),
-          
+
           // Job Title and Company
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Job Title
                 Text(
                   widget.jobData.jobTitle ?? "",
                   style: TextStyle(
-                    color: Colors.blue[800],
+                    color: theme.primary,
                     fontSize: 16,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
-                
-                // Company Name
                 Text(
                   widget.jobData.companyName ?? 'N/A',
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: theme.bodyMedium,
                 ),
                 const SizedBox(height: 8),
-                
-                // Location and Sponsored Badge
                 Row(
                   children: [
                     Icon(
                       Icons.location_on_outlined,
                       size: 16,
-                      color: Colors.grey[600],
+                      color: theme.textSecondary,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         widget.jobData.location ?? 'N/A',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
-                        ),
+                        style: theme.caption,
                       ),
                     ),
-                    if (widget.jobData.promoted != 0)
+                    if (widget.jobData.promoted != null &&
+                        widget.jobData.promoted != 0)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          color: theme.warning.withOpacity(0.15),
+                          borderRadius: theme.radiusM,
                         ),
                         child: Text(
                           'Sponsored',
                           style: TextStyle(
-                            color: Colors.orange[700],
+                            color: theme.warning,
                             fontSize: 10,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
@@ -168,20 +147,20 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
               ],
             ),
           ),
-          
-          // Actions (Share)
+
+          // Share button
           IconButton(
             onPressed: widget.onShareTap,
             icon: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: theme.iconButtonBg,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.share_outlined,
                 size: 18,
-                color: Colors.grey[600],
+                color: theme.iconColor,
               ),
             ),
           ),
@@ -190,18 +169,12 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
     );
   }
 
-  // Job content section with experience and language
-  Widget _buildJobContent() {
+  Widget _buildJobContent(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
+        color: theme.surfaceVariant.withOpacity(0.5),
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
       child: Row(
         children: [
@@ -213,26 +186,19 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                 Icon(
                   Icons.work_history_outlined,
                   size: 20,
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Experience',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      Text('Experience', style: theme.caption),
                       Text(
                         widget.jobData.experience ?? 'Not specified',
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: TextStyle(
+                          color: theme.textPrimary,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -244,7 +210,7 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
               ],
             ),
           ),
-          
+
           // Language Info
           Expanded(
             flex: 4,
@@ -253,26 +219,19 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                 Icon(
                   Icons.language_outlined,
                   size: 20,
-                  color: Colors.grey[600],
+                  color: theme.textSecondary,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Language',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
+                      Text('Language', style: theme.caption),
                       Text(
                         widget.jobData.preferredLanguage ?? 'Any',
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: TextStyle(
+                          color: theme.textPrimary,
                           fontSize: 14,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
@@ -289,20 +248,14 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
     );
   }
 
-  // Job details section with dates and description
-  Widget _buildJobDetails() {
+  Widget _buildJobDetails(OneUITheme theme) {
     String description = widget.jobData.description ?? "";
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
+        color: theme.cardBackground,
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,7 +268,8 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                   'Application Start',
                   widget.jobData.createdAt,
                   Icons.calendar_today_outlined,
-                  Colors.green,
+                  theme.success,
+                  theme,
                 ),
               ),
               const SizedBox(width: 16),
@@ -324,89 +278,90 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                   'Application End',
                   widget.jobData.lastDate,
                   Icons.event_outlined,
-                  Colors.red,
+                  theme.error,
+                  theme,
                 ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Description
-          Text(
-            'Job Description',
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 12,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
+
+          if (description.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              'Job Description',
+              style: TextStyle(
+                color: theme.textSecondary,
+                fontSize: 12,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: _isDescriptionExpanded ? double.infinity : 60,
-            ),
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: HtmlWidget(
-                '<p>${description}</p>',
-                textStyle: TextStyle(
-                  fontSize: 13,
-                  fontFamily: 'Poppins',
-                  color: Colors.grey[700],
-                  height: 1.4,
+            const SizedBox(height: 8),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: _isDescriptionExpanded ? double.infinity : 60,
+              ),
+              child: SingleChildScrollView(
+                physics: _isDescriptionExpanded
+                    ? const ClampingScrollPhysics()
+                    : const NeverScrollableScrollPhysics(),
+                child: HtmlWidget(
+                  '<p>$description</p>',
+                  textStyle: TextStyle(
+                    fontSize: 13,
+                    fontFamily: 'Poppins',
+                    color: theme.textSecondary,
+                    height: 1.4,
+                  ),
                 ),
               ),
             ),
-          ),
-          if (description.length > 100)
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _isDescriptionExpanded = !_isDescriptionExpanded;
-                });
-              },
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-              ),
-              child: Text(
-                _isDescriptionExpanded ? 'Show Less' : 'Show More',
-                style: TextStyle(
-                  color: Colors.blue[600],
-                  fontSize: 12,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
+            if (description.length > 100)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _isDescriptionExpanded = !_isDescriptionExpanded;
+                    });
+                  },
+                  child: Text(
+                    _isDescriptionExpanded ? 'See less' : 'See more',
+                    style: TextStyle(
+                      color: theme.primary,
+                      fontSize: 13,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
-            ),
+          ],
         ],
       ),
     );
   }
 
-  // Helper method to build date info
-  Widget _buildDateInfo(String title, String? date, IconData icon, Color color) {
+  Widget _buildDateInfo(
+    String title,
+    String? date,
+    IconData icon,
+    Color color,
+    OneUITheme theme,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
-        ),
+        borderRadius: theme.radiusM,
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: color,
-              ),
+              Icon(icon, size: 16, color: color),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -427,7 +382,7 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                 ? DateFormat('MMM dd, yyyy').format(DateTime.parse(date))
                 : 'Not specified',
             style: TextStyle(
-              color: Colors.grey[700],
+              color: theme.textSecondary,
               fontSize: 13,
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w500,
@@ -438,18 +393,12 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
     );
   }
 
-  // Action row section with apply and visit site buttons
-  Widget _buildActionRow() {
+  Widget _buildActionRow(OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.05),
-        border: Border(
-          top: BorderSide(
-            color: Colors.grey.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
+        color: theme.surfaceVariant.withOpacity(0.5),
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
       ),
       child: Row(
         children: [
@@ -458,19 +407,18 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
             Expanded(
               flex: 2,
               child: ElevatedButton(
-                onPressed: () => widget.onApplyTap(widget.jobData.id.toString()),
+                onPressed: () =>
+                    widget.onApplyTap(widget.jobData.id.toString()),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
+                  backgroundColor: theme.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: theme.radiusXL),
                   elevation: 0,
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.send_outlined, size: 16),
                     SizedBox(width: 6),
                     Text(
@@ -485,48 +433,58 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                 ),
               ),
             ),
-          
+
           if (widget.jobData.user?.id != null) const SizedBox(width: 12),
-          
+
           // Visit Site Button
           Expanded(
             flex: widget.jobData.user?.id != null ? 2 : 1,
             child: OutlinedButton(
               onPressed: () async {
                 final Uri url = Uri.parse(widget.jobData.link ?? '');
-                final BuildContext currentContext = context;
-                final shouldLeave = await _showConfirmationDialog(currentContext);
+                final shouldLeave = await _showConfirmationDialog(
+                  context,
+                  theme,
+                );
                 if (!mounted) return;
-                
+
                 if (shouldLeave == true) {
                   widget.onLaunchLink(url);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(translation(context).msg_leaving_app_canceled),
+                      content: Text(
+                        translation(context).msg_leaving_app_canceled,
+                      ),
                     ),
                   );
                 }
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.blue[600],
-                side: BorderSide(color: Colors.blue.withOpacity(0.3), width: 1),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                foregroundColor: theme.primary,
+                side: BorderSide(
+                  color: theme.primary.withOpacity(0.3),
+                  width: 1,
                 ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: theme.radiusXL),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.open_in_new_outlined, size: 16),
-                  SizedBox(width: 6),
+                children: [
+                  Icon(
+                    Icons.open_in_new_outlined,
+                    size: 16,
+                    color: theme.primary,
+                  ),
+                  const SizedBox(width: 6),
                   Text(
                     'Visit Site',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
+                      color: theme.primary,
                     ),
                   ),
                 ],
@@ -538,21 +496,37 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
     );
   }
 
-  // Confirmation dialog
-  Future<bool?> _showConfirmationDialog(BuildContext context) async {
+  Future<bool?> _showConfirmationDialog(
+    BuildContext context,
+    OneUITheme theme,
+  ) async {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(translation(context).lbl_leave_app),
-        content: Text(translation(context).msg_open_link_confirm),
+        backgroundColor: theme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: theme.radiusL),
+        title: Text(
+          translation(context).lbl_leave_app,
+          style: theme.titleMedium,
+        ),
+        content: Text(
+          translation(context).msg_open_link_confirm,
+          style: theme.bodyMedium,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(translation(context).lbl_no_answer),
+            child: Text(
+              translation(context).lbl_no_answer,
+              style: TextStyle(color: theme.textSecondary),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(translation(context).lbl_yes),
+            child: Text(
+              translation(context).lbl_yes,
+              style: TextStyle(color: theme.primary),
+            ),
           ),
         ],
       ),

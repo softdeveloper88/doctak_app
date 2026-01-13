@@ -4,6 +4,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/bloc/conference_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/bloc/conference_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/memory_optimized_conference_item.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/shimmer_widget/conferences_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -37,28 +38,48 @@ class _VirtualizedConferencesListState
   @override
   Widget build(BuildContext context) {
     final bloc = widget.conferenceBloc;
+    final theme = OneUITheme.of(context);
 
     return bloc.conferenceList.isEmpty
-        ? _buildEmptyState(context)
-        : _buildVirtualizedConferencesList();
+        ? _buildEmptyState(context, theme)
+        : _buildVirtualizedConferencesList(theme);
   }
 
-  // Empty state widget
-  Widget _buildEmptyState(BuildContext context) {
+  // Empty state widget - One UI 8.5 style
+  Widget _buildEmptyState(BuildContext context, OneUITheme theme) {
     return Center(
-      child: Text(
-        translation(context).msg_no_conference_found,
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 16,
-          color: Colors.grey[600],
-        ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Icon(
+              Icons.event_busy_rounded,
+              size: 48,
+              color: theme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            translation(context).msg_no_conference_found,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: theme.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   // Virtualized list implementation
-  Widget _buildVirtualizedConferencesList() {
+  Widget _buildVirtualizedConferencesList(OneUITheme theme) {
     final bloc = widget.conferenceBloc;
 
     return ListView.builder(

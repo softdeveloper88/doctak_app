@@ -1,31 +1,18 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'work_education_model.g.dart';
-
-@JsonSerializable()
 class WorkEducationModel {
   int? id;
-  @JsonKey(name: 'user_id')
   String? userId;
-  @JsonKey(name: 'work_type')
   String? workType;
   String? name;
   String? position;
   String? address;
-  @JsonKey(name: 'start_date')
   String? startDate;
-  @JsonKey(name: 'end_date')
   String? endDate;
-  @JsonKey(name: 'current_status')
   String? currentStatus;
   String? degree;
   String? courses;
   String? description;
-  @JsonKey(name: 'created_at')
   String? createdAt;
-  @JsonKey(name: 'updated_at')
   String? updatedAt;
-  @JsonKey(name: 'privacy')
   String? privacy;
 
   WorkEducationModel({
@@ -46,8 +33,43 @@ class WorkEducationModel {
     this.privacy,
   });
 
-  factory WorkEducationModel.fromJson(Map<String, dynamic> json) =>
-      _$WorkEducationModelFromJson(json);
+  factory WorkEducationModel.fromJson(Map<String, dynamic> json) {
+    return WorkEducationModel(
+      id: json['id'] as int?,
+      userId: json['user_id'] as String?,
+      workType: json['work_type'] as String?,
+      name: json['name'] as String?,
+      position: json['position'] as String?,
+      address: json['address'] as String?,
+      startDate: json['start_date'] as String?,
+      endDate: json['end_date'] as String?,
+      currentStatus: json['current_status'] as String?,
+      degree: json['degree'] as String?,
+      courses: json['courses'] as String?,
+      description: json['description'] as String?,
+      createdAt: json['created_at'] as String?,
+      updatedAt: json['updated_at'] as String?,
+      privacy: json['privacy'] as String?,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$WorkEducationModelToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'work_type': workType,
+      'name': name,
+      'position': position,
+      'address': address,
+      'start_date': startDate,
+      'end_date': endDate,
+      'current_status': currentStatus,
+      'degree': degree,
+      'courses': courses,
+      'description': description,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+      'privacy': privacy,
+    };
+  }
 }

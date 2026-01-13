@@ -146,6 +146,7 @@
   "msg_login_success": "ورود با موفقیت انجام شد",
   "msg_login_failed": "ورود ناموفق بود، لطفاً دوباره تلاش کنید",
   "msg_something_wrong": "مشکلی پیش آمد.",
+  "msg_google_signin_failed": "ورود با گوگل ناموفق بود. لطفاً دوباره امتحان کنید.",
   "msg_verification_link_sent": "لینک تأیید با موفقیت ارسال شد",
   "msg_validation_error": "خطای اعتبارسنجی یا ایمیل کاربر یافت نشد",
   "msg_user_already_verified": "کاربر قبلاً تأیید شده است",
@@ -925,6 +926,8 @@
 "lbl_disconnecting_in": "قطع اتصال در",
 "lbl_seconds": "ثانیه",
 "lbl_waiting_for_answer": "در انتظار پاسخ",
+"lbl_auto_connecting": "اتصال خودکار...",
+"lbl_requesting_permissions": "درخواست مجوز...",
 
 "@_COMPLETE_PROFILE": {},
   "lbl_complete_your_profile": "پروفایل خود را تکمیل کنید",

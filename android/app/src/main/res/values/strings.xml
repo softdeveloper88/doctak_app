@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Doctak.net</string>
+    
+    <!-- CallKit String Overrides for OneUI 8.5 style -->
+    <string name="callkit_app_name">Doctak.net</string>
+    <string name="callkit_incoming_call">Incoming Call</string>
+    <string name="callkit_outgoing_call">Outgoing Call</string>
+    <string name="callkit_missed_call">Missed Call</string>
+    <string name="callkit_accept">Accept</string>
+    <string name="callkit_decline">Decline</string>
+    <string name="callkit_end">End</string>
+    <string name="callkit_callback">Call Back</string>
+    <string name="callkit_video_call">Video Call</string>
+    <string name="callkit_audio_call">Audio Call</string>
+    
+    <!-- Channel names -->
+    <string name="callkit_incoming_channel_name">Doctak.net Calls</string>
+    <string name="callkit_missed_channel_name">Doctak.net Missed Calls</string>
+</resources>

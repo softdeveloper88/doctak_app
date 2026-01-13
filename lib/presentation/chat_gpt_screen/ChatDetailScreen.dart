@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
@@ -146,8 +145,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               // Default behavior for main screen
               isEmpty = state1.response1.messages?.isEmpty ?? false;
             }
+            final theme = OneUITheme.of(context);
             return Scaffold(
-              backgroundColor: svGetBgColor(),
+              backgroundColor: theme.scaffoldBackground,
               appBar: DoctakAppBar(
                 title: "DocTak AI",
                 titleIcon: Icons.psychology_rounded,
@@ -162,12 +162,12 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: theme.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.history_rounded,
-                        color: Colors.blue[600],
+                        color: theme.primary,
                         size: 16,
                       ),
                     ),
@@ -249,9 +249,15 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: appStore.isDarkMode
-                                ? [Colors.blueGrey[900]!, Colors.blueGrey[800]!]
-                                : [Colors.white, Colors.blue.withAlpha(13)],
+                            colors: theme.isDark
+                                ? [
+                                    theme.scaffoldBackground,
+                                    theme.cardBackground,
+                                  ]
+                                : [
+                                    theme.scaffoldBackground,
+                                    theme.primary.withAlpha(13),
+                                  ],
                           ),
                         ),
                         child: SafeArea(
@@ -272,14 +278,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       begin: Alignment.topLeft,
                                       end: Alignment.bottomRight,
                                       colors: [
-                                        Colors.blue[400]!,
-                                        Colors.blue[700]!,
+                                        theme.primary.withOpacity(0.8),
+                                        theme.primary,
                                       ],
                                     ),
                                     shape: BoxShape.circle,
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.blue.withAlpha(77),
+                                        color: theme.primary.withAlpha(77),
                                         spreadRadius: 3,
                                         blurRadius: 20,
                                         offset: const Offset(0, 8),
@@ -302,9 +308,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     fontSize: 28,
                                     fontWeight: FontWeight.w700,
                                     fontFamily: 'Poppins',
-                                    color: appStore.isDarkMode
-                                        ? Colors.white
-                                        : Colors.blue[900],
+                                    color: theme.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -314,9 +318,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontFamily: 'Poppins',
-                                    color: appStore.isDarkMode
-                                        ? Colors.grey[300]
-                                        : Colors.grey[600],
+                                    color: theme.textSecondary,
                                     height: 1.5,
                                   ),
                                 ),
@@ -387,9 +389,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontFamily: 'Poppins',
-                                    color: appStore.isDarkMode
-                                        ? Colors.grey[400]
-                                        : Colors.grey[600],
+                                    color: theme.textSecondary,
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -554,7 +554,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       ),
                     ),
                   Container(
-                    color: context.cardColor,
+                    color: theme.cardBackground,
                     padding: EdgeInsets.only(
                       left: 10.0,
                       right: 10.0,
@@ -630,15 +630,15 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: theme.inputBackground,
                               border: Border.all(
-                                color: Colors.grey.withOpacity(0.3),
+                                color: theme.primary.withOpacity(0.2),
                                 width: 1,
                               ),
                               borderRadius: BorderRadius.circular(25.0),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: theme.primary.withOpacity(0.05),
                                   offset: const Offset(0, 2),
                                   blurRadius: 8,
                                   spreadRadius: 0,
@@ -650,13 +650,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                               controller: textController,
                               minLines: 1,
                               maxLines: 4,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontFamily: 'Poppins',
+                                color: theme.textPrimary,
                               ),
                               decoration: InputDecoration(
                                 hintStyle: TextStyle(
-                                  color: Colors.grey[500],
+                                  color: theme.textSecondary,
                                   fontSize: 16,
                                   fontFamily: 'Poppins',
                                 ),
@@ -809,14 +810,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
-                                      Colors.blue[400]!,
-                                      Colors.blue[700]!,
+                                      theme.primary.withOpacity(0.8),
+                                      theme.primary,
                                     ],
                                   ),
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.blue.withOpacity(0.3),
+                                      color: theme.primary.withOpacity(0.3),
                                       offset: const Offset(0, 2),
                                       blurRadius: 8,
                                       spreadRadius: 0,
@@ -839,14 +840,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.all(4),
-                    color: Colors.white,
+                    color: theme.cardBackground,
                     child: Marquee(
                       pauseDuration: const Duration(milliseconds: 100),
                       direction: Axis.horizontal,
                       directionMarguee: DirectionMarguee.oneDirection,
                       textDirection: TextDirection.ltr,
-                      child: const Text(
+                      child: Text(
                         'Artificial Intelligence can make mistakes. Consider checking important information.',
+                        style: TextStyle(
+                          color: theme.textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -945,13 +950,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     Color color,
     VoidCallback onTap,
   ) {
+    final theme = OneUITheme.of(context);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: color.withOpacity(0.2), width: 1),
           boxShadow: [
@@ -982,7 +988,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Poppins',
-                color: Colors.grey[800],
+                color: theme.textPrimary,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
@@ -994,7 +1000,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontFamily: 'Poppins',
-                color: Colors.grey[600],
+                color: theme.textSecondary,
               ),
               textAlign: TextAlign.center,
               maxLines: 2,

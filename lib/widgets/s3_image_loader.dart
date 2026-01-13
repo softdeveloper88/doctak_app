@@ -1,10 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/material.dart';
 
 import '../core/network/custom_cache_manager.dart';
 
-/// Enhanced S3 image loader with retry logic and better error handling
+/// Enhanced S3 image loader with retry logic, OneUI 8.5 theming, and better error handling
 class S3ImageLoader extends StatefulWidget {
   final String imageUrl;
   final double? width;
@@ -37,6 +38,8 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return CachedNetworkImage(
       imageUrl: widget.imageUrl,
       width: widget.width,
@@ -44,8 +47,10 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
       fit: widget.fit,
       cacheManager: CustomCacheManager(),
       httpHeaders: _getS3Headers(),
-      placeholder: (context, url) => widget.placeholder ?? _buildDefaultPlaceholder(),
-      errorWidget: (context, url, error) => _handleError(context, url, error),
+      placeholder: (context, url) =>
+          widget.placeholder ?? _buildDefaultPlaceholder(theme),
+      errorWidget: (context, url, error) =>
+          _handleError(context, url, error, theme),
     );
   }
 
@@ -58,7 +63,6 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
-      // S3 specific headers
       'x-amz-acl': 'public-read',
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
@@ -66,34 +70,42 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
     };
   }
 
-  Widget _buildDefaultPlaceholder() {
+  Widget _buildDefaultPlaceholder(OneUITheme theme) {
     return Container(
       width: widget.width,
       height: widget.height,
-      color: Colors.grey[200],
-      child: const Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+          ),
         ),
       ),
     );
   }
 
-  Widget _handleError(BuildContext context, String url, dynamic error) {
-    print('🚨 S3ImageLoader error for URL: $url');
-    print('🚨 Error details: $error');
-    print('🚨 Error type: ${error.runtimeType}');
-    print('🚨 Retry count: $_retryCount');
+  Widget _handleError(
+    BuildContext context,
+    String url,
+    dynamic error,
+    OneUITheme theme,
+  ) {
+    debugPrint('\ud83d\udea8 S3ImageLoader error for URL: $url');
+    debugPrint('\ud83d\udea8 Error details: $error');
 
-    // If we haven't exceeded max retries and not already retrying
     if (_retryCount < widget.maxRetries && !_isRetrying) {
       _scheduleRetry();
-      return _buildRetryingWidget();
+      return _buildRetryingWidget(theme);
     }
 
-    // If we've exceeded retries, show final error
-    return widget.errorWidget ?? _buildDefaultErrorWidget();
+    return widget.errorWidget ?? _buildDefaultErrorWidget(theme);
   }
 
   void _scheduleRetry() {
@@ -108,28 +120,31 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
     });
   }
 
-  Widget _buildRetryingWidget() {
+  Widget _buildRetryingWidget(OneUITheme theme) {
     return Container(
       width: widget.width,
       height: widget.height,
-      color: Colors.orange[50],
+      decoration: BoxDecoration(
+        color: theme.warning.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 24,
             height: 24,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+              valueColor: AlwaysStoppedAnimation<Color>(theme.warning),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'Retrying... ($_retryCount/${widget.maxRetries})',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: Colors.orange,
+              color: theme.warning,
               fontFamily: 'Poppins',
             ),
           ),
@@ -138,24 +153,23 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
     );
   }
 
-  Widget _buildDefaultErrorWidget() {
+  Widget _buildDefaultErrorWidget(OneUITheme theme) {
     return Container(
       width: widget.width,
       height: widget.height,
-      color: Colors.red[50],
-      child: const Column(
+      decoration: BoxDecoration(
+        color: theme.error.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.broken_image_rounded,
-            color: Colors.red,
-            size: 32,
-          ),
-          SizedBox(height: 4),
+          Icon(Icons.broken_image_rounded, color: theme.error, size: 32),
+          const SizedBox(height: 4),
           Text(
             'Image failed to load',
             style: TextStyle(
-              color: Colors.red,
+              color: theme.error,
               fontSize: 12,
               fontFamily: 'Poppins',
             ),
@@ -169,11 +183,11 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
 /// Dio-based image validator for S3 URLs
 class S3ImageValidator {
   static final Dio _dio = Dio();
-  
+
   static Future<bool> validateS3Url(String url) async {
     try {
-      print('🔍 Validating S3 URL: $url');
-      
+      debugPrint('\ud83d\udd0d Validating S3 URL: $url');
+
       final response = await _dio.head(
         url,
         options: Options(
@@ -187,13 +201,11 @@ class S3ImageValidator {
           sendTimeout: const Duration(seconds: 10),
         ),
       );
-      
-      print('🔍 S3 validation response: ${response.statusCode}');
-      print('🔍 S3 headers: ${response.headers.map}');
-      
+
+      debugPrint('\ud83d\udd0d S3 validation response: ${response.statusCode}');
       return response.statusCode == 200;
     } catch (e) {
-      print('🚨 S3 validation error: $e');
+      debugPrint('\ud83d\udea8 S3 validation error: $e');
       return false;
     }
   }
