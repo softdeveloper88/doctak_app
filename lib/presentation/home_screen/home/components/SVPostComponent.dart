@@ -1,6 +1,7 @@
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
@@ -200,7 +201,10 @@ class _SVPostComponentState extends State<SVPostComponent>
                           ).launch(context);
                         },
                         onShareTap: () {
-                          // Share functionality can be added here
+                          DeepLinkService.sharePost(
+                            postId: post.id ?? 0,
+                            title: post.title,
+                          );
                         },
                         onAddComment: (value) {
                           CommentBloc().add(

@@ -23,6 +23,8 @@ enum CallEndReason {
   userEnded,               // User intentionally ended the call
   remoteUserEnded,         // Remote user ended the call
   remoteUserNoAnswer,      // Remote user did not answer (timeout)
+  callerCancelled,         // Caller cancelled the call before it was answered
+  callCancelledByRemote,   // Call was cancelled by remote party (receiver side)
   networkDisconnect,       // Call ended due to network issues
   callFailed,              // Call failed to connect
   permissionDenied,        // Permissions were denied

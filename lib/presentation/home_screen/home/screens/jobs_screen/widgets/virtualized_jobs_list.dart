@@ -1,5 +1,6 @@
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
@@ -10,7 +11,6 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/wid
 import 'package:doctak_app/widgets/shimmer_widget/jobs_shimmer_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 /// A virtualized list of jobs that only renders items when they're visible
@@ -129,10 +129,12 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
 
   // Share job
   void _shareJob(dynamic job) {
-    final jobTitle = job.jobTitle ?? "";
-    final jobLink = job.link ?? "";
-
-    Share.share('Check out this job: $jobTitle\n$jobLink');
+    DeepLinkService.shareJob(
+      jobId: job.id?.toString() ?? '',
+      title: job.jobTitle,
+      company: job.companyName,
+      location: job.location,
+    );
   }
 
   // Show job application dialog

@@ -283,6 +283,10 @@ class CallProvider extends ChangeNotifier {
     // Enable audio by default
     _agoraService.muteLocalAudioStream(false);
     CallDebugUtils.logDebug('MEDIA', 'Local audio enabled');
+    
+    // Verify call is still active on the server after joining
+    // This helps detect if caller cancelled while we were connecting
+    _verifyCallStillActive();
   }
 
   // void _handleUserJoined(int remoteUid, int elapsed) {
@@ -1038,6 +1042,79 @@ class CallProvider extends ChangeNotifier {
     _stopWaitingForRemoteUserTimer();
   }
 
+  /// Verify that the call is still active on the server
+  /// This helps detect if caller cancelled while we were connecting
+  /// NOTE: We should be very careful with this for incoming calls as the status
+  /// might still be propagating on the server side
+  Future<void> _verifyCallStillActive() async {
+    if (!mounted) return;
+    
+    // Longer delay to allow for server-side state propagation
+    // This is critical for incoming calls where status updates may take time
+    await Future.delayed(const Duration(milliseconds: 3000));
+    
+    if (!mounted || _callState.isRemoteUserJoined) {
+      // If remote user already joined, no need to verify
+      return;
+    }
+    
+    // Also skip if we're already in connected state
+    if (_callState.connectionState == CallConnectionState.connected) {
+      print('📞 Skipping call verification - already connected');
+      return;
+    }
+    
+    try {
+      final apiService = CallApiService(baseUrl: AppData.remoteUrl3);
+      final result = await apiService.checkCallActive(callId: _callState.callId);
+      
+      if (!mounted) return;
+      
+      // Double-check remote user hasn't joined during the API call
+      if (_callState.isRemoteUserJoined) {
+        print('📞 Remote user joined during verification - skipping');
+        return;
+      }
+      
+      final isActive = result['is_active'] == true;
+      final status = result['status']?.toString() ?? 'unknown';
+      
+      print('📞 Call status verification: isActive=$isActive, status=$status');
+      
+      // Only end the call for DEFINITIVE ended states
+      // Be very conservative to avoid false positives
+      if (!isActive && (status == 'cancelled' || status == 'ended' || status == 'rejected')) {
+        // Call is definitely no longer active
+        CallEndReason endReason;
+        if (status == 'cancelled') {
+          endReason = CallEndReason.callCancelledByRemote;
+          print('📞 Call was cancelled by remote party - ending gracefully');
+        } else if (status == 'rejected') {
+          endReason = CallEndReason.callerCancelled;
+          print('📞 Call was rejected - ending gracefully');
+        } else {
+          endReason = CallEndReason.remoteUserEnded;
+          print('📞 Call was ended - ending gracefully');
+        }
+        
+        _updateCallState(
+          callEndReason: endReason,
+          connectionState: CallConnectionState.failed,
+        );
+        
+        // Give UI time to show the message before ending
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) endCall();
+        });
+      } else {
+        print('📞 Call verification passed - call is still active or status is ambiguous');
+      }
+    } catch (e) {
+      print('📞 Error verifying call status: $e');
+      // Don't end call on verification error - continue normally
+    }
+  }
+
   // Getter for call end reason (used by UI)
   CallEndReason get callEndReason => _callEndReason;
 
@@ -1159,6 +1236,14 @@ class CallProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  /// Public method to update call end reason (called from CallScreen when remote cancels)
+  void setCallEndReason(CallEndReason reason, {CallConnectionState? connectionState}) {
+    _updateCallState(
+      callEndReason: reason,
+      connectionState: connectionState ?? CallConnectionState.failed,
+    );
   }
 
   // Enhanced user joined handler with better synchronization

@@ -315,6 +315,8 @@ class PiPService {
         if (_iosAgoraPiPService.isActive) {
           await _iosAgoraPiPService.stop();
         }
+        // Disable auto-enter
+        await _iosAgoraPiPService.setAutoEnabled(false);
       }
       _isPiPEnabled = false;
       _isPiPAllowed = false; // Reset allowed flag
@@ -456,6 +458,8 @@ class PiPService {
         final nativeSupported = await _iosAgoraPiPService.isSupported();
         if (nativeSupported) {
           await _iosAgoraPiPService.setup();
+          // Enable auto-enter for iOS using AVPictureInPictureController
+          await _iosAgoraPiPService.setAutoEnabled(true);
           debugPrint('📺 PiP: iOS native Agora PiP auto-configured');
         } else {
           debugPrint('📺 PiP: iOS native PiP not supported');
@@ -517,6 +521,9 @@ class PiPService {
       } else if (Platform.isIOS) {
         // FIRST: Cancel any pending PiP operations in native side
         await _iosAgoraPiPService.cancelPending();
+
+        // Temporarily disable auto-enter
+        await _iosAgoraPiPService.setAutoEnabled(false);
         
         // Only stop PiP if it's been active for a minimum duration
         // This prevents stopping PiP on brief lifecycle transitions (e.g., control center swipe)
@@ -555,18 +562,27 @@ class PiPService {
       debugPrint('📺 PiP: Resume grace period ENDED');
       
       // Re-enable auto-enter on Android if still in a call screen
-      if (Platform.isAndroid && _isPiPAllowed) {
-        try {
-          await _pipAndroid.setup(
-            pip_pkg.PipOptions(
-              autoEnterEnabled: true,
-              aspectRatioX: 9,
-              aspectRatioY: 16,
-            ),
-          );
-          debugPrint('📺 PiP: Android auto-enter RE-ENABLED');
-        } catch (e) {
-          debugPrint('📺 PiP: Android re-enable error: $e');
+      if (_isPiPAllowed) {
+        if (Platform.isAndroid) {
+          try {
+            await _pipAndroid.setup(
+              pip_pkg.PipOptions(
+                autoEnterEnabled: true,
+                aspectRatioX: 9,
+                aspectRatioY: 16,
+              ),
+            );
+            debugPrint('📺 PiP: Android auto-enter RE-ENABLED');
+          } catch (e) {
+            debugPrint('📺 PiP: Android re-enable error: $e');
+          }
+        } else if (Platform.isIOS) {
+          try {
+            await _iosAgoraPiPService.setAutoEnabled(true);
+            debugPrint('📺 PiP: iOS auto-enter RE-ENABLED');
+          } catch (e) {
+            debugPrint('📺 PiP: iOS re-enable error: $e');
+          }
         }
       }
     });

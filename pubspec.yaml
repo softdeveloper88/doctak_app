@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.1.1+117
+version: 3.1.1+118
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -56,6 +56,7 @@ dependencies:
 #  permission_handler: ^11.1.0
 #  images_picker: ^1.2.11
 #  image_pickers: ^2.0.5+2
+  app_links: ^7.0.0
   dio: ^5.4.0
   nb_utils: ^7.1.8
   one_context: ^4.0.0
@@ -86,7 +87,7 @@ dependencies:
   flutter_quill: ^11.4.1
 #  quill_html_converter: ^9.4.0
 #  html_editor_enhanced: ^2.6.0
-  # app_links: ^6.4.1  # TODO: Temporarily disabled - requires SDK ^3.10.0, we have 3.9.2
+  # app_links dependency moved to main dependencies section with version 7.0.0
 #  flutter_html: ^3.0.0-beta.2
 #  fluttertoast: ^8.2.6
 #  flutter_background_service: ^5.0.1

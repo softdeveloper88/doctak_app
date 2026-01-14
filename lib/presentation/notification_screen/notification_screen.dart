@@ -86,7 +86,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: Column(
         children: [
-          // Filter toggle buttons
+          // Filter toggle buttons with edge-to-edge support
           Container(
             color: theme.scaffoldBackground,
             child: AnimatedContainer(
@@ -95,16 +95,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
                 child: isFilterShow
-                    ? Container(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16.0,
-                          vertical: 8.0,
-                        ),
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: theme.surfaceVariant,
-                          borderRadius: BorderRadius.circular(25),
-                        ),
+                    ? SafeArea(
+                        left: true,
+                        right: true,
+                        top: false,
+                        bottom: false,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8.0,
+                          ),
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: theme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(25),
+                          ),
                         child: Row(
                           children: [
                             Expanded(
@@ -212,6 +217,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               ),
                             ),
                           ],
+                        ),
                         ),
                       )
                     : const SizedBox(),

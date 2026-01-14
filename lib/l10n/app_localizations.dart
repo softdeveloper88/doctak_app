@@ -547,7 +547,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_logout.
   ///
   /// In en, this message translates to:
-  /// **'Logout'**
+  /// **'Log Out'**
   String get lbl_logout;
 
   /// No description provided for @lbl_delete_account.
@@ -1173,6 +1173,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Call Ended'**
   String get lbl_call_ended;
+
+  /// No description provided for @lbl_call_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Cancelled'**
+  String get lbl_call_cancelled;
 
   /// No description provided for @lbl_connection_lost.
   ///
@@ -3717,6 +3723,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Terms & privacy'**
   String get desc_privacy;
+
+  /// No description provided for @desc_logout.
+  ///
+  /// In en, this message translates to:
+  /// **'End session'**
+  String get desc_logout;
 
   /// No description provided for @lbl_student.
   ///

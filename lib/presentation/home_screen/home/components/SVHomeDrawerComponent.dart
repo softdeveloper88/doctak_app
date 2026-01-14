@@ -43,87 +43,159 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   late Animation<double> _slideAnimation;
   bool _isDisposed = false;
 
-  // One UI 8.5 Color System
+  // One UI 8.5 Color System - Complete
   static const Color _oneUIPrimary = Color(0xFF0A84FF);
+  static const Color _oneUIPrimaryLight = Color(0xFF4DA3FF);
+
+  // Background Colors
   static const Color _oneUIBackgroundDark = Color(0xFF0D1B2A);
+  static const Color _oneUIBackgroundLight = Color(
+    0xFFFFFFFF,
+  ); // White like HTML
+
+  // Surface Colors
   static const Color _oneUISurfaceDark = Color(0xFF1B2838);
-  static const Color _oneUISurfaceVariantDark = Color(0xFF2D3E50);
-  static const Color _oneUIBackgroundLight = Color(0xFFF7F7F7);
   static const Color _oneUISurfaceLight = Color(0xFFFFFFFF);
+  static const Color _oneUISurfaceVariantDark = Color(0xFF2D3E50);
   static const Color _oneUISurfaceVariantLight = Color(0xFFF0F0F0);
+  static const Color _oneUISurfaceElevatedDark = Color(0xFF243447);
+  static const Color _oneUISurfaceElevatedLight = Color(0xFFFAFAFA);
+
+  // Text Colors
   static const Color _oneUITextPrimaryDark = Color(0xFFFFFFFF);
-  static const Color _oneUITextSecondaryDark = Color(0xB3FFFFFF);
   static const Color _oneUITextPrimaryLight = Color(0xFF1C1C1E);
+  static const Color _oneUITextSecondaryDark = Color(0xB3FFFFFF); // 70% white
   static const Color _oneUITextSecondaryLight = Color(0xFF8E8E93);
+  static const Color _oneUITextTertiaryDark = Color(0x80FFFFFF); // 50% white
+  static const Color _oneUITextTertiaryLight = Color(0xFFC7C7CC);
+
+  // Divider & Border Colors
+  static const Color _oneUIDividerDark = Color(0x1AFFFFFF); // 10% white
+  static const Color _oneUIDividerLight = Color(0x1A000000); // 10% black
+  static const Color _oneUIBorderDark = Color(0x33FFFFFF); // 20% white
+  static const Color _oneUIBorderLight = Color(0x33000000); // 20% black
+
+  // Semantic Colors
+  static const Color _oneUISuccess = Color(0xFF34C759);
+  static const Color _oneUIWarning = Color(0xFFFF9500);
+  static const Color _oneUIError = Color(0xFFFF3B30);
+  static const Color _oneUIInfo = Color(0xFF5AC8FA);
+
+  // Accent Colors for menu sections
+  static const Color _oneUIAccentBlue = Color(0xFF3B82F6);
+  static const Color _oneUIAccentBlueBgLight = Color(0xFFEFF6FF);
+  static const Color _oneUIAccentBlueBgDark = Color(0xFF1E3A5F);
+  static const Color _oneUIAccentIndigo = Color(0xFF6366F1);
+  static const Color _oneUIAccentIndigoBgLight = Color(0xFFEEF2FF);
+  static const Color _oneUIAccentIndigoBgDark = Color(0xFF2D2B55);
+  static const Color _oneUIAccentSlate = Color(0xFF64748B);
+  static const Color _oneUIAccentSlateBgLight = Color(0xFFF1F5F9);
+  static const Color _oneUIAccentSlateBgDark = Color(0xFF374151);
 
   // Helper to check dark mode
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
-  // Updated menu items with localization keys
-  static List<MenuItemData> getMenuItems(BuildContext context) {
+  // Helper getters for theme-aware colors
+  Color get _backgroundColor =>
+      _isDark ? _oneUIBackgroundDark : _oneUIBackgroundLight;
+  Color get _surfaceColor => _isDark ? _oneUISurfaceDark : _oneUISurfaceLight;
+  Color get _surfaceVariantColor =>
+      _isDark ? _oneUISurfaceVariantDark : _oneUISurfaceVariantLight;
+  Color get _surfaceElevatedColor =>
+      _isDark ? _oneUISurfaceElevatedDark : _oneUISurfaceElevatedLight;
+  Color get _textPrimaryColor =>
+      _isDark ? _oneUITextPrimaryDark : _oneUITextPrimaryLight;
+  Color get _textSecondaryColor =>
+      _isDark ? _oneUITextSecondaryDark : _oneUITextSecondaryLight;
+  Color get _textTertiaryColor =>
+      _isDark ? _oneUITextTertiaryDark : _oneUITextTertiaryLight;
+  Color get _dividerColor => _isDark ? _oneUIDividerDark : _oneUIDividerLight;
+  Color get _borderColor => _isDark ? _oneUIBorderDark : _oneUIBorderLight;
+
+  // Updated menu items with localization keys and icon color types
+  static List<MenuSection> getMenuSections(BuildContext context) {
     final l10n = translation(context);
     return [
-      MenuItemData(
-        0,
-        Icons.psychology_outlined,
-        l10n.lbl_medical_ai,
-        l10n.desc_medical_ai,
+      MenuSection(
+        title: "CLINICAL PRACTICE",
+        iconColorType: IconColorType.blue,
+        items: [
+          MenuItemData(
+            1,
+            Icons.business_center_outlined,
+            l10n.lbl_jobs,
+            l10n.desc_jobs,
+          ),
+          MenuItemData(
+            2,
+            Icons.medical_services_outlined,
+            l10n.lbl_drugs,
+            l10n.desc_drugs,
+          ),
+          MenuItemData(
+            4,
+            Icons.description_outlined,
+            l10n.lbl_guidelines,
+            l10n.desc_guidelines,
+          ),
+        ],
       ),
-      MenuItemData(
-        1,
-        Icons.business_center_outlined,
-        l10n.lbl_jobs,
-        l10n.desc_jobs,
+      MenuSection(
+        title: "COMMUNITY",
+        iconColorType: IconColorType.indigo,
+        items: [
+          MenuItemData(
+            3,
+            Icons.forum_outlined,
+            l10n.lbl_discussions,
+            l10n.desc_discussions,
+          ),
+          MenuItemData(
+            5,
+            Icons.event_outlined,
+            l10n.lbl_conferences,
+            l10n.desc_conferences,
+          ),
+          MenuItemData(
+            6,
+            Icons.video_call_outlined,
+            l10n.lbl_meetings,
+            l10n.desc_meetings,
+          ),
+          MenuItemData(
+            7,
+            Icons.lightbulb_outline,
+            l10n.lbl_suggestions,
+            l10n.desc_suggestions,
+          ),
+        ],
       ),
-      MenuItemData(
-        2,
-        Icons.medical_services_outlined,
-        l10n.lbl_drugs,
-        l10n.desc_drugs,
+      MenuSection(
+        title: "SYSTEM",
+        iconColorType: IconColorType.slate,
+        items: [
+          MenuItemData(
+            8,
+            Icons.settings_outlined,
+            l10n.lbl_settings,
+            l10n.desc_settings,
+          ),
+          MenuItemData(
+            9,
+            Icons.shield_outlined,
+            l10n.lbl_privacy,
+            l10n.desc_privacy,
+          ),
+          MenuItemData(10, Icons.info_outline, l10n.lbl_about, l10n.desc_about),
+          MenuItemData(
+            11,
+            Icons.logout,
+            l10n.lbl_logout,
+            l10n.desc_logout,
+            isLogout: true,
+          ),
+        ],
       ),
-      MenuItemData(
-        3,
-        Icons.forum_outlined,
-        l10n.lbl_discussions,
-        l10n.desc_discussions,
-      ),
-      MenuItemData(
-        4,
-        Icons.description_outlined,
-        l10n.lbl_guidelines,
-        l10n.desc_guidelines,
-      ),
-      MenuItemData(
-        5,
-        Icons.event_outlined,
-        l10n.lbl_conferences,
-        l10n.desc_conferences,
-      ),
-      MenuItemData(
-        6,
-        Icons.video_call_outlined,
-        l10n.lbl_meetings,
-        l10n.desc_meetings,
-      ),
-      MenuItemData(
-        7,
-        Icons.lightbulb_outline,
-        l10n.lbl_suggestions,
-        l10n.desc_suggestions,
-      ),
-      MenuItemData(
-        8,
-        Icons.settings_outlined,
-        l10n.lbl_settings,
-        l10n.desc_settings,
-      ),
-      MenuItemData(
-        9,
-        Icons.privacy_tip_outlined,
-        l10n.lbl_privacy,
-        l10n.desc_privacy,
-      ),
-      MenuItemData(10, Icons.work_outline, l10n.lbl_about, l10n.desc_about),
     ];
   }
 
@@ -172,48 +244,466 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 
     if (!mounted) return const SizedBox.shrink();
 
-    final l10n = AppLocalizations.of(context)!;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-
     return SafeArea(
       child: Drawer(
         key: const ValueKey('main_drawer'),
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        width: math.max(280, MediaQuery.of(context).size.width * 0.78),
-        child: Container(
-          decoration: BoxDecoration(
-            // Beautiful gradient background - colorful but One UI refined
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: _isDark
-                  ? [
-                      const Color(0xFF0D1B2A),
-                      const Color(0xFF1B2838),
-                      const Color(0xFF152232),
-                    ]
-                  : [
-                      Colors.white,
-                      Colors.blue.shade50,
-                      Colors.blue.shade100.withOpacity(0.5),
-                    ],
-            ),
-          ),
-          child: Column(
-            children: [
-              // Colorful Professional Header with One UI 8.5 refinements
-              _buildColorfulHeader(),
+        backgroundColor: _backgroundColor,
+        width: math.max(300, MediaQuery.of(context).size.width * 0.82),
+        child: Column(
+          children: [
+            // Clean Header
+            _buildCleanHeader(),
 
-              // Optimized Menu Content
-              Expanded(child: _buildOptimizedMenuContent()),
+            // Menu Content
+            Expanded(child: _buildCleanMenuContent()),
 
-              // Colorful Footer with One UI 8.5 style
-              _buildColorfulFooter(l10n, isRtl),
-            ],
+            // Simple Footer
+            _buildSimpleFooter(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Clean header matching HTML design - blue soft background
+  Widget _buildCleanHeader() {
+    final topPadding = MediaQuery.of(context).padding.top;
+
+    return Container(
+      padding: EdgeInsets.only(
+        top: topPadding + 16,
+        left: 20,
+        right: 20,
+        bottom: 20,
+      ),
+      decoration: BoxDecoration(
+        color: _isDark
+            ? _oneUISurfaceDark
+            : _oneUIAccentBlueBgLight, // bg-[var(--brand-bg-soft)] = #EFF6FF
+        border: Border(
+          bottom: BorderSide(
+            color: _isDark
+                ? _dividerColor
+                : const Color(0xFFDBEAFE), // border-blue-100
+            width: 1,
           ),
         ),
       ),
+      child: Row(
+        children: [
+          // Gradient green circular avatar with initials matching HTML design
+          Stack(
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [_oneUISuccess, _oneUISuccess.withOpacity(0.7)],
+                  ),
+                  border: Border.all(color: _surfaceColor, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(_isDark ? 0.3 : 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(32),
+                  child: AppCachedNetworkImage(
+                    imageUrl: AppData.imageUrl + AppData.profile_pic,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Center(
+                      child: Text(
+                        _getInitials(AppData.name),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Center(
+                      child: Text(
+                        _getInitials(AppData.name),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Online status indicator
+              Positioned(
+                bottom: 2,
+                right: 2,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: _oneUISuccess,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: _surfaceColor, width: 2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(width: 14),
+
+          // Name and specialty
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppData.userType == 'doctor'
+                      ? 'Dr. ${capitalizeWords(AppData.name)}'
+                      : capitalizeWords(AppData.name),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _textPrimaryColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                // Blue specialty pill matching HTML design: bg-blue-100 text-blue-700
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _isDark
+                        ? _oneUIPrimary.withOpacity(0.2)
+                        : const Color(0xFFDBEAFE),  // bg-blue-100 for better visibility
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    AppData.userType == 'doctor'
+                        ? AppData.specialty
+                        : AppData.userType == 'student'
+                        ? '${AppData.university} Student'
+                        : AppData.specialty,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: _isDark ? _oneUIPrimaryLight : const Color(0xFF1D4ED8),  // text-blue-700
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Clean menu content matching HTML design
+  Widget _buildCleanMenuContent() {
+    final l10n = translation(context);
+
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      physics: const BouncingScrollPhysics(),
+      children: [
+        // Doctak AI Card (special top item) - replacing Dashboard
+        _buildDoctakAiCard(l10n),
+
+        const SizedBox(height: 16),
+
+        // Section headers and items
+        ...getMenuSections(context).expand((section) {
+          return [
+            if (section.title != null)
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 12, top: 8),
+                child: Text(
+                  section.title!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: _textSecondaryColor,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+            ...section.items.map(
+              (item) => _buildCleanMenuItem(item, section.iconColorType),
+            ),
+            const SizedBox(height: 8),
+          ];
+        }).toList(),
+
+        // Bottom padding
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // Doctak AI card (special highlighted item) - replacing Dashboard
+  Widget _buildDoctakAiCard(dynamic l10n) {
+    // Matching HTML design: bg-blue-50/50 hover:bg-blue-50 with subtle border on hover
+    final cardBgColor = _isDark
+        ? _oneUIPrimary.withOpacity(0.06) // Subtle blue tint for dark mode
+        : const Color(
+            0xFFEFF6FF,
+          ).withOpacity(0.5); // bg-blue-50/50 exactly like HTML
+
+    return Container(
+      margin: const EdgeInsets.only(top: 24),
+      decoration: BoxDecoration(
+        color: cardBgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _isDark
+              ? Colors.transparent
+              : Colors.transparent, // border-transparent like HTML
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).pop();
+            const AiChatScreen().launch(context);
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Blue icon container matching HTML: bg-[var(--brand-primary)] = #3B82F6
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color:
+                        _oneUIAccentBlue, // #3B82F6 matching HTML brand-primary
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _oneUIAccentBlue.withOpacity(0.25),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Image.asset(
+                      'assets/images/docktak_ai_light.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                // Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.lbl_medical_ai,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: _textPrimaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.desc_medical_ai,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: _textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Clean menu item matching HTML design with icon colors and badges
+  Widget _buildCleanMenuItem(MenuItemData item, IconColorType colorType) {
+    // Get colors based on type using One UI 8.5 color system
+    Color iconBgColor;
+    Color iconColor;
+
+    if (item.isLogout) {
+      iconBgColor = _isDark
+          ? _oneUIError.withOpacity(0.15)
+          : _oneUIError.withOpacity(0.12);
+      iconColor = _oneUIError;
+    } else {
+      switch (colorType) {
+        case IconColorType.blue:
+          iconBgColor = _isDark
+              ? _oneUIAccentBlueBgDark
+              : _oneUIAccentBlueBgLight;
+          iconColor = _isDark ? _oneUIPrimaryLight : _oneUIAccentBlue;
+          break;
+        case IconColorType.indigo:
+          iconBgColor = _isDark
+              ? _oneUIAccentIndigoBgDark
+              : _oneUIAccentIndigoBgLight;
+          iconColor = _isDark
+              ? _oneUIAccentIndigo.withOpacity(0.85)
+              : _oneUIAccentIndigo;
+          break;
+        case IconColorType.slate:
+          iconBgColor = _isDark
+              ? _oneUIAccentSlateBgDark
+              : _oneUIAccentSlateBgLight;
+          iconColor = _isDark ? _oneUITextSecondaryDark : _oneUIAccentSlate;
+          break;
+      }
+    }
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 4, top: item.isLogout ? 8 : 0),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: () => _handleMenuTap(item.index),
+          borderRadius: BorderRadius.circular(12),
+          hoverColor: item.isLogout ? _oneUIError.withOpacity(0.1) : null,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Row(
+              children: [
+                // Icon in rounded container with proper colors
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(item.icon, size: 20, color: iconColor),
+                ),
+                const SizedBox(width: 14),
+                // Title and subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: item.isLogout
+                              ? FontWeight.w700
+                              : FontWeight.w600,
+                          color: item.isLogout
+                              ? _oneUIError
+                              : _textPrimaryColor,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.subtitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: item.isLogout
+                              ? _oneUIError.withOpacity(0.8)
+                              : _textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Badge or Chevron
+                if (item.showBadge)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _oneUIError,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      '3',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                else if (!item.isLogout)
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: _textTertiaryColor,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Simple footer matching HTML design
+  Widget _buildSimpleFooter() {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: _backgroundColor,
+            border: Border(
+              top: BorderSide(
+                color: _isDark
+                    ? Colors.white.withOpacity(0.05)
+                    : Colors.black.withOpacity(0.05),
+                width: 1,
+              ),
+            ),
+          ),
+          child: Text(
+            snapshot.hasData
+                ? 'Version ${snapshot.data!.version} (Build ${snapshot.data!.buildNumber})'
+                : 'DocTak',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: _textTertiaryColor,
+              letterSpacing: 0.3,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+      },
     );
   }
 
@@ -691,21 +1181,43 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             opacity: _slideAnimation.value,
             child: Container(
               key: const ValueKey('menu_content'),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return ListView.builder(
-                    key: const ValueKey('menu_list'),
-                    padding: EdgeInsets.zero,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: getMenuItems(context).length,
-                    itemBuilder: (context, index) {
-                      return _buildColorfulMenuItem(
-                        getMenuItems(context)[index],
-                      );
-                    },
+              decoration: BoxDecoration(
+                color: _isDark ? _oneUIBackgroundDark : _oneUIBackgroundLight,
+              ),
+              child: ListView(
+                key: const ValueKey('menu_list'),
+                padding: EdgeInsets.zero,
+                physics: const BouncingScrollPhysics(),
+                children: getMenuSections(context).map((section) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (section.title != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                          child: Text(
+                            section.title!,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: _isDark
+                                  ? Colors.grey[400]
+                                  : Colors.grey[700],
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ...section.items
+                          .map((item) => _buildColorfulMenuItem(item))
+                          .toList(),
+                      // Add divider after sections except the last one?
+                      // For now, spacing is enough or maybe a divider.
+                      if (section.title == null && section.items.isNotEmpty)
+                        const Divider(height: 1),
+                    ],
                   );
-                },
+                }).toList(),
               ),
             ),
           ),
@@ -714,126 +1226,63 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
     );
   }
 
-  // Colorful menu item with One UI 8.5 refinements
+  // Clean, standard menu item logic
   Widget _buildColorfulMenuItem(MenuItemData item) {
     bool isSelected = selectedIndex == item.index;
 
     return Container(
       key: ValueKey('menu_item_${item.index}'),
-      margin: const EdgeInsets.only(bottom: 6),
-      height: 56,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: () => _handleMenuTap(item.index),
-          borderRadius: BorderRadius.circular(16),
-          splashColor: _oneUIPrimary.withOpacity(0.1),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              // Colorful card background
-              color: isSelected
-                  ? (_isDark
-                        ? _oneUIPrimary.withOpacity(0.15)
-                        : Colors.blue.withOpacity(0.12))
-                  : (_isDark ? Colors.white.withOpacity(0.08) : Colors.white),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: isSelected
-                    ? _oneUIPrimary.withOpacity(0.4)
-                    : (_isDark
-                          ? Colors.white.withOpacity(0.1)
-                          : _oneUIPrimary.withOpacity(0.3)),
-                width: 1,
+      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? (_isDark
+                  ? _oneUIPrimary.withOpacity(0.2)
+                  : const Color(0xFFE8F0FE))
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: InkWell(
+        onTap: () => _handleMenuTap(item.index),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              // Icon or Image
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: item.imagePath != null
+                    ? Image.asset(
+                        item.imagePath!,
+                        fit: BoxFit.contain,
+                        color: isSelected
+                            ? _oneUIPrimary
+                            : (_isDark ? Colors.white70 : Colors.black54),
+                      )
+                    : Icon(
+                        item.icon,
+                        size: 22,
+                        color: isSelected
+                            ? _oneUIPrimary
+                            : (_isDark ? Colors.white70 : Colors.black54),
+                      ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(_isDark ? 0.2 : 0.06),
-                  offset: const Offset(0, 2),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                // Colorful icon container
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? _oneUIPrimary.withOpacity(0.2)
-                        : (_isDark
-                              ? _oneUIPrimary.withOpacity(0.15)
-                              : _oneUIPrimary.withOpacity(0.1)),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    item.icon,
-                    size: 18,
+              const SizedBox(width: 16),
+              // Title
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                     color: isSelected
                         ? _oneUIPrimary
-                        : (_isDark ? Colors.blue[300] : _oneUIPrimary),
+                        : (_isDark ? Colors.white : Colors.black87),
                   ),
                 ),
-
-                const SizedBox(width: 10),
-
-                // Text content
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: isSelected
-                              ? FontWeight.w700
-                              : FontWeight.w600,
-                          color: _isDark ? Colors.white : Colors.black87,
-                          letterSpacing: 0.1,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 1),
-                      Text(
-                        item.subtitle,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: _isDark ? Colors.white70 : Colors.black54,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 6),
-
-                // Colorful arrow container
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: _isDark
-                        ? _oneUIPrimary.withOpacity(0.15)
-                        : _oneUIPrimary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: _isDark ? Colors.blue[300] : _oneUIPrimary,
-                    size: 12,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -1657,6 +2106,10 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
         case 10:
           const AboutUsScreen().launch(context);
           break;
+        case 11:
+          // Logout
+          logoutAccount(context);
+          break;
       }
     });
   }
@@ -1876,13 +2329,39 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
 }
 
 // Data class for menu items
+// Enum for icon color types
+enum IconColorType { blue, indigo, slate }
+
 class MenuItemData {
   final int index;
   final IconData icon;
   final String title;
   final String subtitle;
+  final String? imagePath;
+  final bool showBadge;
+  final bool isLogout;
 
-  const MenuItemData(this.index, this.icon, this.title, this.subtitle);
+  const MenuItemData(
+    this.index,
+    this.icon,
+    this.title,
+    this.subtitle, {
+    this.imagePath,
+    this.showBadge = false,
+    this.isLogout = false,
+  });
+}
+
+class MenuSection {
+  final String? title;
+  final List<MenuItemData> items;
+  final IconColorType iconColorType;
+
+  MenuSection({
+    this.title,
+    required this.items,
+    this.iconColorType = IconColorType.blue,
+  });
 }
 
 // Header pattern painter

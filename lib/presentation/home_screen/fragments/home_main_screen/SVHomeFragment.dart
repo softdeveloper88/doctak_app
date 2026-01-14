@@ -181,12 +181,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               },
             ),
           ),
-          title: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              translation(context).lbl_home,
-              style: theme.appBarTitle,
-            ),
+          title: Text(
+            translation(context).lbl_home,
+            style: theme.appBarTitle,
           ),
           actions: [
             _buildNotificationButton(context, theme),

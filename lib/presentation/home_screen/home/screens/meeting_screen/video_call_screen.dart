@@ -1931,6 +1931,7 @@ import 'dart:io';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart';
@@ -2202,22 +2203,10 @@ class _VideoCallScreenState extends State<VideoCallScreen>
         break;
 
       case AppLifecycleState.inactive:
-        // On iOS, delay PiP start to handle brief inactive states (control center, etc.)
-        // PiP will only start if app stays inactive/hidden for 300ms
-        if (Platform.isIOS) {
-          debugPrint('📺 VideoCallScreen: App inactive - scheduling iOS PiP (300ms delay)');
-          _pipDelayTimer?.cancel();
-          _pipDelayTimer = Timer(const Duration(milliseconds: 300), () {
-            // Double-check: only start PiP if timer wasn't cancelled and not in grace period
-            if (mounted && !_pipService.isInResumeGracePeriod) {
-              debugPrint('📺 VideoCallScreen: PiP delay elapsed - starting PiP');
-              _pipService.onAppPaused();
-            } else {
-              debugPrint('📺 VideoCallScreen: PiP delay elapsed but blocked (grace period or unmounted)');
-            }
-          });
-        }
-        debugPrint('📺 VideoCallScreen: App inactive');
+        // On iOS, we now rely on Auto-PiP (AVPictureInPictureController.canStartPictureInPictureAutomaticallyFromInline)
+        // which handles the transition automatically when minimizing.
+        // We removed the manual 300ms delay trigger to prevent race conditions with the system's auto-PiP.
+        debugPrint('📺 VideoCallScreen: App inactive - Auto-PiP should handle this if enabled');
         break;
 
       case AppLifecycleState.paused:
@@ -4943,6 +4932,16 @@ class _VideoCallScreenState extends State<VideoCallScreen>
             ),
           ),
         ),
+        PopupMenuItem(
+          value: 5,
+          child: ListTile(
+            trailing: const Icon(Icons.share, color: Colors.white),
+            title: Text(
+              translation(context).lbl_share,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
       ],
       onSelected: (value) async {
         // Use addPostFrameCallback to ensure navigation happens after popup is closed
@@ -4982,6 +4981,13 @@ class _VideoCallScreenState extends State<VideoCallScreen>
                 MaterialPageRoute(
                   builder: (_) => SearchUserScreen(channel: channelName),
                 ),
+              );
+              break;
+            case 5:
+              // Share meeting link via deep link
+              DeepLinkService.shareMeeting(
+                meetingId: channelName,
+                title: 'DocTak Meeting',
               );
               break;
           }

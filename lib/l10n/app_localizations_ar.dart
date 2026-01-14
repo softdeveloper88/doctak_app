@@ -574,6 +574,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lbl_call_ended => 'انتهت المكالمة';
 
   @override
+  String get lbl_call_cancelled => 'Call Cancelled';
+
+  @override
   String get lbl_connection_lost => 'فُقد الاتصال';
 
   @override
@@ -1896,6 +1899,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get desc_privacy => 'الشروط والخصوصية';
+
+  @override
+  String get desc_logout => 'End session';
 
   @override
   String get lbl_student => 'طالب';

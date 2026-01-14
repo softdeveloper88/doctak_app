@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
@@ -100,6 +101,20 @@ class IOSAgoraPiPService {
     }
   }
 
+  /// Enable or disable auto-PiP mode
+  Future<bool> setAutoEnabled(bool enabled) async {
+    if (!Platform.isIOS) return false;
+    
+    try {
+      await _channel.invokeMethod('setAutoEnabled', {'enabled': enabled});
+      debugPrint('📺 IOSAgoraPiP: setAutoEnabled = $enabled');
+      return true;
+    } catch (e) {
+      debugPrint('📺 IOSAgoraPiP: Error setting auto enabled: $e');
+      return false;
+    }
+  }
+
   /// Set up PiP controller (must call before start)
   Future<bool> setup() async {
     if (!Platform.isIOS) return false;
@@ -188,6 +203,23 @@ class IOSAgoraPiPService {
   void resetRestorationFlag() {
     _isRestoringUI = false;
     debugPrint('📺 IOSAgoraPiP: Restoration flag reset');
+  }
+
+  /// Update PiP with a Flutter widget frame capture
+  /// Call this periodically (e.g., every 100ms) when PiP is active to show live widget content
+  Future<void> updateFrame(Uint8List imageData, int width, int height) async {
+    if (!Platform.isIOS) return;
+    if (!_isActive) return;
+    
+    try {
+      await _channel.invokeMethod('updateFrame', {
+        'imageData': imageData,
+        'width': width,
+        'height': height,
+      });
+    } catch (e) {
+      // Don't spam logs for frame updates
+    }
   }
 
   /// Dispose and clean up resources
