@@ -57,6 +57,12 @@ class ConnectingView extends StatelessWidget {
           displayIcon = Icons.phone_missed_rounded;
           indicatorColor = theme.warning;
           break;
+        case CallEndReason.callerCancelled:
+        case CallEndReason.callCancelledByRemote:
+          displayMessage = translation(context).lbl_call_cancelled;
+          displayIcon = Icons.phone_missed_rounded;
+          indicatorColor = theme.warning;
+          break;
         case CallEndReason.networkDisconnect:
           displayMessage = translation(context).lbl_connection_lost;
           displayIcon = Icons.signal_wifi_off_rounded;

@@ -76,6 +76,12 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
   DateTime? _pipTransitionStartTime;
   static const int _pipTransitionGracePeriodMs = 4000; // 4 seconds grace period
 
+  // Flag to temporarily hide video views during PiP transition to prevent surface crash
+  bool _isVideoViewSuspended = false;
+  
+  // Key to force recreation of video views after PiP - prevents null surface crash
+  Key _videoViewKey = UniqueKey();
+
   // Add flag to prevent duplicate ending
   bool _isEndingCall = false;
 
@@ -272,6 +278,25 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
           _isInPiPTransition = true;
           _pipTransitionStartTime = DateTime.now();
           debugPrint('📞 CallScreen: Starting PiP transition grace period');
+          
+          // CRITICAL FIX: Suspend video views during PiP transition to prevent
+          // null SurfaceProducer crash when texture registry is being recreated
+          if (mounted) {
+            setState(() {
+              _isVideoViewSuspended = true;
+            });
+          }
+
+          // Recreate video views after a delay to ensure surface is ready
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              setState(() {
+                _isVideoViewSuspended = false;
+                _videoViewKey = UniqueKey(); // Force recreation of video views
+              });
+              debugPrint('📞 CallScreen: Video views recreated after PiP');
+            }
+          });
 
           // Clear the transition state after grace period
           Future.delayed(
@@ -310,6 +335,12 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
         // App fully backgrounded - trigger PiP if allowed
         debugPrint('📞 CallScreen: App paused');
+        // Suspend video views before going to PiP to prevent surface issues
+        if (mounted) {
+          setState(() {
+            _isVideoViewSuspended = true;
+          });
+        }
         _pipService.onAppPaused();
         _callProvider.handleAppBackground();
         break;
@@ -669,16 +700,83 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       // Listen for call ended events from remote side
       pusherService.registerEventListener('call.ended', _handleRemoteCallEnded);
       pusherService.registerEventListener('Call_Ended', _handleRemoteCallEnded);
+      
+      // Listen for call cancelled events (when caller cancels before call is established)
+      pusherService.registerEventListener('call.cancelled', _handleRemoteCallCancelled);
+      pusherService.registerEventListener('Call_Cancelled', _handleRemoteCallCancelled);
+      pusherService.registerEventListener('call_cancelled', _handleRemoteCallCancelled);
 
       print(
-        '📞 CallScreen: Pusher listeners registered for call.ended and Call_Ended events',
+        '📞 CallScreen: Pusher listeners registered for call.ended, call.cancelled events',
       );
     } catch (e) {
       print('📞 CallScreen: Error setting up Pusher listeners: $e');
     }
   }
 
-  // Handle remote call ended event
+  // Handle remote call cancelled event (caller cancelled before call established)
+  void _handleRemoteCallCancelled(dynamic data) {
+    print('📞 CallScreen: ====== REMOTE CALL CANCELLED EVENT RECEIVED ======');
+    print('📞 CallScreen: Raw data: $data');
+
+    // Don't process if call is already established
+    if (_callEstablished) {
+      print('📞 CallScreen: IGNORING call.cancelled - call already established');
+      return;
+    }
+
+    // Don't process if already ending
+    if (_isEndingCall) {
+      print('📞 CallScreen: IGNORING call.cancelled - already ending call');
+      return;
+    }
+
+    try {
+      // Parse the event data
+      Map<String, dynamic> callData = {};
+      if (data is String) {
+        callData = jsonDecode(data);
+      } else if (data is Map<String, dynamic>) {
+        callData = data;
+      }
+
+      // Check if this event is for the current call
+      final remoteCallId =
+          callData['call_id']?.toString() ??
+          callData['id']?.toString() ??
+          callData['callId']?.toString();
+
+      if (remoteCallId == null || remoteCallId.isEmpty) {
+        print('📞 CallScreen: IGNORING call.cancelled - no call_id in event');
+        return;
+      }
+
+      final isForCurrentCall = remoteCallId == _currentCallId;
+
+      if (isForCurrentCall) {
+        print('📞 CallScreen: Caller cancelled the call - showing cancelled state');
+
+        // Update call state to show cancelled
+        _callProvider.setCallEndReason(
+          CallEndReason.callCancelledByRemote,
+          connectionState: CallConnectionState.failed,
+        );
+
+        // End the call after showing the message
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && !_isEndingCall) {
+            _endCallAndCleanup();
+          }
+        });
+      } else {
+        print(
+          '📞 CallScreen: IGNORING call.cancelled - call ID mismatch (remote: $remoteCallId, current: $_currentCallId)',
+        );
+      }
+    } catch (e) {
+      print('Error handling remote call cancelled event: $e');
+    }
+  }  // Handle remote call ended event
   void _handleRemoteCallEnded(dynamic data) {
     print('📞 CallScreen: ====== REMOTE CALL ENDED EVENT RECEIVED ======');
     print('📞 CallScreen: Raw data type: ${data.runtimeType}');
@@ -715,11 +813,9 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       }
     }
 
-    // Also check if we're still in connecting state - don't end during connection
-    if (!_callEstablished && !_isEndingCall) {
-      print(
-        '📞 CallScreen: IGNORING call.ended event - call not yet established',
-      );
+    // Don't process if already ending call
+    if (_isEndingCall) {
+      print('📞 CallScreen: IGNORING call.ended event - already ending call');
       return;
     }
 
@@ -758,19 +854,35 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       if (isForCurrentCall) {
         print('📞 CallScreen: Remote side ended the call, cleaning up locally');
 
-        // Update call state to indicate remote ended call
+        // Determine the appropriate end reason based on call state
+        CallEndReason endReason;
+        if (!_callEstablished) {
+          // If call wasn't established yet, it means caller cancelled
+          endReason = CallEndReason.callCancelledByRemote;
+          print('📞 CallScreen: Call cancelled by remote (not yet established)');
+        } else {
+          endReason = CallEndReason.remoteUserEnded;
+          print('📞 CallScreen: Call ended by remote user');
+        }
+
+        // Update call state to indicate remote ended/cancelled call
+        _callProvider.setCallEndReason(
+          endReason,
+          connectionState: CallConnectionState.failed,
+        );
+
         if (mounted) {
           setState(() {
             _callEstablished = false;
           });
         }
 
-        // End the call immediately without confirmation since remote ended it
-        if (mounted && !_isEndingCall) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+        // End the call after showing the message
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted && !_isEndingCall) {
             _endCallAndCleanup();
-          });
-        }
+          }
+        });
       } else {
         print(
           '📞 CallScreen: IGNORING call.ended event - call ID mismatch (remote: $remoteCallId, current: $_currentCallId)',
@@ -814,6 +926,19 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       pusherService.unregisterEventListener(
         'Call_Ended',
         _handleRemoteCallEnded,
+      );
+      // Unregister call cancelled listeners
+      pusherService.unregisterEventListener(
+        'call.cancelled',
+        _handleRemoteCallCancelled,
+      );
+      pusherService.unregisterEventListener(
+        'Call_Cancelled',
+        _handleRemoteCallCancelled,
+      );
+      pusherService.unregisterEventListener(
+        'call_cancelled',
+        _handleRemoteCallCancelled,
       );
     } catch (e) {
       print('Error cleaning up Pusher listeners: $e');
@@ -1026,49 +1151,66 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
                     fit: StackFit.expand,
                     children: [
                       // Background or video
-                      if (callState.callType == CallType.video &&
+                      // CRITICAL: Don't render video views during PiP transition to prevent null surface crash
+                      if (_isVideoViewSuspended)
+                        Container(
+                          color: const Color(0xFF1a1a2e),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white54,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                      else if (callState.callType == CallType.video &&
                           callState.isRemoteUserJoined &&
                           agoraEngine != null)
-                        const VideoView()
+                        KeyedSubtree(
+                          key: _videoViewKey,
+                          child: const VideoView(),
+                        )
                       else if (callState.callType == CallType.video &&
                           callState.isLocalUserJoined &&
                           callState.isLocalVideoEnabled &&
                           agoraEngine != null)
                         // Show LOCAL video when no remote user has joined yet
-                        Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            AgoraVideoView(
-                              controller: VideoViewController(
-                                rtcEngine: agoraEngine,
-                                canvas: const VideoCanvas(uid: 0),
-                                useFlutterTexture: true,
-                                useAndroidSurfaceView: true,
+                        KeyedSubtree(
+                          key: _videoViewKey,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              SafeAgoraVideoView(
+                                controller: VideoViewController(
+                                  rtcEngine: agoraEngine,
+                                  canvas: const VideoCanvas(uid: 0),
+                                  useFlutterTexture: true,
+                                  useAndroidSurfaceView: true,
+                                ),
                               ),
-                            ),
-                            // Show "You" label
-                            Positioned(
-                              bottom: 4,
-                              left: 4,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: const Text(
-                                  'You',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 8,
+                              // Show "You" label
+                              Positioned(
+                                bottom: 4,
+                                left: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'You',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         )
                       else
                         Container(
@@ -1291,7 +1433,22 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
 
     // Show appropriate view based on call type
     if (callState.callType == CallType.video) {
-      return const VideoView();
+      // CRITICAL: Don't render video during PiP transition to prevent null surface crash
+      if (_isVideoViewSuspended) {
+        return Container(
+          color: const Color(0xFF1a1a2e),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white54,
+              strokeWidth: 2,
+            ),
+          ),
+        );
+      }
+      return KeyedSubtree(
+        key: _videoViewKey,
+        child: const VideoView(),
+      );
     } else {
       return const AudioCallView();
     }

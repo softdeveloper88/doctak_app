@@ -237,7 +237,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lbl_rate_us => 'Rate Us';
 
   @override
-  String get lbl_logout => 'Logout';
+  String get lbl_logout => 'Log Out';
 
   @override
   String get lbl_delete_account => 'Delete Account';
@@ -571,6 +571,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lbl_call_ended => 'Call Ended';
+
+  @override
+  String get lbl_call_cancelled => 'Call Cancelled';
 
   @override
   String get lbl_connection_lost => 'Connection Lost';
@@ -1901,6 +1904,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get desc_privacy => 'Terms & privacy';
+
+  @override
+  String get desc_logout => 'End session';
 
   @override
   String get lbl_student => 'Student';

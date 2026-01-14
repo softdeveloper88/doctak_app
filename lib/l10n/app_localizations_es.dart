@@ -583,6 +583,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get lbl_call_ended => 'Llamada finalizada';
 
   @override
+  String get lbl_call_cancelled => 'Call Cancelled';
+
+  @override
   String get lbl_connection_lost => 'Conexión perdida';
 
   @override
@@ -1934,6 +1937,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get desc_privacy => 'Términos y privacidad';
+
+  @override
+  String get desc_logout => 'End session';
 
   @override
   String get lbl_student => 'Estudiante';

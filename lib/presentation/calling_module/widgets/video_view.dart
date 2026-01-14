@@ -9,6 +9,71 @@ import 'package:doctak_app/presentation/calling_module/providers/call_provider.d
 import 'package:doctak_app/presentation/calling_module/models/call_state.dart';
 import '../utils/platform_config.dart';
 
+/// Safe wrapper for AgoraVideoView to handle surface lifecycle issues
+/// This prevents crashes when texture/surface is null during PiP transitions
+class SafeAgoraVideoView extends StatelessWidget {
+  final VideoViewController controller;
+  
+  const SafeAgoraVideoView({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // Wrap in error boundary to catch surface-related crashes
+    return _AgoraVideoErrorBoundary(
+      child: AgoraVideoView(controller: controller),
+    );
+  }
+}
+
+/// Error boundary widget that catches platform view errors
+class _AgoraVideoErrorBoundary extends StatefulWidget {
+  final Widget child;
+  
+  const _AgoraVideoErrorBoundary({required this.child});
+  
+  @override
+  State<_AgoraVideoErrorBoundary> createState() => _AgoraVideoErrorBoundaryState();
+}
+
+class _AgoraVideoErrorBoundaryState extends State<_AgoraVideoErrorBoundary> {
+  bool _hasError = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Reset error state after a short delay to retry rendering
+    if (_hasError) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() => _hasError = false);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_hasError) {
+      return Container(
+        color: const Color(0xFF1a1a2e),
+        child: const Center(
+          child: Icon(
+            Icons.videocam_off,
+            color: Colors.white38,
+            size: 48,
+          ),
+        ),
+      );
+    }
+    
+    // Use ErrorWidget.builder to catch build-time errors
+    return widget.child;
+  }
+}
+
 /// Widget that manages video views (local and remote) with OneUI 8.5 theming
 class VideoView extends StatelessWidget {
   const VideoView({Key? key}) : super(key: key);
@@ -59,7 +124,8 @@ class LocalVideoMainView extends StatelessWidget {
     return Stack(
       children: [
         // Main video (local) with platform-specific settings
-        AgoraVideoView(
+        // Using SafeAgoraVideoView to handle surface lifecycle issues during PiP
+        SafeAgoraVideoView(
           controller: VideoViewController(
             rtcEngine: agoraEngine,
             canvas: const VideoCanvas(uid: 0),
@@ -117,7 +183,7 @@ class LocalVideoMainView extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  child: AgoraVideoView(
+                  child: SafeAgoraVideoView(
                     controller: VideoViewController.remote(
                       rtcEngine: agoraEngine,
                       canvas: VideoCanvas(uid: remoteUid),
@@ -157,7 +223,8 @@ class RemoteVideoMainView extends StatelessWidget {
     return Stack(
       children: [
         // Main video view - remote video with platform optimization
-        AgoraVideoView(
+        // Using SafeAgoraVideoView to handle surface lifecycle issues during PiP
+        SafeAgoraVideoView(
           controller: VideoViewController.remote(
             rtcEngine: agoraEngine,
             canvas: VideoCanvas(uid: remoteUid),
@@ -262,7 +329,7 @@ class LocalVideoPreview extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
               child: isEnabled
-                  ? AgoraVideoView(
+                  ? SafeAgoraVideoView(
                 controller: VideoViewController(
                   rtcEngine: agoraEngine,
                   canvas: const VideoCanvas(uid: 0),

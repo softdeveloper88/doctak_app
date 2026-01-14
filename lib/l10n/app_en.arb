@@ -203,6 +203,7 @@
 "lbl_failed_to_establish_call": "Failed to establish call. Please try again.",
 "lbl_error_starting_call": "Error starting call. Please try again.",
 "lbl_call_ended": "Call Ended",
+"lbl_call_cancelled": "Call Cancelled",
 "lbl_connection_lost": "Connection Lost",
 "lbl_call_failed": "Call Failed",
 "lbl_permission_denied": "Permission Denied",
@@ -769,6 +770,8 @@
  "desc_settings": "App preferences",
  "lbl_privacy": "Privacy",
  "desc_privacy": "Terms & privacy",
+ "lbl_logout": "Log Out",
+ "desc_logout": "End session",
  "lbl_student": "Student",
  "lbl_version": "Version",
 

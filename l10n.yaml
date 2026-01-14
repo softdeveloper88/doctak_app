@@ -1,3 +1,6 @@
 arb-dir: lib/l10n
 template-arb-file: app_en.arb
 output-localization-file: app_localizations.dart
+
+# Generate a JSON file with all untranslated messages
+untranslated-messages-file: untranslated_messages.json

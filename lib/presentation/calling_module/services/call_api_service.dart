@@ -302,6 +302,37 @@ class CallApiService {
     }
   }
 
+  // Cancel an outgoing call (caller cancels before callee answers)
+  Future<Map<String, dynamic>> cancelCall({
+    required String callId,
+    required String calleeId,
+  }) async {
+    try {
+      // Get headers with token
+      final headers = await _getHeadersAsync();
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/calls/cancel'),
+        headers: headers,
+        body: jsonEncode({'callId': callId, 'calleeId': calleeId}),
+      );
+
+      final responseData = _safeJsonDecode(response, 'cancelCall');
+      debugPrint('Cancel call response: status=${response.statusCode}');
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return responseData;
+      } else {
+        // If the cancel endpoint doesn't exist, try using end endpoint
+        return await endCall(callId: callId);
+      }
+    } catch (e) {
+      debugPrint('Error cancelling call: $e');
+      // Fallback to end call
+      return await endCall(callId: callId);
+    }
+  }
+
   // End an ongoing call with async headers
   Future<Map<String, dynamic>> endCall({required String callId}) async {
     try {
@@ -422,6 +453,62 @@ class CallApiService {
     } catch (e) {
       debugPrint('Exception in getCallStatus: $e');
       return {'is_active': false};
+    }
+  }
+
+  /// Check if a specific call is still active on the server
+  /// Returns true if call is active, false otherwise
+  Future<Map<String, dynamic>> checkCallActive({
+    required String callId,
+  }) async {
+    try {
+      final headers = await _getHeadersAsync();
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/calls/check-active'),
+        headers: headers,
+        body: jsonEncode({'callId': callId}),
+      );
+
+      final responseData = _safeJsonDecode(response, 'checkCallActive');
+      debugPrint('Check call active response: status=${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        // Be more generous with what we consider "active"
+        // Include more statuses that indicate the call is still valid
+        final status = responseData['status']?.toString().toLowerCase() ?? 'unknown';
+        final isActive = responseData['is_active'] == true || 
+                        responseData['active'] == true ||
+                        status == 'active' ||
+                        status == 'ringing' ||
+                        status == 'accepted' ||
+                        status == 'connecting' ||
+                        status == 'connected' ||
+                        status == 'in_progress' ||
+                        status == 'in-progress' ||
+                        status == 'ongoing';
+        return {
+          'success': true,
+          'is_active': isActive,
+          'status': status,
+          'message': responseData['message'],
+        };
+      } else {
+        return {
+          'success': false,
+          'is_active': false,
+          'status': 'unknown',
+          'message': responseData['message'] ?? 'Failed to check call status',
+        };
+      }
+    } catch (e) {
+      debugPrint('Error checking call active status: $e');
+      return {
+        'success': false,
+        'is_active': true, // Assume active on error to not prematurely end calls
+        'status': 'error',
+        'message': 'Network error',
+      };
     }
   }
 

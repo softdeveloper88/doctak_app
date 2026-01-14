@@ -6,6 +6,7 @@ import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/core/utils/call_permission_handler.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
+import 'package:doctak_app/presentation/calling_module/services/call_api_service.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 
@@ -57,7 +58,7 @@ Future<void> startOutgoingCall(
   bool callNavigatedToScreen = false;
 
   // Function to clean up resources (only for failed/cancelled calls)
-  void cleanupResources({bool forceEnd = false}) {
+  Future<void> cleanupResources({bool forceEnd = false}) async {
     debugPrint(
       '📞 cleanupResources() called - callAccepted: $callAccepted, forceEnd: $forceEnd',
     );
@@ -66,6 +67,18 @@ Future<void> startOutgoingCall(
     if (callAccepted && callNavigatedToScreen && !forceEnd) {
       debugPrint('📞 Skipping cleanup - call was accepted and is active');
       return;
+    }
+
+    // Notify server that caller is cancelling the call
+    final currentCallId = callId;
+    if (currentCallId != null && !callAccepted) {
+      try {
+        final apiService = CallApiService(baseUrl: AppData.remoteUrl3);
+        await apiService.cancelCall(callId: currentCallId, calleeId: userId);
+        debugPrint('📞 Server notified of call cancellation');
+      } catch (e) {
+        debugPrint('📞 Error notifying server of cancellation: $e');
+      }
     }
 
     // Unsubscribe from Pusher channel if needed
