@@ -7,9 +7,8 @@ import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/language_selection_screen/language_selection_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
@@ -328,11 +327,42 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     }
   }
 
-  // Deep link initialization - TODO: temporarily disabled due to SDK compatibility
+  // Deep link initialization - using app_links package
   Future<void> _initDeepLinks(BuildContext context) async {
-    // For now, just navigate to dashboard since app_links is incompatible
     try {
+      // Check for initial deep link (cold start)
+      final initialUri = await deepLinkService.getInitialLink();
+      
+      if (initialUri != null) {
+        debugPrint('🔗 Splash: Initial deep link found: $initialUri');
+        
+        // Parse and handle the deep link
+        final deepLinkData = deepLinkService.parseDeepLink(initialUri);
+        
+        if (deepLinkData.type != DeepLinkType.unknown) {
+          // Handle the deep link navigation
+          await deepLinkService.handleDeepLink(context, deepLinkData);
+          return; // Deep link handled, don't navigate to dashboard
+        }
+      }
+      
+      // Check for any pending deep link stored before login
+      if (deepLinkService.hasPendingDeepLink) {
+        debugPrint('🔗 Splash: Handling pending deep link');
+        await deepLinkService.handlePendingDeepLink(context);
+        return;
+      }
+      
+      // No deep link, navigate to dashboard
       const SVDashboardScreen().launch(context, isNewTask: true);
+      
+      // Start listening for future deep links
+      deepLinkService.listenForLinks((uri) {
+        debugPrint('🔗 Splash: Deep link received while app running: $uri');
+        final deepLinkData = deepLinkService.parseDeepLink(uri);
+        deepLinkService.handleDeepLink(context, deepLinkData);
+      });
+      
     } catch (e) {
       debugPrint('Error initializing deep links: $e');
       // Always ensure we navigate somewhere on error

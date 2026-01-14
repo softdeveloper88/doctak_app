@@ -253,7 +253,21 @@ class _PostItemWidgetState extends State<PostItemWidget> {
       mediaList: widget.media ?? [],
       imageUrlBase: AppData.imageUrl,
       onImageTap: (url) {
-        showFullScreenImage(context, 1, url, widget.postData, []);
+        // Construct the full list of media URLs to enable the slider
+        List<Map<String, String>> mediaUrls = [];
+         if (widget.media != null) {
+            for (var media in widget.media!) {
+               // Ensure correct URL construction
+               String fullUrl = AppData.imageUrl + media.mediaPath.toString();
+               mediaUrls.add({
+                 "url": fullUrl, 
+                 "type": media.mediaType ?? "image"
+               });
+            }
+        }
+        
+        // Pass the full media list instead of an empty list
+        showFullScreenImage(context, 1, url, widget.postData, mediaUrls);
       },
       onVideoTap: (url) {
         // Handle video tap

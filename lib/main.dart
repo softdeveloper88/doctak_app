@@ -1336,6 +1336,7 @@ import 'core/app_export.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
 import 'core/utils/common_navigator.dart';
+import 'core/utils/deep_link_service.dart';
 import 'core/utils/get_shared_value.dart';
 import 'core/utils/pusher_service.dart';
 import 'core/utils/text_scale_helper.dart';
@@ -2009,6 +2010,14 @@ Future<void> main() async {
     } catch (e) {
       debugPrint('Error configuring edge-to-edge: $e');
     }
+    
+    // Initialize Deep Link Service
+    try {
+      await deepLinkService.initialize();
+      debugPrint('DeepLinkService initialized');
+    } catch (e) {
+      debugPrint('Error initializing DeepLinkService: $e');
+    }
   } catch (e, stackTrace) {
     // Catch ANY unhandled error during initialization
     debugPrint('CRITICAL: Unhandled error during app initialization: $e');
@@ -2285,8 +2294,23 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         });
       });
     }
+    
+    // Initialize deep link listener for when app is running
+    _initDeepLinkListener();
 
     super.initState();
+  }
+  
+  /// Initialize listener for deep links when app is running
+  void _initDeepLinkListener() {
+    deepLinkService.listenForLinks((uri) {
+      debugPrint('🔗 MyApp: Deep link received: $uri');
+      final context = NavigatorService.navigatorKey.currentState?.context;
+      if (context != null) {
+        final deepLinkData = deepLinkService.parseDeepLink(uri);
+        deepLinkService.handleDeepLink(context, deepLinkData);
+      }
+    });
   }
 
   Map<String, dynamic> userMap = {};

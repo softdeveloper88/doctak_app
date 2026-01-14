@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_item_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
@@ -110,7 +111,10 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                       ).launch(context);
                     },
                     onShareTap: () {
-                      // TODO: Implement share functionality
+                      DeepLinkService.sharePost(
+                        postId: post.id ?? 0,
+                        title: post.title,
+                      );
                     },
                     onToggleComment: () {
                       SVCommentScreen(

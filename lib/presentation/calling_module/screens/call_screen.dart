@@ -112,7 +112,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
     _callScreenInitTime = DateTime.now();
 
     WidgetsBinding.instance.addObserver(this);
-    
+
     // NOTE: PiP is NOT allowed here - only when call is actually established
     // _pipService.allowPiP() will be called in _onCallStateChanged when remote user joins
 
@@ -171,7 +171,7 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
         // Cancel any existing subscription first
         await _pipStatusSubscription?.cancel();
         _pipStatusSubscription = null;
-        
+
         // Subscribe to PiP status changes
         _pipStatusSubscription = _pipService.statusStream.listen((status) {
           if (mounted) {
@@ -301,23 +301,23 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
           });
         }
         break;
-        
+
       case AppLifecycleState.inactive:
         // PiP is handled by Android native onUserLeaveHint - no action needed
         debugPrint('📞 CallScreen: App inactive');
         break;
-        
+
       case AppLifecycleState.paused:
         // App fully backgrounded - trigger PiP if allowed
         debugPrint('📞 CallScreen: App paused');
         _pipService.onAppPaused();
         _callProvider.handleAppBackground();
         break;
-        
+
       case AppLifecycleState.detached:
         debugPrint('📞 CallScreen: App detached');
         break;
-        
+
       case AppLifecycleState.hidden:
         debugPrint('📞 CallScreen: App hidden');
         break;
@@ -368,11 +368,23 @@ class CallScreenState extends State<CallScreen> with WidgetsBindingObserver {
       setState(() {
         _callEstablished = true;
       });
-      
+
       // NOW enable PiP since call is actually connected
       // Allow PiP and enable auto-enter when app goes to background
       _pipService.allowPiP();
-      _pipService.enableAutoPiP(isVideoCall: widget.isVideoCall, context: mounted ? context : null);
+      _pipService.enableAutoPiP(
+        isVideoCall: widget.isVideoCall,
+        context: mounted ? context : null,
+      );
+
+      // IMPORTANT: Pre-setup PiP so it's ready before backgrounding (especially for iOS)
+      // This ensures the PiP controller is fully initialized before we need it
+      if (Platform.isIOS) {
+        _pipService.setup().then((_) {
+          debugPrint('📺 CallScreen: iOS PiP pre-setup complete');
+        });
+      }
+
       debugPrint('📞 CallScreen: Call established - PiP service notified');
     }
 

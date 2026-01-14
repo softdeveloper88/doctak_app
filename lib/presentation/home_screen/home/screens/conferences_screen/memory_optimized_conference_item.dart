@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -517,11 +518,20 @@ class _MemoryOptimizedConferenceItemState
 
   // Share conference details
   void _shareConference() {
-    // createDynamicLink(
-    //   '${widget.conference.title ?? ""} \n  Register Link: ${widget.conference.conferenceAgendaLink ?? ''}',
-    //   '${AppData.base}conference/${widget.conference.id}',
-    //   widget.conference.thumbnail ?? '',
-    // );
+    // Build location string from available fields
+    final locationParts = <String>[
+      if (widget.conference.venue != null && widget.conference.venue!.isNotEmpty) widget.conference.venue!,
+      if (widget.conference.city != null && widget.conference.city!.isNotEmpty) widget.conference.city!,
+      if (widget.conference.country != null && widget.conference.country!.isNotEmpty) widget.conference.country!,
+    ];
+    final location = locationParts.isNotEmpty ? locationParts.join(', ') : null;
+    
+    DeepLinkService.shareConference(
+      conferenceId: widget.conference.id?.toString() ?? '',
+      title: widget.conference.title,
+      date: widget.conference.startDate,
+      location: location,
+    );
   }
 
   // Launch registration link

@@ -13,14 +13,17 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     static let shared = AgoraPiPController()
     
     private var pipController: AVPictureInPictureController?
+    private var sampleBufferDisplayLayer: AVSampleBufferDisplayLayer?
+    private var pipView: UIView?
+    private var pipObservation: NSKeyValueObservation?
+    private var appStateObserver: NSObjectProtocol?
+    
+    // For AVPlayer fallback
     private var playerLayer: AVPlayerLayer?
     private var player: AVPlayer?
     private var playerLooper: AVPlayerLooper?
     private var queuePlayer: AVQueuePlayer?
-    private var pipView: UIView?
-    private var pipObservation: NSKeyValueObservation?
     private var playerStatusObservation: NSKeyValueObservation?
-    private var appStateObserver: NSObjectProtocol?
     
     // Track user intent and state
     private var userWantsPiP = false
@@ -28,7 +31,13 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     private var needsReset = false
     private var videoURL: URL?
     private var pendingStart = false
-    private var isStartingPiP = false  // Prevent multiple concurrent start attempts
+    private var isStartingPiP = false
+    private var isAutoPiPEnabled = false
+    
+    // Frame update timer for live widget capture
+    private var frameUpdateTimer: Timer?
+    private var lastFrameData: Data?
+    private var useSampleBufferMode = false  // Whether to use live widget frames
     
     // Callback to Flutter
     var onStateChanged: ((String) -> Void)?
@@ -39,7 +48,6 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     }
     
     private func setupAppStateObserver() {
-        // Observe when app enters background to start pending PiP
         appStateObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didEnterBackgroundNotification,
             object: nil,
@@ -58,6 +66,7 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
         if let observer = appStateObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        frameUpdateTimer?.invalidate()
     }
     
     var isSupported: Bool {
@@ -66,6 +75,100 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     
     var isActive: Bool {
         return pipController?.isPictureInPictureActive ?? false
+    }
+    
+    // MARK: - Update PiP with Flutter Widget Frame
+    func updateFrame(_ imageData: Data, width: Int, height: Int) {
+        guard useSampleBufferMode else { return }
+        lastFrameData = imageData
+        
+        // Convert image data to sample buffer and enqueue
+        if let sampleBuffer = createSampleBuffer(from: imageData, width: width, height: height) {
+            DispatchQueue.main.async { [weak self] in
+                guard let layer = self?.sampleBufferDisplayLayer else { return }
+                
+                if layer.status == .failed {
+                    layer.flush()
+                }
+                
+                layer.enqueue(sampleBuffer)
+            }
+        }
+    }
+    
+    private func createSampleBuffer(from imageData: Data, width: Int, height: Int) -> CMSampleBuffer? {
+        guard let image = UIImage(data: imageData),
+              let cgImage = image.cgImage else {
+            return nil
+        }
+        
+        // Create pixel buffer
+        var pixelBuffer: CVPixelBuffer?
+        let attrs: [String: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true,
+            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
+        ]
+        
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            width,
+            height,
+            kCVPixelFormatType_32BGRA,
+            attrs as CFDictionary,
+            &pixelBuffer
+        )
+        
+        guard status == kCVReturnSuccess, let buffer = pixelBuffer else {
+            return nil
+        }
+        
+        CVPixelBufferLockBaseAddress(buffer, [])
+        defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
+        
+        guard let context = CGContext(
+            data: CVPixelBufferGetBaseAddress(buffer),
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+        ) else {
+            return nil
+        }
+        
+        // Draw image into context
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        
+        // Create format description
+        var formatDescription: CMFormatDescription?
+        CMVideoFormatDescriptionCreateForImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: buffer,
+            formatDescriptionOut: &formatDescription
+        )
+        
+        guard let format = formatDescription else { return nil }
+        
+        // Create timing info
+        var timing = CMSampleTimingInfo(
+            duration: CMTime(value: 1, timescale: 30),
+            presentationTimeStamp: CMTime(value: Int64(CACurrentMediaTime() * 1000), timescale: 1000),
+            decodeTimeStamp: .invalid
+        )
+        
+        // Create sample buffer
+        var sampleBuffer: CMSampleBuffer?
+        CMSampleBufferCreateReadyWithImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: buffer,
+            formatDescription: format,
+            sampleTiming: &timing,
+            sampleBufferOut: &sampleBuffer
+        )
+        
+        return sampleBuffer
     }
     
     func setup() -> Bool {
@@ -150,28 +253,22 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
         if let window = UIApplication.shared.windows.first {
             let screenBounds = UIScreen.main.bounds
             
-            // Position the view mostly off-screen but with at least 1 pixel visible
-            // The view should be at bottom-right, with only a tiny corner showing
-            pipView?.frame = CGRect(
-                x: screenBounds.width - 10,  // 10 pixels from right edge (9 pixels off-screen)
-                y: screenBounds.height - 10, // 10 pixels from bottom edge (9 pixels off-screen)
-                width: pipWidth,
-                height: pipHeight
-            )
-            pipView?.clipsToBounds = true  // Clip to view bounds
-            pipView?.alpha = 0.01  // Nearly invisible but technically visible
+            // Position the view full-screen but at the very bottom of the view stack
+            // This ensures it's "visible" to the system but covered by the Flutter UI
+            pipView?.frame = window.bounds
+            pipView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            pipView?.clipsToBounds = true
+            pipView?.alpha = 1.0  // Fully opaque (but hidden behind Flutter)
             pipView?.isUserInteractionEnabled = false
-            pipView?.isHidden = false  // Must not be hidden
+            pipView?.isHidden = false
             
-            window.addSubview(pipView!)
+            // Insert at index 0 (behind FlutterViewController's view)
+            window.insertSubview(pipView!, at: 0)
             
-            // Force layout update
-            pipView?.setNeedsLayout()
-            pipView?.layoutIfNeeded()
-            window.setNeedsLayout()
-            window.layoutIfNeeded()
+            // Adjust player layer to match
+            playerLayer?.frame = window.bounds
             
-            print("📺 AgoraPiP: PiP view added at corner, frame: \(pipView?.frame ?? .zero)")
+            print("📺 AgoraPiP: PiP view inserted at back of window hierarchy")
         }
         
         // Create PiP controller from player layer
@@ -206,7 +303,7 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
             print("📺 AgoraPiP: Creating PiP controller (deferred)")
             self.pipController = AVPictureInPictureController(playerLayer: playerLayer)
             self.pipController?.delegate = self
-            self.pipController?.canStartPictureInPictureAutomaticallyFromInline = false
+            self.pipController?.canStartPictureInPictureAutomaticallyFromInline = self.isAutoPiPEnabled
             
             // Observe when PiP becomes possible
             self.pipObservation = self.pipController?.observe(\.isPictureInPicturePossible, options: [.new, .initial]) { [weak self] controller, change in
@@ -407,6 +504,7 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     
     func setAutoEnabled(_ enabled: Bool) {
         print("📺 AgoraPiP: setAutoEnabled(\(enabled))")
+        isAutoPiPEnabled = enabled
         
         if enabled {
             if pipController == nil {
@@ -848,6 +946,21 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
                     AgoraPiPController.shared.cleanup()
                 }
                 result(true)
+                
+            case "updateFrame":
+                if #available(iOS 15.0, *) {
+                    guard let args = call.arguments as? [String: Any],
+                          let imageData = (args["imageData"] as? FlutterStandardTypedData)?.data,
+                          let width = args["width"] as? Int,
+                          let height = args["height"] as? Int else {
+                        result(false)
+                        return
+                    }
+                    AgoraPiPController.shared.updateFrame(imageData, width: width, height: height)
+                    result(true)
+                } else {
+                    result(false)
+                }
                 
             default:
                 result(FlutterMethodNotImplemented)

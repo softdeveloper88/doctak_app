@@ -48,6 +48,16 @@
 				<string>com.googleusercontent.apps.975716064608-d2ff219g0j77e33vdmaft9euhn8nqlad</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>doctak</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>doctak</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
@@ -335,7 +345,6 @@
 		<string>remote-notification</string>
 		<string>fetch</string>
 		<string>processing</string>
-		<string>picture-in-picture</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

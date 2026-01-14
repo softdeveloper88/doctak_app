@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
@@ -18,7 +19,17 @@ import 'upcoming_meeting_screen.dart';
 import 'video_call_screen.dart';
 
 class ManageMeetingScreen extends StatefulWidget {
-  const ManageMeetingScreen({Key? key}) : super(key: key);
+  const ManageMeetingScreen({
+    Key? key,
+    this.meetingCode,
+    this.autoJoin = false,
+  }) : super(key: key);
+
+  /// Optional meeting code to pre-fill (from deep link)
+  final String? meetingCode;
+
+  /// Whether to automatically join the meeting
+  final bool autoJoin;
 
   @override
   State<ManageMeetingScreen> createState() => _ManageMeetingScreenState();
@@ -58,6 +69,25 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(
           ' ',
         )[0];
+
+    // Handle deep link auto-join
+    if (widget.meetingCode != null && widget.meetingCode!.isNotEmpty) {
+      _meetingCodeController.text = widget.meetingCode!;
+      // Auto-join after widget is built
+      if (widget.autoJoin) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _autoJoinMeeting();
+        });
+      }
+    }
+  }
+
+  /// Automatically join meeting from deep link
+  void _autoJoinMeeting() {
+    final code = _meetingCodeController.text.trim();
+    if (code.isNotEmpty) {
+      _checkJoinStatus(context, code);
+    }
   }
 
   @override
@@ -1851,8 +1881,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     String time,
     String code,
   ) {
+    final meetingLink = DeepLinkService.generateMeetingLink(code, title: title);
     final meetingInfo =
-        '${translation(context).lbl_meeting}: $title\n${translation(context).lbl_date}: $date\n${translation(context).lbl_time}: $time\n${translation(context).lbl_meeting_code}: $code';
+        '${translation(context).lbl_meeting}: $title\n${translation(context).lbl_date}: $date\n${translation(context).lbl_time}: $time\n${translation(context).lbl_meeting_code}: $code\n\nJoin: $meetingLink';
 
     showModalBottomSheet(
       context: context,
@@ -1900,7 +1931,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: theme.primary,
                   onTap: () {
                     Navigator.pop(context);
-                    toast('Sharing via email...');
+                    DeepLinkService.shareMeeting(
+                      meetingId: code,
+                      title: title,
+                      date: date,
+                      time: time,
+                    );
                   },
                 ),
                 _buildShareOption(
@@ -1910,7 +1946,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: theme.success,
                   onTap: () {
                     Navigator.pop(context);
-                    toast('Sharing via SMS...');
+                    DeepLinkService.shareMeeting(
+                      meetingId: code,
+                      title: title,
+                      date: date,
+                      time: time,
+                    );
                   },
                 ),
                 _buildShareOption(
@@ -1931,7 +1972,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: theme.secondary,
                   onTap: () {
                     Navigator.pop(context);
-                    toast('Opening share options...');
+                    DeepLinkService.shareMeeting(
+                      meetingId: code,
+                      title: title,
+                      date: date,
+                      time: time,
+                    );
                   },
                 ),
               ],

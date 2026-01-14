@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -122,11 +123,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               ),
               onPressed: () {
                 if (jobsBloc.jobDetailModel.job != null) {
-                  // createDynamicLink(
-                  //   '${jobsBloc.jobDetailModel.job?.jobTitle ?? ""}\n Apply Link  ${jobsBloc.jobDetailModel.job?.link ?? ''}',
-                  //   '${AppData.base}job/${jobsBloc.jobDetailModel.job?.id}',
-                  //   jobsBloc.jobDetailModel.job?.link ?? '',
-                  // );
+                  final job = jobsBloc.jobDetailModel.job!;
+                  DeepLinkService.shareJob(
+                    jobId: job.id?.toString() ?? widget.jobId,
+                    title: job.jobTitle,
+                    company: job.companyName,
+                    location: job.location,
+                  );
                 }
               },
             ),

@@ -132,6 +132,66 @@
                 <data android:host="doctak.net" />
                 <data android:pathPrefix="/post/" />
             </intent-filter>
+            <!-- Deep links for Jobs -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="doctak.net" />
+                <data android:pathPrefix="/job/" />
+            </intent-filter>
+            <!-- Deep links for Conferences -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="doctak.net" />
+                <data android:pathPrefix="/conference/" />
+            </intent-filter>
+            <!-- Deep links for Meetings -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="doctak.net" />
+                <data android:pathPrefix="/meeting/" />
+            </intent-filter>
+            <!-- Deep links for Calls -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="doctak.net" />
+                <data android:pathPrefix="/call/" />
+            </intent-filter>
+            <!-- Deep links for User Profiles -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="doctak.net" />
+                <data android:pathPrefix="/profile/" />
+            </intent-filter>
+            <!-- Deep links for Firebase Dynamic Links domain -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="doctak.page.link" />
+            </intent-filter>
+            <!-- Custom URL Scheme (works without server verification) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="doctak" android:host="open" />
+            </intent-filter>
         </activity>
 
 

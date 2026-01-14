@@ -84,7 +84,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
       case CallStatus.timeout:
         return theme.error;
       default:
-        return theme.textPrimary;
+        return Colors.white; // Always white for dark call background
     }
   }
 
@@ -122,11 +122,11 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
 
                 const SizedBox(height: 24),
 
-                // User name
+                // User name - always white for dark call screen background
                 Text(
                   widget.contactName,
-                  style: TextStyle(
-                    color: theme.textPrimary,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Poppins',
@@ -286,16 +286,18 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
                 ? Image.network(
                     widget.contactAvatar,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Icon(
+                    errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.person_rounded,
                       size: 60,
-                      color: theme.textSecondary,
+                      color: Colors
+                          .white70, // Always white for dark call background
                     ),
                   )
-                : Icon(
+                : const Icon(
                     Icons.person_rounded,
                     size: 60,
-                    color: theme.textSecondary,
+                    color:
+                        Colors.white70, // Always white for dark call background
                   ),
           ),
         ),
