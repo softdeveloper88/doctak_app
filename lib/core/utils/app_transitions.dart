@@ -26,7 +26,6 @@ class CustomPageRoute<T> extends PageRouteBuilder<T> {
             case PageTransitionType.rotate:
               return RotationTransition(turns: animation, child: child);
             case PageTransitionType.noTransition:
-            default:
               return child;
           }
         },

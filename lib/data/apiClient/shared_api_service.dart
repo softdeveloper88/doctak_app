@@ -38,7 +38,6 @@ class SharedApiService {
   factory SharedApiService() => _instance;
   SharedApiService._internal();
 
-  final ApiCaller _apiCaller = ApiCaller();
   final SearchApiService _searchService = SearchApiService();
 
   // ================================== AUTH ENDPOINTS ==================================
@@ -890,35 +889,6 @@ class SharedApiService {
       print('🔗 API connectivity test failed: $e');
       return ApiResponse.error('API connectivity failed: $e');
     }
-  }
-
-  /// Generic method for handling common API patterns
-  Future<ApiResponse<T>> _makeRequest<T>(
-    String endpoint,
-    networkUtils.HttpMethod method,
-    T Function(Map<String, dynamic>) fromJson, {
-    Map<String, dynamic>? request,
-    Map<String, String>? queryParams,
-  }) async {
-    try {
-      String fullEndpoint = endpoint;
-      if (queryParams != null && queryParams.isNotEmpty) {
-        final query = queryParams.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
-        fullEndpoint += (endpoint.contains('?') ? '&' : '?') + query;
-      }
-
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse(fullEndpoint, method: method, request: request));
-      return ApiResponse.success(fromJson(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
-    } catch (e) {
-      return ApiResponse.error('Request failed: $e');
-    }
-  }
-
-  /// Generic method for simple responses
-  Future<ApiResponse<Map<String, dynamic>>> _makeSimpleRequest(String endpoint, networkUtils.HttpMethod method, {Map<String, dynamic>? request, Map<String, String>? queryParams}) async {
-    return _makeRequest<Map<String, dynamic>>(endpoint, method, (response) => Map<String, dynamic>.from(response), request: request, queryParams: queryParams);
   }
 
   // ================================== SEARCH ENDPOINTS ==================================

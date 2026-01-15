@@ -57,12 +57,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
   bool isLoading = false;
   Timer? typingTimer;
   ChatBloc chatBloc = ChatBloc();
-  String? _audioFilePath;
   // late AgoraRtmClient _client; // Remove the nullable type
   // AgoraRtmChannel? _channel;
   // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
-  final bool _isLogin = false;
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
@@ -75,8 +73,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
   bool _isFileUploading = false;
-  bool _isRecording = false;
-  bool _isPaused = false;
   int _recordDuration = 0;
   Timer? _timer;
   Timer? _timerChat;
@@ -119,7 +115,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
     _initRecorder();
     // Handle completion
     // seenSenderMessage(1);
-    _isRecording = false;
+    // _isRecording = false; // Field was removed as unused
     chatBloc.add(LoadRoomMessageEvent(page: 1, userId: widget.id, roomId: widget.roomId, isFirstLoading: isDataLoaded));
     chatBloc.add(ChatReadStatusEvent(userId: widget.id, roomId: widget.roomId));
     ConnectPusher();
@@ -178,78 +174,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
         isBottom = false;
       });
     }
-  }
-
-  Future<void> _start() async {
-    try {
-      // Check microphone permission
-      final status = await Permission.microphone.request();
-      if (status != PermissionStatus.granted) {
-        return;
-      }
-
-      if (!_isRecorderInitialized) {
-        await _initRecorder();
-      }
-
-      final tempDir = await getTemporaryDirectory();
-      _recordingPath = '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
-
-      await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000, sampleRate: 44100), path: _recordingPath!);
-
-      setState(() {
-        _isRecording = true;
-        _recordDuration = 0;
-      });
-      _startTimer();
-    } catch (e) {
-      debugPrint("Error starting recording: $e");
-    }
-  }
-
-  Future<void> _stop() async {
-    _timer?.cancel();
-    _ampTimer?.cancel();
-    await _audioRecorder.stop();
-
-    debugPrint(_recordingPath);
-    setState(() => _isRecording = false);
-    chatBloc.add(
-      SendMessageEvent(userId: AppData.logInUserId, roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId, receiverId: widget.id, attachmentType: 'voice', file: _recordingPath, message: ''),
-    );
-    scrollToBottom();
-  }
-
-  Future<void> _pause() async {
-    _timer?.cancel();
-    _ampTimer?.cancel();
-    await _audioRecorder.pause();
-
-    setState(() => _isPaused = true);
-  }
-
-  Future<void> _resume() async {
-    _startTimer();
-    await _audioRecorder.resume();
-
-    setState(() => _isPaused = false);
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    _ampTimer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      setState(() => _recordDuration++);
-    });
-    // Note: flutter_sound doesn't have getAmplitude() method
-    // If you need amplitude, use setSubscriptionDuration and listen to stream
-  }
-
-  void _log(String info) {
-    debugPrint(info);
-    // setState(() {
-    //   _infoStrings.insert(0, info);
-    // });
   }
 
   String? FromId;
@@ -843,7 +767,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
                               _showFileOptions();
                               print("isGranted");
                             } else if (result.isDenied) {
-                              final result = await permission.request();
+                              await permission.request();
                               print("isDenied");
                             } else if (result.isPermanentlyDenied) {
                               print("isPermanentlyDenied");
@@ -997,8 +921,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
     return "$sdPath/test_${i++}.mp3";
   }
 
-  void _startCall() {}
-
   void _showFileOptions() {
     final BuildContext currentContext = context; // Store context reference
     NavigatorState? bottomSheetNavigator;
@@ -1073,45 +995,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
 
   void onSubscriptionCount(String channelName, int subscriptionCount) {}
 
-  Future<void> _permissionDialog(context) async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          // <-- SEE HERE
-          title: Text(
-            translation(context).lbl_want_to_join_meeting,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.sp, fontFamily: 'Poppins'),
-          ),
-          // content: const SingleChildScrollView(
-          //   child: ListBody(
-          // //     children: <Widget>[
-          // //       Text('Are you sure want to enable permission?'),
-          // //     ],
-          //   ),
-          // ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(translation(context).lbl_no),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text(translation(context).lbl_yes),
-              onPressed: () {
-                openAppSettings();
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // Replace your current outgoing call implementation with this
   Future<dynamic> onAuthorizer(String channelName, String socketId, dynamic options) async {
     try {
@@ -1156,15 +1039,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStat
 
   // Handle typing events
   void handleTypingEvent(Map<String, dynamic> eventData) {
-    final fromId = eventData['from_id'];
-    final typingStatus = eventData['typing'];
     // Handle typing event here
   }
 
   // Handle message events
   void handleMessageEvent(Map<String, dynamic> eventData) {
-    final fromId = eventData['from_id'];
-    final message = eventData['message'];
     // Handle message event here
   }
 
@@ -1431,45 +1310,6 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
   }
 }
 
-class _ControlsOverlay extends StatelessWidget {
-  const _ControlsOverlay({required this.controller});
-
-  final VideoPlayerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
-
-    return Stack(
-      children: <Widget>[
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 50),
-          reverseDuration: const Duration(milliseconds: 200),
-          child: controller.value.isPlaying
-              ? const SizedBox.shrink()
-              : Container(
-                  color: theme.surfaceVariant,
-                  child: Center(
-                    child: Icon(Icons.play_arrow, color: theme.primary, size: 35.0, semanticLabel: 'Play'),
-                  ),
-                ),
-        ),
-        GestureDetector(
-          onTap: () {
-            if (controller.value.isPlaying) {
-              controller.pause();
-            } else {
-              // controller.play();
-              // Navigate to full screen video page
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => FullScreenVideoPage(videoPlayerController: controller)));
-            }
-          },
-        ),
-      ],
-    );
-  }
-}
-
 class VoiceRecordingPainter extends CustomPainter {
   final Animation<double> animation;
   final Color color;
@@ -1481,8 +1321,6 @@ class VoiceRecordingPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-
-    final rect = Offset.zero & size;
 
     final radius = size.width / 2;
     final centerX = size.width / 2;
@@ -1503,12 +1341,4 @@ class VoiceRecordingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
-
-// Simple loading screen for calls
-// Helper function to show error message
-void _showCallError(String message) {
-  if (NavigatorService.navigatorKey.currentContext != null) {
-    ScaffoldMessenger.of(NavigatorService.navigatorKey.currentContext!).showSnackBar(SnackBar(content: Text(message)));
-  }
 }

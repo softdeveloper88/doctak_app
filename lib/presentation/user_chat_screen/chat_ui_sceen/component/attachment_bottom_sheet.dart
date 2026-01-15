@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:doctak_app/main.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'debug_attachment_helper.dart';
 
 class AttachmentBottomSheet extends StatefulWidget {
@@ -22,12 +22,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   bool _isLoading = true;
   int _currentIndex = 0;
 
-  final List<AttachmentOption> _options = [
-    AttachmentOption(icon: Icons.photo_library_rounded, label: 'Gallery', color: const Color(0xFF6B4EFF), type: AttachmentType.gallery),
-    AttachmentOption(icon: Icons.camera_alt_rounded, label: 'Camera', color: const Color(0xFF00C853), type: AttachmentType.camera),
-    AttachmentOption(icon: Icons.videocam_rounded, label: 'Video', color: const Color(0xFFFF4757), type: AttachmentType.video),
-    AttachmentOption(icon: Icons.insert_drive_file_rounded, label: 'Document', color: const Color(0xFF2196F3), type: AttachmentType.document),
-  ];
+  late List<AttachmentOption> _options;
 
   @override
   void initState() {
@@ -36,6 +31,18 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     _animationController.forward();
     _loadMedia();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final theme = OneUITheme.of(context);
+    _options = [
+      AttachmentOption(icon: Icons.photo_library_rounded, label: 'Gallery', color: theme.primary, type: AttachmentType.gallery),
+      AttachmentOption(icon: Icons.camera_alt_rounded, label: 'Camera', color: theme.success, type: AttachmentType.camera),
+      AttachmentOption(icon: Icons.videocam_rounded, label: 'Video', color: theme.error, type: AttachmentType.video),
+      AttachmentOption(icon: Icons.insert_drive_file_rounded, label: 'Document', color: theme.primary.withValues(alpha: 0.85), type: AttachmentType.document),
+    ];
   }
 
   @override
@@ -76,31 +83,97 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
         return Container(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85, minHeight: MediaQuery.of(context).size.height * 0.5),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.85,
+            minHeight: MediaQuery.of(context).size.height * 0.5,
+          ),
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            color: theme.cardBackground,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: Column(
             children: [
-              // Handle bar
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
+              // Drag handle - OneUI 8.5 style
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  decoration: BoxDecoration(
+                    color: theme.textSecondary.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
               ),
 
-              // Tab bar
+              // Title section - OneUI 8.5 style
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: theme.primary.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.attach_file_rounded,
+                        color: theme.primary,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Add Attachment',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: theme.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            'Choose media or file to send',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 13,
+                              color: theme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Tab bar - OneUI 8.5 style
               Container(
                 height: 50,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(color: appStore.isDarkMode ? Colors.grey[800] : Colors.grey[200], borderRadius: BorderRadius.circular(25)),
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: theme.isDark
+                      ? theme.textSecondary.withValues(alpha: 0.15)
+                      : theme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(
+                    color: theme.primary.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
                 child: Row(
                   children: List.generate(
                     _options.length,
@@ -108,34 +181,56 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       child: GestureDetector(
                         onTap: () => setState(() => _currentIndex = index),
                         child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(color: _currentIndex == index ? _options[index].color : Colors.transparent, borderRadius: BorderRadius.circular(22)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                _options[index].icon,
-                                size: 18,
-                                color: _currentIndex == index
-                                    ? Colors.white
-                                    : appStore.isDarkMode
-                                    ? Colors.white70
-                                    : Colors.black54,
-                              ),
-                              if (_currentIndex == index) ...[
-                                const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    _options[index].label,
-                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.easeInOut,
+                          margin: const EdgeInsets.all(1),
+                          decoration: BoxDecoration(
+                            color: _currentIndex == index
+                                ? _options[index].color
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: _currentIndex == index
+                                ? [
+                                    BoxShadow(
+                                      color: _options[index].color.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _options[index].icon,
+                                  size: 20,
+                                  color: _currentIndex == index
+                                      ? Colors.white
+                                      : theme.textSecondary,
                                 ),
+                                if (_currentIndex == index) ...[
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      _options[index].label,
+                                      style: const TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Colors.white,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.2,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
                         ),
                       ),
@@ -144,11 +239,19 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Content area
               Expanded(
-                child: IndexedStack(index: _currentIndex, children: [_buildGalleryView(), _buildCameraOption(), _buildVideoOption(), _buildDocumentOption()]),
+                child: IndexedStack(
+                  index: _currentIndex,
+                  children: [
+                    _buildGalleryView(),
+                    _buildCameraOption(),
+                    _buildVideoOption(),
+                    _buildDocumentOption(),
+                  ],
+                ),
               ),
             ],
           ),
@@ -158,8 +261,15 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   }
 
   Widget _buildGalleryView() {
+    final theme = OneUITheme.of(context);
+    
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          color: theme.primary,
+          strokeWidth: 3,
+        ),
+      );
     }
 
     if (_mediaList.isEmpty) {
@@ -167,9 +277,38 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.photo_library_outlined, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text('No media found', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: theme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.photo_library_outlined,
+                size: 40,
+                color: theme.primary.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'No media found',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: theme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Your gallery appears to be empty',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                color: theme.textSecondary,
+              ),
+            ),
           ],
         ),
       );
@@ -214,9 +353,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                 child: Hero(
                   tag: 'media_$index',
                   child: Container(
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: theme.scaffoldBackground,
+                      border: Border.all(
+                        color: theme.primary.withValues(alpha: 0.1),
+                        width: 1,
+                      ),
+                    ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
@@ -246,8 +392,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
               );
             }
             return Container(
-              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(8)),
-              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              decoration: BoxDecoration(
+                color: theme.scaffoldBackground,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: theme.primary,
+                ),
+              ),
             );
           },
         );
@@ -256,6 +410,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   }
 
   Future<Widget> _buildMediaThumbnail(AssetEntity asset) async {
+    final theme = OneUITheme.of(context);
     try {
       final thumbnail = await asset.thumbnailDataWithSize(const ThumbnailSize(200, 200), quality: 70);
 
@@ -266,8 +421,12 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
           errorBuilder: (context, error, stackTrace) {
             debugPrint('Error loading thumbnail: $error');
             return Container(
-              color: Colors.grey[300],
-              child: Icon(Icons.broken_image, color: Colors.grey[600], size: 32),
+              color: theme.scaffoldBackground,
+              child: Icon(
+                Icons.broken_image,
+                color: theme.textSecondary.withValues(alpha: 0.5),
+                size: 32,
+              ),
             );
           },
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -283,8 +442,12 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     }
 
     return Container(
-      color: Colors.grey[300],
-      child: Icon(Icons.image, color: Colors.grey[600], size: 32),
+      color: theme.scaffoldBackground,
+      child: Icon(
+        Icons.image,
+        color: theme.textSecondary.withValues(alpha: 0.5),
+        size: 32,
+      ),
     );
   }
 
@@ -296,7 +459,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   }
 
   Widget _buildCameraOption() {
-    // Add bottom padding for system navigation bars
+    final theme = OneUITheme.of(context);
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
@@ -349,20 +512,42 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF00C853),
+                  color: theme.success,
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: const Color(0xFF00C853).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.success.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.camera_alt_rounded, size: 50, color: Colors.white),
+                child: const Icon(
+                  Icons.camera_alt_rounded,
+                  size: 50,
+                  color: Colors.white,
+                ),
               ),
             ),
             const SizedBox(height: 24),
             Text(
               'Take a photo',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: appStore.isDarkMode ? Colors.white : Colors.black87),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: theme.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
-            Text('Capture and send instantly', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+            Text(
+              'Capture and send instantly',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                color: theme.textSecondary,
+              ),
+            ),
           ],
         ),
       ),
@@ -370,7 +555,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   }
 
   Widget _buildVideoOption() {
-    // Add bottom padding for system navigation bars
+    final theme = OneUITheme.of(context);
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
@@ -428,17 +613,32 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFF4757),
+                        color: theme.error,
                         shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: const Color(0xFFFF4757).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.error.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.videocam_rounded, size: 40, color: Colors.white),
+                      child: const Icon(
+                        Icons.videocam_rounded,
+                        size: 40,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Record',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: appStore.isDarkMode ? Colors.white : Colors.black87),
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.textPrimary,
+                    ),
                   ),
                 ],
               ),
@@ -490,31 +690,53 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6B4EFF),
+                        color: theme.primary,
                         shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: const Color(0xFF6B4EFF).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.primary.withValues(alpha: 0.3),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.video_library_rounded, size: 40, color: Colors.white),
+                      child: const Icon(
+                        Icons.video_library_rounded,
+                        size: 40,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Gallery',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: appStore.isDarkMode ? Colors.white : Colors.black87),
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: theme.textPrimary,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 24),
-          Text('Choose a video to send', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+          Text(
+            'Choose a video to send',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              color: theme.textSecondary,
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildDocumentOption() {
-    // Add bottom padding for system navigation bars
+    final theme = OneUITheme.of(context);
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
@@ -528,10 +750,10 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
               crossAxisSpacing: 16,
               childAspectRatio: 1.2,
               children: [
-                _buildDocumentTypeCard(icon: Icons.picture_as_pdf, label: 'PDF', color: const Color(0xFFE53935), onTap: () => _pickDocument(['pdf'])),
-                _buildDocumentTypeCard(icon: Icons.description, label: 'Word', color: const Color(0xFF1976D2), onTap: () => _pickDocument(['doc', 'docx'])),
-                _buildDocumentTypeCard(icon: Icons.table_chart, label: 'Excel', color: const Color(0xFF388E3C), onTap: () => _pickDocument(['xls', 'xlsx'])),
-                _buildDocumentTypeCard(icon: Icons.folder_open, label: 'All Files', color: const Color(0xFF6B4EFF), onTap: () => _pickDocument(null)),
+                _buildDocumentTypeCard(icon: Icons.picture_as_pdf, label: 'PDF', color: theme.error, onTap: () => _pickDocument(['pdf'])),
+                _buildDocumentTypeCard(icon: Icons.description, label: 'Word', color: theme.primary, onTap: () => _pickDocument(['doc', 'docx'])),
+                _buildDocumentTypeCard(icon: Icons.table_chart, label: 'Excel', color: theme.success, onTap: () => _pickDocument(['xls', 'xlsx'])),
+                _buildDocumentTypeCard(icon: Icons.folder_open, label: 'All Files', color: theme.primary.withValues(alpha: 0.85), onTap: () => _pickDocument(null)),
               ],
             ),
           ),
@@ -540,23 +762,52 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     );
   }
 
-  Widget _buildDocumentTypeCard({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
+  Widget _buildDocumentTypeCard({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+          color: color.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: color.withValues(alpha: 0.25),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48, color: color),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 28, color: color),
+            ),
             const SizedBox(height: 12),
             Text(
               label,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: color),
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: color,
+                letterSpacing: 0.2,
+              ),
             ),
           ],
         ),

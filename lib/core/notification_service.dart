@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:clear_all_notifications/clear_all_notifications.dart';
-import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
@@ -33,8 +32,7 @@ class NotificationService {
   static const String _payloadKey = 'type';
   static const String _payloadId = 'id';
 
-  // Add CallKitService instance
-  static final CallKitService _callKitService = CallKitService();
+  // CallKitService instance removed (unused)
 
   // Separate tracking for different types of notification events
   static final Map<String, int> _lastHandledPushNotifications = {};
@@ -129,9 +127,6 @@ class NotificationService {
   }
 
   // More specific methods to check and mark different notification types
-  static bool _shouldSkipPushNotification(String notificationId) {
-    return _shouldSkipWithinDuration(notificationId, _lastHandledPushNotifications, 500);
-  }
 
   static bool _shouldSkipForegroundNotification(String notificationId) {
     return _shouldSkipWithinDuration(notificationId, _lastHandledForegroundNotifications, 500);
@@ -159,11 +154,6 @@ class NotificationService {
   }
 
   // Mark notifications as handled in the specific maps
-  static void _markPushNotificationHandled(String notificationId) {
-    _lastHandledPushNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
-    _cleanupOldEntries(_lastHandledPushNotifications);
-  }
-
   static void _markForegroundNotificationHandled(String notificationId) {
     _lastHandledForegroundNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
     _cleanupOldEntries(_lastHandledForegroundNotifications);

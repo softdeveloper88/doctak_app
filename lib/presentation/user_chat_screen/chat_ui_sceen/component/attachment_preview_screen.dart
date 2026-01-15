@@ -1,8 +1,13 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:video_player/video_player.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:path/path.dart' as path;
+import 'package:image_editor_plus/image_editor_plus.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'debug_attachment_helper.dart';
 
 class AttachmentPreviewScreen extends StatefulWidget {
@@ -23,6 +28,10 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> with 
   late Animation<Offset> _slideAnimation;
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
+  File? _editedImageFile;
+  bool _showEmojiPicker = false;
+  List<OverlayItem> _overlayItems = [];
+  final GlobalKey _imageKey = GlobalKey();
 
   @override
   void initState() {
@@ -98,21 +107,19 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> with 
                       if (widget.type == 'image') ...[
                         IconButton(
                           icon: const Icon(Icons.crop_rotate, color: Colors.white),
-                          onPressed: () {
-                            // TODO: Implement image editing
-                          },
+                          onPressed: _openImageEditor,
                         ),
                         IconButton(
                           icon: const Icon(Icons.emoji_emotions_outlined, color: Colors.white),
                           onPressed: () {
-                            // TODO: Implement sticker/emoji overlay
+                            setState(() {
+                              _showEmojiPicker = !_showEmojiPicker;
+                            });
                           },
                         ),
                         IconButton(
                           icon: const Icon(Icons.text_fields, color: Colors.white),
-                          onPressed: () {
-                            // TODO: Implement text overlay
-                          },
+                          onPressed: _addTextOverlay,
                         ),
                       ],
                     ],
@@ -126,69 +133,112 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> with 
               bottom: 0,
               left: 0,
               right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent]),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Caption input
-                      Container(
-                        margin: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(25),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _captionController,
-                                style: const TextStyle(color: Colors.white, fontSize: 16),
-                                decoration: InputDecoration(
-                                  hintText: 'Add a caption...',
-                                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                                  border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                ),
-                                maxLines: null,
-                                textCapitalization: TextCapitalization.sentences,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              margin: const EdgeInsets.only(right: 4),
-                              decoration: BoxDecoration(
-                                color: SVAppColorPrimary,
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: SVAppColorPrimary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () {
-                                    widget.onSend(widget.file, _captionController.text.trim());
-                                    // Don't pop here - let the onSend callback handle navigation
-                                  },
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    child: const Icon(Icons.send_rounded, color: Colors.white, size: 24),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Emoji picker
+                  if (_showEmojiPicker && widget.type == 'image')
+                    Container(
+                      height: 300,
+                      color: Colors.black87,
+                      child: EmojiPicker(
+                        onEmojiSelected: (category, emoji) {
+                          _addEmojiOverlay(emoji.emoji);
+                          setState(() {
+                            _showEmojiPicker = false;
+                          });
+                        },
+                        config: Config(
+                          height: 300,
+                          checkPlatformCompatibility: true,
+                          viewOrderConfig: const ViewOrderConfig(),
+                          emojiViewConfig: const EmojiViewConfig(emojiSizeMax: 32),
+                          skinToneConfig: const SkinToneConfig(),
+                          categoryViewConfig: const CategoryViewConfig(),
+                          bottomActionBarConfig: const BottomActionBarConfig(),
+                          searchViewConfig: const SearchViewConfig(),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                    ],
+                    ),
+                  
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Caption input
+                          Container(
+                            margin: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _captionController,
+                                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                                    decoration: InputDecoration(
+                                      hintText: 'Add a caption...',
+                                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                                      border: InputBorder.none,
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                    ),
+                                    maxLines: null,
+                                    textCapitalization: TextCapitalization.sentences,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  margin: const EdgeInsets.only(right: 4),
+                                  decoration: BoxDecoration(
+                                    color: SVAppColorPrimary,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [BoxShadow(color: SVAppColorPrimary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+                                  ),
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () async {
+                                        File fileToSend = _editedImageFile ?? widget.file;
+                                        
+                                        // If there are overlay items, render them to a new image
+                                        if (_overlayItems.isNotEmpty && widget.type == 'image') {
+                                          final renderedFile = await _renderOverlaysToImage();
+                                          if (renderedFile != null) {
+                                            fileToSend = renderedFile;
+                                          }
+                                        }
+                                        
+                                        widget.onSend(fileToSend, _captionController.text.trim());
+                                      },
+                                      borderRadius: BorderRadius.circular(25),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(12),
+                                        child: const Icon(Icons.send_rounded, color: Colors.white, size: 24),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -213,40 +263,64 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> with 
   }
 
   Widget _buildImagePreview() {
-    return InteractiveViewer(
-      minScale: 0.5,
-      maxScale: 4.0,
-      child: Center(
-        child: Image.file(
-          widget.file,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            DebugAttachmentHelper.logImageError(error, stackTrace, 'Image Preview Loading');
-            return Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.white, size: 64),
-                  const SizedBox(height: 16),
-                  Text('Failed to load image', style: const TextStyle(color: Colors.white, fontSize: 16)),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Path: ${widget.file.path}',
-                    style: const TextStyle(color: Colors.white70, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+    final imageFile = _editedImageFile ?? widget.file;
+    
+    return RepaintBoundary(
+      key: _imageKey,
+      child: Stack(
+        children: [
+          // Base image
+          InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            child: Center(
+              child: Image.file(
+                imageFile,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  DebugAttachmentHelper.logImageError(error, stackTrace, 'Image Preview Loading');
+                  return Container(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error_outline, color: Colors.white, size: 64),
+                        const SizedBox(height: 16),
+                        const Text('Failed to load image', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Path: ${imageFile.path}',
+                          style: const TextStyle(color: Colors.white70, fontSize: 12),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  if (wasSynchronouslyLoaded) {
+                    return child;
+                  }
+                  return AnimatedOpacity(
+                    opacity: frame == null ? 0 : 1,
+                    duration: const Duration(milliseconds: 300),
+                    child: child,
+                  );
+                },
               ),
-            );
-          },
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            if (wasSynchronouslyLoaded) {
-              return child;
-            }
-            return AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 300), child: child);
-          },
-        ),
+            ),
+          ),
+          
+          // Overlays (emojis and text)
+          ..._overlayItems.map((item) => item.buildWidget(
+                onUpdate: () => setState(() {}),
+                onDelete: () {
+                  setState(() {
+                    _overlayItems.remove(item);
+                  });
+                },
+              )),
+        ],
       ),
     );
   }
@@ -385,5 +459,221 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> with 
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  }
+
+  // Image editing methods
+  Future<void> _openImageEditor() async {
+    try {
+      final editedImage = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageEditor(
+            image: (_editedImageFile ?? widget.file).readAsBytesSync(),
+          ),
+        ),
+      );
+
+      if (editedImage != null) {
+        // Save edited image to temporary file
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/edited_${DateTime.now().millisecondsSinceEpoch}.jpg');
+        await tempFile.writeAsBytes(editedImage);
+
+        setState(() {
+          _editedImageFile = tempFile;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error opening image editor: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to open image editor'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _addEmojiOverlay(String emoji) {
+    setState(() {
+      _overlayItems.add(
+        OverlayItem(
+          type: OverlayType.emoji,
+          content: emoji,
+          position: const Offset(100, 100),
+          scale: 1.0,
+          rotation: 0.0,
+        ),
+      );
+    });
+  }
+
+  Future<void> _addTextOverlay() async {
+    final textController = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.black87,
+        title: const Text('Add Text', style: TextStyle(color: Colors.white)),
+        content: TextField(
+          controller: textController,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: 'Enter text...',
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: SVAppColorPrimary),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: SVAppColorPrimary, width: 2),
+            ),
+          ),
+          autofocus: true,
+          maxLines: null,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, textController.text),
+            child: Text('Add', style: TextStyle(color: SVAppColorPrimary)),
+          ),
+        ],
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        _overlayItems.add(
+          OverlayItem(
+            type: OverlayType.text,
+            content: result,
+            position: const Offset(100, 200),
+            scale: 1.0,
+            rotation: 0.0,
+          ),
+        );
+      });
+    }
+  }
+
+  Future<File?> _renderOverlaysToImage() async {
+    try {
+      final boundary = _imageKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return null;
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return null;
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/rendered_${DateTime.now().millisecondsSinceEpoch}.png');
+      await file.writeAsBytes(byteData.buffer.asUint8List());
+
+      return file;
+    } catch (e) {
+      debugPrint('Error rendering overlays: $e');
+      return null;
+    }
+  }
+}
+
+// Overlay item class
+enum OverlayType { emoji, text }
+
+class OverlayItem {
+  final OverlayType type;
+  final String content;
+  Offset position;
+  double scale;
+  double rotation;
+
+  OverlayItem({
+    required this.type,
+    required this.content,
+    required this.position,
+    required this.scale,
+    required this.rotation,
+  });
+
+  Widget buildWidget({
+    required VoidCallback onUpdate,
+    required VoidCallback onDelete,
+  }) {
+    return Positioned(
+      left: position.dx,
+      top: position.dy,
+      child: GestureDetector(
+        onPanUpdate: (details) {
+          position += details.delta;
+          onUpdate();
+        },
+        onScaleUpdate: (details) {
+          scale *= details.scale;
+          rotation += details.rotation;
+          onUpdate();
+        },
+        child: Transform.rotate(
+          angle: rotation,
+          child: Transform.scale(
+            scale: scale,
+            child: Stack(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: type == OverlayType.emoji
+                      ? Text(
+                          content,
+                          style: const TextStyle(fontSize: 48),
+                        )
+                      : Text(
+                          content,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black,
+                                offset: Offset(2, 2),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: GestureDetector(
+                    onTap: onDelete,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

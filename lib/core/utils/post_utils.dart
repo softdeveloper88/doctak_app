@@ -11,8 +11,6 @@ class PostUtils {
     } else {
       return Color(int.parse('ffffff', radix: 16));
     }
-
-    return Color(int.parse(hexColorString, radix: 16));
   }
 
   // Function to launch URL with confirmation dialog

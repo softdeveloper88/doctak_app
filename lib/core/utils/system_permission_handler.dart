@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 
 /// Comprehensive system-level permission handler
 /// Handles special permissions like SYSTEM_ALERT_WINDOW (Draw Over Other Apps)
@@ -65,88 +66,197 @@ class SystemPermissionHandler {
 
   /// Show dialog explaining why overlay permission is needed
   Future<bool> _showOverlayPermissionDialog(BuildContext context) async {
+    final theme = OneUITheme.of(context);
+    
     return await showDialog<bool>(
           context: context,
           barrierDismissible: false,
           builder: (dialogContext) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
-                  child: Icon(Icons.layers_rounded, color: Colors.blue[600], size: 24),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Display Over Other Apps',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            backgroundColor: theme.cardBackground,
+            contentPadding: EdgeInsets.zero,
+            content: Container(
+              width: MediaQuery.of(context).size.width * 0.85,
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 32),
+                  
+                  // Header Icon
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: theme.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.primary.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.layers_rounded,
+                      color: theme.primary,
+                      size: 36,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'DocTak needs permission to display over other apps for:',
-                  style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.grey[700], height: 1.5),
-                ),
-                const SizedBox(height: 16),
-                _buildFeatureItem(Icons.picture_in_picture_alt_rounded, 'Picture-in-Picture mode during video calls'),
-                const SizedBox(height: 10),
-                _buildFeatureItem(Icons.call_rounded, 'Incoming call notifications'),
-                const SizedBox(height: 10),
-                _buildFeatureItem(Icons.stay_current_portrait_rounded, 'Keep calls active while using other apps'),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.shade200, width: 1),
+                  const SizedBox(height: 20),
+                  
+                  // Title
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Display Over Other Apps',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'Poppins',
+                        color: theme.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded, color: Colors.amber.shade700, size: 20),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'You\'ll be redirected to Settings to enable this permission.',
-                          style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: Colors.amber.shade900, height: 1.4),
+                  const SizedBox(height: 12),
+                  
+                  // Description
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'DocTak needs permission to display\nover other apps for:',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        color: theme.textSecondary,
+                        height: 1.4,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Features List
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: [
+                        _buildFeatureItem(
+                          theme,
+                          Icons.picture_in_picture_alt_rounded,
+                          'Picture-in-Picture mode during video calls',
+                        ),
+                        const SizedBox(height: 12),
+                        _buildFeatureItem(
+                          theme,
+                          Icons.call_rounded,
+                          'Incoming call notifications',
+                        ),
+                        const SizedBox(height: 12),
+                        _buildFeatureItem(
+                          theme,
+                          Icons.stay_current_portrait_rounded,
+                          'Keep calls active while using other apps',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // Info Banner
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.warning.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.warning.withValues(alpha: 0.2),
+                          width: 1,
                         ),
                       ),
-                    ],
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: theme.warning,
+                            size: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'You\'ll be redirected to Settings to\nenable this permission.',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontFamily: 'Poppins',
+                                color: theme.textPrimary,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 28),
+                  
+                  // Action Buttons
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(false),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              side: BorderSide(color: theme.border, width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              backgroundColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              'Not Now',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: theme.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(dialogContext).pop(true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Continue',
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-                child: Text(
-                  'Not Now',
-                  style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Colors.grey[600]),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[600],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
           ),
         ) ??
         false;
@@ -154,108 +264,222 @@ class SystemPermissionHandler {
 
   /// Show dialog when overlay permission is denied
   Future<void> _showOverlayPermissionDeniedDialog(BuildContext context) async {
+    final theme = OneUITheme.of(context);
+    
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(Icons.settings_rounded, color: Colors.orange[600], size: 24),
-            ),
-            const SizedBox(width: 12),
-            const Expanded(
-              child: Text(
-                'Permission Required',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        backgroundColor: theme.cardBackground,
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 32),
+              
+              // Header Icon
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: theme.warning.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.warning.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Icon(
+                  Icons.settings_rounded,
+                  color: theme.warning,
+                  size: 36,
+                ),
               ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'To enable Picture-in-Picture mode and call features:',
-              style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.grey[700], height: 1.5),
-            ),
-            const SizedBox(height: 16),
-            _buildStep(1, 'Open Settings'),
-            const SizedBox(height: 8),
-            _buildStep(2, 'Find "DocTak" in the app list'),
-            const SizedBox(height: 8),
-            _buildStep(3, 'Enable "Display over other apps"'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12)),
-            child: Text(
-              'Maybe Later',
-              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Colors.grey[600]),
-            ),
+              const SizedBox(height: 20),
+              
+              // Title
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'Permission Required',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Poppins',
+                    color: theme.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Description
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'To enable Picture-in-Picture mode and\ncall features:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                    color: theme.textSecondary,
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Steps
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    _buildStep(theme, 1, 'Open Settings'),
+                    const SizedBox(height: 12),
+                    _buildStep(theme, 2, 'Find "DocTak" in the app list'),
+                    const SizedBox(height: 12),
+                    _buildStep(theme, 3, 'Enable "Display over other apps"'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              
+              // Action Buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: BorderSide(color: theme.border, width: 1.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          backgroundColor: Colors.transparent,
+                        ),
+                        child: Text(
+                          'Maybe Later',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: theme.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop();
+                          openAppSettings();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.warning,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Open Settings',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              openAppSettings();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange[600],
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String text) {
+  Widget _buildFeatureItem(OneUITheme theme, IconData icon, String text) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: Colors.blue[600]),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: theme.primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 18, color: theme.primary),
+        ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: Colors.grey[700]),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+                height: 1.4,
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildStep(int step, String text) {
+  Widget _buildStep(OneUITheme theme, int step, String text) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(color: Colors.orange.shade100, shape: BoxShape.circle),
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: theme.warning.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
           child: Center(
             child: Text(
               '$step',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.orange.shade700),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: theme.warning,
+                fontFamily: 'Poppins',
+              ),
             ),
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            text,
-            style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: Colors.grey[700]),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+                height: 1.4,
+              ),
+            ),
           ),
         ),
       ],
