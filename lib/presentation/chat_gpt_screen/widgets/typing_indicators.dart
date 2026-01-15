@@ -10,8 +10,7 @@ class TypingIndicators extends StatefulWidget {
   TypingIndicatorState createState() => TypingIndicatorState();
 }
 
-class TypingIndicatorState extends State<TypingIndicators>
-    with TickerProviderStateMixin {
+class TypingIndicatorState extends State<TypingIndicators> with TickerProviderStateMixin {
   late List<AnimationController> _controllers;
   late List<Animation<double>> _animations;
   late List<Animation<double>> _opacityAnimations;
@@ -21,10 +20,7 @@ class TypingIndicatorState extends State<TypingIndicators>
     super.initState();
 
     _controllers = List.generate(3, (index) {
-      return AnimationController(
-        duration: const Duration(milliseconds: 800),
-        vsync: this,
-      )..repeat(reverse: true);
+      return AnimationController(duration: const Duration(milliseconds: 800), vsync: this)..repeat(reverse: true);
     });
 
     _animations = _controllers
@@ -58,16 +54,16 @@ class TypingIndicatorState extends State<TypingIndicators>
         })
         .values
         .toList();
-        
+
     // Start controllers with slight delay to create wave effect
     Future.delayed(Duration(milliseconds: 100), () {
       _controllers[0].forward();
     });
-    
+
     Future.delayed(Duration(milliseconds: 200), () {
       _controllers[1].forward();
     });
-    
+
     Future.delayed(Duration(milliseconds: 300), () {
       _controllers[2].forward();
     });
@@ -78,12 +74,9 @@ class TypingIndicatorState extends State<TypingIndicators>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 10.0),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.05),
+        color: Colors.blue.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.blue.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.1), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -93,10 +86,7 @@ class TypingIndicatorState extends State<TypingIndicators>
             builder: (context, child) {
               return Transform.translate(
                 offset: Offset(0, -_animations[index].value),
-                child: Opacity(
-                  opacity: _opacityAnimations[index].value,
-                  child: child,
-                ),
+                child: Opacity(opacity: _opacityAnimations[index].value, child: child),
               );
             },
             child: Padding(
@@ -109,24 +99,9 @@ class TypingIndicatorState extends State<TypingIndicators>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [
-                      widget.color == Colors.white
-                          ? Colors.white
-                          : Colors.blue[400]!,
-                      widget.color == Colors.white
-                          ? Colors.white.withOpacity(0.9)
-                          : Colors.blue[600]!,
-                    ],
+                    colors: [widget.color == Colors.white ? Colors.white : Colors.blue[400]!, widget.color == Colors.white ? Colors.white.withValues(alpha: 0.9) : Colors.blue[600]!],
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: widget.color == Colors.white
-                          ? Colors.white.withOpacity(0.5)
-                          : Colors.blue.withOpacity(0.4),
-                      blurRadius: 6,
-                      spreadRadius: 1,
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: widget.color == Colors.white ? Colors.white.withValues(alpha: 0.5) : Colors.blue.withValues(alpha: 0.4), blurRadius: 6, spreadRadius: 1)],
                 ),
               ),
             ),

@@ -7,6 +7,7 @@ class PusherConfig {
   static const secret = "f67fbf9db9891a179abb";
   static const cluster = "ap2";
 }
+
 //
 // Future<PusherChannelsFlutter?> createPusherClient() async {
 //   try {

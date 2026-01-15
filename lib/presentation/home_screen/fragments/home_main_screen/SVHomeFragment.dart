@@ -23,11 +23,7 @@ import '../../../notification_screen/bloc/notification_state.dart';
 import 'bloc/home_bloc.dart';
 
 class SVHomeFragment extends StatefulWidget {
-  const SVHomeFragment({
-    required this.homeBloc,
-    required this.openDrawer,
-    Key? key,
-  }) : super(key: key);
+  const SVHomeFragment({required this.homeBloc, required this.openDrawer, super.key});
   final Function openDrawer;
   final HomeBloc homeBloc;
 
@@ -43,7 +39,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   NotificationBloc notificationBloc = NotificationBloc();
   String? emailVerified = '';
   bool isInCompleteProfile = false;
-  getSharedPreferences() async {
+  Future<void> getSharedPreferences() async {
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
     emailVerified = await prefs.getString('email_verified_at') ?? '';
@@ -122,8 +118,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final bool showIncompleteProfile =
-        emailVerified == '' || isInCompleteProfile;
+    final bool showIncompleteProfile = emailVerified == '' || isInCompleteProfile;
 
     return Scaffold(
       // resizeToAvoidBottomInset: false,
@@ -138,16 +133,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           onRefresh: _refresh,
           child: ListView(
             controller: _mainScrollController,
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
+            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             cacheExtent: 1000, // Pre-render items for smoother scrolling
-            children: [
-              const UserChatComponent(),
-              if (showIncompleteProfile)
-                IncompleteProfileCard(emailVerified == '', isInCompleteProfile),
-              SVPostComponent(widget.homeBloc),
-            ],
+            children: [const UserChatComponent(), if (showIncompleteProfile) IncompleteProfileCard(emailVerified == '', isInCompleteProfile), SVPostComponent(widget.homeBloc)],
           ),
         ),
       ),
@@ -168,33 +156,19 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
           leading: Container(
             margin: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
             child: theme.buildIconButton(
-              child: Image.asset(
-                'images/socialv/icons/ic_More.png',
-                width: 16,
-                height: 16,
-                fit: BoxFit.cover,
-                color: theme.iconColor,
-              ),
+              child: Image.asset('images/socialv/icons/ic_More.png', width: 16, height: 16, fit: BoxFit.cover, color: theme.iconColor),
               onPressed: () {
                 widget.openDrawer();
                 FocusManager.instance.primaryFocus?.unfocus();
               },
             ),
           ),
-          title: Text(
-            translation(context).lbl_home,
-            style: theme.appBarTitle,
-          ),
+          title: Text(translation(context).lbl_home, style: theme.appBarTitle),
           actions: [
             _buildNotificationButton(context, theme),
             const SizedBox(width: 8),
             theme.buildIconButton(
-              child: SvgPicture.asset(
-                height: 24,
-                width: 24,
-                icChat,
-                color: theme.iconColor,
-              ),
+              child: SvgPicture.asset(height: 24, width: 24, icChat, color: theme.iconColor),
               onPressed: () async {
                 FocusManager.instance.primaryFocus?.unfocus();
                 UserChatScreen().launch(context);
@@ -216,11 +190,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
         child: InkWell(
           onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => NotificationScreen(notificationBloc),
-              ),
-            );
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => NotificationScreen(notificationBloc)));
           },
           customBorder: const CircleBorder(),
           child: Container(
@@ -236,15 +206,10 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                   top: 6,
                   child: BlocBuilder<NotificationBloc, NotificationState>(
                     bloc: notificationBloc,
-                    buildWhen: (previous, current) =>
-                        previous != current && current is PaginationLoadedState,
+                    buildWhen: (previous, current) => previous != current && current is PaginationLoadedState,
                     builder: (context, state) {
                       if (state is PaginationLoadedState) {
-                        return notificationBloc.totalNotifications > 0
-                            ? theme.buildBadge(
-                                notificationBloc.totalNotifications,
-                              )
-                            : const SizedBox.shrink();
+                        return notificationBloc.totalNotifications > 0 ? theme.buildBadge(notificationBloc.totalNotifications) : const SizedBox.shrink();
                       } else {
                         return const SizedBox.shrink();
                       }

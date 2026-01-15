@@ -18,37 +18,21 @@ class MemoryOptimizedCommentItem extends StatefulWidget {
   final int? selectedCommentId;
   final Function(int) onReplySelected;
 
-  const MemoryOptimizedCommentItem({
-    super.key,
-    required this.comment,
-    required this.commentBloc,
-    required this.postId,
-    this.selectedCommentId,
-    required this.onReplySelected,
-  });
+  const MemoryOptimizedCommentItem({super.key, required this.comment, required this.commentBloc, required this.postId, this.selectedCommentId, required this.onReplySelected});
 
   @override
-  State<MemoryOptimizedCommentItem> createState() =>
-      _MemoryOptimizedCommentItemState();
+  State<MemoryOptimizedCommentItem> createState() => _MemoryOptimizedCommentItemState();
 }
 
-class _MemoryOptimizedCommentItemState
-    extends State<MemoryOptimizedCommentItem> {
+class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem> {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     return RepaintBoundary(
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        decoration: BoxDecoration(
-          color: theme.cardBackground,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: theme.cardShadow,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildCommentContent(theme)],
-        ),
+        decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(16), boxShadow: theme.cardShadow),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildCommentContent(theme)]),
       ),
     );
   }
@@ -77,12 +61,7 @@ class _MemoryOptimizedCommentItemState
                 // Comment Text
                 Text(
                   widget.comment.comment ?? '',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.normal,
-                    color: theme.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.normal, color: theme.textPrimary),
                 ),
 
                 const SizedBox(height: 8),
@@ -90,11 +69,7 @@ class _MemoryOptimizedCommentItemState
                 // Timestamp
                 Text(
                   timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.textTertiary,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(fontSize: 12, color: theme.textTertiary, fontFamily: 'Poppins'),
                 ),
 
                 const SizedBox(height: 8),
@@ -112,9 +87,7 @@ class _MemoryOptimizedCommentItemState
   Widget _buildAvatarSection(OneUITheme theme) {
     return InkWell(
       onTap: () {
-        SVProfileFragment(
-          userId: widget.comment.commenter?.id ?? '',
-        ).launch(context);
+        SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
       },
       borderRadius: BorderRadius.circular(24),
       child: ClipRRect(
@@ -122,39 +95,24 @@ class _MemoryOptimizedCommentItemState
         child: Container(
           width: 48,
           height: 48,
-          decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child:
-              widget.comment.commenter?.profilePic != null &&
-                  widget.comment.commenter!.profilePic!.isNotEmpty
+          decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+          child: widget.comment.commenter?.profilePic != null && widget.comment.commenter!.profilePic!.isNotEmpty
               ? Image.network(
                   widget.comment.commenter?.profilePic ?? '',
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Text(
-                        (widget.comment.commenter?.firstName ?? '')[0]
-                            .toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.primary,
-                        ),
+                        (widget.comment.commenter?.firstName ?? '')[0].toUpperCase(),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.primary),
                       ),
                     );
                   },
                 )
               : Center(
                   child: Text(
-                    (widget.comment.commenter?.firstName ?? '')[0]
-                        .toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: theme.primary,
-                    ),
+                    (widget.comment.commenter?.firstName ?? '')[0].toUpperCase(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.primary),
                   ),
                 ),
         ),
@@ -170,29 +128,17 @@ class _MemoryOptimizedCommentItemState
         Expanded(
           child: InkWell(
             onTap: () {
-              SVProfileFragment(
-                userId: widget.comment.commenter?.id ?? '',
-              ).launch(context);
+              SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
             },
             child: Row(
               children: [
                 Text(
                   '${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: theme.primary,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: theme.primary, fontFamily: 'Poppins'),
                 ),
                 if ((widget.comment.commenter?.firstName ?? '').isNotEmpty) ...[
                   const SizedBox(width: 4),
-                  Image.asset(
-                    'images/socialv/icons/ic_TickSquare.png',
-                    height: 14,
-                    width: 14,
-                    fit: BoxFit.cover,
-                  ),
+                  Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
                 ],
               ],
             ),
@@ -204,9 +150,7 @@ class _MemoryOptimizedCommentItemState
           PopupMenuButton(
             icon: Icon(Icons.more_vert, color: theme.textSecondary, size: 18),
             elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
               return [
                 PopupMenuItem(
@@ -217,11 +161,7 @@ class _MemoryOptimizedCommentItemState
                       const SizedBox(width: 8),
                       Text(
                         translation(context).lbl_delete,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          color: theme.textPrimary,
-                        ),
+                        style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
                       ),
                     ],
                   ),
@@ -236,11 +176,7 @@ class _MemoryOptimizedCommentItemState
                     return CustomAlertDialog(
                       title: translation(context).msg_confirm_delete_comment,
                       callback: () {
-                        widget.commentBloc.add(
-                          DeleteCommentEvent(
-                            commentId: widget.comment.id.toString(),
-                          ),
-                        );
+                        widget.commentBloc.add(DeleteCommentEvent(commentId: widget.comment.id.toString()));
                         Navigator.of(context).pop();
                       },
                     );
@@ -264,24 +200,12 @@ class _MemoryOptimizedCommentItemState
               onPressed: () {
                 widget.onReplySelected(widget.comment.id ?? 0);
               },
-              icon: Icon(
-                Icons.reply_outlined,
-                size: 16,
-                color: theme.textSecondary,
-              ),
+              icon: Icon(Icons.reply_outlined, size: 16, color: theme.textSecondary),
               label: Text(
                 '${widget.comment.replyCount} ${translation(context).lbl_reply}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
+                style: TextStyle(fontSize: 13, color: theme.textSecondary, fontFamily: 'Poppins'),
               ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
+              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             ),
 
             const SizedBox(width: 16),
@@ -289,50 +213,30 @@ class _MemoryOptimizedCommentItemState
             // Like button
             TextButton.icon(
               onPressed: () {
-                widget.commentBloc.add(
-                  LikeReplyComment(commentId: widget.comment.id.toString()),
-                );
+                widget.commentBloc.add(LikeReplyComment(commentId: widget.comment.id.toString()));
 
                 setState(() {
                   if (!(widget.comment.userHasLiked ?? true)) {
-                    widget.comment.reactionCount =
-                        (widget.comment.reactionCount ?? 0) + 1;
+                    widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) + 1;
                     widget.comment.userHasLiked = true;
                   } else {
                     if ((widget.comment.reactionCount ?? 0) > 0) {
-                      widget.comment.reactionCount =
-                          (widget.comment.reactionCount ?? 0) - 1;
+                      widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) - 1;
                     }
                     widget.comment.userHasLiked = false;
                   }
                 });
               },
               icon: Icon(
-                widget.comment.userHasLiked ?? false
-                    ? Icons.favorite
-                    : Icons.favorite_border_outlined,
+                widget.comment.userHasLiked ?? false ? Icons.favorite : Icons.favorite_border_outlined,
                 size: 16,
-                color: widget.comment.userHasLiked ?? false
-                    ? theme.likeColor
-                    : theme.textSecondary,
+                color: widget.comment.userHasLiked ?? false ? theme.likeColor : theme.textSecondary,
               ),
               label: Text(
-                widget.comment.userHasLiked ?? false
-                    ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}'
-                    : '${widget.comment.reactionCount} ${translation(context).lbl_like}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: widget.comment.userHasLiked ?? false
-                      ? theme.likeColor
-                      : theme.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
+                widget.comment.userHasLiked ?? false ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}' : '${widget.comment.reactionCount} ${translation(context).lbl_like}',
+                style: TextStyle(fontSize: 13, color: widget.comment.userHasLiked ?? false ? theme.likeColor : theme.textSecondary, fontFamily: 'Poppins'),
               ),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
+              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             ),
           ],
         ),
@@ -342,15 +246,11 @@ class _MemoryOptimizedCommentItemState
           Container(
             margin: const EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
-              color: theme.surfaceVariant.withOpacity(0.5),
+              color: theme.surfaceVariant.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: theme.border, width: 1),
             ),
-            child: ImprovedReplyCommentListWidget(
-              commentBloc: widget.commentBloc,
-              postId: int.parse(widget.postId),
-              commentId: widget.selectedCommentId ?? 0,
-            ),
+            child: ImprovedReplyCommentListWidget(commentBloc: widget.commentBloc, postId: int.parse(widget.postId), commentId: widget.selectedCommentId ?? 0),
           ),
       ],
     );

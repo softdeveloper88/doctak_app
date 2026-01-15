@@ -13,11 +13,7 @@ class SaveSuggestion extends SuggestionEvent {
   final String email;
   final String message;
 
-  SaveSuggestion(
-      {required this.name,
-      required this.phone,
-      required this.email,
-      required this.message});
+  SaveSuggestion({required this.name, required this.phone, required this.email, required this.message});
   @override
   List<Object> get props => [name, phone, email, message];
 }

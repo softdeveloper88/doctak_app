@@ -14,17 +14,10 @@ class JobsApiService {
   JobsApiService._internal();
 
   /// Get all jobs with pagination
-  Future<ApiResponse<JobsModel>> getJobs({
-    required String page,
-  }) async {
+  Future<ApiResponse<JobsModel>> getJobs({required String page}) async {
     // try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
-      return ApiResponse.success(JobsModel.fromJson(response));
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs?page=$page', method: networkUtils.HttpMethod.GET));
+    return ApiResponse.success(JobsModel.fromJson(response));
     // } on ApiException catch (e) {
     //   return ApiResponse.error(e.message, statusCode: e.statusCode);
     // } catch (e) {
@@ -33,36 +26,24 @@ class JobsApiService {
   }
 
   /// Search jobs by keyword and filters
-  Future<ApiResponse<JobsModel>> searchJobs({
-    required String page,
-    required String keyword,
-    String? location,
-    String? specialty,
-    String? jobType,
-    String? experience,
-  }) async {
+  Future<ApiResponse<JobsModel>> searchJobs({required String page, required String keyword, String? location, String? specialty, String? jobType, String? experience}) async {
     // try {
-      String queryParams = 'page=$page&keyword=$keyword';
-      if (location != null && location.isNotEmpty) {
-        queryParams += '&location=$location';
-      }
-      if (specialty != null && specialty.isNotEmpty) {
-        queryParams += '&specialty=$specialty';
-      }
-      if (jobType != null && jobType.isNotEmpty) {
-        queryParams += '&job_type=$jobType';
-      }
-      if (experience != null && experience.isNotEmpty) {
-        queryParams += '&experience=$experience';
-      }
+    String queryParams = 'page=$page&keyword=$keyword';
+    if (location != null && location.isNotEmpty) {
+      queryParams += '&location=$location';
+    }
+    if (specialty != null && specialty.isNotEmpty) {
+      queryParams += '&specialty=$specialty';
+    }
+    if (jobType != null && jobType.isNotEmpty) {
+      queryParams += '&job_type=$jobType';
+    }
+    if (experience != null && experience.isNotEmpty) {
+      queryParams += '&experience=$experience';
+    }
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/search-job?$queryParams',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
-      return ApiResponse.success(JobsModel.fromJson(response));
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/search-job?$queryParams', method: networkUtils.HttpMethod.GET));
+    return ApiResponse.success(JobsModel.fromJson(response));
     // } on ApiException catch (e) {
     //   return ApiResponse.error(e.message, statusCode: e.statusCode);
     // } catch (e) {
@@ -73,12 +54,7 @@ class JobsApiService {
   /// Get job specialities/categories
   Future<ApiResponse<List<Map<String, dynamic>>>> getJobSpecialities() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs-speciality',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs-speciality', method: networkUtils.HttpMethod.GET));
       final List<dynamic> specialitiesData = response is List ? response : response['data'] ?? [];
       final specialities = specialitiesData.map((json) => Map<String, dynamic>.from(json)).toList();
       return ApiResponse.success(specialities);
@@ -90,28 +66,15 @@ class JobsApiService {
   }
 
   /// Apply for a job
-  Future<ApiResponse<Map<String, dynamic>>> applyForJob({
-    required String jobId,
-    required String coverLetter,
-    String? resumeFilePath,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> applyForJob({required String jobId, required String coverLetter, String? resumeFilePath}) async {
     try {
-      final request = {
-        'job_id': jobId,
-        'cover_letter': coverLetter,
-      };
-      
+      final request = {'job_id': jobId, 'cover_letter': coverLetter};
+
       if (resumeFilePath != null) {
         request['resume'] = resumeFilePath; // This would need proper file upload handling
       }
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/apply',
-          method: networkUtils.HttpMethod.POST,
-          request: request,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/apply', method: networkUtils.HttpMethod.POST, request: request));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -121,17 +84,9 @@ class JobsApiService {
   }
 
   /// Save/Bookmark a job
-  Future<ApiResponse<Map<String, dynamic>>> saveJob({
-    required String jobId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> saveJob({required String jobId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/save',
-          method: networkUtils.HttpMethod.POST,
-          request: {'job_id': jobId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/save', method: networkUtils.HttpMethod.POST, request: {'job_id': jobId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -141,17 +96,9 @@ class JobsApiService {
   }
 
   /// Unsave/Remove bookmark from a job
-  Future<ApiResponse<Map<String, dynamic>>> unsaveJob({
-    required String jobId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> unsaveJob({required String jobId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/unsave',
-          method: networkUtils.HttpMethod.POST,
-          request: {'job_id': jobId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/unsave', method: networkUtils.HttpMethod.POST, request: {'job_id': jobId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -161,16 +108,9 @@ class JobsApiService {
   }
 
   /// Get saved/bookmarked jobs
-  Future<ApiResponse<JobsModel>> getSavedJobs({
-    required String page,
-  }) async {
+  Future<ApiResponse<JobsModel>> getSavedJobs({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/saved?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/saved?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(JobsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -180,16 +120,9 @@ class JobsApiService {
   }
 
   /// Get applied jobs history
-  Future<ApiResponse<JobsModel>> getAppliedJobs({
-    required String page,
-  }) async {
+  Future<ApiResponse<JobsModel>> getAppliedJobs({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/applied?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/applied?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(JobsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -199,16 +132,9 @@ class JobsApiService {
   }
 
   /// Get job details by ID
-  Future<ApiResponse<JobDetailModel>> getJobDetails({
-    required String jobId,
-  }) async {
+  Future<ApiResponse<JobDetailModel>> getJobDetails({required String jobId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/$jobId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/$jobId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(JobDetailModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -218,16 +144,9 @@ class JobsApiService {
   }
 
   /// Get recommended jobs based on user profile
-  Future<ApiResponse<JobsModel>> getRecommendedJobs({
-    required String page,
-  }) async {
+  Future<ApiResponse<JobsModel>> getRecommendedJobs({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/recommended?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/recommended?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(JobsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -237,18 +156,10 @@ class JobsApiService {
   }
 
   /// Get jobs by location
-  Future<ApiResponse<JobsModel>> getJobsByLocation({
-    required String page,
-    required String location,
-  }) async {
+  Future<ApiResponse<JobsModel>> getJobsByLocation({required String page, required String location}) async {
     // try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/location?page=$page&location=$location',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
-      return ApiResponse.success(JobsModel.fromJson(response));
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/location?page=$page&location=$location', method: networkUtils.HttpMethod.GET));
+    return ApiResponse.success(JobsModel.fromJson(response));
     // } on ApiException catch (e) {
     //   return ApiResponse.error(e.message, statusCode: e.statusCode);
     // } catch (e) {
@@ -257,18 +168,10 @@ class JobsApiService {
   }
 
   /// Get jobs by specialty
-  Future<ApiResponse<JobsModel>> getJobsBySpecialty({
-    required String page,
-    required String specialtyId,
-  }) async {
+  Future<ApiResponse<JobsModel>> getJobsBySpecialty({required String page, required String specialtyId}) async {
     // try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs/specialty?page=$page&specialty_id=$specialtyId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
-      return ApiResponse.success(JobsModel.fromJson(response));
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs/specialty?page=$page&specialty_id=$specialtyId', method: networkUtils.HttpMethod.GET));
+    return ApiResponse.success(JobsModel.fromJson(response));
     // } on ApiException catch (e) {
     //   return ApiResponse.error(e.message, statusCode: e.statusCode);
     // } catch (e) {
@@ -277,16 +180,9 @@ class JobsApiService {
   }
 
   /// Withdraw job application
-  Future<ApiResponse<Map<String, dynamic>>> withdrawApplication({
-    required String jobId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> withdrawApplication({required String jobId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs-applicants/$jobId/withdraw-application',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs-applicants/$jobId/withdraw-application', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -296,16 +192,9 @@ class JobsApiService {
   }
 
   /// Get job applicants
-  Future<ApiResponse<JobApplicantsModel>> getJobApplicants({
-    required String jobId,
-  }) async {
+  Future<ApiResponse<JobApplicantsModel>> getJobApplicants({required String jobId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/jobs-applicants/$jobId/applicants',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/jobs-applicants/$jobId/applicants', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(JobApplicantsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -355,10 +244,7 @@ class JobsApiService {
   // ================================== BACKWARD COMPATIBILITY ==================================
 
   /// Get jobs list (backward compatibility)
-  Future<ApiResponse<JobsModel>> getJobsList({
-    required String page,
-    String? searchTerm,
-  }) async {
+  Future<ApiResponse<JobsModel>> getJobsList({required String page, String? searchTerm}) async {
     if (searchTerm != null && searchTerm.isNotEmpty) {
       return searchJobs(page: page, keyword: searchTerm);
     } else {
@@ -367,9 +253,7 @@ class JobsApiService {
   }
 
   /// Get job details (backward compatibility)
-  Future<ApiResponse<JobDetailModel>> getJobsDetails({
-    required String jobId,
-  }) async {
+  Future<ApiResponse<JobDetailModel>> getJobsDetails({required String jobId}) async {
     return getJobDetails(jobId: jobId);
   }
 }

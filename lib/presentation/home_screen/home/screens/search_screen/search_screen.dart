@@ -8,7 +8,6 @@ import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/jobs_shimmer_loader.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,8 +29,7 @@ class SearchScreen extends StatefulWidget {
   _SearchScreenState createState() => _SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen>
-    with SingleTickerProviderStateMixin {
+class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderStateMixin {
   int selectIndex = 0;
   String searchQuery = '';
   Timer? _debounce;
@@ -123,13 +121,7 @@ class _SearchScreenState extends State<SearchScreen>
     // Apply search to all tabs
     searchPeopleBloc.add(SearchPeopleLoadPageEvent(page: 1, searchTerm: query));
     homeBloc.add(LoadSearchPageEvent(page: 1, search: query));
-    drugsBloc.add(
-      LoadPageEvent(
-        page: 1,
-        countryId: selectedValue?.id?.toString() ?? '',
-        searchTerm: query,
-      ),
-    );
+    drugsBloc.add(LoadPageEvent(page: 1, countryId: selectedValue?.id?.toString() ?? '', searchTerm: query));
   }
 
   @override
@@ -146,10 +138,7 @@ class _SearchScreenState extends State<SearchScreen>
         startWithSearch: false,
         showBackButton: false,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [const SizedBox(height: 8), _buildTabWidget(theme)],
-      ),
+      body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const SizedBox(height: 8), _buildTabWidget(theme)]),
     );
   }
 
@@ -174,24 +163,13 @@ class _SearchScreenState extends State<SearchScreen>
               children: [
                 Container(
                   padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: theme.error.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Icon(
-                    Icons.error_outline_rounded,
-                    size: 48,
-                    color: theme.error,
-                  ),
+                  decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+                  child: Icon(Icons.error_outline_rounded, size: 48, color: theme.error),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   translation(context).msg_something_went_wrong_retry,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: theme.textSecondary,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(fontSize: 15, color: theme.textSecondary, fontFamily: 'Poppins'),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
@@ -199,13 +177,9 @@ class _SearchScreenState extends State<SearchScreen>
                   label: translation(context).lbl_try_again,
                   onPressed: () {
                     try {
-                      searchPeopleBloc.add(
-                        SearchPeopleLoadPageEvent(page: 1, searchTerm: ''),
-                      );
+                      searchPeopleBloc.add(SearchPeopleLoadPageEvent(page: 1, searchTerm: ''));
                       homeBloc.add(LoadSearchPageEvent(page: 1, search: 'a'));
-                      drugsBloc.add(
-                        LoadPageEvent(page: 1, countryId: '', searchTerm: ''),
-                      );
+                      drugsBloc.add(LoadPageEvent(page: 1, countryId: '', searchTerm: ''));
                     } catch (e) {
                       debugPrint(e.toString());
                     }
@@ -231,108 +205,62 @@ class _SearchScreenState extends State<SearchScreen>
             } else if (state is CountriesDataLoaded) {
               for (var element in state.countriesModel.countries!) {
                 if (element.countryName == state.countryFlag) {
-                  selectedValue =
-                      state.countriesModel.countries?.first.countryName ??
-                      element.countryName;
+                  selectedValue = state.countriesModel.countries?.first.countryName ?? element.countryName;
                 }
               }
               return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
+                        color: theme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.primary.withOpacity(0.2),
-                          width: 1,
-                        ),
+                        border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1),
                       ),
                       child: PopupMenuButton<Countries>(
                         color: theme.cardBackground,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         offset: const Offset(0, 50),
                         tooltip: 'Select Country',
                         elevation: 8,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 10,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 state.countryFlag != ''
-                                    ? state.countriesModel.countries!
-                                              .firstWhere(
-                                                (element) =>
-                                                    element.id.toString() ==
-                                                    state.countryFlag,
-                                                orElse: () => state
-                                                    .countriesModel
-                                                    .countries!
-                                                    .first,
-                                              )
-                                              .flag ??
+                                    ? state.countriesModel.countries!.firstWhere((element) => element.id.toString() == state.countryFlag, orElse: () => state.countriesModel.countries!.first).flag ??
                                           ''
-                                    : state
-                                              .countriesModel
-                                              .countries!
-                                              .first
-                                              .flag ??
-                                          '',
+                                    : state.countriesModel.countries!.first.flag ?? '',
                                 style: const TextStyle(fontSize: 18),
                               ),
                               const SizedBox(width: 8),
-                              Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color: theme.primary,
-                                size: 22,
-                              ),
+                              Icon(Icons.keyboard_arrow_down_rounded, color: theme.primary, size: 22),
                             ],
                           ),
                         ),
                         itemBuilder: (BuildContext context) {
-                          return state.countriesModel.countries?.map((
-                                Countries item,
-                              ) {
+                          return state.countriesModel.countries?.map((Countries item) {
                                 return PopupMenuItem<Countries>(
                                   value: item,
                                   height: 48,
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Expanded(
                                           child: Text(
                                             item.countryName ?? '',
-                                            style: TextStyle(
-                                              color: theme.textPrimary,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 14,
-                                            ),
+                                            style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 14),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         const SizedBox(width: 12),
-                                        Text(
-                                          item.flag ?? '',
-                                          style: const TextStyle(fontSize: 16),
-                                        ),
+                                        Text(item.flag ?? '', style: const TextStyle(fontSize: 16)),
                                       ],
                                     ),
                                   ),
@@ -341,22 +269,8 @@ class _SearchScreenState extends State<SearchScreen>
                               [];
                         },
                         onSelected: (Countries newValue) {
-                          BlocProvider.of<SplashBloc>(context).add(
-                            LoadDropdownData(
-                              newValue.id.toString(),
-                              state.typeValue,
-                              state.searchTerms ?? '',
-                              '',
-                            ),
-                          );
-                          drugsBloc.add(
-                            LoadPageEvent(
-                              page: 1,
-                              countryId: newValue.id.toString(),
-                              searchTerm: state.searchTerms ?? "",
-                              type: state.typeValue,
-                            ),
-                          );
+                          BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue.id.toString(), state.typeValue, state.searchTerms ?? '', ''));
+                          drugsBloc.add(LoadPageEvent(page: 1, countryId: newValue.id.toString(), searchTerm: state.searchTerms ?? "", type: state.typeValue));
                         },
                       ),
                     ),
@@ -364,14 +278,10 @@ class _SearchScreenState extends State<SearchScreen>
                 ),
               );
             } else if (state is CountriesDataError) {
-              BlocProvider.of<SplashBloc>(
-                context,
-              ).add(LoadDropdownData('', '', '', ''));
+              BlocProvider.of<SplashBloc>(context).add(LoadDropdownData('', '', '', ''));
               return const SizedBox();
             } else {
-              BlocProvider.of<SplashBloc>(
-                context,
-              ).add(LoadDropdownData('', '', '', ''));
+              BlocProvider.of<SplashBloc>(context).add(LoadDropdownData('', '', '', ''));
               return const SizedBox();
             }
           },
@@ -402,55 +312,21 @@ class _SearchScreenState extends State<SearchScreen>
               controller: _tabController!,
               dividerHeight: 0,
               indicator: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [theme.primary, theme.primary.withOpacity(0.85)],
-                ),
+                gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.85)]),
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
               ),
               indicatorSize: TabBarIndicatorSize.tab,
               indicatorPadding: const EdgeInsets.all(4),
               unselectedLabelColor: theme.textSecondary,
               labelColor: Colors.white,
-              unselectedLabelStyle: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-              labelStyle: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-              labelPadding: const EdgeInsets.symmetric(
-                vertical: 8,
-                horizontal: 8,
-              ),
+              unselectedLabelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w500),
+              labelStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600),
+              labelPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
               tabs: [
-                _buildTabItem(
-                  icon: Icons.article_outlined,
-                  label: translation(context).lbl_posts,
-                  isSelected: selectIndex == 0,
-                  theme: theme,
-                ),
-                _buildTabItem(
-                  icon: Icons.work_outline_rounded,
-                  label: translation(context).lbl_jobs,
-                  isSelected: selectIndex == 1,
-                  theme: theme,
-                ),
-                _buildTabItem(
-                  icon: Icons.people_outline_rounded,
-                  label: 'People',
-                  isSelected: selectIndex == 2,
-                  theme: theme,
-                ),
+                _buildTabItem(icon: Icons.article_outlined, label: translation(context).lbl_posts, isSelected: selectIndex == 0, theme: theme),
+                _buildTabItem(icon: Icons.work_outline_rounded, label: translation(context).lbl_jobs, isSelected: selectIndex == 1, theme: theme),
+                _buildTabItem(icon: Icons.people_outline_rounded, label: 'People', isSelected: selectIndex == 2, theme: theme),
               ],
             ),
           ),
@@ -475,12 +351,7 @@ class _SearchScreenState extends State<SearchScreen>
     );
   }
 
-  Widget _buildTabItem({
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required OneUITheme theme,
-  }) {
+  Widget _buildTabItem({required IconData icon, required String label, required bool isSelected, required OneUITheme theme}) {
     return Container(
       constraints: const BoxConstraints(minHeight: 44),
       child: Row(
@@ -491,10 +362,7 @@ class _SearchScreenState extends State<SearchScreen>
             Container(
               padding: const EdgeInsets.all(4),
               margin: const EdgeInsets.only(right: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.95), borderRadius: BorderRadius.circular(8)),
               child: Icon(icon, size: 14, color: theme.primary),
             ),
           Flexible(

@@ -10,11 +10,7 @@ class UserMessageBubble extends StatelessWidget {
   final AiChatMessageModel message;
   final bool showAvatar;
 
-  const UserMessageBubble({
-    Key? key,
-    required this.message,
-    this.showAvatar = true,
-  }) : super(key: key);
+  const UserMessageBubble({super.key, required this.message, this.showAvatar = true});
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +29,7 @@ class UserMessageBubble extends StatelessWidget {
               children: [
                 Flexible(
                   child: Container(
-                    decoration: BoxDecoration(
-                      color: theme.primary,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    decoration: BoxDecoration(color: theme.primary, borderRadius: BorderRadius.circular(16)),
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,17 +37,11 @@ class UserMessageBubble extends StatelessWidget {
                         // The text content
                         Text(
                           message.content,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
+                          style: const TextStyle(color: Colors.white, fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w400),
                         ),
 
                         // File attachment (if any)
-                        if (message.filePath != null)
-                          _buildFileAttachment(context, theme),
+                        if (message.filePath != null) _buildFileAttachment(context, theme),
                       ],
                     ),
                   ),
@@ -70,10 +57,7 @@ class UserMessageBubble extends StatelessWidget {
               ? Container(
                   width: 36,
                   height: 36,
-                  decoration: BoxDecoration(
-                    color: theme.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
                   child: Icon(Icons.person, size: 18, color: theme.primary),
                 )
               : const SizedBox(width: 36),
@@ -84,9 +68,7 @@ class UserMessageBubble extends StatelessWidget {
 
   Widget _buildFileAttachment(BuildContext context, OneUITheme theme) {
     final mimeType = message.mimeType ?? '';
-    final errorPlaceholderColor = theme.isDark
-        ? Colors.grey[800]!
-        : Colors.grey.shade200;
+    final errorPlaceholderColor = theme.isDark ? Colors.grey[800]! : Colors.grey.shade200;
 
     if (mimeType.startsWith('image/')) {
       // Priority 1: Use fileBytes if available (most reliable)
@@ -104,13 +86,7 @@ class UserMessageBubble extends StatelessWidget {
                 return Container(
                   height: 150,
                   color: errorPlaceholderColor,
-                  child: Center(
-                    child: Icon(
-                      Icons.broken_image,
-                      size: 48,
-                      color: theme.textSecondary,
-                    ),
-                  ),
+                  child: Center(child: Icon(Icons.broken_image, size: 48, color: theme.textSecondary)),
                 );
               },
             ),
@@ -123,24 +99,13 @@ class UserMessageBubble extends StatelessWidget {
         return Container(
           margin: const EdgeInsets.only(top: 8),
           height: 150,
-          decoration: BoxDecoration(
-            color: errorPlaceholderColor,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Icon(
-              Icons.broken_image,
-              size: 48,
-              color: theme.textSecondary,
-            ),
-          ),
+          decoration: BoxDecoration(color: errorPlaceholderColor, borderRadius: BorderRadius.circular(8)),
+          child: Center(child: Icon(Icons.broken_image, size: 48, color: theme.textSecondary)),
         );
       }
 
       // Check if path is a local file or URL
-      final isLocalFile =
-          !message.filePath!.startsWith('http://') &&
-          !message.filePath!.startsWith('https://');
+      final isLocalFile = !message.filePath!.startsWith('http://') && !message.filePath!.startsWith('https://');
 
       return Container(
         margin: const EdgeInsets.only(top: 8),
@@ -156,13 +121,7 @@ class UserMessageBubble extends StatelessWidget {
                     return Container(
                       height: 150,
                       color: errorPlaceholderColor,
-                      child: Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          size: 48,
-                          color: theme.textSecondary,
-                        ),
-                      ),
+                      child: Center(child: Icon(Icons.broken_image, size: 48, color: theme.textSecondary)),
                     );
                   },
                 )
@@ -175,13 +134,7 @@ class UserMessageBubble extends StatelessWidget {
                     return Container(
                       height: 150,
                       color: errorPlaceholderColor,
-                      child: Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          size: 48,
-                          color: theme.textSecondary,
-                        ),
-                      ),
+                      child: Center(child: Icon(Icons.broken_image, size: 48, color: theme.textSecondary)),
                     );
                   },
                 ),
@@ -191,27 +144,16 @@ class UserMessageBubble extends StatelessWidget {
       return Container(
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.attach_file,
-              size: 16,
-              color: Colors.white.withOpacity(0.8),
-            ),
+            Icon(Icons.attach_file, size: 16, color: Colors.white.withValues(alpha: 0.8)),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 'Attachment',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 12,
-                  fontFamily: 'Poppins',
-                ),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12, fontFamily: 'Poppins'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

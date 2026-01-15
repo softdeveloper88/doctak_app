@@ -37,11 +37,7 @@ class AddComment extends DiscussionDetailEvent {
   final String comment;
   final String? clinicalTags;
 
-  const AddComment({
-    required this.caseId,
-    required this.comment,
-    this.clinicalTags,
-  });
+  const AddComment({required this.caseId, required this.comment, this.clinicalTags});
 
   @override
   List<Object?> get props => [caseId, comment, clinicalTags];
@@ -93,30 +89,12 @@ class DiscussionDetailLoaded extends DiscussionDetailState {
   final bool isLoadingComments;
   final bool isAddingComment;
 
-  const DiscussionDetailLoaded({
-    required this.discussion,
-    required this.comments,
-    required this.hasMoreComments,
-    this.isLoadingComments = false,
-    this.isAddingComment = false,
-  });
+  const DiscussionDetailLoaded({required this.discussion, required this.comments, required this.hasMoreComments, this.isLoadingComments = false, this.isAddingComment = false});
 
   @override
-  List<Object> get props => [
-        discussion,
-        comments,
-        hasMoreComments,
-        isLoadingComments,
-        isAddingComment,
-      ];
+  List<Object> get props => [discussion, comments, hasMoreComments, isLoadingComments, isAddingComment];
 
-  DiscussionDetailLoaded copyWith({
-    CaseDiscussion? discussion,
-    List<CaseComment>? comments,
-    bool? hasMoreComments,
-    bool? isLoadingComments,
-    bool? isAddingComment,
-  }) {
+  DiscussionDetailLoaded copyWith({CaseDiscussion? discussion, List<CaseComment>? comments, bool? hasMoreComments, bool? isLoadingComments, bool? isAddingComment}) {
     return DiscussionDetailLoaded(
       discussion: discussion ?? this.discussion,
       comments: comments ?? this.comments,
@@ -153,38 +131,28 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
     on<LikeCase>(_onLikeCase);
   }
 
-  Future<void> _onLoadDiscussionDetail(
-    LoadDiscussionDetail event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onLoadDiscussionDetail(LoadDiscussionDetail event, Emitter<DiscussionDetailState> emit) async {
     emit(DiscussionDetailLoading());
     _currentCaseId = event.caseId;
 
     try {
       print('🔄 Loading discussion and comments for case: ${event.caseId}');
-      
+
       // Load both discussion and comments in one go since the new API provides both
       final discussion = await repository.getCaseDiscussion(event.caseId);
       final commentsResponse = await repository.getCaseComments(caseId: event.caseId);
-      
+
       print('✅ Discussion loaded: ${discussion.title}');
       print('💬 Comments loaded: ${commentsResponse.items.length}');
 
-      emit(DiscussionDetailLoaded(
-        discussion: discussion,
-        comments: commentsResponse.items,
-        hasMoreComments: commentsResponse.pagination.hasNextPage,
-      ));
+      emit(DiscussionDetailLoaded(discussion: discussion, comments: commentsResponse.items, hasMoreComments: commentsResponse.pagination.hasNextPage));
     } catch (e) {
       print('❌ Error loading discussion detail: $e');
       emit(DiscussionDetailError(e.toString()));
     }
   }
 
-  Future<void> _onLoadComments(
-    LoadComments event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onLoadComments(LoadComments event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
     if (currentState is DiscussionDetailLoaded) {
       if (event.refresh) {
@@ -194,38 +162,25 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
       emit(currentState.copyWith(isLoadingComments: true));
 
       try {
-        final result = await repository.getCaseComments(
-          caseId: event.caseId,
-          page: _currentPage,
-        );
+        final result = await repository.getCaseComments(caseId: event.caseId, page: _currentPage);
 
         final comments = event.refresh ? result.items : [...currentState.comments, ...result.items];
         _currentPage++;
 
-        emit(currentState.copyWith(
-          comments: comments,
-          hasMoreComments: result.pagination.hasNextPage,
-          isLoadingComments: false,
-        ));
+        emit(currentState.copyWith(comments: comments, hasMoreComments: result.pagination.hasNextPage, isLoadingComments: false));
       } catch (e) {
         emit(currentState.copyWith(isLoadingComments: false));
       }
     }
   }
 
-  Future<void> _onLoadMoreComments(
-    LoadMoreComments event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onLoadMoreComments(LoadMoreComments event, Emitter<DiscussionDetailState> emit) async {
     if (_currentCaseId != null) {
       add(LoadComments(_currentCaseId!));
     }
   }
 
-  Future<void> _onAddComment(
-    AddComment event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onAddComment(AddComment event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
     if (currentState is DiscussionDetailLoaded) {
       // OPTIMISTIC UPDATE: Add comment to UI immediately
@@ -283,45 +238,27 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
       final optimisticComments = [optimisticComment, ...currentState.comments];
 
       // Emit optimistic state immediately
-      emit(currentState.copyWith(
-        discussion: updatedDiscussion,
-        comments: optimisticComments,
-        isAddingComment: true,
-      ));
+      emit(currentState.copyWith(discussion: updatedDiscussion, comments: optimisticComments, isAddingComment: true));
 
       try {
         // Make API call in background
-        final newComment = await repository.addComment(
-          caseId: event.caseId,
-          comment: event.comment,
-          clinicalTags: event.clinicalTags,
-        );
+        final newComment = await repository.addComment(caseId: event.caseId, comment: event.comment, clinicalTags: event.clinicalTags);
 
         // Replace optimistic comment with real one from server
         final updatedComments = [newComment, ...currentState.comments];
 
-        emit(currentState.copyWith(
-          discussion: updatedDiscussion,
-          comments: updatedComments,
-          isAddingComment: false,
-        ));
-        
+        emit(currentState.copyWith(discussion: updatedDiscussion, comments: updatedComments, isAddingComment: false));
+
         print('✅ Comment added and synced with server');
       } catch (e) {
         print('❌ Error adding comment, reverting: $e');
         // REVERT: Remove optimistic comment and revert stats
-        emit(currentState.copyWith(
-          comments: currentState.comments,
-          isAddingComment: false,
-        ));
+        emit(currentState.copyWith(comments: currentState.comments, isAddingComment: false));
       }
     }
   }
 
-  Future<void> _onLikeComment(
-    LikeComment event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onLikeComment(LikeComment event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
     if (currentState is DiscussionDetailLoaded) {
       // OPTIMISTIC UPDATE: Update UI immediately
@@ -355,12 +292,9 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
         final comment = currentState.comments.firstWhere((c) => c.id == event.commentId);
         final isCurrentlyLiked = comment.isLiked ?? false;
         final action = isCurrentlyLiked ? 'unlike' : 'like';
-        
+
         // Make API call in background
-        await repository.likeComment(
-          commentId: event.commentId,
-          action: action,
-        );
+        await repository.likeComment(commentId: event.commentId, action: action);
         print('✅ Comment $action synced with server');
       } catch (e) {
         print('❌ Error liking comment, reverting: $e');
@@ -370,18 +304,13 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
     }
   }
 
-  Future<void> _onDeleteComment(
-    DeleteComment event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onDeleteComment(DeleteComment event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
     if (currentState is DiscussionDetailLoaded) {
       try {
         await repository.deleteComment(event.commentId);
 
-        final updatedComments = currentState.comments
-            .where((comment) => comment.id != event.commentId)
-            .toList();
+        final updatedComments = currentState.comments.where((comment) => comment.id != event.commentId).toList();
 
         // Update discussion stats
         final updatedStats = CaseStats(
@@ -410,20 +339,14 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
           aiSummary: currentState.discussion.aiSummary,
         );
 
-        emit(currentState.copyWith(
-          discussion: updatedDiscussion,
-          comments: updatedComments,
-        ));
+        emit(currentState.copyWith(discussion: updatedDiscussion, comments: updatedComments));
       } catch (e) {
         print('Error deleting comment: $e');
       }
     }
   }
 
-  Future<void> _onLikeCase(
-    LikeCase event,
-    Emitter<DiscussionDetailState> emit,
-  ) async {
+  Future<void> _onLikeCase(LikeCase event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
     if (currentState is DiscussionDetailLoaded) {
       // OPTIMISTIC UPDATE: Update case likes immediately
@@ -462,10 +385,7 @@ class DiscussionDetailBloc extends Bloc<DiscussionDetailEvent, DiscussionDetailS
       try {
         // For now, assuming we're always liking (need to add like state to case model)
         // TODO: Add isLiked field to CaseDiscussion model for proper toggle
-        await repository.performCaseAction(
-          caseId: event.caseId,
-          action: 'like',
-        );
+        await repository.performCaseAction(caseId: event.caseId, action: 'like');
         print('✅ Case like synced with server');
       } catch (e) {
         print('❌ Error liking case, reverting: $e');

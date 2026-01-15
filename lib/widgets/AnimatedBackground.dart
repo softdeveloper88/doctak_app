@@ -5,7 +5,7 @@ import '../presentation/home_screen/utils/SVCommon.dart';
 
 class AnimatedBackground extends StatefulWidget {
   final Widget child;
-  const AnimatedBackground({Key? key, required this.child}) : super(key: key);
+  const AnimatedBackground({super.key, required this.child});
 
   @override
   _AnimatedBackgroundState createState() => _AnimatedBackgroundState();
@@ -44,11 +44,7 @@ class _AnimatedBackgroundState extends State<AnimatedBackground> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 100),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment(_gradientOffset, 0),
-                end: Alignment(_gradientOffset - 4, 0),
-                colors: [svGetScaffoldColor(), svGetScaffoldColor()],
-              ),
+              gradient: LinearGradient(begin: Alignment(_gradientOffset, 0), end: Alignment(_gradientOffset - 4, 0), colors: [svGetScaffoldColor(), svGetScaffoldColor()]),
             ),
           ),
         ),

@@ -29,24 +29,25 @@ class CustomHttpClient extends IOClient {
 /// Custom cache manager that uses our HTTP client with certificate bypass
 class CustomCacheManager extends CacheManager {
   static const key = 'doctakImageCache';
-  
+
   static CustomCacheManager? _instance;
-  
+
   factory CustomCacheManager() {
     _instance ??= CustomCacheManager._();
     return _instance!;
   }
-  
-  CustomCacheManager._() : super(
-    Config(
-      key,
-      stalePeriod: const Duration(days: 7),
-      maxNrOfCacheObjects: 200,
-      repo: JsonCacheInfoRepository(databaseName: key),
-      fileService: HttpFileService(httpClient: CustomHttpClient()),
-    ),
-  );
-  
+
+  CustomCacheManager._()
+    : super(
+        Config(
+          key,
+          stalePeriod: const Duration(days: 7),
+          maxNrOfCacheObjects: 200,
+          repo: JsonCacheInfoRepository(databaseName: key),
+          fileService: HttpFileService(httpClient: CustomHttpClient()),
+        ),
+      );
+
   /// Clear the singleton instance (useful for testing)
   static void reset() {
     _instance = null;

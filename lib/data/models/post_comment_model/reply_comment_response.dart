@@ -1,11 +1,10 @@
 import 'dart:convert';
+
 ReplyCommentResponse replyCommentResponseFromJson(String str) => ReplyCommentResponse.fromJson(json.decode(str));
 String replyCommentResponseToJson(ReplyCommentResponse data) => json.encode(data.toJson());
+
 class ReplyCommentResponse {
-  ReplyCommentResponse({
-      this.success, 
-      this.message, 
-      this.comment,});
+  ReplyCommentResponse({this.success, this.message, this.comment});
 
   ReplyCommentResponse.fromJson(dynamic json) {
     success = json['success'];
@@ -25,19 +24,13 @@ class ReplyCommentResponse {
     }
     return map;
   }
-
 }
 
 Comment commentFromJson(String str) => Comment.fromJson(json.decode(str));
 String commentToJson(Comment data) => json.encode(data.toJson());
+
 class Comment {
-  Comment({
-      this.id, 
-      this.commentableId, 
-      this.commenterId, 
-      this.childId, 
-      this.comment, 
-      this.createdAt,});
+  Comment({this.id, this.commentableId, this.commenterId, this.childId, this.comment, this.createdAt});
 
   Comment.fromJson(dynamic json) {
     id = json['id'];
@@ -64,5 +57,4 @@ class Comment {
     map['created_at'] = createdAt;
     return map;
   }
-
 }

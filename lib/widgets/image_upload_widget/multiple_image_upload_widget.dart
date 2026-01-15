@@ -22,18 +22,10 @@ class MultipleImageUploadWidget extends StatefulWidget {
   // When true, the gallery picker opens automatically once the widget appears
   final bool autoOpenGallery;
 
-  MultipleImageUploadWidget(
-    this.imageUploadBloc,
-    this.onTap, {
-    this.imageType,
-    this.imageLimit = 0,
-    this.autoOpenGallery = false,
-    super.key,
-  });
+  const MultipleImageUploadWidget(this.imageUploadBloc, this.onTap, {this.imageType, this.imageLimit = 0, this.autoOpenGallery = false, super.key});
 
   @override
-  State<MultipleImageUploadWidget> createState() =>
-      _MultipleImageUploadWidgetState();
+  State<MultipleImageUploadWidget> createState() => _MultipleImageUploadWidgetState();
 }
 
 class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
@@ -50,9 +42,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         Future.delayed(const Duration(milliseconds: 250), () {
           if (!mounted) return;
           // Only open if user can add more images according to imageLimit
-          final canAddMore =
-              widget.imageLimit == 0 ||
-              widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
+          final canAddMore = widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
           if (canAddMore) {
             openImages();
           }
@@ -61,7 +51,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
     }
   }
 
-  openImages() async {
+  Future<void> openImages() async {
     debugPrint('MultiWidget: *** OPENING GALLERY with RobustImagePicker ***');
     try {
       List<XFile> pickedfiles = [];
@@ -70,20 +60,14 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       // Use RobustImagePicker which handles limited access + has photo_manager fallback
       try {
         debugPrint('MultiWidget: Using RobustImagePicker.showPhotoManagerPicker...');
-        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(
-          context,
-          limit: widget.imageLimit > 0 ? widget.imageLimit : null,
-          title: 'Select Photos',
-        );
+        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(context, limit: widget.imageLimit > 0 ? widget.imageLimit : null, title: 'Select Photos');
         debugPrint('MultiWidget: showPhotoManagerPicker returned ${pickedfiles.length} files');
       } catch (e) {
         debugPrint('MultiWidget: showPhotoManagerPicker failed: $e, trying fallback...');
 
         // Fallback to standard RobustImagePicker
         try {
-          pickedfiles = await RobustImagePicker.pickMultipleImages(
-            limit: widget.imageLimit > 0 ? widget.imageLimit : null,
-          );
+          pickedfiles = await RobustImagePicker.pickMultipleImages(limit: widget.imageLimit > 0 ? widget.imageLimit : null);
           debugPrint('MultiWidget: Fallback pickMultipleImages returned ${pickedfiles.length} files');
         } catch (e2) {
           debugPrint('MultiWidget: All pickers failed: $e2');
@@ -93,9 +77,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 content: Text('Failed to open gallery: ${e2.toString()}'),
                 backgroundColor: Colors.red[600],
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
             );
           }
@@ -111,15 +93,10 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       if (pickedfiles.isNotEmpty) {
         debugPrint('Gallery: Selected ${pickedfiles.length} files from gallery');
         for (var element in pickedfiles) {
-          if (widget.imageLimit == 0 ||
-              widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
+          if (widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
             debugPrint('Gallery: Adding image ${element.path} to BLoC');
-            widget.imageUploadBloc.add(
-              SelectedFiles(pickedfiles: element, isRemove: false),
-            );
-            debugPrint(
-              'Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images',
-            );
+            widget.imageUploadBloc.add(SelectedFiles(pickedfiles: element, isRemove: false));
+            debugPrint('Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images');
           }
         }
         debugPrint('Gallery: Calling setState');
@@ -138,16 +115,14 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
             content: Text('Error selecting images: ${e.toString()}'),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
     }
   }
 
-  openVideo() async {
+  Future<void> openVideo() async {
     try {
       // Check camera and microphone permissions
       final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
@@ -160,15 +135,10 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Microphone access is required for video recording.',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
+              content: const Text('Microphone access is required for video recording.', style: TextStyle(fontFamily: 'Poppins')),
               backgroundColor: Colors.orange[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           );
         }
@@ -177,9 +147,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
 
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
       if (pickedfiles != null) {
-        widget.imageUploadBloc.add(
-          SelectedFiles(pickedfiles: pickedfiles, isRemove: false),
-        );
+        widget.imageUploadBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
       } else {
         debugPrint("No video is selected.");
       }
@@ -188,22 +156,17 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Error recording video. Please try again.',
-              style: TextStyle(fontFamily: 'Poppins'),
-            ),
+            content: const Text('Error recording video. Please try again.', style: TextStyle(fontFamily: 'Poppins')),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
     }
   }
 
-  openCamera() async {
+  Future<void> openCamera() async {
     try {
       // Use the professional camera permission handler
       final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
@@ -211,19 +174,11 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         return;
       }
 
-      var pickedfiles = await imgpicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
+      var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera, imageQuality: 85, maxWidth: 1920, maxHeight: 1080);
 
       if (pickedfiles != null) {
-        if (widget.imageLimit == 0 ||
-            widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
-          widget.imageUploadBloc.add(
-            SelectedFiles(pickedfiles: pickedfiles, isRemove: false),
-          );
+        if (widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
+          widget.imageUploadBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
           setState(() {});
         }
       } else {
@@ -234,15 +189,10 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Error taking photo. Please try again.',
-              style: TextStyle(fontFamily: 'Poppins'),
-            ),
+            content: const Text('Error taking photo. Please try again.', style: TextStyle(fontFamily: 'Poppins')),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -256,10 +206,7 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: svGetScaffoldColor(),
-        borderRadius: radiusOnly(
-          topRight: SVAppContainerRadius,
-          topLeft: SVAppContainerRadius,
-        ),
+        borderRadius: radiusOnly(topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
       ),
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -276,18 +223,14 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                       if (state is FileLoadedState) {
                         return widget.imageUploadBloc.imagefiles.isNotEmpty
                             ? Wrap(
-                                children: widget.imageUploadBloc.imagefiles.map((
-                                  imageone,
-                                ) {
+                                children: widget.imageUploadBloc.imagefiles.map((imageone) {
                                   return Stack(
                                     children: [
                                       Card(
                                         child: SizedBox(
                                           height: 60,
                                           width: 60,
-                                          child: buildMediaItem(
-                                            File(imageone.path),
-                                          ),
+                                          child: buildMediaItem(File(imageone.path)),
                                           // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
                                         ),
                                       ),
@@ -295,18 +238,10 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                                         right: 0,
                                         child: GestureDetector(
                                           onTap: () {
-                                            widget.imageUploadBloc.add(
-                                              SelectedFiles(
-                                                pickedfiles: imageone,
-                                                isRemove: true,
-                                              ),
-                                            );
+                                            widget.imageUploadBloc.add(SelectedFiles(pickedfiles: imageone, isRemove: true));
                                             setState(() {});
                                           },
-                                          child: const Icon(
-                                            Icons.remove_circle_outlined,
-                                            color: Colors.red,
-                                          ),
+                                          child: const Icon(Icons.remove_circle_outlined, color: Colors.red),
                                         ),
                                       ),
                                     ],
@@ -333,46 +268,28 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (widget.imageType == "CT Scan" ||
-                    widget.imageType == "MRI Scan" ||
-                    widget.imageType == "Mammography")
+                if (widget.imageType == "CT Scan" || widget.imageType == "MRI Scan" || widget.imageType == "Mammography")
                   const Text(
                     "Please upload one or two of the most relevant images for analysis.",
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontFamily: 'Poppins', color: Colors.black87, fontWeight: FontWeight.bold),
                   ),
                 const SizedBox(height: 8),
                 Divider(color: Colors.grey[300]),
                 BlocBuilder<ImageUploadBloc, ImageUploadState>(
                   bloc: widget.imageUploadBloc,
                   builder: (context, state) {
-                    bool canAddMore =
-                        widget.imageLimit == 0 ||
-                        widget.imageUploadBloc.imagefiles.length <
-                            widget.imageLimit;
+                    bool canAddMore = widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
                     return Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         gradient: LinearGradient(
-                          colors: canAddMore
-                              ? [Colors.blue[600]!, Colors.blue[700]!]
-                              : [Colors.grey[400]!, Colors.grey[500]!],
+                          colors: canAddMore ? [Colors.blue[600]!, Colors.blue[700]!] : [Colors.grey[400]!, Colors.grey[500]!],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (canAddMore ? Colors.blue : Colors.grey)
-                                .withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: (canAddMore ? Colors.blue : Colors.grey).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
                       ),
                       child: Material(
                         color: Colors.transparent,
@@ -389,50 +306,26 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.photo_library_outlined,
-                                    size: 24,
-                                    color: Colors.white,
-                                  ),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                                  child: const Icon(Icons.photo_library_outlined, size: 24, color: Colors.white),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Choose from Gallery',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
+                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white, fontSize: 16),
                                       ),
                                       Text(
-                                        widget.imageLimit > 0
-                                            ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected'
-                                            : 'Select medical images from your device',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white.withOpacity(0.8),
-                                          fontSize: 12,
-                                        ),
+                                        widget.imageLimit > 0 ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected' : 'Select medical images from your device',
+                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Colors.white.withOpacity(0.8),
-                                  size: 16,
-                                ),
+                                Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.8), size: 16),
                               ],
                             ),
                           ),
@@ -445,30 +338,18 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                 BlocBuilder<ImageUploadBloc, ImageUploadState>(
                   bloc: widget.imageUploadBloc,
                   builder: (context, state) {
-                    bool canAddMore =
-                        widget.imageLimit == 0 ||
-                        widget.imageUploadBloc.imagefiles.length <
-                            widget.imageLimit;
+                    bool canAddMore = widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
                     return Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         gradient: LinearGradient(
-                          colors: canAddMore
-                              ? [Colors.teal[600]!, Colors.teal[700]!]
-                              : [Colors.grey[400]!, Colors.grey[500]!],
+                          colors: canAddMore ? [Colors.teal[600]!, Colors.teal[700]!] : [Colors.grey[400]!, Colors.grey[500]!],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: (canAddMore ? Colors.teal : Colors.grey)
-                                .withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: (canAddMore ? Colors.teal : Colors.grey).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
                       ),
                       child: Material(
                         color: Colors.transparent,
@@ -485,50 +366,26 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.camera_alt_outlined,
-                                    size: 24,
-                                    color: Colors.white,
-                                  ),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                                  child: const Icon(Icons.camera_alt_outlined, size: 24, color: Colors.white),
                                 ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       const Text(
                                         'Take Photo',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                        ),
+                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white, fontSize: 16),
                                       ),
                                       Text(
-                                        widget.imageLimit > 0
-                                            ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected'
-                                            : 'Capture medical image with camera',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white.withOpacity(0.8),
-                                          fontSize: 12,
-                                        ),
+                                        widget.imageLimit > 0 ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected' : 'Capture medical image with camera',
+                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
                                       ),
                                     ],
                                   ),
                                 ),
-                                Icon(
-                                  Icons.arrow_forward_ios,
-                                  color: Colors.white.withOpacity(0.8),
-                                  size: 16,
-                                ),
+                                Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.8), size: 16),
                               ],
                             ),
                           ),
@@ -552,68 +409,36 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       gradient: LinearGradient(
-                        colors: widget.imageUploadBloc.imagefiles.isNotEmpty
-                            ? [Colors.blue[600]!, Colors.blue[700]!]
-                            : [Colors.grey[300]!, Colors.grey[400]!],
+                        colors: widget.imageUploadBloc.imagefiles.isNotEmpty ? [Colors.blue[600]!, Colors.blue[700]!] : [Colors.grey[300]!, Colors.grey[400]!],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      boxShadow: widget.imageUploadBloc.imagefiles.isNotEmpty
-                          ? [
-                              BoxShadow(
-                                color: Colors.blue.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ]
-                          : null,
+                      boxShadow: widget.imageUploadBloc.imagefiles.isNotEmpty ? [BoxShadow(color: Colors.blue.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))] : null,
                     ),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
-                        onTap: widget.imageUploadBloc.imagefiles.isNotEmpty
-                            ? () => widget.onTap(
-                                widget.imageUploadBloc.imagefiles,
-                              )
-                            : null,
+                        onTap: widget.imageUploadBloc.imagefiles.isNotEmpty ? () => widget.onTap(widget.imageUploadBloc.imagefiles) : null,
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              if (widget
-                                  .imageUploadBloc
-                                  .imagefiles
-                                  .isNotEmpty) ...[
+                              if (widget.imageUploadBloc.imagefiles.isNotEmpty) ...[
                                 Container(
                                   padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.check_circle_outline,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                                  child: const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
                                 ),
                                 const SizedBox(width: 12),
                               ],
                               Text(
-                                widget.imageUploadBloc.imagefiles.isNotEmpty
-                                    ? 'Continue with Images'
-                                    : 'Select Images First',
+                                widget.imageUploadBloc.imagefiles.isNotEmpty ? 'Continue with Images' : 'Select Images First',
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w600,
-                                  color:
-                                      widget
-                                          .imageUploadBloc
-                                          .imagefiles
-                                          .isNotEmpty
-                                      ? Colors.white
-                                      : Colors.grey[600],
+                                  color: widget.imageUploadBloc.imagefiles.isNotEmpty ? Colors.white : Colors.grey[600],
                                   fontSize: 16,
                                 ),
                               ),
@@ -651,13 +476,7 @@ Widget buildMediaItem(File file) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
             color: Colors.grey[200],
-            child: const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            ),
+            child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
           );
         }
         if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {

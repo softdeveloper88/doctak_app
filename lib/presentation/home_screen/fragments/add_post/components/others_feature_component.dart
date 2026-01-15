@@ -13,12 +13,7 @@ class OtherFeatureComponent extends StatefulWidget {
   final Color? colorValue;
   final AddPostBloc searchPeopleBloc;
 
-  const OtherFeatureComponent({
-    this.onColorChange,
-    this.colorValue,
-    required this.searchPeopleBloc,
-    Key? key,
-  }) : super(key: key);
+  const OtherFeatureComponent({this.onColorChange, this.colorValue, required this.searchPeopleBloc, super.key});
 
   @override
   State<OtherFeatureComponent> createState() => _OtherFeatureComponentState();
@@ -52,15 +47,8 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.primary.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      CupertinoIcons.person_2_fill,
-                      color: theme.primary,
-                      size: 20,
-                    ),
+                    decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                    child: Icon(CupertinoIcons.person_2_fill, color: theme.primary, size: 20),
                   ),
                   const SizedBox(width: 14),
                   // Text Content
@@ -70,33 +58,16 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                       children: [
                         Text(
                           translation(context).lbl_tag_friends,
-                          style: TextStyle(
-                            color: theme.textPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                          ),
+                          style: TextStyle(color: theme.textPrimary, fontSize: 15, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                         ),
                         const SizedBox(height: 2),
                         BlocBuilder<AddPostBloc, AddPostState>(
                           bloc: widget.searchPeopleBloc,
                           builder: (context, state) {
-                            final count = widget.searchPeopleBloc
-                                .selectedSearchPeopleData.length;
+                            final count = widget.searchPeopleBloc.selectedSearchPeopleData.length;
                             return Text(
-                              count > 0
-                                  ? '$count friend${count > 1 ? 's' : ''} tagged'
-                                  : 'Mention people in your post',
-                              style: TextStyle(
-                                color: count > 0
-                                    ? theme.primary
-                                    : theme.textTertiary,
-                                fontSize: 12,
-                                fontWeight: count > 0
-                                    ? FontWeight.w500
-                                    : FontWeight.w400,
-                                fontFamily: 'Poppins',
-                              ),
+                              count > 0 ? '$count friend${count > 1 ? 's' : ''} tagged' : 'Mention people in your post',
+                              style: TextStyle(color: count > 0 ? theme.primary : theme.textTertiary, fontSize: 12, fontWeight: count > 0 ? FontWeight.w500 : FontWeight.w400, fontFamily: 'Poppins'),
                             );
                           },
                         ),
@@ -107,15 +78,8 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   Container(
                     width: 32,
                     height: 32,
-                    decoration: BoxDecoration(
-                      color: theme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      CupertinoIcons.chevron_right,
-                      color: theme.textTertiary,
-                      size: 16,
-                    ),
+                    decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(8)),
+                    child: Icon(CupertinoIcons.chevron_right, color: theme.textTertiary, size: 16),
                   ),
                 ],
               ),
@@ -126,8 +90,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
         BlocBuilder<AddPostBloc, AddPostState>(
           bloc: widget.searchPeopleBloc,
           builder: (context, state) {
-            if (state is PaginationLoadedState &&
-                widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
+            if (state is PaginationLoadedState && widget.searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
               return Container(
                 margin: const EdgeInsets.only(top: 10),
                 padding: const EdgeInsets.all(12),
@@ -137,7 +100,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                   border: Border.all(color: theme.border, width: 0.5),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(theme.isDark ? 0.2 : 0.04),
+                      color: Colors.black.withValues(alpha: theme.isDark ? 0.2 : 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -149,20 +112,11 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                     // Header
                     Row(
                       children: [
-                        Icon(
-                          CupertinoIcons.person_2,
-                          size: 14,
-                          color: theme.textSecondary,
-                        ),
+                        Icon(CupertinoIcons.person_2, size: 14, color: theme.textSecondary),
                         const SizedBox(width: 6),
                         Text(
                           'Tagged Friends',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: theme.textSecondary,
-                          ),
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textSecondary),
                         ),
                       ],
                     ),
@@ -171,9 +125,7 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: widget
-                          .searchPeopleBloc.selectedSearchPeopleData
-                          .map((element) {
+                      children: widget.searchPeopleBloc.selectedSearchPeopleData.map((element) {
                         return _buildTagChip(element, theme);
                       }).toList(),
                     ),
@@ -192,12 +144,9 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
     return Container(
       padding: const EdgeInsets.fromLTRB(4, 4, 10, 4),
       decoration: BoxDecoration(
-        color: theme.primary.withOpacity(theme.isDark ? 0.15 : 0.08),
+        color: theme.primary.withValues(alpha: theme.isDark ? 0.15 : 0.08),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.primary.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -207,25 +156,13 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.primary,
-                  theme.primary.withOpacity(0.7),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.7)], begin: Alignment.topLeft, end: Alignment.bottomRight),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 '${element.firstName?.substring(0, 1).toUpperCase() ?? '?'}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Poppins',
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
               ),
             ),
           ),
@@ -233,33 +170,19 @@ class _OtherFeatureComponentState extends State<OtherFeatureComponent> {
           // Name
           Text(
             '${element.firstName ?? ''} ${element.lastName ?? ''}'.trim(),
-            style: TextStyle(
-              color: theme.textPrimary,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(color: theme.textPrimary, fontSize: 13, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
           ),
           const SizedBox(width: 6),
           // Remove Button
           GestureDetector(
             onTap: () {
-              widget.searchPeopleBloc.add(
-                SelectFriendEvent(userData: element, isAdd: false),
-              );
+              widget.searchPeopleBloc.add(SelectFriendEvent(userData: element, isAdd: false));
             },
             child: Container(
               width: 18,
               height: 18,
-              decoration: BoxDecoration(
-                color: theme.textTertiary.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                CupertinoIcons.xmark,
-                size: 10,
-                color: theme.textSecondary,
-              ),
+              decoration: BoxDecoration(color: theme.textTertiary.withValues(alpha: 0.2), shape: BoxShape.circle),
+              child: Icon(CupertinoIcons.xmark, size: 10, color: theme.textSecondary),
             ),
           ),
         ],

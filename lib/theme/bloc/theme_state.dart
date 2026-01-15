@@ -2,7 +2,7 @@ part of 'theme_bloc.dart';
 
 @immutable
 class ThemeState extends Equatable {
-  ThemeState({required this.themeType});
+  const ThemeState({required this.themeType});
 
   final String themeType;
 

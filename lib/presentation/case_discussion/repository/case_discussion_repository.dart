@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:path/path.dart' as path;
 import '../models/case_discussion_models.dart';
 
@@ -14,11 +13,7 @@ class CaseDiscussionRepository {
   List<CountryFilter>? _cachedCountries;
   DateTime? _lastFilterDataFetch;
 
-  CaseDiscussionRepository({
-    required this.baseUrl,
-    required this.getAuthToken,
-    Dio? dio,
-  }) : _dio = dio ?? Dio() {
+  CaseDiscussionRepository({required this.baseUrl, required this.getAuthToken, Dio? dio}) : _dio = dio ?? Dio() {
     _setupInterceptors();
   }
 
@@ -35,18 +30,12 @@ class CaseDiscussionRepository {
           }
 
           print('🌐 API Request: ${options.method} ${options.uri}');
-          print(
-            '🔐 Authorization: Bearer ${getAuthToken().substring(0, 20)}...',
-          );
+          print('🔐 Authorization: Bearer ${getAuthToken().substring(0, 20)}...');
           print('📋 Headers: ${options.headers}');
           if (options.data is FormData) {
             final formData = options.data as FormData;
-            print(
-              '📄 Form Fields: ${formData.fields.map((e) => '${e.key}=${e.value}').join(', ')}',
-            );
-            print(
-              '📎 Form Files: ${formData.files.map((e) => '${e.key}=${e.value.filename}').join(', ')}',
-            );
+            print('📄 Form Fields: ${formData.fields.map((e) => '${e.key}=${e.value}').join(', ')}');
+            print('📎 Form Files: ${formData.files.map((e) => '${e.key}=${e.value.filename}').join(', ')}');
           }
 
           handler.next(options);
@@ -67,14 +56,8 @@ class CaseDiscussionRepository {
   Future<Map<String, dynamic>> getFilterData() async {
     try {
       // Check cache first (cache for 5 minutes)
-      if (_cachedSpecialties != null &&
-          _cachedCountries != null &&
-          _lastFilterDataFetch != null &&
-          DateTime.now().difference(_lastFilterDataFetch!).inMinutes < 5) {
-        return {
-          'specialties': _cachedSpecialties!,
-          'countries': _cachedCountries!,
-        };
+      if (_cachedSpecialties != null && _cachedCountries != null && _lastFilterDataFetch != null && DateTime.now().difference(_lastFilterDataFetch!).inMinutes < 5) {
+        return {'specialties': _cachedSpecialties!, 'countries': _cachedCountries!};
       }
 
       print('Fetching specialties from main API...');
@@ -95,10 +78,7 @@ class CaseDiscussionRepository {
                 (item) => SpecialtyFilter.fromJson({
                   'id': item['id'] ?? 0,
                   'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
-                  'slug': (item['name'] ?? item['specialty_name'] ?? 'unknown')
-                      .toString()
-                      .toLowerCase()
-                      .replaceAll(' ', '-'),
+                  'slug': (item['name'] ?? item['specialty_name'] ?? 'unknown').toString().toLowerCase().replaceAll(' ', '-'),
                   'is_active': true,
                 }),
               )
@@ -112,11 +92,7 @@ class CaseDiscussionRepository {
                   (item) => SpecialtyFilter.fromJson({
                     'id': item['id'] ?? 0,
                     'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
-                    'slug':
-                        (item['name'] ?? item['specialty_name'] ?? 'unknown')
-                            .toString()
-                            .toLowerCase()
-                            .replaceAll(' ', '-'),
+                    'slug': (item['name'] ?? item['specialty_name'] ?? 'unknown').toString().toLowerCase().replaceAll(' ', '-'),
                     'is_active': true,
                   }),
                 )
@@ -158,18 +134,13 @@ class CaseDiscussionRepository {
       _cachedCountries = countries;
       _lastFilterDataFetch = DateTime.now();
 
-      print(
-        'Loaded ${specialties.length} specialties and ${countries.length} countries from main API',
-      );
+      print('Loaded ${specialties.length} specialties and ${countries.length} countries from main API');
 
       return {'specialties': specialties, 'countries': countries};
     } catch (e) {
       print('Error loading filter patient data: $e');
       // Return empty data, not fallback - let the UI handle empty state
-      return {
-        'specialties': <SpecialtyFilter>[],
-        'countries': <CountryFilter>[],
-      };
+      return {'specialties': <SpecialtyFilter>[], 'countries': <CountryFilter>[]};
     }
   }
 
@@ -220,10 +191,7 @@ class CaseDiscussionRepository {
       print('API Request: $baseUrl/api/v3/cases');
       print('Query Parameters: $queryParams');
 
-      final response = await _dio.get(
-        '$baseUrl/api/v3/cases',
-        queryParameters: queryParams,
-      );
+      final response = await _dio.get('$baseUrl/api/v3/cases', queryParameters: queryParams);
 
       final responseData = response.data as Map<String, dynamic>;
       print('API Response Success: ${responseData['success']}');
@@ -247,20 +215,13 @@ class CaseDiscussionRepository {
           total: casesData['total'] ?? 0,
         );
 
-        print(
-          'Returning ${cases.length} cases with pagination: page ${pagination.currentPage}/${pagination.lastPage}',
-        );
+        print('Returning ${cases.length} cases with pagination: page ${pagination.currentPage}/${pagination.lastPage}');
 
-        return PaginatedResponse<CaseDiscussionListItem>(
-          items: cases,
-          pagination: pagination,
-        );
+        return PaginatedResponse<CaseDiscussionListItem>(items: cases, pagination: pagination);
       } else {
-        throw Exception(
-          responseData['message'] ?? 'Failed to load case discussions',
-        );
+        throw Exception(responseData['message'] ?? 'Failed to load case discussions');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('DioError in getCaseDiscussions: ${e.message}');
       throw _handleDioError(e);
     } catch (e) {
@@ -311,21 +272,16 @@ class CaseDiscussionRepository {
         Map<String, dynamic>? userData;
         String authorName = 'Unknown User';
 
-        if (caseData['user'] != null &&
-            caseData['user'] is Map<String, dynamic>) {
+        if (caseData['user'] != null && caseData['user'] is Map<String, dynamic>) {
           // Case detail API: user data is nested under 'user'
           userData = caseData['user'] as Map<String, dynamic>;
-          authorName =
-              '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'
-                  .trim();
+          authorName = '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'.trim();
         } else if (caseData['name'] != null) {
           // Case list API: user data is directly in caseData
           userData = {
             'id': caseData['user_id'] ?? 0,
-            'first_name':
-                caseData['name']?.toString().split(' ').first ?? 'Unknown',
-            'last_name':
-                caseData['name']?.toString().split(' ').skip(1).join(' ') ?? '',
+            'first_name': caseData['name']?.toString().split(' ').first ?? 'Unknown',
+            'last_name': caseData['name']?.toString().split(' ').skip(1).join(' ') ?? '',
             'specialty': caseData['specialty'],
             'profile_pic': caseData['profile_pic'],
           };
@@ -346,35 +302,25 @@ class CaseDiscussionRepository {
           print('📊 Comments field is count ($commentsRaw), not list');
           commentsData = [];
         } else {
-          print(
-            '⚠️ Comments field is neither List nor int: ${commentsRaw.runtimeType}',
-          );
+          print('⚠️ Comments field is neither List nor int: ${commentsRaw.runtimeType}');
           commentsData = [];
         }
 
         // Handle metadata safely
-        final metadata = (data['metadata'] is Map<String, dynamic>)
-            ? data['metadata'] as Map<String, dynamic>?
-            : null;
+        final metadata = (data['metadata'] is Map<String, dynamic>) ? data['metadata'] as Map<String, dynamic>? : null;
 
         // Handle related_cases safely
-        final relatedCases = (data['related_cases'] is List)
-            ? data['related_cases'] as List
-            : [];
+        final relatedCases = (data['related_cases'] is List) ? data['related_cases'] as List : [];
 
         // Handle is_following safely
-        final isFollowing = (data['is_following'] is bool)
-            ? data['is_following'] as bool
-            : false;
+        final isFollowing = (data['is_following'] is bool) ? data['is_following'] as bool : false;
 
         // Debug logging
         print('🔍 Debug Info:');
         print('   - userData is null: ${userData == null}');
         print('   - commentsRaw value: $commentsRaw');
         print('   - commentsRaw type: ${commentsRaw.runtimeType}');
-        print(
-          '   - commentsData type: ${commentsData.runtimeType} (length: ${commentsData.length})',
-        );
+        print('   - commentsData type: ${commentsData.runtimeType} (length: ${commentsData.length})');
         print('   - caseData keys: ${caseData.keys.toList()}');
         print('   - data keys: ${data.keys.toList()}');
         if (userData != null) {
@@ -388,8 +334,7 @@ class CaseDiscussionRepository {
 
         // Parse tags if available
         List<String>? symptoms;
-        if (caseData['tags'] != null &&
-            caseData['tags'].toString().isNotEmpty) {
+        if (caseData['tags'] != null && caseData['tags'].toString().isNotEmpty) {
           try {
             final tagsString = caseData['tags'].toString();
             if (tagsString.startsWith('[') && tagsString.endsWith(']')) {
@@ -405,7 +350,7 @@ class CaseDiscussionRepository {
 
         // Create the JSON structure that matches the new API response
         final caseJson = Map<String, dynamic>.from(caseData);
-        
+
         // Add the additional data from the API response
         if (data['is_like'] != null) {
           caseJson['is_like'] = data['is_like'];
@@ -431,11 +376,9 @@ class CaseDiscussionRepository {
 
         return CaseDiscussion.fromJson(caseJson);
       } else {
-        throw Exception(
-          responseData['message'] ?? 'Failed to load case discussion',
-        );
+        throw Exception(responseData['message'] ?? 'Failed to load case discussion');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('❌ Error loading case discussion: ${e.message}');
       if (e.response != null) {
         print('📱 Response Status: ${e.response?.statusCode}');
@@ -465,8 +408,8 @@ class CaseDiscussionRepository {
           // Parse the JSON tags: [{"value":"tag1"},{"value":"tag2"}]
           final parsed = json.decode(request.tags!) as List;
           final tagValues = parsed
-              .map((tag) => tag['value'].toString())  // Extract values
-              .join(', ');  // Format as "tag1, tag2"
+              .map((tag) => tag['value'].toString()) // Extract values
+              .join(', '); // Format as "tag1, tag2"
           formData.fields.add(MapEntry('tags', tagValues));
         } catch (e) {
           // Fallback: send as-is if parsing fails
@@ -495,11 +438,11 @@ class CaseDiscussionRepository {
       if (request.clinicalComplexity != null) {
         formData.fields.add(MapEntry('clinical_complexity', request.clinicalComplexity!));
       }
-      
+
       if (request.teachingValue != null) {
         formData.fields.add(MapEntry('teaching_value', request.teachingValue!));
       }
-      
+
       if (request.isAnonymized != null) {
         formData.fields.add(MapEntry('is_anonymized', request.isAnonymized! ? '1' : '0'));
       }
@@ -508,16 +451,13 @@ class CaseDiscussionRepository {
       if (request.attachedFiles != null && request.attachedFiles!.isNotEmpty) {
         for (int i = 0; i < request.attachedFiles!.length; i++) {
           final filePath = request.attachedFiles![i];
-          
+
           if (filePath.startsWith('http')) {
             // Handle URL case (existing files)
             formData.fields.add(MapEntry('existing_files[$i]', filePath));
           } else {
             // Local file - use array notation for multiple files
-            final file = await MultipartFile.fromFile(
-              filePath,
-              filename: path.basename(filePath),
-            );
+            final file = await MultipartFile.fromFile(filePath, filename: path.basename(filePath));
             formData.files.add(MapEntry('attached_files[]', file));
           }
         }
@@ -532,10 +472,7 @@ class CaseDiscussionRepository {
         '$baseUrl/api/v3/cases',
         data: formData,
         options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json',
-          },
+          headers: {'Content-Type': 'multipart/form-data', 'Accept': 'application/json'},
           validateStatus: (status) => status! < 500, // Accept 4xx responses for better error handling
         ),
       );
@@ -549,7 +486,6 @@ class CaseDiscussionRepository {
       if (responseData is Map<String, dynamic>) {
         // Check for successful response
         if ((responseData['success'] == true || response.statusCode == 200 || response.statusCode == 201)) {
-          
           // Extract case data from the expected API response structure
           Map<String, dynamic>? caseData;
           Map<String, dynamic>? metadataData;
@@ -573,7 +509,7 @@ class CaseDiscussionRepository {
           // Handle API errors
           final message = responseData['message'] ?? 'Failed to create case discussion';
           final errors = responseData['errors'];
-          
+
           if (errors != null) {
             throw ValidationException(message, errors);
           } else {
@@ -583,11 +519,10 @@ class CaseDiscussionRepository {
       } else {
         throw Exception('Invalid response format from server');
       }
-      
     } on DioException catch (e) {
       print('DioException creating case discussion: ${e.message}');
       print('Response: ${e.response?.data}');
-      
+
       // Handle specific HTTP error codes
       switch (e.response?.statusCode) {
         case 422:
@@ -595,19 +530,19 @@ class CaseDiscussionRepository {
           final errors = e.response?.data['errors'];
           final message = e.response?.data['message'] ?? 'Validation failed';
           throw ValidationException(message, errors);
-        
+
         case 401:
           throw UnauthorizedException('Authentication required');
-        
+
         case 403:
           throw ForbiddenException('Access denied');
-        
+
         case 413:
           throw Exception('File too large');
-        
+
         case 500:
           throw Exception('Server error occurred');
-        
+
         default:
           throw Exception('Network error: ${e.message}');
       }
@@ -633,8 +568,8 @@ class CaseDiscussionRepository {
           // Parse the JSON tags: [{"value":"tag1"},{"value":"tag2"}]
           final parsed = json.decode(request.tags!) as List;
           final tagValues = parsed
-              .map((tag) => tag['value'].toString())  // Extract values
-              .join(', ');  // Format as "tag1, tag2"
+              .map((tag) => tag['value'].toString()) // Extract values
+              .join(', '); // Format as "tag1, tag2"
           formData.fields.add(MapEntry('tags', tagValues));
         } catch (e) {
           // Fallback: send as-is if parsing fails
@@ -663,11 +598,11 @@ class CaseDiscussionRepository {
       if (request.clinicalComplexity != null) {
         formData.fields.add(MapEntry('clinical_complexity', request.clinicalComplexity!));
       }
-      
+
       if (request.teachingValue != null) {
         formData.fields.add(MapEntry('teaching_value', request.teachingValue!));
       }
-      
+
       if (request.isAnonymized != null) {
         formData.fields.add(MapEntry('is_anonymized', request.isAnonymized! ? '1' : '0'));
       }
@@ -676,16 +611,13 @@ class CaseDiscussionRepository {
       if (request.attachedFiles != null && request.attachedFiles!.isNotEmpty) {
         for (int i = 0; i < request.attachedFiles!.length; i++) {
           final filePath = request.attachedFiles![i];
-          
+
           if (filePath.startsWith('http')) {
             // Handle URL case (existing files)
             formData.fields.add(MapEntry('existing_files[$i]', filePath));
           } else {
             // Local file - use array notation for multiple files
-            final file = await MultipartFile.fromFile(
-              filePath,
-              filename: path.basename(filePath),
-            );
+            final file = await MultipartFile.fromFile(filePath, filename: path.basename(filePath));
             formData.files.add(MapEntry('attached_files[]', file));
           }
         }
@@ -700,10 +632,7 @@ class CaseDiscussionRepository {
         '$baseUrl/api/v3/cases/update-case/$caseId',
         data: formData,
         options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'Accept': 'application/json',
-          },
+          headers: {'Content-Type': 'multipart/form-data', 'Accept': 'application/json'},
           validateStatus: (status) => status! < 500, // Accept 4xx responses for better error handling
         ),
       );
@@ -717,7 +646,6 @@ class CaseDiscussionRepository {
       if (responseData is Map<String, dynamic>) {
         // Check for successful response
         if ((responseData['success'] == true || response.statusCode == 200 || response.statusCode == 201)) {
-          
           // Extract case data from the expected API response structure
           Map<String, dynamic>? caseData;
           Map<String, dynamic>? metadataData;
@@ -741,7 +669,7 @@ class CaseDiscussionRepository {
           // Handle API errors
           final message = responseData['message'] ?? 'Failed to update case discussion';
           final errors = responseData['errors'];
-          
+
           if (errors != null) {
             throw ValidationException(message, errors);
           } else {
@@ -751,11 +679,10 @@ class CaseDiscussionRepository {
       } else {
         throw Exception('Invalid response format from server');
       }
-      
     } on DioException catch (e) {
       print('DioException updating case discussion: ${e.message}');
       print('Response: ${e.response?.data}');
-      
+
       // Handle specific HTTP error codes
       switch (e.response?.statusCode) {
         case 422:
@@ -763,22 +690,22 @@ class CaseDiscussionRepository {
           final errors = e.response?.data['errors'];
           final message = e.response?.data['message'] ?? 'Validation failed';
           throw ValidationException(message, errors);
-        
+
         case 401:
           throw UnauthorizedException('Authentication required');
-        
+
         case 403:
           throw ForbiddenException('Access denied');
-        
+
         case 404:
           throw Exception('Case not found');
-        
+
         case 413:
           throw Exception('File too large');
-        
+
         case 500:
           throw Exception('Server error occurred');
-        
+
         default:
           throw Exception('Network error: ${e.message}');
       }
@@ -789,18 +716,12 @@ class CaseDiscussionRepository {
   }
 
   // Get comments for a case (now using the case detail API response)
-  Future<PaginatedResponse<CaseComment>> getCaseComments({
-    required int caseId,
-    int page = 1,
-    int perPage = 10,
-  }) async {
+  Future<PaginatedResponse<CaseComment>> getCaseComments({required int caseId, int page = 1, int perPage = 10}) async {
     try {
       print('💬 Loading comments for case ID: $caseId');
 
       // Get the case details which includes comments
-      final caseDetailResponse = await _dio.get(
-        '$baseUrl/api/v3/cases/$caseId',
-      );
+      final caseDetailResponse = await _dio.get('$baseUrl/api/v3/cases/$caseId');
 
       // Handle potential null response data
       if (caseDetailResponse.data == null) {
@@ -828,14 +749,10 @@ class CaseDiscussionRepository {
         if (commentsRaw is List) {
           commentsList = commentsRaw;
         } else if (commentsRaw is int) {
-          print(
-            '📊 Comments field is count ($commentsRaw), not list - no comments to load',
-          );
+          print('📊 Comments field is count ($commentsRaw), not list - no comments to load');
           commentsList = [];
         } else {
-          print(
-            '⚠️ Comments field is neither List nor int: ${commentsRaw.runtimeType}',
-          );
+          print('⚠️ Comments field is neither List nor int: ${commentsRaw.runtimeType}');
           commentsList = [];
         }
 
@@ -854,20 +771,12 @@ class CaseDiscussionRepository {
 
             if (userDataRaw != null && userDataRaw is Map<String, dynamic>) {
               userData = userDataRaw;
-              authorName =
-                  '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'
-                      .trim();
+              authorName = '${userData['first_name'] ?? ''} ${userData['last_name'] ?? ''}'.trim();
               print('👤 Found user data: $userData');
             } else {
               print('⚠️ User data is null or invalid, creating fallback user');
               // Create fallback user data when user is null
-              userData = {
-                'id': item['user_id'] ?? 'unknown',
-                'first_name': 'Anonymous',
-                'last_name': 'User',
-                'specialty': 'Unknown',
-                'profile_pic': null,
-              };
+              userData = {'id': item['user_id'] ?? 'unknown', 'first_name': 'Anonymous', 'last_name': 'User', 'specialty': 'Unknown', 'profile_pic': null};
               authorName = 'Anonymous User';
             }
 
@@ -881,9 +790,7 @@ class CaseDiscussionRepository {
             if (rawDiscussCaseId != null) {
               if (rawDiscussCaseId is String) {
                 discussCaseIdInt = int.tryParse(rawDiscussCaseId) ?? caseId;
-                print(
-                  '📊 Converted discuss_case_id from String "$rawDiscussCaseId" to int $discussCaseIdInt',
-                );
+                print('📊 Converted discuss_case_id from String "$rawDiscussCaseId" to int $discussCaseIdInt');
               } else if (rawDiscussCaseId is int) {
                 discussCaseIdInt = rawDiscussCaseId;
               }
@@ -892,16 +799,13 @@ class CaseDiscussionRepository {
             final commentData = {
               'id': item['id'] ?? 0,
               'discuss_case_id': discussCaseIdInt, // Now guaranteed to be int
-              'user_id':
-                  item['user_id'] ?? '0', // Keep as dynamic - could be string
+              'user_id': item['user_id'] ?? '0', // Keep as dynamic - could be string
               'comment': item['comment'] ?? '',
               'clinical_tags': item['specialty'],
               'likes': item['likes'] ?? 0,
               'dislikes': item['dislikes'] ?? 0,
-              'created_at':
-                  item['created_at'] ?? DateTime.now().toIso8601String(),
-              'updated_at':
-                  item['updated_at'] ?? DateTime.now().toIso8601String(),
+              'created_at': item['created_at'] ?? DateTime.now().toIso8601String(),
+              'updated_at': item['updated_at'] ?? DateTime.now().toIso8601String(),
               'replies_count': 0, // Not provided in current API
               'is_liked': false, // Not provided in current API
               'is_disliked': false, // Not provided in current API
@@ -935,21 +839,13 @@ class CaseDiscussionRepository {
 
         print('📝 Total comments parsed: ${comments.length}');
 
-        final pagination = PaginationMeta(
-          currentPage: 1,
-          lastPage: 1,
-          perPage: comments.length,
-          total: comments.length,
-        );
+        final pagination = PaginationMeta(currentPage: 1, lastPage: 1, perPage: comments.length, total: comments.length);
 
-        return PaginatedResponse<CaseComment>(
-          items: comments,
-          pagination: pagination,
-        );
+        return PaginatedResponse<CaseComment>(items: comments, pagination: pagination);
       } else {
         throw Exception(responseData['message'] ?? 'Failed to load comments');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('❌ Error loading comments: ${e.message}');
       if (e.response != null) {
         print('📱 Response Status: ${e.response?.statusCode}');
@@ -959,15 +855,7 @@ class CaseDiscussionRepository {
     } catch (e) {
       print('❌ General error loading comments: $e');
       // Return empty list instead of throwing error
-      return PaginatedResponse<CaseComment>(
-        items: [],
-        pagination: PaginationMeta(
-          currentPage: 1,
-          lastPage: 1,
-          perPage: 10,
-          total: 0,
-        ),
-      );
+      return PaginatedResponse<CaseComment>(items: [], pagination: PaginationMeta(currentPage: 1, lastPage: 1, perPage: 10, total: 0));
     }
   }
 
@@ -980,25 +868,21 @@ class CaseDiscussionRepository {
       dynamic discussCaseId = commentData['discuss_case_id'];
       if (discussCaseId is String) {
         discussCaseId = int.tryParse(discussCaseId) ?? 0;
-      } else if (discussCaseId == null) {
-        discussCaseId = 0;
+      } else {
+        discussCaseId ??= 0;
       }
 
       // Ensure all required fields have safe defaults
       final safeCommentData = {
         'id': commentData['id'] ?? 0,
         'discuss_case_id': discussCaseId,
-        'user_id':
-            commentData['user_id'] ??
-            '0', // Keep as dynamic - could be string or int
+        'user_id': commentData['user_id'] ?? '0', // Keep as dynamic - could be string or int
         'comment': commentData['comment'] ?? '',
         'clinical_tags': commentData['clinical_tags'],
         'likes': commentData['likes'] ?? 0,
         'dislikes': commentData['dislikes'] ?? 0,
-        'created_at':
-            commentData['created_at'] ?? DateTime.now().toIso8601String(),
-        'updated_at':
-            commentData['updated_at'] ?? DateTime.now().toIso8601String(),
+        'created_at': commentData['created_at'] ?? DateTime.now().toIso8601String(),
+        'updated_at': commentData['updated_at'] ?? DateTime.now().toIso8601String(),
         'replies_count': commentData['replies_count'] ?? 0,
         'is_liked': commentData['is_liked'] ?? false,
         'is_disliked': commentData['is_disliked'] ?? false,
@@ -1026,32 +910,17 @@ class CaseDiscussionRepository {
   }
 
   // Add comment to case
-  Future<CaseComment> addComment({
-    required int caseId,
-    required String comment,
-    String? clinicalTags,
-  }) async {
+  Future<CaseComment> addComment({required int caseId, required String comment, String? clinicalTags}) async {
     try {
-      final normalizedBaseUrl = baseUrl.endsWith('/')
-          ? baseUrl.substring(0, baseUrl.length - 1)
-          : baseUrl;
+      final normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl;
 
-      final queryParameters = <String, dynamic>{
-        'id': caseId.toString(),
-        'comment': comment,
-        if (clinicalTags != null && clinicalTags.trim().isNotEmpty)
-          'clinical_tags': clinicalTags.trim(),
-      };
+      final queryParameters = <String, dynamic>{'id': caseId.toString(), 'comment': comment, if (clinicalTags != null && clinicalTags.trim().isNotEmpty) 'clinical_tags': clinicalTags.trim()};
 
       // Server variants observed in this codebase:
       // - Legacy: /comment-discuss-case?id=...&comment=...
       // - Newer:  /api/v4/comment-discuss-case
       // - Current (broken for some envs): /api/v3/comment-discuss-case (404)
-      final endpoints = <String>[
-        '$normalizedBaseUrl/api/v4/comment-discuss-case',
-        '$normalizedBaseUrl/comment-discuss-case',
-        '$normalizedBaseUrl/api/v3/comment-discuss-case',
-      ];
+      final endpoints = <String>['$normalizedBaseUrl/api/v4/comment-discuss-case', '$normalizedBaseUrl/comment-discuss-case', '$normalizedBaseUrl/api/v3/comment-discuss-case'];
 
       Response<dynamic>? response;
 
@@ -1059,12 +928,7 @@ class CaseDiscussionRepository {
         try {
           if (endpoint.endsWith('/api/v3/comment-discuss-case')) {
             // Some servers expect form data for this path.
-            final formData = FormData.fromMap({
-              'id': caseId.toString(),
-              'comment': comment,
-              if (clinicalTags != null && clinicalTags.trim().isNotEmpty)
-                'clinical_tags': clinicalTags.trim(),
-            });
+            final formData = FormData.fromMap({'id': caseId.toString(), 'comment': comment, if (clinicalTags != null && clinicalTags.trim().isNotEmpty) 'clinical_tags': clinicalTags.trim()});
 
             response = await _dio.post(endpoint, data: formData);
           } else {
@@ -1074,7 +938,7 @@ class CaseDiscussionRepository {
 
           // Success
           break;
-        } on DioError catch (e) {
+        } on DioException catch (e) {
           final status = e.response?.statusCode;
           if (status == 404) {
             continue;
@@ -1111,7 +975,7 @@ class CaseDiscussionRepository {
         'is_liked': false,
         'is_disliked': false,
       });
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('Error adding comment: ${e.message}');
       print('Response: ${e.response?.data}');
       throw _handleDioError(e);
@@ -1126,25 +990,13 @@ class CaseDiscussionRepository {
   }) async {
     try {
       // Use the new API v3 endpoint for case actions
-      final response = await _dio.post(
-        '$baseUrl/api/v3/cases/action',
-        data: {
-          'discuss_case_id': caseId,
-          'action': action,
-          if (reason != null) 'reason': reason,
-        },
-      );
+      final response = await _dio.post('$baseUrl/api/v3/cases/action', data: {'discuss_case_id': caseId, 'action': action, if (reason != null) 'reason': reason});
 
       print('Case action response: ${response.data}');
 
       // Return response data
-      return {
-        'success': true,
-        'action': action,
-        'case_id': caseId,
-        'response': response.data,
-      };
-    } on DioError catch (e) {
+      return {'success': true, 'action': action, 'case_id': caseId, 'response': response.data};
+    } on DioException catch (e) {
       print('Error performing case action: ${e.message}');
       throw _handleDioError(e);
     }
@@ -1157,15 +1009,8 @@ class CaseDiscussionRepository {
     String? reason,
   }) async {
     try {
-      await _dio.post(
-        '$baseUrl/api/v3/cases/action',
-        data: {
-          'discuss_case_id': commentId,
-          'action': action,
-          if (reason != null) 'reason': reason,
-        },
-      );
-    } on DioError catch (e) {
+      await _dio.post('$baseUrl/api/v3/cases/action', data: {'discuss_case_id': commentId, 'action': action, if (reason != null) 'reason': reason});
+    } on DioException catch (e) {
       print('Error liking/unliking comment: ${e.message}');
       throw _handleDioError(e);
     }
@@ -1175,7 +1020,7 @@ class CaseDiscussionRepository {
   Future<void> deleteComment(int commentId) async {
     try {
       await _dio.delete('$baseUrl/api/v3/cases/comments/$commentId');
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       throw _handleDioError(e);
     }
   }
@@ -1186,12 +1031,10 @@ class CaseDiscussionRepository {
       print('🗑️ Deleting case discussion with ID: $caseId');
       print('🌐 API URL: $baseUrl/api/v3/cases/cases-delete/$caseId');
 
-      final response = await _dio.post(
-        '$baseUrl/api/v3/cases/cases-delete/$caseId',
-      );
+      final response = await _dio.post('$baseUrl/api/v3/cases/cases-delete/$caseId');
 
       print('✅ Case deleted successfully. Response: ${response.statusCode}');
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       print('❌ Error deleting case: ${e.message}');
       if (e.response != null) {
         print('📱 Response Status: ${e.response?.statusCode}');
@@ -1223,22 +1066,19 @@ class CaseDiscussionRepository {
     }
   }
 
-  Exception _handleDioError(DioError error) {
+  Exception _handleDioError(DioException error) {
     switch (error.type) {
-      case DioErrorType.connectionTimeout:
-      case DioErrorType.sendTimeout:
-      case DioErrorType.receiveTimeout:
-        return Exception(
-          'Connection timeout. Please check your internet connection.',
-        );
-      case DioErrorType.badResponse:
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        return Exception('Connection timeout. Please check your internet connection.');
+      case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode;
-        final message =
-            error.response?.data?['message'] ?? 'Server error occurred';
+        final message = error.response?.data?['message'] ?? 'Server error occurred';
         return Exception('Server error ($statusCode): $message');
-      case DioErrorType.cancel:
+      case DioExceptionType.cancel:
         return Exception('Request was cancelled');
-      case DioErrorType.unknown:
+      case DioExceptionType.unknown:
         return Exception('Network error occurred. Please try again.');
       default:
         return Exception('An unexpected error occurred');
@@ -1246,10 +1086,7 @@ class CaseDiscussionRepository {
   }
 
   // Helper method to transform Laravel API response to Flutter model format
-  Map<String, dynamic> _transformLaravelCaseToFlutter(
-    Map<String, dynamic> caseData,
-    Map<String, dynamic>? metadataData,
-  ) {
+  Map<String, dynamic> _transformLaravelCaseToFlutter(Map<String, dynamic> caseData, Map<String, dynamic>? metadataData) {
     return {
       'id': caseData['id'],
       'title': caseData['title'],
@@ -1259,10 +1096,8 @@ class CaseDiscussionRepository {
       'tags': caseData['tags'],
       'created_at': caseData['created_at'],
       'updated_at': caseData['updated_at'],
-      'attachments': caseData['attached_file'] != null 
-          ? _parseAttachedFilesFromList(caseData['attached_file']) 
-          : [],
-      
+      'attachments': caseData['attached_file'] != null ? _parseAttachedFilesFromList(caseData['attached_file']) : [],
+
       // Author information from the user relationship
       'author': {
         'id': caseData['user']?['id'] ?? 0,
@@ -1270,23 +1105,25 @@ class CaseDiscussionRepository {
         'specialty': caseData['user']?['specialty'] ?? '',
         'profile_pic': caseData['user']?['profile_pic'],
       },
-      
+
       // Case statistics
       'stats': {
         'comments_count': caseData['comments_count'] ?? 0,
         'followers_count': 0, // Will be updated when followers are implemented
-        'updates_count': 0,   // Will be updated when updates are implemented
+        'updates_count': 0, // Will be updated when updates are implemented
         'likes': caseData['likes'] ?? 0,
         'views': caseData['views'] ?? 0,
       },
-      
+
       // Metadata if available
-      'metadata': metadataData != null ? {
-        'patient_demographics': metadataData['patient_demographics'],
-        'clinical_complexity': metadataData['clinical_complexity'],
-        'teaching_value': metadataData['teaching_value'],
-        'is_anonymized': metadataData['is_anonymized'],
-      } : null,
+      'metadata': metadataData != null
+          ? {
+              'patient_demographics': metadataData['patient_demographics'],
+              'clinical_complexity': metadataData['clinical_complexity'],
+              'teaching_value': metadataData['teaching_value'],
+              'is_anonymized': metadataData['is_anonymized'],
+            }
+          : null,
     };
   }
 
@@ -1297,52 +1134,38 @@ class CaseDiscussionRepository {
         // If it's a JSON string, decode it
         final decoded = json.decode(attachedFileData);
         if (decoded is List) {
-          return decoded.map((item) {
-            if (item is String) {
-              // If it's just a URL string, create a basic attachment object
-              return {
-                'id': DateTime.now().millisecondsSinceEpoch,
-                'type': 'image',
-                'url': item,
-                'description': path.basename(item),
-              };
-            } else if (item is Map<String, dynamic>) {
-              // If it's already an attachment object, return as is
-              return item;
-            }
-            return {
-              'id': DateTime.now().millisecondsSinceEpoch,
-              'type': 'unknown',
-              'url': item.toString(),
-              'description': 'attachment',
-            };
-          }).cast<Map<String, dynamic>>().toList();
+          return decoded
+              .map((item) {
+                if (item is String) {
+                  // If it's just a URL string, create a basic attachment object
+                  return {'id': DateTime.now().millisecondsSinceEpoch, 'type': 'image', 'url': item, 'description': path.basename(item)};
+                } else if (item is Map<String, dynamic>) {
+                  // If it's already an attachment object, return as is
+                  return item;
+                }
+                return {'id': DateTime.now().millisecondsSinceEpoch, 'type': 'unknown', 'url': item.toString(), 'description': 'attachment'};
+              })
+              .cast<Map<String, dynamic>>()
+              .toList();
         }
       } else if (attachedFileData is List) {
         // If it's already a list, process each item
-        return attachedFileData.map((item) {
-          if (item is String) {
-            return {
-              'id': DateTime.now().millisecondsSinceEpoch,
-              'type': 'image',
-              'url': item,
-              'description': path.basename(item),
-            };
-          } else if (item is Map<String, dynamic>) {
-            return item;
-          }
-          return {
-            'id': DateTime.now().millisecondsSinceEpoch,
-            'type': 'unknown',
-            'url': item.toString(),
-            'description': 'attachment',
-          };
-        }).cast<Map<String, dynamic>>().toList();
+        return attachedFileData
+            .map((item) {
+              if (item is String) {
+                return {'id': DateTime.now().millisecondsSinceEpoch, 'type': 'image', 'url': item, 'description': path.basename(item)};
+              } else if (item is Map<String, dynamic>) {
+                return item;
+              }
+              return {'id': DateTime.now().millisecondsSinceEpoch, 'type': 'unknown', 'url': item.toString(), 'description': 'attachment'};
+            })
+            .cast<Map<String, dynamic>>()
+            .toList();
       }
     } catch (e) {
       print('Error parsing attached files: $e');
     }
-    
+
     return []; // Return empty list if parsing fails
   }
 
@@ -1354,28 +1177,23 @@ class CaseDiscussionRepository {
 
     try {
       final attachedFileString = attachedFile.toString();
-      
+
       // Handle empty arrays
       if (attachedFileString == "\"[]\"" || attachedFileString == "[]") {
         return null;
       }
 
-      // Handle complex JSON string format like "\"[\\\"uploads\\\\\\/...\\\"]\"" 
+      // Handle complex JSON string format like "\"[\\\"uploads\\\\\\/...\\\"]\""
       if (attachedFileString.startsWith('"[') && attachedFileString.endsWith(']"')) {
         // Remove outer quotes and unescape
         String cleanedString = attachedFileString.substring(1, attachedFileString.length - 1);
         cleanedString = cleanedString.replaceAll('\\"', '"').replaceAll('\\\\', '\\');
-        
+
         final parsed = json.decode(cleanedString) as List;
         return parsed.asMap().entries.map((entry) {
           final index = entry.key;
           final url = entry.value.toString();
-          return {
-            'id': index,
-            'type': _getFileTypeFromUrl(url),
-            'url': url,
-            'description': 'Attachment ${index + 1}',
-          };
+          return {'id': index, 'type': _getFileTypeFromUrl(url), 'url': url, 'description': 'Attachment ${index + 1}'};
         }).toList();
       }
 
@@ -1385,24 +1203,14 @@ class CaseDiscussionRepository {
         return parsed.asMap().entries.map((entry) {
           final index = entry.key;
           final url = entry.value.toString();
-          return {
-            'id': index,
-            'type': _getFileTypeFromUrl(url),
-            'url': url,
-            'description': 'Attachment ${index + 1}',
-          };
+          return {'id': index, 'type': _getFileTypeFromUrl(url), 'url': url, 'description': 'Attachment ${index + 1}'};
         }).toList();
       }
 
       // Handle single file URL
       if (attachedFileString.isNotEmpty) {
         return [
-          {
-            'id': 0,
-            'type': _getFileTypeFromUrl(attachedFileString),
-            'url': attachedFileString,
-            'description': 'Attached file',
-          }
+          {'id': 0, 'type': _getFileTypeFromUrl(attachedFileString), 'url': attachedFileString, 'description': 'Attached file'},
         ];
       }
     } catch (e) {
@@ -1430,9 +1238,9 @@ class CaseDiscussionRepository {
 class ValidationException implements Exception {
   final String message;
   final Map<String, dynamic>? errors;
-  
+
   ValidationException(this.message, this.errors);
-  
+
   @override
   String toString() => 'ValidationException: $message';
 }
@@ -1440,7 +1248,7 @@ class ValidationException implements Exception {
 class UnauthorizedException implements Exception {
   final String message;
   UnauthorizedException(this.message);
-  
+
   @override
   String toString() => 'UnauthorizedException: $message';
 }
@@ -1448,7 +1256,7 @@ class UnauthorizedException implements Exception {
 class ForbiddenException implements Exception {
   final String message;
   ForbiddenException(this.message);
-  
+
   @override
   String toString() => 'ForbiddenException: $message';
 }

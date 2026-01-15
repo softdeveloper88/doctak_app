@@ -5,8 +5,7 @@ class PermissionManager {
   /// the permission is granted or not. Returns `false` if the [permission]
   /// is denied or restricted.
   static Future<bool> isPermissionGranted(Permission permission) async {
-    return !(await permission.status.isDenied ||
-        await permission.status.isRestricted);
+    return !(await permission.status.isDenied || await permission.status.isRestricted);
   }
 
   /// Requests a specified [permission] if it has not already been granted.

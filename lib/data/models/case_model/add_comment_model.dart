@@ -1,10 +1,10 @@
 import 'dart:convert';
+
 AddCommentModel addCommentModelFromJson(String str) => AddCommentModel.fromJson(json.decode(str));
 String addCommentModelToJson(AddCommentModel data) => json.encode(data.toJson());
+
 class AddCommentModel {
-  AddCommentModel({
-      this.comment, 
-      this.message,});
+  AddCommentModel({this.comment, this.message});
 
   AddCommentModel.fromJson(dynamic json) {
     comment = json['comment'] != null ? Comment.fromJson(json['comment']) : null;
@@ -21,19 +21,13 @@ class AddCommentModel {
     map['message'] = message;
     return map;
   }
-
 }
 
 Comment commentFromJson(String str) => Comment.fromJson(json.decode(str));
 String commentToJson(Comment data) => json.encode(data.toJson());
+
 class Comment {
-  Comment({
-      this.discussCaseId, 
-      this.userId, 
-      this.comment, 
-      this.updatedAt, 
-      this.createdAt, 
-      this.id,});
+  Comment({this.discussCaseId, this.userId, this.comment, this.updatedAt, this.createdAt, this.id});
 
   Comment.fromJson(dynamic json) {
     discussCaseId = json['discuss_case_id'];
@@ -60,5 +54,4 @@ class Comment {
     map['id'] = id;
     return map;
   }
-
 }

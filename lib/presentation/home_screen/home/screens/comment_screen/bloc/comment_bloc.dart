@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
@@ -38,7 +37,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     });
   }
 
-  _onGetPosts(LoadPageEvent event, Emitter<CommentState> emit) async {
+  Future<void> _onGetPosts(LoadPageEvent event, Emitter<CommentState> emit) async {
     if (event.page == 1) {
       postList.clear();
       pageNumber = 1;
@@ -91,10 +90,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
   }
 
-  _onGetReplyComment(
-    FetchReplyComment event,
-    Emitter<CommentState> emit,
-  ) async {
+  Future<void> _onGetReplyComment(FetchReplyComment event, Emitter<CommentState> emit) async {
     // if (event.page == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -111,10 +107,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
               'Authorization': 'Bearer ${AppData.userToken}', // Set headers
             },
           ),
-          data: FormData.fromMap({
-            'post_id': event.postId,
-            'comment_id': event.commentId,
-          }),
+          data: FormData.fromMap({'post_id': event.postId, 'comment_id': event.commentId}),
         );
         print("response ${response1.data}");
         ReplyCommentModel response = ReplyCommentModel.fromJson(response1.data);
@@ -154,7 +147,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
   }
 
-  _onPostComment(PostCommentEvent event, Emitter<CommentState> emit) async {
+  Future<void> _onPostComment(PostCommentEvent event, Emitter<CommentState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -162,9 +155,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // }
     // try {
     final now = DateTime.now();
-    final formattedDateTime = DateFormat(
-      'yyyy-MM-dd HH:mm:ss',
-    ).format(now); // Custom format
+    final formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now); // Custom format
     postList.add(
       PostComments(
         id: -1,
@@ -173,18 +164,10 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         userHasLiked: false,
         reactionCount: 0,
         replyCount: 0,
-        commenter: Commenter(
-          id: AppData.logInUserId,
-          firstName: AppData.name,
-          lastName: '',
-        ),
+        commenter: Commenter(id: AppData.logInUserId, firstName: AppData.name, lastName: ''),
       ),
     );
-    var response = await apiManager.makeComment(
-      'Bearer ${AppData.userToken}',
-      event.postId.toString(),
-      event.comment ?? "",
-    );
+    var response = await apiManager.makeComment('Bearer ${AppData.userToken}', event.postId.toString(), event.comment ?? "");
 
     print(response.data);
     showToast('Comment post successfully');
@@ -217,10 +200,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // }
   }
 
-  _onCommentReplyLike(
-    LikeReplyComment event,
-    Emitter<CommentState> emit,
-  ) async {
+  Future<void> _onCommentReplyLike(LikeReplyComment event, Emitter<CommentState> emit) async {
     try {
       Dio dio = Dio();
       Response response1 = await dio.post(
@@ -240,7 +220,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
   }
 
-  _onPostCommentReply(ReplyComment event, Emitter<CommentState> emit) async {
+  Future<void> _onPostCommentReply(ReplyComment event, Emitter<CommentState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -256,21 +236,13 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
             'Authorization': 'Bearer ${AppData.userToken}', // Set headers
           },
         ),
-        data: FormData.fromMap({
-          'post_id': event.postId,
-          'comment_id': event.commentId,
-          'comment_text': event.commentText,
-        }),
+        data: FormData.fromMap({'post_id': event.postId, 'comment_id': event.commentId, 'comment_text': event.commentText}),
       );
 
-      ReplyCommentResponse response = ReplyCommentResponse.fromJson(
-        response1.data,
-      );
+      ReplyCommentResponse response = ReplyCommentResponse.fromJson(response1.data);
       showToast('Comment post successfully');
       final now = DateTime.now();
-      final formattedDateTime = DateFormat(
-        'yyyy-MM-dd HH:mm:ss',
-      ).format(now); // Custom format
+      final formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(now); // Custom format
       replyCommentList.add(
         CommentsModel(
           id: response.comment?.id,
@@ -278,10 +250,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           commentableId: event.postId,
           comment: event.commentText,
           createdAt: formattedDateTime,
-          commenter: ReplyCommenter(
-            name: AppData.name,
-            profilePic: AppData.imageUrl,
-          ),
+          commenter: ReplyCommenter(name: AppData.name, profilePic: AppData.imageUrl),
         ),
       );
       emit(PaginationLoadedState());
@@ -400,7 +369,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
   //   // }
   // }
 
-  _onDeleteComment(DeleteCommentEvent event, Emitter<CommentState> emit) async {
+  Future<void> _onDeleteComment(DeleteCommentEvent event, Emitter<CommentState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -408,14 +377,9 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     // }
     print(event.commentId);
     try {
-      var response = await apiManager.deleteComments(
-        'Bearer ${AppData.userToken}',
-        event.commentId.toString(),
-      );
+      var response = await apiManager.deleteComments('Bearer ${AppData.userToken}', event.commentId.toString());
 
-      postList.removeWhere(
-        (element) => element.id.toString() == event.commentId,
-      );
+      postList.removeWhere((element) => element.id.toString() == event.commentId);
       showToast('Delete comment successfully');
       emit(PaginationLoadedState());
       // emit(DataLoaded(postList));
@@ -428,10 +392,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
   }
 
-  _onDeleteReplyComment(
-    DeleteReplyCommentEvent event,
-    Emitter<CommentState> emit,
-  ) async {
+  Future<void> _onDeleteReplyComment(DeleteReplyCommentEvent event, Emitter<CommentState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -447,9 +408,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           },
         ),
       );
-      int index = replyCommentList.indexWhere(
-        (CommentsModel element) => element.id.toString() == event.commentId,
-      );
+      int index = replyCommentList.indexWhere((CommentsModel element) => element.id.toString() == event.commentId);
       replyCommentList.removeAt(index);
       showToast('Delete comment successfully');
       emit(PaginationLoadedState());
@@ -460,10 +419,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
     }
   }
 
-  _onUpdateReplyComment(
-    UpdateReplyCommentEvent event,
-    Emitter<CommentState> emit,
-  ) async {
+  Future<void> _onUpdateReplyComment(UpdateReplyCommentEvent event, Emitter<CommentState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
@@ -480,9 +436,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           },
         ),
       );
-      int index = replyCommentList.indexWhere(
-        (CommentsModel element) => element.id.toString() == event.commentId,
-      );
+      int index = replyCommentList.indexWhere((CommentsModel element) => element.id.toString() == event.commentId);
       replyCommentList[index].comment = event.content;
 
       emit(PaginationLoadedState());

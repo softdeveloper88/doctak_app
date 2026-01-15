@@ -21,14 +21,7 @@ import 'component/error_dialog.dart';
 
 // ignore_for_file: must_be_immutable
 class SignUpScreen extends StatefulWidget {
-  SignUpScreen({
-    this.isSocialLogin = false,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.token,
-    Key? key,
-  }) : super(key: key);
+  SignUpScreen({this.isSocialLogin = false, this.firstName, this.lastName, this.email, this.token, super.key});
   bool? isSocialLogin;
   String? firstName = '';
   String? lastName = '';
@@ -40,7 +33,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DropdownBloc dropdownBloc = DropdownBloc();
   ProfileBloc profileBloc = ProfileBloc();
@@ -69,8 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   TextEditingController emailController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   final TextEditingController phoneController = TextEditingController();
   FocusNode focusNode1 = FocusNode();
@@ -145,12 +137,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                  top: 20,
-                ),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 20),
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Column(
                   children: [
                     Padding(
@@ -158,9 +146,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.01,
-                          ),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.01),
                           // App Logo
                           Center(
                             child: Container(
@@ -168,34 +154,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               decoration: oneUI.authLogoDecoration,
                               child: Hero(
                                 tag: 'app_logo',
-                                child: Image.asset(
-                                  'assets/logo/logo.png',
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.16,
-                                  fit: BoxFit.contain,
-                                ),
+                                child: Image.asset('assets/logo/logo.png', width: MediaQuery.of(context).size.width * 0.16, fit: BoxFit.contain),
                               ),
                             ),
                           ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.02,
-                          ),
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.02),
                           // Welcome Text
                           Center(
                             child: Column(
                               children: [
-                                Text(
-                                  widget.isSocialLogin ?? false
-                                      ? "Complete Profile"
-                                      : "Create Account",
-                                  style: oneUI.authTitleStyle,
-                                ),
+                                Text(widget.isSocialLogin ?? false ? "Complete Profile" : "Create Account", style: oneUI.authTitleStyle),
                                 const SizedBox(height: 8),
-                                Text(
-                                  "Join our community and start your journey",
-                                  textAlign: TextAlign.center,
-                                  style: oneUI.authSubtitleStyle,
-                                ),
+                                Text("Join our community and start your journey", textAlign: TextAlign.center, style: oneUI.authSubtitleStyle),
                               ],
                             ),
                           ),
@@ -209,10 +179,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       width: double.maxFinite,
                       padding: const EdgeInsets.symmetric(horizontal: 24),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 20,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                         decoration: oneUI.authCardDecoration,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -222,17 +189,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               bloc: dropdownBloc,
                               builder: (context, state) {
                                 if (state is DataLoaded) {
-                                  return _buildFormFields(
-                                    context,
-                                    state,
-                                    oneUI,
-                                  );
+                                  return _buildFormFields(context, state, oneUI);
                                 } else {
-                                  return Center(
-                                    child: CupertinoActivityIndicator(
-                                      color: oneUI.primary,
-                                    ),
-                                  );
+                                  return Center(child: CupertinoActivityIndicator(color: oneUI.primary));
                                 }
                               },
                             ),
@@ -248,35 +207,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               label: '',
                               richText: RichText(
                                 text: TextSpan(
-                                  style: TextStyle(
-                                    fontSize: 14.0,
-                                    color: oneUI.textSecondary,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Poppins',
-                                  ),
+                                  style: TextStyle(fontSize: 14.0, color: oneUI.textSecondary, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
                                   children: <TextSpan>[
+                                    TextSpan(text: '${translation(context).msg_agree_terms} '),
                                     TextSpan(
-                                      text:
-                                          translation(context).msg_agree_terms +
-                                          ' ',
-                                    ),
-                                    TextSpan(
-                                      text: translation(
-                                        context,
-                                      ).lbl_privacy_policy,
+                                      text: translation(context).lbl_privacy_policy,
                                       style: oneUI.authLinkStyle,
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () {
-                                          launchScreen(
-                                            context,
-                                            TermsAndConditionScreen(),
-                                            isNewTask: false,
-                                            pageRouteAnimation:
-                                                PageRouteAnimation.Slide,
-                                            duration: const Duration(
-                                              microseconds: 500,
-                                            ),
-                                          );
+                                          launchScreen(context, TermsAndConditionScreen(), isNewTask: false, pageRouteAnimation: PageRouteAnimation.Slide, duration: const Duration(microseconds: 500));
                                         },
                                     ),
                                   ],
@@ -290,84 +229,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 if (state is DataLoaded) {
                                   if (state.isSubmit) {
                                     if (state.response['success'] == true) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            translation(
-                                              context,
-                                            ).msg_login_success,
-                                          ),
-                                          backgroundColor: oneUI.success,
-                                        ),
-                                      );
-                                      launchScreen(
-                                        context,
-                                        const SVDashboardScreen(),
-                                        isNewTask: true,
-                                        pageRouteAnimation:
-                                            PageRouteAnimation.Slide,
-                                      );
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_login_success), backgroundColor: oneUI.success));
+                                      launchScreen(context, const SVDashboardScreen(), isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
                                     } else {
                                       ScaffoldMessenger.of(
                                         context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            state.response['message'] ??
-                                                translation(
-                                                  context,
-                                                ).msg_something_wrong,
-                                          ),
-                                          backgroundColor: oneUI.error,
-                                        ),
-                                      );
+                                      ).showSnackBar(SnackBar(content: Text(state.response['message'] ?? translation(context).msg_something_wrong), backgroundColor: oneUI.error));
                                       if (state.response['errors'] != null) {
-                                        _showErrorDialog(
-                                          state.response['errors'],
-                                        );
+                                        _showErrorDialog(state.response['errors']);
                                       }
                                     }
                                   }
                                 } else if (state is SocialLoginSuccess) {
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SVDashboardScreen(),
-                                    ),
-                                    (route) => false,
-                                  );
-                                } else if (state is DataError ||
-                                    state is DropdownError) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        translation(
-                                          context,
-                                        ).msg_something_wrong,
-                                      ),
-                                      backgroundColor: oneUI.error,
-                                    ),
-                                  );
+                                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const SVDashboardScreen()), (route) => false);
+                                } else if (state is DataError || state is DropdownError) {
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), backgroundColor: oneUI.error));
                                 }
                               },
                               bloc: dropdownBloc,
-                              child: oneUI.buildAuthPrimaryButton(
-                                label: 'Sign Up',
-                                onPressed: () => onTapSignUp(context),
-                              ),
+                              child: oneUI.buildAuthPrimaryButton(label: 'Sign Up', onPressed: () => onTapSignUp(context)),
                             ),
                             const SizedBox(height: 24),
                             // Login Link
-                            oneUI.buildAuthNavLink(
-                              message: translation(
-                                context,
-                              ).msg_already_have_account,
-                              actionText: translation(context).lbl_log_in2,
-                              onTap: () => onTapTxtLogIn(context),
-                            ),
+                            oneUI.buildAuthNavLink(message: translation(context).msg_already_have_account, actionText: translation(context).lbl_log_in2, onTap: () => onTapTxtLogIn(context)),
                             const SizedBox(height: 8),
                           ],
                         ),
@@ -384,11 +268,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildFormFields(
-    BuildContext context,
-    DataLoaded state,
-    OneUITheme oneUI,
-  ) {
+  Widget _buildFormFields(BuildContext context, DataLoaded state, OneUITheme oneUI) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -400,18 +280,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    translation(context).lbl_enter_first_name,
-                    style: oneUI.authLabelStyle,
-                  ),
+                  Text(translation(context).lbl_enter_first_name, style: oneUI.authLabelStyle),
                   const SizedBox(height: 8),
-                  _buildNameField(
-                    context,
-                    firstnameController!,
-                    focusNode1,
-                    translation(context).lbl_enter_your_name1,
-                    oneUI,
-                  ),
+                  _buildNameField(context, firstnameController!, focusNode1, translation(context).lbl_enter_your_name1, oneUI),
                 ],
               ),
             ),
@@ -420,18 +291,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    translation(context).lbl_enter_last_name,
-                    style: oneUI.authLabelStyle,
-                  ),
+                  Text(translation(context).lbl_enter_last_name, style: oneUI.authLabelStyle),
                   const SizedBox(height: 8),
-                  _buildNameField(
-                    context,
-                    lastNameController!,
-                    focusNode2,
-                    translation(context).lbl_enter_your_name2,
-                    oneUI,
-                  ),
+                  _buildNameField(context, lastNameController!, focusNode2, translation(context).lbl_enter_your_name2, oneUI),
                 ],
               ),
             ),
@@ -440,53 +302,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
         const SizedBox(height: 16),
         // Email Field
         if (widget.isSocialLogin == false) ...[
-          Text(
-            translation(context).lbl_enter_email,
-            style: oneUI.authLabelStyle,
-          ),
+          Text(translation(context).lbl_enter_email, style: oneUI.authLabelStyle),
           const SizedBox(height: 8),
           _buildEmailField(context, oneUI),
           const SizedBox(height: 16),
         ],
         // Password Fields
         if (widget.isSocialLogin == false) ...[
-          Text(
-            translation(context).lbl_create_password,
-            style: oneUI.authLabelStyle,
-          ),
+          Text(translation(context).lbl_create_password, style: oneUI.authLabelStyle),
           const SizedBox(height: 8),
-          _buildPasswordField(
-            context,
-            passwordController,
-            focusNode4,
-            translation(context).lbl_create_password,
-            state.isPasswordVisible,
-            oneUI,
-          ),
+          _buildPasswordField(context, passwordController, focusNode4, translation(context).lbl_create_password, state.isPasswordVisible, oneUI),
           const SizedBox(height: 16),
           Text('Confirm Password:', style: oneUI.authLabelStyle),
           const SizedBox(height: 8),
-          _buildPasswordField(
-            context,
-            confirmPasswordController,
-            focusNode5,
-            translation(context).msg_confirm_password,
-            state.isPasswordVisible,
-            oneUI,
-            isConfirm: true,
-          ),
+          _buildPasswordField(context, confirmPasswordController, focusNode5, translation(context).msg_confirm_password, state.isPasswordVisible, oneUI, isConfirm: true),
         ],
       ],
     );
   }
 
-  Widget _buildNameField(
-    BuildContext context,
-    TextEditingController controller,
-    FocusNode focusNode,
-    String hint,
-    OneUITheme oneUI,
-  ) {
+  Widget _buildNameField(BuildContext context, TextEditingController controller, FocusNode focusNode, String hint, OneUITheme oneUI) {
     return CustomTextFormField(
       fillColor: oneUI.inputBackground,
       filled: true,
@@ -543,15 +378,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildPasswordField(
-    BuildContext context,
-    TextEditingController controller,
-    FocusNode focusNode,
-    String hint,
-    bool isPasswordVisible,
-    OneUITheme oneUI, {
-    bool isConfirm = false,
-  }) {
+  Widget _buildPasswordField(BuildContext context, TextEditingController controller, FocusNode focusNode, String hint, bool isPasswordVisible, OneUITheme oneUI, {bool isConfirm = false}) {
     return CustomTextFormField(
       fillColor: oneUI.inputBackground,
       filled: true,
@@ -572,11 +399,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         },
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 14),
-          child: Icon(
-            isPasswordVisible ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
-            color: oneUI.textTertiary,
-            size: 20,
-          ),
+          child: Icon(isPasswordVisible ? CupertinoIcons.eye_slash : CupertinoIcons.eye, color: oneUI.textTertiary, size: 20),
         ),
       ),
       suffixConstraints: const BoxConstraints(maxHeight: 52),
@@ -607,15 +430,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   /// Displays a dialog with the [SignUpSuccessDialog] content.
-  onTapSignUp(BuildContext context) async {
+  Future<void> onTapSignUp(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(translation(context).err_msg_please_enter_valid_text),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).err_msg_please_enter_valid_text)));
       return;
     }
 
@@ -623,13 +442,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final token = await _getSafeFcmToken();
 
       if (passwordController.text != confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              translation(context).err_msg_please_enter_valid_password,
-            ),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).err_msg_please_enter_valid_password)));
       } else {
         if (_isChecked) {
           dropdownBloc.add(
@@ -655,11 +468,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   /// Navigates to the loginScreen when the action is triggered.
-  onTapTxtLogIn(BuildContext context) {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (route) => false,
-    );
+  void onTapTxtLogIn(BuildContext context) {
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
   }
 }

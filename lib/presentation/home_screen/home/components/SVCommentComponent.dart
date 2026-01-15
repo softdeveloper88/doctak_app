@@ -6,12 +6,9 @@ import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
-import '../../utils/SVCommon.dart';
 import '../screens/comment_screen/reply_comment_list_widget.dart';
-import 'SVCommentReplyComponent.dart';
 
 class SVCommentComponent extends StatefulWidget {
   final PostComments comment;
@@ -20,16 +17,13 @@ class SVCommentComponent extends StatefulWidget {
   final int? selectedCommentId; // ID of the currently selected comment for reply
   final Function(int) onReplySelected; // Callback when Reply button is clicked
 
-
-
-  SVCommentComponent({required this.postId,required this.comment, required this.commentBloc,this.selectedCommentId,required this.onReplySelected});
+  SVCommentComponent({super.key, required this.postId, required this.comment, required this.commentBloc, this.selectedCommentId, required this.onReplySelected});
 
   @override
   State<SVCommentComponent> createState() => _SVCommentComponentState();
 }
 
 class _SVCommentComponentState extends State<SVCommentComponent> {
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -41,14 +35,9 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
             children: [
               InkWell(
                 onTap: () {
-                  SVProfileFragment(userId: widget.comment.commenter?.id??'')
-                      .launch(context);
+                  SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
                 },
-                child: CircleAvatar(
-                  backgroundImage:
-                      NetworkImage(widget.comment.commenter?.profilePic??''),
-                  radius: 24.0,
-                ),
+                child: CircleAvatar(backgroundImage: NetworkImage(widget.comment.commenter?.profilePic ?? ''), radius: 24.0),
               ),
               const SizedBox(width: 12.0),
               Expanded(
@@ -61,34 +50,17 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                           flex: 5,
                           child: InkWell(
                             onTap: () {
-                              SVProfileFragment(userId: widget.comment.commenter?.id??"")
-                                  .launch(context);
+                              SVProfileFragment(userId: widget.comment.commenter?.id ?? "").launch(context);
                             },
-                            child:  Wrap(
+                            child: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                Text(
-                                  '${widget.comment.commenter?.firstName??''} ${widget.comment.commenter?.lastName??''}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14
-
-                                  ),
-                                ),
+                                Text('${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
                                 const Text(
                                   ' · ',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                      fontWeight: FontWeight.bold
-                                  ),
+                                  style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
                                 ),
-                                Image.asset(
-                                  'images/socialv/icons/ic_TickSquare.png',
-                                  height: 14,
-                                  width: 14,
-                                  fit: BoxFit.cover,
-                                ),
+                                Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
                               ],
                             ),
                             // RichText(
@@ -111,7 +83,6 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                             //       ],
                             //     )),
                           ),
-
                         ),
                         const Spacer(),
                         if (widget.comment.commenter?.id == AppData.logInUserId)
@@ -120,35 +91,32 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                               itemBuilder: (context) {
                                 return [
                                   PopupMenuItem(
-                                    child: Builder(builder: (context) {
-                                      return Column(
-                                        children: [translation(context).lbl_delete].map((String item) {
-                                          return PopupMenuItem(
-                                            value: item,
-                                            child: Text(item),
-                                          );
-                                        }).toList(),
-                                      );
-                                    }),
+                                    child: Builder(
+                                      builder: (context) {
+                                        return Column(
+                                          children: [translation(context).lbl_delete].map((String item) {
+                                            return PopupMenuItem(value: item, child: Text(item));
+                                          }).toList(),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ];
                               },
                               onSelected: (value) {
                                 if (value == translation(context).lbl_delete) {
                                   showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return CustomAlertDialog(
-                                            title:
-                                                translation(context).msg_confirm_delete_comment,
-                                            callback: () {
-                                              widget.commentBloc.add(
-                                                  DeleteCommentEvent(
-                                                      commentId: widget.comment.id
-                                                          .toString()));
-                                              Navigator.of(context).pop();
-                                            });
-                                      });
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return CustomAlertDialog(
+                                        title: translation(context).msg_confirm_delete_comment,
+                                        callback: () {
+                                          widget.commentBloc.add(DeleteCommentEvent(commentId: widget.comment.id.toString()));
+                                          Navigator.of(context).pop();
+                                        },
+                                      );
+                                    },
+                                  );
                                 }
                               },
                             ),
@@ -156,76 +124,66 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                       ],
                     ),
                     const SizedBox(height: 4.0),
-                    Text(
-                      widget.comment.comment ?? 'No Name',
-                      style: const TextStyle(fontSize: 14.0,),
-                    ),
+                    Text(widget.comment.comment ?? 'No Name', style: const TextStyle(fontSize: 14.0)),
                     const SizedBox(height: 8.0),
-                    Text(timeAgo.format(DateTime.parse(widget.comment.createdAt!)),style: const TextStyle(fontSize: 14,color: Colors.black38,fontWeight: FontWeight.w400),),
+                    Text(
+                      timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
+                      style: const TextStyle(fontSize: 14, color: Colors.black38, fontWeight: FontWeight.w400),
+                    ),
                     Row(
                       children: [
                         TextButton(
                           onPressed: () {
                             widget.onReplySelected(widget.comment.id ?? 0);
                           },
-                          child: Text(
-                            '${widget.comment.replyCount} ${translation(context).lbl_reply}',
-                            style: TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+                          child: Text('${widget.comment.replyCount} ${translation(context).lbl_reply}', style: TextStyle(fontSize: 13.0, color: Colors.grey[600])),
                         ),
                         TextButton(
                           onPressed: () {
-                            widget.commentBloc.add(LikeReplyComment(commentId:widget.comment.id.toString()));
+                            widget.commentBloc.add(LikeReplyComment(commentId: widget.comment.id.toString()));
                             // widget.comment.userHasLiked=true;
-                                print(widget.comment.id);
-                            if(!(widget.comment.userHasLiked??true)){
-                              widget.comment.reactionCount= (widget.comment.reactionCount??0)+1;
-                              widget.comment.userHasLiked=true;
-
-                            }else{
-                              if((widget.comment.reactionCount??0)>0) {
-                                widget.comment.reactionCount = (widget.comment
-                                    .reactionCount ?? 0) - 1;
+                            print(widget.comment.id);
+                            if (!(widget.comment.userHasLiked ?? true)) {
+                              widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) + 1;
+                              widget.comment.userHasLiked = true;
+                            } else {
+                              if ((widget.comment.reactionCount ?? 0) > 0) {
+                                widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) - 1;
                               }
-                              widget.comment.userHasLiked=false;
-
+                              widget.comment.userHasLiked = false;
                             }
                             print(widget.comment.userHasLiked);
                           },
                           child:
-                          // ReactionButton<String>(
-                          //   onReactionChanged: (Reaction<String>? reaction) {
-                          //     debugPrint('Selected value: ${reaction?.value}');
-                          //   },
-                          //   reactions: <Reaction<String>>[
-                          //     Reaction<String>(
-                          //       value: 'like',
-                          //       icon: widget,
-                          //     ),
-                          //     Reaction<String>(
-                          //       value: 'love',
-                          //       icon: widget,
-                          //     ),
-                          //   ],
-                            // initialReaction: Reaction<String>(
-                            //   value: 'like',
-                            //   icon: widget,
-                            // ),
-                          //   selectedReaction: Reaction<String>(
-                          //     value: 'like_fill',
-                          //     icon: widget,
-                          //   ), itemSize: Size.infinite,
-                          // )
-                          Text(
-                            widget.comment.userHasLiked??false ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}':'${widget.comment.reactionCount} ${translation(context).lbl_like}',
-                            style: TextStyle(
-                              fontSize: 13.0,
-                              color: Colors.grey[600],
-                            ),
-                          ),
+                              // ReactionButton<String>(
+                              //   onReactionChanged: (Reaction<String>? reaction) {
+                              //     debugPrint('Selected value: ${reaction?.value}');
+                              //   },
+                              //   reactions: <Reaction<String>>[
+                              //     Reaction<String>(
+                              //       value: 'like',
+                              //       icon: widget,
+                              //     ),
+                              //     Reaction<String>(
+                              //       value: 'love',
+                              //       icon: widget,
+                              //     ),
+                              //   ],
+                              // initialReaction: Reaction<String>(
+                              //   value: 'like',
+                              //   icon: widget,
+                              // ),
+                              //   selectedReaction: Reaction<String>(
+                              //     value: 'like_fill',
+                              //     icon: widget,
+                              //   ), itemSize: Size.infinite,
+                              // )
+                              Text(
+                                widget.comment.userHasLiked ?? false
+                                    ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}'
+                                    : '${widget.comment.reactionCount} ${translation(context).lbl_like}',
+                                style: TextStyle(fontSize: 13.0, color: Colors.grey[600]),
+                              ),
                         ),
                         const Spacer(),
                         // Row(
@@ -247,17 +205,14 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                         // ),
                       ],
                     ),
-                    if(widget.selectedCommentId==widget.comment.id)ReplyCommentListWidget(commentBloc:widget.commentBloc,postId:int.parse(widget.postId),commentId:widget.selectedCommentId??0 ),
-
+                    if (widget.selectedCommentId == widget.comment.id)
+                      ReplyCommentListWidget(commentBloc: widget.commentBloc, postId: int.parse(widget.postId), commentId: widget.selectedCommentId ?? 0),
                   ],
                 ),
               ),
             ],
           ),
-          const Divider(
-            color: Colors.black12,
-            thickness: 1,
-          )
+          const Divider(color: Colors.black12, thickness: 1),
         ],
       ),
     );

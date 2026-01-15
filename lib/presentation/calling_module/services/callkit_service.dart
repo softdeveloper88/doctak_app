@@ -30,7 +30,7 @@ class CallKitService {
   // Add event tracking to prevent duplicate events
   String? _lastHandledCallEvent;
   DateTime? _lastEventTime;
-  Map<String, DateTime> _lastEventsByType = {};
+  final Map<String, DateTime> _lastEventsByType = {};
   //
   // Add these properties for better debouncing
   final Map<String, bool> _callEndProcessed = {};
@@ -54,9 +54,7 @@ class CallKitService {
   }) async {
     try {
       // Check if already initialized with the same base URL
-      if (_isInitialized &&
-          _callApiService != null &&
-          _callApiService!.baseUrl == baseUrl) {
+      if (_isInitialized && _callApiService != null && _callApiService!.baseUrl == baseUrl) {
         debugPrint('CallKitService already initialized with the same baseUrl');
         // Update the status flag to ensure consistent behavior
         _shouldUpdateStatus = shouldUpdateStatus;
@@ -66,12 +64,8 @@ class CallKitService {
       _callApiService = CallApiService(baseUrl: baseUrl);
       _isInitialized = true;
       _shouldUpdateStatus = shouldUpdateStatus;
-      debugPrint(
-        'CallKitService initialized successfully with baseUrl: $baseUrl',
-      );
-      debugPrint(
-        'Status updates will be ${_shouldUpdateStatus ? 'handled by CallKitService' : 'deferred to CallService'}',
-      );
+      debugPrint('CallKitService initialized successfully with baseUrl: $baseUrl');
+      debugPrint('Status updates will be ${_shouldUpdateStatus ? 'handled by CallKitService' : 'deferred to CallService'}');
     } catch (e) {
       _isInitialized = false;
       debugPrint('Error initializing CallKitService: $e');
@@ -102,13 +96,7 @@ class CallKitService {
 
   //
   /// Display incoming call UI using CallKit
-  Future<void> displayIncomingCall({
-    required String uuid,
-    required String callerName,
-    required String callerId,
-    required String avatar,
-    required bool hasVideo,
-  }) async {
+  Future<void> displayIncomingCall({required String uuid, required String callerName, required String callerId, required String avatar, required bool hasVideo}) async {
     if (!Platform.isIOS && !Platform.isAndroid) {
       debugPrint('CallKit is only supported on iOS and Android');
       return;
@@ -127,12 +115,7 @@ class CallKitService {
       textAccept: 'Accept',
       textDecline: 'Decline',
       duration: 30000,
-      extra: {
-        'userId': callerId,
-        'has_video': hasVideo,
-        'avatar': avatar,
-        'callerName': callerName,
-      },
+      extra: {'userId': callerId, 'has_video': hasVideo, 'avatar': avatar, 'callerName': callerName},
       android: AndroidParams(
         isCustomNotification: true,
         isShowLogo: false, // Hide logo to show avatar only
@@ -204,9 +187,7 @@ class CallKitService {
     _callKitEventSubscription?.cancel();
     //
     try {
-      _callKitEventSubscription = FlutterCallkitIncoming.onEvent.listen((
-        event,
-      ) async {
+      _callKitEventSubscription = FlutterCallkitIncoming.onEvent.listen((event) async {
         final eventType = event?.event;
         //
         // Safely extract data - fix for the type error by explicit type conversion
@@ -222,9 +203,7 @@ class CallKitService {
           });
         }
         //
-        final extra = data['extra'] is Map
-            ? Map<String, dynamic>.from(data['extra'] as Map)
-            : <String, dynamic>{};
+        final extra = data['extra'] is Map ? Map<String, dynamic>.from(data['extra'] as Map) : <String, dynamic>{};
         final callId = data['id']?.toString() ?? '';
         //
         // Skip if we shouldn't process this action
@@ -236,8 +215,7 @@ class CallKitService {
         final callerName = extra['callerName']?.toString() ?? 'Unknown';
         final avatar = extra['avatar']?.toString() ?? '';
         final userId = extra['userId']?.toString() ?? '';
-        final hasVideo =
-            extra['has_video'] == true || extra['has_video'] == 'true';
+        final hasVideo = extra['has_video'] == true || extra['has_video'] == 'true';
         //
         debugPrint('CallKit event: $eventType for call: $callId');
         //
@@ -270,13 +248,7 @@ class CallKitService {
               // Use a longer delay to ensure the app is fully launched
               await Future.delayed(const Duration(milliseconds: 1500));
               // Navigate to call screen with proper data
-              _navigateToCallScreen(
-                callId: callId,
-                userId: userId,
-                callerName: callerName,
-                avatar: avatar,
-                hasVideo: hasVideo,
-              );
+              _navigateToCallScreen(callId: callId, userId: userId, callerName: callerName, avatar: avatar, hasVideo: hasVideo);
             } catch (e) {
               debugPrint('Error accepting call: $e');
             }
@@ -290,19 +262,14 @@ class CallKitService {
               // Check if service is initialized before making API calls
               if (_isInitialized && _callApiService != null) {
                 // Call reject API
-                await _callApiService!.rejectCall(
-                  callId: callId,
-                  callerId: userId,
-                );
+                await _callApiService!.rejectCall(callId: callId, callerId: userId);
               }
               //
               // Clear notification - wrap in try-catch as CallKit may have already ended the call
               try {
                 await FlutterCallkitIncoming.endCall(callId);
               } catch (e) {
-                debugPrint(
-                  'CallKit endCall error (expected on iOS decline): $e',
-                );
+                debugPrint('CallKit endCall error (expected on iOS decline): $e');
               }
               await _clearCallInfo();
             } catch (e) {
@@ -320,19 +287,14 @@ class CallKitService {
                 // Check if service is initialized before making API calls
                 if (_isInitialized && _callApiService != null) {
                   // Call missed API
-                  await _callApiService!.missCall(
-                    callId: callId,
-                    callerId: userId,
-                  );
+                  await _callApiService!.missCall(callId: callId, callerId: userId);
                 }
                 //
                 // Clear notification - wrap in try-catch as CallKit may have already ended the call
                 try {
                   await FlutterCallkitIncoming.endCall(callId);
                 } catch (e) {
-                  debugPrint(
-                    'CallKit endCall error (expected on iOS timeout): $e',
-                  );
+                  debugPrint('CallKit endCall error (expected on iOS timeout): $e');
                 }
                 await _clearCallInfo();
               }
@@ -345,13 +307,9 @@ class CallKitService {
             // Check if this is a recently started outgoing call - if so, ignore the end event
             final outgoingStartTime = _outgoingCallsStartTime[callId];
             if (outgoingStartTime != null) {
-              final timeSinceStart = DateTime.now().difference(
-                outgoingStartTime,
-              );
+              final timeSinceStart = DateTime.now().difference(outgoingStartTime);
               if (timeSinceStart < _outgoingCallProtectionDuration) {
-                debugPrint(
-                  '📞 Ignoring actionCallEnded for protected outgoing call $callId (started ${timeSinceStart.inSeconds}s ago)',
-                );
+                debugPrint('📞 Ignoring actionCallEnded for protected outgoing call $callId (started ${timeSinceStart.inSeconds}s ago)');
                 return; // Don't end the call
               }
               // Remove from tracking after protection period
@@ -449,13 +407,7 @@ class CallKitService {
 
   //
   // More reliable navigation to call screen
-  void _navigateToCallScreen({
-    required String callId,
-    required String userId,
-    required String callerName,
-    required String avatar,
-    required bool hasVideo,
-  }) {
+  void _navigateToCallScreen({required String callId, required String userId, required String callerName, required String avatar, required bool hasVideo}) {
     // Function to attempt navigation with retries
     Future<void> attemptNavigation([int retryCount = 0]) async {
       if (NavigatorService.navigatorKey.currentState != null) {
@@ -486,9 +438,7 @@ class CallKitService {
       } else if (retryCount < 5) {
         // Retry with exponential backoff up to 5 times
         final delay = Duration(milliseconds: 500 * (retryCount + 1));
-        debugPrint(
-          'Navigator not available, retrying in ${delay.inMilliseconds}ms...',
-        );
+        debugPrint('Navigator not available, retrying in ${delay.inMilliseconds}ms...');
         Future.delayed(delay, () => attemptNavigation(retryCount + 1));
       } else {
         debugPrint('Failed to navigate to call screen after multiple attempts');
@@ -498,15 +448,7 @@ class CallKitService {
             NavigatorService.navigatorKey.currentState?.push(
               MaterialPageRoute(
                 settings: const RouteSettings(name: '/call'),
-                builder: (context) => CallScreen(
-                  callId: callId,
-                  contactId: userId,
-                  contactName: callerName,
-                  contactAvatar: avatar,
-                  isIncoming: true,
-                  isVideoCall: hasVideo,
-                  token: '',
-                ),
+                builder: (context) => CallScreen(callId: callId, contactId: userId, contactName: callerName, contactAvatar: avatar, isIncoming: true, isVideoCall: hasVideo, token: ''),
               ),
             );
           }
@@ -521,21 +463,12 @@ class CallKitService {
 
   //
   /// Start an outgoing call with proper type safety
-  Future<Map<String, dynamic>> startOutgoingCall({
-    required String userId,
-    required String calleeName,
-    required String avatar,
-    required bool hasVideo,
-  }) async {
+  Future<Map<String, dynamic>> startOutgoingCall({required String userId, required String calleeName, required String avatar, required bool hasVideo}) async {
     try {
       // Make sure service is initialized
       if (!_isInitialized || _callApiService == null) {
         debugPrint('CallKitService not initialized for outgoing call');
-        return {
-          'callId': 'error',
-          'success': false,
-          'message': 'CallKitService not initialized',
-        };
+        return {'callId': 'error', 'success': false, 'message': 'CallKitService not initialized'};
       }
       //
       // Update status to busy via API
@@ -544,36 +477,18 @@ class CallKitService {
       // Call the API to initiate the call
       Map<String, dynamic> response;
       try {
-        final rawResponse = await _callApiService!.initiateCall(
-          userId: userId,
-          hasVideo: hasVideo,
-        );
+        final rawResponse = await _callApiService!.initiateCall(userId: userId, hasVideo: hasVideo);
         //
         // Convert response to ensure it's Map<String, dynamic>
         response = {};
-        if (rawResponse is Map) {
-          rawResponse.forEach((key, value) {
-            if (key is String) {
-              response[key] = value;
-            }
-          });
-        } else {
-          // Fallback if conversion fails
-          response = {
-            'callId': 'error',
-            'success': false,
-            'message': 'Invalid response format',
-          };
-        }
+        rawResponse.forEach((key, value) {
+          response[key] = value;
+        });
       } catch (e) {
         debugPrint('Error initiating call API: $e');
         // Update status to available if call fails
         await _safeUpdateCallStatus('available');
-        return {
-          'callId': 'error',
-          'success': false,
-          'message': 'Error calling API: $e',
-        };
+        return {'callId': 'error', 'success': false, 'message': 'Error calling API: $e'};
       }
       //
       // Check if API returned an error
@@ -585,9 +500,7 @@ class CallKitService {
       }
       //
       // Extract callId with proper null checking
-      final callId =
-          response['callId']?.toString() ??
-          DateTime.now().millisecondsSinceEpoch.toString();
+      final callId = response['callId']?.toString() ?? DateTime.now().millisecondsSinceEpoch.toString();
       //
       // Update response with string callId
       response['callId'] = callId;
@@ -602,18 +515,8 @@ class CallKitService {
         appName: 'Doctak.net',
         handle: '', // Hide call ID
         type: hasVideo ? 1 : 0,
-        extra: {
-          'userId': userId,
-          'has_video': hasVideo,
-          'callerName': calleeName,
-          'avatar': avatar,
-        },
-        ios: IOSParams(
-          iconName: 'CallKitLogo',
-          handleType: 'generic',
-          supportsVideo: true,
-          ringtonePath: 'system_ringtone_default',
-        ),
+        extra: {'userId': userId, 'has_video': hasVideo, 'callerName': calleeName, 'avatar': avatar},
+        ios: IOSParams(iconName: 'CallKitLogo', handleType: 'generic', supportsVideo: true, ringtonePath: 'system_ringtone_default'),
         android: AndroidParams(
           isCustomNotification: true,
           isShowLogo: false,
@@ -629,9 +532,7 @@ class CallKitService {
       //
       // Mark this as an outgoing call to prevent premature termination from CallKit events
       _outgoingCallsStartTime[callId] = DateTime.now();
-      debugPrint(
-        '📞 Marked $callId as outgoing call, protected from CallKit end events',
-      );
+      debugPrint('📞 Marked $callId as outgoing call, protected from CallKit end events');
       //
       try {
         await FlutterCallkitIncoming.startCall(params);
@@ -648,11 +549,7 @@ class CallKitService {
       await _safeUpdateCallStatus('available');
       debugPrint('Error starting outgoing call: $e');
       // Return a default response to prevent crashes
-      return {
-        'callId': 'error',
-        'success': false,
-        'message': 'Error starting call: $e',
-      };
+      return {'callId': 'error', 'success': false, 'message': 'Error starting call: $e'};
     }
   }
 
@@ -714,13 +611,7 @@ class CallKitService {
 
   //
   /// Save call info to SharedPreferences for potential resuming
-  Future<void> _saveCallInfo(
-    String callId,
-    String userId,
-    String name,
-    String avatar,
-    bool hasVideo,
-  ) async {
+  Future<void> _saveCallInfo(String callId, String userId, String name, String avatar, bool hasVideo) async {
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
     await prefs.setString('active_call_id', callId);
@@ -730,10 +621,7 @@ class CallKitService {
     await prefs.setBool('active_call_has_video', hasVideo);
     //
     // Save timestamp to check for stale calls
-    await prefs.setInt(
-      'active_call_timestamp',
-      DateTime.now().millisecondsSinceEpoch,
-    );
+    await prefs.setInt('active_call_timestamp', DateTime.now().millisecondsSinceEpoch);
     //
     // Save the base URL for potential service initialization after app restart
     if (_isInitialized && _callApiService != null) {
@@ -777,30 +665,16 @@ class CallKitService {
     }
   }
 
-  Future<void> updateCallState({
-    required String callId,
-    required String callerName,
-    required String callerId,
-    required String avatar,
-    required bool hasVideo,
-  }) async {
+  Future<void> updateCallState({required String callId, required String callerName, required String callerId, required String avatar, required bool hasVideo}) async {
     try {
       // Check if this call is active in CallKit
       final activeCalls = await getActiveCalls();
       final isActive = activeCalls.any((call) => call['id'] == callId);
       //
       if (!isActive) {
-        debugPrint(
-          'Call not found in CallKit, displaying as new call: $callId',
-        );
+        debugPrint('Call not found in CallKit, displaying as new call: $callId');
         // If not active, display it as a new call
-        await displayIncomingCall(
-          uuid: callId,
-          callerName: callerName,
-          callerId: callerId,
-          avatar: avatar,
-          hasVideo: hasVideo,
-        );
+        await displayIncomingCall(uuid: callId, callerName: callerName, callerId: callerId, avatar: avatar, hasVideo: hasVideo);
         return;
       }
       //
@@ -816,17 +690,8 @@ class CallKitService {
           appName: 'Doctak.net',
           handle: '', // Hide call ID
           type: hasVideo ? 1 : 0,
-          extra: {
-            'userId': callerId,
-            'has_video': hasVideo,
-            'callerName': callerName,
-            'avatar': avatar,
-          },
-          ios: IOSParams(
-            iconName: 'CallKitLogo',
-            handleType: 'generic',
-            supportsVideo: true,
-          ),
+          extra: {'userId': callerId, 'has_video': hasVideo, 'callerName': callerName, 'avatar': avatar},
+          ios: IOSParams(iconName: 'CallKitLogo', handleType: 'generic', supportsVideo: true),
         );
         //
         try {
@@ -840,9 +705,7 @@ class CallKitService {
         // Android: Currently the plugin doesn't support updating an existing call notification directly
         // If we need to update the Android notification, we would need to extend the plugin
         // For now, we'll rely on the existing notification
-        debugPrint(
-          'Call already active in Android CallKit, no update needed: $callId',
-        );
+        debugPrint('Call already active in Android CallKit, no update needed: $callId');
       }
       //
       // Make sure the call screen is shown
@@ -894,13 +757,10 @@ class CallKitService {
         final callerName = call['nameCaller']?.toString() ?? 'Unknown';
         //
         // Extract extra fields safely
-        final extra = call['extra'] is Map
-            ? Map<String, dynamic>.from(call['extra'] as Map)
-            : <String, dynamic>{};
+        final extra = call['extra'] is Map ? Map<String, dynamic>.from(call['extra'] as Map) : <String, dynamic>{};
         final avatar = extra['avatar']?.toString() ?? '';
         final userId = extra['userId']?.toString() ?? '';
-        final hasVideo =
-            extra['has_video'] == true || extra['has_video'] == 'true';
+        final hasVideo = extra['has_video'] == true || extra['has_video'] == 'true';
         //
         debugPrint('Found active call in CallKit, resuming: $callId');
         //
@@ -908,13 +768,7 @@ class CallKitService {
         await Future.delayed(const Duration(milliseconds: 1500));
         //
         // Use the more reliable navigation method
-        _navigateToCallScreen(
-          callId: callId,
-          userId: userId,
-          callerName: callerName,
-          avatar: avatar,
-          hasVideo: hasVideo,
-        );
+        _navigateToCallScreen(callId: callId, userId: userId, callerName: callerName, avatar: avatar, hasVideo: hasVideo);
       } else {
         debugPrint('No active calls found in CallKit');
         //
@@ -942,19 +796,12 @@ class CallKitService {
           final userId = await prefs.getString('active_call_user_id') ?? '';
           final name = await prefs.getString('active_call_name') ?? 'Unknown';
           final avatar = await prefs.getString('active_call_avatar') ?? '';
-          final hasVideo =
-              await prefs.getBool('active_call_has_video') ?? false;
+          final hasVideo = await prefs.getBool('active_call_has_video') ?? false;
           //
           debugPrint('Found saved call info that appears active: $savedCallId');
           //
           // Navigate to call screen
-          _navigateToCallScreen(
-            callId: savedCallId,
-            userId: userId,
-            callerName: name,
-            avatar: avatar,
-            hasVideo: hasVideo,
-          );
+          _navigateToCallScreen(callId: savedCallId, userId: userId, callerName: name, avatar: avatar, hasVideo: hasVideo);
         } else if (savedCallId != null) {
           // Clean up old call data
           debugPrint('Found stale call data, cleaning up');

@@ -1,6 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
@@ -8,13 +7,11 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/sv_comment_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart'
-    as comment_bloc;
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart' as comment_bloc;
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -51,13 +48,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
           decoration: BoxDecoration(
             color: theme.scaffoldBackground,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, -5))],
           ),
           child: Column(
             children: [
@@ -66,17 +57,12 @@ class _MyPostComponentState extends State<MyPostComponent> {
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: theme.divider,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: theme.divider, borderRadius: BorderRadius.circular(2)),
               ),
               // Comment Screen
               Expanded(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
-                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   child: SVCommentScreen(id: postId, homeBloc: homeBloc),
                 ),
               ),
@@ -87,13 +73,10 @@ class _MyPostComponentState extends State<MyPostComponent> {
     );
   }
 
-  showAlertDialog(ProfileBloc profileBloc, BuildContext context, int id) {
+  AlertDialog showAlertDialog(ProfileBloc profileBloc, BuildContext context, int id) {
     // set up the buttons
     Widget cancelButton = TextButton(
-      child: Text(
-        translation(context).lbl_cancel,
-        style: const TextStyle(color: Colors.red),
-      ),
+      child: Text(translation(context).lbl_cancel, style: const TextStyle(color: Colors.red)),
       onPressed: () {
         setState(() {
           Navigator.of(context).pop('dismiss');
@@ -101,21 +84,14 @@ class _MyPostComponentState extends State<MyPostComponent> {
       },
     );
     Widget continueButton = TextButton(
-      child: Text(
-        translation(context).lbl_yes,
-        style: const TextStyle(color: Colors.black),
-      ),
+      child: Text(translation(context).lbl_yes, style: const TextStyle(color: Colors.black)),
       onPressed: () async {
         homeBloc.add(DeletePostEvent(postId: id));
         profileBloc.postList.removeWhere((post) => post.id == id);
         setState(() {
           Navigator.of(context).pop();
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_post_deleted_successfully),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_post_deleted_successfully)));
         // } else {
         //   setState(() {
         //     _isLoading = false;
@@ -133,11 +109,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
     );
 
     // set up the AlertDialog
-    return AlertDialog(
-      title: Text(translation(context).lbl_warning),
-      content: Text(translation(context).msg_delete_confirm),
-      actions: [cancelButton, continueButton],
-    );
+    return AlertDialog(title: Text(translation(context).lbl_warning), content: Text(translation(context).msg_delete_confirm), actions: [cancelButton, continueButton]);
 
     // show the dialog
   }
@@ -161,12 +133,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
       builder: (context, state) {
         if (state is PaginationLoadedState) {
           return widget.profileBloc.postList.isEmpty
-              ? SizedBox(
-                  height: 200,
-                  child: Center(
-                    child: Text(translation(context).msg_no_post_found),
-                  ),
-                )
+              ? SizedBox(height: 200, child: Center(child: Text(translation(context).msg_no_post_found)))
               : ListView.builder(
                   padding: const EdgeInsets.only(top: 10),
                   physics: const NeverScrollableScrollPhysics(),
@@ -174,25 +141,14 @@ class _MyPostComponentState extends State<MyPostComponent> {
                   scrollDirection: Axis.vertical,
                   itemCount: widget.profileBloc.postList.length,
                   itemBuilder: (context, index) {
-                    if (widget.profileBloc.pageNumber <=
-                        widget.profileBloc.numberOfPage) {
-                      if (index ==
-                          widget.profileBloc.postList.length -
-                              widget.profileBloc.nextPageTrigger) {
-                        widget.profileBloc.add(
-                          CheckIfNeedMoreDataEvent(index: index),
-                        );
+                    if (widget.profileBloc.pageNumber <= widget.profileBloc.numberOfPage) {
+                      if (index == widget.profileBloc.postList.length - widget.profileBloc.nextPageTrigger) {
+                        widget.profileBloc.add(CheckIfNeedMoreDataEvent(index: index));
                       }
                     }
 
-                    if (widget.profileBloc.numberOfPage !=
-                            widget.profileBloc.pageNumber - 1 &&
-                        index >= widget.profileBloc.postList.length - 1) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: svGetBodyColor(),
-                        ),
-                      );
+                    if (widget.profileBloc.numberOfPage != widget.profileBloc.pageNumber - 1 && index >= widget.profileBloc.postList.length - 1) {
+                      return Center(child: CircularProgressIndicator(color: svGetBodyColor()));
                       // Container(
                       //         padding: const EdgeInsets.only(top: 10),
                       //         margin: const EdgeInsets.symmetric(vertical: 4),
@@ -560,12 +516,9 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       final post = widget.profileBloc.postList[index];
 
                       return PostItemWidget(
-                        profilePicUrl:
-                            '${AppData.imageUrl}${post.user?.profilePic}',
+                        profilePicUrl: '${AppData.imageUrl}${post.user?.profilePic}',
                         userName: post.user?.name ?? '',
-                        createdAt: timeAgo.format(
-                          DateTime.parse(post.createdAt!),
-                        ),
+                        createdAt: timeAgo.format(DateTime.parse(post.createdAt!)),
                         title: post.title,
                         backgroundColor: post.backgroundColor,
                         image: post.image,
@@ -577,24 +530,17 @@ class _MyPostComponentState extends State<MyPostComponent> {
                         isCurrentUser: post.userId == AppData.logInUserId,
                         isShowComment: isShowComment == index,
                         onProfileTap: () {
-                          SVProfileFragment(
-                            userId: post.user?.id,
-                          ).launch(context);
+                          SVProfileFragment(userId: post.user?.id).launch(context);
                         },
                         onDeleteTap: () {
                           showDialog(
                             context: context,
                             builder: (context) {
                               return CustomAlertDialog(
-                                title:
-                                    'Are you sure you want to delete this post?',
+                                title: 'Are you sure you want to delete this post?',
                                 callback: () {
-                                  widget.profileBloc.postList.removeWhere(
-                                    (p) => p.id == post.id,
-                                  );
-                                  homeBloc.add(
-                                    DeletePostEvent(postId: post.id),
-                                  );
+                                  widget.profileBloc.postList.removeWhere((p) => p.id == post.id);
+                                  homeBloc.add(DeletePostEvent(postId: post.id));
                                   // Dialog is already closed by CustomAlertDialog
                                 },
                               );
@@ -603,50 +549,28 @@ class _MyPostComponentState extends State<MyPostComponent> {
                         },
                         onLikeTap: () {
                           setState(() {});
-                          if (findIsLiked(
-                            widget.profileBloc.postList[index].likes,
-                          )) {
+                          if (findIsLiked(widget.profileBloc.postList[index].likes)) {
                             print('object unlike');
-                            widget.profileBloc.postList[index].likes!
-                                .removeWhere(
-                                  (e) => e.userId == AppData.logInUserId,
-                                );
+                            widget.profileBloc.postList[index].likes!.removeWhere((e) => e.userId == AppData.logInUserId);
                           } else {
                             widget.profileBloc.postList[index].likes!.add(
-                              Likes(
-                                id: index,
-                                userId: AppData.logInUserId,
-                                postId: widget.profileBloc.postList[index].id
-                                    .toString(),
-                                createdAt: '',
-                                updatedAt: '',
-                              ),
+                              Likes(id: index, userId: AppData.logInUserId, postId: widget.profileBloc.postList[index].id.toString(), createdAt: '', updatedAt: ''),
                             );
                           }
                           HomeBloc().add(PostLikeEvent(postId: post.id));
                         },
                         onViewLikesTap: () {
-                          LikesListScreen(
-                            id: post.id.toString(),
-                          ).launch(context);
+                          LikesListScreen(id: post.id.toString()).launch(context);
                         },
                         onViewCommentsTap: () {
-                          SVCommentScreen(
-                            homeBloc: homeBloc,
-                            id: post.id ?? 0,
-                          ).launch(context);
+                          SVCommentScreen(homeBloc: homeBloc, id: post.id ?? 0).launch(context);
                         },
                         onShareTap: () {
                           // Share functionality can be added here
                         },
                         onAddComment: (value) {
                           print('object');
-                          comment_bloc.CommentBloc().add(
-                            comment_bloc.PostCommentEvent(
-                              postId: post.id ?? 0,
-                              comment: value,
-                            ),
-                          );
+                          comment_bloc.CommentBloc().add(comment_bloc.PostCommentEvent(postId: post.id ?? 0, comment: value));
                           setState(() {
                             post.comments?.add(Comments());
                             isShowComment = -1;
@@ -666,9 +590,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
         } else if (state is DataError) {
           return Expanded(child: Center(child: Text(state.errorMessage)));
         } else {
-          return const Expanded(
-            child: Center(child: Text('Something went wrong')),
-          );
+          return const Expanded(child: Center(child: Text('Something went wrong')));
         }
       },
     );

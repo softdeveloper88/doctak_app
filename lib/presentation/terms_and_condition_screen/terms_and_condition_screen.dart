@@ -8,8 +8,7 @@ class TermsAndConditionScreen extends StatefulWidget {
   const TermsAndConditionScreen({super.key});
 
   @override
-  State<TermsAndConditionScreen> createState() =>
-      _TermsAndConditionScreenState();
+  State<TermsAndConditionScreen> createState() => _TermsAndConditionScreenState();
 }
 
 class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
@@ -24,10 +23,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
       body: Column(
         children: [
           // Custom App Bar with DoctakAppBar
-          DoctakAppBar(
-            title: translation(context).lbl_terms_and_conditions,
-            titleIcon: Icons.description_outlined,
-          ),
+          DoctakAppBar(title: translation(context).lbl_terms_and_conditions, titleIcon: Icons.description_outlined),
 
           // Content
           Expanded(
@@ -44,12 +40,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                         color: theme.cardBackground,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: theme.isDark ? [] : theme.cardShadow,
-                        border: Border.all(
-                          color: theme.isDark
-                              ? theme.surfaceVariant
-                              : theme.primary.withOpacity(0.1),
-                          width: 1,
-                        ),
+                        border: Border.all(color: theme.isDark ? theme.surfaceVariant : theme.primary.withValues(alpha: 0.1), width: 1),
                       ),
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
@@ -58,38 +49,20 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                           children: [
                             // Header
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 16,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                               child: Row(
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: theme.primary.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Icon(
-                                      Icons.info_outline_rounded,
-                                      color: theme.primary,
-                                      size: 22,
-                                    ),
+                                    decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+                                    child: Icon(Icons.info_outline_rounded, color: theme.primary, size: 22),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
                                       'Terms of Service',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.textPrimary,
-                                        fontFamily: 'Poppins',
-                                      ),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary, fontFamily: 'Poppins'),
                                     ),
                                   ),
                                 ],
@@ -169,12 +142,7 @@ These Terms shall be governed by and construed in accordance with the laws of [Y
 If you have any questions about these Terms, please contact us at info@DocTak.net.
 
 By using the App, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service''',
-                              style: TextStyle(
-                                fontSize: 14,
-                                height: 1.6,
-                                fontFamily: 'Poppins',
-                                color: theme.textSecondary,
-                              ),
+                              style: TextStyle(fontSize: 14, height: 1.6, fontFamily: 'Poppins', color: theme.textSecondary),
                             ),
                           ],
                         ),
@@ -188,18 +156,8 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: theme.cardBackground,
-                      border: Border(
-                        top: BorderSide(color: theme.divider, width: 1),
-                      ),
-                      boxShadow: theme.isDark
-                          ? []
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                offset: const Offset(0, -3),
-                                blurRadius: 6,
-                              ),
-                            ],
+                      border: Border(top: BorderSide(color: theme.divider, width: 1)),
+                      boxShadow: theme.isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), offset: const Offset(0, -3), blurRadius: 6)],
                     ),
                     child: Column(
                       children: [
@@ -207,38 +165,21 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: _isChecked
-                                ? theme.primary.withOpacity(0.05)
-                                : theme.surfaceVariant.withOpacity(0.3),
+                            color: _isChecked ? theme.primary.withValues(alpha: 0.05) : theme.surfaceVariant.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: _isChecked
-                                  ? theme.primary.withOpacity(0.3)
-                                  : theme.border,
-                              width: 1.5,
-                            ),
+                            border: Border.all(color: _isChecked ? theme.primary.withValues(alpha: 0.3) : theme.border, width: 1.5),
                           ),
                           child: Row(
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: _isChecked
-                                      ? theme.primary.withOpacity(0.1)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
+                                decoration: BoxDecoration(color: _isChecked ? theme.primary.withValues(alpha: 0.1) : Colors.transparent, borderRadius: BorderRadius.circular(6)),
                                 child: Checkbox(
                                   value: _isChecked,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                                   activeColor: theme.primary,
                                   checkColor: Colors.white,
-                                  side: BorderSide(
-                                    color: theme.textSecondary,
-                                    width: 1.5,
-                                  ),
+                                  side: BorderSide(color: theme.textSecondary, width: 1.5),
                                   onChanged: (bool? value) {
                                     setState(() {
                                       _isChecked = value!;
@@ -249,17 +190,8 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  translation(
-                                    context,
-                                  ).lbl_agree_terms_conditions,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    fontFamily: 'Poppins',
-                                    color: _isChecked
-                                        ? theme.primary
-                                        : theme.textSecondary,
-                                  ),
+                                  translation(context).lbl_agree_terms_conditions,
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: _isChecked ? theme.primary : theme.textSecondary),
                                 ),
                               ),
                             ],
@@ -273,15 +205,7 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                           width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: _isChecked && !theme.isDark
-                                ? [
-                                    BoxShadow(
-                                      color: theme.primary.withOpacity(0.3),
-                                      blurRadius: 8,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ]
-                                : [],
+                            boxShadow: _isChecked && !theme.isDark ? [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))] : [],
                           ),
                           child: ElevatedButton(
                             onPressed: _isChecked
@@ -293,41 +217,22 @@ By using the App, you acknowledge that you have read, understood, and agree to b
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: _isChecked
-                                  ? theme.primary
-                                  : theme.surfaceVariant,
+                              backgroundColor: _isChecked ? theme.primary : theme.surfaceVariant,
                               foregroundColor: Colors.white,
                               disabledBackgroundColor: theme.surfaceVariant,
                               disabledForegroundColor: theme.textTertiary,
                               padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               elevation: 0,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  _isChecked
-                                      ? Icons.check_circle_rounded
-                                      : Icons.radio_button_unchecked_rounded,
-                                  size: 20,
-                                  color: _isChecked
-                                      ? Colors.white
-                                      : theme.textTertiary,
-                                ),
+                                Icon(_isChecked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, size: 20, color: _isChecked ? Colors.white : theme.textTertiary),
                                 const SizedBox(width: 8),
                                 Text(
                                   translation(context).lbl_accept,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'Poppins',
-                                    color: _isChecked
-                                        ? Colors.white
-                                        : theme.textTertiary,
-                                  ),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: _isChecked ? Colors.white : theme.textTertiary),
                                 ),
                               ],
                             ),

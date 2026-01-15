@@ -14,10 +14,7 @@ import 'package:timeago/timeago.dart' as timeAgo;
 import 'meeting_chat_screen.dart';
 
 /// Shows the One UI 8.5 styled chat bottom sheet
-Future<void> showMeetingChatBottomSheet({
-  required BuildContext context,
-  required String channelId,
-}) {
+Future<void> showMeetingChatBottomSheet({required BuildContext context, required String channelId}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
@@ -69,12 +66,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
 
       await pusher.connect();
 
-      clientListenChannel = await pusher.subscribe(
-        channelName: "meeting-channel${widget.channelId}",
-        onMemberAdded: (member) {},
-        onMemberRemoved: (member) {},
-        onEvent: _onEvent,
-      );
+      clientListenChannel = await pusher.subscribe(channelName: "meeting-channel${widget.channelId}", onMemberAdded: (member) {}, onMemberRemoved: (member) {}, onEvent: _onEvent);
     } catch (e) {
       debugPrint('Pusher connection error: $e');
     }
@@ -102,13 +94,8 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
 
   void _onSubscriptionCount(String channelName, int subscriptionCount) {}
 
-  Future<dynamic>? _onAuthorizer(
-    String channelName,
-    String socketId,
-    dynamic options,
-  ) async {
-    if (!channelName.startsWith('private-') &&
-        !channelName.startsWith('presence-')) {
+  Future<dynamic>? _onAuthorizer(String channelName, String socketId, dynamic options) async {
+    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
       return null;
     }
     return null;
@@ -121,16 +108,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
     switch (eventName) {
       case 'new-message':
         if (AppData.logInUserId != jsonMap['user_id']) {
-          AppData.chatMessages.add(
-            Message(
-              text: jsonMap['message'],
-              senderId: jsonMap['user_id'],
-              profilePic: jsonMap['profile_pic'],
-              name: '',
-              timestamp: DateTime.timestamp(),
-              isSentByMe: false,
-            ),
-          );
+          AppData.chatMessages.add(Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: jsonMap['profile_pic'], name: '', timestamp: DateTime.timestamp(), isSentByMe: false));
         }
         if (mounted) setState(() {});
         break;
@@ -145,31 +123,15 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
     setState(() => _isSending = true);
 
     try {
-      await sendMessage(
-        widget.channelId,
-        _messageController.text,
-        AppData.logInUserId,
-      );
+      await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
       AppData.chatMessages.add(
-        Message(
-          text: _messageController.text,
-          senderId: AppData.logInUserId,
-          timestamp: DateTime.timestamp(),
-          isSentByMe: true,
-          name: '',
-          profilePic: "${AppData.imageUrl}${AppData.profile_pic}",
-        ),
+        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: "${AppData.imageUrl}${AppData.profile_pic}"),
       );
       _messageController.clear();
       if (mounted) setState(() {});
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${translation(context).msg_something_wrong} $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${translation(context).msg_something_wrong} $e'), backgroundColor: Colors.red));
       }
     } finally {
       if (mounted) setState(() => _isSending = false);
@@ -206,7 +168,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
           // Header
           _buildHeader(theme),
           // Divider
-          Divider(color: theme.textSecondary.withOpacity(0.1), height: 1),
+          Divider(color: theme.textSecondary.withValues(alpha: 0.1), height: 1),
           // Chat messages
           Expanded(child: _buildMessageList(theme)),
           // Message input
@@ -221,10 +183,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
       width: 40,
       height: 4,
       margin: const EdgeInsets.only(top: 12, bottom: 8),
-      decoration: BoxDecoration(
-        color: theme.textSecondary.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(2),
-      ),
+      decoration: BoxDecoration(color: theme.textSecondary.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
     );
   }
 
@@ -235,15 +194,8 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: theme.inputBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              Icons.chat_bubble_outline,
-              color: theme.primary,
-              size: 22,
-            ),
+            decoration: BoxDecoration(color: theme.inputBackground, borderRadius: BorderRadius.circular(12)),
+            child: Icon(Icons.chat_bubble_outline, color: theme.primary, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -252,21 +204,12 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
               children: [
                 Text(
                   translation(context).lbl_chat,
-                  style: TextStyle(
-                    color: theme.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.15,
-                  ),
+                  style: TextStyle(color: theme.textPrimary, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 0.15),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '${AppData.chatMessages.length} messages',
-                  style: TextStyle(
-                    color: theme.textSecondary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: TextStyle(color: theme.textSecondary, fontSize: 13, fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -278,11 +221,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
             child: InkWell(
               onTap: () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(22),
-              child: SizedBox(
-                width: 44,
-                height: 44,
-                child: Icon(Icons.close, color: theme.textSecondary, size: 22),
-              ),
+              child: SizedBox(width: 44, height: 44, child: Icon(Icons.close, color: theme.textSecondary, size: 22)),
             ),
           ),
         ],
@@ -300,33 +239,16 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.inputBackground.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.chat_bubble_outline,
-                color: theme.textSecondary.withOpacity(0.5),
-                size: 48,
-              ),
+              decoration: BoxDecoration(color: theme.inputBackground.withValues(alpha: 0.5), shape: BoxShape.circle),
+              child: Icon(Icons.chat_bubble_outline, color: theme.textSecondary.withValues(alpha: 0.5), size: 48),
             ),
             const SizedBox(height: 16),
             Text(
               'No messages yet',
-              style: TextStyle(
-                color: theme.textSecondary,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(color: theme.textSecondary, fontSize: 16, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Start a conversation',
-              style: TextStyle(
-                color: theme.textSecondary.withOpacity(0.5),
-                fontSize: 14,
-              ),
-            ),
+            Text('Start a conversation', style: TextStyle(color: theme.textSecondary.withValues(alpha: 0.5), fontSize: 14)),
           ],
         ),
       );
@@ -351,9 +273,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: isMe
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (!isMe) _buildAvatar(theme, message.profilePic),
           const SizedBox(width: 8),
@@ -361,15 +281,10 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
             child: Container(
               constraints: BoxConstraints(maxWidth: 70.w),
               child: Column(
-                crossAxisAlignment: isMe
-                    ? CrossAxisAlignment.end
-                    : CrossAxisAlignment.start,
+                crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: isMe ? theme.primary : theme.inputBackground,
                       borderRadius: BorderRadius.only(
@@ -381,12 +296,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
                     ),
                     child: Text(
                       message.text,
-                      style: TextStyle(
-                        color: isMe ? Colors.white : theme.textPrimary,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w400,
-                        height: 1.4,
-                      ),
+                      style: TextStyle(color: isMe ? Colors.white : theme.textPrimary, fontSize: 15, fontWeight: FontWeight.w400, height: 1.4),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -394,11 +304,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Text(
                       timeAgo.format(message.timestamp),
-                      style: TextStyle(
-                        color: theme.textSecondary.withOpacity(0.5),
-                        fontSize: 11,
-                        fontWeight: FontWeight.w400,
-                      ),
+                      style: TextStyle(color: theme.textSecondary.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w400),
                     ),
                   ),
                 ],
@@ -421,52 +327,28 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
       child: CircleAvatar(
         radius: 16,
         backgroundColor: theme.inputBackground,
-        backgroundImage: profilePic.isNotEmpty
-            ? NetworkImage(profilePic)
-            : null,
-        child: profilePic.isEmpty
-            ? Icon(Icons.person, color: theme.textSecondary, size: 18)
-            : null,
+        backgroundImage: profilePic.isNotEmpty ? NetworkImage(profilePic) : null,
+        child: profilePic.isEmpty ? Icon(Icons.person, color: theme.textSecondary, size: 18) : null,
       ),
     );
   }
 
-  Widget _buildMessageInput(
-    OneUITheme theme,
-    double bottomInset,
-    double bottomPadding,
-  ) {
+  Widget _buildMessageInput(OneUITheme theme, double bottomInset, double bottomPadding) {
     // Use viewInsets.bottom when keyboard is showing, otherwise use viewPadding.bottom for gesture nav bar
-    final effectiveBottomPadding = bottomInset > 0
-        ? bottomInset + 12
-        : bottomPadding + 16;
+    final effectiveBottomPadding = bottomInset > 0 ? bottomInset + 12 : bottomPadding + 16;
 
     return Container(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 12,
-        bottom: effectiveBottomPadding,
-      ),
+      padding: EdgeInsets.only(left: 16, right: 16, top: 12, bottom: effectiveBottomPadding),
       decoration: BoxDecoration(
         color: theme.scaffoldBackground,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, -2))],
       ),
       child: Row(
         children: [
           // Text field
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                color: theme.inputBackground,
-                borderRadius: BorderRadius.circular(24),
-              ),
+              decoration: BoxDecoration(color: theme.inputBackground, borderRadius: BorderRadius.circular(24)),
               child: TextField(
                 controller: _messageController,
                 focusNode: _focusNode,
@@ -474,15 +356,9 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
                 style: TextStyle(color: theme.textPrimary, fontSize: 15),
                 decoration: InputDecoration(
                   hintText: translation(context).lbl_type_message_here,
-                  hintStyle: TextStyle(
-                    color: theme.textSecondary.withOpacity(0.5),
-                    fontSize: 15,
-                  ),
+                  hintStyle: TextStyle(color: theme.textSecondary.withValues(alpha: 0.5), fontSize: 15),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                 ),
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(),
@@ -502,19 +378,8 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
                 height: 48,
                 alignment: Alignment.center,
                 child: _isSending
-                    ? const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(
-                        Icons.send_rounded,
-                        color: Colors.white,
-                        size: 22,
-                      ),
+                    ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send_rounded, color: Colors.white, size: 22),
               ),
             ),
           ),

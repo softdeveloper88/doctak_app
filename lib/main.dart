@@ -1292,7 +1292,6 @@ import 'package:doctak_app/presentation/calling_module/services/call_service.dar
 import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/presentation/case_discussion/bloc/create_discussion_bloc.dart';
 import 'package:doctak_app/presentation/case_discussion/bloc/discussion_detail_bloc.dart';
-import 'package:doctak_app/presentation/case_discussion/bloc/discussion_list_bloc.dart';
 import 'package:doctak_app/presentation/case_discussion/repository/case_discussion_repository.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.dart';
@@ -1309,7 +1308,6 @@ import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/bloc/guideline_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/store/AppStore.dart';
 import 'package:doctak_app/presentation/home_screen/utils/AppTheme.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_bloc.dart';
@@ -1329,7 +1327,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:hive_flutter/hive_flutter.dart'; // Import hive_flutter package
 import 'package:nb_utils/nb_utils.dart';
 import 'package:provider/provider.dart';
-import 'package:sizer/sizer.dart';
 
 import 'ads_setting/ad_setting.dart';
 import 'core/app_export.dart';
@@ -1338,15 +1335,9 @@ import 'core/notification_service.dart';
 import 'core/utils/common_navigator.dart';
 import 'core/utils/deep_link_service.dart';
 import 'core/utils/get_shared_value.dart';
-import 'core/utils/pusher_service.dart';
-import 'core/utils/text_scale_helper.dart';
-import 'core/utils/simple_fixed_media_query.dart';
-import 'core/utils/fixed_sizer.dart';
 import 'core/utils/edge_to_edge_helper.dart';
 import 'firebase_options.dart';
-import 'widgets/fixed_scale_material_app.dart';
 import 'package:overlay_support/overlay_support.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 // Removed path_provider import - using direct paths to avoid Pigeon channel issues in release mode
 
 /// Waits for native plugin channels to be ready.
@@ -1385,22 +1376,16 @@ late AndroidNotificationChannel channel;
 
 /// Initialize the [FlutterLocalNotificationsPlugin] package.
 late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey(
-  debugLabel: 'Main Navigator',
-);
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey(debugLabel: 'Main Navigator');
 var calllRoute;
 
 @pragma('vm:entry-point')
-void onDidReceiveNotificationResponse(
-  NotificationResponse notificationResponse,
-) async {
+void onDidReceiveNotificationResponse(NotificationResponse notificationResponse) async {
   final String? payload = notificationResponse.payload;
   if (notificationResponse.payload != null) {
     debugPrint('notification payload: $payload');
   }
-  NavigatorService.navigatorKey.currentState?.push(
-    MaterialPageRoute(builder: (context) => const ComingSoonScreen()),
-  );
+  NavigatorService.navigatorKey.currentState?.push(MaterialPageRoute(builder: (context) => const ComingSoonScreen()));
 }
 
 void checkNotificationPermission() async {
@@ -1494,8 +1479,7 @@ Future<void> _cleanupStaleCallData() async {
 
     // Clean up pending call data if it's too old
     if (pendingCallId != null) {
-      final pendingTimestamp =
-          await prefs.getInt('pending_call_timestamp') ?? 0;
+      final pendingTimestamp = await prefs.getInt('pending_call_timestamp') ?? 0;
       if (now - pendingTimestamp > 30000) {
         // 30 seconds
         debugPrint('Found stale pending call data, cleaning up');
@@ -1533,9 +1517,7 @@ Future<bool> _isActiveCallPending() async {
         return true;
       }
 
-      debugPrint(
-        'Found call in CallKit but it appears stale, clearing: $callId',
-      );
+      debugPrint('Found call in CallKit but it appears stale, clearing: $callId');
       await callKitService.endCall(callId);
     }
 
@@ -1545,8 +1527,7 @@ Future<bool> _isActiveCallPending() async {
     // First check for pending calls from notifications
     final pendingCallId = await prefs.getString('pending_call_id');
     if (pendingCallId != null) {
-      final pendingTimestamp =
-          await prefs.getInt('pending_call_timestamp') ?? 0;
+      final pendingTimestamp = await prefs.getInt('pending_call_timestamp') ?? 0;
       final now = DateTime.now().millisecondsSinceEpoch;
 
       // Only consider pending calls within the last 15 seconds
@@ -1598,11 +1579,7 @@ class PiPCallWidget extends StatelessWidget {
         backgroundColor: const Color(0xFF1E1E2E),
         body: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [const Color(0xFF2D2D44), const Color(0xFF1E1E2E)],
-            ),
+            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [const Color(0xFF2D2D44), const Color(0xFF1E1E2E)]),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
@@ -1614,39 +1591,23 @@ class PiPCallWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
+                    color: Colors.green.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.green.withOpacity(0.5),
-                      width: 2,
-                    ),
+                    border: Border.all(color: Colors.green.withValues(alpha: 0.5), width: 2),
                   ),
-                  child: const Icon(
-                    Icons.videocam_rounded,
-                    color: Colors.green,
-                    size: 36,
-                  ),
+                  child: const Icon(Icons.videocam_rounded, color: Colors.green, size: 36),
                 ),
                 const SizedBox(height: 12),
                 // Call status text
                 const Text(
                   'Call in Progress',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                 ),
                 const SizedBox(height: 4),
                 // Tap to return hint
                 Text(
                   'Tap to return',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.6),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -1740,9 +1701,7 @@ Future<void> main() async {
 
     // Initialize Firebase FIRST, before any Firebase-dependent services
     try {
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       firebaseInitialized = true;
       debugPrint('Firebase initialized successfully');
     } catch (e) {
@@ -1790,9 +1749,7 @@ Future<void> main() async {
         FlutterError.onError = (errorDetails) {
           try {
             if (fatalError) {
-              FirebaseCrashlytics.instance.recordFlutterFatalError(
-                errorDetails,
-              );
+              FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
             } else {
               FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
             }
@@ -1804,11 +1761,7 @@ Future<void> main() async {
         PlatformDispatcher.instance.onError = (error, stack) {
           try {
             if (fatalError) {
-              FirebaseCrashlytics.instance.recordError(
-                error,
-                stack,
-                fatal: true,
-              );
+              FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
             } else {
               FirebaseCrashlytics.instance.recordError(error, stack);
             }
@@ -1885,10 +1838,7 @@ Future<void> main() async {
     // Step 2: Initialize CallService with the same baseUrl
     try {
       debugPrint('Initializing CallService...');
-      await globalCallService.initialize(
-        baseUrl: baseUrl,
-        isFromCallNotification: isFromCallNotification,
-      );
+      await globalCallService.initialize(baseUrl: baseUrl, isFromCallNotification: isFromCallNotification);
       debugPrint('CallService initialized successfully');
     } catch (e) {
       debugPrint('Error initializing CallService, continuing: $e');
@@ -1896,11 +1846,7 @@ Future<void> main() async {
     }
 
     // Set up notification channel for Android
-    channel = const AndroidNotificationChannel(
-      'high_importance_channel',
-      'High Importance Notifications',
-      importance: Importance.max,
-    );
+    channel = const AndroidNotificationChannel('high_importance_channel', 'High Importance Notifications', importance: Importance.max);
 
     // Step 3: Handle incoming call if launched from notification with a small delay
     if (isFromCallNotification && initialRoute != null) {
@@ -1914,31 +1860,17 @@ Future<void> main() async {
       final hasVideo = initialRoute.data['is_video_call'] == 'true';
       final avatar = initialRoute.data['caller_avatar'] ?? '';
 
-      debugPrint(
-        'Handling incoming call from notification: $callId from $callerName',
-      );
+      debugPrint('Handling incoming call from notification: $callId from $callerName');
 
       try {
-        await globalCallService.handleIncomingCall(
-          callId: callId,
-          callerName: callerName,
-          callerId: callerId,
-          callerAvatar: avatar,
-          isVideoCall: hasVideo,
-        );
+        await globalCallService.handleIncomingCall(callId: callId, callerName: callerName, callerId: callerId, callerAvatar: avatar, isVideoCall: hasVideo);
       } catch (e) {
         debugPrint('Error handling incoming call at startup: $e');
 
         // Try again after a longer delay if initial handling fails
         Future.delayed(const Duration(seconds: 1), () {
           try {
-            globalCallService.handleIncomingCall(
-              callId: callId,
-              callerName: callerName,
-              callerId: callerId,
-              callerAvatar: avatar,
-              isVideoCall: hasVideo,
-            );
+            globalCallService.handleIncomingCall(callId: callId, callerName: callerName, callerId: callerId, callerAvatar: avatar, isVideoCall: hasVideo);
           } catch (e) {
             debugPrint('Second attempt also failed: $e');
           }
@@ -1986,9 +1918,7 @@ Future<void> main() async {
 
     // Initialize system settings and start the app
     try {
-      await SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-      ]);
+      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       debugPrint('System orientation set');
     } catch (e) {
       debugPrint('Error setting orientation: $e');
@@ -2010,7 +1940,7 @@ Future<void> main() async {
     } catch (e) {
       debugPrint('Error configuring edge-to-edge: $e');
     }
-    
+
     // Initialize Deep Link Service
     try {
       await deepLinkService.initialize();
@@ -2027,15 +1957,7 @@ Future<void> main() async {
 
   // ALWAYS run the app, even if initialization failed
   debugPrint('Launching app UI...');
-  runApp(
-    MyApp(
-      message: initialRoute,
-      initialRoute: isHandlingCallAtStartup
-          ? 'call'
-          : initialRoute?.data['type'] ?? '',
-      id: initialRoute?.data['id'] ?? '',
-    ),
-  );
+  runApp(MyApp(message: initialRoute, initialRoute: isHandlingCallAtStartup ? 'call' : initialRoute?.data['type'] ?? '', id: initialRoute?.data['id'] ?? ''));
 }
 
 class MyApp extends StatefulWidget {
@@ -2043,7 +1965,7 @@ class MyApp extends StatefulWidget {
   String? id;
   RemoteMessage? message;
 
-  MyApp({Key? key, this.message, this.initialRoute, this.id}) : super(key: key);
+  MyApp({super.key, this.message, this.initialRoute, this.id});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -2060,12 +1982,11 @@ late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   FirebaseMessaging? firebaseMessaging;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   Locale? _locale;
 
-  setLocale(Locale locale) {
+  void setLocale(Locale locale) {
     setState(() {
       _locale = locale;
     });
@@ -2133,9 +2054,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           return;
         }
 
-        debugPrint(
-          'Found active call, ensuring call screen is displayed: $callId',
-        );
+        debugPrint('Found active call, ensuring call screen is displayed: $callId');
         await callKitService.resumeCallScreenIfNeeded();
       }
     } catch (e) {
@@ -2156,14 +2075,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         return;
       }
 
-      NotificationSettings settings = await FirebaseMessaging.instance
-          .requestPermission(
-            alert: true,
-            badge: true,
-            sound: true,
-            criticalAlert:
-                false, // Use normal notifications that respect device mute
-          );
+      NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        criticalAlert: false, // Use normal notifications that respect device mute
+      );
       print('User granted permission: ${settings.authorizationStatus}');
     } catch (e) {
       print('Error requesting FCM permission: $e');
@@ -2193,15 +2110,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
       if (_kTestingCrashlytics) {
         // Force enable crashlytics collection enabled if we're testing it.
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-          true,
-        );
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
       } else {
         // Else only enable it in non-debug builds.
         // You could additionally extend this to allow users to opt-in.
-        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-          !kDebugMode,
-        );
+        await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
       }
       debugPrint('Crashlytics collection settings configured');
     } catch (e) {
@@ -2216,7 +2129,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       result = await _connectivity.checkConnectivity();
-    } on PlatformException catch (e) {
+    } on PlatformException {
       // developer.log('Couldn\'t check connectivity status', error: e);
       return;
     }
@@ -2238,15 +2151,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     if (_connectionStatus.first == ConnectivityResult.none) {
       isCurrentlyOnNoInternet = true;
-      launchScreen(
-        NavigatorService.navigatorKey.currentState!.overlay!.context,
-        NoInternetScreen(),
-      );
+      launchScreen(NavigatorService.navigatorKey.currentState!.overlay!.context, NoInternetScreen());
     } else {
       if (isCurrentlyOnNoInternet) {
-        Navigator.pop(
-          NavigatorService.navigatorKey.currentState!.overlay!.context,
-        );
+        Navigator.pop(NavigatorService.navigatorKey.currentState!.overlay!.context);
         isCurrentlyOnNoInternet = false;
       }
     }
@@ -2272,9 +2180,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
 
     initConnectivity();
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      _updateConnectionStatus,
-    );
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
     // setToken();
@@ -2294,13 +2200,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         });
       });
     }
-    
+
     // Initialize deep link listener for when app is running
     _initDeepLinkListener();
 
     super.initState();
   }
-  
+
   /// Initialize listener for deep links when app is running
   void _initDeepLinkListener() {
     deepLinkService.listenForLinks((uri) {
@@ -2322,10 +2228,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         providers: [
           // ChangeNotifierProvider(create: (_) => ConnectivityService()),
           BlocProvider(create: (context) => LoginBloc()),
-          Provider<AgoraService>(
-            create: (_) => AgoraService(),
-            dispose: (_, service) => service.release(),
-          ),
+          Provider<AgoraService>(create: (_) => AgoraService(), dispose: (_, service) => service.release()),
 
           // ChangeNotifierProvider(create: (_) => PusherProvider()),
           ///
@@ -2367,10 +2270,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           // We're using a global instance, so this is just for UI components that need it
           // It won't be used for app lifecycle events
           ChangeNotifierProvider<CallService>.value(value: globalCallService),
-          BlocProvider(
-            create: (context) =>
-                ThemeBloc(ThemeState(themeType: PrefUtils().getThemeData())),
-          ),
+          BlocProvider(create: (context) => ThemeBloc(ThemeState(themeType: PrefUtils().getThemeData()))),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
           builder: (context, state) {
@@ -2382,11 +2282,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     scaffoldMessengerKey: globalMessengerKey,
                     navigatorKey: NavigatorService.navigatorKey,
                     // If handling a call, use '/call' as our home route, otherwise use the regular route
-                    initialRoute: isHandlingCallAtStartup
-                        ? '/call'
-                        : (widget.initialRoute != null
-                              ? '/${widget.initialRoute}'
-                              : '/'),
+                    initialRoute: isHandlingCallAtStartup ? '/call' : (widget.initialRoute != null ? '/${widget.initialRoute}' : '/'),
 
                     // Add onGenerateRoute to better handle deep linking for calls
                     onGenerateRoute: (settings) {
@@ -2404,18 +2300,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                               return FutureBuilder<List<Map<String, dynamic>>>(
                                 future: callKitService.getActiveCalls(),
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
                                     // Show a loading indicator while getting call info
-                                    return const Scaffold(
-                                      body: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
+                                    return const Scaffold(body: Center(child: CircularProgressIndicator()));
                                   }
 
-                                  if (snapshot.hasData &&
-                                      snapshot.data!.isNotEmpty) {
+                                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                                     // We have active call data, but verify it's still active
                                     final call = snapshot.data!.first;
                                     final callId = call['id']?.toString() ?? '';
@@ -2431,105 +2321,53 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                       });
                                     }
 
-                                    final userId =
-                                        extra['userId']?.toString() ?? '';
-                                    final name =
-                                        call['nameCaller']?.toString() ??
-                                        'Unknown';
-                                    final avatar =
-                                        extra['avatar']?.toString() ?? '';
-                                    final hasVideo =
-                                        extra['has_video'] == true ||
-                                        extra['has_video'] == 'true';
+                                    final userId = extra['userId']?.toString() ?? '';
+                                    final name = call['nameCaller']?.toString() ?? 'Unknown';
+                                    final avatar = extra['avatar']?.toString() ?? '';
+                                    final hasVideo = extra['has_video'] == true || extra['has_video'] == 'true';
 
                                     // Navigate to call screen - handle null safety properly
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                          Navigator.of(context).pushReplacement(
-                                            MaterialPageRoute(
-                                              settings: const RouteSettings(
-                                                name: '/call',
-                                              ),
-                                              builder: (context) => CallScreen(
-                                                callId: callId,
-                                                contactId: userId,
-                                                contactName: name,
-                                                contactAvatar: avatar,
-                                                isIncoming: true,
-                                                isVideoCall: hasVideo,
-                                                token: '',
-                                              ),
-                                            ),
-                                          );
-                                        });
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          settings: const RouteSettings(name: '/call'),
+                                          builder: (context) =>
+                                              CallScreen(callId: callId, contactId: userId, contactName: name, contactAvatar: avatar, isIncoming: true, isVideoCall: hasVideo, token: ''),
+                                        ),
+                                      );
+                                    });
 
                                     // Return a temporary screen while we check
                                     return const Scaffold(
                                       body: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            CircularProgressIndicator(),
-                                            SizedBox(height: 16),
-                                            Text('Preparing call...'),
-                                          ],
-                                        ),
+                                        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Preparing call...')]),
                                       ),
                                     );
                                   }
 
                                   // No active call found, check for pending calls
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) async {
-                                    final prefs =
-                                        await getSharedPreferencesWithRetry();
-                                    final pendingCallId = await prefs.getString(
-                                      'pending_call_id',
-                                    );
+                                  WidgetsBinding.instance.addPostFrameCallback((_) async {
+                                    final prefs = await getSharedPreferencesWithRetry();
+                                    final pendingCallId = await prefs.getString('pending_call_id');
 
                                     if (pendingCallId != null) {
                                       // Check if the pending call is recent
-                                      final pendingTimestamp =
-                                          await prefs.getInt(
-                                            'pending_call_timestamp',
-                                          ) ??
-                                          0;
-                                      final now =
-                                          DateTime.now().millisecondsSinceEpoch;
+                                      final pendingTimestamp = await prefs.getInt('pending_call_timestamp') ?? 0;
+                                      final now = DateTime.now().millisecondsSinceEpoch;
 
                                       if (now - pendingTimestamp < 15000) {
                                         // Within 15 seconds
                                         // Extract pending call information
-                                        final callerId =
-                                            await prefs.getString(
-                                              'pending_caller_id',
-                                            ) ??
-                                            '';
-                                        final callerName =
-                                            await prefs.getString(
-                                              'pending_caller_name',
-                                            ) ??
-                                            'Unknown';
-                                        final avatar =
-                                            await prefs.getString(
-                                              'pending_caller_avatar',
-                                            ) ??
-                                            '';
-                                        final hasVideo =
-                                            await prefs.getBool(
-                                              'pending_call_has_video',
-                                            ) ??
-                                            false;
+                                        final callerId = await prefs.getString('pending_caller_id') ?? '';
+                                        final callerName = await prefs.getString('pending_caller_name') ?? 'Unknown';
+                                        final avatar = await prefs.getString('pending_caller_avatar') ?? '';
+                                        final hasVideo = await prefs.getBool('pending_call_has_video') ?? false;
 
                                         // Handle the pending call
                                         Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            settings: const RouteSettings(
-                                              name: '/call',
-                                            ),
+                                            settings: const RouteSettings(name: '/call'),
                                             builder: (context) => CallScreen(
                                               callId: pendingCallId,
                                               contactId: callerId,
@@ -2546,16 +2384,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                                     }
 
                                     // If we get here, no call is active, redirect to home
-                                    Navigator.of(
-                                      context,
-                                    ).pushReplacementNamed('/');
+                                    Navigator.of(context).pushReplacementNamed('/');
                                   });
 
-                                  return const Scaffold(
-                                    body: Center(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
+                                  return const Scaffold(body: Center(child: CircularProgressIndicator()));
                                 },
                               );
                             },
@@ -2566,9 +2398,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         final args = _extractCallArguments(settings.arguments);
 
                         return MaterialPageRoute(
-                          settings: RouteSettings(
-                            name: '/call',
-                          ), // Important for route recognition
+                          settings: RouteSettings(name: '/call'), // Important for route recognition
                           builder: (context) => CallScreen(
                             callId: args['callId'] ?? '',
                             contactId: args['contactId'] ?? '',
@@ -2589,9 +2419,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             id: widget.id.toString(),
                             roomId: '',
                             username: widget.message?.notification?.title ?? "",
-                            profilePic:
-                                widget.message?.data['image'] ??
-                                ''.replaceAll(AppData.imageUrl, ''),
+                            profilePic: widget.message?.data['image'] ?? ''.replaceAll(AppData.imageUrl, ''),
                           ),
                         );
                       }
@@ -2604,52 +2432,28 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       '/': (context) => UnifiedSplashUpgradeScreen(),
 
                       // Keep all your existing routes
-                      '/follow_request': (context) =>
-                          SVProfileFragment(userId: widget.id ?? ''),
-                      '/follower_notification': (context) =>
-                          SVProfileFragment(userId: widget.id ?? ''),
-                      '/un_follower_notification': (context) =>
-                          SVProfileFragment(userId: widget.id ?? ''),
-                      '/friend_request': (context) =>
-                          SVProfileFragment(userId: widget.id ?? ''),
+                      '/follow_request': (context) => SVProfileFragment(userId: widget.id ?? ''),
+                      '/follower_notification': (context) => SVProfileFragment(userId: widget.id ?? ''),
+                      '/un_follower_notification': (context) => SVProfileFragment(userId: widget.id ?? ''),
+                      '/friend_request': (context) => SVProfileFragment(userId: widget.id ?? ''),
                       '/message_received': (context) => ChatRoomScreen(
                         id: widget.id.toString(),
                         roomId: '',
                         username: widget.message?.notification?.title ?? "",
-                        profilePic:
-                            widget.message?.data['image'] ??
-                            ''.replaceAll(AppData.imageUrl, ''),
+                        profilePic: widget.message?.data['image'] ?? ''.replaceAll(AppData.imageUrl, ''),
                       ),
-                      '/comments_on_posts': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/reply_to_comment': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/like_comment_on_post': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/like_comments': (context) => PostDetailsScreen(
-                        commentId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/new_like': (context) => PostDetailsScreen(
-                        postId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/like_on_posts': (context) => PostDetailsScreen(
-                        postId: int.parse(widget.id ?? '0'),
-                      ),
-                      '/new_job_posted': (context) =>
-                          JobsDetailsScreen(jobId: widget.id ?? '0'),
-                      '/job_update': (context) =>
-                          JobsDetailsScreen(jobId: widget.id ?? '0'),
-                      '/conference_invitation': (context) =>
-                          ConferencesScreen(),
-                      '/new_discuss_case': (context) =>
-                          const DiscussionListScreen(),
-                      '/discuss_case_comment': (context) =>
-                          const DiscussionListScreen(),
-                      '/job_post_notification': (context) =>
-                          JobsDetailsScreen(jobId: widget.id ?? '0'),
+                      '/comments_on_posts': (context) => PostDetailsScreen(commentId: int.parse(widget.id ?? '0')),
+                      '/reply_to_comment': (context) => PostDetailsScreen(commentId: int.parse(widget.id ?? '0')),
+                      '/like_comment_on_post': (context) => PostDetailsScreen(commentId: int.parse(widget.id ?? '0')),
+                      '/like_comments': (context) => PostDetailsScreen(commentId: int.parse(widget.id ?? '0')),
+                      '/new_like': (context) => PostDetailsScreen(postId: int.parse(widget.id ?? '0')),
+                      '/like_on_posts': (context) => PostDetailsScreen(postId: int.parse(widget.id ?? '0')),
+                      '/new_job_posted': (context) => JobsDetailsScreen(jobId: widget.id ?? '0'),
+                      '/job_update': (context) => JobsDetailsScreen(jobId: widget.id ?? '0'),
+                      '/conference_invitation': (context) => ConferencesScreen(),
+                      '/new_discuss_case': (context) => const DiscussionListScreen(),
+                      '/discuss_case_comment': (context) => const DiscussionListScreen(),
+                      '/job_post_notification': (context) => JobsDetailsScreen(jobId: widget.id ?? '0'),
                     },
 
                     debugShowCheckedModeBanner: false,
@@ -2657,17 +2461,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     themeAnimationDuration: const Duration(microseconds: 500),
                     theme: AppTheme.lightTheme,
                     darkTheme: AppTheme.darkTheme,
-                    themeMode: appStore.isDarkMode
-                        ? ThemeMode.dark
-                        : ThemeMode.light,
+                    themeMode: appStore.isDarkMode ? ThemeMode.dark : ThemeMode.light,
                     builder: (context, child) {
-                      return SimpleFixedMediaQuery.wrap(
-                        context: context,
-                        child: child!,
-                      );
+                      return SimpleFixedMediaQuery.wrap(context: context, child: child!);
                     },
-                    localizationsDelegates:
-                        AppLocalizations.localizationsDelegates,
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
                     locale: _locale,
                   ),

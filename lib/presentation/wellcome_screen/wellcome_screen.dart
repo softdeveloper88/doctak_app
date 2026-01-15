@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import '../../core/utils/app/AppData.dart';
+
 class WelcomeScreen extends StatelessWidget {
-   WelcomeScreen(this.email,{super.key});
- String email;
+  WelcomeScreen(this.email, {super.key});
+  String email;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,36 +22,20 @@ class WelcomeScreen extends StatelessWidget {
               const Spacer(flex: 1),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
-                child: AspectRatio(
-                  aspectRatio: 2,
-                  child: Image.asset(
-                    'assets/logo/logo.png',
-                    fit: BoxFit.scaleDown,
-                  ),
-                ),
+                child: AspectRatio(aspectRatio: 2, child: Image.asset('assets/logo/logo.png', fit: BoxFit.scaleDown)),
               ),
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
-                child: AspectRatio(
-                  aspectRatio: 1.5,
-                  child: SvgPicture.string(
-                    paymentProcessIllistration,
-                    fit: BoxFit.scaleDown,
-                  ),
-                ),
+                child: AspectRatio(aspectRatio: 1.5, child: SvgPicture.string(paymentProcessIllistration, fit: BoxFit.scaleDown)),
               ),
               const Spacer(flex: 1),
               ButtonInfo(
                 title: translation(context).lbl_welcome_title,
-                description:
-                translation(context).msg_account_created,
-                button: Transform.scale(
-                  scale: 1.8,
-                  child: const CircularProgressIndicator.adaptive(),
-                ),
+                description: translation(context).msg_account_created,
+                button: Transform.scale(scale: 1.8, child: const CircularProgressIndicator.adaptive()),
                 btnText: translation(context).lbl_send_email_again,
                 press: () {
-                  sendVerificationLink(email,context);
+                  sendVerificationLink(email, context);
                 },
               ),
             ],
@@ -59,15 +44,13 @@ class WelcomeScreen extends StatelessWidget {
       ),
     );
   }
+
   Future<void> sendVerificationLink(String email, BuildContext context) async {
     // Show the loading dialog
     showLoadingDialog(context);
 
     try {
-      final response = await http.post(
-        Uri.parse('${AppData.remoteUrl}/send-verification-link'),
-        body: {'email': email},
-      );
+      final response = await http.post(Uri.parse('${AppData.remoteUrl}/send-verification-link'), body: {'email': email});
 
       // Close the loading dialog
       Navigator.of(context).pop();
@@ -75,71 +58,33 @@ class WelcomeScreen extends StatelessWidget {
       if (response.statusCode == 200) {
         // Successful API call, handle the response if needed
         // Show success Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_verification_link_sent),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => const LoginScreen(),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent), duration: Duration(seconds: 2)));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const LoginScreen()));
       } else if (response.statusCode == 422) {
         // Validation error or user email not found
         // Show error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_validation_error),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), duration: Duration(seconds: 2)));
       } else if (response.statusCode == 404) {
         // User already verified
         // Show info Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_user_already_verified),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_user_already_verified), duration: Duration(seconds: 2)));
       } else {
         // Something went wrong
         // Show error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_something_wrong),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), duration: Duration(seconds: 2)));
       }
     } catch (e) {
       // Handle network errors or other exceptions
       // Close the loading dialog
       Navigator.of(context).pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(translation(context).msg_something_wrong),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), duration: Duration(seconds: 2)));
     }
   }
-
 }
 
 class ButtonInfo extends StatelessWidget {
-  const ButtonInfo({
-    super.key,
-    required this.title,
-    required this.description,
-    this.button,
-    this.btnText,
-    required this.press,
-  });
+  const ButtonInfo({super.key, required this.title, required this.description, this.button, this.btnText, required this.press});
 
   final String title;
   final String description;
@@ -157,29 +102,20 @@ class ButtonInfo extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(fontWeight: FontWeight.bold),
-            ),
+            Text(title, style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-            ),
+            Text(description, textAlign: TextAlign.center),
             const SizedBox(height: 16 * 3),
-             ElevatedButton(
-                  onPressed: press,
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8)))),
-                  child: Text(btnText ?? translation(context).lbl_retry.toUpperCase()),
-                ),
+            ElevatedButton(
+              onPressed: press,
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+              ),
+              child: Text(btnText ?? translation(context).lbl_retry.toUpperCase()),
+            ),
             const SizedBox(height: 30),
           ],
         ),

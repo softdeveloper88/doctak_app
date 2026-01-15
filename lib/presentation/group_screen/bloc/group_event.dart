@@ -84,10 +84,8 @@ class GroupNotificationEvent extends GroupEvent {
   final String groupNotificationPush;
   final String groupNotificationEmail;
 
-  GroupNotificationEvent(
-      this.type, this.groupNotificationPush, this.groupNotificationEmail);
+  GroupNotificationEvent(this.type, this.groupNotificationPush, this.groupNotificationEmail);
 
   @override
-  List<Object?> get props =>
-      [type, groupNotificationPush, groupNotificationEmail];
+  List<Object?> get props => [type, groupNotificationPush, groupNotificationEmail];
 }

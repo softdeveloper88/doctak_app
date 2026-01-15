@@ -24,8 +24,7 @@ class ProfessionalInfoScreen extends StatefulWidget {
 bool isEditModeMap = false;
 final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
-    with SingleTickerProviderStateMixin {
+class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -40,14 +39,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
     widget.profileBloc.add(UpdateSpecialtyDropdownValue(''));
 
     // Setup animations
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
-    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
 
     _animationController.forward();
 
@@ -96,18 +90,11 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).padding.bottom + 16,
-              ),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
               child: Column(
                 children: [
                   // Information card
-                  if (!isEditModeMap)
-                    OneUIInfoBanner(
-                      message: translation(context).msg_professional_info_desc,
-                      icon: Icons.info_outline,
-                      accentColor: theme.primary,
-                    ),
+                  if (!isEditModeMap) OneUIInfoBanner(message: translation(context).msg_professional_info_desc, icon: Icons.info_outline, accentColor: theme.primary),
 
                   // Specialty section
                   Card(
@@ -127,24 +114,13 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.medical_services_outlined,
-                                  color: Colors.blue[700],
-                                  size: 18,
-                                ),
+                                decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                                child: Icon(Icons.medical_services_outlined, color: Colors.blue[700], size: 18),
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 translation(context).lbl_specialty_info,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue[700],
-                                ),
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue[700]),
                               ),
                             ],
                           ),
@@ -158,71 +134,36 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                                 if (state is PaginationLoadedState) {
                                   return Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      if (AppData.userType == "doctor")
-                                        const SizedBox(height: 10),
-                                      if (AppData.userType == "doctor")
-                                        Text(
-                                          translation(context).lbl_specialty,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
+                                      if (AppData.userType == "doctor") const SizedBox(height: 10),
+                                      if (AppData.userType == "doctor") Text(translation(context).lbl_specialty, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                                       if (AppData.userType == "doctor")
                                         Container(
                                           margin: const EdgeInsets.only(top: 8),
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                            border: Border.all(
-                                              color: theme.border,
-                                            ),
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: theme.border),
                                           ),
                                           child: CustomDropdownButtonFormField(
-                                            itemBuilder: (item) => Text(
-                                              item,
-                                              style: TextStyle(
-                                                color: theme.textPrimary,
-                                              ),
-                                            ),
+                                            itemBuilder: (item) => Text(item, style: TextStyle(color: theme.textPrimary)),
                                             items: state.specialtyDropdownValue,
-                                            value: state
-                                                .selectedSpecialtyDropdownValue,
+                                            value: state.selectedSpecialtyDropdownValue,
                                             width: double.infinity,
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 4,
-                                                ),
+                                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                             onChanged: (String? newValue) {
                                               print(newValue);
                                               print("Specialty $newValue");
-                                              widget.profileBloc.specialtyName =
-                                                  newValue!;
-                                              widget
-                                                      .profileBloc
-                                                      .userProfile
-                                                      ?.user
-                                                      ?.specialty =
-                                                  newValue;
-                                              widget.profileBloc.add(
-                                                UpdateSpecialtyDropdownValue(
-                                                  newValue,
-                                                ),
-                                              );
+                                              widget.profileBloc.specialtyName = newValue!;
+                                              widget.profileBloc.userProfile?.user?.specialty = newValue;
+                                              widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
                                             },
                                           ),
                                         ),
                                     ],
                                   );
                                 } else {
-                                  return Text(
-                                    translation(context).lbl_unknown_state,
-                                  );
+                                  return Text(translation(context).lbl_unknown_state);
                                 }
                               },
                             ),
@@ -231,23 +172,9 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                           if (!isEditModeMap)
                             TextFieldEditWidget(
                               index: 0,
-                              label: translation(
-                                context,
-                              ).lbl_title_and_specialization,
-                              value:
-                                  widget
-                                      .profileBloc
-                                      .userProfile
-                                      ?.user
-                                      ?.specialty ??
-                                  '',
-                              onSave: (value) =>
-                                  widget
-                                          .profileBloc
-                                          .userProfile
-                                          ?.user
-                                          ?.specialty =
-                                      value,
+                              label: translation(context).lbl_title_and_specialization,
+                              value: widget.profileBloc.userProfile?.user?.specialty ?? '',
+                              onSave: (value) => widget.profileBloc.userProfile?.user?.specialty = value,
                             ),
                         ],
                       ),
@@ -274,24 +201,13 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.business_center_outlined,
-                                  color: Colors.orange[700],
-                                  size: 18,
-                                ),
+                                decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                                child: Icon(Icons.business_center_outlined, color: Colors.orange[700], size: 18),
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 translation(context).lbl_workplace_info,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.orange[700],
-                                ),
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange[700]),
                               ),
                             ],
                           ),
@@ -307,29 +223,11 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             focusNode: focusNode1,
                             hints: translation(context).hint_workplace,
                             label: translation(context).lbl_current_workplace,
-                            value:
-                                widget
-                                    .profileBloc
-                                    .userProfile
-                                    ?.profile
-                                    ?.address ??
-                                '',
-                            onSave: (value) =>
-                                widget
-                                        .profileBloc
-                                        .userProfile
-                                        ?.profile
-                                        ?.address =
-                                    value,
+                            value: widget.profileBloc.userProfile?.profile?.address ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,
                           ),
 
-                          if (!isEditModeMap)
-                            Divider(
-                              color: theme.border,
-                              thickness: 1,
-                              indent: 10,
-                              endIndent: 10,
-                            ),
+                          if (!isEditModeMap) Divider(color: theme.border, thickness: 1, indent: 10, endIndent: 10),
 
                           // Years of experience field
                           TextFieldEditWidget(
@@ -341,20 +239,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             hints: translation(context).hint_years_experience,
                             focusNode: focusNode2,
                             label: translation(context).lbl_years_experience,
-                            value:
-                                widget
-                                    .profileBloc
-                                    .userProfile
-                                    ?.profile
-                                    ?.aboutMe ??
-                                '',
-                            onSave: (value) =>
-                                widget
-                                        .profileBloc
-                                        .userProfile!
-                                        .profile
-                                        ?.aboutMe =
-                                    value,
+                            value: widget.profileBloc.userProfile?.profile?.aboutMe ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile!.profile?.aboutMe = value,
                             maxLines: 1,
                           ),
                         ],
@@ -382,26 +268,13 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.emoji_events_outlined,
-                                  color: Colors.green[700],
-                                  size: 18,
-                                ),
+                                decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+                                child: Icon(Icons.emoji_events_outlined, color: Colors.green[700], size: 18),
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                translation(
-                                  context,
-                                ).lbl_achievements_and_location,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[700],
-                                ),
+                                translation(context).lbl_achievements_and_location,
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green[700]),
                               ),
                             ],
                           ),
@@ -413,37 +286,15 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             icon: Icons.star_border_rounded,
                             index: 1,
                             textInputAction: TextInputAction.newline,
-                            hints: translation(
-                              context,
-                            ).hint_notable_achievements,
+                            hints: translation(context).hint_notable_achievements,
                             focusNode: focusNode3,
-                            label: translation(
-                              context,
-                            ).lbl_notable_achievements,
-                            value:
-                                widget
-                                    .profileBloc
-                                    .userProfile
-                                    ?.profile
-                                    ?.birthplace ??
-                                '',
-                            onSave: (value) =>
-                                widget
-                                        .profileBloc
-                                        .userProfile!
-                                        .profile
-                                        ?.birthplace =
-                                    value,
+                            label: translation(context).lbl_notable_achievements,
+                            value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile!.profile?.birthplace = value,
                             textInputType: TextInputType.multiline,
                           ),
 
-                          if (!isEditModeMap)
-                            Divider(
-                              color: theme.border,
-                              thickness: 1,
-                              indent: 10,
-                              endIndent: 10,
-                            ),
+                          if (!isEditModeMap) Divider(color: theme.border, thickness: 1, indent: 10, endIndent: 10),
 
                           // Location field
                           TextFieldEditWidget(
@@ -455,20 +306,8 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             focusNode: focusNode4,
                             hints: translation(context).hint_location,
                             label: translation(context).lbl_location,
-                            value:
-                                widget
-                                    .profileBloc
-                                    .userProfile
-                                    ?.profile
-                                    ?.hobbies ??
-                                '',
-                            onSave: (value) =>
-                                widget
-                                        .profileBloc
-                                        .userProfile!
-                                        .profile
-                                        ?.hobbies =
-                                    value,
+                            value: widget.profileBloc.userProfile?.profile?.hobbies ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile!.profile?.hobbies = value,
                             maxLines: 1,
                           ),
                         ],
@@ -488,9 +327,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 2,
                         ),
                         child: Row(
@@ -500,11 +337,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen>
                             const SizedBox(width: 10),
                             Text(
                               translation(context).lbl_update,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                           ],
                         ),

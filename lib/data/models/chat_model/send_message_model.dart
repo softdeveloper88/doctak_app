@@ -1,18 +1,10 @@
 import 'dart:convert';
 
-SendMessageModel messagesFromJson(String str) =>
-    SendMessageModel.fromJson(json.decode(str));
+SendMessageModel messagesFromJson(String str) => SendMessageModel.fromJson(json.decode(str));
 String messagesToJson(SendMessageModel data) => json.encode(data.toJson());
 
 class SendMessageModel {
-  SendMessageModel({
-    this.userId,
-    this.profile,
-    this.body,
-    this.attachment,
-    this.attachmentType,
-    this.createdAt,
-  });
+  SendMessageModel({this.userId, this.profile, this.body, this.attachment, this.attachmentType, this.createdAt});
 
   SendMessageModel.fromJson(dynamic json) {
     userId = json['user_id'];

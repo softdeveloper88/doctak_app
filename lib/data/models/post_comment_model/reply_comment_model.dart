@@ -1,11 +1,10 @@
 import 'dart:convert';
+
 ReplyCommentModel replyCommentModelFromJson(String str) => ReplyCommentModel.fromJson(json.decode(str));
 String replyCommentModelToJson(ReplyCommentModel data) => json.encode(data.toJson());
+
 class ReplyCommentModel {
-  ReplyCommentModel({
-      this.success, 
-      this.pagination, 
-      this.comments,});
+  ReplyCommentModel({this.success, this.pagination, this.comments});
 
   ReplyCommentModel.fromJson(dynamic json) {
     success = json['success'];
@@ -32,21 +31,13 @@ class ReplyCommentModel {
     }
     return map;
   }
-
 }
 
 CommentsModel commentsFromJson(String str) => CommentsModel.fromJson(json.decode(str));
 String commentsToJson(CommentsModel data) => json.encode(data.toJson());
+
 class CommentsModel {
-  CommentsModel({
-      this.id, 
-      this.commentableId, 
-      this.commenterId, 
-      this.comment, 
-      this.createdAt, 
-      this.likeCount, 
-      this.userHasLiked, 
-      this.commenter,});
+  CommentsModel({this.id, this.commentableId, this.commenterId, this.comment, this.createdAt, this.likeCount, this.userHasLiked, this.commenter});
 
   CommentsModel.fromJson(dynamic json) {
     id = json['id'];
@@ -81,15 +72,13 @@ class CommentsModel {
     }
     return map;
   }
-
 }
 
 ReplyCommenter commenterFromJson(String str) => ReplyCommenter.fromJson(json.decode(str));
 String commenterToJson(ReplyCommenter data) => json.encode(data.toJson());
+
 class ReplyCommenter {
-  ReplyCommenter({
-      this.name, 
-      this.profilePic,});
+  ReplyCommenter({this.name, this.profilePic});
 
   ReplyCommenter.fromJson(dynamic json) {
     name = json['name'];
@@ -104,19 +93,13 @@ class ReplyCommenter {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }
 
 Pagination paginationFromJson(String str) => Pagination.fromJson(json.decode(str));
 String paginationToJson(Pagination data) => json.encode(data.toJson());
+
 class Pagination {
-  Pagination({
-      this.total, 
-      this.perPage, 
-      this.currentPage, 
-      this.lastPage, 
-      this.nextPageUrl, 
-      this.prevPageUrl,});
+  Pagination({this.total, this.perPage, this.currentPage, this.lastPage, this.nextPageUrl, this.prevPageUrl});
 
   Pagination.fromJson(dynamic json) {
     total = json['total'];
@@ -143,5 +126,4 @@ class Pagination {
     map['prev_page_url'] = prevPageUrl;
     return map;
   }
-
 }

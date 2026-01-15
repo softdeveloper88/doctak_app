@@ -15,9 +15,7 @@ class ChangePasswordVisibilityEvent extends ChatEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class PostLikeEvent extends ChatEvent {
@@ -33,9 +31,7 @@ class ChangeCheckBoxEvent extends ChatEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class LoadPageEvent extends ChatEvent {
@@ -52,12 +48,13 @@ class LoadContactsEvent extends ChatEvent {
   @override
   List<Object?> get props => [page, keyword];
 }
+
 class ChatReadStatusEvent extends ChatEvent {
   String? userId;
   String? roomId;
-  ChatReadStatusEvent({this.userId,this.roomId});
+  ChatReadStatusEvent({this.userId, this.roomId});
   @override
-  List<Object?> get props => [userId,Fontisto.room];
+  List<Object?> get props => [userId, Fontisto.room];
 }
 
 class LoadRoomMessageEvent extends ChatEvent {
@@ -65,9 +62,9 @@ class LoadRoomMessageEvent extends ChatEvent {
   String? userId;
   String? roomId;
   bool? isFirstLoading;
-  LoadRoomMessageEvent({this.page, this.userId, this.roomId,this.isFirstLoading=false});
+  LoadRoomMessageEvent({this.page, this.userId, this.roomId, this.isFirstLoading = false});
   @override
-  List<Object?> get props => [page, userId, roomId,isFirstLoading];
+  List<Object?> get props => [page, userId, roomId, isFirstLoading];
 }
 
 class CheckIfNeedMoreDataEvent extends ChatEvent {
@@ -88,8 +85,7 @@ class CheckIfNeedMoreMessageDataEvent extends ChatEvent {
   final int index;
   String userId;
   String roomId;
-  CheckIfNeedMoreMessageDataEvent(
-      {required this.index, required this.userId, required this.roomId});
+  CheckIfNeedMoreMessageDataEvent({required this.index, required this.userId, required this.roomId});
   @override
   List<Object?> get props => [index, userId, roomId];
 }
@@ -101,16 +97,9 @@ class SendMessageEvent extends ChatEvent {
   String? attachmentType;
   String? file;
   String? message;
-  SendMessageEvent(
-      {required this.userId,
-      required this.roomId,
-      required this.receiverId,
-      required this.attachmentType,
-      required this.file,
-      required this.message});
+  SendMessageEvent({required this.userId, required this.roomId, required this.receiverId, required this.attachmentType, required this.file, required this.message});
   @override
-  List<Object?> get props =>
-      [userId, roomId, receiverId, attachmentType, file, message];
+  List<Object?> get props => [userId, roomId, receiverId, attachmentType, file, message];
 }
 
 class DeleteMessageEvent extends ChatEvent {

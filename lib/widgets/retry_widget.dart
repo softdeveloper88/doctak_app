@@ -7,11 +7,7 @@ class RetryWidget extends StatelessWidget {
   final String errorMessage;
   final VoidCallback onRetry;
 
-  const RetryWidget({
-    Key? key,
-    required this.errorMessage,
-    required this.onRetry,
-  }) : super(key: key);
+  const RetryWidget({super.key, required this.errorMessage, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +25,7 @@ class RetryWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               errorMessage,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                color: theme.error,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontFamily: 'Poppins', color: theme.error, fontSize: 18, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -43,22 +34,13 @@ class RetryWidget extends StatelessWidget {
               style: FilledButton.styleFrom(
                 backgroundColor: theme.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 36,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
               child: Text(
                 translation(context).lbl_retry,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ],

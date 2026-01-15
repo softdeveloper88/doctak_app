@@ -1,10 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:doctak_app/main.dart';
-import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:path/path.dart' as path;
 import 'debug_attachment_helper.dart';
 
@@ -13,60 +10,36 @@ class AttachmentPreviewScreen extends StatefulWidget {
   final String type;
   final Function(File file, String caption) onSend;
 
-  const AttachmentPreviewScreen({
-    Key? key,
-    required this.file,
-    required this.type,
-    required this.onSend,
-  }) : super(key: key);
+  const AttachmentPreviewScreen({super.key, required this.file, required this.type, required this.onSend});
 
   @override
   State<AttachmentPreviewScreen> createState() => _AttachmentPreviewScreenState();
 }
 
-class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> 
-    with SingleTickerProviderStateMixin {
+class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _captionController = TextEditingController();
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Debug logging
     DebugAttachmentHelper.logFileInfo(widget.file, 'Preview Screen Init');
-    DebugAttachmentHelper.logAttachmentFlow('Preview Screen', {
-      'File Type': widget.type,
-      'File Path': widget.file.path,
-    });
-    
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+    DebugAttachmentHelper.logAttachmentFlow('Preview Screen', {'File Type': widget.type, 'File Path': widget.file.path});
+
+    _animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0.0, 0.1), end: Offset.zero).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic));
+
     _animationController.forward();
-    
+
     if (widget.type == 'video') {
       _initializeVideo();
     }
@@ -100,13 +73,10 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
             Positioned.fill(
               child: FadeTransition(
                 opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: _buildPreview(),
-                ),
+                child: SlideTransition(position: _slideAnimation, child: _buildPreview()),
               ),
             ),
-            
+
             // Top bar
             Positioned(
               top: 0,
@@ -114,52 +84,32 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
               right: 0,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
-                  ),
+                  gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent]),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(
-                          Icons.close,
-                          color: Colors.white,
-                          size: 28,
-                        ),
+                        icon: const Icon(Icons.close, color: Colors.white, size: 28),
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
                       if (widget.type == 'image') ...[
                         IconButton(
-                          icon: const Icon(
-                            Icons.crop_rotate,
-                            color: Colors.white,
-                          ),
+                          icon: const Icon(Icons.crop_rotate, color: Colors.white),
                           onPressed: () {
                             // TODO: Implement image editing
                           },
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.emoji_emotions_outlined,
-                            color: Colors.white,
-                          ),
+                          icon: const Icon(Icons.emoji_emotions_outlined, color: Colors.white),
                           onPressed: () {
                             // TODO: Implement sticker/emoji overlay
                           },
                         ),
                         IconButton(
-                          icon: const Icon(
-                            Icons.text_fields,
-                            color: Colors.white,
-                          ),
+                          icon: const Icon(Icons.text_fields, color: Colors.white),
                           onPressed: () {
                             // TODO: Implement text overlay
                           },
@@ -170,7 +120,7 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
                 ),
               ),
             ),
-            
+
             // Bottom controls
             Positioned(
               bottom: 0,
@@ -178,19 +128,10 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
               right: 0,
               child: Container(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.8),
-                      Colors.transparent,
-                    ],
-                  ),
+                  gradient: LinearGradient(begin: Alignment.bottomCenter, end: Alignment.topCenter, colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent]),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                  ),
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -198,32 +139,21 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
                       Container(
                         margin: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.2),
-                            width: 1,
-                          ),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1),
                         ),
                         child: Row(
                           children: [
                             Expanded(
                               child: TextField(
                                 controller: _captionController,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
+                                style: const TextStyle(color: Colors.white, fontSize: 16),
                                 decoration: InputDecoration(
                                   hintText: 'Add a caption...',
-                                  hintStyle: TextStyle(
-                                    color: Colors.white.withOpacity(0.6),
-                                  ),
+                                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                                   border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 12,
-                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 ),
                                 maxLines: null,
                                 textCapitalization: TextCapitalization.sentences,
@@ -235,32 +165,19 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
                               decoration: BoxDecoration(
                                 color: SVAppColorPrimary,
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: SVAppColorPrimary.withOpacity(0.3),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
+                                boxShadow: [BoxShadow(color: SVAppColorPrimary.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
                               ),
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
                                   onTap: () {
-                                    widget.onSend(
-                                      widget.file,
-                                      _captionController.text.trim(),
-                                    );
+                                    widget.onSend(widget.file, _captionController.text.trim());
                                     // Don't pop here - let the onSend callback handle navigation
                                   },
                                   borderRadius: BorderRadius.circular(25),
                                   child: Container(
                                     padding: const EdgeInsets.all(12),
-                                    child: const Icon(
-                                      Icons.send_rounded,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
+                                    child: const Icon(Icons.send_rounded, color: Colors.white, size: 24),
                                   ),
                                 ),
                               ),
@@ -290,10 +207,7 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
         return _buildDocumentPreview();
       default:
         return const Center(
-          child: Text(
-            'Unsupported file type',
-            style: TextStyle(color: Colors.white),
-          ),
+          child: Text('Unsupported file type', style: TextStyle(color: Colors.white)),
         );
     }
   }
@@ -313,26 +227,13 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    color: Colors.white,
-                    size: 64,
-                  ),
+                  const Icon(Icons.error_outline, color: Colors.white, size: 64),
                   const SizedBox(height: 16),
-                  Text(
-                    'Failed to load image',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
+                  Text('Failed to load image', style: const TextStyle(color: Colors.white, fontSize: 16)),
                   const SizedBox(height: 8),
                   Text(
                     'Path: ${widget.file.path}',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -343,11 +244,7 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
             if (wasSynchronouslyLoaded) {
               return child;
             }
-            return AnimatedOpacity(
-              opacity: frame == null ? 0 : 1,
-              duration: const Duration(milliseconds: 300),
-              child: child,
-            );
+            return AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 300), child: child);
           },
         ),
       ),
@@ -356,11 +253,7 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
 
   Widget _buildVideoPreview() {
     if (!_isVideoInitialized || _videoController == null) {
-      return const Center(
-        child: CircularProgressIndicator(
-          color: Colors.white,
-        ),
-      );
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
     }
 
     return GestureDetector(
@@ -376,43 +269,21 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AspectRatio(
-            aspectRatio: _videoController!.value.aspectRatio,
-            child: VideoPlayer(_videoController!),
-          ),
+          AspectRatio(aspectRatio: _videoController!.value.aspectRatio, child: VideoPlayer(_videoController!)),
           if (!_videoController!.value.isPlaying)
             Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.play_arrow,
-                color: Colors.white,
-                size: 48,
-              ),
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.5), shape: BoxShape.circle),
+              child: const Icon(Icons.play_arrow, color: Colors.white, size: 48),
             ),
           // Video duration
           Positioned(
             bottom: 16,
             right: 16,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                _formatDuration(_videoController!.value.duration),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                ),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(20)),
+              child: Text(_formatDuration(_videoController!.value.duration), style: const TextStyle(color: Colors.white, fontSize: 14)),
             ),
           ),
         ],
@@ -469,59 +340,29 @@ class _AttachmentPreviewScreenState extends State<AttachmentPreviewScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10))],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              iconData,
-              size: 80,
-              color: iconColor,
-            ),
+            Icon(iconData, size: 80, color: iconColor),
             const SizedBox(height: 24),
             Text(
               fileName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 8),
-            Text(
-              _formatFileSize(fileSize),
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            ),
+            Text(_formatFileSize(fileSize), style: TextStyle(fontSize: 14, color: Colors.grey[600])),
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
               child: Text(
                 fileExtension.replaceAll('.', '').toUpperCase(),
-                style: TextStyle(
-                  color: iconColor,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: iconColor, fontWeight: FontWeight.w600, fontSize: 12),
               ),
             ),
           ],

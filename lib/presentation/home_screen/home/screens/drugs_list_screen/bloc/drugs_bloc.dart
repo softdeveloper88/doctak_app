@@ -1,10 +1,6 @@
-import 'package:dio/dio.dart';
-import 'package:doctak_app/core/errors/failures.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'drugs_event.dart';
@@ -28,7 +24,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
     });
   }
 
-  _onGetJobs(LoadPageEvent event, Emitter<DrugsState> emit) async {
+  Future<void> _onGetJobs(LoadPageEvent event, Emitter<DrugsState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
@@ -42,12 +38,7 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
 
     // ProgressDialogUtils.showProgressDialog();
     // try {
-    DrugsModel response = await apiManager.getDrugsList(
-        'Bearer ${AppData.userToken}',
-        '${pageNumber}',
-        event.countryId ?? "1",
-        event.searchTerm ?? '',
-        event.type == 'Generic' ? 'Active' : "Brand");
+    DrugsModel response = await apiManager.getDrugsList('Bearer ${AppData.userToken}', '$pageNumber', event.countryId ?? "1", event.searchTerm ?? '', event.type == 'Generic' ? 'Active' : "Brand");
     numberOfPage = response.data?.lastPage ?? 0;
     if (pageNumber < numberOfPage + 1) {
       pageNumber = pageNumber + 1;
@@ -66,18 +57,13 @@ class DrugsBloc extends Bloc<DrugsEvent, DrugsState> {
     // }
   }
 
-  _onGetJobs1(GetPost event, Emitter<DrugsState> emit) async {
+  Future<void> _onGetJobs1(GetPost event, Emitter<DrugsState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
-    print('33' + event.type);
+    print('33${event.type}');
     // emit(PaginationLoadingState());
     // try {
-    final response = await apiManager.getDrugsList(
-        'Bearer ${AppData.userToken}',
-        "1",
-        event.countryId,
-        event.searchTerm,
-        event.type);
+    final response = await apiManager.getDrugsList('Bearer ${AppData.userToken}', "1", event.countryId, event.searchTerm, event.type);
     print("ddd${response.data?.data!.length}");
     drugsData.clear();
     drugsData.addAll(response.data?.data ?? []);

@@ -44,9 +44,7 @@ class AiChatLocalStorage {
 
     try {
       final List sessionsList = jsonDecode(sessionsString);
-      return sessionsList
-          .map((json) => AiChatSessionModel.fromJson(json))
-          .toList();
+      return sessionsList.map((json) => AiChatSessionModel.fromJson(json)).toList();
     } catch (e) {
       print('Error deserializing sessions: $e');
       return null;
@@ -54,16 +52,10 @@ class AiChatLocalStorage {
   }
 
   // Save messages for a session
-  static Future<void> saveMessages(
-    String sessionId,
-    List<AiChatMessageModel> messages,
-  ) async {
+  static Future<void> saveMessages(String sessionId, List<AiChatMessageModel> messages) async {
     final prefs = await _prefs;
     final messagesJson = messages.map((message) => message.toJson()).toList();
-    await prefs.setString(
-      '$_messagesPrefix$sessionId',
-      jsonEncode(messagesJson),
-    );
+    await prefs.setString('$_messagesPrefix$sessionId', jsonEncode(messagesJson));
     await _updateLastUpdateTime();
   }
 
@@ -76,18 +68,14 @@ class AiChatLocalStorage {
       return null;
     }
 
-    final messagesString = await prefs.getString(
-      '${_messagesPrefix}$sessionId',
-    );
+    final messagesString = await prefs.getString('$_messagesPrefix$sessionId');
     if (messagesString == null) {
       return null;
     }
 
     try {
       final List messagesList = jsonDecode(messagesString);
-      return messagesList
-          .map((json) => AiChatMessageModel.fromJson(json))
-          .toList();
+      return messagesList.map((json) => AiChatMessageModel.fromJson(json)).toList();
     } catch (e) {
       print('Error deserializing messages: $e');
       return null;
@@ -95,10 +83,7 @@ class AiChatLocalStorage {
   }
 
   // Add a new message to a session's message list
-  static Future<void> addMessage(
-    String sessionId,
-    AiChatMessageModel message,
-  ) async {
+  static Future<void> addMessage(String sessionId, AiChatMessageModel message) async {
     final messages = await getMessages(sessionId) ?? [];
     messages.add(message);
     await saveMessages(sessionId, messages);

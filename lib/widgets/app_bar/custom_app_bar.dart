@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:doctak_app/core/app_export.dart';
 import 'package:sizer/sizer.dart';
 
 // ignore: must_be_immutable
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  CustomAppBar({
-    Key? key,
-    this.height,
-    this.leadingWidth,
-    this.leading,
-    this.title,
-    this.centerTitle,
-    this.actions,
-  }) : super(
-          key: key,
-        );
+  const CustomAppBar({super.key, this.height, this.leadingWidth, this.leading, this.title, this.centerTitle, this.actions});
 
   final double? height;
 
@@ -46,8 +35,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size(
-        100.w,
-        height ?? 40,
-      );
+  Size get preferredSize => Size(100.w, height ?? 40);
 }

@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/group_model/group_about_model.dart';
@@ -55,193 +54,112 @@ class GroupBloc extends Bloc<GroupEvent, GroupState> {
     on<GroupPostRequestEvent>(_groupPostRequest);
   }
 
-  void _updateSpecialtyDropdownValues(
-      UpdateSpecialtyDropdownValue event, Emitter<GroupState> emit) async {
+  void _updateSpecialtyDropdownValues(UpdateSpecialtyDropdownValue event, Emitter<GroupState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
     List<String>? secondDropdownValues = await _onGetSpecialty();
-    emit(PaginationLoadedState(
-      secondDropdownValues ?? [],
-      secondDropdownValues?.first ?? '',
-    ));
+    emit(PaginationLoadedState(secondDropdownValues ?? [], secondDropdownValues?.first ?? ''));
   }
 
   void _groupDetails(GroupDetailsEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupDetailsModel =
-        await apiManager.groupDetails('Bearer ${AppData.userToken}', event.id);
-    groupAboutModel =
-        await apiManager.groupAbout('Bearer ${AppData.userToken}', event.id);
-    groupPostModel = await apiManager.groupPost(
-        'Bearer ${AppData.userToken}', event.id, '0');
-    var response = await apiManager.groupNotificationUpdate(
-        'Bearer ${AppData.userToken}', 'get', '', '');
+    groupDetailsModel = await apiManager.groupDetails('Bearer ${AppData.userToken}', event.id);
+    groupAboutModel = await apiManager.groupAbout('Bearer ${AppData.userToken}', event.id);
+    groupPostModel = await apiManager.groupPost('Bearer ${AppData.userToken}', event.id, '0');
+    var response = await apiManager.groupNotificationUpdate('Bearer ${AppData.userToken}', 'get', '', '');
     print(response);
     print(AppData.logInUserId);
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    emit(PaginationLoadedState([], ''));
   }
 
-  void _groupNotification(
-      GroupNotificationEvent event, Emitter<GroupState> emit) async {
+  void _groupNotification(GroupNotificationEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    var response = await apiManager.groupNotificationUpdate(
-        'Bearer ${AppData.userToken}',
-        event.type,
-        event.groupNotificationPush,
-        event.groupNotificationEmail);
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    var response = await apiManager.groupNotificationUpdate('Bearer ${AppData.userToken}', event.type, event.groupNotificationPush, event.groupNotificationEmail);
+    emit(PaginationLoadedState([], ''));
   }
 
-  void _groupMemberRequest(
-      GroupMemberRequestEvent event, Emitter<GroupState> emit) async {
+  void _groupMemberRequest(GroupMemberRequestEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupMemberRequestModel = await apiManager.groupMemberRequest(
-        'Bearer ${AppData.userToken}', event.id);
+    groupMemberRequestModel = await apiManager.groupMemberRequest('Bearer ${AppData.userToken}', event.id);
     print(groupMemberRequestModel?.toJson());
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    emit(PaginationLoadedState([], ''));
   }
 
-  void _groupPostRequest(
-      GroupPostRequestEvent event, Emitter<GroupState> emit) async {
+  void _groupPostRequest(GroupPostRequestEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupPostModelRequest = await apiManager.groupPostRequest(
-        'Bearer ${AppData.userToken}', event.id, event.offset);
+    groupPostModelRequest = await apiManager.groupPostRequest('Bearer ${AppData.userToken}', event.id, event.offset);
     print(groupPostModelRequest?.toJson());
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    emit(PaginationLoadedState([], ''));
   }
 
   void _groupMembers(GroupMembersEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
-    groupMemberModel = await apiManager.groupMembers(
-        'Bearer ${AppData.userToken}', event.id, event.keyword);
+    groupMemberModel = await apiManager.groupMembers('Bearer ${AppData.userToken}', event.id, event.keyword);
     print(groupMemberRequestModel?.toJson());
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    emit(PaginationLoadedState([], ''));
   }
 
-  void _groupMemberRequestUpdate(
-      GroupMemberRequestUpdateEvent event, Emitter<GroupState> emit) async {
+  void _groupMemberRequestUpdate(GroupMemberRequestUpdateEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
     print(event.groupId);
     print(event.id);
     print(event.status);
-    var response = await apiManager.groupMemberRequestUpdate(
-        'Bearer ${AppData.userToken}', event.id, event.groupId, event.status);
+    var response = await apiManager.groupMemberRequestUpdate('Bearer ${AppData.userToken}', event.id, event.groupId, event.status);
     print(response.data);
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    emit(PaginationLoadedState([], ''));
   }
 
   void _listGroups(ListGroupsEvent event, Emitter<GroupState> emit) async {
     emit(PaginationLoadingState());
 
-    groupListModel = await apiManager.listGroup(
-        'Bearer ${AppData.userToken}', AppData.logInUserId);
-    emit(PaginationLoadedState(
-      [],
-      '',
-    ));
+    groupListModel = await apiManager.listGroup('Bearer ${AppData.userToken}', AppData.logInUserId);
+    emit(PaginationLoadedState([], ''));
   }
 
-  void _createGroup(
-      UpdateSpecialtyDropdownValue1 event, Emitter<GroupState> emit) async {
+  void _createGroup(UpdateSpecialtyDropdownValue1 event, Emitter<GroupState> emit) async {
     // Simulate fetching second dropdown values based on the first dropdown selection
-    print(
-      name.toString(),
-    );
-    print(
-      selectSpecialtyList.toString(),
-    );
-    print(
-      tags.toString(),
-    );
-    print(
-      location.toString(),
-    );
-    print(
-      interest.toString(),
-    );
-    print(
-      language.toString(),
-    );
-    print(
-      description.toString(),
-    );
-    print(
-      memberLimit.toString(),
-    );
-    print(
-      addAdmin.toString(),
-    );
-    print(
-      status.toString(),
-    );
-    print(
-      postPermission.toString(),
-    );
-    print(
-      allowInSearch.toString(),
-    );
-    print(
-      visibility.toString(),
-    );
-    print(
-      joinRequest.toString(),
-    );
-    print(
-      customRules.toString(),
-    );
-    print(
-      coverPicture.toString(),
-    );
-    print(
-      profilePicture.toString(),
-    );
+    print(name.toString());
+    print(selectSpecialtyList.toString());
+    print(tags.toString());
+    print(location.toString());
+    print(interest.toString());
+    print(language.toString());
+    print(description.toString());
+    print(memberLimit.toString());
+    print(addAdmin.toString());
+    print(status.toString());
+    print(postPermission.toString());
+    print(allowInSearch.toString());
+    print(visibility.toString());
+    print(joinRequest.toString());
+    print(customRules.toString());
+    print(coverPicture.toString());
+    print(profilePicture.toString());
     try {
       final response = await apiManager.groupStore(
-          'Bearer ${AppData.userToken}',
-          name ?? '',
-          selectSpecialtyList.toString(),
-          tags.toString(),
-          location ?? '',
-          interest.toString(),
-          language.toString(),
-          description ?? "",
-          memberLimit ?? '50',
-          AppData.logInUserId,
-          status ?? '1',
-          postPermission ?? "Open",
-          allowInSearch ?? "1",
-          visibility ?? "1",
-          joinRequest ?? '1',
-          customRules ?? 'No Rules Set',
-          profilePicture ?? '',
-          coverPicture ?? "");
-      globalMessengerKey.currentState
-          ?.showSnackBar(SnackBar(content: Text(response.toString())));
-      emit(PaginationLoadedState(
-        [],
-        '',
-      ));
+        'Bearer ${AppData.userToken}',
+        name ?? '',
+        selectSpecialtyList.toString(),
+        tags.toString(),
+        location ?? '',
+        interest.toString(),
+        language.toString(),
+        description ?? "",
+        memberLimit ?? '50',
+        AppData.logInUserId,
+        status ?? '1',
+        postPermission ?? "Open",
+        allowInSearch ?? "1",
+        visibility ?? "1",
+        joinRequest ?? '1',
+        customRules ?? 'No Rules Set',
+        profilePicture ?? '',
+        coverPicture ?? "",
+      );
+      globalMessengerKey.currentState?.showSnackBar(SnackBar(content: Text(response.toString())));
+      emit(PaginationLoadedState([], ''));
     } catch (e) {
       emit(DataError('$e'));
-      globalMessengerKey.currentState
-          ?.showSnackBar(SnackBar(content: Text("$e")));
+      globalMessengerKey.currentState?.showSnackBar(SnackBar(content: Text("$e")));
     }
   }
 

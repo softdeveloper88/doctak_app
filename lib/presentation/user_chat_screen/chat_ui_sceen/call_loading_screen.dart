@@ -11,20 +11,13 @@ class CallLoadingScreen extends StatefulWidget {
   final bool isVideoCall;
   final VoidCallback onCancel;
 
-  const CallLoadingScreen({
-    Key? key,
-    required this.contactName,
-    required this.contactAvatar,
-    required this.isVideoCall,
-    required this.onCancel,
-  }) : super(key: key);
+  const CallLoadingScreen({super.key, required this.contactName, required this.contactAvatar, required this.isVideoCall, required this.onCancel});
 
   @override
   CallLoadingScreenState createState() => CallLoadingScreenState();
 }
 
-class CallLoadingScreenState extends State<CallLoadingScreen>
-    with SingleTickerProviderStateMixin {
+class CallLoadingScreenState extends State<CallLoadingScreen> with SingleTickerProviderStateMixin {
   CallStatus _status = CallStatus.calling;
   late AnimationController _animationController;
 
@@ -34,10 +27,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..repeat(reverse: true);
+    _animationController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
   }
 
   @override
@@ -94,9 +84,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
     final statusColor = _getStatusColor(theme);
 
     return Scaffold(
-      backgroundColor: theme.isDark
-          ? const Color(0xFF0D1B2A)
-          : const Color(0xFF1B2838),
+      backgroundColor: theme.isDark ? const Color(0xFF0D1B2A) : const Color(0xFF1B2838),
       body: SafeArea(
         child: Stack(
           fit: StackFit.expand,
@@ -104,11 +92,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
             // Background blur effect
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                color: theme.isDark
-                    ? const Color(0xFF0D1B2A).withOpacity(0.8)
-                    : const Color(0xFF1B2838).withOpacity(0.8),
-              ),
+              child: Container(color: theme.isDark ? const Color(0xFF0D1B2A).withValues(alpha: 0.8) : const Color(0xFF1B2838).withValues(alpha: 0.8)),
             ),
 
             // Main content
@@ -125,45 +109,23 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
                 // User name - always white for dark call screen background
                 Text(
                   widget.contactName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                 ),
 
                 const SizedBox(height: 12),
 
                 // Call status indicator
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.surfaceVariant.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(20)),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        widget.isVideoCall
-                            ? Icons.videocam_rounded
-                            : Icons.phone_rounded,
-                        color: statusColor,
-                        size: 18,
-                      ),
+                      Icon(widget.isVideoCall ? Icons.videocam_rounded : Icons.phone_rounded, color: statusColor, size: 18),
                       const SizedBox(width: 8),
                       Text(
                         statusText,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins',
-                        ),
+                        style: TextStyle(color: statusColor, fontSize: 16, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
                       ),
                     ],
                   ),
@@ -200,19 +162,9 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
           decoration: BoxDecoration(
             color: theme.error,
             shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: theme.error.withOpacity(0.4),
-                blurRadius: 12,
-                spreadRadius: 2,
-              ),
-            ],
+            boxShadow: [BoxShadow(color: theme.error.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)],
           ),
-          child: const Icon(
-            Icons.call_end_rounded,
-            color: Colors.white,
-            size: 30,
-          ),
+          child: const Icon(Icons.call_end_rounded, color: Colors.white, size: 30),
         ),
       ),
     );
@@ -235,9 +187,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: theme.success.withOpacity(
-                        (1 - _animationController.value) * 0.2,
-                      ),
+                      color: theme.success.withValues(alpha: (1 - _animationController.value) * 0.2),
                     ),
                   ),
                 );
@@ -255,12 +205,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
                 height: 130,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: theme.primary.withOpacity(
-                      0.3 + _animationController.value * 0.5,
-                    ),
-                    width: 3,
-                  ),
+                  border: Border.all(color: theme.primary.withValues(alpha: 0.3 + _animationController.value * 0.5), width: 3),
                 ),
               );
             },
@@ -273,13 +218,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: theme.surfaceVariant,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 4))],
           ),
           child: ClipOval(
             child: widget.contactAvatar.isNotEmpty
@@ -289,15 +228,13 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
                     errorBuilder: (context, error, stackTrace) => const Icon(
                       Icons.person_rounded,
                       size: 60,
-                      color: Colors
-                          .white70, // Always white for dark call background
+                      color: Colors.white70, // Always white for dark call background
                     ),
                   )
                 : const Icon(
                     Icons.person_rounded,
                     size: 60,
-                    color:
-                        Colors.white70, // Always white for dark call background
+                    color: Colors.white70, // Always white for dark call background
                   ),
           ),
         ),
@@ -308,10 +245,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
   Widget _buildStatusIndicator(OneUITheme theme) {
     switch (_status) {
       case CallStatus.calling:
-        return CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-          strokeWidth: 3,
-        );
+        return CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(theme.primary), strokeWidth: 3);
 
       case CallStatus.ringing:
         return _buildRingingDots(theme);
@@ -323,11 +257,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
         return Icon(Icons.phone_disabled_rounded, color: theme.error, size: 40);
 
       case CallStatus.offline:
-        return Icon(
-          Icons.signal_wifi_off_rounded,
-          color: theme.error,
-          size: 40,
-        );
+        return Icon(Icons.signal_wifi_off_rounded, color: theme.error, size: 40);
 
       case CallStatus.rejected:
         return Icon(Icons.call_end_rounded, color: theme.error, size: 40);
@@ -354,7 +284,7 @@ class CallLoadingScreenState extends State<CallLoadingScreen>
               height: size,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
-                color: theme.success.withOpacity(opacity),
+                color: theme.success.withValues(alpha: opacity),
                 shape: BoxShape.circle,
               ),
             );

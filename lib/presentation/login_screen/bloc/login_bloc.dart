@@ -16,10 +16,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<ChangePasswordVisibilityEvent>(_changePasswordVisibility);
   }
 
-  void _onLoginButtonPressed(
-    LoginButtonPressed event,
-    Emitter<LoginState> emit,
-  ) async {
+  void _onLoginButtonPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
     emit(LoginLoading());
     ProgressDialogUtils.showProgressDialog();
     try {
@@ -42,18 +39,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       Response response1 = await dio.post(
         '${AppData.remoteUrl2}/login',
         // Add query parameters
-        data: FormData.fromMap({
-          'email': event.username,
-          'password': event.password,
-          'device_token': event.deviceToken,
-          'device_type': deviceType,
-          'device_id': deviceId,
-        }),
+        data: FormData.fromMap({'email': event.username, 'password': event.password, 'device_token': event.deviceToken, 'device_type': deviceType, 'device_id': deviceId}),
       );
       // log(response);
-      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(
-        response1.data,
-      );
+      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(response1.data);
 
       if (response.success == true) {
         // if (response.user!.emailVerifiedAt == null) {
@@ -66,16 +55,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           await prefs.initialize();
           await prefs.setString('token', response.token ?? '');
           await prefs.setBool('rememberMe', event.rememberMe);
-          await prefs.setString(
-            'email_verified_at',
-            response.user?.emailVerifiedAt ?? '',
-          );
+          await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
           await prefs.setString('device_token', event.deviceToken ?? '');
           await prefs.setString('userId', response.user?.id ?? '');
-          await prefs.setString(
-            'name',
-            '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}',
-          );
+          await prefs.setString('name', '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}');
           await prefs.setString('profile_pic', response.user?.profilePic ?? '');
           await prefs.setString('email', response.user?.email ?? '');
           await prefs.setString('phone', response.user?.phone ?? '');
@@ -84,39 +67,24 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
           await prefs.setString('title', response.user?.title ?? '');
           await prefs.setString('city', response.user?.state ?? '');
-          await prefs.setString(
-            'countryOrigin',
-            response.user?.countryOrigin ?? '',
-          );
+          await prefs.setString('countryOrigin', response.user?.countryOrigin ?? '');
           await prefs.setString('college', response.user?.college ?? '');
           await prefs.setString('clinicName', response.user?.clinicName ?? '');
           await prefs.setString('dob', response.user?.dob ?? '');
           await prefs.setString('user_type', response.user?.userType ?? '');
-          await prefs.setString(
-            'countryName',
-            response.country?.countryName ?? '',
-          );
+          await prefs.setString('countryName', response.country?.countryName ?? '');
           await prefs.setString('currency', response.country?.currency ?? '');
           if (response.university != null) {
-            await prefs.setString(
-              'university',
-              response.university?.name ?? '',
-            );
+            await prefs.setString('university', response.university?.name ?? '');
           }
-          await prefs.setString(
-            'practicingCountry',
-            response.user?.practicingCountry ?? '',
-          );
+          await prefs.setString('practicingCountry', response.user?.practicingCountry ?? '');
           await prefs.setString('gender', response.user?.gender ?? '');
-          await prefs.setString(
-            'country',
-            response.user?.country.toString() ?? '',
-          );
+          await prefs.setString('country', response.user?.country.toString() ?? '');
           String? userToken = await prefs.getString('token') ?? '';
           String? userId = await prefs.getString('userId') ?? '';
 
           String? name = await prefs.getString('name') ?? '';
-          String? profile_pic = await prefs.getString('profile_pic') ?? '';
+          String? profilePic = await prefs.getString('profile_pic') ?? '';
           String? background = await prefs.getString('background') ?? '';
           String? email = await prefs.getString('email') ?? '';
           String? userType = await prefs.getString('user_type') ?? '';
@@ -128,11 +96,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
           if (userToken != '') {
             AppData.userToken = userToken;
-            AppData.deviceToken =
-                await prefs.getString('device_token') ?? event.deviceToken;
+            AppData.deviceToken = await prefs.getString('device_token') ?? event.deviceToken;
             AppData.logInUserId = userId;
             AppData.name = name;
-            AppData.profile_pic = profile_pic;
+            AppData.profile_pic = profilePic;
 
             AppData.university = university;
             AppData.userType = response.user?.userType ?? '';
@@ -148,14 +115,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           await prefs.initialize();
           await prefs.setString('token', response.token ?? '');
           String? userToken = await prefs.getString('token') ?? '';
-          await prefs.setString(
-            'email_verified_at',
-            response.user?.emailVerifiedAt ?? '',
-          );
+          await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
           AppData.userToken = response.token ?? '';
           AppData.logInUserId = response.user?.id ?? '';
-          AppData.name =
-              '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}';
+          AppData.name = '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}';
           AppData.profile_pic = response.user?.profilePic ?? '';
           if (response.university != null) {
             AppData.university = response.university?.name ?? '';
@@ -171,9 +134,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           AppData.currency = response.country?.currency ?? '';
         }
 
-        emit(
-          LoginSuccess(isEmailVerified: response.user?.emailVerifiedAt ?? ''),
-        );
+        emit(LoginSuccess(isEmailVerified: response.user?.emailVerifiedAt ?? ''));
         ProgressDialogUtils.hideProgressDialog();
       } else {
         ProgressDialogUtils.hideProgressDialog();
@@ -187,10 +148,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  void _onSocialLoginButtonPressed(
-    SocialLoginButtonPressed event,
-    Emitter<LoginState> emit,
-  ) async {
+  void _onSocialLoginButtonPressed(SocialLoginButtonPressed event, Emitter<LoginState> emit) async {
     emit(LoginLoading());
     ProgressDialogUtils.showProgressDialog();
     try {
@@ -224,9 +182,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           'device_token': event.deviceToken,
         }),
       );
-      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(
-        response1.data,
-      );
+      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(response1.data);
 
       //   final response = await apiService.loginWithSocial(
       //       event.email,
@@ -252,16 +208,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         await prefs.initialize();
         await prefs.setBool('rememberMe', true);
         await prefs.setString('device_token', event.deviceToken ?? '');
-        await prefs.setString(
-          'email_verified_at',
-          response.user?.emailVerifiedAt ?? '',
-        );
+        await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
         await prefs.setString('token', response.token ?? '');
         await prefs.setString('userId', response.user?.id ?? '');
-        await prefs.setString(
-          'name',
-          '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}',
-        );
+        await prefs.setString('name', '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}');
         await prefs.setString('profile_pic', response.user?.profilePic ?? '');
         await prefs.setString('email', response.user?.email ?? '');
         await prefs.setString('phone', response.user?.phone ?? '');
@@ -270,35 +220,23 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
         await prefs.setString('title', response.user?.title ?? '');
         await prefs.setString('city', response.user?.state ?? '');
-        await prefs.setString(
-          'countryOrigin',
-          response.user?.countryOrigin ?? '',
-        );
+        await prefs.setString('countryOrigin', response.user?.countryOrigin ?? '');
         await prefs.setString('college', response.user?.college ?? '');
         await prefs.setString('clinicName', response.user?.clinicName ?? '');
         await prefs.setString('dob', response.user?.dob ?? '');
         await prefs.setString('user_type', response.user?.userType ?? '');
-        await prefs.setString(
-          'countryName',
-          response.country?.countryName ?? '',
-        );
+        await prefs.setString('countryName', response.country?.countryName ?? '');
         await prefs.setString('currency', response.country?.currency ?? '');
         if (response.university != null) {
           await prefs.setString('university', response.university?.name ?? '');
         }
-        await prefs.setString(
-          'practicingCountry',
-          response.user?.practicingCountry ?? '',
-        );
+        await prefs.setString('practicingCountry', response.user?.practicingCountry ?? '');
         await prefs.setString('gender', response.user?.gender ?? '');
-        await prefs.setString(
-          'country',
-          response.user?.country.toString() ?? '',
-        );
+        await prefs.setString('country', response.user?.country.toString() ?? '');
         String? userToken = await prefs.getString('token') ?? '';
         String? userId = await prefs.getString('userId') ?? '';
         String? name = await prefs.getString('name') ?? '';
-        String? profile_pic = await prefs.getString('profile_pic') ?? '';
+        String? profilePic = await prefs.getString('profile_pic') ?? '';
         String? background = await prefs.getString('background') ?? '';
         String? email = await prefs.getString('email') ?? '';
         String? specialty = await prefs.getString('specialty') ?? '';
@@ -308,12 +246,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         String? currency = await prefs.getString('currency') ?? '';
 
         if (userToken != '') {
-          AppData.deviceToken =
-              await prefs.getString('device_token') ?? event.deviceToken;
+          AppData.deviceToken = await prefs.getString('device_token') ?? event.deviceToken;
           AppData.userToken = userToken;
           AppData.logInUserId = userId;
           AppData.name = name;
-          AppData.profile_pic = profile_pic;
+          AppData.profile_pic = profilePic;
           AppData.university = university;
           AppData.userType = userType;
           AppData.background = background;
@@ -352,10 +289,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  _changePasswordVisibility(
-    ChangePasswordVisibilityEvent event,
-    Emitter<LoginState> emit,
-  ) {
+  void _changePasswordVisibility(ChangePasswordVisibilityEvent event, Emitter<LoginState> emit) {
     emit(LoginState(isShowPassword: event.value));
     // emit(state.copyWith(isShowPassword: event.value));
   }

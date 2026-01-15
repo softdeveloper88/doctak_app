@@ -13,9 +13,7 @@ void showLoadingDialog(BuildContext context, {String? title, String? message}) {
     builder: (BuildContext dialogContext) {
       return Dialog(
         backgroundColor: theme.cardBackground,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24.0),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.0)),
         elevation: 0,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -24,33 +22,20 @@ void showLoadingDialog(BuildContext context, {String? title, String? message}) {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Loading indicator
-              SizedBox(
-                height: 56,
-                width: 56,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-                ),
-              ),
+              SizedBox(height: 56, width: 56, child: CircularProgressIndicator(strokeWidth: 3.0, valueColor: AlwaysStoppedAnimation<Color>(theme.primary))),
               const SizedBox(height: 24.0),
 
               // Title
               Text(
-                title ??
-                    translation(dialogContext).lbl_sending_verification_link,
+                title ?? translation(dialogContext).lbl_sending_verification_link,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 17.0,
-                  fontWeight: FontWeight.w600,
-                  color: theme.textPrimary,
-                ),
+                style: TextStyle(fontSize: 17.0, fontWeight: FontWeight.w600, color: theme.textPrimary),
               ),
               const SizedBox(height: 8.0),
 
               // Message
               Text(
-                message ??
-                    translation(dialogContext).msg_verification_email_wait,
+                message ?? translation(dialogContext).msg_verification_email_wait,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14.0, color: theme.textSecondary),
               ),
@@ -74,14 +59,8 @@ void showSimpleLoadingDialog(BuildContext context) {
       return Center(
         child: Container(
           padding: const EdgeInsets.all(24.0),
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: CircularProgressIndicator(
-            strokeWidth: 3.0,
-            valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-          ),
+          decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(16.0)),
+          child: CircularProgressIndicator(strokeWidth: 3.0, valueColor: AlwaysStoppedAnimation<Color>(theme.primary)),
         ),
       );
     },

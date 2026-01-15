@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_event.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/search_people/bloc/search_people_state.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/search_people/components/SVSearchCardComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_people.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../utils/SVCommon.dart';
@@ -29,10 +26,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
 
   @override
   void initState() {
-    searchPeopleBloc.add(SearchPeopleLoadPageEvent(
-      page: 1,
-      searchTerm: '',
-    ));
+    searchPeopleBloc.add(SearchPeopleLoadPageEvent(page: 1, searchTerm: ''));
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
     });
@@ -50,12 +44,7 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      searchPeopleBloc.add(
-        SearchPeopleLoadPageEvent(
-          page: 1,
-          searchTerm: query,
-        ),
-      );
+      searchPeopleBloc.add(SearchPeopleLoadPageEvent(page: 1, searchTerm: query));
       print('Search query: $query');
       // Replace this with your actual search logic and API calls
     });
@@ -69,13 +58,13 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
         backgroundColor: svGetScaffoldColor(),
         surfaceTintColor: svGetScaffoldColor(),
         iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(translation(context).lbl_search_peoples, style: boldTextStyle(size: 18,fontFamily: 'Poppins',)),
+        title: Text(translation(context).lbl_search_peoples, style: boldTextStyle(size: 18, fontFamily: 'Poppins')),
         leading: IconButton(
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-            onPressed: () {
-              widget.backPress!();
-            }),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
+          onPressed: () {
+            widget.backPress!();
+          },
+        ),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -85,36 +74,29 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
               isSearchShow = !isSearchShow;
             },
             child: isSearchShow
-                ? Icon(Icons.close,
-                        size: 25,
-                        // height: 16,
-                        // width: 16,
-                        // fit: BoxFit.cover,
-                        color: svGetBodyColor())
-                    .paddingLeft(4)
-                : Image.asset(
-                    'assets/images/search.png',
-                    height: 17,
-                    width: 17,
+                ? Icon(
+                    Icons.close,
+                    size: 25,
+                    // height: 16,
+                    // width: 16,
+                    // fit: BoxFit.cover,
                     color: svGetBodyColor(),
-                  ),
-          ).paddingRight(16)
+                  ).paddingLeft(4)
+                : Image.asset('assets/images/search.png', height: 17, width: 17, color: svGetBodyColor()),
+          ).paddingRight(16),
         ],
       ),
       body: Column(
         children: [
-
           if (isSearchShow) searchDataField(),
-          SearchPeopleList(
-            searchPeopleBloc: searchPeopleBloc,
-          )
+          SearchPeopleList(searchPeopleBloc: searchPeopleBloc),
           // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
         ],
       ),
     );
   }
 
-  searchDataField() {
+  Padding searchDataField() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
@@ -126,9 +108,10 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
         //   right: 16,
         // ),
         decoration: BoxDecoration(
-            color: context.cardColor.withOpacity(0.4),
-            borderRadius: radius(5),
-            border: Border.all(color: Colors.black, width: 0.3)),
+          color: context.cardColor.withValues(alpha: 0.4),
+          borderRadius: radius(5),
+          border: Border.all(color: Colors.black, width: 0.3),
+        ),
         child: Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: AppTextField(
@@ -138,13 +121,8 @@ class _SVSearchFragmentState extends State<SVSearchFragment> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: translation(context).lbl_search_people,
-              hintStyle: secondaryTextStyle(color: svGetBodyColor(),fontFamily: 'Poppins',),
-              suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                      height: 17,
-                      width: 17,
-                      fit: BoxFit.cover,
-                      color: svGetBodyColor())
-                  .paddingAll(16),
+              hintStyle: secondaryTextStyle(color: svGetBodyColor(), fontFamily: 'Poppins'),
+              suffixIcon: Image.asset('images/socialv/icons/ic_Search.png', height: 17, width: 17, fit: BoxFit.cover, color: svGetBodyColor()).paddingAll(16),
             ),
           ),
         ),

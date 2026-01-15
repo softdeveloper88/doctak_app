@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
@@ -28,8 +27,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     });
   }
   bool _isLoading = false;
-  StreamController<bool> _loadingController =
-      StreamController<bool>.broadcast();
+  final StreamController<bool> _loadingController = StreamController<bool>.broadcast();
 
   // Getter for loading state stream
   Stream<bool> get loadingStream => _loadingController.stream;
@@ -45,8 +43,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     _loadingController.close();
   }
 
-  _onGetUserInfo(
-      SearchPeopleLoadPageEvent event, Emitter<SearchPeopleState> emit) async {
+  Future<void> _onGetUserInfo(SearchPeopleLoadPageEvent event, Emitter<SearchPeopleState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
@@ -57,8 +54,7 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-      SearchPeopleModel response = await apiManager.getSearchPeople(
-          'Bearer ${AppData.userToken}', '$pageNumber', event.searchTerm ?? '');
+      SearchPeopleModel response = await apiManager.getSearchPeople('Bearer ${AppData.userToken}', '$pageNumber', event.searchTerm ?? '');
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
@@ -76,13 +72,12 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     }
   }
 
-  _setUserFollow(SetUserFollow event, Emitter<SearchPeopleState> emit) async {
+  Future<void> _setUserFollow(SetUserFollow event, Emitter<SearchPeopleState> emit) async {
     // emit(DrugsDataInitial());
     // ProgressDialogUtils.showProgressDialog();
 
     try {
-      var response = await apiManager.setUserFollow(
-          'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
+      var response = await apiManager.setUserFollow('Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       setLoading(false);
       emit(SearchPeoplePaginationLoadedState());
     } catch (e) {
@@ -92,17 +87,13 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
     }
   }
 
-  _onGetUserInfo1(GetPost event, Emitter<SearchPeopleState> emit) async {
+  Future<void> _onGetUserInfo1(GetPost event, Emitter<SearchPeopleState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
 
     // emit(PaginationLoadingState());
     try {
-      SearchPeopleModel response = await apiManager.getSearchPeople(
-        'Bearer ${AppData.userToken}',
-        "1",
-        '',
-      );
+      SearchPeopleModel response = await apiManager.getSearchPeople('Bearer ${AppData.userToken}', "1", '');
       print("ddd${response.data!.length}");
       searchPeopleData.clear();
       searchPeopleData.addAll(response.data ?? []);

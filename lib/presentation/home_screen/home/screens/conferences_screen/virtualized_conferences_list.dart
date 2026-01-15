@@ -13,19 +13,13 @@ class VirtualizedConferencesList extends StatefulWidget {
   final ConferenceBloc conferenceBloc;
   final ScrollController? scrollController;
 
-  const VirtualizedConferencesList({
-    super.key,
-    required this.conferenceBloc,
-    this.scrollController,
-  });
+  const VirtualizedConferencesList({super.key, required this.conferenceBloc, this.scrollController});
 
   @override
-  State<VirtualizedConferencesList> createState() =>
-      _VirtualizedConferencesListState();
+  State<VirtualizedConferencesList> createState() => _VirtualizedConferencesListState();
 }
 
-class _VirtualizedConferencesListState
-    extends State<VirtualizedConferencesList> {
+class _VirtualizedConferencesListState extends State<VirtualizedConferencesList> {
   // Track which conference items are currently visible for optimization
   final Set<int> _visibleConferenceIndices = {};
 
@@ -40,9 +34,7 @@ class _VirtualizedConferencesListState
     final bloc = widget.conferenceBloc;
     final theme = OneUITheme.of(context);
 
-    return bloc.conferenceList.isEmpty
-        ? _buildEmptyState(context, theme)
-        : _buildVirtualizedConferencesList(theme);
+    return bloc.conferenceList.isEmpty ? _buildEmptyState(context, theme) : _buildVirtualizedConferencesList(theme);
   }
 
   // Empty state widget - One UI 8.5 style
@@ -53,25 +45,13 @@ class _VirtualizedConferencesListState
         children: [
           Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Icon(
-              Icons.event_busy_rounded,
-              size: 48,
-              color: theme.primary,
-            ),
+            decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(24)),
+            child: Icon(Icons.event_busy_rounded, size: 48, color: theme.primary),
           ),
           const SizedBox(height: 16),
           Text(
             translation(context).msg_no_conference_found,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: theme.textSecondary,
-            ),
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w500, color: theme.textSecondary),
           ),
         ],
       ),
@@ -84,10 +64,7 @@ class _VirtualizedConferencesListState
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: EdgeInsets.only(
-        top: 10,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
+      padding: EdgeInsets.only(top: 10, bottom: MediaQuery.of(context).padding.bottom + 16),
       itemCount: bloc.conferenceList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -100,13 +77,11 @@ class _VirtualizedConferencesListState
         }
 
         // Show shimmer loader at the bottom if loading more
-        if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-            index >= bloc.conferenceList.length - 1) {
+        if (bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.conferenceList.length - 1) {
           return SizedBox(height: 400, child: ConferencesShimmerLoader());
         }
         // Show ads every 5 items
-        else if ((index % 5 == 0 && index != 0) &&
-            AppData.isShowGoogleNativeAds) {
+        else if ((index % 5 == 0 && index != 0) && AppData.isShowGoogleNativeAds) {
           return NativeAdWidget();
         }
         // Regular conference item
@@ -120,16 +95,12 @@ class _VirtualizedConferencesListState
   // Lazy loading conference item implementation
   Widget _buildLazyLoadConferenceItem(int index) {
     return VisibilityDetector(
-      key: Key(
-        'conference_visibility_${widget.conferenceBloc.conferenceList[index].id}',
-      ),
+      key: Key('conference_visibility_${widget.conferenceBloc.conferenceList[index].id}'),
       onVisibilityChanged: (visibilityInfo) {
         final isVisible = visibilityInfo.visibleFraction > 0.1;
         _handleVisibilityChanged(index, isVisible);
       },
-      child: MemoryOptimizedConferenceItem(
-        conference: widget.conferenceBloc.conferenceList[index],
-      ),
+      child: MemoryOptimizedConferenceItem(conference: widget.conferenceBloc.conferenceList[index]),
     );
   }
 

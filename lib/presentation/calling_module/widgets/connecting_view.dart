@@ -19,7 +19,7 @@ class ConnectingView extends StatelessWidget {
   final int reconnectCountdown;
 
   const ConnectingView({
-    Key? key,
+    super.key,
     required this.contactName,
     required this.isIncoming,
     required this.isVideoCall,
@@ -28,7 +28,7 @@ class ConnectingView extends StatelessWidget {
     this.customMessage,
     this.callEndReason,
     this.reconnectCountdown = 0,
-  }) : super(key: key);
+  });
 
   // Calling screen colors - always dark for consistent experience
   static const _callBackgroundDark = Color(0xFF1A2332);
@@ -88,20 +88,14 @@ class ConnectingView extends StatelessWidget {
       displayIcon = isVideoCall ? Icons.videocam_rounded : Icons.phone_rounded;
       indicatorColor = theme.primary;
     } else {
-      displayMessage = isIncoming
-          ? translation(context).lbl_connecting
-          : "${translation(context).lbl_ringing}...";
+      displayMessage = isIncoming ? translation(context).lbl_connecting : "${translation(context).lbl_ringing}...";
       displayIcon = isVideoCall ? Icons.videocam_rounded : Icons.phone_rounded;
       indicatorColor = theme.primary;
     }
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [_callBackgroundLight, _callBackgroundDark],
-        ),
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [_callBackgroundLight, _callBackgroundDark]),
       ),
       child: Center(
         child: Column(
@@ -127,10 +121,7 @@ class ConnectingView extends StatelessWidget {
                             child: Container(
                               width: 100,
                               height: 100,
-                              decoration: BoxDecoration(
-                                color: indicatorColor.withOpacity(0.3),
-                                shape: BoxShape.circle,
-                              ),
+                              decoration: BoxDecoration(color: indicatorColor.withValues(alpha: 0.3), shape: BoxShape.circle),
                             ),
                           ),
                         );
@@ -146,40 +137,21 @@ class ConnectingView extends StatelessWidget {
                       width: 100,
                       height: 100,
                       decoration: BoxDecoration(
-                        color: indicatorColor.withOpacity(0.15),
+                        color: indicatorColor.withValues(alpha: 0.15),
                         shape: BoxShape.circle,
                         border: Border.all(color: indicatorColor, width: 2),
                       ),
                     ),
 
                   // Main indicator (only when still connecting)
-                  if (showSpinner)
-                    SizedBox(
-                      width: 80,
-                      height: 80,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          indicatorColor,
-                        ),
-                        strokeWidth: 3,
-                      ),
-                    ),
+                  if (showSpinner) SizedBox(width: 80, height: 80, child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(indicatorColor), strokeWidth: 3)),
 
                   // Center icon
                   Container(
                     width: 60,
                     height: 60,
-                    decoration: BoxDecoration(
-                      color: showSpinner
-                          ? indicatorColor
-                          : indicatorColor.withOpacity(0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      displayIcon,
-                      color: showSpinner ? Colors.white : indicatorColor,
-                      size: 28,
-                    ),
+                    decoration: BoxDecoration(color: showSpinner ? indicatorColor : indicatorColor.withValues(alpha: 0.2), shape: BoxShape.circle),
+                    child: Icon(displayIcon, color: showSpinner ? Colors.white : indicatorColor, size: 28),
                   ),
                 ],
               ),
@@ -189,13 +161,7 @@ class ConnectingView extends StatelessWidget {
             // Contact name - WHITE text for visibility
             Text(
               contactName,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Poppins',
-                letterSpacing: 0.5,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold, fontFamily: 'Poppins', letterSpacing: 0.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -203,12 +169,7 @@ class ConnectingView extends StatelessWidget {
             // Status message
             Text(
               displayMessage,
-              style: TextStyle(
-                color: showSpinner ? Colors.white70 : indicatorColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Poppins',
-              ),
+              style: TextStyle(color: showSpinner ? Colors.white70 : indicatorColor, fontSize: 16, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
               textAlign: TextAlign.center,
             ),
 
@@ -216,14 +177,11 @@ class ConnectingView extends StatelessWidget {
             if (reconnectCountdown > 0) ...[
               const SizedBox(height: 20),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
-                  color: theme.warning.withOpacity(0.2),
+                  color: theme.warning.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: theme.warning.withOpacity(0.4)),
+                  border: Border.all(color: theme.warning.withValues(alpha: 0.4)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -232,12 +190,7 @@ class ConnectingView extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       '${translation(context).lbl_disconnecting_in} $reconnectCountdown ${translation(context).lbl_seconds}',
-                      style: TextStyle(
-                        color: theme.warning,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        fontFamily: 'Poppins',
-                      ),
+                      style: TextStyle(color: theme.warning, fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
                     ),
                   ],
                 ),
@@ -250,35 +203,16 @@ class ConnectingView extends StatelessWidget {
             // Shows when connection is being established or reconnecting
             if (callEndReason == null)
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          theme.primary.withOpacity(0.8),
-                        ),
-                      ),
-                    ),
+                    SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.primary.withValues(alpha: 0.8)))),
                     const SizedBox(width: 10),
                     Text(
                       translation(context).lbl_auto_connecting,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
-                        fontSize: 13,
-                        fontFamily: 'Poppins',
-                      ),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 13, fontFamily: 'Poppins'),
                     ),
                   ],
                 ),

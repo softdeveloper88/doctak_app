@@ -1,18 +1,10 @@
 import 'dart:convert';
 
-InterestModel interestModelFromJson(String str) =>
-    InterestModel.fromJson(json.decode(str));
+InterestModel interestModelFromJson(String str) => InterestModel.fromJson(json.decode(str));
 String interestModelToJson(InterestModel data) => json.encode(data.toJson());
 
 class InterestModel {
-  InterestModel({
-    this.id,
-    this.userId,
-    this.interestType,
-    this.interestDetails,
-    this.createdAt,
-    this.updatedAt,
-  });
+  InterestModel({this.id, this.userId, this.interestType, this.interestDetails, this.createdAt, this.updatedAt});
 
   InterestModel.fromJson(dynamic json) {
     id = json['id'];

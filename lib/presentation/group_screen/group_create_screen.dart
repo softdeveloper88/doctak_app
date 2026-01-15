@@ -3,9 +3,7 @@ import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
@@ -42,13 +40,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
             Navigator.pop(context);
           },
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon:
-                Image.asset('assets/images/search.png', height: 20, width: 20),
-          )
-        ],
+        actions: [IconButton(onPressed: () {}, icon: Image.asset('assets/images/search.png', height: 20, width: 20))],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -84,7 +76,7 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
 class StepProgress extends StatelessWidget {
   final int step;
 
-  const StepProgress({Key? key, required this.step}) : super(key: key);
+  const StepProgress({super.key, required this.step});
 
   @override
   Widget build(BuildContext context) {
@@ -119,111 +111,70 @@ class StepProgress extends StatelessWidget {
               color: context.cardColor,
               child: Column(
                 children: [
-                  Text(
-                    translation(context).lbl_step1_info,
-                    style: TextStyle(color: svGetBodyColor()),
-                  ),
+                  Text(translation(context).lbl_step1_info, style: TextStyle(color: svGetBodyColor())),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Stack(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomImageView(
-                            imagePath: 'assets/images/un_fill_line.png',
-                            height: 60,
-                            width: 90,
-                          ),
-                          CustomImageView(
-                            imagePath: 'assets/images/un_fille_line_2.png',
-                            height: 40,
-                            width: 160,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                    child: Stack(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomImageView(imagePath: 'assets/images/un_fill_line.png', height: 60, width: 90),
+                            CustomImageView(imagePath: 'assets/images/un_fille_line_2.png', height: 40, width: 160),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/person.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/person.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_basic_info),
+                              ],
                             ),
-                            Text(translation(context).lbl_basic_info)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/un_fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/un_fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/privacy.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/privacy.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_privacy),
+                              ],
                             ),
-                            Text(translation(context).lbl_privacy)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/un_fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/un_fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/camera.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/camera.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_image),
+                              ],
                             ),
-                            Text(translation(context).lbl_image)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/un_fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/un_fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/check.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/check.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_finish),
+                              ],
                             ),
-                            Text(translation(context).lbl_finish)
-                          ]),
-                        ],
-                      ),
-                    ]),
-                  )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )
@@ -233,112 +184,73 @@ class StepProgress extends StatelessWidget {
               color: context.cardColor,
               child: Column(
                 children: [
-                  Text(
-                    translation(context).lbl_step2_info,
-                    style: TextStyle(color: svGetBodyColor()),
-                  ),
+                  Text(translation(context).lbl_step2_info, style: TextStyle(color: svGetBodyColor())),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Stack(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomImageView(
-                            imagePath: 'assets/images/fill_line_1.png',
-                            height: 60,
-                            width: 90,
-                          ),
-                          CustomImageView(
-                            imagePath: 'assets/images/un_fille_line_2.png',
-                            height: 40,
-                            width: 160,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                    child: Stack(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomImageView(imagePath: 'assets/images/fill_line_1.png', height: 60, width: 90),
+                            CustomImageView(imagePath: 'assets/images/un_fille_line_2.png', height: 40, width: 160),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/person.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/person.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_basic_info),
+                              ],
                             ),
-                            Text(translation(context).lbl_basic_info)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Image.asset('assets/images/privacy.png', color: grey),
+                                  ),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/privacy.png',
-                                  color: grey,
-                                ),
-                              ),
+                                Text(translation(context).lbl_privacy),
+                              ],
                             ),
-                            Text(translation(context).lbl_privacy)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/un_fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/un_fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/camera.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/camera.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_image),
+                              ],
                             ),
-                            Text(translation(context).lbl_image)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/un_fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/un_fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/check.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/check.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_finish),
+                              ],
                             ),
-                            Text(translation(context).lbl_finish)
-                          ]),
-                        ],
-                      ),
-                    ]),
-                  )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )
@@ -348,118 +260,77 @@ class StepProgress extends StatelessWidget {
               color: context.cardColor,
               child: Column(
                 children: [
-                  Text(
-                    translation(context).lbl_step3_info,
-                    style: TextStyle(color: svGetBodyColor()),
-                  ),
+                  Text(translation(context).lbl_step3_info, style: TextStyle(color: svGetBodyColor())),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Stack(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomImageView(
-                            imagePath: 'assets/images/fill_line_1.png',
-                            height: 60,
-                            width: 90,
-                          ),
-                          CustomImageView(
-                            imagePath: 'assets/images/fill_line_2.png',
-                            height: 50,
-                            width: 80,
-                          ),
-                          CustomImageView(
-                            imagePath: 'assets/images/un_fill_line_3.png',
-                            height: 50,
-                            width: 100,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                    child: Stack(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomImageView(imagePath: 'assets/images/fill_line_1.png', height: 60, width: 90),
+                            CustomImageView(imagePath: 'assets/images/fill_line_2.png', height: 50, width: 80),
+                            CustomImageView(imagePath: 'assets/images/un_fill_line_3.png', height: 50, width: 100),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/person.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/person.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_basic_info),
+                              ],
                             ),
-                            Text(translation(context).lbl_basic_info)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Image.asset('assets/images/privacy.png', color: grey),
+                                  ),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/privacy.png',
-                                  color: grey,
-                                ),
-                              ),
+                                Text(translation(context).lbl_privacy),
+                              ],
                             ),
-                            Text(translation(context).lbl_privacy)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Image.asset('assets/images/camera.png', color: grey),
+                                  ),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/camera.png',
-                                  color: grey,
-                                ),
-                              ),
+                                Text(translation(context).lbl_image),
+                              ],
                             ),
-                            Text(translation(context).lbl_image)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/images/un_fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/un_fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/check.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/check.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_finish),
+                              ],
                             ),
-                            Text(translation(context).lbl_finish)
-                          ]),
-                        ],
-                      ),
-                    ]),
-                  )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )
@@ -469,119 +340,80 @@ class StepProgress extends StatelessWidget {
               color: context.cardColor,
               child: Column(
                 children: [
-                  Text(
-                    translation(context).lbl_step3_info,
-                    style: TextStyle(color: svGetBodyColor()),
-                  ),
+                  Text(translation(context).lbl_step3_info, style: TextStyle(color: svGetBodyColor())),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Stack(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomImageView(
-                            imagePath: 'assets/images/fill_line_1.png',
-                            height: 60,
-                            width: 90,
-                          ),
-                          CustomImageView(
-                            imagePath: 'assets/images/fill_line_2.png',
-                            height: 50,
-                            width: 80,
-                          ),
-                          CustomImageView(
-                            imagePath: 'assets/images/fill_line_3.png',
-                            height: 50,
-                            width: 100,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                    child: Stack(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomImageView(imagePath: 'assets/images/fill_line_1.png', height: 60, width: 90),
+                            CustomImageView(imagePath: 'assets/images/fill_line_2.png', height: 50, width: 80),
+                            CustomImageView(imagePath: 'assets/images/fill_line_3.png', height: 50, width: 100),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset('assets/images/person.png')),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/person.png',
-                                ),
-                              ),
+                                Text(translation(context).lbl_basic_info),
+                              ],
                             ),
-                            Text(translation(context).lbl_basic_info)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Image.asset('assets/images/privacy.png', color: grey),
+                                  ),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/privacy.png',
-                                  color: grey,
-                                ),
-                              ),
+                                Text(translation(context).lbl_privacy),
+                              ],
                             ),
-                            Text(translation(context).lbl_privacy)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Image.asset('assets/images/camera.png', color: grey),
+                                  ),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/camera.png',
-                                  color: grey,
-                                ),
-                              ),
+                                Text(translation(context).lbl_image),
+                              ],
                             ),
-                            Text(translation(context).lbl_image)
-                          ]),
-                          Column(children: [
-                            Container(
-                              height: 60,
-                              width: 60,
-                              decoration: const BoxDecoration(
-                                image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/images/fill_step.png'),
+                            Column(
+                              children: [
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  decoration: const BoxDecoration(image: DecorationImage(image: AssetImage('assets/images/fill_step.png'))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Image.asset('assets/images/check.png', color: grey),
+                                  ),
                                 ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Image.asset(
-                                  'assets/images/check.png',
-                                  color: grey,
-                                ),
-                              ),
+                                Text(translation(context).lbl_finish),
+                              ],
                             ),
-                            Text(translation(context).lbl_finish)
-                          ]),
-                        ],
-                      ),
-                    ]),
-                  )
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -592,11 +424,7 @@ class StepProgress extends StatelessWidget {
 
   List<Widget> _buildProgressImages() {
     return List.generate(3, (index) {
-      return CustomImageView(
-        imagePath: _getProgressImagePath(index),
-        height: 60,
-        width: 90,
-      );
+      return CustomImageView(imagePath: _getProgressImagePath(index), height: 60, width: 90);
     });
   }
 
@@ -617,15 +445,8 @@ class StepProgress extends StatelessWidget {
           Container(
             height: 60,
             width: 60,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(_getStepImagePath(index)),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Image.asset(_stepIcons[index]),
-            ),
+            decoration: BoxDecoration(image: DecorationImage(image: AssetImage(_getStepImagePath(index)))),
+            child: Padding(padding: const EdgeInsets.all(16.0), child: Image.asset(_stepIcons[index])),
           ),
           Text(_stepTitles[index]),
         ],
@@ -641,26 +462,16 @@ class StepProgress extends StatelessWidget {
     }
   }
 
-  static const List<String> _stepTitles = [
-    "Basic Info",
-    "Privacy",
-    "Image",
-    "Finish"
-  ];
+  static const List<String> _stepTitles = ["Basic Info", "Privacy", "Image", "Finish"];
 
-  static const List<String> _stepIcons = [
-    'assets/images/person.png',
-    'assets/images/privacy.png',
-    'assets/images/camera.png',
-    'assets/images/check.png'
-  ];
+  static const List<String> _stepIcons = ['assets/images/person.png', 'assets/images/privacy.png', 'assets/images/camera.png', 'assets/images/check.png'];
 }
 
 class Step1 extends StatefulWidget {
   final VoidCallback onNextStep;
   final GroupBloc groupBloc;
 
-  Step1(this.onNextStep, this.groupBloc, {Key? key}) : super(key: key);
+  const Step1(this.onNextStep, this.groupBloc, {super.key});
 
   @override
   State<Step1> createState() => _Step1State();
@@ -696,89 +507,75 @@ class _Step1State extends State<Step1> {
               onSave: (value) => widget.groupBloc.name = value,
             ),
             BlocBuilder<GroupBloc, GroupState>(
-                bloc: widget.groupBloc,
-                builder: (context, state) {
-                  if (state is PaginationLoadedState) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Wrap(
-                              spacing: 8.0,
-                              runSpacing: 4.0,
-                              children: widget.groupBloc.selectSpecialtyList
-                                  .map((tag) => Chip(
-                                        backgroundColor:
-                                            Colors.blue.withOpacity(0.3),
-                                        label: Text(tag['value']),
-                                        deleteIcon: const Icon(
-                                          Icons.cancel,
-                                          color: Colors.blue,
-                                        ),
-                                        onDeleted: () {
-                                          setState(() {});
-                                          widget.groupBloc.selectSpecialtyList
-                                              .remove(tag);
-                                        },
-                                      ))
-                                  .toList(),
-                            ),
+              bloc: widget.groupBloc,
+              builder: (context, state) {
+                if (state is PaginationLoadedState) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Wrap(
+                            spacing: 8.0,
+                            runSpacing: 4.0,
+                            children: widget.groupBloc.selectSpecialtyList
+                                .map(
+                                  (tag) => Chip(
+                                    backgroundColor: Colors.blue.withValues(alpha: 0.3),
+                                    label: Text(tag['value']),
+                                    deleteIcon: const Icon(Icons.cancel, color: Colors.blue),
+                                    onDeleted: () {
+                                      setState(() {});
+                                      widget.groupBloc.selectSpecialtyList.remove(tag);
+                                    },
+                                  ),
+                                )
+                                .toList(),
                           ),
-                          Text(
-                            translation(context).lbl_specialty_colon,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w500),
-                          ),
-                          CustomDropdownButtonFormField(
-                            itemBuilder: (item) => Text(
-                              item??'',
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                            items: state.specialtyDropdownValue,
-                            value: state.selectedSpecialtyDropdownValue,
-                            width: double.infinity,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 0,
-                            ),
-                            onChanged: (String? newValue) {
-                              print(newValue);
-                              setState(() {});
-                              widget.groupBloc.selectSpecialtyList
-                                  .add({'id': '0', 'value': newValue});
-                              // widget.profileBloc.specialtyName = newValue!;
-                              // widget.profileBloc
-                              //     .add(UpdateSpecialtyDropdownValue(newValue!));
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return Container();
-                  }
-                }),
+                        ),
+                        Text(translation(context).lbl_specialty_colon, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                        CustomDropdownButtonFormField(
+                          itemBuilder: (item) => Text(item ?? '', style: const TextStyle(color: Colors.black)),
+                          items: state.specialtyDropdownValue,
+                          value: state.selectedSpecialtyDropdownValue,
+                          width: double.infinity,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                          onChanged: (String? newValue) {
+                            print(newValue);
+                            setState(() {});
+                            widget.groupBloc.selectSpecialtyList.add({'id': '0', 'value': newValue});
+                            // widget.profileBloc.specialtyName = newValue!;
+                            // widget.profileBloc
+                            //     .add(UpdateSpecialtyDropdownValue(newValue!));
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Container();
+                }
+              },
+            ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
                 children: widget.groupBloc.tags
-                    .map((tag) => Chip(
-                          backgroundColor: Colors.blue.withOpacity(0.3),
-                          label: Text(tag['value']),
-                          deleteIcon: const Icon(
-                            Icons.cancel,
-                            color: Colors.blue,
-                          ),
-                          onDeleted: () {
-                            setState(() {});
-                            widget.groupBloc.tags.remove(tag);
-                          },
-                        ))
+                    .map(
+                      (tag) => Chip(
+                        backgroundColor: Colors.blue.withValues(alpha: 0.3),
+                        label: Text(tag['value']),
+                        deleteIcon: const Icon(Icons.cancel, color: Colors.blue),
+                        onDeleted: () {
+                          setState(() {});
+                          widget.groupBloc.tags.remove(tag);
+                        },
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -796,32 +593,24 @@ class _Step1State extends State<Step1> {
                 widget.groupBloc.tags.add({'value': value});
               }),
             ),
-            TextFieldEditWidget(
-              isEditModeMap: true,
-              icon: Icons.description,
-              index: 2,
-              label: 'Location:',
-              value: "",
-              onSave: (value) => widget.groupBloc.location = value,
-            ),
+            TextFieldEditWidget(isEditModeMap: true, icon: Icons.description, index: 2, label: 'Location:', value: "", onSave: (value) => widget.groupBloc.location = value),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
                 children: widget.groupBloc.interest
-                    .map((tag) => Chip(
-                          backgroundColor: Colors.blue.withOpacity(0.3),
-                          label: Text(tag['value']),
-                          deleteIcon: const Icon(
-                            Icons.cancel,
-                            color: Colors.blue,
-                          ),
-                          onDeleted: () {
-                            setState(() {});
-                            widget.groupBloc.interest.remove(tag);
-                          },
-                        ))
+                    .map(
+                      (tag) => Chip(
+                        backgroundColor: Colors.blue.withValues(alpha: 0.3),
+                        label: Text(tag['value']),
+                        deleteIcon: const Icon(Icons.cancel, color: Colors.blue),
+                        onDeleted: () {
+                          setState(() {});
+                          widget.groupBloc.interest.remove(tag);
+                        },
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -845,18 +634,17 @@ class _Step1State extends State<Step1> {
                 spacing: 8.0,
                 runSpacing: 4.0,
                 children: widget.groupBloc.language
-                    .map((tag) => Chip(
-                          backgroundColor: Colors.blue.withOpacity(0.3),
-                          label: Text(tag['value']),
-                          deleteIcon: const Icon(
-                            Icons.cancel,
-                            color: Colors.blue,
-                          ),
-                          onDeleted: () {
-                            setState(() {});
-                            widget.groupBloc.language.remove(tag);
-                          },
-                        ))
+                    .map(
+                      (tag) => Chip(
+                        backgroundColor: Colors.blue.withValues(alpha: 0.3),
+                        label: Text(tag['value']),
+                        deleteIcon: const Icon(Icons.cancel, color: Colors.blue),
+                        onDeleted: () {
+                          setState(() {});
+                          widget.groupBloc.language.remove(tag);
+                        },
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -883,13 +671,14 @@ class _Step1State extends State<Step1> {
               onSave: (value) => widget.groupBloc.description = value,
             ),
             TextFieldEditWidget(
-                textInputType: TextInputType.number,
-                isEditModeMap: true,
-                icon: Icons.description,
-                index: 2,
-                label: 'Member Limit*',
-                value: widget.groupBloc.memberLimit,
-                onSave: (value) => widget.groupBloc.memberLimit = value),
+              textInputType: TextInputType.number,
+              isEditModeMap: true,
+              icon: Icons.description,
+              index: 2,
+              label: 'Member Limit*',
+              value: widget.groupBloc.memberLimit,
+              onSave: (value) => widget.groupBloc.memberLimit = value,
+            ),
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(8.0),
@@ -913,25 +702,17 @@ class _Step1State extends State<Step1> {
 
 List<String> listStatus = ['Active', 'Deactivate'];
 List<String> listPostStatus = ['On Admin Approval', 'Already Approved'];
-List<String> listWhoCanPostStatus = [
-  'Open,Every one can post',
-  'Members,Only members',
-  'Admin'
-];
+List<String> listWhoCanPostStatus = ['Open,Every one can post', 'Members,Only members', 'Admin'];
 List<String> listAllowSearch = ['Yes', 'No'];
 List<String> listVisibility = ['Only me', 'Public', 'Followers'];
-List<String> listJointRequest = [
-  'Yes,User can Join directly',
-  'No,Approval Required'
-];
+List<String> listJointRequest = ['Yes,User can Join directly', 'No,Approval Required'];
 
 class Step2 extends StatefulWidget {
   final VoidCallback onBackStep;
   final VoidCallback onNextStep;
   final GroupBloc groupBloc;
 
-  const Step2(this.onNextStep, this.onBackStep, this.groupBloc, {Key? key})
-      : super(key: key);
+  const Step2(this.onNextStep, this.onBackStep, this.groupBloc, {super.key});
 
   @override
   State<Step2> createState() => _Step2State();
@@ -964,26 +745,14 @@ class _Step2State extends State<Step2> {
             // ),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Status:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text('Status:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ),
             CustomDropdownButtonFormField(
-              itemBuilder: (item) => Text(
-                item??'',
-                style: const TextStyle(color: Colors.black),
-              ),
+              itemBuilder: (item) => Text(item ?? '', style: const TextStyle(color: Colors.black)),
               items: listStatus,
               value: listStatus.first,
               width: double.infinity,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 0,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               onChanged: (String? newValue) {
                 setState(() {
                   widget.groupBloc.status = newValue == 'Active' ? '1' : '0';
@@ -1017,26 +786,14 @@ class _Step2State extends State<Step2> {
             // ),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Who can post :',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text('Who can post :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ),
             CustomDropdownButtonFormField(
-              itemBuilder: (item) => Text(
-                item??'',
-                style: const TextStyle(color: Colors.black),
-              ),
+              itemBuilder: (item) => Text(item ?? '', style: const TextStyle(color: Colors.black)),
               items: listWhoCanPostStatus,
               value: listWhoCanPostStatus.first,
               width: double.infinity,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 0,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               onChanged: (String? newValue) {
                 setState(() {
                   // a. Open (Open, Every one can post), b. Members (Members, Only members) c. Admin (Admin)
@@ -1052,91 +809,53 @@ class _Step2State extends State<Step2> {
             ),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Allow in Search :',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text('Allow in Search :', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ),
             CustomDropdownButtonFormField(
-              itemBuilder: (item) => Text(
-                item??'',
-                style: const TextStyle(color: Colors.black),
-              ),
+              itemBuilder: (item) => Text(item ?? '', style: const TextStyle(color: Colors.black)),
               items: listAllowSearch,
               value: listAllowSearch.first,
               width: double.infinity,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 0,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.groupBloc.allowInSearch =
-                      newValue == 'Yes' ? '1' : '0';
+                  widget.groupBloc.allowInSearch = newValue == 'Yes' ? '1' : '0';
                 });
               },
             ),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Visibility:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text('Visibility:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ),
             CustomDropdownButtonFormField(
-              itemBuilder: (item) => Text(
-                item??'',
-                style: const TextStyle(color: Colors.black),
-              ),
+              itemBuilder: (item) => Text(item ?? '', style: const TextStyle(color: Colors.black)),
               items: listVisibility,
               value: listVisibility.first,
               width: double.infinity,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 0,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               onChanged: (String? newValue) {
                 setState(() {
                   widget.groupBloc.visibility = newValue == 'Only me'
                       ? 'only_me'
                       : newValue == 'Public'
-                          ? 'public'
-                          : 'followers';
+                      ? 'public'
+                      : 'followers';
                 });
               },
             ),
             const Padding(
               padding: EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Joined Request:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              child: Text('Joined Request:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ),
             CustomDropdownButtonFormField(
-              itemBuilder: (item) => Text(
-                item??'',
-                style: const TextStyle(color: Colors.black),
-              ),
+              itemBuilder: (item) => Text(item ?? '', style: const TextStyle(color: Colors.black)),
               items: listJointRequest,
               value: listJointRequest.first,
               width: double.infinity,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 0,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
               onChanged: (String? newValue) {
                 setState(() {
-                  widget.groupBloc.joinRequest =
-                      newValue == 'Yes,User can Join directly' ? '1' : '0';
+                  widget.groupBloc.joinRequest = newValue == 'Yes,User can Join directly' ? '1' : '0';
                 });
               },
             ),
@@ -1155,12 +874,7 @@ class _Step2State extends State<Step2> {
                 Container(
                   width: 45.w,
                   padding: const EdgeInsets.all(8.0),
-                  child: svAppButton(
-                    color: Colors.grey,
-                    context: context,
-                    onTap: widget.onBackStep,
-                    text: 'Back',
-                  ),
+                  child: svAppButton(color: Colors.grey, context: context, onTap: widget.onBackStep, text: 'Back'),
                 ),
                 Container(
                   width: 45.w,
@@ -1191,8 +905,7 @@ class Step3 extends StatefulWidget {
   final VoidCallback onBackStep;
   final GroupBloc groupBloc;
 
-  const Step3(this.onNextStep, this.onBackStep, this.groupBloc, {Key? key})
-      : super(key: key);
+  const Step3(this.onNextStep, this.onBackStep, this.groupBloc, {super.key});
 
   @override
   State<Step3> createState() => _Step3State();
@@ -1308,61 +1021,60 @@ class _Step3State extends State<Step3> {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: FileImage(File(_selectedCoverFile ?? '')),
-                        fit: BoxFit.cover,
-                      ),
-                      color: svGetBgColor(),
-                      borderRadius: BorderRadius.circular(10)),
+                    image: DecorationImage(image: FileImage(File(_selectedCoverFile ?? '')), fit: BoxFit.cover),
+                    color: svGetBgColor(),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   width: 90.w,
                   height: 35.w,
                   child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: GestureDetector(
-                          onTap: () async {
-                            const permission = Permission.storage;
-                            const permission1 = Permission.photos;
-                            var status = await permission.status;
-                            print(status);
-                            if (await permission1.isGranted) {
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: GestureDetector(
+                        onTap: () async {
+                          const permission = Permission.storage;
+                          const permission1 = Permission.photos;
+                          var status = await permission.status;
+                          print(status);
+                          if (await permission1.isGranted) {
+                            _showFileOptions(false);
+                            // _selectFiles(context);
+                          } else if (await permission1.isDenied) {
+                            final result = await permission1.request();
+                            if (status.isGranted) {
                               _showFileOptions(false);
                               // _selectFiles(context);
-                            } else if (await permission1.isDenied) {
-                              final result = await permission1.request();
-                              if (status.isGranted) {
-                                _showFileOptions(false);
-                                // _selectFiles(context);
-                                print("isGranted");
-                              } else if (result.isGranted) {
-                                _showFileOptions(
-                                  false,
-                                );
-                                // _selectFiles(context);
-                                print("isGranted");
-                              } else if (result.isDenied) {
-                                final result = await permission.request();
-                                print("isDenied");
-                              } else if (result.isPermanentlyDenied) {
-                                print("isPermanentlyDenied");
-                                // _permissionDialog(context);
-                              }
-                            } else if (await permission.isPermanentlyDenied) {
+                              print("isGranted");
+                            } else if (result.isGranted) {
+                              _showFileOptions(false);
+                              // _selectFiles(context);
+                              print("isGranted");
+                            } else if (result.isDenied) {
+                              final result = await permission.request();
+                              print("isDenied");
+                            } else if (result.isPermanentlyDenied) {
                               print("isPermanentlyDenied");
                               // _permissionDialog(context);
                             }
-                          },
-                          child: Container(
-                              height: 50,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                  color: svGetBgColor(),
-                                  border: Border.all(color: grey),
-                                  borderRadius: BorderRadius.circular(100)),
-                              child: const Icon(Icons.camera_alt)),
+                          } else if (await permission.isPermanentlyDenied) {
+                            print("isPermanentlyDenied");
+                            // _permissionDialog(context);
+                          }
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                            color: svGetBgColor(),
+                            border: Border.all(color: grey),
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: const Icon(Icons.camera_alt),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ),
                 Positioned(
                   top: 80,
@@ -1383,9 +1095,7 @@ class _Step3State extends State<Step3> {
                           // _selectFiles(context);
                           print("isGranted");
                         } else if (result.isGranted) {
-                          _showFileOptions(
-                            true,
-                          );
+                          _showFileOptions(true);
                           // _selectFiles(context);
                           print("isGranted");
                         } else if (result.isDenied) {
@@ -1402,54 +1112,44 @@ class _Step3State extends State<Step3> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: FileImage(File(_selectedProfileFile ?? '')),
-                            fit: BoxFit.cover,
-                          ),
-                          color: svGetBgColor(),
-                          border: Border.all(color: grey),
-                          borderRadius: BorderRadius.circular(100)),
+                        image: DecorationImage(image: FileImage(File(_selectedProfileFile ?? '')), fit: BoxFit.cover),
+                        color: svGetBgColor(),
+                        border: Border.all(color: grey),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
                       width: 25.w,
                       height: 25.w,
-                      child: const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Icon(Icons.camera_alt),
-                      ),
+                      child: const Padding(padding: EdgeInsets.all(16.0), child: Icon(Icons.camera_alt)),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          CustomImageView(
-            imagePath: 'assets/images/upload_image.png',
-            width: 50.w,
-          ),
+          CustomImageView(imagePath: 'assets/images/upload_image.png', width: 50.w),
           Text(translation(context).lbl_upload_logo_banner),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Container(
-              width: 45.w,
-              padding: const EdgeInsets.all(8.0),
-              child: svAppButton(
-                color: Colors.grey,
-                context: context,
-                onTap: widget.onBackStep,
-                text: 'Back',
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 45.w,
+                padding: const EdgeInsets.all(8.0),
+                child: svAppButton(color: Colors.grey, context: context, onTap: widget.onBackStep, text: 'Back'),
               ),
-            ),
-            Container(
-              width: 45.w,
-              padding: const EdgeInsets.all(8.0),
-              child: svAppButton(
-                context: context,
-                onTap: () {
-                  widget.groupBloc.add(UpdateSpecialtyDropdownValue1(''));
-                  widget.onNextStep();
-                },
-                text: 'Next',
+              Container(
+                width: 45.w,
+                padding: const EdgeInsets.all(8.0),
+                child: svAppButton(
+                  context: context,
+                  onTap: () {
+                    widget.groupBloc.add(UpdateSpecialtyDropdownValue1(''));
+                    widget.onNextStep();
+                  },
+                  text: 'Next',
+                ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ],
       ),
     );
@@ -1461,8 +1161,7 @@ class Step4 extends StatelessWidget {
   final VoidCallback onBackStep;
   final GroupBloc groupBloc;
 
-  const Step4(this.onNextStep, this.onBackStep, this.groupBloc, {Key? key})
-      : super(key: key);
+  const Step4(this.onNextStep, this.onBackStep, this.groupBloc, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -1472,111 +1171,64 @@ class Step4 extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       color: context.cardColor,
       child: BlocBuilder(
-          bloc: groupBloc,
-          builder: (context, state) {
-            if (state is PaginationLoadedState) {
-              return Column(
-                children: [
-                  Text(
-                    translation(context).lbl_successfully,
-                    style:  TextStyle(fontFamily: 'Poppins',
-                        color: Colors.blue,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500),
+        bloc: groupBloc,
+        builder: (context, state) {
+          if (state is PaginationLoadedState) {
+            return Column(
+              children: [
+                Text(
+                  translation(context).lbl_successfully,
+                  style: TextStyle(fontFamily: 'Poppins', color: Colors.blue, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 10),
+                Image.asset('assets/images/success.png', height: 30.w, width: 30.w),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    translation(context).msg_group_created_success,
+                    style: TextStyle(fontFamily: 'Poppins', color: svGetBodyColor(), fontSize: 10.sp, fontWeight: FontWeight.w400),
                   ),
-                  const SizedBox(
-                    height: 10,
+                ),
+                const SizedBox(height: 30),
+                Container(
+                  width: 90.w,
+                  padding: const EdgeInsets.all(8.0),
+                  child: svAppButton(color: Colors.blue, context: context, onTap: onNextStep, text: 'Finish'),
+                ),
+              ],
+            );
+          } else if (state is DataError) {
+            return Column(
+              children: [
+                const SizedBox(height: 20),
+                Image.asset('assets/images/error.png', height: 30.w, color: Colors.grey, width: 30.w),
+                const SizedBox(height: 20),
+                Text(
+                  translation(context).lbl_error_exclamation,
+                  style: TextStyle(fontFamily: 'Poppins', color: Colors.red, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    translation(context).msg_group_create_error,
+                    style: TextStyle(fontFamily: 'Poppins', color: svGetBodyColor(), fontSize: 10.sp, fontWeight: FontWeight.w400),
                   ),
-                  Image.asset(
-                    'assets/images/success.png',
-                    height: 30.w,
-                    width: 30.w,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      translation(context).msg_group_created_success,
-                      style:  TextStyle(fontFamily: 'Poppins',
-                          color: svGetBodyColor(),
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Container(
-                    width: 90.w,
-                    padding: const EdgeInsets.all(8.0),
-                    child: svAppButton(
-                      color: Colors.blue,
-                      context: context,
-                      onTap: onNextStep,
-                      text: 'Finish',
-                    ),
-                  ),
-                ],
-              );
-            } else if (state is DataError) {
-              return Column(
-                children: [
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Image.asset(
-                    'assets/images/error.png',
-                    height: 30.w,
-                    color: Colors.grey,
-                    width: 30.w,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    translation(context).lbl_error_exclamation,
-                    style: TextStyle(fontFamily: 'Poppins',
-                        color: Colors.red,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      translation(context).msg_group_create_error,
-                      style:  TextStyle(fontFamily: 'Poppins',
-                          color: svGetBodyColor(),
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Container(
-                    width: 90.w,
-                    padding: const EdgeInsets.all(8.0),
-                    child: svAppButton(
-                      color: Colors.grey,
-                      context: context,
-                      onTap: onBackStep,
-                      text: 'Back',
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              return Image.asset(
-                'assets/images/success.png',
-                color: grey,
-              );
-            }
-          }),
+                ),
+                const SizedBox(height: 30),
+                Container(
+                  width: 90.w,
+                  padding: const EdgeInsets.all(8.0),
+                  child: svAppButton(color: Colors.grey, context: context, onTap: onBackStep, text: 'Back'),
+                ),
+              ],
+            );
+          } else {
+            return Image.asset('assets/images/success.png', color: grey);
+          }
+        },
+      ),
     );
   }
 }

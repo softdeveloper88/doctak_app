@@ -1,15 +1,10 @@
 import 'dart:convert';
 
-CheckInSearchModel checkInSearchModelFromJson(String str) =>
-    CheckInSearchModel.fromJson(json.decode(str));
-String checkInSearchModelToJson(CheckInSearchModel data) =>
-    json.encode(data.toJson());
+CheckInSearchModel checkInSearchModelFromJson(String str) => CheckInSearchModel.fromJson(json.decode(str));
+String checkInSearchModelToJson(CheckInSearchModel data) => json.encode(data.toJson());
 
 class CheckInSearchModel {
-  CheckInSearchModel({
-    this.success,
-    this.data,
-  });
+  CheckInSearchModel({this.success, this.data});
 
   CheckInSearchModel.fromJson(dynamic json) {
     success = json['success'];

@@ -29,8 +29,7 @@ enum GalleryPermissionResult {
 /// - Android 14+ visual user selected permission
 /// - Older Android versions with storage permission
 class GalleryPermissionHandler {
-  static final GalleryPermissionHandler _instance =
-      GalleryPermissionHandler._internal();
+  static final GalleryPermissionHandler _instance = GalleryPermissionHandler._internal();
 
   factory GalleryPermissionHandler() => _instance;
 
@@ -235,68 +234,39 @@ class GalleryPermissionHandler {
 
   /// Show a professional permission dialog explaining why permission is needed
   /// Returns true if user wants to open settings, false otherwise
-  Future<bool> showPermissionDeniedDialog(
-    BuildContext context, {
-    String? title,
-    String? message,
-    String? cancelText,
-    String? settingsText,
-  }) async {
+  Future<bool> showPermissionDeniedDialog(BuildContext context, {String? title, String? message, String? cancelText, String? settingsText}) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.photo_library_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
+                decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
+                child: Icon(Icons.photo_library_rounded, color: Colors.blue[600], size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title ?? 'Photo Access Required',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                 ),
               ),
             ],
           ),
           content: Text(
-            message ??
-                'To share photos and images, please allow access to your photo library in Settings.',
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              color: Colors.grey[700],
-              height: 1.5,
-            ),
+            message ?? 'To share photos and images, please allow access to your photo library in Settings.',
+            style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.grey[700], height: 1.5),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
               child: Text(
                 cancelText ?? 'Not Now',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Colors.grey[600]),
               ),
             ),
             ElevatedButton(
@@ -304,21 +274,13 @@ class GalleryPermissionHandler {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[600],
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
               child: Text(
                 settingsText ?? 'Open Settings',
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -335,44 +297,25 @@ class GalleryPermissionHandler {
 
   /// Show a rationale dialog before requesting permission
   /// Returns true if user wants to proceed, false otherwise
-  Future<bool> showPermissionRationaleDialog(
-    BuildContext context, {
-    String? title,
-    String? message,
-    String? cancelText,
-    String? proceedText,
-  }) async {
+  Future<bool> showPermissionRationaleDialog(BuildContext context, {String? title, String? message, String? cancelText, String? proceedText}) async {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: true,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.photo_library_rounded,
-                  color: Colors.blue[600],
-                  size: 24,
-                ),
+                decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
+                child: Icon(Icons.photo_library_rounded, color: Colors.blue[600], size: 24),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   title ?? 'Access Your Photos',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                 ),
               ),
             ],
@@ -382,30 +325,15 @@ class GalleryPermissionHandler {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                message ??
-                    'DocTak needs access to your photos to share images in posts and messages.',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'Poppins',
-                  color: Colors.grey[700],
-                  height: 1.5,
-                ),
+                message ?? 'DocTak needs access to your photos to share images in posts and messages.',
+                style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.grey[700], height: 1.5),
               ),
               const SizedBox(height: 16),
-              _buildFeatureRow(
-                Icons.post_add_rounded,
-                'Share images in posts',
-              ),
+              _buildFeatureRow(Icons.post_add_rounded, 'Share images in posts'),
               const SizedBox(height: 8),
-              _buildFeatureRow(
-                Icons.medical_services_outlined,
-                'Upload medical images for AI analysis',
-              ),
+              _buildFeatureRow(Icons.medical_services_outlined, 'Upload medical images for AI analysis'),
               const SizedBox(height: 8),
-              _buildFeatureRow(
-                Icons.chat_rounded,
-                'Send images in messages',
-              ),
+              _buildFeatureRow(Icons.chat_rounded, 'Send images in messages'),
             ],
           ),
           actions: [
@@ -413,11 +341,7 @@ class GalleryPermissionHandler {
               onPressed: () => Navigator.of(dialogContext).pop(false),
               child: Text(
                 cancelText ?? 'Cancel',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Colors.grey[600]),
               ),
             ),
             ElevatedButton(
@@ -425,21 +349,13 @@ class GalleryPermissionHandler {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue[600],
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
               child: Text(
                 proceedText ?? 'Allow Access',
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -458,11 +374,7 @@ class GalleryPermissionHandler {
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
-              fontSize: 13,
-              fontFamily: 'Poppins',
-              color: Colors.grey[700],
-            ),
+            style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: Colors.grey[700]),
           ),
         ),
       ],
@@ -471,14 +383,7 @@ class GalleryPermissionHandler {
 
   /// Request gallery permission with full UI handling
   /// Returns true if permission is granted and user can proceed
-  Future<bool> requestWithUI(
-    BuildContext context, {
-    bool showRationale = true,
-    String? rationaleTitle,
-    String? rationaleMessage,
-    String? deniedTitle,
-    String? deniedMessage,
-  }) async {
+  Future<bool> requestWithUI(BuildContext context, {bool showRationale = true, String? rationaleTitle, String? rationaleMessage, String? deniedTitle, String? deniedMessage}) async {
     // Check if already granted
     if (await isGranted()) {
       return true;
@@ -486,11 +391,7 @@ class GalleryPermissionHandler {
 
     // Show rationale dialog first (optional but recommended for better UX)
     if (showRationale) {
-      final shouldProceed = await showPermissionRationaleDialog(
-        context,
-        title: rationaleTitle,
-        message: rationaleMessage,
-      );
+      final shouldProceed = await showPermissionRationaleDialog(context, title: rationaleTitle, message: rationaleMessage);
 
       if (!shouldProceed) {
         return false;
@@ -510,15 +411,10 @@ class GalleryPermissionHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Photo access denied. Please allow access to continue.',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
+              content: const Text('Photo access denied. Please allow access to continue.', style: TextStyle(fontFamily: 'Poppins')),
               backgroundColor: Colors.orange[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               action: SnackBarAction(
                 label: 'Retry',
                 textColor: Colors.white,
@@ -534,11 +430,7 @@ class GalleryPermissionHandler {
       case GalleryPermissionResult.permanentlyDenied:
         // Show dialog to open settings
         if (context.mounted) {
-          await showPermissionDeniedDialog(
-            context,
-            title: deniedTitle,
-            message: deniedMessage,
-          );
+          await showPermissionDeniedDialog(context, title: deniedTitle, message: deniedMessage);
         }
         return false;
 
@@ -547,15 +439,10 @@ class GalleryPermissionHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Photo access is restricted on this device.',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
+              content: const Text('Photo access is restricted on this device.', style: TextStyle(fontFamily: 'Poppins')),
               backgroundColor: Colors.red[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           );
         }
@@ -566,15 +453,10 @@ class GalleryPermissionHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'An error occurred while requesting permission.',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
+              content: const Text('An error occurred while requesting permission.', style: TextStyle(fontFamily: 'Poppins')),
               backgroundColor: Colors.red[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           );
         }
@@ -602,15 +484,10 @@ class GalleryPermissionHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Photo access denied. Please allow to continue.',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
+              content: const Text('Photo access denied. Please allow to continue.', style: TextStyle(fontFamily: 'Poppins')),
               backgroundColor: Colors.orange[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               duration: const Duration(seconds: 3),
             ),
           );
@@ -629,15 +506,10 @@ class GalleryPermissionHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'Unable to access photos. Please check your settings.',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
+              content: const Text('Unable to access photos. Please check your settings.', style: TextStyle(fontFamily: 'Poppins')),
               backgroundColor: Colors.red[600],
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
           );
         }

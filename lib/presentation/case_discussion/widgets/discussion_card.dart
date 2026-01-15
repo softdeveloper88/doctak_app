@@ -11,25 +11,14 @@ class DiscussionCard extends StatelessWidget {
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
 
-  const DiscussionCard({
-    Key? key,
-    required this.discussion,
-    required this.onTap,
-    required this.onLike,
-    this.onDelete,
-    this.onEdit,
-  }) : super(key: key);
+  const DiscussionCard({super.key, required this.discussion, required this.onTap, required this.onLike, this.onDelete, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: theme.cardShadow,
-      ),
+      decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(20), boxShadow: theme.cardShadow),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(20),
@@ -49,38 +38,19 @@ class DiscussionCard extends StatelessWidget {
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.primary,
-                            theme.primary.withOpacity(0.5),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.5)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                       ),
                       child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: theme.cardBackground,
-                        ),
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: theme.cardBackground),
                         padding: const EdgeInsets.all(2),
                         child: CircleAvatar(
                           radius: 22,
                           backgroundColor: theme.avatarBackground,
-                          backgroundImage: discussion.author.profilePic != null
-                              ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}")
-                              : null,
+                          backgroundImage: discussion.author.profilePic != null ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}") : null,
                           child: discussion.author.profilePic == null
                               ? Text(
-                                  discussion.author.name.isNotEmpty
-                                      ? discussion.author.name[0].toUpperCase()
-                                      : '?',
-                                  style: TextStyle(
-                                    color: theme.primary,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 16,
-                                    fontFamily: 'Poppins',
-                                  ),
+                                  discussion.author.name.isNotEmpty ? discussion.author.name[0].toUpperCase() : '?',
+                                  style: TextStyle(color: theme.primary, fontWeight: FontWeight.w700, fontSize: 16, fontFamily: 'Poppins'),
                                 )
                               : null,
                         ),
@@ -93,23 +63,12 @@ class DiscussionCard extends StatelessWidget {
                         children: [
                           Text(
                             discussion.author.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                              fontFamily: 'Poppins',
-                              color: theme.textPrimary,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, fontFamily: 'Poppins', color: theme.textPrimary),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            discussion.author.specialty.isNotEmpty
-                                ? discussion.author.specialty
-                                : 'Medical Professional',
-                            style: TextStyle(
-                              color: theme.textSecondary,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                            ),
+                            discussion.author.specialty.isNotEmpty ? discussion.author.specialty : 'Medical Professional',
+                            style: TextStyle(color: theme.textSecondary, fontSize: 12, fontFamily: 'Poppins'),
                           ),
                         ],
                       ),
@@ -118,45 +77,23 @@ class DiscussionCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            _getSpecialtyColor(discussion.author.specialty, theme),
-                            _getSpecialtyColor(discussion.author.specialty, theme).withOpacity(0.7),
-                          ],
-                        ),
+                        gradient: LinearGradient(colors: [_getSpecialtyColor(discussion.author.specialty, theme), _getSpecialtyColor(discussion.author.specialty, theme).withValues(alpha: 0.7)]),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        discussion.author.specialty.isNotEmpty
-                            ? discussion.author.specialty.toUpperCase()
-                            : 'GENERAL',
-                        style: TextStyle(
-                          color: theme.cardBackground,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Poppins',
-                          letterSpacing: 0.5,
-                        ),
+                        discussion.author.specialty.isNotEmpty ? discussion.author.specialty.toUpperCase() : 'GENERAL',
+                        style: TextStyle(color: theme.cardBackground, fontSize: 9, fontWeight: FontWeight.w700, fontFamily: 'Poppins', letterSpacing: 0.5),
                       ),
                     ),
                     // More menu for author
                     if (_isCurrentUserAuthor() && onDelete != null) ...[
                       const SizedBox(width: 8),
                       Container(
-                        decoration: BoxDecoration(
-                          color: theme.surfaceVariant,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(12)),
                         child: PopupMenuButton<String>(
                           padding: EdgeInsets.zero,
-                          icon: Icon(
-                            Icons.more_horiz_rounded,
-                            color: theme.textSecondary,
-                            size: 20,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          icon: Icon(Icons.more_horiz_rounded, color: theme.textSecondary, size: 20),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           color: theme.cardBackground,
                           elevation: 8,
                           onSelected: (value) {
@@ -176,11 +113,7 @@ class DiscussionCard extends StatelessWidget {
                                     const SizedBox(width: 12),
                                     Text(
                                       'Edit',
-                                      style: TextStyle(
-                                        color: theme.textPrimary,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                                     ),
                                   ],
                                 ),
@@ -193,11 +126,7 @@ class DiscussionCard extends StatelessWidget {
                                   const SizedBox(width: 12),
                                   Text(
                                     'Delete',
-                                    style: TextStyle(
-                                      color: theme.error,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: TextStyle(color: theme.error, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                                   ),
                                 ],
                               ),
@@ -208,19 +137,13 @@ class DiscussionCard extends StatelessWidget {
                     ],
                   ],
                 ),
-                
+
                 const SizedBox(height: 16),
 
                 // Title - prominent and clean
                 Text(
                   discussion.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
-                    color: theme.textPrimary,
-                    height: 1.3,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: theme.textPrimary, height: 1.3),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -228,15 +151,8 @@ class DiscussionCard extends StatelessWidget {
 
                 // Description preview
                 Text(
-                  discussion.title.length > 100
-                      ? '${discussion.title.substring(0, 100)}...'
-                      : discussion.title,
-                  style: TextStyle(
-                    color: theme.textSecondary,
-                    fontSize: 13,
-                    fontFamily: 'Poppins',
-                    height: 1.4,
-                  ),
+                  discussion.title.length > 100 ? '${discussion.title.substring(0, 100)}...' : discussion.title,
+                  style: TextStyle(color: theme.textSecondary, fontSize: 13, fontFamily: 'Poppins', height: 1.4),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -250,18 +166,10 @@ class DiscussionCard extends StatelessWidget {
                     children: discussion.parsedTags.take(3).map((tag) {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: theme.warning.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
+                        decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
                         child: Text(
                           tag,
-                          style: TextStyle(
-                            color: theme.warning,
-                            fontSize: 11,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(color: theme.warning, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                         ),
                       );
                     }).toList(),
@@ -271,24 +179,16 @@ class DiscussionCard extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         '+${discussion.parsedTags.length - 3} more',
-                        style: TextStyle(
-                          color: theme.textTertiary,
-                          fontSize: 11,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: TextStyle(color: theme.textTertiary, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                       ),
                     ),
                 ],
 
                 const SizedBox(height: 16),
-                
+
                 // Divider
-                Container(
-                  height: 1,
-                  color: theme.divider,
-                ),
-                
+                Container(height: 1, color: theme.divider),
+
                 const SizedBox(height: 12),
 
                 // Footer with stats - One UI style
@@ -303,27 +203,15 @@ class DiscussionCard extends StatelessWidget {
                     // Time with icon - One UI style container
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: theme.surfaceVariant.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                      decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(20)),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.schedule_rounded,
-                            size: 14,
-                            color: theme.textTertiary,
-                          ),
+                          Icon(Icons.schedule_rounded, size: 14, color: theme.textTertiary),
                           const SizedBox(width: 4),
                           Text(
                             _formatTime(discussion.createdAt),
-                            style: TextStyle(
-                              color: theme.textTertiary,
-                              fontSize: 11,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(color: theme.textTertiary, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -352,21 +240,13 @@ class DiscussionCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(6),
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
             child: Icon(icon, size: 12, color: color),
           ),
           const SizedBox(width: 6),
           Text(
             _formatCount(count),
-            style: TextStyle(
-              color: theme.textSecondary,
-              fontSize: 12,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: theme.textSecondary, fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -423,28 +303,18 @@ class DiscussionCard extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
             'Delete Discussion',
-            style: TextStyle(
-              color: theme.textPrimary,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
           ),
           content: Text(
             'Are you sure you want to delete this case discussion? This action cannot be undone.',
-            style: TextStyle(
-              color: theme.textSecondary,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
                 'Cancel',
-                style: TextStyle(
-                  color: theme.textSecondary,
-                  fontFamily: 'Poppins',
-                ),
+                style: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
               ),
             ),
             TextButton(
@@ -455,11 +325,7 @@ class DiscussionCard extends StatelessWidget {
               style: TextButton.styleFrom(foregroundColor: theme.error),
               child: Text(
                 'Delete',
-                style: TextStyle(
-                  color: theme.error,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: theme.error, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
               ),
             ),
           ],

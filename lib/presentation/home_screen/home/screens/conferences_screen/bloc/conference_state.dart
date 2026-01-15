@@ -8,10 +8,7 @@ class CountriesDataLoaded extends ConferenceState {
   List<dynamic> countriesModel;
   String countryName;
   String? searchTerms = '';
-  CountriesDataLoaded(
-      {required this.countriesModel,
-      required this.countryName,
-      required this.searchTerms});
+  CountriesDataLoaded({required this.countriesModel, required this.countryName, required this.searchTerms});
 }
 
 class DataError extends ConferenceState {

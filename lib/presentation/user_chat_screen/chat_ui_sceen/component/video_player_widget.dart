@@ -6,7 +6,7 @@ import 'package:doctak_app/main.dart';
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
-  VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoPlayerWidget({super.key, required this.videoUrl});
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -26,47 +26,39 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Future<void> initializeVideoPlayer() async {
     try {
       _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-        ..initialize().then((_) {
-          if (mounted) {
-            chewieController = ChewieController(
-              videoPlayerController: _controller!,
-              autoPlay: false,
-              looping: false,
-              errorBuilder: (context, errorMessage) {
-                return Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.error_outline,
-                          color: Colors.red,
-                          size: 48,
+        ..initialize()
+            .then((_) {
+              if (mounted) {
+                chewieController = ChewieController(
+                  videoPlayerController: _controller!,
+                  autoPlay: false,
+                  looping: false,
+                  errorBuilder: (context, errorMessage) {
+                    return Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                            const SizedBox(height: 16),
+                            Text('Unable to load video', style: TextStyle(color: appStore.isDarkMode ? Colors.white70 : Colors.black87, fontSize: 16)),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Unable to load video',
-                          style: TextStyle(
-                            color: appStore.isDarkMode ? Colors.white70 : Colors.black87,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 );
-              },
-            );
-            setState(() {}); // Update UI once the controller has initialized
-          }
-        }).catchError((error) {
-          if (mounted) {
-            setState(() {
-              _hasError = true;
+                setState(() {}); // Update UI once the controller has initialized
+              }
+            })
+            .catchError((error) {
+              if (mounted) {
+                setState(() {
+                  _hasError = true;
+                });
+              }
             });
-          }
-        });
     } catch (e) {
       debugPrint('Error initializing video player: $e');
       if (mounted) {
@@ -88,18 +80,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: appStore.isDarkMode ? Colors.white70 : Colors.black54,
-                  size: 48,
-                ),
+                Icon(Icons.error_outline, color: appStore.isDarkMode ? Colors.white70 : Colors.black54, size: 48),
                 const SizedBox(height: 8),
-                Text(
-                  'Unable to load video',
-                  style: TextStyle(
-                    color: appStore.isDarkMode ? Colors.white70 : Colors.black54,
-                  ),
-                ),
+                Text('Unable to load video', style: TextStyle(color: appStore.isDarkMode ? Colors.white70 : Colors.black54)),
               ],
             ),
           ),
@@ -117,11 +100,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         aspectRatio: 16 / 9, // Common aspect ratio for videos
         child: Container(
           color: appStore.isDarkMode ? Colors.black : Colors.grey[900],
-          child: Center(
-            child: CircularProgressIndicator(
-              color: appStore.isDarkMode ? Colors.white : Colors.blue,
-            ),
-          ),
+          child: Center(child: CircularProgressIndicator(color: appStore.isDarkMode ? Colors.white : Colors.blue)),
         ),
       );
     }

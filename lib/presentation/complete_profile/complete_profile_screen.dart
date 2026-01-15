@@ -1,7 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/common_navigator.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
 import 'package:flutter/material.dart';
@@ -15,18 +14,18 @@ import '../home_screen/utils/SVCommon.dart';
 import '../sign_up_screen/bloc/sign_up_bloc.dart';
 
 class CompleteProfileScreen extends StatefulWidget {
-  const CompleteProfileScreen({Key? key}) : super(key: key);
+  const CompleteProfileScreen({super.key});
 
   @override
   State<CompleteProfileScreen> createState() => _CompleteProfileScreenState();
 }
 
 class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   DropdownBloc dropdownBloc = DropdownBloc();
   ProfileBloc profileBloc = ProfileBloc();
-  bool _isChecked = false;
+  final bool _isChecked = false;
 
   @override
   void initState() {
@@ -48,46 +47,25 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             children: [
               // App Bar Content Moved Here
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.arrow_back_ios),
-                        ),
-                      ],
+                      children: [IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_ios))],
                     ),
-                    Image.asset(
-                      'assets/images/ic_complete_profile.png',
-                      width: 300,
-                      height: 100,
-                    ),
-                    Text(
-                      translation(context).lbl_complete_your_profile,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
+                    Image.asset('assets/images/ic_complete_profile.png', width: 300, height: 100),
+                    Text(translation(context).lbl_complete_your_profile, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text(
-                      translation(context).msg_unlock_personalized_features,
-                      overflow: TextOverflow.visible,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12),
-                    ),
+                    Text(translation(context).msg_unlock_personalized_features, overflow: TextOverflow.visible, textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
                     const SizedBox(height: 16),
                   ],
                 ),
               ),
               Expanded(
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom,
-                  ),
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: BlocBuilder<ProfileBloc, ProfileState>(
@@ -98,37 +76,22 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 10),
-                              Text(
-                                translation(context).lbl_country,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text(translation(context).lbl_country, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                               const SizedBox(height: 8),
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
+                                  border: Border.all(color: Colors.grey.shade300),
                                 ),
                                 child: CustomDropdownButtonFormField(
                                   items: state.firstDropdownValues,
-                                  value: state.firstDropdownValues.isNotEmpty 
-                                      ? state.firstDropdownValues.firstWhere(
-                                          (country) => country.countryName == state.selectedFirstDropdownValue,
-                                          orElse: () => state.firstDropdownValues.first,
-                                        )
+                                  value: state.firstDropdownValues.isNotEmpty
+                                      ? state.firstDropdownValues.firstWhere((country) => country.countryName == state.selectedFirstDropdownValue, orElse: () => state.firstDropdownValues.first)
                                       : null,
                                   width: double.infinity,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                   itemBuilder: (item) => Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
@@ -137,49 +100,31 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      Text(
-                                        item.flag ?? '',
-                                      ),
+                                      Text(item.flag ?? ''),
                                     ],
                                   ),
-                                  selectedItemBuilder: (context) =>
-                                      state.firstDropdownValues.map((item) {
-                                        return Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            item.countryName ?? '',
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                  selectedItemBuilder: (context) => state.firstDropdownValues.map((item) {
+                                    return Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        item.countryName ?? '',
+                                        style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
+                                      ),
+                                    );
+                                  }).toList(),
                                   onChanged: (newValue) {
-                                    profileBloc.country =
-                                        newValue?.countryName ?? '';
-                                    profileBloc.add(UpdateSecondDropdownValues(
-                                        newValue?.countryName ?? ''));
+                                    profileBloc.country = newValue?.countryName ?? '';
+                                    profileBloc.add(UpdateSecondDropdownValues(newValue?.countryName ?? ''));
                                   },
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              Text(
-                                translation(context).lbl_state,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              Text(translation(context).lbl_state, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
                               const SizedBox(height: 8),
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                  ),
+                                  border: Border.all(color: Colors.grey.shade300),
                                 ),
                                 child: CustomDropdownButtonFormField(
                                   itemBuilder: (item) => Text(
@@ -187,54 +132,33 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                     style: const TextStyle(color: Colors.black),
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  selectedItemBuilder: (context) => state
-                                      .secondDropdownValues
-                                      .map((item) {
-                                        return Container(
-                                          alignment: Alignment.centerLeft,
-                                          child: Text(
-                                            item ?? '',
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        );
-                                      })
-                                      .toList(),
+                                  selectedItemBuilder: (context) => state.secondDropdownValues.map((item) {
+                                    return Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        item ?? '',
+                                        style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
+                                      ),
+                                    );
+                                  }).toList(),
                                   items: state.secondDropdownValues,
                                   value: state.selectedSecondDropdownValue,
                                   width: double.infinity,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                   onChanged: (String? newValue) {
                                     profileBloc.stateName = newValue!;
-                                    profileBloc.add(
-                                        UpdateSpecialtyDropdownValue(newValue));
+                                    profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
                                   },
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              if (AppData.userType == 'doctor') Text(
-                                translation(context).lbl_specialty,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              if (AppData.userType == 'doctor')
-                                const SizedBox(height: 8),
+                              if (AppData.userType == 'doctor') Text(translation(context).lbl_specialty, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                              if (AppData.userType == 'doctor') const SizedBox(height: 8),
                               if (AppData.userType == 'doctor')
                                 Container(
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Colors.grey.shade300,
-                                    ),
+                                    border: Border.all(color: Colors.grey.shade300),
                                   ),
                                   child: CustomDropdownButtonFormField(
                                     itemBuilder: (item) => Text(
@@ -242,30 +166,19 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                       style: const TextStyle(color: Colors.black),
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    selectedItemBuilder: (context) => state
-                                        .specialtyDropdownValue
-                                        .map((item) {
-                                          return Container(
-                                            alignment: Alignment.centerLeft,
-                                            child: Text(
-                                              item ?? '',
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          );
-                                        })
-                                        .toList(),
+                                    selectedItemBuilder: (context) => state.specialtyDropdownValue.map((item) {
+                                      return Container(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          item ?? '',
+                                          style: const TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
+                                        ),
+                                      );
+                                    }).toList(),
                                     items: state.specialtyDropdownValue,
                                     value: state.selectedSpecialtyDropdownValue,
                                     width: double.infinity,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 14,
-                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                     onChanged: (String? newValue) {
                                       profileBloc.specialtyName = newValue!;
                                     },
@@ -280,16 +193,10 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
+                                const Center(child: CircularProgressIndicator()),
                                 Text(
                                   translation(context).msg_wait_fields_loading,
-                                  style: const TextStyle(
-                                    fontFamily: 'Poppins',
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style: const TextStyle(fontFamily: 'Poppins', color: Colors.blue, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
@@ -300,28 +207,19 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   ),
                 ),
               ),
-        BlocListener<DropdownBloc, DropdownState>(
-          listener: (context, state) {
-            if (state is DataCompleteLoaded) {
-                print(state.response);
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(
-                      content: Text(translation(context).msg_account_update_success)),);
-                  launchScreen(context,
-                      const SVDashboardScreen(),
-                      isNewTask: true,
-                      pageRouteAnimation: PageRouteAnimation
-                          .Slide);
-
-            } else {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(
-                  content: Text(translation(context).msg_something_went_wrong)),);
-            }
-          },
-          bloc: dropdownBloc,
-          child: _buildCompleteProfile(context),
-        ),
+              BlocListener<DropdownBloc, DropdownState>(
+                listener: (context, state) {
+                  if (state is DataCompleteLoaded) {
+                    print(state.response);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_account_update_success)));
+                    launchScreen(context, const SVDashboardScreen(), isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_went_wrong)));
+                  }
+                },
+                bloc: dropdownBloc,
+                child: _buildCompleteProfile(context),
+              ),
               const SizedBox(height: 26),
             ],
           ),
@@ -339,28 +237,19 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       },
     );
   }
+
   void onTapComplete(BuildContext context) async {
     if (profileBloc.country == '' || profileBloc.country == null) {
-      toast(translation(context).msg_please_select_country,
-          bgColor: Colors.red, textColor: Colors.white);
+      toast(translation(context).msg_please_select_country, bgColor: Colors.red, textColor: Colors.white);
       return;
     } else if (profileBloc.stateName == '' || profileBloc.stateName == null) {
-      toast(translation(context).msg_please_select_state,
-          bgColor: Colors.red, textColor: Colors.white);
+      toast(translation(context).msg_please_select_state, bgColor: Colors.red, textColor: Colors.white);
       return;
-    } else if ((profileBloc.specialtyName == null ||
-        profileBloc.specialtyName == '') &&  AppData.userType == 'doctor') {
-      toast(translation(context).msg_please_select_specialty,
-          bgColor: Colors.red, textColor: Colors.white);
+    } else if ((profileBloc.specialtyName == null || profileBloc.specialtyName == '') && AppData.userType == 'doctor') {
+      toast(translation(context).msg_please_select_specialty, bgColor: Colors.red, textColor: Colors.white);
       return;
     } else {
-      dropdownBloc.add(
-        CompleteButtonPressed(
-          country: profileBloc.country ?? '',
-          state: profileBloc.stateName ?? "",
-          specialty: profileBloc.specialtyName ?? "",
-        ),
-      );
+      dropdownBloc.add(CompleteButtonPressed(country: profileBloc.country ?? '', state: profileBloc.stateName ?? "", specialty: profileBloc.specialtyName ?? ""));
     }
   }
 }

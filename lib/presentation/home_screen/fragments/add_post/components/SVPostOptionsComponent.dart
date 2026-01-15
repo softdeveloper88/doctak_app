@@ -33,21 +33,15 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     print('SVPostOptions: Setting up BLoC stream listener');
     // Sync local imagefiles with BLoC whenever state changes
     addPostSubscription = widget.searchPeopleBloc.stream.listen((state) {
-      print(
-        'SVPostOptions: *** BLoC STREAM EVENT *** state: ${state.runtimeType}',
-      );
+      print('SVPostOptions: *** BLoC STREAM EVENT *** state: ${state.runtimeType}');
       if (state is PaginationLoadedState) {
-        print(
-          'SVPostOptions: PaginationLoadedState - BLoC has ${widget.searchPeopleBloc.imagefiles.length} files',
-        );
+        print('SVPostOptions: PaginationLoadedState - BLoC has ${widget.searchPeopleBloc.imagefiles.length} files');
         if (mounted) {
           setState(() {
             imagefiles = List.from(widget.searchPeopleBloc.imagefiles);
           });
         }
-        print(
-          'SVPostOptions: Local imagefiles synced to ${imagefiles.length} files',
-        );
+        print('SVPostOptions: Local imagefiles synced to ${imagefiles.length} files');
       }
     });
   }
@@ -58,7 +52,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     super.dispose();
   }
 
-  openImages() async {
+  Future<void> openImages() async {
     if (_isPickingMedia) return;
 
     setState(() {
@@ -66,82 +60,54 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      debugPrint(
-        "SVPostOptions: *** OPENING GALLERY with RobustImagePicker ***",
-      );
+      debugPrint("SVPostOptions: *** OPENING GALLERY with RobustImagePicker ***");
 
       List<XFile> pickedfiles = [];
 
       try {
-        debugPrint(
-          "SVPostOptions: Using RobustImagePicker.showPhotoManagerPicker...",
-        );
-        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(
-          context,
-          title: 'Select Photos',
-        );
-        debugPrint(
-          "SVPostOptions: showPhotoManagerPicker returned ${pickedfiles.length} files",
-        );
+        debugPrint("SVPostOptions: Using RobustImagePicker.showPhotoManagerPicker...");
+        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(context, title: 'Select Photos');
+        debugPrint("SVPostOptions: showPhotoManagerPicker returned ${pickedfiles.length} files");
       } catch (e) {
-        debugPrint(
-          "SVPostOptions: showPhotoManagerPicker failed: $e, trying fallback...",
-        );
+        debugPrint("SVPostOptions: showPhotoManagerPicker failed: $e, trying fallback...");
 
         try {
           pickedfiles = await RobustImagePicker.pickMultipleImages();
-          debugPrint(
-            "SVPostOptions: Fallback pickMultipleImages returned ${pickedfiles.length} files",
-          );
+          debugPrint("SVPostOptions: Fallback pickMultipleImages returned ${pickedfiles.length} files");
         } catch (e2) {
           debugPrint("SVPostOptions: All pickers failed: $e2");
         }
       }
 
       if (pickedfiles.isNotEmpty) {
-        debugPrint(
-          "SVPostOptions: Processing ${pickedfiles.length} selected files",
-        );
+        debugPrint("SVPostOptions: Processing ${pickedfiles.length} selected files");
         List<XFile> validFiles = [];
         for (var element in pickedfiles) {
           final srcPath = element.path;
           final srcName = element.name;
-          final isValid =
-              _isValidMediaFile(srcPath) || _isValidMediaFile(srcName);
+          final isValid = _isValidMediaFile(srcPath) || _isValidMediaFile(srcName);
           if (isValid) {
             validFiles.add(element);
             debugPrint("SVPostOptions: Valid file added: ${element.path}");
           } else {
-            debugPrint(
-              "SVPostOptions: Invalid file skipped: ${element.path} (name: ${element.name})",
-            );
+            debugPrint("SVPostOptions: Invalid file skipped: ${element.path} (name: ${element.name})");
           }
         }
 
         if (validFiles.isNotEmpty) {
-          debugPrint(
-            "SVPostOptions: Adding ${validFiles.length} valid files to BLoC",
-          );
+          debugPrint("SVPostOptions: Adding ${validFiles.length} valid files to BLoC");
           for (var element in validFiles) {
             imagefiles.add(element);
             debugPrint("SVPostOptions: Adding file to BLoC: ${element.path}");
-            widget.searchPeopleBloc.add(
-              SelectedFiles(pickedfiles: element, isRemove: false),
-            );
+            widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: element, isRemove: false));
             debugPrint("SVPostOptions: SelectedFiles event sent to BLoC");
           }
-          debugPrint(
-            "SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now",
-          );
+          debugPrint("SVPostOptions: BLoC should have ${widget.searchPeopleBloc.imagefiles.length} files now");
           setState(() {});
           debugPrint("SVPostOptions: setState() called - UI should refresh");
-          debugPrint(
-            "SVPostOptions: Local imagefiles has ${imagefiles.length} total files",
-          );
+          debugPrint("SVPostOptions: Local imagefiles has ${imagefiles.length} total files");
         } else {
-          _showErrorMessage(
-            "No valid image files selected. Please select JPG, PNG, WebP, or GIF files.",
-          );
+          _showErrorMessage("No valid image files selected. Please select JPG, PNG, WebP, or GIF files.");
         }
       } else {
         debugPrint("SVPostOptions: No images selected by user");
@@ -182,7 +148,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     );
   }
 
-  openVideo() async {
+  Future<void> openVideo() async {
     if (_isPickingMedia) return;
 
     setState(() {
@@ -190,9 +156,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(
-        context,
-      );
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
       if (!cameraGranted) {
         setState(() {
           _isPickingMedia = false;
@@ -200,8 +164,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         return;
       }
 
-      final microphoneGranted =
-          await PermissionUtils.ensureMicrophonePermission();
+      final microphoneGranted = await PermissionUtils.ensureMicrophonePermission();
       if (!microphoneGranted) {
         _showErrorMessage("Microphone access is required for video recording.");
         setState(() {
@@ -210,15 +173,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         return;
       }
 
-      var pickedfiles = await imgpicker.pickVideo(
-        source: ImageSource.camera,
-        maxDuration: const Duration(minutes: 10),
-      );
+      var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera, maxDuration: const Duration(minutes: 10));
       if (pickedfiles != null) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(
-          SelectedFiles(pickedfiles: pickedfiles, isRemove: false),
-        );
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         setState(() {});
       } else {
         debugPrint("No video is selected.");
@@ -233,7 +191,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     }
   }
 
-  openCamera() async {
+  Future<void> openCamera() async {
     if (_isPickingMedia) return;
 
     setState(() {
@@ -241,9 +199,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(
-        context,
-      );
+      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
       if (!cameraGranted) {
         setState(() {
           _isPickingMedia = false;
@@ -251,15 +207,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         return;
       }
 
-      var pickedfiles = await imgpicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-      );
+      var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera, imageQuality: 85);
       if (pickedfiles != null) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(
-          SelectedFiles(pickedfiles: pickedfiles, isRemove: false),
-        );
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         setState(() {});
       } else {
         debugPrint("No image is selected.");
@@ -292,14 +243,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
           BlocBuilder<AddPostBloc, AddPostState>(
             bloc: widget.searchPeopleBloc,
             builder: (context, state) {
-              print(
-                'SVPostOptions: BlocBuilder state: ${state.runtimeType}, BLoC files: ${widget.searchPeopleBloc.imagefiles.length}',
-              );
-              if (state is PaginationLoadedState &&
-                  widget.searchPeopleBloc.imagefiles.isNotEmpty) {
-                print(
-                  'SVPostOptions: Rendering ${widget.searchPeopleBloc.imagefiles.length} images in UI',
-                );
+              print('SVPostOptions: BlocBuilder state: ${state.runtimeType}, BLoC files: ${widget.searchPeopleBloc.imagefiles.length}');
+              if (state is PaginationLoadedState && widget.searchPeopleBloc.imagefiles.isNotEmpty) {
+                print('SVPostOptions: Rendering ${widget.searchPeopleBloc.imagefiles.length} images in UI');
                 return Container(
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   padding: const EdgeInsets.all(12),
@@ -313,20 +259,11 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                     children: [
                       Row(
                         children: [
-                          Icon(
-                            CupertinoIcons.photo_on_rectangle,
-                            size: 16,
-                            color: theme.primary,
-                          ),
+                          Icon(CupertinoIcons.photo_on_rectangle, size: 16, color: theme.primary),
                           const SizedBox(width: 8),
                           Text(
                             'Media (${widget.searchPeopleBloc.imagefiles.length})',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                              color: theme.textPrimary,
-                            ),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
                           ),
                         ],
                       ),
@@ -337,8 +274,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                           scrollDirection: Axis.horizontal,
                           itemCount: widget.searchPeopleBloc.imagefiles.length,
                           itemBuilder: (context, index) {
-                            final imageone =
-                                widget.searchPeopleBloc.imagefiles[index];
+                            final imageone = widget.searchPeopleBloc.imagefiles[index];
                             return Container(
                               margin: const EdgeInsets.only(right: 8),
                               child: Stack(
@@ -348,25 +284,10 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                                     height: 56,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: theme.border,
-                                        width: 1,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.08),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
+                                      border: Border.all(color: theme.border, width: 1),
+                                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 4, offset: const Offset(0, 2))],
                                     ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: buildMediaItem(
-                                        File(imageone.path),
-                                        theme,
-                                      ),
-                                    ),
+                                    child: ClipRRect(borderRadius: BorderRadius.circular(10), child: buildMediaItem(File(imageone.path), theme)),
                                   ),
                                   Positioned(
                                     top: -2,
@@ -375,37 +296,17 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                                       onTap: () {
                                         setState(() {});
                                         imagefiles.remove(imageone);
-                                        widget.searchPeopleBloc.add(
-                                          SelectedFiles(
-                                            pickedfiles: imageone,
-                                            isRemove: true,
-                                          ),
-                                        );
+                                        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: imageone, isRemove: true));
                                       },
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
                                           color: theme.error,
                                           shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: theme.cardBackground,
-                                            width: 2,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: theme.error.withOpacity(
-                                                0.3,
-                                              ),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                          border: Border.all(color: theme.cardBackground, width: 2),
+                                          boxShadow: [BoxShadow(color: theme.error.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))],
                                         ),
-                                        child: const Icon(
-                                          CupertinoIcons.xmark,
-                                          color: Colors.white,
-                                          size: 10,
-                                        ),
+                                        child: const Icon(CupertinoIcons.xmark, color: Colors.white, size: 10),
                                       ),
                                     ),
                                   ),
@@ -427,20 +328,11 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Row(
               children: [
-                Icon(
-                  CupertinoIcons.photo_camera,
-                  size: 18,
-                  color: theme.textSecondary,
-                ),
+                Icon(CupertinoIcons.photo_camera, size: 18, color: theme.textSecondary),
                 const SizedBox(width: 8),
                 Text(
                   'Add Media',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: theme.textPrimary,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
                 ),
               ],
             ),
@@ -512,14 +404,11 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
           padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: color.withOpacity(0.2),
-              width: 1.5,
-            ),
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1.5),
             gradient: LinearGradient(
               colors: [
-                color.withOpacity(theme.isDark ? 0.12 : 0.06),
-                color.withOpacity(theme.isDark ? 0.05 : 0.02),
+                color.withValues(alpha: theme.isDark ? 0.12 : 0.06),
+                color.withValues(alpha: theme.isDark ? 0.05 : 0.02),
               ],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -532,38 +421,20 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(theme.isDark ? 0.2 : 0.12),
+                  color: color.withValues(alpha: theme.isDark ? 0.2 : 0.12),
                   borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withOpacity(0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: color.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 3))],
                 ),
                 child: isLoading
                     ? Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            valueColor: AlwaysStoppedAnimation<Color>(color),
-                          ),
-                        ),
+                        child: SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(color))),
                       )
                     : Icon(icon, size: 24, color: color),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                  color: onTap == null ? theme.textTertiary : theme.textPrimary,
-                ),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: onTap == null ? theme.textTertiary : theme.textPrimary),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -576,32 +447,18 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
   Widget buildMediaItem(File file, OneUITheme theme) {
     final path = file.path;
     final lower = path.toLowerCase();
-    if (lower.endsWith('.mp4') ||
-        lower.endsWith('.mov') ||
-        lower.endsWith('.avi') ||
-        lower.endsWith('.mkv') ||
-        lower.endsWith('.webm')) {
+    if (lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.avi') || lower.endsWith('.mkv') || lower.endsWith('.webm')) {
       return Stack(
         children: [
           AspectRatio(aspectRatio: 1, child: DisplayVideo(selectedByte: file)),
           Positioned.fill(
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(10),
-              ),
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(10)),
               child: Center(
                 child: Container(
                   padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.9),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    CupertinoIcons.play_fill,
-                    color: theme.primary,
-                    size: 14,
-                  ),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle),
+                  child: Icon(CupertinoIcons.play_fill, color: theme.primary, size: 14),
                 ),
               ),
             ),
@@ -611,17 +468,9 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     }
 
     final looksLikeImage =
-        lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.png') ||
-        lower.endsWith('.webp') ||
-        lower.endsWith('.gif') ||
-        lower.endsWith('.heic') ||
-        lower.endsWith('.heif');
+        lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.webp') || lower.endsWith('.gif') || lower.endsWith('.heic') || lower.endsWith('.heif');
 
-    if (looksLikeImage ||
-        path.startsWith('content://') ||
-        path.startsWith('/data/')) {
+    if (looksLikeImage || path.startsWith('content://') || path.startsWith('/data/')) {
       return FutureBuilder<List<int>>(
         future: XFile(path).readAsBytes(),
         builder: (context, snapshot) {
@@ -629,20 +478,11 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
             return Container(
               color: theme.surfaceVariant,
               child: Center(
-                child: SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-                  ),
-                ),
+                child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.primary))),
               ),
             );
           }
-          if (snapshot.hasError ||
-              snapshot.data == null ||
-              snapshot.data!.isEmpty) {
+          if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
             debugPrint('buildMediaItem error: ${snapshot.error}');
             return _buildUnsupportedFileWidget(theme);
           }
@@ -672,11 +512,7 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
           const SizedBox(height: 2),
           Text(
             'File',
-            style: TextStyle(
-              color: theme.textTertiary,
-              fontSize: 8,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(color: theme.textTertiary, fontSize: 8, fontFamily: 'Poppins'),
             textAlign: TextAlign.center,
           ),
         ],

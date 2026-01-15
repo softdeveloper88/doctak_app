@@ -10,7 +10,7 @@ part 'meeting_state.dart';
 
 class MeetingBloc extends Bloc<MeetingEvent, MeetingState> {
   final int nextPageTrigger = 1;
-   GetMeetingModel? meetings;
+  GetMeetingModel? meetings;
 
   // search contacts
   int contactPageNumber = 1;
@@ -25,19 +25,19 @@ class MeetingBloc extends Bloc<MeetingEvent, MeetingState> {
       }
     });
   }
-  onGetSearchContacts(LoadSearchUserEvent event, Emitter<MeetingState> emit) async {
+  Future<void> onGetSearchContacts(LoadSearchUserEvent event, Emitter<MeetingState> emit) async {
     if (event.page == 1) {
       searchContactsList.clear();
       contactPageNumber = 1;
       emit(MeetingsLoading());
     }
     try {
-     SearchUserModel searchUserModel= await searchUserForMeeting(event.keyword);
+      SearchUserModel searchUserModel = await searchUserForMeeting(event.keyword);
 
       contactNumberOfPage = searchUserModel.pagination?.lastPage ?? 0;
       if (contactPageNumber < contactNumberOfPage + 1) {
         contactPageNumber = contactPageNumber + 1;
-        searchContactsList.addAll( searchUserModel.data ?? []);
+        searchContactsList.addAll(searchUserModel.data ?? []);
       }
 
       emit(MeetingsLoaded());
@@ -51,17 +51,15 @@ class MeetingBloc extends Bloc<MeetingEvent, MeetingState> {
       // emit(DataError('An error occurred $e'));
     }
   }
-  Future<void> _onFetchMeetings(
-      FetchMeetings event,
-      Emitter<MeetingState> emit,
-      ) async {
+
+  Future<void> _onFetchMeetings(FetchMeetings event, Emitter<MeetingState> emit) async {
     emit(MeetingsLoading());
     // try {
-     meetings = await getMeetings();
+    meetings = await getMeetings();
 
-      // print('meeting ${meetings}');
+    // print('meeting ${meetings}');
 
-      emit(MeetingsLoaded());
+    emit(MeetingsLoaded());
     // } catch (e) {
     //
     //   emit(MeetingsError(e.toString()));

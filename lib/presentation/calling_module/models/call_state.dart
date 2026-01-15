@@ -3,31 +3,22 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Enum representing the different call types
-enum CallType {
-  audio,
-  video
-}
+enum CallType { audio, video }
 
 /// Enum representing the different call states
-enum CallConnectionState {
-  connecting,
-  connected,
-  reconnecting,
-  disconnected,
-  failed
-}
+enum CallConnectionState { connecting, connected, reconnecting, disconnected, failed }
 
 /// Enum representing the reason why a call ended
 enum CallEndReason {
-  none,                    // Call is still active
-  userEnded,               // User intentionally ended the call
-  remoteUserEnded,         // Remote user ended the call
-  remoteUserNoAnswer,      // Remote user did not answer (timeout)
-  callerCancelled,         // Caller cancelled the call before it was answered
-  callCancelledByRemote,   // Call was cancelled by remote party (receiver side)
-  networkDisconnect,       // Call ended due to network issues
-  callFailed,              // Call failed to connect
-  permissionDenied,        // Permissions were denied
+  none, // Call is still active
+  userEnded, // User intentionally ended the call
+  remoteUserEnded, // Remote user ended the call
+  remoteUserNoAnswer, // Remote user did not answer (timeout)
+  callerCancelled, // Caller cancelled the call before it was answered
+  callCancelledByRemote, // Call was cancelled by remote party (receiver side)
+  networkDisconnect, // Call ended due to network issues
+  callFailed, // Call failed to connect
+  permissionDenied, // Permissions were denied
 }
 
 /// Model representing the state of a call
@@ -122,26 +113,38 @@ class CallState {
   /// Get a string representation of the network quality
   String getNetworkQualityText({required BuildContext context}) {
     switch (networkQuality) {
-      case 1: return translation(context).lbl_network_quality_excellent;
-      case 2: return translation(context).lbl_network_quality_good;
-      case 3: return translation(context).lbl_network_quality_fair;
-      case 4: return translation(context).lbl_network_quality_poor;
+      case 1:
+        return translation(context).lbl_network_quality_excellent;
+      case 2:
+        return translation(context).lbl_network_quality_good;
+      case 3:
+        return translation(context).lbl_network_quality_fair;
+      case 4:
+        return translation(context).lbl_network_quality_poor;
       case 5:
-      case 6: return translation(context).lbl_network_quality_very_poor;
-      default: return translation(context).lbl_network_quality_unknown;
+      case 6:
+        return translation(context).lbl_network_quality_very_poor;
+      default:
+        return translation(context).lbl_network_quality_unknown;
     }
   }
 
   /// Get a color for the network quality
   Color getNetworkQualityColor() {
     switch (networkQuality) {
-      case 1: return Colors.green;
-      case 2: return Colors.green.shade300;
-      case 3: return Colors.yellow;
-      case 4: return Colors.orange;
+      case 1:
+        return Colors.green;
+      case 2:
+        return Colors.green.shade300;
+      case 3:
+        return Colors.yellow;
+      case 4:
+        return Colors.orange;
       case 5:
-      case 6: return Colors.red;
-      default: return Colors.grey;
+      case 6:
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -150,11 +153,14 @@ class CallState {
     switch (networkQuality) {
       case 1:
       case 2:
-      case 3: return Icons.network_wifi;
+      case 3:
+        return Icons.network_wifi;
       case 4:
       case 5:
-      case 6: return Icons.signal_wifi_statusbar_connected_no_internet_4;
-      default: return Icons.signal_wifi_statusbar_null;
+      case 6:
+        return Icons.signal_wifi_statusbar_connected_no_internet_4;
+      default:
+        return Icons.signal_wifi_statusbar_null;
     }
   }
 

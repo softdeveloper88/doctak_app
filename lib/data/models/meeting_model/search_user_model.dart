@@ -1,11 +1,10 @@
 import 'dart:convert';
+
 SearchUserModel searchUserModelFromJson(String str) => SearchUserModel.fromJson(json.decode(str));
 String searchUserModelToJson(SearchUserModel data) => json.encode(data.toJson());
+
 class SearchUserModel {
-  SearchUserModel({
-      this.success, 
-      this.data, 
-      this.pagination,});
+  SearchUserModel({this.success, this.data, this.pagination});
 
   SearchUserModel.fromJson(dynamic json) {
     success = json['success'];
@@ -32,19 +31,13 @@ class SearchUserModel {
     }
     return map;
   }
-
 }
 
 Pagination paginationFromJson(String str) => Pagination.fromJson(json.decode(str));
 String paginationToJson(Pagination data) => json.encode(data.toJson());
+
 class Pagination {
-  Pagination({
-      this.currentPage, 
-      this.perPage, 
-      this.total, 
-      this.lastPage, 
-      this.nextPageUrl, 
-      this.prevPageUrl,});
+  Pagination({this.currentPage, this.perPage, this.total, this.lastPage, this.nextPageUrl, this.prevPageUrl});
 
   Pagination.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -71,18 +64,13 @@ class Pagination {
     map['prev_page_url'] = prevPageUrl;
     return map;
   }
-
 }
 
 SearchData dataFromJson(String str) => SearchData.fromJson(json.decode(str));
 String dataToJson(SearchData data) => json.encode(data.toJson());
+
 class SearchData {
-  SearchData({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.specialty, 
-      this.profilePic,});
+  SearchData({this.id, this.firstName, this.lastName, this.specialty, this.profilePic});
 
   SearchData.fromJson(dynamic json) {
     id = json['id'];
@@ -106,5 +94,4 @@ class SearchData {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }

@@ -9,26 +9,16 @@ class CustomElevatedButton extends BaseButton {
     this.decoration,
     this.leftIcon,
     this.rightIcon,
-    EdgeInsets? margin,
-    VoidCallback? onPressed,
-    ButtonStyle? buttonStyle,
-    Alignment? alignment,
-    TextStyle? buttonTextStyle,
-    bool? isDisabled,
-    double? height,
-    double? width,
-    required String text,
-  }) : super(
-         text: text,
-         onPressed: onPressed,
-         buttonStyle: buttonStyle,
-         isDisabled: isDisabled,
-         buttonTextStyle: buttonTextStyle,
-         height: height,
-         width: width,
-         alignment: alignment,
-         margin: margin,
-       );
+    super.margin,
+    super.onPressed,
+    super.buttonStyle,
+    super.alignment,
+    super.buttonTextStyle,
+    super.isDisabled,
+    super.height,
+    super.width,
+    required super.text,
+  });
 
   final BoxDecoration? decoration;
   final Widget? leftIcon;
@@ -38,12 +28,7 @@ class CustomElevatedButton extends BaseButton {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return alignment != null
-        ? Align(
-            alignment: alignment ?? Alignment.center,
-            child: _buildButton(context, theme),
-          )
-        : _buildButton(context, theme);
+    return alignment != null ? Align(alignment: alignment ?? Alignment.center, child: _buildButton(context, theme)) : _buildButton(context, theme);
   }
 
   Widget _buildButton(BuildContext context, OneUITheme theme) {
@@ -62,9 +47,7 @@ class CustomElevatedButton extends BaseButton {
               disabledBackgroundColor: theme.surfaceVariant,
               disabledForegroundColor: theme.textTertiary,
               elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(26),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
               padding: const EdgeInsets.symmetric(horizontal: 24),
             ),
         child: Row(
@@ -72,12 +55,7 @@ class CustomElevatedButton extends BaseButton {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (leftIcon != null) ...[leftIcon!, const SizedBox(width: 8)],
-            Text(
-              text,
-              style:
-                  buttonTextStyle ??
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            Text(text, style: buttonTextStyle ?? const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             if (rightIcon != null) ...[const SizedBox(width: 8), rightIcon!],
           ],
         ),

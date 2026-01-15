@@ -14,21 +14,22 @@ class UserProfilePrivacyModel {
   String? cityPrivacy = 'lock';
   String? countryOrigin = 'lock';
 
-  UserProfilePrivacyModel(
-      {this.aboutMePrivacy,
-      this.addressPrivacy,
-      this.birthPlacePrivacy,
-      this.languagePrivacy,
-      this.liveInPrivacy,
-      this.dobPrivacy,
-      this.emailPrivacy,
-      this.genderPrivacy,
-      this.phonePrivacy,
-      this.licenseNumberPrivacy,
-      this.specialtyPrivacy,
-      this.countryPrivacy,
-      this.cityPrivacy,
-      this.countryOrigin});
+  UserProfilePrivacyModel({
+    this.aboutMePrivacy,
+    this.addressPrivacy,
+    this.birthPlacePrivacy,
+    this.languagePrivacy,
+    this.liveInPrivacy,
+    this.dobPrivacy,
+    this.emailPrivacy,
+    this.genderPrivacy,
+    this.phonePrivacy,
+    this.licenseNumberPrivacy,
+    this.specialtyPrivacy,
+    this.countryPrivacy,
+    this.cityPrivacy,
+    this.countryOrigin,
+  });
   Map<String, dynamic> toJson() {
     return {
       'aboutMePrivacy': aboutMePrivacy,

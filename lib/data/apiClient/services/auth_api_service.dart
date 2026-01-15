@@ -12,25 +12,13 @@ class AuthApiService {
   AuthApiService._internal();
 
   /// User login with email/password
-  Future<ApiResponse<PostLoginDeviceAuthResp>> login({
-    required String email,
-    required String password,
-    required String deviceType,
-    required String deviceId,
-    required String deviceToken,
-  }) async {
+  Future<ApiResponse<PostLoginDeviceAuthResp>> login({required String email, required String password, required String deviceType, required String deviceId, required String deviceToken}) async {
     try {
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse1(
           '/login',
           method: networkUtils.HttpMethod.POST,
-          request: {
-            'email': email,
-            'password': password,
-            'device_type': deviceType,
-            'device_id': deviceId,
-            'device_token': deviceToken,
-          },
+          request: {'email': email, 'password': password, 'device_type': deviceType, 'device_id': deviceId, 'device_token': deviceToken},
         ),
       );
       return ApiResponse.success(PostLoginDeviceAuthResp.fromJson(response));
@@ -129,15 +117,7 @@ class AuthApiService {
         await networkUtils.buildHttpResponse1(
           '/complete-profile',
           method: networkUtils.HttpMethod.POST,
-          request: {
-            'first_name': firstName,
-            'last_name': lastName,
-            'country': country,
-            'state': state,
-            'specialty': specialty,
-            'phone': phone,
-            'user_type': userType,
-          },
+          request: {'first_name': firstName, 'last_name': lastName, 'country': country, 'state': state, 'specialty': specialty, 'phone': phone, 'user_type': userType},
         ),
       );
       return ApiResponse.success(PostLoginDeviceAuthResp.fromJson(response));
@@ -149,17 +129,9 @@ class AuthApiService {
   }
 
   /// Forgot password
-  Future<ApiResponse<Map<String, dynamic>>> forgotPassword({
-    required String email,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> forgotPassword({required String email}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/forgot_password',
-          method: networkUtils.HttpMethod.POST,
-          request: {'email': email},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/forgot_password', method: networkUtils.HttpMethod.POST, request: {'email': email}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -171,12 +143,7 @@ class AuthApiService {
   /// Get countries list
   Future<ApiResponse<CountriesModel>> getCountries() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/country-list',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/country-list', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(CountriesModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -186,16 +153,9 @@ class AuthApiService {
   }
 
   /// Get states by country
-  Future<ApiResponse<Map<String, dynamic>>> getStates({
-    required String countryId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> getStates({required String countryId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/get-states?country_id=$countryId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/get-states?country_id=$countryId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -207,12 +167,7 @@ class AuthApiService {
   /// Get specialty list
   Future<ApiResponse<Map<String, dynamic>>> getSpecialty() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/specialty',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/specialty', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -222,16 +177,9 @@ class AuthApiService {
   }
 
   /// Get universities by state
-  Future<ApiResponse<Map<String, dynamic>>> getUniversitiesByState({
-    required String stateId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> getUniversitiesByState({required String stateId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/universities/state/$stateId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/universities/state/$stateId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);

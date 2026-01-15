@@ -1,7 +1,4 @@
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/data/models/post_model/post_data_model.dart';
-import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -16,18 +13,10 @@ class SVCommentReplyComponent extends StatefulWidget {
   String? commentValue;
   double? width;
   int id;
-  SVCommentReplyComponent(
-    this.commentBloc,
-    this.id,
-    this.onPostComment, {
-    this.commentValue,
-    this.width,
-    Key? key,
-  }) : super(key: key);
+  SVCommentReplyComponent(this.commentBloc, this.id, this.onPostComment, {this.commentValue, this.width, super.key});
 
   @override
-  State<SVCommentReplyComponent> createState() =>
-      _SVCommentReplyComponentState();
+  State<SVCommentReplyComponent> createState() => _SVCommentReplyComponentState();
 }
 
 class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
@@ -59,20 +48,12 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
-                backgroundColor: theme.primary.withOpacity(0.1),
-                child: CustomImageView(
-                  imagePath: AppData.imageUrl + AppData.profile_pic,
-                  height: 40,
-                  width: 40,
-                  fit: BoxFit.cover,
-                ).cornerRadiusWithClipRRect(50),
+                backgroundColor: theme.primary.withValues(alpha: 0.1),
+                child: CustomImageView(imagePath: AppData.imageUrl + AppData.profile_pic, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
               ),
               10.width,
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: theme.surfaceVariant,
                   borderRadius: BorderRadius.circular(24),
@@ -94,27 +75,17 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
                           },
                           child: Text(
                             translation(context).lbl_post,
-                            style: TextStyle(
-                              color: theme.primary,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(color: theme.primary, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                           ),
                         ),
                         focus: focusNode,
                         minLines: 1,
                         controller: commentController,
                         textFieldType: TextFieldType.MULTILINE,
-                        textStyle: TextStyle(
-                          color: theme.textPrimary,
-                          fontFamily: 'Poppins',
-                        ),
+                        textStyle: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins'),
                         decoration: InputDecoration(
                           hintText: translation(context).lbl_write_a_comment,
-                          hintStyle: TextStyle(
-                            color: theme.textTertiary,
-                            fontFamily: 'Poppins',
-                          ),
+                          hintStyle: TextStyle(color: theme.textTertiary, fontFamily: 'Poppins'),
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           enabledBorder: InputBorder.none,

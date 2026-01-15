@@ -11,13 +11,11 @@ class AppRoutes {
 
   static const String resetPasswordEmailPage = '/reset_password_email_page';
 
-  static const String resetPasswordEmailTabContainerScreen =
-      '/reset_password_email_tab_container_screen';
+  static const String resetPasswordEmailTabContainerScreen = '/reset_password_email_tab_container_screen';
 
   static const String resetPasswordPhonePage = '/reset_password_phone_page';
 
-  static const String resetPasswordVerifyCodeScreen =
-      '/reset_password_verify_code_screen';
+  static const String resetPasswordVerifyCodeScreen = '/reset_password_verify_code_screen';
 
   static const String createNewPasswordScreen = '/create_new_password_screen';
 
@@ -43,8 +41,7 @@ class AppRoutes {
 
   static const String messageHistoryPage = '/message_history_page';
 
-  static const String messageHistoryTabContainerPage =
-      '/message_history_tab_container_page';
+  static const String messageHistoryTabContainerPage = '/message_history_tab_container_page';
 
   static const String articlesScreen = '/articles_screen';
 
@@ -63,26 +60,26 @@ class AppRoutes {
   static const String initialRoute = '/initialRoute';
 
   static Map<String, WidgetBuilder> get routes => {
-        // onboardingOneScreen: OnboardingOneScreen.builder,
-        // loginScreen: LoginScreen.builder,
-        // signUpScreen: SignUpScreen.builder,
-        // resetPasswordEmailTabContainerScreen:
-        //     ResetPasswordEmailTabContainerScreen.builder,
-        // resetPasswordVerifyCodeScreen: ResetPasswordVerifyCodeScreen.builder,
-        // createNewPasswordScreen: CreateNewPasswordScreen.builder,
-        // homeContainerScreen: SVDashboardScreen(),
-        // topDoctorScreen: TopDoctorScreen.builder,
-        // findDoctorsScreen: FindDoctorsScreen.builder,
-        // doctorDetailScreen: DoctorDetailScreen.builder,
-        // bookingDoctorScreen: BookingDoctorScreen.builder,
-        // chatWithDoctorScreen: ChatWithDoctorScreen.builder,
-        // audioCallScreen: AudioCallScreen.builder,
-        // videoCallScreen: VideoCallScreen.builder,
-        // articlesScreen: ArticlesScreen.builder,
-        // pharmacyScreen: PharmacyScreen.builder,
-        // drugsDetailScreen: DrugsDetailScreen.builder,
-        // myCartScreen: MyCartScreen.builder,
-        // locationScreen: LocationScreen.builder,
-        // appNavigationScreen: AppNavigationScreen.builder,
-      };
+    // onboardingOneScreen: OnboardingOneScreen.builder,
+    // loginScreen: LoginScreen.builder,
+    // signUpScreen: SignUpScreen.builder,
+    // resetPasswordEmailTabContainerScreen:
+    //     ResetPasswordEmailTabContainerScreen.builder,
+    // resetPasswordVerifyCodeScreen: ResetPasswordVerifyCodeScreen.builder,
+    // createNewPasswordScreen: CreateNewPasswordScreen.builder,
+    // homeContainerScreen: SVDashboardScreen(),
+    // topDoctorScreen: TopDoctorScreen.builder,
+    // findDoctorsScreen: FindDoctorsScreen.builder,
+    // doctorDetailScreen: DoctorDetailScreen.builder,
+    // bookingDoctorScreen: BookingDoctorScreen.builder,
+    // chatWithDoctorScreen: ChatWithDoctorScreen.builder,
+    // audioCallScreen: AudioCallScreen.builder,
+    // videoCallScreen: VideoCallScreen.builder,
+    // articlesScreen: ArticlesScreen.builder,
+    // pharmacyScreen: PharmacyScreen.builder,
+    // drugsDetailScreen: DrugsDetailScreen.builder,
+    // myCartScreen: MyCartScreen.builder,
+    // locationScreen: LocationScreen.builder,
+    // appNavigationScreen: AppNavigationScreen.builder,
+  };
 }

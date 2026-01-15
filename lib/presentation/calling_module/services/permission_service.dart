@@ -38,16 +38,14 @@ class PermissionService {
   }
 
   // Request all required permissions for calling
-  static Future<Map<Permission, bool>> requestCallPermissions({
-    required bool isVideoCall,
-  }) async {
+  static Future<Map<Permission, bool>> requestCallPermissions({required bool isVideoCall}) async {
     List<Permission> permissions = [Permission.microphone];
-    
+
     // Add camera permission for video calls
     if (isVideoCall) {
       permissions.add(Permission.camera);
     }
-    
+
     // Add notification permission for Android 13+
     if (Platform.isAndroid) {
       permissions.add(Permission.notification);
@@ -64,9 +62,7 @@ class PermissionService {
   }
 
   // Request all permissions with better error handling
-  static Future<bool> requestAllCallPermissions({
-    required bool isVideoCall,
-  }) async {
+  static Future<bool> requestAllCallPermissions({required bool isVideoCall}) async {
     try {
       // Request notification permission first (non-blocking)
       if (Platform.isAndroid) {
@@ -75,11 +71,11 @@ class PermissionService {
 
       // Request core permissions
       final results = await requestCallPermissions(isVideoCall: isVideoCall);
-      
+
       // Check if all core permissions are granted
       bool micGranted = results[Permission.microphone] ?? false;
       bool camGranted = isVideoCall ? (results[Permission.camera] ?? false) : true;
-      
+
       return micGranted && camGranted;
     } catch (e) {
       print('Error requesting call permissions: $e');
@@ -88,11 +84,9 @@ class PermissionService {
   }
 
   // Check if we have all required permissions
-  static Future<bool> hasRequiredPermissions({
-    required bool isVideoCall,
-  }) async {
+  static Future<bool> hasRequiredPermissions({required bool isVideoCall}) async {
     final micStatus = await Permission.microphone.status;
-    
+
     // For core functionality, notification permission is not strictly required
     // but we should warn if it's missing on Android 13+
     if (Platform.isAndroid) {
@@ -111,9 +105,7 @@ class PermissionService {
   }
 
   // Check if we have all permissions including notifications
-  static Future<bool> hasAllPermissions({
-    required bool isVideoCall,
-  }) async {
+  static Future<bool> hasAllPermissions({required bool isVideoCall}) async {
     final micStatus = await Permission.microphone.status;
     final notificationStatus = await hasNotificationPermission();
 
@@ -131,9 +123,7 @@ class PermissionService {
   }
 
   // Get permission status summary
-  static Future<Map<String, bool>> getPermissionSummary({
-    required bool isVideoCall,
-  }) async {
+  static Future<Map<String, bool>> getPermissionSummary({required bool isVideoCall}) async {
     return {
       'microphone': await Permission.microphone.status.then((s) => s.isGranted),
       'camera': isVideoCall ? await Permission.camera.status.then((s) => s.isGranted) : true,

@@ -1,33 +1,19 @@
 import 'dart:convert';
 
-UserProfile profileModelFromJson(String str) =>
-    UserProfile.fromJson(json.decode(str));
+UserProfile profileModelFromJson(String str) => UserProfile.fromJson(json.decode(str));
 String profileModelToJson(UserProfile data) => json.encode(data.toJson());
 
 class UserProfile {
-  UserProfile({
-    this.totalFollows,
-    this.profilePicture,
-    this.coverPicture,
-    this.isFollowing,
-    this.totalPosts,
-    this.user,
-    this.profile,
-    this.followers,
-    this.privacySetting,
-  });
+  UserProfile({this.totalFollows, this.profilePicture, this.coverPicture, this.isFollowing, this.totalPosts, this.user, this.profile, this.followers, this.privacySetting});
 
   UserProfile.fromJson(dynamic json) {
-    totalFollows = json['total_follows'] != null
-        ? TotalFollows.fromJson(json['total_follows'])
-        : null;
+    totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
     profilePicture = json['profile_picture'];
     coverPicture = json['cover_picture'];
     isFollowing = json['isFollowing'];
     totalPosts = json['total_posts'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
-    profile =
-        json['profile'] != null ? Profile.fromJson(json['profile']) : null;
+    profile = json['profile'] != null ? Profile.fromJson(json['profile']) : null;
     if (json['followers'] != null) {
       followers = [];
       json['followers'].forEach((v) {
@@ -76,20 +62,11 @@ class UserProfile {
   }
 }
 
-PrivacySetting privacySettingFromJson(String str) =>
-    PrivacySetting.fromJson(json.decode(str));
+PrivacySetting privacySettingFromJson(String str) => PrivacySetting.fromJson(json.decode(str));
 String privacySettingToJson(PrivacySetting data) => json.encode(data.toJson());
 
 class PrivacySetting {
-  PrivacySetting({
-    this.id,
-    this.userId,
-    this.recordType,
-    this.recordId,
-    this.visibility,
-    this.createdAt,
-    this.updatedAt,
-  });
+  PrivacySetting({this.id, this.userId, this.recordType, this.recordId, this.visibility, this.createdAt, this.updatedAt});
 
   PrivacySetting.fromJson(dynamic json) {
     id = json['id'];
@@ -125,9 +102,7 @@ Followers followersFromJson(String str) => Followers.fromJson(json.decode(str));
 String followersToJson(Followers data) => json.encode(data.toJson());
 
 class Followers {
-  Followers({
-    this.id,
-  });
+  Followers({this.id});
 
   Followers.fromJson(dynamic json) {
     id = json['id'];
@@ -145,18 +120,7 @@ Profile profileFromJson(String str) => Profile.fromJson(json.decode(str));
 String profileToJson(Profile data) => json.encode(data.toJson());
 
 class Profile {
-  Profile({
-    this.id,
-    this.userId,
-    this.aboutMe,
-    this.address,
-    this.birthplace,
-    this.livesIn,
-    this.languages,
-    this.hobbies,
-    this.createdAt,
-    this.updatedAt,
-  });
+  Profile({this.id, this.userId, this.aboutMe, this.address, this.birthplace, this.livesIn, this.languages, this.hobbies, this.createdAt, this.updatedAt});
 
   Profile.fromJson(dynamic json) {
     id = json['id'];
@@ -201,21 +165,7 @@ User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
 
 class User {
-  User({
-    this.role,
-    this.country,
-    this.firstName,
-    this.lastName,
-    this.licenseNo,
-    this.specialty,
-    this.clinicName,
-    this.phone,
-    this.college,
-    this.city,
-    this.state,
-    this.dob,
-    this.id,
-  });
+  User({this.role, this.country, this.firstName, this.lastName, this.licenseNo, this.specialty, this.clinicName, this.phone, this.college, this.city, this.state, this.dob, this.id});
 
   User.fromJson(dynamic json) {
     role = json['role'];
@@ -265,15 +215,11 @@ class User {
   }
 }
 
-TotalFollows totalFollowsFromJson(String str) =>
-    TotalFollows.fromJson(json.decode(str));
+TotalFollows totalFollowsFromJson(String str) => TotalFollows.fromJson(json.decode(str));
 String totalFollowsToJson(TotalFollows data) => json.encode(data.toJson());
 
 class TotalFollows {
-  TotalFollows({
-    this.totalFollowers,
-    this.totalFollowings,
-  });
+  TotalFollows({this.totalFollowers, this.totalFollowings});
 
   TotalFollows.fromJson(dynamic json) {
     totalFollowers = json['total_followers'];

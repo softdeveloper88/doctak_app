@@ -19,11 +19,7 @@ import 'upcoming_meeting_screen.dart';
 import 'video_call_screen.dart';
 
 class ManageMeetingScreen extends StatefulWidget {
-  const ManageMeetingScreen({
-    Key? key,
-    this.meetingCode,
-    this.autoJoin = false,
-  }) : super(key: key);
+  const ManageMeetingScreen({super.key, this.meetingCode, this.autoJoin = false});
 
   /// Optional meeting code to pre-fill (from deep link)
   final String? meetingCode;
@@ -35,8 +31,7 @@ class ManageMeetingScreen extends StatefulWidget {
   State<ManageMeetingScreen> createState() => _ManageMeetingScreenState();
 }
 
-class _ManageMeetingScreenState extends State<ManageMeetingScreen>
-    with SingleTickerProviderStateMixin {
+class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _meetingCodeController = TextEditingController();
   final TextEditingController _meetingTitleController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
@@ -65,10 +60,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     });
     meetingBloc.add(FetchMeetings());
     // Initialize date field with tomorrow's date
-    _dateController.text =
-        "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(
-          ' ',
-        )[0];
+    _dateController.text = "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(' ')[0];
 
     // Handle deep link auto-join
     if (widget.meetingCode != null && widget.meetingCode!.isNotEmpty) {
@@ -112,14 +104,8 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: theme.primary,
-              onPrimary: Colors.white,
-              onSurface: theme.textPrimary,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: theme.primary),
-            ),
+            colorScheme: ColorScheme.light(primary: theme.primary, onPrimary: Colors.white, onSurface: theme.textPrimary),
+            textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: theme.primary)),
           ),
           child: child!,
         );
@@ -141,27 +127,17 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: theme.primary,
-              onPrimary: Colors.white,
-              onSurface: theme.textPrimary,
-            ),
+            colorScheme: ColorScheme.light(primary: theme.primary, onPrimary: Colors.white, onSurface: theme.textPrimary),
             timePickerTheme: TimePickerThemeData(
               backgroundColor: theme.cardBackground,
-              hourMinuteShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              dayPeriodShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              dayPeriodColor: theme.primary.withOpacity(0.1),
+              hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              dayPeriodShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              dayPeriodColor: theme.primary.withValues(alpha: 0.1),
               dayPeriodTextColor: theme.primary,
-              hourMinuteColor: theme.primary.withOpacity(0.1),
+              hourMinuteColor: theme.primary.withValues(alpha: 0.1),
               hourMinuteTextColor: theme.primary,
             ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(foregroundColor: theme.primary),
-            ),
+            textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: theme.primary)),
           ),
           child: child!,
         );
@@ -183,47 +159,20 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
       body: Column(
         children: [
           // Custom App Bar using DoctakAppBar
-          DoctakAppBar(
-            title: translation(context).lbl_meeting_management,
-            titleIcon: Icons.video_call_rounded,
-          ),
+          DoctakAppBar(title: translation(context).lbl_meeting_management, titleIcon: Icons.video_call_rounded),
 
           // Compact Tab Container with One UI 8.5 style
           Container(
             color: theme.cardBackground,
             child: Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
+              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               height: 48,
-              decoration: BoxDecoration(
-                color: theme.surfaceVariant.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(25),
-              ),
+              decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(25)),
               child: Row(
                 children: [
-                  _buildTabItem(
-                    context: context,
-                    theme: theme,
-                    index: 0,
-                    icon: Icons.videocam_rounded,
-                    label: translation(context).lbl_join_create,
-                  ),
-                  _buildTabItem(
-                    context: context,
-                    theme: theme,
-                    index: 1,
-                    icon: Icons.calendar_today_rounded,
-                    label: translation(context).lbl_scheduled,
-                  ),
-                  _buildTabItem(
-                    context: context,
-                    theme: theme,
-                    index: 2,
-                    icon: Icons.history_rounded,
-                    label: translation(context).lbl_history,
-                  ),
+                  _buildTabItem(context: context, theme: theme, index: 0, icon: Icons.videocam_rounded, label: translation(context).lbl_join_create),
+                  _buildTabItem(context: context, theme: theme, index: 1, icon: Icons.calendar_today_rounded, label: translation(context).lbl_scheduled),
+                  _buildTabItem(context: context, theme: theme, index: 2, icon: Icons.history_rounded, label: translation(context).lbl_history),
                 ],
               ),
             ),
@@ -231,27 +180,14 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
 
           // Tab Content
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildJoinCreateTab(theme),
-                const UpcomingMeetingScreen(),
-                _buildHistoryTab(theme),
-              ],
-            ),
+            child: TabBarView(controller: _tabController, children: [_buildJoinCreateTab(theme), const UpcomingMeetingScreen(), _buildHistoryTab(theme)]),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTabItem({
-    required BuildContext context,
-    required OneUITheme theme,
-    required int index,
-    required IconData icon,
-    required String label,
-  }) {
+  Widget _buildTabItem({required BuildContext context, required OneUITheme theme, required int index, required IconData icon, required String label}) {
     final isSelected = _tabController.index == index;
 
     return Expanded(
@@ -260,10 +196,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           _tabController.animateTo(index);
         },
         child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? theme.primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(25),
-          ),
+          decoration: BoxDecoration(color: isSelected ? theme.primary : Colors.transparent, borderRadius: BorderRadius.circular(25)),
           child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -272,20 +205,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   Container(
                     padding: const EdgeInsets.all(4),
                     margin: const EdgeInsets.only(right: 6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
                     child: Icon(icon, size: 12, color: theme.primary),
                   ),
                 Text(
                   label,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : theme.textSecondary,
-                    fontSize: 12,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: isSelected ? Colors.white : theme.textSecondary, fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -307,27 +232,14 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             decoration: BoxDecoration(
               color: theme.cardBackground,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-                width: 1,
-              ),
-              boxShadow: theme.isDark
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: theme.primary.withOpacity(0.1),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+              border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
+              boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.1), blurRadius: 12, offset: const Offset(0, 4))],
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: AnimatedCrossFade(
                 duration: const Duration(milliseconds: 300),
-                crossFadeState: _showNewMeeting
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
+                crossFadeState: _showNewMeeting ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                 firstChild: _buildJoinMeetingView(theme),
                 secondChild: _buildCreateMeetingView(theme),
                 sizeCurve: Curves.easeInOut,
@@ -342,19 +254,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           // Quick action buttons
           Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [theme.primary, theme.primary.withOpacity(0.8)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primary.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
             ),
             child: Material(
               color: Colors.transparent,
@@ -364,18 +266,10 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   ProgressDialogUtils.showProgressDialog();
                   try {
                     await startMeetings().then((createMeeting) async {
-                      await joinMeetings(
-                        createMeeting.data?.meeting?.meetingChannel ?? '',
-                      ).then((joinMeetingData) {
+                      await joinMeetings(createMeeting.data?.meeting?.meetingChannel ?? '').then((joinMeetingData) {
                         print('Meeting data${joinMeetingData.toJson()}');
                         ProgressDialogUtils.hideProgressDialog();
-                        VideoCallScreen(
-                          meetingDetailsModel: joinMeetingData,
-                          isHost: true,
-                        ).launch(
-                          context,
-                          pageRouteAnimation: PageRouteAnimation.Slide,
-                        );
+                        VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: true).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                       });
                     });
                   } catch (error) {
@@ -384,27 +278,15 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   }
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 14,
-                    horizontal: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.videocam_rounded,
-                        size: 20,
-                        color: Colors.white,
-                      ),
+                      const Icon(Icons.videocam_rounded, size: 20, color: Colors.white),
                       const SizedBox(width: 8),
                       Text(
                         translation(context).lbl_create_instant_meeting,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Colors.white,
-                          fontFamily: 'Poppins',
-                        ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white, fontFamily: 'Poppins'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -423,19 +305,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               Container(
                 width: 4,
                 height: 24,
-                decoration: BoxDecoration(
-                  color: theme.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: theme.primary, borderRadius: BorderRadius.circular(2)),
               ),
               const SizedBox(width: 8),
               Text(
                 translation(context).lbl_key_features,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textPrimary,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
               ),
             ],
           ),
@@ -451,13 +326,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             crossAxisSpacing: 8,
             childAspectRatio: 1.1,
             children: [
-              _buildFeatureCard(
-                theme: theme,
-                icon: Icons.hd_rounded,
-                title: translation(context).lbl_hd_video,
-                description: translation(context).desc_hd_video,
-                color: theme.primary,
-              ),
+              _buildFeatureCard(theme: theme, icon: Icons.hd_rounded, title: translation(context).lbl_hd_video, description: translation(context).desc_hd_video, color: theme.primary),
               _buildFeatureCard(
                 theme: theme,
                 icon: Icons.people_alt_rounded,
@@ -472,13 +341,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 description: translation(context).desc_screen_sharing,
                 color: theme.warning,
               ),
-              _buildFeatureCard(
-                theme: theme,
-                icon: Icons.chat_rounded,
-                title: translation(context).lbl_group_chat,
-                description: translation(context).desc_group_chat,
-                color: theme.secondary,
-              ),
+              _buildFeatureCard(theme: theme, icon: Icons.chat_rounded, title: translation(context).lbl_group_chat, description: translation(context).desc_group_chat, color: theme.secondary),
             ],
           ),
         ],
@@ -497,12 +360,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             Expanded(
               child: Text(
                 translation(context).lbl_join_meeting,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary, fontFamily: 'Poppins'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -523,19 +381,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.add_circle_outline_rounded,
-                    size: 14,
-                    color: theme.primary,
-                  ),
+                  Icon(Icons.add_circle_outline_rounded, size: 14, color: theme.primary),
                   const SizedBox(width: 4),
                   Text(
                     translation(context).lbl_create_instead,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      color: theme.primary,
-                    ),
+                    style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.primary),
                   ),
                 ],
               ),
@@ -546,18 +396,13 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.05),
+            color: theme.primary.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.primary.withOpacity(0.2)),
+            border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
           ),
           child: Text(
             translation(context).msg_enter_meeting_code_description,
-            style: TextStyle(
-              color: theme.textSecondary,
-              fontSize: 12,
-              fontFamily: 'Poppins',
-              height: 1.3,
-            ),
+            style: TextStyle(color: theme.textSecondary, fontSize: 12, fontFamily: 'Poppins', height: 1.3),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -573,11 +418,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         const SizedBox(height: 16),
         Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [theme.primary, theme.primary.withOpacity(0.8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Material(
@@ -597,20 +438,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.login_rounded,
-                      size: 18,
-                      color: Colors.white,
-                    ),
+                    const Icon(Icons.login_rounded, size: 18, color: Colors.white),
                     const SizedBox(width: 8),
                     Text(
                       translation(context).lbl_join_meeting,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -636,12 +468,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             Expanded(
               child: Text(
                 translation(context).lbl_create_meeting,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textPrimary,
-                  fontFamily: 'Poppins',
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary, fontFamily: 'Poppins'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -666,11 +493,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   const SizedBox(width: 4),
                   Text(
                     translation(context).lbl_join_instead,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      color: theme.primary,
-                    ),
+                    style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.primary),
                   ),
                 ],
               ),
@@ -681,21 +504,16 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.05),
+            color: theme.primary.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.primary.withOpacity(0.2)),
+            border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
           ),
-          child: Text(
-            translation(context).msg_create_new_meeting_description,
-            style: TextStyle(color: theme.textSecondary, fontSize: 14),
-          ),
+          child: Text(translation(context).msg_create_new_meeting_description, style: TextStyle(color: theme.textSecondary, fontSize: 14)),
         ),
         const SizedBox(height: 16),
         AnimatedCrossFade(
           duration: const Duration(milliseconds: 300),
-          crossFadeState: _isScheduling
-              ? CrossFadeState.showSecond
-              : CrossFadeState.showFirst,
+          crossFadeState: _isScheduling ? CrossFadeState.showSecond : CrossFadeState.showFirst,
           firstChild: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -773,41 +591,26 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               const SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
-                  color: theme.surfaceVariant.withOpacity(0.5),
+                  color: theme.surfaceVariant.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: theme.surfaceVariant),
                 ),
                 child: DropdownButtonFormField<int>(
-                  value: _durationMinutes,
+                  initialValue: _durationMinutes,
                   decoration: InputDecoration(
                     labelText: 'Duration',
                     labelStyle: TextStyle(color: theme.textSecondary),
-                    prefixIcon: Icon(
-                      Icons.timelapse_rounded,
-                      color: theme.primary,
-                    ),
+                    prefixIcon: Icon(Icons.timelapse_rounded, color: theme.primary),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
                     filled: false,
                   ),
                   items: [
-                    DropdownMenuItem(
-                      value: 30,
-                      child: Text(translation(context).lbl_30_minutes),
-                    ),
-                    DropdownMenuItem(
-                      value: 60,
-                      child: Text(translation(context).lbl_1_hour),
-                    ),
-                    DropdownMenuItem(
-                      value: 90,
-                      child: Text(translation(context).lbl_1_5_hours),
-                    ),
-                    DropdownMenuItem(
-                      value: 120,
-                      child: Text(translation(context).lbl_2_hours),
-                    ),
+                    DropdownMenuItem(value: 30, child: Text(translation(context).lbl_30_minutes)),
+                    DropdownMenuItem(value: 60, child: Text(translation(context).lbl_1_hour)),
+                    DropdownMenuItem(value: 90, child: Text(translation(context).lbl_1_5_hours)),
+                    DropdownMenuItem(value: 120, child: Text(translation(context).lbl_2_hours)),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -842,24 +645,16 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                       icon: Icons.schedule_rounded,
                       isPrimary: true,
                       onTap: () async {
-                        if (_meetingTitleController.text.isEmpty ||
-                            _dateController.text.isEmpty ||
-                            _startTimeController.text.isEmpty) {
+                        if (_meetingTitleController.text.isEmpty || _dateController.text.isEmpty || _startTimeController.text.isEmpty) {
                           toast(translation(context).msg_all_fields_required);
                           return;
                         }
 
                         try {
                           ProgressDialogUtils.showProgressDialog();
-                          final response = await setScheduleMeeting(
-                            title: _meetingTitleController.text,
-                            date: _dateController.text,
-                            time: _startTimeController.text,
-                          );
+                          final response = await setScheduleMeeting(title: _meetingTitleController.text, date: _dateController.text, time: _startTimeController.text);
 
-                          Map<String, dynamic> responseData = json.decode(
-                            jsonEncode(response.data),
-                          );
+                          Map<String, dynamic> responseData = json.decode(jsonEncode(response.data));
                           ProgressDialogUtils.hideProgressDialog();
 
                           toast(responseData['message']);
@@ -868,18 +663,14 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                           });
 
                           _meetingTitleController.clear();
-                          _dateController.text =
-                              "${DateTime.now().add(const Duration(days: 1)).toLocal()}"
-                                  .split(' ')[0];
+                          _dateController.text = "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(' ')[0];
                           _startTimeController.clear();
 
                           _showScheduleSuccessDialog();
                           meetingBloc.add(FetchMeetings());
                         } catch (e) {
                           ProgressDialogUtils.hideProgressDialog();
-                          toast(
-                            '${translation(context).msg_error_scheduling_meeting}: ${e.toString()}',
-                          );
+                          toast('${translation(context).msg_error_scheduling_meeting}: ${e.toString()}');
                         }
                       },
                     ),
@@ -903,22 +694,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     );
   }
 
-  Widget _buildThemedButton({
-    required OneUITheme theme,
-    required String label,
-    required IconData icon,
-    required bool isPrimary,
-    required VoidCallback onTap,
-    Color? color,
-  }) {
+  Widget _buildThemedButton({required OneUITheme theme, required String label, required IconData icon, required bool isPrimary, required VoidCallback onTap, Color? color}) {
     final buttonColor = color ?? theme.primary;
 
     if (isPrimary) {
       return Container(
-        decoration: BoxDecoration(
-          color: buttonColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: BoxDecoration(color: buttonColor, borderRadius: BorderRadius.circular(12)),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -934,12 +715,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   const SizedBox(width: 6),
                   Text(
                     label,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -971,12 +747,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   const SizedBox(width: 6),
                   Text(
                     label,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: theme.textSecondary,
-                    ),
+                    style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: theme.textSecondary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1000,7 +771,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.surfaceVariant.withOpacity(0.5),
+        color: theme.surfaceVariant.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: theme.surfaceVariant),
       ),
@@ -1022,10 +793,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
               filled: false,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
         ],
@@ -1033,30 +801,13 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     );
   }
 
-  Widget _buildFeatureCard({
-    required OneUITheme theme,
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color color,
-  }) {
+  Widget _buildFeatureCard({required OneUITheme theme, required IconData icon, required String title, required String description, required Color color}) {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-          width: 1,
-        ),
-        boxShadow: theme.isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: color.withOpacity(0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+        border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
+        boxShadow: theme.isDark ? [] : [BoxShadow(color: color.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -1065,21 +816,13 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
               child: Icon(icon, size: 28, color: color),
             ),
             const SizedBox(height: 8),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-                fontFamily: 'Poppins',
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textPrimary, fontFamily: 'Poppins'),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -1088,12 +831,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             Expanded(
               child: Text(
                 description,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: theme.textSecondary,
-                  height: 1.2,
-                  fontFamily: 'Poppins',
-                ),
+                style: TextStyle(fontSize: 11, color: theme.textSecondary, height: 1.2, fontFamily: 'Poppins'),
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -1115,36 +853,18 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           decoration: BoxDecoration(
             color: theme.cardBackground,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-              width: 1,
-            ),
-            boxShadow: theme.isDark
-                ? []
-                : [
-                    BoxShadow(
-                      color: theme.primary.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+            border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
+            boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 translation(context).lbl_history,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textPrimary,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
               ),
               Container(
-                decoration: BoxDecoration(
-                  color: theme.surfaceVariant.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(10)),
                 child: IconButton(
                   icon: Icon(Icons.search_rounded, color: theme.primary),
                   onPressed: () {
@@ -1165,12 +885,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             shrinkWrap: true,
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 4),
-            children: [
-              _buildFilterChip(theme, 'All', true),
-              _buildFilterChip(theme, 'This Week', false),
-              _buildFilterChip(theme, 'This Month', false),
-              _buildFilterChip(theme, 'Custom Range', false),
-            ],
+            children: [_buildFilterChip(theme, 'All', true), _buildFilterChip(theme, 'This Week', false), _buildFilterChip(theme, 'This Month', false), _buildFilterChip(theme, 'Custom Range', false)],
           ),
         ),
 
@@ -1214,50 +929,27 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         onSelected: (selected) {
           // Update filter
         },
-        backgroundColor: theme.surfaceVariant.withOpacity(0.5),
-        selectedColor: theme.primary.withOpacity(0.15),
+        backgroundColor: theme.surfaceVariant.withValues(alpha: 0.5),
+        selectedColor: theme.primary.withValues(alpha: 0.15),
         checkmarkColor: theme.primary,
-        labelStyle: TextStyle(
-          color: isSelected ? theme.primary : theme.textSecondary,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-        ),
+        labelStyle: TextStyle(color: isSelected ? theme.primary : theme.textSecondary, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(
-            color: isSelected ? theme.primary : Colors.transparent,
-          ),
+          side: BorderSide(color: isSelected ? theme.primary : Colors.transparent),
         ),
       ),
     );
   }
 
-  Widget _buildHistoryCard({
-    required OneUITheme theme,
-    required String title,
-    required DateTime date,
-    required Duration duration,
-    required int participants,
-    required bool hasRecording,
-  }) {
+  Widget _buildHistoryCard({required OneUITheme theme, required String title, required DateTime date, required Duration duration, required int participants, required bool hasRecording}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: theme.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-          width: 1,
-        ),
-        boxShadow: theme.isDark
-            ? []
-            : [
-                BoxShadow(
-                  color: theme.primary.withOpacity(0.08),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+        border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
+        boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Material(
         color: Colors.transparent,
@@ -1276,15 +968,8 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.video_file_rounded,
-                        color: theme.primary,
-                        size: 24,
-                      ),
+                      decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                      child: Icon(Icons.video_file_rounded, color: theme.primary, size: 24),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -1293,11 +978,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                         children: [
                           Text(
                             title,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: theme.textPrimary,
-                            ),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary),
                           ),
                           const SizedBox(height: 8),
                           Wrap(
@@ -1307,37 +988,17 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.calendar_today_rounded,
-                                    size: 14,
-                                    color: theme.textSecondary,
-                                  ),
+                                  Icon(Icons.calendar_today_rounded, size: 14, color: theme.textSecondary),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    '${date.day}/${date.month}/${date.year}',
-                                    style: TextStyle(
-                                      color: theme.textSecondary,
-                                      fontSize: 13,
-                                    ),
-                                  ),
+                                  Text('${date.day}/${date.month}/${date.year}', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                                 ],
                               ),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    Icons.access_time_rounded,
-                                    size: 14,
-                                    color: theme.textSecondary,
-                                  ),
+                                  Icon(Icons.access_time_rounded, size: 14, color: theme.textSecondary),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    '${duration.inHours}h ${duration.inMinutes.remainder(60)}m',
-                                    style: TextStyle(
-                                      color: theme.textSecondary,
-                                      fontSize: 13,
-                                    ),
-                                  ),
+                                  Text('${duration.inHours}h ${duration.inMinutes.remainder(60)}m', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                                 ],
                               ),
                             ],
@@ -1345,19 +1006,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              Icon(
-                                Icons.people_rounded,
-                                size: 14,
-                                color: theme.textSecondary,
-                              ),
+                              Icon(Icons.people_rounded, size: 14, color: theme.textSecondary),
                               const SizedBox(width: 4),
-                              Text(
-                                '$participants Participants',
-                                style: TextStyle(
-                                  color: theme.textSecondary,
-                                  fontSize: 13,
-                                ),
-                              ),
+                              Text('$participants Participants', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                             ],
                           ),
                         ],
@@ -1372,21 +1023,8 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   spacing: 12,
                   runSpacing: 8,
                   children: [
-                    _buildThemedButton(
-                      theme: theme,
-                      label: translation(context).lbl_details,
-                      icon: Icons.info_outline_rounded,
-                      isPrimary: false,
-                      onTap: () {},
-                    ),
-                    if (hasRecording)
-                      _buildThemedButton(
-                        theme: theme,
-                        label: translation(context).lbl_see_more,
-                        icon: Icons.play_circle_outline_rounded,
-                        isPrimary: true,
-                        onTap: () {},
-                      ),
+                    _buildThemedButton(theme: theme, label: translation(context).lbl_details, icon: Icons.info_outline_rounded, isPrimary: false, onTap: () {}),
+                    if (hasRecording) _buildThemedButton(theme: theme, label: translation(context).lbl_see_more, icon: Icons.play_circle_outline_rounded, isPrimary: true, onTap: () {}),
                   ],
                 ),
               ],
@@ -1403,16 +1041,11 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     askToJoin(context, channel)
         .then((resp) async {
           print("join response ${jsonEncode(resp.data)}");
-          Map<String, dynamic> responseData = json.decode(
-            jsonEncode(resp.data),
-          );
+          Map<String, dynamic> responseData = json.decode(jsonEncode(resp.data));
           if (responseData['success'] == '1') {
             await joinMeetings(channel).then((joinMeetingData) {
               ProgressDialogUtils.hideProgressDialog();
-              VideoCallScreen(
-                meetingDetailsModel: joinMeetingData,
-                isHost: false,
-              ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
             });
           } else {
             _connectPusher(responseData['meeting_id'], channel);
@@ -1424,10 +1057,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
         });
   }
 
-  Future<void> _navigateToCallScreen(
-    BuildContext context,
-    String getChannelName,
-  ) async {
+  Future<void> _navigateToCallScreen(BuildContext context, String getChannelName) async {
     if (getChannelName.isNotEmpty) {
       _checkJoinStatus(context, getChannelName);
     } else {
@@ -1454,49 +1084,38 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
 
       pusher.connect();
 
-      if (pusher != null) {
-        // Successfully created and connected to Pusher
-        clientListenChannel = await pusher.subscribe(
-          channelName: "meeting-channel$meetingId",
-          onMemberAdded: (member) {
-            // print("Member added: $member");
-          },
-          onMemberRemoved: (member) {
-            print("Member removed: $member");
-          },
-          onEvent: (event) async {
-            String eventName = event.eventName;
-            print(eventName);
-            switch (eventName) {
-              case 'new-user-allowed':
-                await joinMeetings(channel).then((joinMeetingData) {
-                  ProgressDialogUtils.hideProgressDialog();
-                  VideoCallScreen(
-                    meetingDetailsModel: joinMeetingData,
-                    isHost: false,
-                  ).launch(
-                    context,
-                    pageRouteAnimation: PageRouteAnimation.Slide,
-                  );
-                });
-                print("eventName $eventName");
-                toast(eventName);
-                break;
-              case 'new-user-rejected':
+      // Successfully created and connected to Pusher
+      clientListenChannel = await pusher.subscribe(
+        channelName: "meeting-channel$meetingId",
+        onMemberAdded: (member) {
+          // print("Member added: $member");
+        },
+        onMemberRemoved: (member) {
+          print("Member removed: $member");
+        },
+        onEvent: (event) async {
+          String eventName = event.eventName;
+          print(eventName);
+          switch (eventName) {
+            case 'new-user-allowed':
+              await joinMeetings(channel).then((joinMeetingData) {
                 ProgressDialogUtils.hideProgressDialog();
-                print("eventName $eventName");
-                toast("Meeting join request was rejected");
-                break;
-              default:
-                // Handle unknown event types or ignore them
-                break;
-            }
-          },
-        );
-      } else {
-        ProgressDialogUtils.hideProgressDialog();
-        toast("Failed to connect to meeting");
-      }
+                VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              });
+              print("eventName $eventName");
+              toast(eventName);
+              break;
+            case 'new-user-rejected':
+              ProgressDialogUtils.hideProgressDialog();
+              print("eventName $eventName");
+              toast("Meeting join request was rejected");
+              break;
+            default:
+              // Handle unknown event types or ignore them
+              break;
+          }
+        },
+      );
     } catch (e) {
       ProgressDialogUtils.hideProgressDialog();
       print('Pusher error: $e');
@@ -1535,19 +1154,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
   void _onSubscriptionCount(String channelName, int subscriptionCount) {}
 
   // Authorizer method for Pusher - required to prevent iOS crash
-  Future<dynamic>? _onAuthorizer(
-    String channelName,
-    String socketId,
-    dynamic options,
-  ) async {
-    print(
-      "_onAuthorizer called for channel: $channelName, socketId: $socketId",
-    );
+  Future<dynamic>? _onAuthorizer(String channelName, String socketId, dynamic options) async {
+    print("_onAuthorizer called for channel: $channelName, socketId: $socketId");
 
     // For public channels (not starting with 'private-' or 'presence-'),
     // return null
-    if (!channelName.startsWith('private-') &&
-        !channelName.startsWith('presence-')) {
+    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
       return null;
     }
 
@@ -1556,13 +1168,10 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
 
   void _showScheduleSuccessDialog() {
     final theme = OneUITheme.of(context);
-    final meetingTitle = _meetingTitleController.text.trim().isEmpty
-        ? 'Untitled Meeting'
-        : _meetingTitleController.text.trim();
+    final meetingTitle = _meetingTitleController.text.trim().isEmpty ? 'Untitled Meeting' : _meetingTitleController.text.trim();
     final meetingDate = _dateController.text;
     final meetingTime = _startTimeController.text;
-    final meetingCode =
-        'MT-${DateTime.now().millisecondsSinceEpoch.toString().substring(7, 13)}';
+    final meetingCode = 'MT-${DateTime.now().millisecondsSinceEpoch.toString().substring(7, 13)}';
 
     showDialog(
       context: context,
@@ -1573,24 +1182,13 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.success.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_circle_rounded,
-                color: theme.success,
-                size: 28,
-              ),
+              decoration: BoxDecoration(color: theme.success.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(Icons.check_circle_rounded, color: theme.success, size: 28),
             ),
             const SizedBox(width: 16),
             Text(
               'Meeting Scheduled',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
             ),
           ],
         ),
@@ -1601,87 +1199,48 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.success.withOpacity(0.05),
+                color: theme.success.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: theme.success.withOpacity(0.2)),
+                border: Border.all(color: theme.success.withValues(alpha: 0.2)),
               ),
-              child: Text(
-                'Your meeting has been scheduled successfully!',
-                style: TextStyle(color: theme.success),
-              ),
+              child: Text('Your meeting has been scheduled successfully!', style: TextStyle(color: theme.success)),
             ),
             const SizedBox(height: 20),
             Text(
               translation(context).lbl_meeting_detail,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: theme.textPrimary, fontSize: 16),
             ),
             const SizedBox(height: 12),
-            _buildDialogDetailRow(
-              theme,
-              translation(context).lbl_meeting_title,
-              meetingTitle,
-            ),
-            _buildDialogDetailRow(
-              theme,
-              translation(context).lbl_date,
-              meetingDate,
-            ),
-            _buildDialogDetailRow(
-              theme,
-              translation(context).lbl_time,
-              meetingTime,
-            ),
-            _buildDialogDetailRow(
-              theme,
-              'Duration',
-              '$_durationMinutes minutes',
-            ),
+            _buildDialogDetailRow(theme, translation(context).lbl_meeting_title, meetingTitle),
+            _buildDialogDetailRow(theme, translation(context).lbl_date, meetingDate),
+            _buildDialogDetailRow(theme, translation(context).lbl_time, meetingTime),
+            _buildDialogDetailRow(theme, 'Duration', '$_durationMinutes minutes'),
             const SizedBox(height: 16),
             Text(
               translation(context).lbl_meeting_code,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, color: theme.textPrimary, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.05),
+                color: theme.primary.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: theme.primary.withOpacity(0.2)),
+                border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       meetingCode,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: theme.primary,
-                        fontSize: 16,
-                        letterSpacing: 1.2,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.bold, color: theme.primary, fontSize: 16, letterSpacing: 1.2),
                     ),
                   ),
                   IconButton(
                     icon: Icon(Icons.copy_rounded, color: theme.primary),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: meetingCode));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            translation(context).msg_meeting_code_copied,
-                          ),
-                          backgroundColor: theme.primary,
-                        ),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_meeting_code_copied), backgroundColor: theme.primary));
                     },
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -1696,50 +1255,28 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text(
-              translation(context).lbl_close,
-              style: TextStyle(color: theme.textSecondary),
-            ),
+            child: Text(translation(context).lbl_close, style: TextStyle(color: theme.textSecondary)),
           ),
           Container(
-            decoration: BoxDecoration(
-              color: theme.primary,
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: BoxDecoration(color: theme.primary, borderRadius: BorderRadius.circular(8)),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(8),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _shareDialog(
-                    theme,
-                    meetingTitle,
-                    meetingDate,
-                    meetingTime,
-                    meetingCode,
-                  );
+                  _shareDialog(theme, meetingTitle, meetingDate, meetingTime, meetingCode);
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.share_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      ),
+                      const Icon(Icons.share_rounded, size: 18, color: Colors.white),
                       const SizedBox(width: 6),
                       Text(
                         translation(context).lbl_share,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -1762,19 +1299,13 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             width: 80,
             child: Text(
               label,
-              style: TextStyle(
-                color: theme.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(color: theme.textSecondary, fontWeight: FontWeight.w500),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w500, color: theme.textPrimary),
             ),
           ),
         ],
@@ -1794,52 +1325,32 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.error.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.warning_amber_rounded,
-                color: theme.error,
-                size: 28,
-              ),
+              decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(Icons.warning_amber_rounded, color: theme.error, size: 28),
             ),
             const SizedBox(width: 16),
             Text(
               'Cancel Meeting',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
             ),
           ],
         ),
         content: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: theme.error.withOpacity(0.05),
+            color: theme.error.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.error.withOpacity(0.2)),
+            border: Border.all(color: theme.error.withValues(alpha: 0.2)),
           ),
-          child: Text(
-            'Are you sure you want to cancel this meeting? This action cannot be undone.',
-            style: TextStyle(color: theme.textPrimary),
-          ),
+          child: Text('Are you sure you want to cancel this meeting? This action cannot be undone.', style: TextStyle(color: theme.textPrimary)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              translation(context).lbl_cancel,
-              style: TextStyle(color: theme.textSecondary),
-            ),
+            child: Text(translation(context).lbl_cancel, style: TextStyle(color: theme.textSecondary)),
           ),
           Container(
-            decoration: BoxDecoration(
-              color: theme.error,
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: BoxDecoration(color: theme.error, borderRadius: BorderRadius.circular(8)),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -1858,10 +1369,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                       SizedBox(width: 6),
                       Text(
                         'Yes, Cancel',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -1874,13 +1382,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     );
   }
 
-  void _shareDialog(
-    OneUITheme theme,
-    String title,
-    String date,
-    String time,
-    String code,
-  ) {
+  void _shareDialog(OneUITheme theme, String title, String date, String time, String code) {
     final meetingLink = DeepLinkService.generateMeetingLink(code, title: title);
     final meetingInfo =
         '${translation(context).lbl_meeting}: $title\n${translation(context).lbl_date}: $date\n${translation(context).lbl_time}: $time\n${translation(context).lbl_meeting_code}: $code\n\nJoin: $meetingLink';
@@ -1900,19 +1402,12 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
             Container(
               width: 50,
               height: 4,
-              decoration: BoxDecoration(
-                color: theme.surfaceVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(height: 24),
             Text(
               'Share Meeting Details',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
@@ -1931,12 +1426,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: theme.primary,
                   onTap: () {
                     Navigator.pop(context);
-                    DeepLinkService.shareMeeting(
-                      meetingId: code,
-                      title: title,
-                      date: date,
-                      time: time,
-                    );
+                    DeepLinkService.shareMeeting(meetingId: code, title: title, date: date, time: time);
                   },
                 ),
                 _buildShareOption(
@@ -1946,12 +1436,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: theme.success,
                   onTap: () {
                     Navigator.pop(context);
-                    DeepLinkService.shareMeeting(
-                      meetingId: code,
-                      title: title,
-                      date: date,
-                      time: time,
-                    );
+                    DeepLinkService.shareMeeting(meetingId: code, title: title, date: date, time: time);
                   },
                 ),
                 _buildShareOption(
@@ -1972,12 +1457,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
                   color: theme.secondary,
                   onTap: () {
                     Navigator.pop(context);
-                    DeepLinkService.shareMeeting(
-                      meetingId: code,
-                      title: title,
-                      date: date,
-                      time: time,
-                    );
+                    DeepLinkService.shareMeeting(meetingId: code, title: title, date: date, time: time);
                   },
                 ),
               ],
@@ -1989,13 +1469,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
     );
   }
 
-  Widget _buildShareOption({
-    required OneUITheme theme,
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildShareOption({required OneUITheme theme, required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -2003,20 +1477,16 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
-              border: Border.all(color: color.withOpacity(0.3), width: 1),
+              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
             ),
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(height: 8),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: color,
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color),
           ),
         ],
       ),

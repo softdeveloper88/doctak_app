@@ -14,16 +14,9 @@ class GroupApiService {
   GroupApiService._internal();
 
   /// Get all groups with pagination
-  Future<ApiResponse<GroupListModel>> getGroups({
-    required String page,
-  }) async {
+  Future<ApiResponse<GroupListModel>> getGroups({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupListModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -33,16 +26,9 @@ class GroupApiService {
   }
 
   /// Get user's joined groups
-  Future<ApiResponse<GroupListModel>> getMyGroups({
-    required String page,
-  }) async {
+  Future<ApiResponse<GroupListModel>> getMyGroups({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/my-groups?page=$page',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/my-groups?page=$page', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(GroupListModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -52,16 +38,9 @@ class GroupApiService {
   }
 
   /// Get group details by ID
-  Future<ApiResponse<GroupDetailsModel>> getGroupDetails({
-    required String groupId,
-  }) async {
+  Future<ApiResponse<GroupDetailsModel>> getGroupDetails({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/group-details/$groupId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/group-details/$groupId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupDetailsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -71,17 +50,9 @@ class GroupApiService {
   }
 
   /// Search groups by keyword
-  Future<ApiResponse<GroupListModel>> searchGroups({
-    required String page,
-    required String keyword,
-  }) async {
+  Future<ApiResponse<GroupListModel>> searchGroups({required String page, required String keyword}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/search?page=$page&keyword=$keyword',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/search?page=$page&keyword=$keyword', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupListModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -91,16 +62,9 @@ class GroupApiService {
   }
 
   /// Join a group
-  Future<ApiResponse<Map<String, dynamic>>> joinGroup({
-    required String groupId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> joinGroup({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/join',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/join', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -110,16 +74,9 @@ class GroupApiService {
   }
 
   /// Leave a group
-  Future<ApiResponse<Map<String, dynamic>>> leaveGroup({
-    required String groupId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> leaveGroup({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/leave',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/leave', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -136,23 +93,13 @@ class GroupApiService {
     String? coverImagePath,
   }) async {
     try {
-      final request = {
-        'name': name,
-        'description': description,
-        'privacy': privacy,
-      };
-      
+      final request = {'name': name, 'description': description, 'privacy': privacy};
+
       if (coverImagePath != null) {
         request['cover_image'] = coverImagePath; // This would need proper file upload handling
       }
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/create',
-          method: networkUtils.HttpMethod.POST,
-          request: request,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/create', method: networkUtils.HttpMethod.POST, request: request));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -162,32 +109,15 @@ class GroupApiService {
   }
 
   /// Update group information (for group admins)
-  Future<ApiResponse<Map<String, dynamic>>> updateGroup({
-    required String groupId,
-    required String name,
-    required String description,
-    required String privacy,
-    String? coverImagePath,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> updateGroup({required String groupId, required String name, required String description, required String privacy, String? coverImagePath}) async {
     try {
-      final request = {
-        'group_id': groupId,
-        'name': name,
-        'description': description,
-        'privacy': privacy,
-      };
-      
+      final request = {'group_id': groupId, 'name': name, 'description': description, 'privacy': privacy};
+
       if (coverImagePath != null) {
         request['cover_image'] = coverImagePath;
       }
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/update',
-          method: networkUtils.HttpMethod.POST,
-          request: request,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/update', method: networkUtils.HttpMethod.POST, request: request));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -197,16 +127,9 @@ class GroupApiService {
   }
 
   /// Delete a group (for group admins)
-  Future<ApiResponse<Map<String, dynamic>>> deleteGroup({
-    required String groupId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteGroup({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/delete',
-          method: networkUtils.HttpMethod.DELETE,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/delete', method: networkUtils.HttpMethod.DELETE));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -216,17 +139,9 @@ class GroupApiService {
   }
 
   /// Get group members
-  Future<ApiResponse<GroupMemberRequestModel>> getGroupMembers({
-    required String groupId,
-    required String page,
-  }) async {
+  Future<ApiResponse<GroupMemberRequestModel>> getGroupMembers({required String groupId, required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/members?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/members?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupMemberRequestModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -236,18 +151,9 @@ class GroupApiService {
   }
 
   /// Add member to group (for group admins)
-  Future<ApiResponse<Map<String, dynamic>>> addGroupMember({
-    required String groupId,
-    required String userId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> addGroupMember({required String groupId, required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/add-member',
-          method: networkUtils.HttpMethod.POST,
-          request: {'user_id': userId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/add-member', method: networkUtils.HttpMethod.POST, request: {'user_id': userId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -257,18 +163,9 @@ class GroupApiService {
   }
 
   /// Remove member from group (for group admins)
-  Future<ApiResponse<Map<String, dynamic>>> removeGroupMember({
-    required String groupId,
-    required String userId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> removeGroupMember({required String groupId, required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/remove-member',
-          method: networkUtils.HttpMethod.POST,
-          request: {'user_id': userId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/remove-member', method: networkUtils.HttpMethod.POST, request: {'user_id': userId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -278,18 +175,9 @@ class GroupApiService {
   }
 
   /// Promote member to admin (for group owners)
-  Future<ApiResponse<Map<String, dynamic>>> promoteMemberToAdmin({
-    required String groupId,
-    required String userId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> promoteMemberToAdmin({required String groupId, required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/promote-admin',
-          method: networkUtils.HttpMethod.POST,
-          request: {'user_id': userId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/promote-admin', method: networkUtils.HttpMethod.POST, request: {'user_id': userId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -299,18 +187,9 @@ class GroupApiService {
   }
 
   /// Demote admin to member (for group owners)
-  Future<ApiResponse<Map<String, dynamic>>> demoteAdminToMember({
-    required String groupId,
-    required String userId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> demoteAdminToMember({required String groupId, required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/demote-admin',
-          method: networkUtils.HttpMethod.POST,
-          request: {'user_id': userId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/demote-admin', method: networkUtils.HttpMethod.POST, request: {'user_id': userId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -320,17 +199,9 @@ class GroupApiService {
   }
 
   /// Get group posts/feed
-  Future<ApiResponse<GroupPostModel>> getGroupPosts({
-    required String groupId,
-    required String page,
-  }) async {
+  Future<ApiResponse<GroupPostModel>> getGroupPosts({required String groupId, required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/posts?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/posts?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupPostModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -340,33 +211,19 @@ class GroupApiService {
   }
 
   /// Post to group
-  Future<ApiResponse<Map<String, dynamic>>> postToGroup({
-    required String groupId,
-    required String content,
-    List<String>? imagePaths,
-    String? videoPath,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> postToGroup({required String groupId, required String content, List<String>? imagePaths, String? videoPath}) async {
     try {
-      final request = {
-        'group_id': groupId,
-        'content': content,
-      };
-      
+      final request = {'group_id': groupId, 'content': content};
+
       if (imagePaths != null && imagePaths.isNotEmpty) {
         request['images'] = imagePaths.join(','); // Convert list to comma-separated string
       }
-      
+
       if (videoPath != null) {
         request['video'] = videoPath; // This would need proper file upload handling
       }
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/post',
-          method: networkUtils.HttpMethod.POST,
-          request: request,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/post', method: networkUtils.HttpMethod.POST, request: request));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -376,16 +233,9 @@ class GroupApiService {
   }
 
   /// Get recommended groups based on user interests
-  Future<ApiResponse<GroupListModel>> getRecommendedGroups({
-    required String page,
-  }) async {
+  Future<ApiResponse<GroupListModel>> getRecommendedGroups({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/recommended?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/recommended?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupListModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -395,16 +245,9 @@ class GroupApiService {
   }
 
   /// Get popular/trending groups
-  Future<ApiResponse<GroupListModel>> getPopularGroups({
-    required String page,
-  }) async {
+  Future<ApiResponse<GroupListModel>> getPopularGroups({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/popular?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/popular?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(GroupListModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -414,18 +257,9 @@ class GroupApiService {
   }
 
   /// Invite users to group
-  Future<ApiResponse<Map<String, dynamic>>> inviteUsersToGroup({
-    required String groupId,
-    required List<String> userIds,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> inviteUsersToGroup({required String groupId, required List<String> userIds}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/$groupId/invite',
-          method: networkUtils.HttpMethod.POST,
-          request: {'user_ids': userIds},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/invite', method: networkUtils.HttpMethod.POST, request: {'user_ids': userIds}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -435,16 +269,9 @@ class GroupApiService {
   }
 
   /// Accept group invitation
-  Future<ApiResponse<Map<String, dynamic>>> acceptGroupInvitation({
-    required String invitationId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> acceptGroupInvitation({required String invitationId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/invitation/$invitationId/accept',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/invitation/$invitationId/accept', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -454,16 +281,9 @@ class GroupApiService {
   }
 
   /// Decline group invitation
-  Future<ApiResponse<Map<String, dynamic>>> declineGroupInvitation({
-    required String invitationId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> declineGroupInvitation({required String invitationId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/groups/invitation/$invitationId/decline',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/invitation/$invitationId/decline', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -24,7 +23,7 @@ class ChatBubble extends StatelessWidget {
   final List<int>? imageBytes2;
 
   const ChatBubble({
-    Key? key,
+    super.key,
     required this.text,
     required this.isUserMessage,
     this.onTapReginarate,
@@ -34,7 +33,7 @@ class ChatBubble extends StatelessWidget {
     this.responseImageUrl2 = '',
     this.imageBytes1,
     this.imageBytes2,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +46,7 @@ class ChatBubble extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
       child: IntrinsicHeight(
         child: Row(
-          mainAxisAlignment: isUserMessage
-              ? MainAxisAlignment.end
-              : MainAxisAlignment.start,
+          mainAxisAlignment: isUserMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (!isUserMessage) ...[
@@ -59,52 +56,20 @@ class ChatBubble extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [theme.primary.withOpacity(0.7), theme.primary],
-                    ),
+                    gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary.withValues(alpha: 0.7), theme.primary]),
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.primary.withAlpha(51),
-                        blurRadius: 4,
-                        spreadRadius: 0,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: theme.primary.withAlpha(51), blurRadius: 4, spreadRadius: 0, offset: const Offset(0, 2))],
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.psychology_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
+                  child: const Center(child: Icon(Icons.psychology_rounded, color: Colors.white, size: 20)),
                 ),
               ),
               Flexible(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                      bottomLeft: Radius.circular(4),
-                    ),
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomRight: Radius.circular(16), bottomLeft: Radius.circular(4)),
                     color: theme.cardBackground,
-                    border: Border.all(
-                      color: theme.primary.withAlpha(26),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.primary.withAlpha(13),
-                        blurRadius: 8,
-                        spreadRadius: 0,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    border: Border.all(color: theme.primary.withAlpha(26), width: 1),
+                    boxShadow: [BoxShadow(color: theme.primary.withAlpha(13), blurRadius: 8, spreadRadius: 0, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,13 +77,8 @@ class ChatBubble extends StatelessWidget {
                     children: [
                       Flexible(
                         child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 12.0,
-                          ),
-                          child:
-                              text ==
-                                  translation(context).lbl_generating_response
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          child: text == translation(context).lbl_generating_response
                               ? Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -127,25 +87,17 @@ class ChatBubble extends StatelessWidget {
                                       config: MarkdownConfig(
                                         configs: [
                                           PreConfig(
-                                            decoration: BoxDecoration(
-                                              color: theme.isDark
-                                                  ? theme.inputBackground
-                                                  : Colors.grey[100],
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
+                                            decoration: BoxDecoration(color: theme.isDark ? theme.inputBackground : Colors.grey[100], borderRadius: BorderRadius.circular(8)),
                                             padding: const EdgeInsets.all(12),
                                             textStyle: TextStyle(
-                                              fontSize:
-                                                  16.sp, // Responsive font size
+                                              fontSize: 16.sp, // Responsive font size
                                               fontFamily: 'Poppins',
                                               color: theme.textPrimary,
                                             ),
                                           ),
                                           PConfig(
                                             textStyle: TextStyle(
-                                              fontSize:
-                                                  15.sp, // Responsive font size
+                                              fontSize: 15.sp, // Responsive font size
                                               fontFamily: 'Poppins',
                                               height: 1.5,
                                               color: theme.textPrimary,
@@ -155,9 +107,7 @@ class ChatBubble extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-                                    CircularProgressIndicator(
-                                      color: theme.primary,
-                                    ),
+                                    CircularProgressIndicator(color: theme.primary),
                                   ],
                                 )
                               : MarkdownBlock(
@@ -165,72 +115,40 @@ class ChatBubble extends StatelessWidget {
                                   config: MarkdownConfig(
                                     configs: [
                                       PreConfig(
-                                        decoration: BoxDecoration(
-                                          color: theme.isDark
-                                              ? theme.inputBackground
-                                              : Colors.grey[100],
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
+                                        decoration: BoxDecoration(color: theme.isDark ? theme.inputBackground : Colors.grey[100], borderRadius: BorderRadius.circular(8)),
                                         padding: const EdgeInsets.all(12),
                                         textStyle: TextStyle(
-                                          fontSize:
-                                              16.sp, // Responsive font size
+                                          fontSize: 16.sp, // Responsive font size
                                           fontFamily: 'Poppins',
                                           color: theme.textPrimary,
                                         ),
                                       ),
                                       PConfig(
                                         textStyle: TextStyle(
-                                          fontSize:
-                                              15.sp, // Responsive font size
+                                          fontSize: 15.sp, // Responsive font size
                                           fontFamily: 'Poppins',
                                           height: 1.5,
                                           color: theme.textPrimary,
                                         ),
                                       ),
                                       H1Config(
-                                        style: TextStyle(
-                                          fontSize: 20.sp,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
-                                          color: theme.textPrimary,
-                                        ),
+                                        style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
                                       ),
                                       H2Config(
-                                        style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
-                                          color: theme.textPrimary,
-                                        ),
+                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
                                       ),
                                       H3Config(
-                                        style: TextStyle(
-                                          fontSize: 17.sp,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Poppins',
-                                          color: theme.textPrimary,
-                                        ),
+                                        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
                                       ),
                                       CodeConfig(
-                                        style: TextStyle(
-                                          fontSize: 14.sp,
-                                          fontFamily: 'monospace',
-                                          color: theme.textPrimary,
-                                        ),
+                                        style: TextStyle(fontSize: 14.sp, fontFamily: 'monospace', color: theme.textPrimary),
                                       ),
                                     ],
                                   ),
                                 ),
                         ),
                       ),
-                      Divider(
-                        color: theme.isDark
-                            ? Colors.grey[700]
-                            : Colors.grey[200],
-                      ),
+                      Divider(color: theme.isDark ? Colors.grey[700] : Colors.grey[200]),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -252,15 +170,7 @@ class ChatBubble extends StatelessWidget {
                               // Copy text to clipboard
                               Clipboard.setData(ClipboardData(text: text));
                               // You can show a snackbar or any other feedback here
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    translation(
-                                      context,
-                                    ).lbl_text_copied_clipboard,
-                                  ),
-                                ),
-                              );
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).lbl_text_copied_clipboard)));
                             },
                           ),
                         ],
@@ -279,66 +189,30 @@ class ChatBubble extends StatelessWidget {
                       child: Container(
                         margin: const EdgeInsets.only(left: 48),
                         decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            topRight: Radius.circular(16),
-                            bottomLeft: Radius.circular(16),
-                            bottomRight: Radius.circular(4),
-                          ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              theme.primary.withOpacity(0.85),
-                              theme.primary,
-                            ],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: theme.primary.withAlpha(51),
-                              blurRadius: 8,
-                              spreadRadius: 0,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(16), bottomRight: Radius.circular(4)),
+                          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary.withValues(alpha: 0.85), theme.primary]),
+                          boxShadow: [BoxShadow(color: theme.primary.withAlpha(51), blurRadius: 8, spreadRadius: 0, offset: const Offset(0, 2))],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 12.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: bubbleMaxWidth,
-                            ),
+                            constraints: BoxConstraints(maxWidth: bubbleMaxWidth),
                             child: Column(
                               children: [
                                 if (imageUrl2 != null)
                                   Row(
                                     children: [
                                       if (responseImageUrl1 != '')
-                                        SizedBox(
-                                          height: 100,
-                                          width: 100,
-                                          child: CustomImageView(
-                                            imagePath: responseImageUrl1,
-                                          ),
-                                        )
-                                      else if (imageBytes1 != null &&
-                                          imageBytes1!.isNotEmpty)
+                                        SizedBox(height: 100, width: 100, child: CustomImageView(imagePath: responseImageUrl1))
+                                      else if (imageBytes1 != null && imageBytes1!.isNotEmpty)
                                         SizedBox(
                                           height: 100,
                                           width: 100,
                                           child: Image.memory(
                                             Uint8List.fromList(imageBytes1!),
-                                            errorBuilder:
-                                                (
-                                                  BuildContext context,
-                                                  Object exception,
-                                                  StackTrace? stackTrace,
-                                                ) {
-                                                  return const SizedBox();
-                                                },
+                                            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                              return const SizedBox();
+                                            },
                                           ),
                                         )
                                       else if (imageUrl1 != null)
@@ -347,40 +221,23 @@ class ChatBubble extends StatelessWidget {
                                           width: 100,
                                           child: Image.file(
                                             imageUrl1!,
-                                            errorBuilder:
-                                                (
-                                                  BuildContext context,
-                                                  Object exception,
-                                                  StackTrace? stackTrace,
-                                                ) {
-                                                  return const SizedBox();
-                                                },
+                                            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                              return const SizedBox();
+                                            },
                                           ),
                                         ),
                                       const SizedBox(width: 4),
                                       if (responseImageUrl2 != '')
-                                        SizedBox(
-                                          height: 100,
-                                          width: 100,
-                                          child: CustomImageView(
-                                            imagePath: responseImageUrl2,
-                                          ),
-                                        )
-                                      else if (imageBytes2 != null &&
-                                          imageBytes2!.isNotEmpty)
+                                        SizedBox(height: 100, width: 100, child: CustomImageView(imagePath: responseImageUrl2))
+                                      else if (imageBytes2 != null && imageBytes2!.isNotEmpty)
                                         SizedBox(
                                           height: 100,
                                           width: 100,
                                           child: Image.memory(
                                             Uint8List.fromList(imageBytes2!),
-                                            errorBuilder:
-                                                (
-                                                  BuildContext context,
-                                                  Object exception,
-                                                  StackTrace? stackTrace,
-                                                ) {
-                                                  return const SizedBox();
-                                                },
+                                            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                              return const SizedBox();
+                                            },
                                           ),
                                         )
                                       else if (imageUrl2 != null)
@@ -389,44 +246,28 @@ class ChatBubble extends StatelessWidget {
                                           width: 100,
                                           child: Image.file(
                                             imageUrl2!,
-                                            errorBuilder:
-                                                (
-                                                  BuildContext context,
-                                                  Object exception,
-                                                  StackTrace? stackTrace,
-                                                ) {
-                                                  return const SizedBox();
-                                                },
+                                            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                              return const SizedBox();
+                                            },
                                           ),
                                         ),
                                     ],
                                   )
                                 else if (responseImageUrl1 != '')
                                   CustomImageView(imagePath: responseImageUrl1)
-                                else if (imageBytes1 != null &&
-                                    imageBytes1!.isNotEmpty)
+                                else if (imageBytes1 != null && imageBytes1!.isNotEmpty)
                                   Image.memory(
                                     Uint8List.fromList(imageBytes1!),
-                                    errorBuilder:
-                                        (
-                                          BuildContext context,
-                                          Object exception,
-                                          StackTrace? stackTrace,
-                                        ) {
-                                          return const SizedBox();
-                                        },
+                                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                      return const SizedBox();
+                                    },
                                   )
                                 else if (imageUrl1 != null)
                                   Image.file(
                                     imageUrl1!,
-                                    errorBuilder:
-                                        (
-                                          BuildContext context,
-                                          Object exception,
-                                          StackTrace? stackTrace,
-                                        ) {
-                                          return const SizedBox();
-                                        },
+                                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                                      return const SizedBox();
+                                    },
                                   ),
                                 Text(
                                   text,
@@ -449,10 +290,7 @@ class ChatBubble extends StatelessWidget {
                       height: 36,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: theme.primary.withAlpha(51),
-                          width: 2,
-                        ),
+                        border: Border.all(color: theme.primary.withAlpha(51), width: 2),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
@@ -462,21 +300,15 @@ class ChatBubble extends StatelessWidget {
                           height: 32,
                           fit: BoxFit.cover,
                           httpHeaders: const {
-                            'User-Agent':
-                                'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
+                            'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
                             'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
                             'Accept-Encoding': 'gzip, deflate, br',
                             'Connection': 'keep-alive',
                             'Cache-Control': 'no-cache',
                           },
                           placeholder: (context, url) => Container(
-                            color: theme.primary.withOpacity(0.1),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: theme.primary,
-                                strokeWidth: 2,
-                              ),
-                            ),
+                            color: theme.primary.withValues(alpha: 0.1),
+                            child: Center(child: CircularProgressIndicator(color: theme.primary, strokeWidth: 2)),
                           ),
                           errorWidget: (context, url, error) {
                             // Enhanced error debugging for profile images
@@ -485,14 +317,8 @@ class ChatBubble extends StatelessWidget {
                             print('🚨 Error type: ${error.runtimeType}');
 
                             return Container(
-                              color: theme.primary.withOpacity(0.2),
-                              child: Center(
-                                child: Icon(
-                                  Icons.person,
-                                  color: theme.primary,
-                                  size: 20,
-                                ),
-                              ),
+                              color: theme.primary.withValues(alpha: 0.2),
+                              child: Center(child: Icon(Icons.person, color: theme.primary, size: 20)),
                             );
                           },
                         ),

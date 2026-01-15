@@ -10,13 +10,7 @@ class StreamingMessageBubble extends StatefulWidget {
   final bool isComplete;
   final VoidCallback? onCopyPressed;
 
-  const StreamingMessageBubble({
-    Key? key,
-    required this.partialContent,
-    this.showAvatar = true,
-    this.isComplete = false,
-    this.onCopyPressed,
-  }) : super(key: key);
+  const StreamingMessageBubble({super.key, required this.partialContent, this.showAvatar = true, this.isComplete = false, this.onCopyPressed});
 
   @override
   State<StreamingMessageBubble> createState() => _StreamingMessageBubbleState();
@@ -27,35 +21,32 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
   int _currentPosition = 0;
   late AnimationController _typeController;
   Timer? _typeTimer;
-  
+
   @override
   void initState() {
     super.initState();
     _displayContent = '';
-    _typeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
+    _typeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     _processIncomingContent();
   }
-  
+
   @override
   void dispose() {
     _typeController.dispose();
     _typeTimer?.cancel();
     super.dispose();
   }
-  
+
   @override
   void didUpdateWidget(StreamingMessageBubble oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // If content changed, update display
     if (widget.partialContent != oldWidget.partialContent) {
       _processIncomingContent();
     }
   }
-  
+
   // Process and animate incoming content
   void _processIncomingContent() {
     // If we already have all the content displayed, just update directly
@@ -65,13 +56,13 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
       });
       return;
     }
-    
+
     // Cancel any existing typing animation
     _typeTimer?.cancel();
-    
+
     // Start from current position and animate typing the rest
     _currentPosition = _displayContent.length;
-    
+
     // Define typing speed based on content length
     // Faster typing for longer content, but maintain readability
     final int charsToAdd = widget.partialContent.length - _currentPosition;
@@ -89,7 +80,7 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -105,18 +96,11 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.blue.withOpacity(0.2),
-                  width: 1.5,
-                ),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.2), width: 1.5),
               ),
-              child: Icon(
-                Icons.psychology_rounded,
-                size: 18,
-                color: Colors.blue[600],
-              ),
+              child: Icon(Icons.psychology_rounded, size: 18, color: Colors.blue[600]),
             )
           else
             const SizedBox(width: 36), // Same width as avatar for alignment
@@ -134,18 +118,8 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.blue.withOpacity(0.1),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blue.withOpacity(0.05),
-                        offset: const Offset(0, 2),
-                        blurRadius: 8,
-                        spreadRadius: 0,
-                      ),
-                    ],
+                    border: Border.all(color: Colors.blue.withValues(alpha: 0.1), width: 1),
+                    boxShadow: [BoxShadow(color: Colors.blue.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,63 +128,20 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                       MarkdownBody(
                         data: _displayContent,
                         styleSheet: MarkdownStyleSheet(
-                          p: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: Colors.black87,
-                            height: 1.5,
-                          ),
-                          h1: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          h2: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          h3: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                          blockquote: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: Colors.black54,
-                            fontStyle: FontStyle.italic,
-                          ),
-                          code: const TextStyle(
-                            fontFamily: 'monospace',
-                            color: Colors.teal,
-                            backgroundColor: Colors.grey,
-                            fontSize: 13,
-                          ),
+                          p: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87, height: 1.5),
+                          h1: const TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                          h2: const TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                          h3: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                          blockquote: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black54, fontStyle: FontStyle.italic),
+                          code: const TextStyle(fontFamily: 'monospace', color: Colors.teal, backgroundColor: Colors.grey, fontSize: 13),
                           codeblockDecoration: BoxDecoration(
                             color: Colors.grey,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.blue,
-                              width: 1,
-                            ),
+                            border: Border.all(color: Colors.blue, width: 1),
                           ),
-                          listBullet: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                          strong: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Poppins',
-                          ),
-                          em: const TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontFamily: 'Poppins',
-                          ),
+                          listBullet: const TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.black87),
+                          strong: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                          em: const TextStyle(fontStyle: FontStyle.italic, fontFamily: 'Poppins'),
                         ),
                         onTapLink: (text, href, title) {
                           if (href != null) {
@@ -221,11 +152,7 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                       ),
 
                       // Typing cursor animation when actively streaming
-                      if (!widget.isComplete)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: _buildTypingCursor(),
-                        ),
+                      if (!widget.isComplete) Padding(padding: const EdgeInsets.only(top: 4), child: _buildTypingCursor()),
                     ],
                   ),
                 ),
@@ -242,22 +169,16 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                           color: Colors.transparent,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.05),
+                              color: Colors.blue.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: Colors.blue.withOpacity(0.1),
-                                width: 1,
-                              ),
+                              border: Border.all(color: Colors.blue.withValues(alpha: 0.1), width: 1),
                             ),
                             child: InkWell(
                               onTap: () {
                                 Clipboard.setData(ClipboardData(text: widget.partialContent));
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text(
-                                      'Message copied to clipboard',
-                                      style: TextStyle(fontFamily: 'Poppins'),
-                                    ),
+                                    content: const Text('Message copied to clipboard', style: TextStyle(fontFamily: 'Poppins')),
                                     duration: const Duration(seconds: 2),
                                     behavior: SnackBarBehavior.floating,
                                     backgroundColor: Colors.blue[600],
@@ -271,20 +192,11 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
-                                      Icons.copy,
-                                      size: 16,
-                                      color: Colors.blue[600],
-                                    ),
+                                    Icon(Icons.copy, size: 16, color: Colors.blue[600]),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Copy',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.blue[600],
-                                      ),
+                                      style: TextStyle(fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Colors.blue[600]),
                                     ),
                                   ],
                                 ),
@@ -314,10 +226,7 @@ class _StreamingMessageBubbleState extends State<StreamingMessageBubble> with Si
           child: Container(
             width: 8,
             height: 16,
-            decoration: BoxDecoration(
-              color: Colors.blue[600],
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: Colors.blue[600], borderRadius: BorderRadius.circular(2)),
           ),
         );
       },

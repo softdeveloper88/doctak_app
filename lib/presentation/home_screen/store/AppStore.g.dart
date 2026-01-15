@@ -9,10 +9,7 @@ part of 'AppStore.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AppStore on AppStoreBase, Store {
-  late final _$isDarkModeAtom = Atom(
-    name: 'AppStoreBase.isDarkMode',
-    context: context,
-  );
+  late final _$isDarkModeAtom = Atom(name: 'AppStoreBase.isDarkMode', context: context);
 
   @override
   bool get isDarkMode {
@@ -27,10 +24,7 @@ mixin _$AppStore on AppStoreBase, Store {
     });
   }
 
-  late final _$isUsingSystemThemeAtom = Atom(
-    name: 'AppStoreBase.isUsingSystemTheme',
-    context: context,
-  );
+  late final _$isUsingSystemThemeAtom = Atom(name: 'AppStoreBase.isUsingSystemTheme', context: context);
 
   @override
   bool get isUsingSystemTheme {
@@ -45,42 +39,21 @@ mixin _$AppStore on AppStoreBase, Store {
     });
   }
 
-  late final _$updateFromSystemThemeAsyncAction = AsyncAction(
-    'AppStoreBase.updateFromSystemTheme',
-    context: context,
-  );
+  late final _$updateFromSystemThemeAsyncAction = AsyncAction('AppStoreBase.updateFromSystemTheme', context: context);
 
   @override
   Future<void> updateFromSystemTheme() {
-    return _$updateFromSystemThemeAsyncAction.run(
-      () => super.updateFromSystemTheme(),
-    );
+    return _$updateFromSystemThemeAsyncAction.run(() => super.updateFromSystemTheme());
   }
 
-  late final _$toggleDarkModeAsyncAction = AsyncAction(
-    'AppStoreBase.toggleDarkMode',
-    context: context,
-  );
+  late final _$toggleDarkModeAsyncAction = AsyncAction('AppStoreBase.toggleDarkMode', context: context);
 
   @override
-  Future<void> toggleDarkMode({
-    bool? value,
-    bool save = true,
-    bool isUserChoice = true,
-  }) {
-    return _$toggleDarkModeAsyncAction.run(
-      () => super.toggleDarkMode(
-        value: value,
-        save: save,
-        isUserChoice: isUserChoice,
-      ),
-    );
+  Future<void> toggleDarkMode({bool? value, bool save = true, bool isUserChoice = true}) {
+    return _$toggleDarkModeAsyncAction.run(() => super.toggleDarkMode(value: value, save: save, isUserChoice: isUserChoice));
   }
 
-  late final _$useSystemThemeAsyncAction = AsyncAction(
-    'AppStoreBase.useSystemTheme',
-    context: context,
-  );
+  late final _$useSystemThemeAsyncAction = AsyncAction('AppStoreBase.useSystemTheme', context: context);
 
   @override
   Future<void> useSystemTheme() {

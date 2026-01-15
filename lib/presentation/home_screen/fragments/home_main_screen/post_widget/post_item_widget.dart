@@ -3,7 +3,6 @@ import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +13,6 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:html/parser.dart';
 import 'package:nb_utils/nb_utils.dart';
 
-import '../../../home/components/SVCommentReplyComponent.dart';
 import 'full_screen_image_widget.dart';
 import 'post_media_widget.dart';
 import 'profile_header_widget.dart';
@@ -45,7 +43,7 @@ class PostItemWidget extends StatefulWidget {
   dynamic postData;
 
   PostItemWidget({
-    Key? key,
+    super.key,
     required this.profilePicUrl,
     required this.userName,
     required this.createdAt,
@@ -69,7 +67,7 @@ class PostItemWidget extends StatefulWidget {
     required this.onViewCommentsTap,
     required this.onAddComment,
     required this.postData,
-  }) : super(key: key);
+  });
 
   @override
   _PostItemWidgetState createState() => _PostItemWidgetState();
@@ -93,9 +91,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
     String fullText = widget.title ?? '';
     List<String> words = fullText.split(' ');
     bool isExpanded = _expandedIndex == widget.postId;
-    String textToShow = isExpanded || words.length <= 25
-        ? fullText
-        : '${words.take(20).join(' ')}...';
+    String textToShow = isExpanded || words.length <= 25 ? fullText : '${words.take(20).join(' ')}...';
     Color bgColor = PostUtils.HexColor(widget.backgroundColor ?? '#FFFFFF');
 
     Color textColor = PostUtils.contrastingTextColor(bgColor);
@@ -103,30 +99,18 @@ class _PostItemWidgetState extends State<PostItemWidget> {
       builder: (context, constraints) {
         return GestureDetector(
           onLongPress: () {
-            Clipboard.setData(
-              ClipboardData(text: parseHtmlString(widget.title ?? '')),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(translation(context).lbl_text_copied)),
-            );
+            Clipboard.setData(ClipboardData(text: parseHtmlString(widget.title ?? '')));
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).lbl_text_copied)));
           },
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              color:
-                  (widget.image?.isNotEmpty == true ||
-                      widget.media?.isNotEmpty == true)
-                  ? Colors.transparent
-                  : bgColor,
-              borderRadius: BorderRadius.circular(5.0),
-            ),
+            decoration: BoxDecoration(color: (widget.image?.isNotEmpty == true || widget.media?.isNotEmpty == true) ? Colors.transparent : bgColor, borderRadius: BorderRadius.circular(5.0)),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (widget.image?.isNotEmpty == true ||
-                      widget.media?.isNotEmpty == true)
+                  if (widget.image?.isNotEmpty == true || widget.media?.isNotEmpty == true)
                     if (isHtml(textToShow))
                       Center(
                         child: HtmlWidget(
@@ -148,28 +132,20 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                       Linkify(
                         onOpen: (link) {
                           if (link.url.contains('doctak/jobs-detail')) {
-                            String jobID = Uri.parse(
-                              link.url,
-                            ).pathSegments.last;
+                            String jobID = Uri.parse(link.url).pathSegments.last;
                             JobsDetailsScreen(jobId: jobID).launch(context);
                           } else {
                             PostUtils.launchURL(context, link.url);
                           }
                         },
                         text: textToShow,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          color: OneUITheme.of(context).textPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontSize: 14.0, color: OneUITheme.of(context).textPrimary, fontWeight: FontWeight.bold),
                         linkStyle: const TextStyle(color: Colors.blue),
                         textAlign: TextAlign.center,
                       )
                   else if (isHtml(textToShow))
                     Container(
-                      constraints: BoxConstraints(
-                        minHeight: textToShow.length < 25 ? 200 : 0,
-                      ),
+                      constraints: BoxConstraints(minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: HtmlWidget(
                           textStyle: const TextStyle(),
@@ -190,27 +166,19 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                     )
                   else
                     Container(
-                      constraints: BoxConstraints(
-                        minHeight: textToShow.length < 25 ? 200 : 0,
-                      ),
+                      constraints: BoxConstraints(minHeight: textToShow.length < 25 ? 200 : 0),
                       child: Center(
                         child: Linkify(
                           onOpen: (link) {
                             if (link.url.contains('doctak/jobs-detail')) {
-                              String jobID = Uri.parse(
-                                link.url,
-                              ).pathSegments.last;
+                              String jobID = Uri.parse(link.url).pathSegments.last;
                               JobsDetailsScreen(jobId: jobID).launch(context);
                             } else {
                               PostUtils.launchURL(context, link.url);
                             }
                           },
                           text: textToShow,
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            color: textColor,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(fontSize: 14.0, color: textColor, fontWeight: FontWeight.bold),
                           linkStyle: const TextStyle(color: Colors.blue),
                           textAlign: TextAlign.left,
                         ),
@@ -230,13 +198,8 @@ class _PostItemWidgetState extends State<PostItemWidget> {
                         });
                       },
                       child: Text(
-                        isExpanded
-                            ? translation(context).lbl_show_less
-                            : translation(context).lbl_show_more,
-                        style: TextStyle(
-                          color: OneUITheme.of(context).primary,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        isExpanded ? translation(context).lbl_show_less : translation(context).lbl_show_more,
+                        style: TextStyle(color: OneUITheme.of(context).primary, fontWeight: FontWeight.w500),
                       ),
                     ),
                 ],
@@ -255,17 +218,14 @@ class _PostItemWidgetState extends State<PostItemWidget> {
       onImageTap: (url) {
         // Construct the full list of media URLs to enable the slider
         List<Map<String, String>> mediaUrls = [];
-         if (widget.media != null) {
-            for (var media in widget.media!) {
-               // Ensure correct URL construction
-               String fullUrl = AppData.imageUrl + media.mediaPath.toString();
-               mediaUrls.add({
-                 "url": fullUrl, 
-                 "type": media.mediaType ?? "image"
-               });
-            }
+        if (widget.media != null) {
+          for (var media in widget.media!) {
+            // Ensure correct URL construction
+            String fullUrl = AppData.imageUrl + media.mediaPath.toString();
+            mediaUrls.add({"url": fullUrl, "type": media.mediaType ?? "image"});
+          }
         }
-        
+
         // Pass the full media list instead of an empty list
         showFullScreenImage(context, 1, url, widget.postData, mediaUrls);
       },
@@ -411,7 +371,7 @@ class InteractionRowWidget extends StatelessWidget {
   final int comments;
 
   const InteractionRowWidget({
-    Key? key,
+    super.key,
     required this.isLiked,
     required this.onLikeTap,
     required this.onToggleComment,
@@ -420,7 +380,7 @@ class InteractionRowWidget extends StatelessWidget {
     required this.onViewCommentsTap,
     required this.likes,
     required this.comments,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -438,16 +398,9 @@ class InteractionRowWidget extends StatelessWidget {
                 onTap: onViewLikesTap,
                 child: Row(
                   children: [
-                    Icon(
-                      CupertinoIcons.heart_fill,
-                      size: 14,
-                      color: likes > 0 ? theme.likeColor : theme.textSecondary,
-                    ),
+                    Icon(CupertinoIcons.heart_fill, size: 14, color: likes > 0 ? theme.likeColor : theme.textSecondary),
                     const SizedBox(width: 4),
-                    Text(
-                      AppLocalizations.of(context)!.lbl_likes_count(likes),
-                      style: theme.bodySecondary,
-                    ),
+                    Text(AppLocalizations.of(context)!.lbl_likes_count(likes), style: theme.bodySecondary),
                   ],
                 ),
               ),
@@ -455,18 +408,9 @@ class InteractionRowWidget extends StatelessWidget {
                 onTap: onViewCommentsTap,
                 child: Row(
                   children: [
-                    Icon(
-                      CupertinoIcons.chat_bubble_fill,
-                      size: 14,
-                      color: theme.textSecondary,
-                    ),
+                    Icon(CupertinoIcons.chat_bubble_fill, size: 14, color: theme.textSecondary),
                     const SizedBox(width: 4),
-                    Text(
-                      AppLocalizations.of(
-                        context,
-                      )!.lbl_comments_count(comments),
-                      style: theme.bodySecondary,
-                    ),
+                    Text(AppLocalizations.of(context)!.lbl_comments_count(comments), style: theme.bodySecondary),
                   ],
                 ),
               ),
@@ -484,9 +428,7 @@ class InteractionRowWidget extends StatelessWidget {
               // Like Button
               Expanded(
                 child: theme.buildActionButton(
-                  icon: isLiked
-                      ? CupertinoIcons.heart_fill
-                      : CupertinoIcons.heart,
+                  icon: isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
                   label: translation(context).lbl_like,
                   onTap: onLikeTap,
                   isActive: isLiked,
@@ -497,21 +439,13 @@ class InteractionRowWidget extends StatelessWidget {
               theme.buildVerticalDivider(),
               // Comment Button
               Expanded(
-                child: theme.buildActionButton(
-                  icon: CupertinoIcons.chat_bubble,
-                  label: translation(context).lbl_comment,
-                  onTap: onToggleComment,
-                ),
+                child: theme.buildActionButton(icon: CupertinoIcons.chat_bubble, label: translation(context).lbl_comment, onTap: onToggleComment),
               ),
               // Vertical Divider
               theme.buildVerticalDivider(),
               // Send/Share Button
               Expanded(
-                child: theme.buildActionButton(
-                  icon: CupertinoIcons.paperplane,
-                  label: translation(context).lbl_send,
-                  onTap: onShareTap,
-                ),
+                child: theme.buildActionButton(icon: CupertinoIcons.paperplane, label: translation(context).lbl_send, onTap: onShareTap),
               ),
             ],
           ),

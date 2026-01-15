@@ -1,26 +1,14 @@
 import 'dart:convert';
 
-GroupDetailsModel groupDetailsModelFromJson(String str) =>
-    GroupDetailsModel.fromJson(json.decode(str));
-String groupDetailsModelToJson(GroupDetailsModel data) =>
-    json.encode(data.toJson());
+GroupDetailsModel groupDetailsModelFromJson(String str) => GroupDetailsModel.fromJson(json.decode(str));
+String groupDetailsModelToJson(GroupDetailsModel data) => json.encode(data.toJson());
 
 class GroupDetailsModel {
-  GroupDetailsModel({
-    this.group,
-    this.groupStatus,
-    this.groupMembers,
-    this.totalMembers,
-    this.membersRequest,
-    this.postsRequest,
-    this.isAdmin,
-  });
+  GroupDetailsModel({this.group, this.groupStatus, this.groupMembers, this.totalMembers, this.membersRequest, this.postsRequest, this.isAdmin});
 
   GroupDetailsModel.fromJson(dynamic json) {
     group = json['group'] != null ? Group.fromJson(json['group']) : null;
-    groupStatus = json['group_status'] != null
-        ? GroupStatus.fromJson(json['group_status'])
-        : null;
+    groupStatus = json['group_status'] != null ? GroupStatus.fromJson(json['group_status']) : null;
     if (json['group_members'] != null) {
       groupMembers = [];
       json['group_members'].forEach((v) {
@@ -59,17 +47,11 @@ class GroupDetailsModel {
   }
 }
 
-GroupMembers groupMembersFromJson(String str) =>
-    GroupMembers.fromJson(json.decode(str));
+GroupMembers groupMembersFromJson(String str) => GroupMembers.fromJson(json.decode(str));
 String groupMembersToJson(GroupMembers data) => json.encode(data.toJson());
 
 class GroupMembers {
-  GroupMembers({
-    this.joinedAt,
-    this.adminType,
-    this.name,
-    this.profilePic,
-  });
+  GroupMembers({this.joinedAt, this.adminType, this.name, this.profilePic});
 
   GroupMembers.fromJson(dynamic json) {
     joinedAt = json['joined_at'];
@@ -92,15 +74,11 @@ class GroupMembers {
   }
 }
 
-GroupStatus groupStatusFromJson(String str) =>
-    GroupStatus.fromJson(json.decode(str));
+GroupStatus groupStatusFromJson(String str) => GroupStatus.fromJson(json.decode(str));
 String groupStatusToJson(GroupStatus data) => json.encode(data.toJson());
 
 class GroupStatus {
-  GroupStatus({
-    this.status,
-    this.adminType,
-  });
+  GroupStatus({this.status, this.adminType});
 
   GroupStatus.fromJson(dynamic json) {
     status = json['status'];
@@ -121,13 +99,7 @@ Group groupFromJson(String str) => Group.fromJson(json.decode(str));
 String groupToJson(Group data) => json.encode(data.toJson());
 
 class Group {
-  Group({
-    this.id,
-    this.name,
-    this.privacySetting,
-    this.logo,
-    this.banner,
-  });
+  Group({this.id, this.name, this.privacySetting, this.logo, this.banner});
 
   Group.fromJson(dynamic json) {
     id = json['id'];

@@ -15,7 +15,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   int numberOfPage = 1;
   List<Data> drugsData = [];
   JobDetailModel jobDetailModel = JobDetailModel();
-  JobApplicantsModel? jobApplicantsModel=JobApplicantsModel();
+  JobApplicantsModel? jobApplicantsModel = JobApplicantsModel();
   final int nextPageTrigger = 1;
 
   JobsBloc() : super(PaginationInitialState()) {
@@ -32,7 +32,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     });
   }
 
-  _onGetJobs(JobLoadPageEvent event, Emitter<JobsState> emit) async {
+  Future<void> _onGetJobs(JobLoadPageEvent event, Emitter<JobsState> emit) async {
     // emit(DrugsDataInitial());
     print('search text ${event.searchTerm}');
     print('country id ${event.countryId}');
@@ -46,19 +46,14 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-    JobsModel response = await apiManager.getJobsList(
-        'Bearer ${AppData.userToken}',
-        '$pageNumber',
-        event.countryId ?? "1",
-        event.searchTerm ?? '',
-        ""); // Empty string to get all jobs
-    numberOfPage = response.jobs?.lastPage ?? 0;
-    if (pageNumber < numberOfPage + 1) {
-      pageNumber = pageNumber + 1;
-      drugsData.addAll(response.jobs?.data ?? []);
-    }
-    emit(PaginationLoadedState());
-    // emit(DataLoaded(drugsData));
+      JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', '$pageNumber', event.countryId ?? "1", event.searchTerm ?? '', ""); // Empty string to get all jobs
+      numberOfPage = response.jobs?.lastPage ?? 0;
+      if (pageNumber < numberOfPage + 1) {
+        pageNumber = pageNumber + 1;
+        drugsData.addAll(response.jobs?.data ?? []);
+      }
+      emit(PaginationLoadedState());
+      // emit(DataLoaded(drugsData));
     } catch (e) {
       print(e);
 
@@ -68,7 +63,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     }
   }
 
-  _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
+  Future<void> _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
     print('jobId ${event.jobId}');
     try {
@@ -86,18 +81,13 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     }
   }
 
-  _onGetJobs1(GetPost event, Emitter<JobsState> emit) async {
+  Future<void> _onGetJobs1(GetPost event, Emitter<JobsState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
 
     // emit(PaginationLoadingState());
     try {
-      JobsModel response = await apiManager.getJobsList(
-          'Bearer ${AppData.userToken}',
-          "1",
-          event.countryId,
-          event.searchTerm,
-          ""); // Empty string to get all jobs
+      JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', "1", event.countryId, event.searchTerm, ""); // Empty string to get all jobs
       print("ddd${response.jobs?.data!.length}");
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);
@@ -111,7 +101,8 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       emit(DataError('No Data Found'));
     }
   }
-  _withDrawApplicant(WithDrawApplicant event, Emitter<JobsState> emit) async {
+
+  Future<void> _withDrawApplicant(WithDrawApplicant event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
     try {
       // Use the SharedApiService for withdrawing application
@@ -119,7 +110,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       if (response.success) {
         toast(response.data?['message'] ?? 'Application withdrawn successfully');
         print("response ${response.data}");
-        
+
         // Reload job details after successful withdrawal
         add(JobDetailPageEvent(jobId: event.jobId));
         return; // Return early to let JobDetailPageEvent handle the emission
@@ -133,7 +124,8 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       toast('Failed to withdraw application');
     }
   }
-  _showApplicant(ShowApplicantEvent event, Emitter<JobsState> emit) async {
+
+  Future<void> _showApplicant(ShowApplicantEvent event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
     try {
       // Use the SharedApiService for getting job applicants
@@ -151,5 +143,4 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       emit(DataError('Failed to get job applicants'));
     }
   }
-
 }

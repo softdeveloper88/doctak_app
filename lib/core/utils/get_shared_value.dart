@@ -5,14 +5,8 @@ import 'package:flutter/foundation.dart';
 /// Get SecureStorageService instance with retry mechanism for devices
 /// where initialization may be delayed in release mode.
 /// This replaces the old SharedPreferences implementation with secure storage.
-Future<SecureStorageService> getSharedPreferencesWithRetry({
-  int maxRetries = 5,
-  int initialDelayMs = 100,
-}) async {
-  return getSecureStorageWithRetry(
-    maxRetries: maxRetries,
-    initialDelayMs: initialDelayMs,
-  );
+Future<SecureStorageService> getSharedPreferencesWithRetry({int maxRetries = 5, int initialDelayMs = 100}) async {
+  return getSecureStorageWithRetry(maxRetries: maxRetries, initialDelayMs: initialDelayMs);
 }
 
 Future<void> initializeAsync() async {
@@ -24,7 +18,7 @@ Future<void> initializeAsync() async {
       String? userId = await prefs.getString('userId');
 
       String? name = await prefs.getString('name');
-      String? profile_pic = await prefs.getString('profile_pic');
+      String? profilePic = await prefs.getString('profile_pic');
       String? background = await prefs.getString('background');
       String? email = await prefs.getString('email');
       String? specialty = await prefs.getString('specialty');
@@ -36,7 +30,7 @@ Future<void> initializeAsync() async {
         AppData.userToken = userToken;
         AppData.logInUserId = userId;
         AppData.name = name ?? '';
-        AppData.profile_pic = profile_pic ?? '';
+        AppData.profile_pic = profilePic ?? '';
         AppData.background = background ?? '';
         AppData.email = email ?? '';
         AppData.specialty = specialty ?? '';

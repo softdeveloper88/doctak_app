@@ -11,12 +11,10 @@ class SettingsHostControlsScreen extends StatefulWidget {
   final String? meetingId;
 
   @override
-  State<SettingsHostControlsScreen> createState() =>
-      _SettingsHostControlsScreenState();
+  State<SettingsHostControlsScreen> createState() => _SettingsHostControlsScreenState();
 }
 
-class _SettingsHostControlsScreenState
-    extends State<SettingsHostControlsScreen> {
+class _SettingsHostControlsScreenState extends State<SettingsHostControlsScreen> {
   bool startStopMeeting = true;
   bool muteAll = true;
   bool unMuteAll = true;
@@ -75,21 +73,12 @@ class _SettingsHostControlsScreenState
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_rounded,
-            color: theme.textPrimary,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_rounded, color: theme.textPrimary, size: 20),
           onPressed: () => Navigator.pop(context, true),
         ),
         title: Text(
           translation(context).lbl_settings_host_controls,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            color: theme.textPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
+          style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontWeight: FontWeight.w600, fontSize: 18),
         ),
         centerTitle: true,
       ),
@@ -224,20 +213,12 @@ class _SettingsHostControlsScreenState
     );
   }
 
-  Widget _buildSectionCard({
-    required OneUITheme theme,
-    required IconData icon,
-    required String title,
-    required String description,
-    required List<Widget> children,
-  }) {
+  Widget _buildSectionCard({required OneUITheme theme, required IconData icon, required String title, required String description, required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
         color: theme.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-        ),
+        border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
         boxShadow: theme.isDark ? [] : theme.cardShadow,
       ),
       child: Column(
@@ -250,10 +231,7 @@ class _SettingsHostControlsScreenState
               children: [
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: theme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                   child: Icon(icon, color: theme.primary, size: 22),
                 ),
                 const SizedBox(width: 14),
@@ -263,22 +241,12 @@ class _SettingsHostControlsScreenState
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: theme.textPrimary,
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         description,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          color: theme.textSecondary,
-                          height: 1.3,
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: theme.textSecondary, height: 1.3),
                       ),
                     ],
                   ),
@@ -294,52 +262,30 @@ class _SettingsHostControlsScreenState
     );
   }
 
-  Widget _buildSwitchTile({
-    required OneUITheme theme,
-    required IconData icon,
-    required String title,
-    required bool value,
-    required Function(bool) onChanged,
-  }) {
+  Widget _buildSwitchTile({required OneUITheme theme, required IconData icon, required String title, required bool value, required Function(bool) onChanged}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: value
-                  ? theme.primary.withOpacity(0.1)
-                  : theme.surfaceVariant.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              icon,
-              color: value ? theme.primary : theme.textSecondary,
-              size: 18,
-            ),
+            decoration: BoxDecoration(color: value ? theme.primary.withValues(alpha: 0.1) : theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: value ? theme.primary : theme.textSecondary, size: 18),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w500, color: theme.textPrimary),
             ),
           ),
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
             activeColor: theme.primary,
-            activeTrackColor: theme.primary.withOpacity(0.3),
+            activeTrackColor: theme.primary.withValues(alpha: 0.3),
             inactiveThumbColor: theme.isDark ? Colors.white70 : Colors.white,
-            inactiveTrackColor: theme.isDark
-                ? Colors.white.withOpacity(0.2)
-                : Colors.black.withOpacity(0.1),
+            inactiveTrackColor: theme.isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.1),
           ),
         ],
       ),

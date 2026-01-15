@@ -3,14 +3,7 @@ import 'package:doctak_app/core/app_export.dart';
 
 // ignore: must_be_immutable
 class AppbarSubtitle extends StatelessWidget {
-  AppbarSubtitle({
-    Key? key,
-    required this.text,
-    this.margin,
-    this.onTap,
-  }) : super(
-          key: key,
-        );
+  AppbarSubtitle({super.key, required this.text, this.margin, this.onTap});
 
   String text;
 
@@ -32,10 +25,7 @@ class AppbarSubtitle extends StatelessWidget {
             text,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: CustomTextStyles.titleLargeSemiBold.copyWith(
-              color: theme.colorScheme.onPrimary,
-              height: 1.50,
-            ),
+            style: CustomTextStyles.titleLargeSemiBold.copyWith(color: theme.colorScheme.onPrimary, height: 1.50),
           ),
         ),
       ),

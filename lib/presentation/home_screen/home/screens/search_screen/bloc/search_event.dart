@@ -13,11 +13,7 @@ class GetPost extends SearchEvent {
   final String type;
   final String searchTerm;
 
-  GetPost(
-      {required this.page,
-      required this.countryId,
-      required this.searchTerm,
-      required this.type});
+  GetPost({required this.page, required this.countryId, required this.searchTerm, required this.type});
   @override
   List<Object> get props => [page, countryId, searchTerm, type];
 }

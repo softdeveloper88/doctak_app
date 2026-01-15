@@ -1,25 +1,13 @@
 import 'dart:convert';
 
-FollowerDataModel followerDataModelFromJson(String str) =>
-    FollowerDataModel.fromJson(json.decode(str));
-String followerDataModelToJson(FollowerDataModel data) =>
-    json.encode(data.toJson());
+FollowerDataModel followerDataModelFromJson(String str) => FollowerDataModel.fromJson(json.decode(str));
+String followerDataModelToJson(FollowerDataModel data) => json.encode(data.toJson());
 
 class FollowerDataModel {
-  FollowerDataModel({
-    this.totalFollows,
-    this.profilePicture,
-    this.coverPicture,
-    this.totalPosts,
-    this.user,
-    this.followers,
-    this.following,
-  });
+  FollowerDataModel({this.totalFollows, this.profilePicture, this.coverPicture, this.totalPosts, this.user, this.followers, this.following});
 
   FollowerDataModel.fromJson(dynamic json) {
-    totalFollows = json['total_follows'] != null
-        ? TotalFollows.fromJson(json['total_follows'])
-        : null;
+    totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
     profilePicture = json['profile_picture'];
     coverPicture = json['cover_picture'];
     totalPosts = json['total_posts'];
@@ -70,14 +58,7 @@ Following followingFromJson(String str) => Following.fromJson(json.decode(str));
 String followingToJson(Following data) => json.encode(data.toJson());
 
 class Following {
-  Following({
-    this.id,
-    this.profileUrl,
-    this.isCurrentlyFollow,
-    this.name,
-    this.profilePic,
-    this.specialty,
-  });
+  Following({this.id, this.profileUrl, this.isCurrentlyFollow, this.name, this.profilePic, this.specialty});
 
   Following.fromJson(dynamic json) {
     id = json['user_id'];
@@ -110,14 +91,7 @@ Followers followersFromJson(String str) => Followers.fromJson(json.decode(str));
 String followersToJson(Followers data) => json.encode(data.toJson());
 
 class Followers {
-  Followers({
-    this.id,
-    this.profileUrl,
-    this.isCurrentlyFollow,
-    this.name,
-    this.profilePic,
-    this.specialty,
-  });
+  Followers({this.id, this.profileUrl, this.isCurrentlyFollow, this.name, this.profilePic, this.specialty});
 
   Followers.fromJson(dynamic json) {
     id = json['user_id'];
@@ -298,15 +272,11 @@ class User {
   }
 }
 
-TotalFollows totalFollowsFromJson(String str) =>
-    TotalFollows.fromJson(json.decode(str));
+TotalFollows totalFollowsFromJson(String str) => TotalFollows.fromJson(json.decode(str));
 String totalFollowsToJson(TotalFollows data) => json.encode(data.toJson());
 
 class TotalFollows {
-  TotalFollows({
-    this.totalFollowers,
-    this.totalFollowings,
-  });
+  TotalFollows({this.totalFollowers, this.totalFollowings});
 
   TotalFollows.fromJson(dynamic json) {
     totalFollowers = json['total_followers'];

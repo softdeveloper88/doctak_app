@@ -1,7 +1,4 @@
-import 'package:dio/dio.dart';
-import 'package:doctak_app/core/errors/failures.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,7 +23,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       }
     });
   }
-  _onGetJobs(LoadPageEvent event, Emitter<SearchState> emit) async {
+  Future<void> _onGetJobs(LoadPageEvent event, Emitter<SearchState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
@@ -39,19 +36,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     // try {
-      JobsModel response = await apiManager.getSearchJobsList(
-          'Bearer ${AppData.userToken}',
-          '${pageNumber}',
-          event.countryId ?? "1",
-          event.searchTerm ?? '');
-      numberOfPage = response.jobs?.lastPage ?? 0;
-      if (pageNumber < numberOfPage + 1) {
-        pageNumber = pageNumber + 1;
-        drugsData.addAll(response.jobs?.data ?? []);
-      }
-      emit(PaginationLoadedState());
+    JobsModel response = await apiManager.getSearchJobsList('Bearer ${AppData.userToken}', '$pageNumber', event.countryId ?? "1", event.searchTerm ?? '');
+    numberOfPage = response.jobs?.lastPage ?? 0;
+    if (pageNumber < numberOfPage + 1) {
+      pageNumber = pageNumber + 1;
+      drugsData.addAll(response.jobs?.data ?? []);
+    }
+    emit(PaginationLoadedState());
 
-      // emit(DataLoaded(drugsData));
+    // emit(DataLoaded(drugsData));
     // } catch (e) {
     //   print(e);
     //
@@ -61,18 +54,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     // }
   }
 
-  _onGetJobs1(GetPost event, Emitter<SearchState> emit) async {
+  Future<void> _onGetJobs1(GetPost event, Emitter<SearchState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
-    print('33' + event.type);
+    print('33${event.type}');
     // emit(PaginationLoadingState());
     try {
-      final response = await apiManager.getJobsList(
-          'Bearer ${AppData.userToken}',
-          "1",
-          event.countryId,
-          event.searchTerm,
-          '');
+      final response = await apiManager.getJobsList('Bearer ${AppData.userToken}', "1", event.countryId, event.searchTerm, '');
       print("ddd${response.jobs?.data!.length}");
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);

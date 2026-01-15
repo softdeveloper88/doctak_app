@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
@@ -26,7 +25,7 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
     });
   }
 
-  _onGetJobs(LoadPageEvent event, Emitter<GuidelineState> emit) async {
+  Future<void> _onGetJobs(LoadPageEvent event, Emitter<GuidelineState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
@@ -37,10 +36,7 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     try {
-      GuidelinesModel response = await apiManager.guideline(
-          'Bearer ${AppData.userToken}',
-          '${pageNumber}',
-          event.searchTerm ?? '');
+      GuidelinesModel response = await apiManager.guideline('Bearer ${AppData.userToken}', '$pageNumber', event.searchTerm ?? '');
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
@@ -58,17 +54,13 @@ class GuidelinesBloc extends Bloc<GuidelineEvent, GuidelineState> {
     }
   }
 
-  _onGetJobs1(GetPost event, Emitter<GuidelineState> emit) async {
+  Future<void> _onGetJobs1(GetPost event, Emitter<GuidelineState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
 
     // emit(PaginationLoadingState());
     try {
-      GuidelinesModel response = await apiManager.guideline(
-        'Bearer ${AppData.userToken}',
-        "1",
-        event.searchTerm,
-      );
+      GuidelinesModel response = await apiManager.guideline('Bearer ${AppData.userToken}', "1", event.searchTerm);
       print("ddd${response.data!.length}");
       guidelinesList.clear();
       guidelinesList.addAll(response.data ?? []);

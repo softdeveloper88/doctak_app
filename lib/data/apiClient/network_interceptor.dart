@@ -14,32 +14,26 @@ import 'package:flutter/foundation.dart';
 class NetworkInterceptor extends Interceptor {
   // Track response times for performance monitoring
   final Map<String, DateTime> _requestStartTimes = {};
-  
+
   // Configure debug logging
   final bool enableDetailedLogging;
-  
+
   // Configure max content log length
   final int maxLogContentLength;
-  
-  NetworkInterceptor({
-    this.enableDetailedLogging = true,
-    this.maxLogContentLength = 1000,
-  });
-  
+
+  NetworkInterceptor({this.enableDetailedLogging = true, this.maxLogContentLength = 1000});
+
   @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) {
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     // Start timing the request
     _requestStartTimes[options.uri.toString()] = DateTime.now();
-    
+
     // Enhanced logging for request
     if (enableDetailedLogging) {
       debugPrint('┌────── 📡 API REQUEST ──────');
       debugPrint('│ URL: ${options.uri}');
       debugPrint('│ METHOD: ${options.method}');
-      
+
       // Log headers (excluding sensitive information)
       final Map<String, dynamic> safeHeaders = Map.from(options.headers);
       // Redact auth tokens for security
@@ -50,12 +44,12 @@ class NetworkInterceptor extends Interceptor {
         }
       }
       debugPrint('│ HEADERS: $safeHeaders');
-      
+
       // Log query parameters
       if (options.queryParameters.isNotEmpty) {
         debugPrint('│ QUERY PARAMS: ${options.queryParameters}');
       }
-      
+
       // Log request data (with length limits)
       if (options.data != null) {
         var dataStr = options.data.toString();
@@ -64,27 +58,24 @@ class NetworkInterceptor extends Interceptor {
         }
         debugPrint('│ DATA: $dataStr');
       }
-      
+
       debugPrint('└──────────────────────────');
     }
-    
+
     super.onRequest(options, handler);
   }
 
   @override
-  void onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
     // Calculate response time
     final requestTime = _calculateRequestTime(err.requestOptions.uri.toString());
-    
+
     // Enhanced error logging
     debugPrint('┌────── ❌ API ERROR (${err.type}) ──────');
     debugPrint('│ URL: ${err.requestOptions.uri}');
     debugPrint('│ METHOD: ${err.requestOptions.method}');
     debugPrint('│ REQUEST TIME: ${requestTime}ms');
-    
+
     // Log specific error information based on error type
     switch (err.type) {
       case DioExceptionType.connectionTimeout:
@@ -105,7 +96,7 @@ class NetworkInterceptor extends Interceptor {
       case DioExceptionType.badResponse:
         final statusCode = err.response?.statusCode;
         debugPrint('│ 🔥 STATUS CODE: $statusCode');
-        
+
         // Add more context by status code
         if (statusCode == 500) {
           debugPrint('│ 📊 CONTEXT: Server error (500) - The server encountered an unexpected condition');
@@ -129,7 +120,7 @@ class NetworkInterceptor extends Interceptor {
           debugPrint('│ 📊 CONTEXT: Not Found (404) - The requested resource could not be found');
           debugPrint('│ 🔍 SOLUTION: Verify the endpoint URL is correct');
         }
-        
+
         _logResponseData(err.response);
         break;
       case DioExceptionType.cancel:
@@ -159,47 +150,42 @@ class NetworkInterceptor extends Interceptor {
         debugPrint('│ 📊 CONTEXT: An unknown error occurred with Dio request');
         break;
     }
-    
+
     // Log the stack trace for debugging
-    if (err.stackTrace != null) {
-      debugPrint('│ STACK TRACE: ${err.stackTrace.toString().split('\n').first}');
-    }
-    
+    debugPrint('│ STACK TRACE: ${err.stackTrace.toString().split('\n').first}');
+
     debugPrint('└──────────────────────────');
-    
+
     // Continue with error handling
     super.onError(err, handler);
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) {
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
     // Calculate response time
     final requestTime = _calculateRequestTime(response.requestOptions.uri.toString());
-    
+
     // Enhanced logging for successful responses
     if (enableDetailedLogging) {
       debugPrint('┌────── ✅ API RESPONSE (${response.statusCode}) ──────');
       debugPrint('│ URL: ${response.requestOptions.uri}');
       debugPrint('│ METHOD: ${response.requestOptions.method}');
       debugPrint('│ REQUEST TIME: ${requestTime}ms');
-      
+
       // Log headers
       if (response.headers.map.isNotEmpty) {
         debugPrint('│ HEADERS: ${response.headers.map}');
       }
-      
+
       // Log response data
       _logResponseData(response);
-      
+
       debugPrint('└──────────────────────────');
     }
-    
+
     super.onResponse(response, handler);
   }
-  
+
   /// Calculate request time in milliseconds
   int _calculateRequestTime(String uri) {
     final startTime = _requestStartTimes[uri];
@@ -209,18 +195,18 @@ class NetworkInterceptor extends Interceptor {
     }
     return -1;
   }
-  
+
   /// Log response data with proper formatting and truncation
   void _logResponseData(Response? response) {
     if (response?.data != null) {
       var dataStr = response!.data.toString();
-      
+
       // Check if it's too large to log
       if (dataStr.length > maxLogContentLength) {
         // Truncate and indicate truncation
         dataStr = '${dataStr.substring(0, maxLogContentLength)}... [${dataStr.length - maxLogContentLength} more bytes]';
       }
-      
+
       // Special handling for JSON objects to improve readability
       if (response.data is Map || response.data is List) {
         // For large JSON, just log the structure/keys

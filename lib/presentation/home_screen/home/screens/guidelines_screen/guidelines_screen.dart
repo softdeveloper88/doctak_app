@@ -14,7 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'bloc/guideline_event.dart';
 
 class GuidelinesScreen extends StatefulWidget {
-  const GuidelinesScreen({Key? key}) : super(key: key);
+  const GuidelinesScreen({super.key});
 
   @override
   State<GuidelinesScreen> createState() => _GuidelinesScreenState();
@@ -41,8 +41,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
 
   // Function to show search bottom sheet with One UI 8.5 styling
   void _showSearchBottomSheet(OneUITheme theme) {
-    final TextEditingController dialogSearchController =
-        TextEditingController();
+    final TextEditingController dialogSearchController = TextEditingController();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -51,16 +50,11 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
               child: Container(
                 decoration: BoxDecoration(
                   color: theme.cardBackground,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Column(
@@ -70,10 +64,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                     Container(
                       width: 40,
                       height: 4,
-                      decoration: BoxDecoration(
-                        color: theme.textTertiary,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: theme.textTertiary, borderRadius: BorderRadius.circular(2)),
                     ),
                     const SizedBox(height: 20),
 
@@ -85,31 +76,15 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  theme.primary.withOpacity(0.2),
-                                  theme.primary.withOpacity(0.1),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                              gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.2), theme.primary.withValues(alpha: 0.1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Icon(
-                              Icons.search_rounded,
-                              color: theme.primary,
-                              size: 20,
-                            ),
+                            child: Icon(Icons.search_rounded, color: theme.primary, size: 20),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             translation(context).lbl_search,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: theme.textPrimary,
-                            ),
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w600, color: theme.textPrimary),
                           ),
                         ],
                       ),
@@ -122,56 +97,33 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       decoration: BoxDecoration(
                         color: theme.surfaceVariant,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.primary.withOpacity(0.2),
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1.5),
                       ),
                       child: Row(
                         children: [
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Icon(
-                              Icons.search_rounded,
-                              size: 22,
-                              color: theme.textSecondary,
-                            ),
+                            child: Icon(Icons.search_rounded, size: 22, color: theme.textSecondary),
                           ),
                           Expanded(
                             child: TextField(
                               controller: dialogSearchController,
                               autofocus: true,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 15,
-                                color: theme.textPrimary,
-                              ),
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary),
                               decoration: InputDecoration(
                                 hintText: translation(context).lbl_search,
-                                hintStyle: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 15,
-                                  color: theme.textTertiary,
-                                ),
+                                hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textTertiary),
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 14),
                               ),
                               onSubmitted: (value) {
-                                guidelineBloc.add(
-                                  LoadPageEvent(page: 1, searchTerm: value),
-                                );
+                                guidelineBloc.add(LoadPageEvent(page: 1, searchTerm: value));
                                 Navigator.of(context).pop();
                               },
                             ),
                           ),
                           IconButton(
-                            icon: Icon(
-                              Icons.close_rounded,
-                              color: theme.textSecondary,
-                              size: 22,
-                            ),
+                            icon: Icon(Icons.close_rounded, color: theme.textSecondary, size: 22),
                             onPressed: () {
                               dialogSearchController.clear();
                             },
@@ -227,10 +179,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             hintText: translation(context).lbl_search,
             controller: searchController,
             height: 72,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             onChanged: (searchTxt) {
               guidelineBloc.add(LoadPageEvent(page: 1, searchTerm: searchTxt));
             },
@@ -252,10 +201,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                 return const Expanded(child: GuidelinesShimmerLoader());
               } else if (state is PaginationLoadedState) {
                 return Expanded(
-                  child: VirtualizedGuidelinesList(
-                    guidelineBloc: guidelineBloc,
-                    scrollController: _scrollController,
-                  ),
+                  child: VirtualizedGuidelinesList(guidelineBloc: guidelineBloc, scrollController: _scrollController),
                 );
               } else if (state is DataError) {
                 return Expanded(
@@ -265,24 +211,13 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: theme.error.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Icon(
-                            Icons.error_outline_rounded,
-                            color: theme.error,
-                            size: 40,
-                          ),
+                          decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+                          child: Icon(Icons.error_outline_rounded, color: theme.error, size: 40),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           state.errorMessage,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: theme.textSecondary,
-                          ),
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -297,24 +232,13 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: theme.warning.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Icon(
-                            Icons.warning_amber_rounded,
-                            color: theme.warning,
-                            size: 40,
-                          ),
+                          decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
+                          child: Icon(Icons.warning_amber_rounded, color: theme.warning, size: 40),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           translation(context).msg_something_went_wrong,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: theme.textSecondary,
-                          ),
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
                         ),
                       ],
                     ),
@@ -332,19 +256,9 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       floatingActionButton: !isSearchShow
           ? Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [theme.primary, theme.primary.withOpacity(0.8)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.primary.withOpacity(0.4),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))],
               ),
               child: Material(
                 color: Colors.transparent,
@@ -353,11 +267,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                   onTap: () => _showSearchBottomSheet(theme),
                   child: const Padding(
                     padding: EdgeInsets.all(16),
-                    child: Icon(
-                      Icons.search_rounded,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                    child: Icon(Icons.search_rounded, color: Colors.white, size: 24),
                   ),
                 ),
               ),

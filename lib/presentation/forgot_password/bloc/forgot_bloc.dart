@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/forgot_password/bloc/forgot_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'forgot_state.dart';
+
 class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
   // API service not actively used in this bloc
 
@@ -13,8 +14,7 @@ class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
     on<ForgotPasswordEvent>(_onLoginButtonPressed);
   }
 
-  void _onLoginButtonPressed(
-      ForgotPasswordEvent event, Emitter<ForgotState> emit) async {
+  void _onLoginButtonPressed(ForgotPasswordEvent event, Emitter<ForgotState> emit) async {
     ProgressDialogUtils.showProgressDialog();
     print("response ${event.username}");
 
@@ -22,17 +22,9 @@ class ForgotBloc extends Bloc<ForgotEvent, ForgotState> {
     //   final response = await apiService.forgotPassword(
     //        event.username,
     //   );
-    var postBody = {
-      'email': event.username,
-    };
+    var postBody = {'email': event.username};
     Uri url = Uri.parse("${AppData.remoteUrl}/forgot_password");
-    final response = await http.post(
-      url,
-      body: jsonEncode(postBody),
-      headers: {
-        "Accept": "application/json",
-      },
-    );
+    final response = await http.post(url, body: jsonEncode(postBody), headers: {"Accept": "application/json"});
 
     if (response.statusCode == 200) {
       ProgressDialogUtils.hideProgressDialog();

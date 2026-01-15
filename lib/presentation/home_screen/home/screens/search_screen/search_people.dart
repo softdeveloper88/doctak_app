@@ -28,10 +28,7 @@ class SearchPeopleList extends StatelessWidget {
       builder: (context, state) {
         print("state $state");
         if (state is SearchPeoplePaginationLoadingState) {
-          return Container(
-            color: theme.scaffoldBackground,
-            child: const ProfileListShimmer(),
-          );
+          return Container(color: theme.scaffoldBackground, child: const ProfileListShimmer());
         } else if (state is SearchPeoplePaginationLoadedState) {
           final bloc = searchPeopleBloc;
           if (bloc.searchPeopleData.isNotEmpty) {
@@ -44,25 +41,15 @@ class SearchPeopleList extends StatelessWidget {
                 cacheExtent: 500,
                 itemBuilder: (context, index) {
                   if (bloc.pageNumber <= bloc.numberOfPage) {
-                    if (index ==
-                        bloc.searchPeopleData.length - bloc.nextPageTrigger) {
-                      bloc.add(
-                        SearchPeopleCheckIfNeedMoreDataEvent(index: index),
-                      );
+                    if (index == bloc.searchPeopleData.length - bloc.nextPageTrigger) {
+                      bloc.add(SearchPeopleCheckIfNeedMoreDataEvent(index: index));
                     }
                   }
-                  if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-                      index >= bloc.searchPeopleData.length - 1) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: const ProfileListShimmer(),
-                    );
+                  if (bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.searchPeopleData.length - 1) {
+                    return Container(padding: const EdgeInsets.symmetric(vertical: 8), child: const ProfileListShimmer());
                   }
                   return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 6,
-                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: theme.cardDecoration,
                     child: ClipRRect(
                       borderRadius: theme.radiusL,
@@ -70,33 +57,14 @@ class SearchPeopleList extends StatelessWidget {
                         bloc: bloc,
                         element: bloc.searchPeopleData[index],
                         onTap: () {
-                          if (bloc
-                                  .searchPeopleData[index]
-                                  .isFollowedByCurrentUser ??
-                              false) {
-                            bloc.add(
-                              SetUserFollow(
-                                bloc.searchPeopleData[index].id ?? '',
-                                'unfollow',
-                              ),
-                            );
+                          if (bloc.searchPeopleData[index].isFollowedByCurrentUser ?? false) {
+                            bloc.add(SetUserFollow(bloc.searchPeopleData[index].id ?? '', 'unfollow'));
 
-                            bloc
-                                    .searchPeopleData[index]
-                                    .isFollowedByCurrentUser =
-                                false;
+                            bloc.searchPeopleData[index].isFollowedByCurrentUser = false;
                           } else {
-                            bloc.add(
-                              SetUserFollow(
-                                bloc.searchPeopleData[index].id ?? '',
-                                'follow',
-                              ),
-                            );
+                            bloc.add(SetUserFollow(bloc.searchPeopleData[index].id ?? '', 'follow'));
 
-                            bloc
-                                    .searchPeopleData[index]
-                                    .isFollowedByCurrentUser =
-                                true;
+                            bloc.searchPeopleData[index].isFollowedByCurrentUser = true;
                           }
                         },
                       ),
@@ -129,27 +97,13 @@ class SearchPeopleList extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.primary.withOpacity(0.15),
-                    theme.secondary.withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.15), theme.secondary.withValues(alpha: 0.1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.search_off_rounded,
-                size: 48,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.search_off_rounded, size: 48, color: theme.primary),
             ),
             const SizedBox(height: 16),
-            Text(
-              translation(context).lbl_no_search_results,
-              style: theme.titleMedium,
-            ),
+            Text(translation(context).lbl_no_search_results, style: theme.titleMedium),
           ],
         ),
       ),
@@ -165,29 +119,16 @@ class SearchPeopleList extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: theme.error.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.error_outline_rounded,
-                size: 48,
-                color: theme.error,
-              ),
+              decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(Icons.error_outline_rounded, size: 48, color: theme.error),
             ),
             const SizedBox(height: 16),
-            Text(
-              translation(context).msg_something_went_wrong_retry,
-              style: theme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
+            Text(translation(context).msg_something_went_wrong_retry, style: theme.titleMedium, textAlign: TextAlign.center),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () {
                 try {
-                  searchPeopleBloc.add(
-                    SearchPeopleLoadPageEvent(page: 1, searchTerm: ''),
-                  );
+                  searchPeopleBloc.add(SearchPeopleLoadPageEvent(page: 1, searchTerm: ''));
                 } catch (e) {
                   debugPrint(e.toString());
                 }
@@ -195,18 +136,12 @@ class SearchPeopleList extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded, size: 20),
               label: Text(
                 translation(context).lbl_try_again,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: theme.radiusXL),
               ),
             ),
@@ -226,27 +161,13 @@ class SearchPeopleList extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.primary.withOpacity(0.15),
-                    theme.secondary.withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.15), theme.secondary.withValues(alpha: 0.1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.people_outline_rounded,
-                size: 48,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.people_outline_rounded, size: 48, color: theme.primary),
             ),
             const SizedBox(height: 16),
-            Text(
-              translation(context).lbl_search_peoples,
-              style: theme.titleMedium,
-            ),
+            Text(translation(context).lbl_search_peoples, style: theme.titleMedium),
           ],
         ),
       ),

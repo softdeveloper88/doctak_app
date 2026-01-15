@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 abstract class JobsEvent extends Equatable {}
 
@@ -13,22 +12,21 @@ class GetPost extends JobsEvent {
   final String countryId;
   final String searchTerm;
 
-  GetPost(
-      {required this.page, required this.countryId, required this.searchTerm});
+  GetPost({required this.page, required this.countryId, required this.searchTerm});
   @override
   List<Object> get props => [page, countryId, searchTerm];
 }
+
 class WithDrawApplicant extends JobsEvent {
   final String? jobId;
-
 
   WithDrawApplicant({this.jobId});
   @override
   List<Object> get props => [jobId!];
 }
+
 class ShowApplicantEvent extends JobsEvent {
   final String? jobId;
-
 
   ShowApplicantEvent({this.jobId});
   @override
@@ -40,8 +38,7 @@ class JobLoadPageEvent extends JobsEvent {
   final String? countryId;
   final String? searchTerm;
 
-  JobLoadPageEvent(
-      {this.page, this.countryId, this.searchTerm});
+  JobLoadPageEvent({this.page, this.countryId, this.searchTerm});
   @override
   List<Object?> get props => [page, countryId, searchTerm];
 }

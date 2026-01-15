@@ -16,7 +16,7 @@ class MessageInput extends StatefulWidget {
   final bool isWaitingForResponse; // Add waiting indicator
 
   const MessageInput({
-    Key? key,
+    super.key,
     this.controller,
     required this.onSendMessage,
     required this.onAttachImage,
@@ -27,7 +27,7 @@ class MessageInput extends StatefulWidget {
     required this.searchContextSize,
     required this.onSearchContextSizeChanged,
     this.isWaitingForResponse = false, // Default to not waiting
-  }) : super(key: key);
+  });
 
   @override
   State<MessageInput> createState() => _MessageInputState();
@@ -36,7 +36,7 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   late TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
-  bool _showAdvancedOptions = false;
+  final bool _showAdvancedOptions = false;
   bool _isComposing = false;
 
   @override
@@ -90,14 +90,7 @@ class _MessageInputState extends State<MessageInput> {
           height: _showAdvancedOptions ? 56 : 0,
           decoration: BoxDecoration(
             color: theme.cardBackground,
-            border: Border(
-              top: BorderSide(
-                color: theme.isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.grey.shade300.withOpacity(0.5),
-                width: 1,
-              ),
-            ),
+            border: Border(top: BorderSide(color: theme.isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade300.withValues(alpha: 0.5), width: 1)),
           ),
           child: SingleChildScrollView(
             child: Padding(
@@ -109,26 +102,14 @@ class _MessageInputState extends State<MessageInput> {
                     value: widget.selectedModel,
                     underline: const SizedBox.shrink(),
                     isDense: true,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontFamily: 'Poppins',
-                      color: theme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
                     icon: Icon(Icons.arrow_drop_down, color: theme.primary),
-                    items: ['gpt-4o', 'gpt-3.5-turbo', 'gpt-4-turbo'].map((
-                      model,
-                    ) {
+                    items: ['gpt-4o', 'gpt-3.5-turbo', 'gpt-4-turbo'].map((model) {
                       return DropdownMenuItem<String>(
                         value: model,
                         child: Text(
                           model,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontFamily: 'Poppins',
-                            color: theme.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
                         ),
                       );
                     }).toList(),
@@ -145,32 +126,17 @@ class _MessageInputState extends State<MessageInput> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.search,
-                        size: 16,
-                        color: widget.webSearchEnabled
-                            ? theme.primary
-                            : theme.textSecondary,
-                      ),
+                      Icon(Icons.search, size: 16, color: widget.webSearchEnabled ? theme.primary : theme.textSecondary),
                       const SizedBox(width: 4),
                       Text(
                         'Web search',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          color: widget.webSearchEnabled
-                              ? theme.primary
-                              : theme.textSecondary,
-                        ),
+                        style: TextStyle(fontSize: 13, fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: widget.webSearchEnabled ? theme.primary : theme.textSecondary),
                       ),
                       const SizedBox(width: 4),
                       Switch.adaptive(
                         value: widget.webSearchEnabled,
                         // Disable toggle when waiting for response
-                        onChanged: widget.isWaitingForResponse
-                            ? null
-                            : widget.onWebSearchToggled,
+                        onChanged: widget.isWaitingForResponse ? null : widget.onWebSearchToggled,
                         activeColor: theme.primary,
                         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
@@ -190,36 +156,21 @@ class _MessageInputState extends State<MessageInput> {
                           value: 'low',
                           child: Text(
                             'Low context',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontFamily: 'Poppins',
-                              color: theme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
                           ),
                         ),
                         DropdownMenuItem<String>(
                           value: 'medium',
                           child: Text(
                             'Medium context',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontFamily: 'Poppins',
-                              color: theme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
                           ),
                         ),
                         DropdownMenuItem<String>(
                           value: 'high',
                           child: Text(
                             'High context',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontFamily: 'Poppins',
-                              color: theme.primary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
@@ -240,20 +191,9 @@ class _MessageInputState extends State<MessageInput> {
         Container(
           decoration: BoxDecoration(
             color: theme.cardBackground,
-            boxShadow: [
-              BoxShadow(
-                color: theme.primary.withAlpha(13),
-                offset: const Offset(0, -3),
-                blurRadius: 8,
-              ),
-            ],
+            boxShadow: [BoxShadow(color: theme.primary.withAlpha(13), offset: const Offset(0, -3), blurRadius: 8)],
           ),
-          padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 8.0,
-            bottom: 8.0 + MediaQuery.of(context).padding.bottom,
-          ),
+          padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 8.0 + MediaQuery.of(context).padding.bottom),
           child: Column(
             children: [
               Row(
@@ -265,18 +205,8 @@ class _MessageInputState extends State<MessageInput> {
                       decoration: BoxDecoration(
                         color: theme.inputBackground,
                         borderRadius: BorderRadius.circular(24.0),
-                        border: Border.all(
-                          color: theme.primary.withOpacity(0.2),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.primary.withOpacity(0.05),
-                            offset: const Offset(0, 2),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                        ],
+                        border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1.5),
+                        boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -287,24 +217,12 @@ class _MessageInputState extends State<MessageInput> {
                               focusNode: _focusNode,
                               minLines: 1,
                               maxLines: 4,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 16,
-                                color: theme.textPrimary,
-                              ),
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 16, color: theme.textPrimary),
                               decoration: InputDecoration(
-                                hintStyle: TextStyle(
-                                  color: theme.textSecondary,
-                                  fontFamily: 'Poppins',
-                                ),
-                                hintText: widget.isWaitingForResponse
-                                    ? 'Waiting for AI response...'
-                                    : 'Ask anything...',
+                                hintStyle: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
+                                hintText: widget.isWaitingForResponse ? 'Waiting for AI response...' : 'Ask anything...',
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                  vertical: 16.0,
-                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
                               ),
                               textCapitalization: TextCapitalization.sentences,
                               cursorColor: theme.primary,
@@ -316,42 +234,19 @@ class _MessageInputState extends State<MessageInput> {
                             margin: const EdgeInsets.only(right: 8.0),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color:
-                                  _isComposing && !widget.isWaitingForResponse
-                                  ? theme.primary
-                                  : theme.textSecondary.withOpacity(0.3),
-                              boxShadow:
-                                  _isComposing && !widget.isWaitingForResponse
-                                  ? [
-                                      BoxShadow(
-                                        color: theme.primary.withOpacity(0.3),
-                                        offset: const Offset(0, 2),
-                                        blurRadius: 8,
-                                        spreadRadius: 0,
-                                      ),
-                                    ]
+                              color: _isComposing && !widget.isWaitingForResponse ? theme.primary : theme.textSecondary.withValues(alpha: 0.3),
+                              boxShadow: _isComposing && !widget.isWaitingForResponse
+                                  ? [BoxShadow(color: theme.primary.withValues(alpha: 0.3), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)]
                                   : [],
                             ),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(30),
-                                onTap:
-                                    (!widget.isWaitingForResponse &&
-                                        _isComposing)
-                                    ? _handleSend
-                                    : null,
+                                onTap: (!widget.isWaitingForResponse && _isComposing) ? _handleSend : null,
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
-                                  child: Icon(
-                                    Icons.send_rounded,
-                                    color:
-                                        _isComposing &&
-                                            !widget.isWaitingForResponse
-                                        ? Colors.white
-                                        : theme.textSecondary,
-                                    size: 20,
-                                  ),
+                                  child: Icon(Icons.send_rounded, color: _isComposing && !widget.isWaitingForResponse ? Colors.white : theme.textSecondary, size: 20),
                                 ),
                               ),
                             ),
@@ -366,12 +261,7 @@ class _MessageInputState extends State<MessageInput> {
               // Disclaimer note - ChatGPT style
               Text(
                 translation(context).msg_ai_disclaimer,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 11,
-                  color: theme.textSecondary,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: theme.textSecondary, fontStyle: FontStyle.italic),
                 textAlign: TextAlign.center,
               ),
             ],

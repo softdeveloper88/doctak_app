@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
-import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_caller.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/connectivity_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -31,10 +29,7 @@ Future<void> _checkConnectivity() async {
     final bool isConnected = !connectivityResult.contains(ConnectivityResult.none);
 
     if (!isConnected) {
-      throw ApiException(
-          message: "Network is not available. Please check your connection.",
-          statusCode: 0
-      );
+      throw ApiException(message: "Network is not available. Please check your connection.", statusCode: 0);
     }
   } catch (e) {
     if (e is ApiException) rethrow;
@@ -77,16 +72,11 @@ String _getMimeType(File file) {
 /// Get all chat sessions
 Future<List<AiChatSessionModel>> getChatSessions() async {
   try {
-    final rawResponse = await networkUtils.buildHttpResponse2(
-        '/chat/sessions',
-        method: networkUtils.HttpMethod.GET
-    );
+    final rawResponse = await networkUtils.buildHttpResponse2('/chat/sessions', method: networkUtils.HttpMethod.GET);
 
     final response = await networkUtils.handleResponse(rawResponse);
 
-    return (response['data'] as List)
-        .map((session) => AiChatSessionModel.fromJson(session))
-        .toList();
+    return (response['data'] as List).map((session) => AiChatSessionModel.fromJson(session)).toList();
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
@@ -98,13 +88,7 @@ Future<AiChatSessionModel> createChatSession({String? name}) async {
     final Map<String, dynamic> request = {};
     if (name != null) request['name'] = name;
 
-    final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2(
-        '/chat/sessions',
-        method: networkUtils.HttpMethod.POST,
-        request: request,
-      ),
-    );
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse2('/chat/sessions', method: networkUtils.HttpMethod.POST, request: request));
 
     return AiChatSessionModel.fromJson(response['data']);
   } on ApiException catch (e) {
@@ -115,22 +99,12 @@ Future<AiChatSessionModel> createChatSession({String? name}) async {
 /// Get a specific chat session with its messages
 Future<Map<String, dynamic>> getChatSession(String sessionId) async {
   try {
-    final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2(
-        '/chat/sessions/$sessionId',
-        method: networkUtils.HttpMethod.GET,
-      ),
-    );
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse2('/chat/sessions/$sessionId', method: networkUtils.HttpMethod.GET));
 
     final session = AiChatSessionModel.fromJson(response['data']['session']);
-    final messages = (response['data']['messages'] as List)
-        .map((message) => AiChatMessageModel.fromJson(message))
-        .toList();
+    final messages = (response['data']['messages'] as List).map((message) => AiChatMessageModel.fromJson(message)).toList();
 
-    return {
-      'session': session,
-      'messages': messages,
-    };
+    return {'session': session, 'messages': messages};
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
@@ -164,11 +138,7 @@ Future<Map<String, dynamic>> sendMessage({
       modelParams: modelParams,
       webSearch: webSearch,
       searchContextSize: searchContextSize,
-      locationParams: {
-        'country': userLocationCountry,
-        'city': userLocationCity,
-        'region': userLocationRegion,
-      },
+      locationParams: {'country': userLocationCountry, 'city': userLocationCity, 'region': userLocationRegion},
     );
   } else {
     return _sendMessageWithFile(
@@ -177,11 +147,7 @@ Future<Map<String, dynamic>> sendMessage({
       modelParams: modelParams,
       webSearch: webSearch,
       searchContextSize: searchContextSize,
-      locationParams: {
-        'country': userLocationCountry,
-        'city': userLocationCity,
-        'region': userLocationRegion,
-      },
+      locationParams: {'country': userLocationCountry, 'city': userLocationCity, 'region': userLocationRegion},
       file: file,
     );
   }
@@ -193,18 +159,13 @@ Map<String, dynamic> _prepareModelParameters(String model, double temperature, i
   if (model.toLowerCase() == "gpt-4o") {
     return {
       'model': "gpt-4o", // GPT-4o model
-      'temperature': 0.5,  // Lower temperature for more precise thinking
-      'maxTokens': 4000,   // Higher token limit for more detailed responses
+      'temperature': 0.5, // Lower temperature for more precise thinking
+      'maxTokens': 4000, // Higher token limit for more detailed responses
       'timeout': extendedTimeout,
     };
   }
 
-  return {
-    'model': model,
-    'temperature': temperature,
-    'maxTokens': maxTokens,
-    'timeout': defaultTimeout,
-  };
+  return {'model': model, 'temperature': temperature, 'maxTokens': maxTokens, 'timeout': defaultTimeout};
 }
 
 /// Send text-only message (JSON POST request)
@@ -255,18 +216,14 @@ Future<Map<String, dynamic>> _sendTextOnlyMessage({
   try {
     // Make the API call
     final stopwatch = Stopwatch()..start();
-    final response = await http.post(
-      messageUrl,
-      headers: headers,
-      body: json.encode(requestBody),
-    ).timeout(
-      modelParams['timeout'] as Duration,
-      onTimeout: () {
-        throw TimeoutException(
-            "Request timed out after ${(modelParams['timeout'] as Duration).inSeconds} seconds"
+    final response = await http
+        .post(messageUrl, headers: headers, body: json.encode(requestBody))
+        .timeout(
+          modelParams['timeout'] as Duration,
+          onTimeout: () {
+            throw TimeoutException("Request timed out after ${(modelParams['timeout'] as Duration).inSeconds} seconds");
+          },
         );
-      },
-    );
 
     stopwatch.stop();
 
@@ -274,14 +231,7 @@ Future<Map<String, dynamic>> _sendTextOnlyMessage({
     return _processApiResponse(response);
   } catch (e) {
     // If direct POST fails, try multipart as fallback
-    return _sendMessageWithMultipart(
-      sessionId: sessionId,
-      message: message,
-      modelParams: modelParams,
-      webSearch: webSearch,
-      searchContextSize: searchContextSize,
-      locationParams: locationParams,
-    );
+    return _sendMessageWithMultipart(sessionId: sessionId, message: message, modelParams: modelParams, webSearch: webSearch, searchContextSize: searchContextSize, locationParams: locationParams);
   }
 }
 
@@ -297,10 +247,7 @@ Future<Map<String, dynamic>> _sendMessageWithFile({
 }) async {
   // Validate file
   if (!await _validateFile(file)) {
-    throw ApiException(
-        message: "The selected file is empty or inaccessible",
-        statusCode: 400
-    );
+    throw ApiException(message: "The selected file is empty or inaccessible", statusCode: 400);
   }
 
   // Add file to multipart request
@@ -357,7 +304,7 @@ Future<Map<String, dynamic>> _sendMessageWithMultipart({
       // Default to medium if not specified
       request.fields['search_context_size'] = 'medium';
     }
-    
+
     // Only include location parameters with web search
     locationParams.forEach((key, value) {
       if (value != null) {
@@ -374,13 +321,7 @@ Future<Map<String, dynamic>> _sendMessageWithMultipart({
       final mimeType = _getMimeType(file);
       final filename = file.path.split('/').last;
 
-      final multipartFile = http.MultipartFile(
-        'file',
-        fileStream,
-        fileLength,
-        filename: filename,
-        contentType: MediaType.parse(mimeType),
-      );
+      final multipartFile = http.MultipartFile('file', fileStream, fileLength, filename: filename, contentType: MediaType.parse(mimeType));
 
       request.files.add(multipartFile);
     } catch (e) {
@@ -394,9 +335,7 @@ Future<Map<String, dynamic>> _sendMessageWithMultipart({
     final streamedResponse = await request.send().timeout(
       modelParams['timeout'] as Duration,
       onTimeout: () {
-        throw TimeoutException(
-            "Request timed out after ${(modelParams['timeout'] as Duration).inSeconds} seconds"
-        );
+        throw TimeoutException("Request timed out after ${(modelParams['timeout'] as Duration).inSeconds} seconds");
       },
     );
 
@@ -406,15 +345,9 @@ Future<Map<String, dynamic>> _sendMessageWithMultipart({
     return _processApiResponse(response);
   } catch (e) {
     if (e is TimeoutException) {
-      throw ApiException(
-          message: e.message ?? "Request timed out",
-          statusCode: 408
-      );
+      throw ApiException(message: e.message ?? "Request timed out", statusCode: 408);
     } else {
-      throw ApiException(
-          message: "Network error: $e",
-          statusCode: 0
-      );
+      throw ApiException(message: "Network error: $e", statusCode: 0);
     }
   }
 }
@@ -423,10 +356,7 @@ Future<Map<String, dynamic>> _sendMessageWithMultipart({
 Future<Map<String, dynamic>> _processApiResponse(http.Response response) async {
   // Check for empty response
   if (response.body.isEmpty) {
-    throw ApiException(
-      message: "Server returned empty response",
-      statusCode: response.statusCode,
-    );
+    throw ApiException(message: "Server returned empty response", statusCode: response.statusCode);
   }
 
   if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -435,10 +365,7 @@ Future<Map<String, dynamic>> _processApiResponse(http.Response response) async {
     try {
       jsonResponse = json.decode(response.body);
     } catch (e) {
-      throw ApiException(
-        message: "Failed to parse JSON response: $e",
-        statusCode: response.statusCode,
-      );
+      throw ApiException(message: "Failed to parse JSON response: $e", statusCode: response.statusCode);
     }
 
     // Validate response structure
@@ -456,17 +383,11 @@ Future<Map<String, dynamic>> _processApiResponse(http.Response response) async {
 
       // Debug log message structure
       debugPrint("⚠️⚠️⚠️ API LAYER - message data structure: $messageData");
-      
+
       // Return the raw JSON data instead of a parsed model
-      return {
-        'message': messageData,
-        'sources': sources ?? [],
-      };
+      return {'message': messageData, 'sources': sources ?? []};
     } catch (e) {
-      throw ApiException(
-        message: "Invalid response format: $e",
-        statusCode: response.statusCode,
-      );
+      throw ApiException(message: "Invalid response format: $e", statusCode: response.statusCode);
     }
   } else {
     // Handle error response
@@ -478,10 +399,7 @@ Future<Map<String, dynamic>> _processApiResponse(http.Response response) async {
       errorMessage = 'Failed to parse error response: ${response.body}';
     }
 
-    throw ApiException(
-      message: errorMessage,
-      statusCode: response.statusCode,
-    );
+    throw ApiException(message: errorMessage, statusCode: response.statusCode);
   }
 }
 
@@ -508,22 +426,14 @@ Future<AiChatSessionModel> renameSession(String sessionId, String name) async {
 /// Delete a chat session
 Future<Map<String, dynamic>> deleteSession(String sessionId) async {
   try {
-    final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2(
-        '/chat/sessions/$sessionId',
-        method: networkUtils.HttpMethod.DELETE,
-      ),
-    );
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse2('/chat/sessions/$sessionId', method: networkUtils.HttpMethod.DELETE));
 
     AiChatSessionModel? nextSession;
     if (response['data']['next_session'] != null) {
       nextSession = AiChatSessionModel.fromJson(response['data']['next_session']);
     }
 
-    return {
-      'success': true,
-      'nextSession': nextSession,
-    };
+    return {'success': true, 'nextSession': nextSession};
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
@@ -533,14 +443,7 @@ Future<Map<String, dynamic>> deleteSession(String sessionId) async {
 Future<AiChatMessageModel> submitFeedback(String messageId, String feedback) async {
   try {
     final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2(
-        '/chat/feedback',
-        method: networkUtils.HttpMethod.POST,
-        request: {
-          'message_id': messageId,
-          'feedback': feedback,
-        },
-      ),
+      await networkUtils.buildHttpResponse2('/chat/feedback', method: networkUtils.HttpMethod.POST, request: {'message_id': messageId, 'feedback': feedback}),
     );
 
     return AiChatMessageModel.fromJson(response['data']);
@@ -553,15 +456,7 @@ Future<AiChatMessageModel> submitFeedback(String messageId, String feedback) asy
 Future<String> suggestTitle(String sessionId, String userMessage, String aiResponse) async {
   try {
     final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2(
-        '/chat/suggest-title',
-        method: networkUtils.HttpMethod.POST,
-        request: {
-          'session_id': sessionId,
-          'user_message': userMessage,
-          'ai_response': aiResponse,
-        },
-      ),
+      await networkUtils.buildHttpResponse2('/chat/suggest-title', method: networkUtils.HttpMethod.POST, request: {'session_id': sessionId, 'user_message': userMessage, 'ai_response': aiResponse}),
     );
 
     return response['data']['title'];

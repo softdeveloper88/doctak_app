@@ -1,7 +1,3 @@
-import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
-import 'package:doctak_app/data/models/jobs_model/jobs_model.dart';
-import 'package:equatable/equatable.dart';
-
 abstract class NotificationState {}
 
 class DrugsDataInitial extends NotificationState {}

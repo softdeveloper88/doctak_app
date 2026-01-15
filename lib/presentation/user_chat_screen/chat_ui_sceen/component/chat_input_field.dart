@@ -30,8 +30,7 @@ class ChatInputField extends StatefulWidget {
   State<ChatInputField> createState() => _ChatInputFieldState();
 }
 
-class _ChatInputFieldState extends State<ChatInputField>
-    with SingleTickerProviderStateMixin {
+class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProviderStateMixin {
   bool _showEmoji = false;
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -41,14 +40,8 @@ class _ChatInputFieldState extends State<ChatInputField>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
+    _animationController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
+    _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
   }
 
   @override
@@ -83,15 +76,7 @@ class _ChatInputFieldState extends State<ChatInputField>
         Container(
           decoration: BoxDecoration(
             color: theme.cardBackground,
-            boxShadow: [
-              BoxShadow(
-                color: theme.isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.grey.withOpacity(0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -3),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: theme.isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -3))],
           ),
           padding: EdgeInsets.only(
             left: 16,
@@ -106,10 +91,7 @@ class _ChatInputFieldState extends State<ChatInputField>
               // Input field
               Expanded(
                 child: Container(
-                  constraints: const BoxConstraints(
-                    minHeight: 48,
-                    maxHeight: 120,
-                  ),
+                  constraints: const BoxConstraints(minHeight: 48, maxHeight: 120),
                   decoration: BoxDecoration(
                     color: theme.inputBackground,
                     borderRadius: BorderRadius.circular(24),
@@ -120,13 +102,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                     children: [
                       // Emoji button
                       IconButton(
-                        icon: Icon(
-                          _showEmoji
-                              ? Icons.keyboard
-                              : Icons.emoji_emotions_outlined,
-                          color: theme.textSecondary,
-                          size: 24,
-                        ),
+                        icon: Icon(_showEmoji ? Icons.keyboard : Icons.emoji_emotions_outlined, color: theme.textSecondary, size: 24),
                         onPressed: _toggleEmoji,
                       ),
                       // Text field
@@ -138,25 +114,12 @@ class _ChatInputFieldState extends State<ChatInputField>
                           keyboardType: TextInputType.multiline,
                           maxLines: null,
                           minLines: 1,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: theme.textPrimary,
-                            fontFamily: 'Poppins',
-                          ),
+                          style: TextStyle(fontSize: 16, color: theme.textPrimary, fontFamily: 'Poppins'),
                           decoration: InputDecoration(
-                            hintText: translation(
-                              context,
-                            ).lbl_type_message_here,
-                            hintStyle: TextStyle(
-                              color: theme.textTertiary,
-                              fontSize: 16,
-                              fontFamily: 'Poppins',
-                            ),
+                            hintText: translation(context).lbl_type_message_here,
+                            hintStyle: TextStyle(color: theme.textTertiary, fontSize: 16, fontFamily: 'Poppins'),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 0,
-                              vertical: 12,
-                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
                           ),
                           onChanged: widget.onTyping,
                           onTap: () {
@@ -171,11 +134,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                       ),
                       // Attachment button
                       IconButton(
-                        icon: Icon(
-                          Icons.attach_file_rounded,
-                          color: theme.textSecondary,
-                          size: 24,
-                        ),
+                        icon: Icon(Icons.attach_file_rounded, color: theme.textSecondary, size: 24),
                         onPressed: widget.onAttachmentPressed,
                       ),
                     ],
@@ -196,9 +155,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                             widget.onSubmitted(widget.controller.text);
                           }
                         },
-                  onLongPressStart:
-                      widget.isLoading ||
-                          widget.controller.text.trim().isNotEmpty
+                  onLongPressStart: widget.isLoading || widget.controller.text.trim().isNotEmpty
                       ? null
                       : (details) {
                           // Start recording on long press (hold) - not on tap
@@ -228,39 +185,16 @@ class _ChatInputFieldState extends State<ChatInputField>
                     height: 48,
                     width: 48,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [theme.primary, theme.primary.withOpacity(0.8)],
-                      ),
+                      gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)]),
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.primary.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
                     ),
                     child: Center(
                       child: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: widget.isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : Icon(
-                                widget.controller.text.trim().isEmpty
-                                    ? Icons.mic
-                                    : Icons.send_rounded,
-                                color: Colors.white,
-                                size: 24,
-                              ),
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
+                            : Icon(widget.controller.text.trim().isEmpty ? Icons.mic : Icons.send_rounded, color: Colors.white, size: 24),
                       ),
                     ),
                   ),
@@ -280,11 +214,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                     child: EmojiPicker(
                       onEmojiSelected: (category, emoji) {
                         widget.controller.text += emoji.emoji;
-                        widget
-                            .controller
-                            .selection = TextSelection.fromPosition(
-                          TextPosition(offset: widget.controller.text.length),
-                        );
+                        widget.controller.selection = TextSelection.fromPosition(TextPosition(offset: widget.controller.text.length));
                         if (widget.onTyping != null) {
                           widget.onTyping!(widget.controller.text);
                         }
@@ -294,14 +224,7 @@ class _ChatInputFieldState extends State<ChatInputField>
                         height: 256,
                         checkPlatformCompatibility: true,
                         viewOrderConfig: const ViewOrderConfig(),
-                        emojiViewConfig: EmojiViewConfig(
-                          emojiSizeMax:
-                              28 *
-                              (foundation.defaultTargetPlatform ==
-                                      TargetPlatform.iOS
-                                  ? 1.2
-                                  : 1.0),
-                        ),
+                        emojiViewConfig: EmojiViewConfig(emojiSizeMax: 28 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0)),
                         skinToneConfig: const SkinToneConfig(),
                         categoryViewConfig: const CategoryViewConfig(),
                         bottomActionBarConfig: const BottomActionBarConfig(),

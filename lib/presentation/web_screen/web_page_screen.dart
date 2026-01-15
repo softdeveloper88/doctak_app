@@ -11,14 +11,7 @@ class WebPageScreen extends StatefulWidget {
   final bool hasHeaders;
   final bool isHtml;
 
-  const WebPageScreen({
-    super.key,
-    this.url = '',
-    this.pageName = '',
-    this.htmlString = '',
-    this.hasHeaders = false,
-    this.isHtml = false,
-  });
+  const WebPageScreen({super.key, this.url = '', this.pageName = '', this.htmlString = '', this.hasHeaders = false, this.isHtml = false});
 
   @override
   State<WebPageScreen> createState() => _WebPageScreenState();
@@ -81,10 +74,7 @@ class _WebPageScreenState extends State<WebPageScreen> {
       textDirection: TextDirection.ltr,
       child: Scaffold(
         backgroundColor: theme.scaffoldBackground,
-        appBar: DoctakAppBar(
-          title: widget.pageName,
-          titleIcon: Icons.web_rounded,
-        ),
+        appBar: DoctakAppBar(title: widget.pageName, titleIcon: Icons.web_rounded),
         body: _buildBody(theme),
       ),
     );
@@ -107,14 +97,7 @@ class _WebPageScreenState extends State<WebPageScreen> {
               left: 0,
               right: 0,
               child: Column(
-                children: [
-                  LinearProgressIndicator(
-                    value: _loadingProgress,
-                    backgroundColor: theme.surfaceVariant,
-                    valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-                    minHeight: 3,
-                  ),
-                ],
+                children: [LinearProgressIndicator(value: _loadingProgress, backgroundColor: theme.surfaceVariant, valueColor: AlwaysStoppedAnimation<Color>(theme.primary), minHeight: 3)],
               ),
             ),
         ],
@@ -128,25 +111,13 @@ class _WebPageScreenState extends State<WebPageScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: theme.error.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  Icons.error_outline_rounded,
-                  size: 48,
-                  color: theme.error,
-                ),
+                decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
+                child: Icon(Icons.error_outline_rounded, size: 48, color: theme.error),
               ),
               const SizedBox(height: 16),
               Text(
                 translation(context).msg_webview_error,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: theme.textSecondary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w500, color: theme.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],

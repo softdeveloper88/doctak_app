@@ -58,9 +58,7 @@ class AppData {
 
   static PusherChannelsFlutter get pusher {
     if (_pusherInstance == null) {
-      throw Exception(
-        'Pusher not initialized. Call initializePusherIfNeeded() first.',
-      );
+      throw Exception('Pusher not initialized. Call initializePusherIfNeeded() first.');
     }
     return _pusherInstance!;
   }
@@ -111,10 +109,7 @@ class AppData {
   }
 
   // Callback functions
-  static void onConnectionStateChange(
-    dynamic currentState,
-    dynamic previousState,
-  ) {
+  static void onConnectionStateChange(dynamic currentState, dynamic previousState) {
     print("Connection: $currentState from $previousState");
   }
 

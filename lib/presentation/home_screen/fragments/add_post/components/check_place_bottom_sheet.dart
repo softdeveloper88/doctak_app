@@ -1,4 +1,3 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
@@ -10,7 +9,7 @@ import '../../add_post/bloc/add_post_event.dart';
 
 class CheckPlaceBottomSheet extends StatefulWidget {
   AddPostBloc searchPeopleBloc;
-  CheckPlaceBottomSheet(this.searchPeopleBloc, {Key? key}) : super(key: key);
+  CheckPlaceBottomSheet(this.searchPeopleBloc, {super.key});
 
   @override
   State<CheckPlaceBottomSheet> createState() => _CheckPlaceBottomSheetState();
@@ -19,8 +18,7 @@ class CheckPlaceBottomSheet extends StatefulWidget {
 class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
   @override
   void initState() {
-    widget.searchPeopleBloc
-        .add(PlaceAddEvent(page: 1, name: '', latitude: '', longitude: ''));
+    widget.searchPeopleBloc.add(PlaceAddEvent(page: 1, name: '', latitude: '', longitude: ''));
     super.initState();
     afterBuildCreated(() {
       setStatusBarColor(svGetScaffoldColor());
@@ -36,45 +34,28 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
       children: [
         30.height,
         Align(
-            alignment: Alignment.centerRight,
-            child: InkWell(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: const SizedBox(
-                  height: 40,
-                  width: 40,
-                  child: Icon(
-                    Icons.cancel,
-                    size: 30,
-                  ),
-                ))),
+          alignment: Alignment.centerRight,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+            child: const SizedBox(height: 40, width: 40, child: Icon(Icons.cancel, size: 30)),
+          ),
+        ),
 
         Container(
           padding: const EdgeInsets.only(left: 8.0),
-          decoration: BoxDecoration(
-              color: svGetScaffoldColor(),
-              borderRadius: radius(SVAppCommonRadius)),
+          decoration: BoxDecoration(color: svGetScaffoldColor(), borderRadius: radius(SVAppCommonRadius)),
           child: AppTextField(
             textFieldType: TextFieldType.NAME,
             onChanged: (name) {
-              widget.searchPeopleBloc.add(
-                LoadPageEvent(
-                  page: 1,
-                  name: name,
-                ),
-              );
+              widget.searchPeopleBloc.add(LoadPageEvent(page: 1, name: name));
             },
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: 'Search',
               hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-              suffixIcon: Image.asset('images/socialv/icons/ic_Search.png',
-                      height: 16,
-                      width: 16,
-                      fit: BoxFit.cover,
-                      color: svGetBodyColor())
-                  .paddingAll(16),
+              suffixIcon: Image.asset('images/socialv/icons/ic_Search.png', height: 16, width: 16, fit: BoxFit.cover, color: svGetBodyColor()).paddingAll(16),
             ),
           ),
         ),
@@ -87,9 +68,7 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
             if (state is DataError) {
               showDialog(
                 context: context,
-                builder: (context) => AlertDialog(
-                  content: Text(state.errorMessage),
-                ),
+                builder: (context) => AlertDialog(content: Text(state.errorMessage)),
               );
             }
           },
@@ -97,10 +76,8 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
             print("state $state");
             if (state is PaginationLoadingState) {
               return Expanded(
-                  child: Center(
-                      child: CircularProgressIndicator(
-                color: svGetBodyColor(),
-              )));
+                child: Center(child: CircularProgressIndicator(color: svGetBodyColor())),
+              );
             } else if (state is PaginationLoadedState) {
               // print(state.drugsModel.length);
               // return _buildPostList(context);
@@ -117,10 +94,7 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
                         onTap: () {
                           Navigator.of(context).pop();
 
-                          bloc.add(SelectedLocation(
-                              name: bloc.placeList[index].name,
-                              latitude: bloc.placeList[index].latitude,
-                              longitude: bloc.placeList[index].longitude));
+                          bloc.add(SelectedLocation(name: bloc.placeList[index].name, latitude: bloc.placeList[index].latitude, longitude: bloc.placeList[index].longitude));
                         },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,10 +105,8 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
                                 Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text('${bloc.placeList[index].name}',
-                                        style: boldTextStyle()),
-                                    Text('${bloc.placeList[index].description}',
-                                        style: boldTextStyle()),
+                                    Text('${bloc.placeList[index].name}', style: boldTextStyle()),
+                                    Text('${bloc.placeList[index].description}', style: boldTextStyle()),
                                     6.width,
                                     // e.isOfficialAccount.validate()
                                     //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
@@ -156,14 +128,9 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
                 ],
               );
             } else if (state is DataError) {
-              return Expanded(
-                child: Center(
-                  child: Text(state.errorMessage),
-                ),
-              );
+              return Expanded(child: Center(child: Text(state.errorMessage)));
             } else {
-              return const Expanded(
-                  child: Center(child: Text('Something went wrong')));
+              return const Expanded(child: Center(child: Text('Something went wrong')));
             }
           },
         ),

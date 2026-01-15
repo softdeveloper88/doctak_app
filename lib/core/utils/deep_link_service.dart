@@ -21,12 +21,7 @@ class DeepLinkData {
   final Map<String, String> queryParams;
   final Uri originalUri;
 
-  DeepLinkData({
-    required this.type,
-    this.id,
-    required this.queryParams,
-    required this.originalUri,
-  });
+  DeepLinkData({required this.type, this.id, required this.queryParams, required this.originalUri});
 
   @override
   String toString() {
@@ -89,9 +84,7 @@ class DeepLinkService {
   /// Listen for incoming deep links when app is running
   void listenForLinks(void Function(Uri uri) onLink) {
     if (!_isInitialized) {
-      debugPrint(
-        '🔗 DeepLinkService: Not initialized, cannot listen for links',
-      );
+      debugPrint('🔗 DeepLinkService: Not initialized, cannot listen for links');
       return;
     }
 
@@ -158,12 +151,7 @@ class DeepLinkService {
         }
         if (type != DeepLinkType.unknown) {
           debugPrint('🔗 DeepLinkService: Parsed custom scheme: type=$type, id=$id');
-          return DeepLinkData(
-            type: type,
-            id: id,
-            queryParams: Map<String, String>.from(queryParams),
-            originalUri: uri,
-          );
+          return DeepLinkData(type: type, id: id, queryParams: Map<String, String>.from(queryParams), originalUri: uri);
         }
       }
     }
@@ -245,20 +233,10 @@ class DeepLinkService {
 
     // Also check query parameters for ID if not found
     if (id == null || id.isEmpty) {
-      id =
-          queryParams['post_id'] ??
-          queryParams['job_id'] ??
-          queryParams['meeting_id'] ??
-          queryParams['conference_id'] ??
-          queryParams['id'];
+      id = queryParams['post_id'] ?? queryParams['job_id'] ?? queryParams['meeting_id'] ?? queryParams['conference_id'] ?? queryParams['id'];
     }
 
-    final result = DeepLinkData(
-      type: type,
-      id: id,
-      queryParams: Map<String, String>.from(queryParams),
-      originalUri: uri,
-    );
+    final result = DeepLinkData(type: type, id: id, queryParams: Map<String, String>.from(queryParams), originalUri: uri);
 
     debugPrint('🔗 DeepLinkService: Parsed result: $result');
     return result;
@@ -278,17 +256,12 @@ class DeepLinkService {
 
   /// Handle and navigate based on deep link data
   /// Returns true if navigation was successful
-  Future<bool> handleDeepLink(
-    BuildContext context,
-    DeepLinkData deepLink,
-  ) async {
+  Future<bool> handleDeepLink(BuildContext context, DeepLinkData deepLink) async {
     debugPrint('🔗 DeepLinkService: Handling deep link: $deepLink');
 
     // Check if user is logged in
     if (AppData.userToken == null || AppData.userToken!.isEmpty) {
-      debugPrint(
-        '🔗 DeepLinkService: User not logged in, storing pending link',
-      );
+      debugPrint('🔗 DeepLinkService: User not logged in, storing pending link');
       storePendingDeepLink(deepLink);
       return false;
     }
@@ -312,15 +285,11 @@ class DeepLinkService {
 
         case DeepLinkType.profile:
           // Profile deep link - can be implemented later
-          debugPrint(
-            '🔗 DeepLinkService: Profile deep links not yet implemented',
-          );
+          debugPrint('🔗 DeepLinkService: Profile deep links not yet implemented');
           return false;
 
         case DeepLinkType.unknown:
-          debugPrint(
-            '🔗 DeepLinkService: Unknown deep link type, navigating to dashboard',
-          );
+          debugPrint('🔗 DeepLinkService: Unknown deep link type, navigating to dashboard');
           const SVDashboardScreen().launch(context, isNewTask: true);
           return true;
       }
@@ -333,10 +302,7 @@ class DeepLinkService {
   }
 
   /// Handle post deep link
-  Future<bool> _handlePostDeepLink(
-    BuildContext context,
-    DeepLinkData deepLink,
-  ) async {
+  Future<bool> _handlePostDeepLink(BuildContext context, DeepLinkData deepLink) async {
     final postId = deepLink.id;
     if (postId == null || postId.isEmpty) {
       debugPrint('🔗 DeepLinkService: Post ID is missing');
@@ -354,21 +320,13 @@ class DeepLinkService {
     debugPrint('🔗 DeepLinkService: Navigating to post details: $parsedId');
 
     // Navigate to post details screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => PostDetailsScreen(postId: parsedId),
-      ),
-      (route) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => PostDetailsScreen(postId: parsedId)), (route) => false);
 
     return true;
   }
 
   /// Handle job deep link
-  Future<bool> _handleJobDeepLink(
-    BuildContext context,
-    DeepLinkData deepLink,
-  ) async {
+  Future<bool> _handleJobDeepLink(BuildContext context, DeepLinkData deepLink) async {
     final jobId = deepLink.id;
     if (jobId == null || jobId.isEmpty) {
       debugPrint('🔗 DeepLinkService: Job ID is missing');
@@ -379,40 +337,23 @@ class DeepLinkService {
     debugPrint('🔗 DeepLinkService: Navigating to job details: $jobId');
 
     // Navigate to job details screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) =>
-            JobsDetailsScreen(jobId: jobId, isFromSplash: true),
-      ),
-      (route) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => JobsDetailsScreen(jobId: jobId, isFromSplash: true)), (route) => false);
 
     return true;
   }
 
   /// Handle conference deep link
-  Future<bool> _handleConferenceDeepLink(
-    BuildContext context,
-    DeepLinkData deepLink,
-  ) async {
+  Future<bool> _handleConferenceDeepLink(BuildContext context, DeepLinkData deepLink) async {
     debugPrint('🔗 DeepLinkService: Navigating to conferences screen');
 
     // Navigate to conferences screen
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => const ConferencesScreen(isFromSplash: true),
-      ),
-      (route) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const ConferencesScreen(isFromSplash: true)), (route) => false);
 
     return true;
   }
 
   /// Handle meeting deep link
-  Future<bool> _handleMeetingDeepLink(
-    BuildContext context,
-    DeepLinkData deepLink,
-  ) async {
+  Future<bool> _handleMeetingDeepLink(BuildContext context, DeepLinkData deepLink) async {
     final meetingId = deepLink.id;
 
     debugPrint('🔗 DeepLinkService: Navigating to meeting: $meetingId');
@@ -425,24 +366,13 @@ class DeepLinkService {
     }
 
     // Navigate to ManageMeetingScreen with auto-join enabled
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => ManageMeetingScreen(
-          meetingCode: meetingId,
-          autoJoin: true,
-        ),
-      ),
-      (route) => false,
-    );
+    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => ManageMeetingScreen(meetingCode: meetingId, autoJoin: true)), (route) => false);
 
     return true;
   }
 
   /// Handle call deep link
-  Future<bool> _handleCallDeepLink(
-    BuildContext context,
-    DeepLinkData deepLink,
-  ) async {
+  Future<bool> _handleCallDeepLink(BuildContext context, DeepLinkData deepLink) async {
     final callId = deepLink.id;
     if (callId == null || callId.isEmpty) {
       debugPrint('🔗 DeepLinkService: Call ID is missing');
@@ -461,14 +391,7 @@ class DeepLinkService {
     // Navigate to call screen
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (context) => CallScreen(
-          callId: callId,
-          contactId: contactId,
-          contactName: contactName,
-          contactAvatar: contactAvatar,
-          isIncoming: true,
-          isVideoCall: isVideo,
-        ),
+        builder: (context) => CallScreen(callId: callId, contactId: contactId, contactName: contactName, contactAvatar: contactAvatar, isIncoming: true, isVideoCall: isVideo),
       ),
       (route) => false,
     );
@@ -518,49 +441,31 @@ class DeepLinkService {
   }
 
   /// Generate a shareable link for a call
-  static String generateCallLink(
-    String callId, {
-    String? contactId,
-    String? contactName,
-    bool isVideo = false,
-  }) {
+  static String generateCallLink(String callId, {String? contactId, String? contactName, bool isVideo = false}) {
     final params = <String, String>{};
     if (contactId != null) params['contact_id'] = contactId;
     if (contactName != null) params['name'] = contactName;
     if (isVideo) params['video'] = 'true';
 
-    final queryString = params.isNotEmpty
-        ? '?${params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&')}'
-        : '';
+    final queryString = params.isNotEmpty ? '?${params.entries.map((e) => '${e.key}=${Uri.encodeComponent(e.value)}').join('&')}' : '';
 
     return '$baseUrl/call/$callId$queryString';
   }
 
   /// Share a post via system share sheet
-  static Future<void> sharePost({
-    required int postId,
-    String? title,
-    String? description,
-  }) async {
+  static Future<void> sharePost({required int postId, String? title, String? description}) async {
     final link = generatePostLink(postId, title: title);
-    final shareText = title != null
-        ? '$title\n\n$link'
-        : 'Check out this post on DocTak\n\n$link';
+    final shareText = title != null ? '$title\n\n$link' : 'Check out this post on DocTak\n\n$link';
 
     await Share.share(shareText, subject: title ?? 'DocTak Post');
   }
 
   /// Share a job via system share sheet
-  static Future<void> shareJob({
-    required String jobId,
-    String? title,
-    String? company,
-    String? location,
-  }) async {
+  static Future<void> shareJob({required String jobId, String? title, String? company, String? location}) async {
     final link = generateJobLink(jobId, title: title);
 
     String shareText = 'Check out this job opportunity on DocTak';
-    if (title != null) shareText = '$title';
+    if (title != null) shareText = title;
     if (company != null) shareText += ' at $company';
     if (location != null) shareText += ' - $location';
     shareText += '\n\n$link';
@@ -569,12 +474,7 @@ class DeepLinkService {
   }
 
   /// Share a conference via system share sheet
-  static Future<void> shareConference({
-    required String conferenceId,
-    String? title,
-    String? date,
-    String? location,
-  }) async {
+  static Future<void> shareConference({required String conferenceId, String? title, String? date, String? location}) async {
     final link = generateConferenceLink(conferenceId, title: title);
 
     String shareText = 'Check out this conference on DocTak';
@@ -587,12 +487,7 @@ class DeepLinkService {
   }
 
   /// Share a meeting link via system share sheet
-  static Future<void> shareMeeting({
-    required String meetingId,
-    String? title,
-    String? date,
-    String? time,
-  }) async {
+  static Future<void> shareMeeting({required String meetingId, String? title, String? date, String? time}) async {
     final link = generateMeetingLink(meetingId, title: title);
 
     String shareText = 'Join my meeting on DocTak';

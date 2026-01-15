@@ -25,7 +25,7 @@ class TextFieldEditWidget extends StatefulWidget {
     this.iconColor,
     this.editable = true,
     this.obscureText = false,
-    super.key
+    super.key,
   });
 
   int? index;
@@ -81,7 +81,7 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     // Edit mode with form field
     if (widget.isEditModeMap ?? false) {
       return Column(
@@ -93,21 +93,12 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
             children: [
               Text(
                 widget.label ?? '',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: theme.textPrimary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w500, color: theme.textPrimary),
               ),
               if (widget.required)
                 Text(
                   ' *',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.error,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.error),
                 ),
             ],
           ),
@@ -132,37 +123,23 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       margin: const EdgeInsets.only(left: 8, right: 8),
-                      decoration: BoxDecoration(
-                        color: (widget.iconColor ?? theme.primary).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Icon(
-                        widget.icon,
-                        size: 16,
-                        color: widget.iconColor ?? theme.primary,
-                      ),
+                      decoration: BoxDecoration(color: (widget.iconColor ?? theme.primary).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+                      child: Icon(widget.icon, size: 16, color: widget.iconColor ?? theme.primary),
                     ),
                 ],
               ),
               obscureText: _obscureText,
               suffix: widget.obscureText
                   ? IconButton(
-                icon: Icon(
-                  _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: theme.textSecondary,
-                  size: 20,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
+                      icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: theme.textSecondary, size: 20),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                    )
                   : null,
-              prefixConstraints: BoxConstraints(
-                minWidth: widget.icon != null ? 60 : 40,
-                maxHeight: 56,
-              ),
+              prefixConstraints: BoxConstraints(minWidth: widget.icon != null ? 60 : 40, maxHeight: 56),
               controller: _controller,
               maxLines: widget.maxLines,
               onChanged: (value) {
@@ -185,11 +162,11 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
               },
               validator: widget.required
                   ? (v) {
-                if (v == null || v.isEmpty) {
-                  return widget.errorText ?? translation(context).msg_required_field;
-                }
-                return null;
-              }
+                      if (v == null || v.isEmpty) {
+                        return widget.errorText ?? translation(context).msg_required_field;
+                      }
+                      return null;
+                    }
                   : null,
               contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             ),
@@ -205,14 +182,7 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
         decoration: BoxDecoration(
           color: theme.cardBackground,
           borderRadius: theme.radiusL,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 8,
-              spreadRadius: 0,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, spreadRadius: 0, offset: const Offset(0, 2))],
         ),
         child: Row(
           children: [
@@ -222,15 +192,8 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                 width: 36,
                 height: 36,
                 margin: const EdgeInsets.only(right: 12),
-                decoration: BoxDecoration(
-                  color: (widget.iconColor ?? theme.primary).withOpacity(0.1),
-                  borderRadius: theme.radiusM,
-                ),
-                child: Icon(
-                  widget.icon,
-                  size: 18,
-                  color: widget.iconColor ?? theme.primary,
-                ),
+                decoration: BoxDecoration(color: (widget.iconColor ?? theme.primary).withValues(alpha: 0.1), borderRadius: theme.radiusM),
+                child: Icon(widget.icon, size: 18, color: widget.iconColor ?? theme.primary),
               ),
 
             // Label and value
@@ -242,12 +205,7 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                     flex: 2,
                     child: Text(
                       capitalizeWords(widget.label ?? ''),
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: theme.textSecondary,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary, fontSize: 14.sp, fontWeight: FontWeight.w600),
                     ),
                   ),
                   Expanded(
@@ -255,22 +213,18 @@ class _TextFieldEditWidgetState extends State<TextFieldEditWidget> {
                     child: Text(
                       widget.value != null && widget.value!.isNotEmpty
                           ? widget.obscureText
-                          ? '••••••••'
-                          : capitalizeWords(widget.value ?? '')
+                                ? '••••••••'
+                                : capitalizeWords(widget.value ?? '')
                           : translation(context).lbl_not_specified,
                       textAlign: TextAlign.end,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        color: widget.value != null && widget.value!.isNotEmpty
-                            ? theme.textPrimary
-                            : theme.textTertiary,
+                        color: widget.value != null && widget.value!.isNotEmpty ? theme.textPrimary : theme.textTertiary,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        fontStyle: widget.value != null && widget.value!.isNotEmpty
-                            ? FontStyle.normal
-                            : FontStyle.italic,
+                        fontStyle: widget.value != null && widget.value!.isNotEmpty ? FontStyle.normal : FontStyle.italic,
                       ),
                     ),
                   ),

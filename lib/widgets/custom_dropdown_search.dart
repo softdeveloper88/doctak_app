@@ -58,38 +58,31 @@ class _CustomDropdownSearchState extends State<CustomDropdownSearch> {
           onChanged: (val) {
             widget.onChanged!(val);
             setState(() {
-              _filteredList = _subFilteredList
-                  .where((element) => element
-                      .toLowerCase()
-                      .contains(widget.textController!.text.toLowerCase()))
-                  .toList();
+              _filteredList = _subFilteredList.where((element) => element.toLowerCase().contains(widget.textController!.text.toLowerCase())).toList();
             });
           },
           validator: (val) => val!.isEmpty ? 'Field can\'t empty' : null,
-          style: widget.style ??
-              TextStyle(color: Colors.grey.shade800, fontSize: 16.0),
+          style: widget.style ?? TextStyle(color: Colors.grey.shade800, fontSize: 16.0),
           onTap: () => setState(() => _isTapped = !_isTapped),
           decoration: InputDecoration(
-
-              // labelStyle: const TextStyle(decoration: TextDecoration.none,),
-              border: widget.textFieldBorder ?? InputBorder.none,
-              hintText: widget.hintText ?? "Write here...",
-              hintStyle: widget.hintStyle ??
-                  const TextStyle(fontSize: 16.0, color: Colors.black),
-              suffixIcon: Icon(widget.suffixIcon ?? Icons.search, size: 25),
-              contentPadding: widget.contentPadding ??
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-              isDense: true,
-              suffixIconConstraints:
-                  BoxConstraints.loose(MediaQuery.of(context).size),
-              suffix: widget.textController!.text.isEmpty
-                  ? const SizedBox()
-                  : InkWell(
-                      onTap: () {
-                        widget.textController!.clear();
-                        setState(() => _filteredList = widget.items!);
-                      },
-                      child: const Icon(Icons.clear, color: Colors.blue))),
+            // labelStyle: const TextStyle(decoration: TextDecoration.none,),
+            border: widget.textFieldBorder ?? InputBorder.none,
+            hintText: widget.hintText ?? "Write here...",
+            hintStyle: widget.hintStyle ?? const TextStyle(fontSize: 16.0, color: Colors.black),
+            suffixIcon: Icon(widget.suffixIcon ?? Icons.search, size: 25),
+            contentPadding: widget.contentPadding ?? const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+            isDense: true,
+            suffixIconConstraints: BoxConstraints.loose(MediaQuery.of(context).size),
+            suffix: widget.textController!.text.isEmpty
+                ? const SizedBox()
+                : InkWell(
+                    onTap: () {
+                      widget.textController!.clear();
+                      setState(() => _filteredList = widget.items!);
+                    },
+                    child: const Icon(Icons.clear, color: Colors.blue),
+                  ),
+          ),
         ),
 
         ///Dropdown Items
@@ -105,16 +98,11 @@ class _CustomDropdownSearchState extends State<CustomDropdownSearch> {
                       onTap: () {
                         setState(() => _isTapped = !_isTapped);
                         widget.textController!.text = _filteredList[index];
-                        widget.onSelect?.call(
-                            _filteredList[index]); // Call the callback function
+                        widget.onSelect?.call(_filteredList[index]); // Call the callback function
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(_filteredList[index],
-                            style: widget.dropdownTextStyle ??
-                                TextStyle(
-                                    color: Colors.grey.shade800,
-                                    fontSize: 16.0)),
+                        child: Text(_filteredList[index], style: widget.dropdownTextStyle ?? TextStyle(color: Colors.grey.shade800, fontSize: 16.0)),
                       ),
                     );
                   },

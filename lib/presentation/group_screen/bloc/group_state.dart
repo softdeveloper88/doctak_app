@@ -11,10 +11,7 @@ class PaginationInitialState extends GroupState {
 class PaginationLoadedState extends GroupState {
   final List<String> specialtyDropdownValue;
   String selectedSpecialtyDropdownValue;
-  PaginationLoadedState(
-    this.specialtyDropdownValue,
-    this.selectedSpecialtyDropdownValue,
-  );
+  PaginationLoadedState(this.specialtyDropdownValue, this.selectedSpecialtyDropdownValue);
 }
 // class PaginationLoadedState extends GroupState {}
 

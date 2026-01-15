@@ -8,9 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 class PermissionUtils {
   /// Quick check and request for photo permission
   /// Returns true if permission is granted
-  static Future<bool> ensurePhotoPermission({
-    bool requestIfDenied = true,
-  }) async {
+  static Future<bool> ensurePhotoPermission({bool requestIfDenied = true}) async {
     try {
       final handler = GalleryPermissionHandler();
 
@@ -35,21 +33,11 @@ class PermissionUtils {
 
   /// Request gallery permission with full UI handling
   /// Shows dialogs and handles all edge cases professionally
-  static Future<bool> requestGalleryPermissionWithUI(
-    BuildContext context, {
-    bool showRationale = false,
-    String? title,
-    String? message,
-  }) async {
+  static Future<bool> requestGalleryPermissionWithUI(BuildContext context, {bool showRationale = false, String? title, String? message}) async {
     final handler = GalleryPermissionHandler();
 
     if (showRationale) {
-      return await handler.requestWithUI(
-        context,
-        showRationale: true,
-        rationaleTitle: title,
-        rationaleMessage: message,
-      );
+      return await handler.requestWithUI(context, showRationale: true, rationaleTitle: title, rationaleMessage: message);
     } else {
       return await handler.requestQuick(context);
     }
@@ -61,22 +49,12 @@ class PermissionUtils {
   }
 
   /// Show permission denied dialog with option to open settings
-  static Future<void> showGalleryPermissionDeniedDialog(
-    BuildContext context, {
-    String? title,
-    String? message,
-  }) async {
-    await GalleryPermissionHandler().showPermissionDeniedDialog(
-      context,
-      title: title,
-      message: message,
-    );
+  static Future<void> showGalleryPermissionDeniedDialog(BuildContext context, {String? title, String? message}) async {
+    await GalleryPermissionHandler().showPermissionDeniedDialog(context, title: title, message: message);
   }
 
   /// Request camera permission
-  static Future<bool> ensureCameraPermission({
-    bool requestIfDenied = true,
-  }) async {
+  static Future<bool> ensureCameraPermission({bool requestIfDenied = true}) async {
     try {
       final status = await Permission.camera.status;
 
@@ -95,9 +73,7 @@ class PermissionUtils {
   }
 
   /// Request camera permission with UI handling
-  static Future<bool> requestCameraPermissionWithUI(
-    BuildContext context,
-  ) async {
+  static Future<bool> requestCameraPermissionWithUI(BuildContext context) async {
     try {
       if (await Permission.camera.isGranted) {
         return true;
@@ -114,15 +90,10 @@ class PermissionUtils {
       } else if (result.isDenied && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              'Camera access denied. Please allow to continue.',
-              style: TextStyle(fontFamily: 'Poppins'),
-            ),
+            content: const Text('Camera access denied. Please allow to continue.', style: TextStyle(fontFamily: 'Poppins')),
             backgroundColor: Colors.orange[600],
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -134,63 +105,39 @@ class PermissionUtils {
     }
   }
 
-  static Future<void> _showCameraPermissionDeniedDialog(
-    BuildContext context,
-  ) async {
+  static Future<void> _showCameraPermissionDeniedDialog(BuildContext context) async {
     await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.camera_alt_rounded,
-                  color: Colors.green[600],
-                  size: 24,
-                ),
+                decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
+                child: Icon(Icons.camera_alt_rounded, color: Colors.green[600], size: 24),
               ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
                   'Camera Access Required',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                 ),
               ),
             ],
           ),
           content: Text(
             'To take photos and record videos, please allow camera access in Settings.',
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              color: Colors.grey[700],
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.grey[700], height: 1.5),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
                 'Not Now',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Colors.grey[600]),
               ),
             ),
             ElevatedButton(
@@ -201,21 +148,13 @@ class PermissionUtils {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[600],
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
               child: const Text(
                 'Open Settings',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -225,9 +164,7 @@ class PermissionUtils {
   }
 
   /// Request microphone permission
-  static Future<bool> ensureMicrophonePermission({
-    bool requestIfDenied = true,
-  }) async {
+  static Future<bool> ensureMicrophonePermission({bool requestIfDenied = true}) async {
     try {
       final status = await Permission.microphone.status;
 
@@ -246,15 +183,9 @@ class PermissionUtils {
   }
 
   /// Request multiple permissions for video recording (camera + microphone)
-  static Future<bool> ensureVideoRecordingPermissions({
-    bool requestIfDenied = true,
-  }) async {
-    final cameraGranted = await ensureCameraPermission(
-      requestIfDenied: requestIfDenied,
-    );
-    final microphoneGranted = await ensureMicrophonePermission(
-      requestIfDenied: requestIfDenied,
-    );
+  static Future<bool> ensureVideoRecordingPermissions({bool requestIfDenied = true}) async {
+    final cameraGranted = await ensureCameraPermission(requestIfDenied: requestIfDenied);
+    final microphoneGranted = await ensureMicrophonePermission(requestIfDenied: requestIfDenied);
 
     return cameraGranted && microphoneGranted;
   }

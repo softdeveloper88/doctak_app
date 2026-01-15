@@ -1,10 +1,10 @@
 import 'dart:convert';
+
 CreateMeetingModel createMeetingModelFromJson(String str) => CreateMeetingModel.fromJson(json.decode(str));
 String createMeetingModelToJson(CreateMeetingModel data) => json.encode(data.toJson());
+
 class CreateMeetingModel {
-  CreateMeetingModel({
-      this.success, 
-      this.data,});
+  CreateMeetingModel({this.success, this.data});
 
   CreateMeetingModel.fromJson(dynamic json) {
     success = json['success'];
@@ -21,16 +21,13 @@ class CreateMeetingModel {
     }
     return map;
   }
-
 }
 
 Meetings dataFromJson(String str) => Meetings.fromJson(json.decode(str));
 String dataToJson(Meetings data) => json.encode(data.toJson());
+
 class Meetings {
-  Meetings({
-      this.meeting, 
-      this.settings, 
-      this.user,});
+  Meetings({this.meeting, this.settings, this.user});
 
   Meetings.fromJson(dynamic json) {
     meeting = json['meeting'] != null ? Meeting.fromJson(json['meeting']) : null;
@@ -54,16 +51,13 @@ class Meetings {
     }
     return map;
   }
-
 }
 
 User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
-  User({
-      this.id, 
-      this.name, 
-      this.email,});
+  User({this.id, this.name, this.email});
 
   User.fromJson(dynamic json) {
     id = json['id'];
@@ -81,28 +75,29 @@ class User {
     map['email'] = email;
     return map;
   }
-
 }
 
 Settings settingsFromJson(String str) => Settings.fromJson(json.decode(str));
 String settingsToJson(Settings data) => json.encode(data.toJson());
+
 class Settings {
   Settings({
-      this.id, 
-      this.meetingId, 
-      this.startStopMeeting, 
-      this.muteAll, 
-      this.unmuteAll, 
-      this.addRemoveHost, 
-      this.shareScreen, 
-      this.raisedHand, 
-      this.sendReactions, 
-      this.toggleMicrophone, 
-      this.toggleVideo, 
-      this.enableWaitingRoom, 
-      this.requirePassword, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.meetingId,
+    this.startStopMeeting,
+    this.muteAll,
+    this.unmuteAll,
+    this.addRemoveHost,
+    this.shareScreen,
+    this.raisedHand,
+    this.sendReactions,
+    this.toggleMicrophone,
+    this.toggleVideo,
+    this.enableWaitingRoom,
+    this.requirePassword,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Settings.fromJson(dynamic json) {
     id = json['id'];
@@ -156,20 +151,13 @@ class Settings {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }
 
 Meeting meetingFromJson(String str) => Meeting.fromJson(json.decode(str));
 String meetingToJson(Meeting data) => json.encode(data.toJson());
+
 class Meeting {
-  Meeting({
-      this.id, 
-      this.meetingToken, 
-      this.meetingChannel, 
-      this.userId, 
-      this.isEnded, 
-      this.createdAt, 
-      this.updatedAt,});
+  Meeting({this.id, this.meetingToken, this.meetingChannel, this.userId, this.isEnded, this.createdAt, this.updatedAt});
 
   Meeting.fromJson(dynamic json) {
     id = json['id'];
@@ -199,5 +187,4 @@ class Meeting {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }

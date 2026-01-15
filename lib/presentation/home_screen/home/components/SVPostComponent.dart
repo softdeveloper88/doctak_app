@@ -3,7 +3,6 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
@@ -12,7 +11,6 @@ import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/post_shimmer_loader.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -34,8 +32,7 @@ class SVPostComponent extends StatefulWidget {
   State<SVPostComponent> createState() => _SVPostComponentState();
 }
 
-class _SVPostComponentState extends State<SVPostComponent>
-    with WidgetsBindingObserver {
+class _SVPostComponentState extends State<SVPostComponent> with WidgetsBindingObserver {
   int? isShowComment = -1;
 
   /// Shows the comment screen in a beautiful bottom sheet
@@ -54,13 +51,7 @@ class _SVPostComponentState extends State<SVPostComponent>
           decoration: BoxDecoration(
             color: theme.scaffoldBackground,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, -5))],
           ),
           child: Column(
             children: [
@@ -69,17 +60,12 @@ class _SVPostComponentState extends State<SVPostComponent>
                 margin: const EdgeInsets.symmetric(vertical: 12),
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: theme.divider,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: theme.divider, borderRadius: BorderRadius.circular(2)),
               ),
               // Comment Screen
               Expanded(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
-                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                   child: SVCommentScreen(id: postId, homeBloc: widget.homeBloc),
                 ),
               ),
@@ -105,28 +91,15 @@ class _SVPostComponentState extends State<SVPostComponent>
                   key: const PageStorageKey<String>('posts_list'),
                   shrinkWrap: widget.isNestedScroll,
                   scrollDirection: Axis.vertical,
-                  physics: widget.isNestedScroll
-                      ? const NeverScrollableScrollPhysics()
-                      : const ClampingScrollPhysics(),
+                  physics: widget.isNestedScroll ? const NeverScrollableScrollPhysics() : const ClampingScrollPhysics(),
                   addAutomaticKeepAlives: true,
                   addRepaintBoundaries: true,
                   cacheExtent: 1000,
-                  itemCount:
-                      widget.homeBloc.postList.length +
-                      (widget.homeBloc.numberOfPage !=
-                              widget.homeBloc.pageNumber - 1
-                          ? 1
-                          : 0),
+                  itemCount: widget.homeBloc.postList.length + (widget.homeBloc.numberOfPage != widget.homeBloc.pageNumber - 1 ? 1 : 0),
                   itemBuilder: (context, index) {
                     // Trigger data fetching when reaching nextPageTrigger
-                    if (index ==
-                            widget.homeBloc.postList.length -
-                                widget.homeBloc.nextPageTrigger &&
-                        widget.homeBloc.pageNumber <=
-                            widget.homeBloc.numberOfPage) {
-                      widget.homeBloc.add(
-                        PostCheckIfNeedMoreDataEvent(index: index),
-                      );
+                    if (index == widget.homeBloc.postList.length - widget.homeBloc.nextPageTrigger && widget.homeBloc.pageNumber <= widget.homeBloc.numberOfPage) {
+                      widget.homeBloc.add(PostCheckIfNeedMoreDataEvent(index: index));
                     }
 
                     // Show shimmer loader for pagination
@@ -135,8 +108,7 @@ class _SVPostComponentState extends State<SVPostComponent>
                     }
 
                     // Insert ad widgets after every 5 posts
-                    if ((index % 8 == 0 && index != 0) &&
-                        AppData.isShowGoogleNativeAds) {
+                    if ((index % 8 == 0 && index != 0) && AppData.isShowGoogleNativeAds) {
                       return NativeAdWidget();
                     }
 
@@ -147,12 +119,9 @@ class _SVPostComponentState extends State<SVPostComponent>
                     return RepaintBoundary(
                       child: PostItemWidget(
                         postData: post,
-                        profilePicUrl:
-                            '${AppData.imageUrl}${post.user?.profilePic}',
+                        profilePicUrl: '${AppData.imageUrl}${post.user?.profilePic}',
                         userName: post.user?.name ?? '',
-                        createdAt: timeAgo.format(
-                          DateTime.parse(post.createdAt!),
-                        ),
+                        createdAt: timeAgo.format(DateTime.parse(post.createdAt!)),
                         title: post.title,
                         backgroundColor: post.backgroundColor,
                         image: post.image,
@@ -164,22 +133,16 @@ class _SVPostComponentState extends State<SVPostComponent>
                         isCurrentUser: post.userId == AppData.logInUserId,
                         isShowComment: isShowComment == index,
                         onProfileTap: () {
-                          SVProfileFragment(
-                            userId: post.user?.id,
-                          ).launch(context);
+                          SVProfileFragment(userId: post.user?.id).launch(context);
                         },
                         onDeleteTap: () {
                           showDialog(
                             context: context,
                             builder: (context) {
                               return CustomAlertDialog(
-                                title: translation(
-                                  context,
-                                ).msg_confirm_delete_post,
+                                title: translation(context).msg_confirm_delete_post,
                                 callback: () {
-                                  widget.homeBloc.add(
-                                    DeletePostEvent(postId: post.id),
-                                  );
+                                  widget.homeBloc.add(DeletePostEvent(postId: post.id));
                                   // Dialog is already closed by CustomAlertDialog
                                 },
                               );
@@ -190,29 +153,16 @@ class _SVPostComponentState extends State<SVPostComponent>
                           widget.homeBloc.add(PostLikeEvent(postId: post.id));
                         },
                         onViewLikesTap: () {
-                          LikesListScreen(
-                            id: post.id.toString(),
-                          ).launch(context);
+                          LikesListScreen(id: post.id.toString()).launch(context);
                         },
                         onViewCommentsTap: () {
-                          SVCommentScreen(
-                            homeBloc: widget.homeBloc,
-                            id: post.id ?? 0,
-                          ).launch(context);
+                          SVCommentScreen(homeBloc: widget.homeBloc, id: post.id ?? 0).launch(context);
                         },
                         onShareTap: () {
-                          DeepLinkService.sharePost(
-                            postId: post.id ?? 0,
-                            title: post.title,
-                          );
+                          DeepLinkService.sharePost(postId: post.id ?? 0, title: post.title);
                         },
                         onAddComment: (value) {
-                          CommentBloc().add(
-                            PostCommentEvent(
-                              postId: post.id ?? 0,
-                              comment: value,
-                            ),
-                          );
+                          CommentBloc().add(PostCommentEvent(postId: post.id ?? 0, comment: value));
                           setState(() {
                             post.comments?.add(Comments());
                             isShowComment = -1;

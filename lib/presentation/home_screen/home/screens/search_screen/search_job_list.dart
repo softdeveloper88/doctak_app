@@ -31,28 +31,18 @@ class _SearchJobListState extends State<SearchJobList> {
         color: theme.scaffoldBackground,
         child: ListView.builder(
           key: const PageStorageKey<String>('jobs_list'),
-          padding: EdgeInsets.only(
-            top: 10,
-            bottom: MediaQuery.of(context).padding.bottom + 16,
-          ),
+          padding: EdgeInsets.only(top: 10, bottom: MediaQuery.of(context).padding.bottom + 16),
           itemCount: widget.drugsBloc.drugsData.length,
           cacheExtent: 1000,
           physics: const ClampingScrollPhysics(),
           itemBuilder: (context, index) {
             if (widget.drugsBloc.pageNumber <= widget.drugsBloc.numberOfPage) {
-              if (index ==
-                  widget.drugsBloc.drugsData.length -
-                      widget.drugsBloc.nextPageTrigger) {
+              if (index == widget.drugsBloc.drugsData.length - widget.drugsBloc.nextPageTrigger) {
                 widget.drugsBloc.add(CheckIfNeedMoreDataEvent(index: index));
               }
             }
-            if (widget.drugsBloc.numberOfPage !=
-                    widget.drugsBloc.pageNumber - 1 &&
-                index >= widget.drugsBloc.drugsData.length - 1) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: const JobsShimmerLoader(),
-              );
+            if (widget.drugsBloc.numberOfPage != widget.drugsBloc.pageNumber - 1 && index >= widget.drugsBloc.drugsData.length - 1) {
+              return Container(padding: const EdgeInsets.symmetric(vertical: 8), child: const JobsShimmerLoader());
             } else {
               final jobData = widget.drugsBloc.drugsData[index];
               return MemoryOptimizedJobItem(
@@ -62,9 +52,7 @@ class _SearchJobListState extends State<SearchJobList> {
                 },
                 onShareTap: () {
                   // Share job
-                  Share.share(
-                    'Check out this job: ${jobData.jobTitle}\n${jobData.link ?? ''}',
-                  );
+                  Share.share('Check out this job: ${jobData.jobTitle}\n${jobData.link ?? ''}');
                 },
                 onApplyTap: (jobId) {
                   showDialog(
@@ -99,32 +87,15 @@ class _SearchJobListState extends State<SearchJobList> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.primary.withOpacity(0.15),
-                    theme.secondary.withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.15), theme.secondary.withValues(alpha: 0.1)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.work_off_rounded,
-                size: 48,
-                color: theme.primary,
-              ),
+              child: Icon(Icons.work_off_rounded, size: 48, color: theme.primary),
             ),
             const SizedBox(height: 24),
-            Text(
-              translation(context).msg_no_jobs_found,
-              style: theme.titleMedium,
-            ),
+            Text(translation(context).msg_no_jobs_found, style: theme.titleMedium),
             const SizedBox(height: 8),
-            Text(
-              'Try adjusting your search criteria',
-              style: theme.bodySecondary,
-            ),
+            Text('Try adjusting your search criteria', style: theme.bodySecondary),
           ],
         ),
       ),

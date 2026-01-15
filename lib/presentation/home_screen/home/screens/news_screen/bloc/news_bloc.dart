@@ -1,7 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
-import 'package:doctak_app/data/models/news_model/news_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,17 +17,11 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     on<GetPost>(_onGetNewsData);
   }
 
-  _onGetNewsData(GetPost event, Emitter<NewsState> emit) async {
+  Future<void> _onGetNewsData(GetPost event, Emitter<NewsState> emit) async {
     emit(PaginationLoadingState());
     // try {
-    var response1 = await apiManager.newsChannel(
-      'Bearer ${AppData.userToken}',
-      'bbc-news',
-    );
-    var response2 = await apiManager.newsChannel(
-      'Bearer ${AppData.userToken}',
-      'cnn-news',
-    );
+    var response1 = await apiManager.newsChannel('Bearer ${AppData.userToken}', 'bbc-news');
+    var response2 = await apiManager.newsChannel('Bearer ${AppData.userToken}', 'cnn-news');
 
     // List<NewsModel> newsList1 = response1.map((item) => NewsModel.fromJson(item)).toList();
     // List<NewsModel> newsList2 = response2.map((item) => NewsModel.fromJson(item)).toList();

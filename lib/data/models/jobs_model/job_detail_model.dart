@@ -1,12 +1,10 @@
 import 'dart:convert';
+
 JobDetailModel jobDetailModelFromJson(String str) => JobDetailModel.fromJson(json.decode(str));
 String jobDetailModelToJson(JobDetailModel data) => json.encode(data.toJson());
+
 class JobDetailModel {
-  JobDetailModel({
-      this.job, 
-      this.hasApplied,
-      this.totalApplicants, 
-      this.isViewedByAdmin,});
+  JobDetailModel({this.job, this.hasApplied, this.totalApplicants, this.isViewedByAdmin});
 
   JobDetailModel.fromJson(dynamic json) {
     job = json['job'] != null ? Job.fromJson(json['job']) : null;
@@ -29,37 +27,38 @@ class JobDetailModel {
     map['isViewedByAdmin'] = isViewedByAdmin;
     return map;
   }
-
 }
 
 Job jobFromJson(String str) => Job.fromJson(json.decode(str));
 String jobToJson(Job data) => json.encode(data.toJson());
+
 class Job {
   Job({
-      this.id, 
-      this.jobTitle, 
-      this.companyName, 
-      this.experience, 
-      this.location, 
-      this.description, 
-      this.link, 
-      this.createdAt, 
-      this.preferredLanguage,
-      this.updatedAt,
-      this.userId, 
-      this.jobImage, 
-      this.countryId, 
-      this.lastDate, 
-      this.totalJobs, 
-      this.specialty, 
-      this.noOfJobs, 
-      this.postedAt, 
-      this.salaryRange, 
-      this.promoted, 
-      this.views, 
-      this.clicks, 
-      this.specialties, 
-      this.user,});
+    this.id,
+    this.jobTitle,
+    this.companyName,
+    this.experience,
+    this.location,
+    this.description,
+    this.link,
+    this.createdAt,
+    this.preferredLanguage,
+    this.updatedAt,
+    this.userId,
+    this.jobImage,
+    this.countryId,
+    this.lastDate,
+    this.totalJobs,
+    this.specialty,
+    this.noOfJobs,
+    this.postedAt,
+    this.salaryRange,
+    this.promoted,
+    this.views,
+    this.clicks,
+    this.specialties,
+    this.user,
+  });
 
   Job.fromJson(dynamic json) {
     id = json['id'];
@@ -157,23 +156,20 @@ class Job {
     }
     return map;
   }
-
 }
 
 User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
-  User({
-      this.id, 
-      this.name, 
-      this.profilePic,});
+  User({this.id, this.name, this.profilePic});
 
   User.fromJson(dynamic json) {
     id = json['id'];
     name = json['name'];
     profilePic = json['profile_pic'];
   }
-  dynamic? id;
+  dynamic id;
   dynamic name;
   String? profilePic;
 
@@ -184,18 +180,13 @@ class User {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }
 
 Specialties specialtiesFromJson(String str) => Specialties.fromJson(json.decode(str));
 String specialtiesToJson(Specialties data) => json.encode(data.toJson());
+
 class Specialties {
-  Specialties({
-      this.id, 
-      this.name, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.pivot,});
+  Specialties({this.id, this.name, this.createdAt, this.updatedAt, this.pivot});
 
   Specialties.fromJson(dynamic json) {
     id = json['id'];
@@ -221,15 +212,13 @@ class Specialties {
     }
     return map;
   }
-
 }
 
 Pivot pivotFromJson(String str) => Pivot.fromJson(json.decode(str));
 String pivotToJson(Pivot data) => json.encode(data.toJson());
+
 class Pivot {
-  Pivot({
-      this.jobId, 
-      this.specialityId,});
+  Pivot({this.jobId, this.specialityId});
 
   Pivot.fromJson(dynamic json) {
     jobId = json['job_id'];
@@ -244,5 +233,4 @@ class Pivot {
     map['speciality_id'] = specialityId;
     return map;
   }
-
 }

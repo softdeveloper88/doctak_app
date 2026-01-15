@@ -51,15 +51,11 @@ class CaseDiscussionListItem {
   // Parse tags to extract clean values - now expects simple comma-separated format
   List<String> get parsedTags {
     if (tags == null || tags!.isEmpty || tags == 'null') return [];
-    
+
     try {
       // Handle comma-separated format: "tag1,tag2,tag3" or "tag1, tag2, tag3"
       if (tags!.contains(',')) {
-        return tags!
-            .split(',')
-            .map((tag) => tag.trim())
-            .where((tag) => tag.isNotEmpty)
-            .toList();
+        return tags!.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList();
       } else {
         // Handle single tag
         return [tags!.trim()];
@@ -108,6 +104,7 @@ class CaseDiscussionListItem {
     };
   }
 }
+
 class CaseDiscussion {
   final int id;
   final String title;
@@ -127,7 +124,7 @@ class CaseDiscussion {
   final String? treatmentPlan;
   final List<CaseAttachment>? attachments;
   final AISummary? aiSummary;
-  
+
   // Additional fields from new API
   final Map<String, dynamic>? metadata;
   final bool? isFollowing;
@@ -206,12 +203,7 @@ class CaseDiscussion {
             final index = entry.key;
             final item = entry.value;
             if (item is String) {
-              return CaseAttachment(
-                id: index,
-                type: 'image',
-                url: item,
-                description: 'Attachment ${index + 1}',
-              );
+              return CaseAttachment(id: index, type: 'image', url: item, description: 'Attachment ${index + 1}');
             }
             return CaseAttachment.fromJson(item);
           }).toList();
@@ -245,38 +237,20 @@ class CaseDiscussion {
         'likes': caseData['likes'] ?? 0,
         'views': caseData['views'] ?? 0,
       }),
-      patientInfo: caseData['patient_info'] != null
-          ? PatientInfo.fromJson(caseData['patient_info'])
-          : null,
+      patientInfo: caseData['patient_info'] != null ? PatientInfo.fromJson(caseData['patient_info']) : null,
       symptoms: parsedTags,
       diagnosis: caseData['diagnosis'],
       treatmentPlan: caseData['treatment_plan'],
       attachments: attachments,
-      aiSummary: json['ai_summary'] != null
-          ? AISummary.fromJson(json['ai_summary'])
-          : null,
+      aiSummary: json['ai_summary'] != null ? AISummary.fromJson(json['ai_summary']) : null,
       metadata: json['metadata'], // Top-level metadata map
       isFollowing: json['is_following'],
       isLiked: json['is_like'],
       followersCount: json['followers_count'],
-      caseMetadata: json['metadata'] != null
-          ? CaseMetadata.fromJson(json['metadata'])
-          : null,
-      decisionSupports: json['decision_supports'] != null
-          ? (json['decision_supports'] as List)
-              .map((item) => DecisionSupport.fromJson(item))
-              .toList()
-          : [],
-      updates: json['updates'] != null
-          ? (json['updates'] as List)
-              .map((item) => CaseUpdate.fromJson(item))
-              .toList()
-          : [],
-      relatedCases: json['related_cases'] != null
-          ? (json['related_cases'] as List)
-              .map((item) => RelatedCase.fromJson(item))
-              .toList()
-          : null,
+      caseMetadata: json['metadata'] != null ? CaseMetadata.fromJson(json['metadata']) : null,
+      decisionSupports: json['decision_supports'] != null ? (json['decision_supports'] as List).map((item) => DecisionSupport.fromJson(item)).toList() : [],
+      updates: json['updates'] != null ? (json['updates'] as List).map((item) => CaseUpdate.fromJson(item)).toList() : [],
+      relatedCases: json['related_cases'] != null ? (json['related_cases'] as List).map((item) => RelatedCase.fromJson(item)).toList() : null,
     );
   }
 
@@ -298,8 +272,7 @@ class CaseDiscussion {
       if (symptoms != null) 'symptoms': symptoms,
       if (diagnosis != null) 'diagnosis': diagnosis,
       if (treatmentPlan != null) 'treatment_plan': treatmentPlan,
-      if (attachments != null)
-        'attachments': attachments!.map((a) => a.toJson()).toList(),
+      if (attachments != null) 'attachments': attachments!.map((a) => a.toJson()).toList(),
       if (aiSummary != null) 'ai_summary': aiSummary!.toJson(),
     };
   }
@@ -311,29 +284,14 @@ class CaseAuthor {
   final String specialty;
   final String? profilePic;
 
-  CaseAuthor({
-    required this.id,
-    required this.name,
-    required this.specialty,
-    this.profilePic,
-  });
+  CaseAuthor({required this.id, required this.name, required this.specialty, this.profilePic});
 
   factory CaseAuthor.fromJson(Map<String, dynamic> json) {
-    return CaseAuthor(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      specialty: json['specialty'] ?? '',
-      profilePic: json['profile_pic'],
-    );
+    return CaseAuthor(id: json['id'] ?? 0, name: json['name'] ?? '', specialty: json['specialty'] ?? '', profilePic: json['profile_pic']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'specialty': specialty,
-      'profile_pic': profilePic,
-    };
+    return {'id': id, 'name': name, 'specialty': specialty, 'profile_pic': profilePic};
   }
 }
 
@@ -344,13 +302,7 @@ class CaseStats {
   final int likes;
   final int views;
 
-  CaseStats({
-    required this.commentsCount,
-    required this.followersCount,
-    required this.updatesCount,
-    required this.likes,
-    required this.views,
-  });
+  CaseStats({required this.commentsCount, required this.followersCount, required this.updatesCount, required this.likes, required this.views});
 
   factory CaseStats.fromJson(Map<String, dynamic> json) {
     return CaseStats(
@@ -363,13 +315,7 @@ class CaseStats {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'comments_count': commentsCount,
-      'followers_count': followersCount,
-      'updates_count': updatesCount,
-      'likes': likes,
-      'views': views,
-    };
+    return {'comments_count': commentsCount, 'followers_count': followersCount, 'updates_count': updatesCount, 'likes': likes, 'views': views};
   }
 }
 
@@ -378,26 +324,14 @@ class PatientInfo {
   final String gender;
   final String medicalHistory;
 
-  PatientInfo({
-    required this.age,
-    required this.gender,
-    required this.medicalHistory,
-  });
+  PatientInfo({required this.age, required this.gender, required this.medicalHistory});
 
   factory PatientInfo.fromJson(Map<String, dynamic> json) {
-    return PatientInfo(
-      age: json['age'] ?? 0,
-      gender: json['gender'] ?? '',
-      medicalHistory: json['medical_history'] ?? '',
-    );
+    return PatientInfo(age: json['age'] ?? 0, gender: json['gender'] ?? '', medicalHistory: json['medical_history'] ?? '');
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'age': age,
-      'gender': gender,
-      'medical_history': medicalHistory,
-    };
+    return {'age': age, 'gender': gender, 'medical_history': medicalHistory};
   }
 }
 
@@ -407,29 +341,14 @@ class CaseAttachment {
   final String url;
   final String description;
 
-  CaseAttachment({
-    required this.id,
-    required this.type,
-    required this.url,
-    required this.description,
-  });
+  CaseAttachment({required this.id, required this.type, required this.url, required this.description});
 
   factory CaseAttachment.fromJson(Map<String, dynamic> json) {
-    return CaseAttachment(
-      id: json['id'] ?? 0,
-      type: json['type'] ?? '',
-      url: json['url'] ?? '',
-      description: json['description'] ?? '',
-    );
+    return CaseAttachment(id: json['id'] ?? 0, type: json['type'] ?? '', url: json['url'] ?? '', description: json['description'] ?? '');
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'type': type,
-      'url': url,
-      'description': description,
-    };
+    return {'id': id, 'type': type, 'url': url, 'description': description};
   }
 }
 
@@ -443,16 +362,7 @@ class AISummary {
   final int? version;
   final DateTime? lastGeneratedAt;
 
-  AISummary({
-    this.id,
-    this.discussCaseId,
-    required this.generatedAt,
-    required this.summary,
-    required this.confidenceScore,
-    this.keyPoints,
-    this.version,
-    this.lastGeneratedAt,
-  });
+  AISummary({this.id, this.discussCaseId, required this.generatedAt, required this.summary, required this.confidenceScore, this.keyPoints, this.version, this.lastGeneratedAt});
 
   factory AISummary.fromJson(Map<String, dynamic> json) {
     // Parse key points
@@ -486,12 +396,7 @@ class AISummary {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'generated_at': generatedAt.toIso8601String(),
-      'summary': summary,
-      'confidence_score': confidenceScore,
-      if (keyPoints != null) 'key_points': keyPoints,
-    };
+    return {'generated_at': generatedAt.toIso8601String(), 'summary': summary, 'confidence_score': confidenceScore, if (keyPoints != null) 'key_points': keyPoints};
   }
 }
 
@@ -542,7 +447,7 @@ class CaseComment {
         'profile_pic': json['profile_pic'],
       };
     }
-    
+
     return CaseComment(
       id: json['id'] ?? 0,
       caseId: json['discuss_case_id'] ?? json['case_id'] ?? 0,
@@ -552,9 +457,7 @@ class CaseComment {
       likes: json['likes'] ?? 0,
       dislikes: json['dislikes'] ?? 0,
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'])
-          : null,
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       author: CaseAuthor.fromJson(userData),
       repliesCount: json['replies_count'] ?? 0,
       isLiked: json['is_liked'],
@@ -606,18 +509,10 @@ class AttachmentData {
   final String file; // base64 encoded
   final String description;
 
-  AttachmentData({
-    required this.type,
-    required this.file,
-    required this.description,
-  });
+  AttachmentData({required this.type, required this.file, required this.description});
 
   Map<String, dynamic> toJson() {
-    return {
-      'type': type,
-      'file': file,
-      'description': description,
-    };
+    return {'type': type, 'file': file, 'description': description};
   }
 }
 
@@ -628,13 +523,7 @@ class ApiResponse<T> {
   final Map<String, dynamic>? errors;
   final ApiMeta meta;
 
-  ApiResponse({
-    required this.status,
-    required this.message,
-    this.data,
-    this.errors,
-    required this.meta,
-  });
+  ApiResponse({required this.status, required this.message, this.data, this.errors, required this.meta});
 
   bool get isSuccess => status == 'success';
 
@@ -653,16 +542,10 @@ class ApiMeta {
   final DateTime timestamp;
   final String version;
 
-  ApiMeta({
-    required this.timestamp,
-    required this.version,
-  });
+  ApiMeta({required this.timestamp, required this.version});
 
   factory ApiMeta.fromJson(Map<String, dynamic> json) {
-    return ApiMeta(
-      timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()),
-      version: json['version'] ?? 'v3',
-    );
+    return ApiMeta(timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()), version: json['version'] ?? 'v3');
   }
 }
 
@@ -670,10 +553,7 @@ class PaginatedResponse<T> {
   final List<T> items;
   final PaginationMeta pagination;
 
-  PaginatedResponse({
-    required this.items,
-    required this.pagination,
-  });
+  PaginatedResponse({required this.items, required this.pagination});
 }
 
 class PaginationMeta {
@@ -682,20 +562,10 @@ class PaginationMeta {
   final int perPage;
   final int total;
 
-  PaginationMeta({
-    required this.currentPage,
-    required this.lastPage,
-    required this.perPage,
-    required this.total,
-  });
+  PaginationMeta({required this.currentPage, required this.lastPage, required this.perPage, required this.total});
 
   factory PaginationMeta.fromJson(Map<String, dynamic> json) {
-    return PaginationMeta(
-      currentPage: json['current_page'] ?? 1,
-      lastPage: json['last_page'] ?? 1,
-      perPage: json['per_page'] ?? 15,
-      total: json['total'] ?? 0,
-    );
+    return PaginationMeta(currentPage: json['current_page'] ?? 1, lastPage: json['last_page'] ?? 1, perPage: json['per_page'] ?? 15, total: json['total'] ?? 0);
   }
 
   bool get hasNextPage => currentPage < lastPage;
@@ -708,29 +578,14 @@ class SpecialtyFilter {
   final String slug;
   final bool isActive;
 
-  SpecialtyFilter({
-    required this.id,
-    required this.name,
-    required this.slug,
-    this.isActive = true,
-  });
+  SpecialtyFilter({required this.id, required this.name, required this.slug, this.isActive = true});
 
   factory SpecialtyFilter.fromJson(Map<String, dynamic> json) {
-    return SpecialtyFilter(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      slug: json['slug'] ?? '',
-      isActive: json['is_active'] ?? true,
-    );
+    return SpecialtyFilter(id: json['id'] ?? 0, name: json['name'] ?? '', slug: json['slug'] ?? '', isActive: json['is_active'] ?? true);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'slug': slug,
-      'is_active': isActive,
-    };
+    return {'id': id, 'name': name, 'slug': slug, 'is_active': isActive};
   }
 
   @override
@@ -752,29 +607,14 @@ class CountryFilter {
   final String code;
   final String flag;
 
-  CountryFilter({
-    required this.id,
-    required this.name,
-    required this.code,
-    required this.flag,
-  });
+  CountryFilter({required this.id, required this.name, required this.code, required this.flag});
 
   factory CountryFilter.fromJson(Map<String, dynamic> json) {
-    return CountryFilter(
-      id: json['id'] ?? 0,
-      name: json['countryName'] ?? json['name'] ?? '',
-      code: json['countryCode'] ?? json['code'] ?? '',
-      flag: json['flag'] ?? '',
-    );
+    return CountryFilter(id: json['id'] ?? 0, name: json['countryName'] ?? json['name'] ?? '', code: json['countryCode'] ?? json['code'] ?? '', flag: json['flag'] ?? '');
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'code': code,
-      'flag': flag,
-    };
+    return {'id': id, 'name': name, 'code': code, 'flag': flag};
   }
 
   @override
@@ -798,14 +638,7 @@ class CaseDiscussionFilters {
   final String? sortOrder;
   final CaseStatus? status;
 
-  const CaseDiscussionFilters({
-    this.searchQuery,
-    this.selectedSpecialty,
-    this.selectedCountry,
-    this.sortBy,
-    this.sortOrder,
-    this.status,
-  });
+  const CaseDiscussionFilters({this.searchQuery, this.selectedSpecialty, this.selectedCountry, this.sortBy, this.sortOrder, this.status});
 
   CaseDiscussionFilters copyWith({
     String? searchQuery,
@@ -821,10 +654,8 @@ class CaseDiscussionFilters {
   }) {
     return CaseDiscussionFilters(
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedSpecialty:
-          clearSpecialty ? null : (selectedSpecialty ?? this.selectedSpecialty),
-      selectedCountry:
-          clearCountry ? null : (selectedCountry ?? this.selectedCountry),
+      selectedSpecialty: clearSpecialty ? null : (selectedSpecialty ?? this.selectedSpecialty),
+      selectedCountry: clearCountry ? null : (selectedCountry ?? this.selectedCountry),
       sortBy: clearSort ? null : (sortBy ?? this.sortBy),
       sortOrder: clearSort ? null : (sortOrder ?? this.sortOrder),
       status: clearStatus ? null : (status ?? this.status),
@@ -833,7 +664,7 @@ class CaseDiscussionFilters {
 
   Map<String, dynamic> toQueryParameters() {
     final params = <String, dynamic>{};
-    
+
     if (searchQuery != null && searchQuery!.isNotEmpty) {
       params['keyword'] = searchQuery;
     }
@@ -849,7 +680,7 @@ class CaseDiscussionFilters {
     if (status != null) {
       params['status'] = status!.value;
     }
-    
+
     return params;
   }
 }
@@ -865,8 +696,7 @@ enum CaseStatus {
 
   static CaseStatus? fromString(String? value) {
     try {
-      return CaseStatus.values
-          .firstWhere((status) => status.value == value);
+      return CaseStatus.values.firstWhere((status) => status.value == value);
     } catch (e) {
       return null;
     }
@@ -1044,15 +874,7 @@ class DecisionSupport {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  DecisionSupport({
-    required this.id,
-    required this.discussCaseId,
-    required this.type,
-    required this.content,
-    this.source,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  DecisionSupport({required this.id, required this.discussCaseId, required this.type, required this.content, this.source, required this.createdAt, required this.updatedAt});
 
   factory DecisionSupport.fromJson(Map<String, dynamic> json) {
     return DecisionSupport(
@@ -1067,15 +889,7 @@ class DecisionSupport {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'discuss_case_id': discussCaseId,
-      'type': type,
-      'content': content,
-      'source': source,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-    };
+    return {'id': id, 'discuss_case_id': discussCaseId, 'type': type, 'content': content, 'source': source, 'created_at': createdAt.toIso8601String(), 'updated_at': updatedAt.toIso8601String()};
   }
 }
 
@@ -1088,15 +902,7 @@ class CaseUpdate {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  CaseUpdate({
-    required this.id,
-    required this.discussCaseId,
-    required this.updateType,
-    required this.content,
-    this.authorId,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  CaseUpdate({required this.id, required this.discussCaseId, required this.updateType, required this.content, this.authorId, required this.createdAt, required this.updatedAt});
 
   factory CaseUpdate.fromJson(Map<String, dynamic> json) {
     return CaseUpdate(

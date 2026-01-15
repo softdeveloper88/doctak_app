@@ -14,15 +14,7 @@ void showToast(String message, {BuildContext? context}) {
     textColor = Colors.white;
   }
 
-  Fluttertoast.showToast(
-    msg: message,
-    toastLength: Toast.LENGTH_LONG,
-    gravity: ToastGravity.TOP,
-    timeInSecForIosWeb: 2,
-    backgroundColor: bgColor,
-    textColor: textColor,
-    fontSize: 14.0,
-  );
+  Fluttertoast.showToast(msg: message, toastLength: Toast.LENGTH_LONG, gravity: ToastGravity.TOP, timeInSecForIosWeb: 2, backgroundColor: bgColor, textColor: textColor, fontSize: 14.0);
 }
 
 /// Shows a success toast with green accent

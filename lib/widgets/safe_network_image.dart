@@ -11,16 +11,7 @@ class SafeNetworkImage extends StatelessWidget {
   final Widget? errorWidget;
   final BorderRadius? borderRadius;
 
-  const SafeNetworkImage({
-    Key? key,
-    required this.imageUrl,
-    this.width,
-    this.height,
-    this.fit = BoxFit.cover,
-    this.placeholder,
-    this.errorWidget,
-    this.borderRadius,
-  }) : super(key: key);
+  const SafeNetworkImage({super.key, required this.imageUrl, this.width, this.height, this.fit = BoxFit.cover, this.placeholder, this.errorWidget, this.borderRadius});
 
   @override
   Widget build(BuildContext context) {
@@ -59,17 +50,8 @@ class SafeNetworkImage extends StatelessWidget {
         Container(
           width: width,
           height: height,
-          decoration: BoxDecoration(
-            color: theme.surfaceVariant,
-            borderRadius: borderRadius,
-          ),
-          child: Center(
-            child: Icon(
-              Icons.broken_image_outlined,
-              size: 48,
-              color: theme.textTertiary,
-            ),
-          ),
+          decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: borderRadius),
+          child: Center(child: Icon(Icons.broken_image_outlined, size: 48, color: theme.textTertiary)),
         );
   }
 
@@ -77,16 +59,10 @@ class SafeNetworkImage extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: theme.inputBackground,
-        borderRadius: borderRadius,
-      ),
+      decoration: BoxDecoration(color: theme.inputBackground, borderRadius: borderRadius),
       child: Center(
         child: CircularProgressIndicator(
-          value: loadingProgress.expectedTotalBytes != null
-              ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
-              : null,
+          value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
         ),

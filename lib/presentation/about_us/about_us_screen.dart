@@ -16,15 +16,10 @@ class AboutUsScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: DoctakAppBar(
-        title: translation(context).lbl_about_us,
-        titleIcon: Icons.info_outline_rounded,
-      ),
+      appBar: DoctakAppBar(title: translation(context).lbl_about_us, titleIcon: Icons.info_outline_rounded),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).padding.bottom + 16,
-        ),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -33,56 +28,26 @@ class AboutUsScreen extends StatelessWidget {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.primary.withOpacity(0.08),
-                    theme.secondary.withOpacity(0.04),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.08), theme.secondary.withValues(alpha: 0.04)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: theme.primary.withOpacity(0.15)),
+                border: Border.all(color: theme.primary.withValues(alpha: 0.15)),
               ),
               child: Column(
                 children: [
-                  SvgPicture.asset(
-                    'assets/images/header.svg',
-                    height: 80,
-                    colorFilter: theme.isDark
-                        ? ColorFilter.mode(
-                            theme.primary.withOpacity(0.8),
-                            BlendMode.srcIn,
-                          )
-                        : null,
-                  ),
+                  SvgPicture.asset('assets/images/header.svg', height: 80, colorFilter: theme.isDark ? ColorFilter.mode(theme.primary.withValues(alpha: 0.8), BlendMode.srcIn) : null),
                   const SizedBox(height: 16),
-                  Image.asset(
-                    'assets/logo/logo.png',
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    height: 100,
-                  ),
+                  Image.asset('assets/logo/logo.png', width: MediaQuery.of(context).size.width * 0.6, height: 100),
                   const SizedBox(height: 16),
                   Text(
                     translation(context).lbl_better_health_solutions,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                      color: theme.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: theme.textPrimary),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
                   Text(
                     translation(context).msg_health_mission,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Poppins',
-                      color: theme.textSecondary,
-                      height: 1.5,
-                    ),
+                    style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary, height: 1.5),
                   ),
                 ],
               ),
@@ -176,55 +141,29 @@ class AboutUsScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-          ),
+          border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
           boxShadow: theme.isDark ? [] : theme.cardShadow,
         ),
         child: Theme(
-          data: Theme.of(context).copyWith(
-            dividerColor: Colors.transparent,
-            splashColor: theme.primary.withOpacity(0.1),
-            highlightColor: theme.primary.withOpacity(0.05),
-          ),
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent, splashColor: theme.primary.withValues(alpha: 0.1), highlightColor: theme.primary.withValues(alpha: 0.05)),
           child: ExpansionTile(
-            tilePadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 4,
-            ),
+            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             childrenPadding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            collapsedShape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             leading: Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: theme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
+              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
               child: Icon(icon, color: theme.primary, size: 22),
             ),
             title: Text(
               title,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-                fontFamily: 'Poppins',
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, fontFamily: 'Poppins', color: theme.textPrimary),
             ),
             iconColor: theme.primary,
             collapsedIconColor: theme.textSecondary,
             children: [
-              Divider(
-                height: 1,
-                color: theme.divider,
-                indent: 16,
-                endIndent: 16,
-              ),
+              Divider(height: 1, color: theme.divider, indent: 16, endIndent: 16),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
@@ -233,21 +172,9 @@ class AboutUsScreen extends StatelessWidget {
                     // Image/SVG
                     Container(
                       padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: theme.surfaceVariant.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                      decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(16)),
                       child: svg != null
-                          ? SvgPicture.asset(
-                              svg,
-                              height: 180,
-                              colorFilter: theme.isDark
-                                  ? ColorFilter.mode(
-                                      theme.primary.withOpacity(0.7),
-                                      BlendMode.srcIn,
-                                    )
-                                  : null,
-                            )
+                          ? SvgPicture.asset(svg, height: 180, colorFilter: theme.isDark ? ColorFilter.mode(theme.primary.withValues(alpha: 0.7), BlendMode.srcIn) : null)
                           : Image.asset(image ?? '', height: 180),
                     ),
                     const SizedBox(height: 16),
@@ -255,12 +182,7 @@ class AboutUsScreen extends StatelessWidget {
                     // HTML Content
                     HtmlWidget(
                       content,
-                      textStyle: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Poppins',
-                        color: theme.textSecondary,
-                        height: 1.6,
-                      ),
+                      textStyle: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary, height: 1.6),
                     ),
 
                     // Contact Info
@@ -269,22 +191,15 @@ class AboutUsScreen extends StatelessWidget {
                         margin: const EdgeInsets.only(top: 20),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: theme.primary.withOpacity(0.05),
+                          color: theme.primary.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: theme.primary.withOpacity(0.15),
-                          ),
+                          border: Border.all(color: theme.primary.withValues(alpha: 0.15)),
                         ),
                         child: Column(
                           children: [
                             Text(
                               translation(context).lbl_contact_follow_us,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                color: theme.textPrimary,
-                              ),
+                              style: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                             ),
                             const SizedBox(height: 16),
                             Row(
@@ -294,38 +209,19 @@ class AboutUsScreen extends StatelessWidget {
                                   context: context,
                                   theme: theme,
                                   icon: 'assets/icon/face_icon.png',
-                                  onTap: () => PostUtils.launchURL(
-                                    context,
-                                    'https://www.facebook.com/profile.php?id=100090277690568&mibextid=ZbWKwL',
-                                  ),
+                                  onTap: () => PostUtils.launchURL(context, 'https://www.facebook.com/profile.php?id=100090277690568&mibextid=ZbWKwL'),
                                 ),
                                 const SizedBox(width: 12),
                                 _buildSocialButton(
                                   context: context,
                                   theme: theme,
                                   icon: 'assets/icon/linkedin_icon.png',
-                                  onTap: () => PostUtils.launchURL(
-                                    context,
-                                    'https://www.linkedin.com/company/doctak-net/',
-                                  ),
+                                  onTap: () => PostUtils.launchURL(context, 'https://www.linkedin.com/company/doctak-net/'),
                                 ),
                                 const SizedBox(width: 12),
-                                _buildSocialButton(
-                                  context: context,
-                                  theme: theme,
-                                  icon: 'assets/icon/whats_icon.png',
-                                  onTap: () => PostUtils.launchURL(
-                                    context,
-                                    'https://wa.me/971504957572',
-                                  ),
-                                ),
+                                _buildSocialButton(context: context, theme: theme, icon: 'assets/icon/whats_icon.png', onTap: () => PostUtils.launchURL(context, 'https://wa.me/971504957572')),
                                 const SizedBox(width: 12),
-                                _buildSocialButton(
-                                  context: context,
-                                  theme: theme,
-                                  icon: 'assets/icon/email.png',
-                                  onTap: () => _sendEmail('Info@doctak.net'),
-                                ),
+                                _buildSocialButton(context: context, theme: theme, icon: 'assets/icon/email.png', onTap: () => _sendEmail('Info@doctak.net')),
                               ],
                             ),
                           ],
@@ -341,12 +237,7 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButton({
-    required BuildContext context,
-    required OneUITheme theme,
-    required String icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildSocialButton({required BuildContext context, required OneUITheme theme, required String icon, required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -358,15 +249,7 @@ class AboutUsScreen extends StatelessWidget {
             color: theme.cardBackground,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: theme.border),
-            boxShadow: theme.isDark
-                ? []
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+            boxShadow: theme.isDark ? [] : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))],
           ),
           child: Image.asset(icon, height: 28, width: 28),
         ),
@@ -375,11 +258,7 @@ class AboutUsScreen extends StatelessWidget {
   }
 
   void _sendEmail(String email) async {
-    final Uri emailLaunchUri = Uri(
-      scheme: 'mailto',
-      path: email,
-      queryParameters: {'subject': ''},
-    );
+    final Uri emailLaunchUri = Uri(scheme: 'mailto', path: email, queryParameters: {'subject': ''});
     if (await canLaunchUrl(emailLaunchUri)) {
       await launchUrl(emailLaunchUri);
     }

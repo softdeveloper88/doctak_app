@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,13 +14,7 @@ class AudioRecorderWidget extends StatefulWidget {
   final VoidCallback? onPause;
   final VoidCallback? onResume;
 
-  const AudioRecorderWidget({
-    Key? key,
-    this.onStart,
-    this.onStop,
-    this.onPause,
-    this.onResume,
-  }) : super(key: key);
+  const AudioRecorderWidget({super.key, this.onStart, this.onStop, this.onPause, this.onResume});
 
   @override
   State<AudioRecorderWidget> createState() => _AudioRecorderWidgetState();
@@ -66,14 +59,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget> {
       _recordingPath = '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       // Start recording
-      await _audioRecorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-        ),
-        path: _recordingPath ?? '',
-      );
+      await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000, sampleRate: 44100), path: _recordingPath ?? '');
 
       setState(() {
         _isRecording = true;
@@ -140,11 +126,7 @@ class _AudioRecorderWidgetState extends State<AudioRecorderWidget> {
         ),
         child: Container(
           padding: const EdgeInsets.all(10),
-          child: Icon(
-            CupertinoIcons.mic,
-            color: svGetBodyColor(),
-            size: 25,
-          ),
+          child: Icon(CupertinoIcons.mic, color: svGetBodyColor(), size: 25),
         ),
       ),
     );

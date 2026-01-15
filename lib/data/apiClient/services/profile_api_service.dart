@@ -16,16 +16,9 @@ class ProfileApiService {
   ProfileApiService._internal();
 
   /// Get user profile
-  Future<ApiResponse<UserProfile>> getProfile({
-    required String userId,
-  }) async {
+  Future<ApiResponse<UserProfile>> getProfile({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/profile?user_id=$userId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/profile?user_id=$userId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(UserProfile.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -93,18 +86,10 @@ class ProfileApiService {
   }
 
   /// Upload profile picture
-  Future<ApiResponse<Map<String, dynamic>>> uploadProfilePicture({
-    required String filePath,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> uploadProfilePicture({required String filePath}) async {
     try {
       // Note: This needs proper file upload handling in networkUtils
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/upload-profile-pic',
-          method: networkUtils.HttpMethod.POST,
-          request: {'profile_pic': filePath},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/upload-profile-pic', method: networkUtils.HttpMethod.POST, request: {'profile_pic': filePath}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -114,18 +99,10 @@ class ProfileApiService {
   }
 
   /// Upload cover picture
-  Future<ApiResponse<Map<String, dynamic>>> uploadCoverPicture({
-    required String filePath,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> uploadCoverPicture({required String filePath}) async {
     try {
       // Note: This needs proper file upload handling in networkUtils
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/upload-cover-pic',
-          method: networkUtils.HttpMethod.POST,
-          request: {'background': filePath},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/upload-cover-pic', method: networkUtils.HttpMethod.POST, request: {'background': filePath}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -135,16 +112,9 @@ class ProfileApiService {
   }
 
   /// Get user interests
-  Future<ApiResponse<List<InterestModel>>> getInterests({
-    required String userId,
-  }) async {
+  Future<ApiResponse<List<InterestModel>>> getInterests({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/interests?user_id=$userId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/interests?user_id=$userId', method: networkUtils.HttpMethod.GET));
       final List<dynamic> interestsData = response as List<dynamic>;
       final interests = interestsData.map((json) => InterestModel.fromJson(json)).toList();
       return ApiResponse.success(interests);
@@ -156,17 +126,11 @@ class ProfileApiService {
   }
 
   /// Update user interests
-  Future<ApiResponse<Map<String, dynamic>>> updateInterests({
-    required List<InterestModel> interests,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> updateInterests({required List<InterestModel> interests}) async {
     try {
       // Note: This needs proper JSON encoding for list data
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/interests/update',
-          method: networkUtils.HttpMethod.POST,
-          request: {'interests': interests.map((i) => i.toJson()).toList()},
-        ),
+        await networkUtils.buildHttpResponse('/interests/update', method: networkUtils.HttpMethod.POST, request: {'interests': interests.map((i) => i.toJson()).toList()}),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
@@ -177,16 +141,9 @@ class ProfileApiService {
   }
 
   /// Get work and education information
-  Future<ApiResponse<List<WorkEducationModel>>> getWorkEducation({
-    required String userId,
-  }) async {
+  Future<ApiResponse<List<WorkEducationModel>>> getWorkEducation({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/work-and-education?user_id=$userId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/work-and-education?user_id=$userId', method: networkUtils.HttpMethod.GET));
       final List<dynamic> workEducationData = response as List<dynamic>;
       final workEducation = workEducationData.map((json) => WorkEducationModel.fromJson(json)).toList();
       return ApiResponse.success(workEducation);
@@ -242,17 +199,9 @@ class ProfileApiService {
   }
 
   /// Delete work/education entry
-  Future<ApiResponse<Map<String, dynamic>>> deleteWorkEducation({
-    required String id,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteWorkEducation({required String id}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/delete-work-and-education',
-          method: networkUtils.HttpMethod.POST,
-          request: {'id': id},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/delete-work-and-education', method: networkUtils.HttpMethod.POST, request: {'id': id}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -262,16 +211,9 @@ class ProfileApiService {
   }
 
   /// Get places lived information
-  Future<ApiResponse<PlaceLiveModel>> getPlacesLived({
-    required String userId,
-  }) async {
+  Future<ApiResponse<PlaceLiveModel>> getPlacesLived({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/places-lived?user_id=$userId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/places-lived?user_id=$userId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PlaceLiveModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -281,17 +223,10 @@ class ProfileApiService {
   }
 
   /// Update places lived information
-  Future<ApiResponse<Map<String, dynamic>>> updatePlacesLived({
-    required String place,
-    required String description,
-    required String privacy,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> updatePlacesLived({required String place, required String description, required String privacy}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/places-lived/update?place=$place&description=$description&privacy=$privacy',
-          method: networkUtils.HttpMethod.POST,
-        ),
+        await networkUtils.buildHttpResponse('/places-lived/update?place=$place&description=$description&privacy=$privacy', method: networkUtils.HttpMethod.POST),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
@@ -302,16 +237,9 @@ class ProfileApiService {
   }
 
   /// Get family relationship information
-  Future<ApiResponse<FamilyRelationshipModel>> getFamilyRelationship({
-    required String userId,
-  }) async {
+  Future<ApiResponse<FamilyRelationshipModel>> getFamilyRelationship({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/family-relationship?user_id=$userId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/family-relationship?user_id=$userId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(FamilyRelationshipModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -365,12 +293,7 @@ class ProfileApiService {
   /// Get about me information
   Future<ApiResponse<Map<String, dynamic>>> getAboutMe() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/about-me',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/about-me', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -385,12 +308,7 @@ class ProfileApiService {
     required String followAction, // "follow" or "unfollow"
   }) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/user/$userId/$followAction',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/user/$userId/$followAction', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -400,17 +318,9 @@ class ProfileApiService {
   }
 
   /// Get user followers and following
-  Future<ApiResponse<FollowerDataModel>> getUserFollowers({
-    required String userId,
-  }) async {
+  Future<ApiResponse<FollowerDataModel>> getUserFollowers({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/followers-and-following',
-          method: networkUtils.HttpMethod.POST,
-          request: {'user_id': userId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/followers-and-following', method: networkUtils.HttpMethod.POST, request: {'user_id': userId}));
       return ApiResponse.success(FollowerDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -434,15 +344,7 @@ class ProfileApiService {
         await networkUtils.buildHttpResponse(
           '/update-hobbies-interests',
           method: networkUtils.HttpMethod.POST,
-          request: {
-            'id': id,
-            'favt_tv_shows': favTvShows,
-            'favt_movies': favMovies,
-            'favt_books': favBooks,
-            'favt_writers': favWriters,
-            'favt_music_bands': favMusicBands,
-            'favt_games': favGames,
-          },
+          request: {'id': id, 'favt_tv_shows': favTvShows, 'favt_movies': favMovies, 'favt_books': favBooks, 'favt_writers': favWriters, 'favt_music_bands': favMusicBands, 'favt_games': favGames},
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -455,7 +357,7 @@ class ProfileApiService {
 
   // ================================== BACKWARD COMPATIBILITY ==================================
 
-  /// Get profile update method (backward compatibility)  
+  /// Get profile update method (backward compatibility)
   Future<ApiResponse<Map<String, dynamic>>> getProfileUpdate({
     required String firstName,
     required String lastName,

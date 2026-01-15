@@ -19,7 +19,6 @@ class MeetingsLoaded extends MeetingState {
 
   @override
   List<Object> get props => [];
-
 }
 
 class MeetingsError extends MeetingState {

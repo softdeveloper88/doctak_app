@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
@@ -16,22 +15,22 @@ class IOSAgoraPiPService {
   bool _isSetup = false;
   bool _isActive = false;
   bool _isRestoringUI = false; // Tracks if user is returning to app
-  
+
   final StreamController<PiPState> _stateController = StreamController<PiPState>.broadcast();
-  
+
   /// Stream of PiP state changes
   Stream<PiPState> get stateStream => _stateController.stream;
-  
+
   /// Check if PiP is currently active
   bool get isActive => _isActive;
-  
+
   /// Check if user is returning to app from PiP
   bool get isRestoringUI => _isRestoringUI;
 
   /// Initialize the service and set up method channel handler
   Future<void> initialize() async {
     if (!Platform.isIOS) return;
-    
+
     // Set up method channel handler for callbacks from native
     _channel.setMethodCallHandler(_handleMethodCall);
     debugPrint('📺 IOSAgoraPiP: Initialized');
@@ -51,7 +50,7 @@ class IOSAgoraPiPService {
   /// Process state changes from native
   void _handleStateChange(String state) {
     debugPrint('📺 IOSAgoraPiP: State changed to $state');
-    
+
     PiPState pipState;
     switch (state) {
       case 'started':
@@ -83,14 +82,14 @@ class IOSAgoraPiPService {
       default:
         pipState = PiPState.unknown;
     }
-    
+
     _stateController.add(pipState);
   }
 
   /// Check if PiP is supported on this device
   Future<bool> isSupported() async {
     if (!Platform.isIOS) return false;
-    
+
     try {
       final result = await _channel.invokeMethod<bool>('isSupported');
       debugPrint('📺 IOSAgoraPiP: isSupported = $result');
@@ -104,7 +103,7 @@ class IOSAgoraPiPService {
   /// Enable or disable auto-PiP mode
   Future<bool> setAutoEnabled(bool enabled) async {
     if (!Platform.isIOS) return false;
-    
+
     try {
       await _channel.invokeMethod('setAutoEnabled', {'enabled': enabled});
       debugPrint('📺 IOSAgoraPiP: setAutoEnabled = $enabled');
@@ -118,7 +117,7 @@ class IOSAgoraPiPService {
   /// Set up PiP controller (must call before start)
   Future<bool> setup() async {
     if (!Platform.isIOS) return false;
-    
+
     try {
       final result = await _channel.invokeMethod<bool>('setup');
       _isSetup = result ?? false;
@@ -133,17 +132,17 @@ class IOSAgoraPiPService {
   /// Start PiP mode
   Future<bool> start() async {
     if (!Platform.isIOS) return false;
-    
+
     // Don't start if we're restoring UI (user returning to app)
     if (_isRestoringUI) {
       debugPrint('📺 IOSAgoraPiP: Skipping start - UI is being restored');
       return false;
     }
-    
+
     if (!_isSetup) {
       await setup();
     }
-    
+
     try {
       final result = await _channel.invokeMethod<bool>('start');
       debugPrint('📺 IOSAgoraPiP: start = $result');
@@ -157,10 +156,10 @@ class IOSAgoraPiPService {
   /// Stop PiP mode
   Future<bool> stop() async {
     if (!Platform.isIOS) return false;
-    
+
     // Reset restoration flag on explicit stop
     _isRestoringUI = false;
-    
+
     try {
       final result = await _channel.invokeMethod<bool>('stop');
       debugPrint('📺 IOSAgoraPiP: stop = $result');
@@ -175,7 +174,7 @@ class IOSAgoraPiPService {
   /// Call this immediately when app resumes to prevent delayed PiP start
   Future<void> cancelPending() async {
     if (!Platform.isIOS) return;
-    
+
     try {
       await _channel.invokeMethod<bool>('cancelPending');
       debugPrint('📺 IOSAgoraPiP: cancelPending called');
@@ -187,7 +186,7 @@ class IOSAgoraPiPService {
   /// Check if PiP is currently active
   Future<bool> checkIsActive() async {
     if (!Platform.isIOS) return false;
-    
+
     try {
       final result = await _channel.invokeMethod<bool>('isActive');
       _isActive = result ?? false;
@@ -210,13 +209,9 @@ class IOSAgoraPiPService {
   Future<void> updateFrame(Uint8List imageData, int width, int height) async {
     if (!Platform.isIOS) return;
     if (!_isActive) return;
-    
+
     try {
-      await _channel.invokeMethod('updateFrame', {
-        'imageData': imageData,
-        'width': width,
-        'height': height,
-      });
+      await _channel.invokeMethod('updateFrame', {'imageData': imageData, 'width': width, 'height': height});
     } catch (e) {
       // Don't spam logs for frame updates
     }
@@ -225,7 +220,7 @@ class IOSAgoraPiPService {
   /// Dispose and clean up resources
   Future<void> dispose() async {
     if (!Platform.isIOS) return;
-    
+
     try {
       await _channel.invokeMethod<bool>('dispose');
       _isSetup = false;
@@ -243,12 +238,4 @@ class IOSAgoraPiPService {
 }
 
 /// PiP state enum
-enum PiPState {
-  willStart,
-  started,
-  willStop,
-  stopped,
-  failed,
-  restoreUI,
-  unknown,
-}
+enum PiPState { willStart, started, willStop, stopped, failed, restoreUI, unknown }

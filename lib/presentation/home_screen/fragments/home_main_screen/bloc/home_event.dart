@@ -15,9 +15,7 @@ class ChangePasswordVisibilityEvent extends HomeEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class PostLikeEvent extends HomeEvent {
@@ -41,12 +39,13 @@ class DeletePostEvent extends HomeEvent {
   @override
   List<Object?> get props => [postId];
 }
+
 class DetailsPostEvent extends HomeEvent {
   int? postId;
   int? commentId;
-  DetailsPostEvent({this.postId,this.commentId});
+  DetailsPostEvent({this.postId, this.commentId});
   @override
-  List<Object?> get props => [postId,commentId];
+  List<Object?> get props => [postId, commentId];
 }
 
 class ChangeCheckBoxEvent extends HomeEvent {
@@ -55,9 +54,7 @@ class ChangeCheckBoxEvent extends HomeEvent {
   bool value;
 
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class PostLoadPageEvent extends HomeEvent {

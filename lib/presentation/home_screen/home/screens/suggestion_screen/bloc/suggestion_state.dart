@@ -1,5 +1,3 @@
-import 'package:doctak_app/data/models/news_model/news_model.dart';
-
 abstract class SuggestionState {}
 
 class NewsDataInitial extends SuggestionState {}

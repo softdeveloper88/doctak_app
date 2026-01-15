@@ -1,9 +1,7 @@
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:flutter/services.dart';
 
-import '../../../utils/SVCommon.dart';
 import '../../../../../main.dart';
 import '../../../../../core/utils/video_utils.dart';
 
@@ -11,11 +9,7 @@ class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
   final bool showMinimalControls;
 
-  VideoPlayerWidget({
-    Key? key, 
-    required this.videoUrl,
-    this.showMinimalControls = false,
-  }) : super(key: key);
+  const VideoPlayerWidget({super.key, required this.videoUrl, this.showMinimalControls = false});
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -36,22 +30,22 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Future<void> initializeVideoPlayer() async {
     try {
       _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
-      
+
       await _controller!.initialize();
-      
+
       if (mounted) {
         // Check video resolution and handle high-resolution videos
         final videoInfo = _controller!.value;
         final resolution = videoInfo.size;
-        
+
         // Log video information using utility
         VideoUtils.logVideoInfo(videoInfo, 'Post Video');
-        
+
         // Check if resolution is supported
         if (!VideoUtils.isResolutionSupported(resolution)) {
           debugPrint('WARNING: Video resolution may not be supported - ${VideoUtils.getVideoQuality(resolution)}');
         }
-        
+
         chewieController = ChewieController(
           videoPlayerController: _controller!,
           autoPlay: false,
@@ -61,17 +55,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           showControls: !widget.showMinimalControls,
           showControlsOnInitialize: false,
           showOptions: false,
-          materialProgressColors: ChewieProgressColors(
-            playedColor: Colors.blue,
-            handleColor: Colors.blueAccent,
-            backgroundColor: Colors.grey,
-            bufferedColor: Colors.lightBlue,
-          ),
+          materialProgressColors: ChewieProgressColors(playedColor: Colors.blue, handleColor: Colors.blueAccent, backgroundColor: Colors.grey, bufferedColor: Colors.lightBlue),
           placeholder: Container(
             color: Colors.black,
-            child: const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            ),
+            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
           ),
           errorBuilder: (context, errorMessage) {
             return _buildErrorWidget('Video playback error: $errorMessage');
@@ -89,11 +76,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
     }
   }
-  
+
   String _getErrorMessage(dynamic error) {
     return VideoUtils.getVideoErrorMessage(error);
   }
-  
+
   Widget _buildErrorWidget(String message) {
     return Container(
       color: appStore.isDarkMode ? Colors.grey[900] : Colors.grey[200],
@@ -103,19 +90,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.error_outline,
-                color: appStore.isDarkMode ? Colors.white70 : Colors.black54,
-                size: 48,
-              ),
+              Icon(Icons.error_outline, color: appStore.isDarkMode ? Colors.white70 : Colors.black54, size: 48),
               const SizedBox(height: 12),
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: appStore.isDarkMode ? Colors.white70 : Colors.black54,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: appStore.isDarkMode ? Colors.white70 : Colors.black54, fontSize: 14),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
@@ -128,10 +108,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 },
                 icon: const Icon(Icons.refresh),
                 label: const Text('Retry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
               ),
             ],
           ),
@@ -143,77 +120,53 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
-      return AspectRatio(
-        aspectRatio: 16 / 9,
-        child: _buildErrorWidget(_errorMessage ?? 'Unknown error occurred'),
-      );
+      return AspectRatio(aspectRatio: 16 / 9, child: _buildErrorWidget(_errorMessage ?? 'Unknown error occurred'));
     }
-    
+
     if (_controller != null && _controller!.value.isInitialized && chewieController != null) {
       Widget videoWidget = widget.showMinimalControls
-            ? Stack(
-                children: [
-                  Chewie(controller: chewieController!),
-                  Positioned.fill(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_controller!.value.isPlaying) {
-                          _controller!.pause();
-                        } else {
-                          _controller!.play();
-                        }
-                        setState(() {});
-                      },
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Center(
-                          child: AnimatedOpacity(
-                            opacity: !_controller!.value.isPlaying ? 1.0 : 0.0,
-                            duration: const Duration(milliseconds: 300),
-                            child: Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.play_arrow,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
+          ? Stack(
+              children: [
+                Chewie(controller: chewieController!),
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      if (_controller!.value.isPlaying) {
+                        _controller!.pause();
+                      } else {
+                        _controller!.play();
+                      }
+                      setState(() {});
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Center(
+                        child: AnimatedOpacity(
+                          opacity: !_controller!.value.isPlaying ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 300),
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.6), shape: BoxShape.circle),
+                            child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              )
-            : Chewie(controller: chewieController!);
-      
-      return widget.showMinimalControls 
-        ? videoWidget
-        : AspectRatio(
-            aspectRatio: _controller!.value.aspectRatio,
-            child: videoWidget,
-          );
+                ),
+              ],
+            )
+          : Chewie(controller: chewieController!);
+
+      return widget.showMinimalControls ? videoWidget : AspectRatio(aspectRatio: _controller!.value.aspectRatio, child: videoWidget);
     } else {
       Widget loadingWidget = Container(
         color: appStore.isDarkMode ? Colors.black : Colors.grey[900],
-        child: Center(
-          child: CircularProgressIndicator(
-            color: appStore.isDarkMode ? Colors.white : Colors.blue,
-          ),
-        ),
+        child: Center(child: CircularProgressIndicator(color: appStore.isDarkMode ? Colors.white : Colors.blue)),
       );
-      
-      return widget.showMinimalControls 
-        ? loadingWidget
-        : AspectRatio(
-            aspectRatio: 16 / 9,
-            child: loadingWidget,
-          );
+
+      return widget.showMinimalControls ? loadingWidget : AspectRatio(aspectRatio: 16 / 9, child: loadingWidget);
     }
   }
 

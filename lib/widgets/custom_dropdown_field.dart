@@ -140,12 +140,11 @@
 //   }
 // }
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/theme/app_decoration.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 class CustomDropdownField<T> extends StatelessWidget {
-  CustomDropdownField({
+  const CustomDropdownField({
     required this.items,
     required this.value,
     required this.onChanged,
@@ -162,8 +161,8 @@ class CustomDropdownField<T> extends StatelessWidget {
     this.isEnableDropDown = true,
     this.isTextBold = true,
 
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<T> items;
   final T? value;
@@ -190,22 +189,14 @@ class CustomDropdownField<T> extends StatelessWidget {
       height: height ?? 50,
       child: DropdownButtonFormField<T>(
         onChanged: isEnableDropDown! ? (value) => onChanged(value) : null,
-        value: value,
+        initialValue: value,
         dropdownColor: svGetScaffoldColor(),
         isExpanded: true,
         decoration: _buildDecoration(),
         iconSize: isTextBold ? 20.0 : 0.0,
-        alignment:AlignmentDirectional.centerEnd,
-        style: TextStyle(
-          color: isTextBold ? Colors.black : Colors.grey,
-          fontSize: 12,
-          fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal,
-          overflow: TextOverflow.clip,
-
-        ),
-        selectedItemBuilder: selectedItemBuilder != null
-            ? (context) => selectedItemBuilder!(context)
-            : null,
+        alignment: AlignmentDirectional.centerEnd,
+        style: TextStyle(color: isTextBold ? Colors.black : Colors.grey, fontSize: 12, fontWeight: isTextBold ? FontWeight.bold : FontWeight.normal, overflow: TextOverflow.clip),
+        selectedItemBuilder: selectedItemBuilder != null ? (context) => selectedItemBuilder!(context) : null,
         // selectedItemBuilder:(context){
         //   return items.map((item) {
         //     // You can set any custom value here for the selected item
@@ -213,28 +204,18 @@ class CustomDropdownField<T> extends StatelessWidget {
         //     );
         //   }).toList();
         // },
-        icon: isTimeDropDown!
-            ? Icon(
-          Icons.arrow_drop_down,
-          size: 12.sp,
-          color: svGetBodyColor(),
-        )
-            : null,
+        icon: isTimeDropDown! ? Icon(Icons.arrow_drop_down, size: 12.sp, color: svGetBodyColor()) : null,
         items: items.map((item) {
-          return DropdownMenuItem<T>(
-            value: item,
-            child: itemBuilder(item),
-          );
+          return DropdownMenuItem<T>(value: item, child: itemBuilder(item));
         }).toList(),
       ),
     );
   }
-    OutlineInputBorder _outLinedInputBorder() {
+
+  OutlineInputBorder _outLinedInputBorder() {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius ?? 8),
-      borderSide: const BorderSide(
-        color: Colors.transparent,
-      ),
+      borderSide: const BorderSide(color: Colors.transparent),
     );
   }
 
@@ -248,21 +229,11 @@ class CustomDropdownField<T> extends StatelessWidget {
       fillColor: Colors.transparent,
       filled: true,
       isDense: true,
-      contentPadding: const EdgeInsets.only(
-        top: 15,
-        left: 10,
-        bottom: 15,
-      ),
+      contentPadding: const EdgeInsets.only(top: 15, left: 10, bottom: 15),
     );
   }
 
   TextStyle _setFontStyle() {
-    return const TextStyle(
-      color: Colors.grey,
-      fontSize: 14,
-      fontFamily: 'Roboto',
-      fontWeight: FontWeight.w700,
-      height: 1.21,
-    );
+    return const TextStyle(color: Colors.grey, fontSize: 14, fontFamily: 'Roboto', fontWeight: FontWeight.w700, height: 1.21);
   }
 }

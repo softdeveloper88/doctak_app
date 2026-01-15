@@ -1,22 +1,14 @@
 import 'dart:convert';
 
-SearchContactsModel searchContactsModelFromJson(String str) =>
-    SearchContactsModel.fromJson(json.decode(str));
-String searchContactsModelToJson(SearchContactsModel data) =>
-    json.encode(data.toJson());
+SearchContactsModel searchContactsModelFromJson(String str) => SearchContactsModel.fromJson(json.decode(str));
+String searchContactsModelToJson(SearchContactsModel data) => json.encode(data.toJson());
 
 class SearchContactsModel {
-  SearchContactsModel({
-    this.success,
-    this.records,
-    this.total,
-    this.lastPage,
-  });
+  SearchContactsModel({this.success, this.records, this.total, this.lastPage});
 
   SearchContactsModel.fromJson(dynamic json) {
     success = json['success'];
-    records =
-        json['records'] != null ? Records.fromJson(json['records']) : null;
+    records = json['records'] != null ? Records.fromJson(json['records']) : null;
     total = json['total'];
     lastPage = json['last_page'];
   }
@@ -41,21 +33,7 @@ Records recordsFromJson(String str) => Records.fromJson(json.decode(str));
 String recordsToJson(Records data) => json.encode(data.toJson());
 
 class Records {
-  Records({
-    this.currentPage,
-    this.data,
-    this.firstPageUrl,
-    this.from,
-    this.lastPage,
-    this.lastPageUrl,
-    this.links,
-    this.nextPageUrl,
-    this.path,
-    this.perPage,
-    this.prevPageUrl,
-    this.to,
-    this.total,
-  });
+  Records({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
 
   Records.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -123,11 +101,7 @@ Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
 
 class Links {
-  Links({
-    this.url,
-    this.label,
-    this.active,
-  });
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -151,12 +125,7 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 
 class Data {
-  Data({
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.profilePic,
-  });
+  Data({this.id, this.firstName, this.lastName, this.profilePic});
 
   Data.fromJson(dynamic json) {
     id = json['id'];

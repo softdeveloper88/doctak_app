@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class UserChatComponent extends StatefulWidget {
-  const UserChatComponent({Key? key}) : super(key: key);
+  const UserChatComponent({super.key});
 
   @override
   State<UserChatComponent> createState() => _UserChatComponentState();
@@ -41,8 +41,7 @@ class _UserChatComponentState extends State<UserChatComponent> {
                   itemCount: chatBloc.contactsList.length,
                   itemBuilder: (context, index) {
                     final contact = chatBloc.contactsList[index];
-                    final hasProfilePic =
-                        contact.profilePic?.isNotEmpty == true;
+                    final hasProfilePic = contact.profilePic?.isNotEmpty == true;
 
                     return GestureDetector(
                       onTap: () {
@@ -57,50 +56,21 @@ class _UserChatComponentState extends State<UserChatComponent> {
                             height: 60,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  theme.primary,
-                                  theme.primary.withOpacity(0.6),
-                                ],
-                              ),
-                              boxShadow: theme.isDark
-                                  ? []
-                                  : [
-                                      BoxShadow(
-                                        color: theme.primary.withOpacity(0.25),
-                                        spreadRadius: 1,
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary, theme.primary.withValues(alpha: 0.6)]),
+                              boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.25), spreadRadius: 1, blurRadius: 6, offset: const Offset(0, 2))],
                             ),
                             padding: const EdgeInsets.all(2.5),
                             child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: theme.scaffoldBackground,
-                              ),
+                              decoration: BoxDecoration(shape: BoxShape.circle, color: theme.scaffoldBackground),
                               padding: const EdgeInsets.all(2),
                               child: ClipOval(
                                 child: hasProfilePic
-                                    ? AppCachedNetworkImage(
-                                        imageUrl:
-                                            '${AppData.imageUrl}${contact.profilePic}',
-                                        height: 50,
-                                        width: 50,
-                                        fit: BoxFit.cover,
-                                      )
+                                    ? AppCachedNetworkImage(imageUrl: '${AppData.imageUrl}${contact.profilePic}', height: 50, width: 50, fit: BoxFit.cover)
                                     : Container(
                                         width: 50,
                                         height: 50,
                                         color: theme.surfaceVariant,
-                                        child: Icon(
-                                          Icons.person_rounded,
-                                          size: 28,
-                                          color: theme.textSecondary,
-                                        ),
+                                        child: Icon(Icons.person_rounded, size: 28, color: theme.textSecondary),
                                       ),
                               ),
                             ),
@@ -114,12 +84,7 @@ class _UserChatComponentState extends State<UserChatComponent> {
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
                               maxLines: 1,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
-                                color: theme.textSecondary,
-                              ),
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 11, fontWeight: FontWeight.w500, color: theme.textSecondary),
                             ),
                           ),
                         ],

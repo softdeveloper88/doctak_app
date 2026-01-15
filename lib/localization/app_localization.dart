@@ -38,20 +38,20 @@ const String HINDI = 'hi';
 const String URDU = 'ur';
 
 Future<Locale> setLocale(String languageCode) async {
-  final _prefs = SecureStorageService.instance;
-  await _prefs.initialize();
+  final prefs = SecureStorageService.instance;
+  await prefs.initialize();
   // Set both keys for backward compatibility
-  await _prefs.setString(LAGUAGE_CODE, languageCode);
-  await _prefs.setString('selected_language', languageCode);
+  await prefs.setString(LAGUAGE_CODE, languageCode);
+  await prefs.setString('selected_language', languageCode);
   return _locale(languageCode);
 }
 
 Future<Locale> getLocale() async {
-  final _prefs = SecureStorageService.instance;
-  await _prefs.initialize();
+  final prefs = SecureStorageService.instance;
+  await prefs.initialize();
   // First check for the new selected_language key (from language selection screen)
-  String? selectedLang = await _prefs.getString('selected_language');
-  String? langCode = await _prefs.getString(LAGUAGE_CODE);
+  String? selectedLang = await prefs.getString('selected_language');
+  String? langCode = await prefs.getString(LAGUAGE_CODE);
   String languageCode = selectedLang ?? langCode ?? ENGLISH;
   return _locale(languageCode);
 }

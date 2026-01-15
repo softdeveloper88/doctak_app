@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
 
 abstract class ChatGPTEvent extends Equatable {}
 
@@ -21,10 +20,10 @@ class GetPost extends ChatGPTEvent {
   String? imageUrl1;
   String? imageUrl2;
   String? imageType;
-  GetPost({required this.sessionId, required this.question,this.imageUrl1,this.imageUrl2,this.imageType});
+  GetPost({required this.sessionId, required this.question, this.imageUrl1, this.imageUrl2, this.imageType});
 
   @override
-  List<Object> get props => [sessionId, question,imageUrl1??"",imageUrl2??"",imageType??''];
+  List<Object> get props => [sessionId, question, imageUrl1 ?? "", imageUrl2 ?? "", imageType ?? ''];
 }
 
 class GetDrugAskEvent extends ChatGPTEvent {

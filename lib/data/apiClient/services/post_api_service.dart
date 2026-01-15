@@ -20,12 +20,7 @@ class PostApiService {
   /// Get posts feed with pagination
   Future<ApiResponse<PostDataModel>> getPosts({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/posts?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/posts?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -35,16 +30,9 @@ class PostApiService {
   }
 
   /// Get post details by ID with comments
-  Future<ApiResponse<PostDetailsDataModel>> getPostDetails({
-    required String postId,
-  }) async {
+  Future<ApiResponse<PostDetailsDataModel>> getPostDetails({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/post-by-comment/$postId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/post-by-comment/$postId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDetailsDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -54,16 +42,9 @@ class PostApiService {
   }
 
   /// Get post details with likes information
-  Future<ApiResponse<PostDetailModel>> getPostDetailsWithLikes({
-    required String postId,
-  }) async {
+  Future<ApiResponse<PostDetailModel>> getPostDetailsWithLikes({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/posts/$postId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/posts/$postId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDetailModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -73,17 +54,9 @@ class PostApiService {
   }
 
   /// Get user's posts (profile posts)
-  Future<ApiResponse<PostDataModel>> getUserPosts({
-    required String page,
-    required String userId,
-  }) async {
+  Future<ApiResponse<PostDataModel>> getUserPosts({required String page, required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/user-profile-post?page=$page&user_id=$userId',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/user-profile-post?page=$page&user_id=$userId', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -111,21 +84,14 @@ class PostApiService {
       if (locationName != null) request['location_name'] = locationName;
       if (lat != null) request['lat'] = lat;
       if (lng != null) request['lng'] = lng;
-      if (backgroundColor != null)
-        request['background_color'] = backgroundColor;
+      if (backgroundColor != null) request['background_color'] = backgroundColor;
       if (tagging != null) request['tagging'] = tagging;
       if (feelings != null) request['feelings'] = feelings;
 
       // Note: File uploads need special handling in network_utils
       // This would need to be enhanced for actual file upload
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/new_post',
-          method: networkUtils.HttpMethod.POST,
-          request: request,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/new_post', method: networkUtils.HttpMethod.POST, request: request));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -135,16 +101,9 @@ class PostApiService {
   }
 
   /// Like or unlike a post
-  Future<ApiResponse<Map<String, dynamic>>> likePost({
-    required String postId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> likePost({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/like?post_id=$postId',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/like?post_id=$postId', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -154,18 +113,11 @@ class PostApiService {
   }
 
   /// Get users who liked a post
-  Future<ApiResponse<List<PostLikesModel>>> getPostLikes({
-    required String postId,
-  }) async {
+  Future<ApiResponse<List<PostLikesModel>>> getPostLikes({required String postId}) async {
     try {
       // The server expects GET for this route (405 returned for POST).
       // Send postId as query parameter.
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/getPostLikes?postId=$postId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/getPostLikes?postId=$postId', method: networkUtils.HttpMethod.GET));
 
       // Handle response - API may return List directly or wrapped in a Map with 'data' key
       List<dynamic> likesData;
@@ -178,9 +130,7 @@ class PostApiService {
         likesData = [];
       }
 
-      final likes = likesData
-          .map((json) => PostLikesModel.fromJson(json))
-          .toList();
+      final likes = likesData.map((json) => PostLikesModel.fromJson(json)).toList();
       return ApiResponse.success(likes);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -190,16 +140,9 @@ class PostApiService {
   }
 
   /// Delete a post
-  Future<ApiResponse<Map<String, dynamic>>> deletePost({
-    required String postId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deletePost({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/delete_post?post_id=$postId',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/delete_post?post_id=$postId', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -209,17 +152,9 @@ class PostApiService {
   }
 
   /// Search posts by keyword
-  Future<ApiResponse<PostDataModel>> searchPosts({
-    required String page,
-    required String keyword,
-  }) async {
+  Future<ApiResponse<PostDataModel>> searchPosts({required String page, required String keyword}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/search-post?page=$page&search=$keyword',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/search-post?page=$page&search=$keyword', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -231,12 +166,7 @@ class PostApiService {
   /// Get advertisement settings
   Future<ApiResponse<AdsSettingModel>> getAdvertisementSettings() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/advertisement-setting',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/advertisement-setting', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(AdsSettingModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -248,18 +178,9 @@ class PostApiService {
   /// Get advertisement types
   Future<ApiResponse<List<AdsTypeModel>>> getAdvertisementTypes() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/advertisement-types',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
-      final List<dynamic> adsData = response is List
-          ? response
-          : response['data'] ?? [];
-      final adTypes = adsData
-          .map((json) => AdsTypeModel.fromJson(json))
-          .toList();
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/advertisement-types', method: networkUtils.HttpMethod.GET));
+      final List<dynamic> adsData = response is List ? response : response['data'] ?? [];
+      final adTypes = adsData.map((json) => AdsTypeModel.fromJson(json)).toList();
       return ApiResponse.success(adTypes);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -269,22 +190,10 @@ class PostApiService {
   }
 
   /// Make comment (backward compatibility)
-  Future<ApiResponse<Map<String, dynamic>>> makeComment({
-    required String postId,
-    required String comment,
-    String? replyId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> makeComment({required String postId, required String comment, String? replyId}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/comment',
-          method: networkUtils.HttpMethod.POST,
-          request: {
-            'post_id': postId,
-            'comment': comment,
-            if (replyId != null) 'reply_id': replyId,
-          },
-        ),
+        await networkUtils.buildHttpResponse1('/comment', method: networkUtils.HttpMethod.POST, request: {'post_id': postId, 'comment': comment, if (replyId != null) 'reply_id': replyId}),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
@@ -295,16 +204,9 @@ class PostApiService {
   }
 
   /// Delete comment (backward compatibility)
-  Future<ApiResponse<Map<String, dynamic>>> deleteComments({
-    required String commentId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteComments({required String commentId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/delete-comment?comment_id=$commentId',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/delete-comment?comment_id=$commentId', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -314,17 +216,9 @@ class PostApiService {
   }
 
   /// Get my posts (backward compatibility)
-  Future<ApiResponse<PostDataModel>> getMyPosts({
-    required String page,
-    required String userId,
-  }) async {
+  Future<ApiResponse<PostDataModel>> getMyPosts({required String page, required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/get_my_posts?page=$page&user_id=$userId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/get_my_posts?page=$page&user_id=$userId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -334,18 +228,10 @@ class PostApiService {
   }
 
   /// Save suggestion (backward compatibility)
-  Future<ApiResponse<Map<String, dynamic>>> saveSuggestion({
-    required String name,
-    required String email,
-    required String suggestion,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> saveSuggestion({required String name, required String email, required String suggestion}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/save-suggestion',
-          method: networkUtils.HttpMethod.POST,
-          request: {'name': name, 'email': email, 'suggestion': suggestion},
-        ),
+        await networkUtils.buildHttpResponse1('/save-suggestion', method: networkUtils.HttpMethod.POST, request: {'name': name, 'email': email, 'suggestion': suggestion}),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
@@ -356,19 +242,10 @@ class PostApiService {
   }
 
   /// Get news channel (backward compatibility)
-  Future<ApiResponse<List<NewsModel>>> getNewsChannel({
-    required String channel,
-  }) async {
+  Future<ApiResponse<List<NewsModel>>> getNewsChannel({required String channel}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/news/$channel',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
-      final List<dynamic> newsData = response is List
-          ? response
-          : response['data'] ?? [];
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/news/$channel', method: networkUtils.HttpMethod.GET));
+      final List<dynamic> newsData = response is List ? response : response['data'] ?? [];
       final news = newsData.map((json) => NewsModel.fromJson(json)).toList();
       return ApiResponse.success(news);
     } on ApiException catch (e) {
@@ -381,16 +258,9 @@ class PostApiService {
   // ================================== COMMENTS ==================================
 
   /// Get comments for a post
-  Future<ApiResponse<PostCommentModel>> getPostComments({
-    required String postId,
-  }) async {
+  Future<ApiResponse<PostCommentModel>> getPostComments({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/get-post-comments?post_id=$postId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/get-post-comments?post_id=$postId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostCommentModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -400,17 +270,9 @@ class PostApiService {
   }
 
   /// Add a comment to a post
-  Future<ApiResponse<Map<String, dynamic>>> addComment({
-    required String postId,
-    required String comment,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> addComment({required String postId, required String comment}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/post-comment?post_id=$postId&comment=$comment',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/post-comment?post_id=$postId&comment=$comment', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -420,17 +282,9 @@ class PostApiService {
   }
 
   /// Delete a comment
-  Future<ApiResponse<Map<String, dynamic>>> deleteComment({
-    required String commentId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteComment({required String commentId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/delete-comment',
-          method: networkUtils.HttpMethod.POST,
-          request: {'comment_id': commentId},
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/delete-comment', method: networkUtils.HttpMethod.POST, request: {'comment_id': commentId}));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);

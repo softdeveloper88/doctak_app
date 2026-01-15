@@ -15,20 +15,10 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
   Color _fontColor = Colors.black;
   FontWeight _fontWeight = FontWeight.normal;
 
-  final List<String> _fontFamilies = [
-    'Roboto',
-    'Arial',
-    'Courier New',
-    'Times New Roman'
-  ];
+  final List<String> _fontFamilies = ['Roboto', 'Arial', 'Courier New', 'Times New Roman'];
 
   void _updateStyle() {
-    widget.onStyleChanged({
-      'fontFamily': _fontFamily,
-      'fontSize': _fontSize,
-      'fontColor': _fontColor,
-      'fontWeight': _fontWeight,
-    });
+    widget.onStyleChanged({'fontFamily': _fontFamily, 'fontSize': _fontSize, 'fontColor': _fontColor, 'fontWeight': _fontWeight});
   }
 
   @override
@@ -47,16 +37,10 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     isExpanded: true,
-                    value: _fontFamily,
-                    decoration: const InputDecoration(
-                      labelText: 'Font Family',
-                      border: OutlineInputBorder(),
-                    ),
+                    initialValue: _fontFamily,
+                    decoration: const InputDecoration(labelText: 'Font Family', border: OutlineInputBorder()),
                     items: _fontFamilies.map((String family) {
-                      return DropdownMenuItem<String>(
-                        value: family,
-                        child: Text(family),
-                      );
+                      return DropdownMenuItem<String>(value: family, child: Text(family));
                     }).toList(),
                     onChanged: (String? newFamily) {
                       setState(() {
@@ -70,20 +54,11 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
                 Expanded(
                   child: DropdownButtonFormField<FontWeight>(
                     isExpanded: true,
-                    value: _fontWeight,
-                    decoration: const InputDecoration(
-                      labelText: 'Font Weight',
-                      border: OutlineInputBorder(),
-                    ),
+                    initialValue: _fontWeight,
+                    decoration: const InputDecoration(labelText: 'Font Weight', border: OutlineInputBorder()),
                     items: const [
-                      DropdownMenuItem(
-                        value: FontWeight.normal,
-                        child: Text('Normal'),
-                      ),
-                      DropdownMenuItem(
-                        value: FontWeight.bold,
-                        child: Text('Bold'),
-                      ),
+                      DropdownMenuItem(value: FontWeight.normal, child: Text('Normal')),
+                      DropdownMenuItem(value: FontWeight.bold, child: Text('Bold')),
                     ],
                     onChanged: (FontWeight? newWeight) {
                       setState(() {
@@ -98,13 +73,7 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
             const SizedBox(height: 20),
             Row(
               children: [
-                const Text(
-                  'Font Size',
-                  style: TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                const Text('Font Size', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Slider(
@@ -128,8 +97,7 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
               children: <Widget>[
                 Expanded(
                   child: ElevatedButton(
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                     onPressed: () {
                       setState(() {
                         _fontColor = Colors.red;
@@ -142,8 +110,7 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                     onPressed: () {
                       setState(() {
                         _fontColor = Colors.green;
@@ -156,8 +123,7 @@ class _DynamicTextFontWidgetState extends State<DynamicTextFontWidget> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton(
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
                     onPressed: () {
                       setState(() {
                         _fontColor = Colors.blue;

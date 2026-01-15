@@ -8,7 +8,7 @@ class PostModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (posts != null) {
       data['posts'] = posts!.toJson();
     }
@@ -31,20 +31,7 @@ class Posts {
   int? to;
   int? total;
 
-  Posts(
-      {this.currentPage,
-      this.data,
-      this.firstPageUrl,
-      this.from,
-      this.lastPage,
-      this.lastPageUrl,
-      this.links,
-      this.nextPageUrl,
-      this.path,
-      this.perPage,
-      this.prevPageUrl,
-      this.to,
-      this.total});
+  Posts({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
 
   Posts.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
@@ -73,7 +60,7 @@ class Posts {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['current_page'] = currentPage;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
@@ -112,22 +99,23 @@ class Data {
   List<Media>? media;
   List<Likes>? likes;
 
-  Data(
-      {this.id,
-      this.userId,
-      this.title,
-      this.lat,
-      this.lng,
-      this.country,
-      this.image,
-      this.createdAt,
-      this.updatedAt,
-      this.backgroundColor,
-      this.relevanceScore,
-      this.comments,
-      this.user,
-      this.media,
-      this.likes});
+  Data({
+    this.id,
+    this.userId,
+    this.title,
+    this.lat,
+    this.lng,
+    this.country,
+    this.image,
+    this.createdAt,
+    this.updatedAt,
+    this.backgroundColor,
+    this.relevanceScore,
+    this.comments,
+    this.user,
+    this.media,
+    this.likes,
+  });
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -163,7 +151,7 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['user_id'] = userId;
     data['title'] = title;
@@ -207,21 +195,22 @@ class Comments {
   String? updatedAt;
   Commenter? commenter;
 
-  Comments(
-      {this.id,
-      this.commenterId,
-      this.commenterType,
-      this.guestName,
-      this.guestEmail,
-      this.commentableType,
-      this.commentableId,
-      this.comment,
-      this.approved,
-      this.childId,
-      this.deletedAt,
-      this.createdAt,
-      this.updatedAt,
-      this.commenter});
+  Comments({
+    this.id,
+    this.commenterId,
+    this.commenterType,
+    this.guestName,
+    this.guestEmail,
+    this.commentableType,
+    this.commentableId,
+    this.comment,
+    this.approved,
+    this.childId,
+    this.deletedAt,
+    this.createdAt,
+    this.updatedAt,
+    this.commenter,
+  });
 
   Comments.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -237,13 +226,11 @@ class Comments {
     deletedAt = json['deleted_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    commenter = json['commenter'] != null
-        ? Commenter.fromJson(json['commenter'])
-        : null;
+    commenter = json['commenter'] != null ? Commenter.fromJson(json['commenter']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['commenter_id'] = commenterId;
     data['commenter_type'] = commenterType;
@@ -278,7 +265,7 @@ class Commenter {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['name'] = name;
     data['profile_pic'] = profilePic;
@@ -294,13 +281,7 @@ class Media {
   String? createdAt;
   String? updatedAt;
 
-  Media(
-      {this.id,
-      this.postId,
-      this.mediaType,
-      this.mediaPath,
-      this.createdAt,
-      this.updatedAt});
+  Media({this.id, this.postId, this.mediaType, this.mediaPath, this.createdAt, this.updatedAt});
 
   Media.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -312,7 +293,7 @@ class Media {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['post_id'] = postId;
     data['media_type'] = mediaType;
@@ -341,7 +322,7 @@ class Likes {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
     data['user_id'] = userId;
     data['post_id'] = postId;
@@ -365,7 +346,7 @@ class Links {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['url'] = url;
     data['label'] = label;
     data['active'] = active;

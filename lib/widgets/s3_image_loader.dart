@@ -17,7 +17,7 @@ class S3ImageLoader extends StatefulWidget {
   final Duration retryDelay;
 
   const S3ImageLoader({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
@@ -26,7 +26,7 @@ class S3ImageLoader extends StatefulWidget {
     this.errorWidget,
     this.maxRetries = 3,
     this.retryDelay = const Duration(seconds: 2),
-  }) : super(key: key);
+  });
 
   @override
   _S3ImageLoaderState createState() => _S3ImageLoaderState();
@@ -47,10 +47,8 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
       fit: widget.fit,
       cacheManager: CustomCacheManager(),
       httpHeaders: _getS3Headers(),
-      placeholder: (context, url) =>
-          widget.placeholder ?? _buildDefaultPlaceholder(theme),
-      errorWidget: (context, url, error) =>
-          _handleError(context, url, error, theme),
+      placeholder: (context, url) => widget.placeholder ?? _buildDefaultPlaceholder(theme),
+      errorWidget: (context, url, error) => _handleError(context, url, error, theme),
     );
   }
 
@@ -74,29 +72,14 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
     return Container(
       width: widget.width,
       height: widget.height,
-      decoration: BoxDecoration(
-        color: theme.surfaceVariant,
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(8)),
       child: Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-          ),
-        ),
+        child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.primary))),
       ),
     );
   }
 
-  Widget _handleError(
-    BuildContext context,
-    String url,
-    dynamic error,
-    OneUITheme theme,
-  ) {
+  Widget _handleError(BuildContext context, String url, dynamic error, OneUITheme theme) {
     debugPrint('\ud83d\udea8 S3ImageLoader error for URL: $url');
     debugPrint('\ud83d\udea8 Error details: $error');
 
@@ -124,29 +107,15 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
     return Container(
       width: widget.width,
       height: widget.height,
-      decoration: BoxDecoration(
-        color: theme.warning.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation<Color>(theme.warning),
-            ),
-          ),
+          SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.warning))),
           const SizedBox(height: 8),
           Text(
             'Retrying... ($_retryCount/${widget.maxRetries})',
-            style: TextStyle(
-              fontSize: 12,
-              color: theme.warning,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(fontSize: 12, color: theme.warning, fontFamily: 'Poppins'),
           ),
         ],
       ),
@@ -157,10 +126,7 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
     return Container(
       width: widget.width,
       height: widget.height,
-      decoration: BoxDecoration(
-        color: theme.error.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -168,11 +134,7 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
           const SizedBox(height: 4),
           Text(
             'Image failed to load',
-            style: TextStyle(
-              color: theme.error,
-              fontSize: 12,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(color: theme.error, fontSize: 12, fontFamily: 'Poppins'),
           ),
         ],
       ),
@@ -191,10 +153,7 @@ class S3ImageValidator {
       final response = await _dio.head(
         url,
         options: Options(
-          headers: {
-            'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
-            'Accept': '*/*',
-          },
+          headers: {'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)', 'Accept': '*/*'},
           followRedirects: true,
           validateStatus: (status) => status! < 500,
           receiveTimeout: const Duration(seconds: 10),

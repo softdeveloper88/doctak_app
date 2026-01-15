@@ -9,7 +9,6 @@ import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/post_shimmer_loader.dart';
 import 'package:flutter/material.dart';
@@ -36,9 +35,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
   void initState() {
     super.initState();
     if (widget.commentId != null) {
-      homeBloc.add(
-        DetailsPostEvent(commentId: widget.commentId ?? 0, postId: 0),
-      );
+      homeBloc.add(DetailsPostEvent(commentId: widget.commentId ?? 0, postId: 0));
     } else {
       homeBloc.add(DetailsPostEvent(postId: widget.postId ?? 0, commentId: 0));
     }
@@ -50,10 +47,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
       resizeToAvoidBottomInset: true,
-      appBar: DoctakAppBar(
-        title: 'Post Detail',
-        titleIcon: Icons.article_outlined,
-      ),
+      appBar: DoctakAppBar(title: 'Post Detail', titleIcon: Icons.article_outlined),
       body: BlocConsumer<HomeBloc, HomeState>(
         bloc: homeBloc,
         listener: (BuildContext context, HomeState state) {
@@ -80,8 +74,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 children: [
                   // Reuse PostItemWidget to avoid code duplication
                   PostItemWidget(
-                    profilePicUrl:
-                        "${AppData.imageUrl}${post.user?.profilePic ?? ''}",
+                    profilePicUrl: "${AppData.imageUrl}${post.user?.profilePic ?? ''}",
                     userName: post.user?.name ?? '',
                     createdAt: post.createdAt ?? '',
                     title: post.title,
@@ -105,43 +98,24 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                       homeBloc.add(PostLikeEvent(postId: post.id ?? 0));
                     },
                     onCommentTap: () {
-                      SVCommentScreen(
-                        homeBloc: homeBloc,
-                        id: post.id ?? 0,
-                      ).launch(context);
+                      SVCommentScreen(homeBloc: homeBloc, id: post.id ?? 0).launch(context);
                     },
                     onShareTap: () {
-                      DeepLinkService.sharePost(
-                        postId: post.id ?? 0,
-                        title: post.title,
-                      );
+                      DeepLinkService.sharePost(postId: post.id ?? 0, title: post.title);
                     },
                     onToggleComment: () {
-                      SVCommentScreen(
-                        homeBloc: homeBloc,
-                        id: post.id ?? 0,
-                      ).launch(context);
+                      SVCommentScreen(homeBloc: homeBloc, id: post.id ?? 0).launch(context);
                     },
                     onViewLikesTap: () {
-                      LikesListScreen(
-                        id: post.id?.toString() ?? '0',
-                      ).launch(context);
+                      LikesListScreen(id: post.id?.toString() ?? '0').launch(context);
                     },
                     onViewCommentsTap: () {
-                      SVCommentScreen(
-                        homeBloc: homeBloc,
-                        id: post.id ?? 0,
-                      ).launch(context);
+                      SVCommentScreen(homeBloc: homeBloc, id: post.id ?? 0).launch(context);
                     },
                     onAddComment: (value) {
                       if (value.isNotEmpty) {
                         var commentBloc = CommentBloc();
-                        commentBloc.add(
-                          PostCommentEvent(
-                            postId: post.id ?? 0,
-                            comment: value,
-                          ),
-                        );
+                        commentBloc.add(PostCommentEvent(postId: post.id ?? 0, comment: value));
                         post.comments?.add(Comments());
                         setState(() {});
                       }
@@ -149,30 +123,19 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                   ),
 
                   // Specific Comment Section (when navigating from a comment notification)
-                  if (widget.commentId != null &&
-                      homeBloc.postData?.specificComment != null)
-                    _buildSpecificCommentSection(context, theme),
+                  if (widget.commentId != null && homeBloc.postData?.specificComment != null) _buildSpecificCommentSection(context, theme),
 
                   // Comment Reply Component
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
-                    child: SVCommentReplyComponent(
-                      CommentBloc(),
-                      post.id ?? 0,
-                      (value) {
-                        if (value.isNotEmpty) {
-                          var commentBloc = CommentBloc();
-                          commentBloc.add(
-                            PostCommentEvent(
-                              postId: post.id ?? 0,
-                              comment: value,
-                            ),
-                          );
-                          post.comments?.add(Comments());
-                          setState(() {});
-                        }
-                      },
-                    ),
+                    child: SVCommentReplyComponent(CommentBloc(), post.id ?? 0, (value) {
+                      if (value.isNotEmpty) {
+                        var commentBloc = CommentBloc();
+                        commentBloc.add(PostCommentEvent(postId: post.id ?? 0, comment: value));
+                        post.comments?.add(Comments());
+                        setState(() {});
+                      }
+                    }),
                   ),
                 ],
               ),
@@ -216,17 +179,9 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: theme.primary.withOpacity(0.3),
-                      width: 2,
-                    ),
+                    border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 2),
                   ),
-                  child: CircleAvatar(
-                    radius: 18,
-                    backgroundImage: NetworkImage(
-                      '${AppData.imageUrl}${specificComment.commenterProfilePic ?? ''}',
-                    ),
-                  ),
+                  child: CircleAvatar(radius: 18, backgroundImage: NetworkImage('${AppData.imageUrl}${specificComment.commenterProfilePic ?? ''}')),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -238,12 +193,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                           Flexible(
                             child: Text(
                               specificComment.commenterName ?? 'No Name',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: theme.textPrimary,
-                              ),
+                              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600, color: theme.textPrimary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -253,14 +203,8 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                         ],
                       ),
                       Text(
-                        timeAgo.format(
-                          DateTime.parse(specificComment.createdAt ?? ""),
-                        ),
-                        style: TextStyle(
-                          color: theme.textTertiary,
-                          fontFamily: 'Poppins',
-                          fontSize: 11,
-                        ),
+                        timeAgo.format(DateTime.parse(specificComment.createdAt ?? "")),
+                        style: TextStyle(color: theme.textTertiary, fontFamily: 'Poppins', fontSize: 11),
                       ),
                     ],
                   ),
@@ -272,35 +216,19 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
           // Comment Text
           Text(
             specificComment.comment ?? '',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              color: theme.textPrimary,
-              fontSize: 14,
-            ),
+            style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontSize: 14),
           ),
           const SizedBox(height: 12),
           // More Comments Button
           Center(
             child: TextButton.icon(
               onPressed: () {
-                SVCommentScreen(
-                  id: homeBloc.postData?.post?.id?.toInt() ?? 0,
-                  homeBloc: HomeBloc(),
-                ).launch(context);
+                SVCommentScreen(id: homeBloc.postData?.post?.id?.toInt() ?? 0, homeBloc: HomeBloc()).launch(context);
               },
-              icon: Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 16,
-                color: theme.primary,
-              ),
+              icon: Icon(Icons.chat_bubble_outline_rounded, size: 16, color: theme.primary),
               label: Text(
                 "View All Comments",
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: theme.primary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600, color: theme.primary),
               ),
             ),
           ),
@@ -317,20 +245,14 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: theme.cardBackground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: theme.warning, size: 24),
               const SizedBox(width: 8),
               Text(
                 "Delete Post",
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: theme.textPrimary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: theme.textPrimary),
               ),
             ],
           ),
@@ -343,10 +265,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: Text(
                 "Cancel",
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  color: theme.textSecondary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary),
               ),
             ),
             TextButton(
@@ -359,9 +278,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                     content: const Text('Post deleted successfully'),
                     backgroundColor: theme.success,
                     behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                 );
 
@@ -372,11 +289,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
               },
               child: Text(
                 "Delete",
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: theme.error,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: theme.error),
               ),
             ),
           ],

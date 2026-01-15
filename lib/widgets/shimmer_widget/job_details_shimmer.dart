@@ -6,7 +6,7 @@ import 'package:sizer/sizer.dart';
 /// Shimmer loader that exactly matches JobDetailsScreen structure
 /// Mirrors the actual job details UI components with proper content reflection
 class JobDetailsShimmer extends StatelessWidget {
-  const JobDetailsShimmer({Key? key}) : super(key: key);
+  const JobDetailsShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -60,20 +60,20 @@ class JobDetailsShimmer extends StatelessWidget {
   Color _getBaseColor(BuildContext context) {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
+    return isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
   }
 
   Color _getHighlightColor(BuildContext context) {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
+    return isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
   }
 
   // ignore: unused_element
   Color _getShimmerColor(BuildContext context) {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? theme.surfaceVariant.withOpacity(0.4) : Colors.grey[300]!;
+    return isDark ? theme.surfaceVariant.withValues(alpha: 0.4) : Colors.grey[300]!;
   }
 
   Widget _buildActionButtonsShimmer(BuildContext context) {
@@ -88,10 +88,7 @@ class JobDetailsShimmer extends StatelessWidget {
             child: Container(
               width: 80,
               height: 32,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(16),
-              ),
+              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(16)),
             ),
           ),
         ],
@@ -102,23 +99,13 @@ class JobDetailsShimmer extends StatelessWidget {
   Widget _buildJobHeaderCardShimmer(context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.grey[400]!, Colors.grey[500]!],
-        ),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Colors.grey[400]!, Colors.grey[500]!]),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Shimmer.fromColors(
-        baseColor: Colors.white.withOpacity(0.3),
-        highlightColor: Colors.white.withOpacity(0.6),
+        baseColor: Colors.white.withValues(alpha: 0.3),
+        highlightColor: Colors.white.withValues(alpha: 0.6),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -135,20 +122,14 @@ class JobDetailsShimmer extends StatelessWidget {
                         Container(
                           height: 24,
                           width: 75.w, // Realistic job title width
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(4)),
                         ),
                         const SizedBox(height: 4),
                         // Second line for longer titles
                         Container(
                           height: 20,
                           width: 45.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(4)),
                         ),
                       ],
                     ),
@@ -156,33 +137,21 @@ class JobDetailsShimmer extends StatelessWidget {
                   const SizedBox(width: 12),
                   // Sponsored Badge Placeholder
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(20)),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
                           width: 16,
                           height: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.7),
-                            shape: BoxShape.circle,
-                          ),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), shape: BoxShape.circle),
                         ),
                         const SizedBox(width: 4),
                         Container(
                           width: 60,
                           height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(2)),
                         ),
                       ],
                     ),
@@ -195,17 +164,11 @@ class JobDetailsShimmer extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(4)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -213,10 +176,7 @@ class JobDetailsShimmer extends StatelessWidget {
                     child: Container(
                       height: 18,
                       width: 60.w, // Realistic company name width
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(4)),
                     ),
                   ),
                 ],
@@ -227,17 +187,11 @@ class JobDetailsShimmer extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(4)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -245,10 +199,7 @@ class JobDetailsShimmer extends StatelessWidget {
                     child: Container(
                       height: 16,
                       width: 50.w, // Realistic location width
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(4)),
                     ),
                   ),
                 ],
@@ -259,17 +210,11 @@ class JobDetailsShimmer extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.6),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(4)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -277,10 +222,7 @@ class JobDetailsShimmer extends StatelessWidget {
                     child: Container(
                       height: 16,
                       width: 40.w, // Realistic salary range width
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(4)),
                     ),
                   ),
                 ],
@@ -308,10 +250,7 @@ class JobDetailsShimmer extends StatelessWidget {
               Container(
                 width: 120,
                 height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
               ),
               const SizedBox(height: 20),
               // Experience Row
@@ -336,20 +275,13 @@ class JobDetailsShimmer extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               // Divider
-              Container(
-                width: double.infinity,
-                height: 1,
-                color: Colors.grey[300],
-              ),
+              Container(width: double.infinity, height: 1, color: Colors.grey[300]),
               const SizedBox(height: 20),
               // Apply Date Section Title
               Container(
                 width: 100,
                 height: 18,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
               ),
               const SizedBox(height: 16),
               // Date From & Date To Row
@@ -367,11 +299,7 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRowShimmer({
-    required double iconSize,
-    required double titleWidth,
-    required double valueWidth,
-  }) {
+  Widget _buildInfoRowShimmer({required double iconSize, required double titleWidth, required double valueWidth}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -379,8 +307,7 @@ class JobDetailsShimmer extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors
-                .grey[200], // Light background like actual blue.withOpacity(0.1)
+            color: Colors.grey[200], // Light background like actual blue.withValues(alpha: 0.1)
             shape: BoxShape.circle,
           ),
           child: Container(
@@ -401,20 +328,14 @@ class JobDetailsShimmer extends StatelessWidget {
               Container(
                 width: titleWidth,
                 height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(3),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
               ),
               const SizedBox(height: 4),
               // Value with realistic width variation
               Container(
                 width: valueWidth,
                 height: 16,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(3),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
               ),
             ],
           ),
@@ -431,10 +352,7 @@ class JobDetailsShimmer extends StatelessWidget {
         Container(
           width: isFromDate ? 70 : 60, // "Date From" vs "Date To"
           height: 14,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(3),
-          ),
+          decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
         ),
         const SizedBox(height: 4),
         Row(
@@ -444,17 +362,14 @@ class JobDetailsShimmer extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: isFromDate
-                    ? Colors.blue.withOpacity(0.1) // Blue for start date
-                    : Colors.red.withOpacity(0.1), // Red for end date (expired)
+                    ? Colors.blue.withValues(alpha: 0.1) // Blue for start date
+                    : Colors.red.withValues(alpha: 0.1), // Red for end date (expired)
                 shape: BoxShape.circle,
               ),
               child: Container(
                 width: 14,
                 height: 14,
-                decoration: BoxDecoration(
-                  color: isFromDate ? Colors.blue[300] : Colors.red[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: isFromDate ? Colors.blue[300] : Colors.red[300], borderRadius: BorderRadius.circular(2)),
               ),
             ),
             const SizedBox(width: 8),
@@ -462,10 +377,7 @@ class JobDetailsShimmer extends StatelessWidget {
               child: Container(
                 height: 14,
                 width: isFromDate ? 70 : 65, // Different widths for dates
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(3),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
               ),
             ),
           ],
@@ -490,10 +402,7 @@ class JobDetailsShimmer extends StatelessWidget {
               Container(
                 width: 120,
                 height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(4),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
               ),
               const SizedBox(height: 20),
               Row(
@@ -528,20 +437,14 @@ class JobDetailsShimmer extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItemShimmer({
-    required Color color,
-    required String value,
-    required String label,
-  }) {
+  Widget _buildStatItemShimmer({required Color color, required String value, required String label}) {
     return Container(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(
-          0.1,
-        ), // Colored background matching actual design
+        color: color.withValues(alpha: 0.1), // Colored background matching actual design
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -556,7 +459,7 @@ class JobDetailsShimmer extends StatelessWidget {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8), // Icon placeholder
+                color: Colors.white.withValues(alpha: 0.8), // Icon placeholder
                 borderRadius: BorderRadius.circular(3),
               ),
             ),
@@ -566,20 +469,14 @@ class JobDetailsShimmer extends StatelessWidget {
           Container(
             width: value.length * 10.0, // Dynamic width based on value length
             height: 18,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(3),
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(3)),
           ),
           const SizedBox(height: 4),
           // Label with realistic width
           Container(
             width: label.length * 6.0, // Dynamic width based on label length
             height: 12,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(3),
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(3)),
           ),
         ],
       ),
@@ -604,28 +501,20 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.purple.withOpacity(
-                        0.1,
-                      ), // Purple theme for medical
+                      color: Colors.purple.withValues(alpha: 0.1), // Purple theme for medical
                       shape: BoxShape.circle,
                     ),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.purple[300],
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: Colors.purple[300], borderRadius: BorderRadius.circular(3)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
                     width: 150, // "Medical Specialties"
                     height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
                   ),
                 ],
               ),
@@ -640,9 +529,7 @@ class JobDetailsShimmer extends StatelessWidget {
                   _buildSpecialtyChipShimmer(width: 110), // "Internal Medicine"
                   _buildSpecialtyChipShimmer(width: 75), // "Surgery"
                   _buildSpecialtyChipShimmer(width: 90), // "Pediatrics"
-                  _buildSpecialtyChipShimmer(
-                    width: 105,
-                  ), // "Emergency Medicine"
+                  _buildSpecialtyChipShimmer(width: 105), // "Emergency Medicine"
                 ],
               ),
             ],
@@ -658,16 +545,13 @@ class JobDetailsShimmer extends StatelessWidget {
       height: 32,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.purple.withOpacity(0.1), // Purple theme matching actual
+        color: Colors.purple.withValues(alpha: 0.1), // Purple theme matching actual
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.purple.withOpacity(0.3)),
+        border: Border.all(color: Colors.purple.withValues(alpha: 0.3)),
       ),
       child: Container(
         height: 14,
-        decoration: BoxDecoration(
-          color: Colors.purple.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(3),
-        ),
+        decoration: BoxDecoration(color: Colors.purple.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(3)),
       ),
     );
   }
@@ -690,28 +574,20 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.teal.withOpacity(
-                        0.1,
-                      ), // Teal theme like actual
+                      color: Colors.teal.withValues(alpha: 0.1), // Teal theme like actual
                       shape: BoxShape.circle,
                     ),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.teal[300],
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: Colors.teal[300], borderRadius: BorderRadius.circular(3)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
                     width: 100, // "Description"
                     height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
                   ),
                 ],
               ),
@@ -724,66 +600,45 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     width: double.infinity,
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     width: 75.w, // Partial line
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(height: 12),
                   // Second paragraph
                   Container(
                     width: double.infinity,
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     width: 60.w, // Shorter paragraph ending
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(height: 12),
                   // Requirements list simulation
                   Container(
                     width: 85.w,
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(height: 6),
                   Container(
                     width: 80.w,
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                   ),
                 ],
               ),
@@ -794,19 +649,13 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     width: 16,
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.teal[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.teal[300], borderRadius: BorderRadius.circular(3)),
                   ),
                   const SizedBox(width: 8),
                   Container(
                     width: 80, // "Show More"
                     height: 16,
-                    decoration: BoxDecoration(
-                      color: Colors.teal[300],
-                      borderRadius: BorderRadius.circular(3),
-                    ),
+                    decoration: BoxDecoration(color: Colors.teal[300], borderRadius: BorderRadius.circular(3)),
                   ),
                 ],
               ),
@@ -835,28 +684,20 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.indigo.withOpacity(
-                        0.1,
-                      ), // Indigo theme like actual
+                      color: Colors.indigo.withValues(alpha: 0.1), // Indigo theme like actual
                       shape: BoxShape.circle,
                     ),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.indigo[300],
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: Colors.indigo[300], borderRadius: BorderRadius.circular(3)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
                     width: 80, // "Posted By"
                     height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
                   ),
                 ],
               ),
@@ -870,17 +711,11 @@ class JobDetailsShimmer extends StatelessWidget {
                     height: 60,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.indigo.withOpacity(0.3),
-                        width: 2,
-                      ),
+                      border: Border.all(color: Colors.indigo.withValues(alpha: 0.3), width: 2),
                     ),
                     child: Container(
                       margin: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        shape: BoxShape.circle,
-                      ),
+                      decoration: BoxDecoration(color: Colors.grey[300], shape: BoxShape.circle),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -892,20 +727,14 @@ class JobDetailsShimmer extends StatelessWidget {
                         Container(
                           width: 45.w, // Realistic name width
                           height: 16,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(3),
-                          ),
+                          decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(3)),
                         ),
                         const SizedBox(height: 4),
                         // "Job Poster" subtitle
                         Container(
                           width: 80,
                           height: 14,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(3),
-                          ),
+                          decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(3)),
                         ),
                       ],
                     ),
@@ -937,28 +766,20 @@ class JobDetailsShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(
-                        0.1,
-                      ), // Green theme like actual
+                      color: Colors.green.withValues(alpha: 0.1), // Green theme like actual
                       shape: BoxShape.circle,
                     ),
                     child: Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.green[300],
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: Colors.green[300], borderRadius: BorderRadius.circular(3)),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Container(
                     width: 80, // "Actions"
                     height: 20,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(4)),
                   ),
                 ],
               ),
@@ -972,9 +793,7 @@ class JobDetailsShimmer extends StatelessWidget {
                       height: 48,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(
-                          0.8,
-                        ), // Blue for apply button
+                        color: Colors.blue.withValues(alpha: 0.8), // Blue for apply button
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -983,19 +802,13 @@ class JobDetailsShimmer extends StatelessWidget {
                           Container(
                             width: 18,
                             height: 18,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(3)),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             width: 40, // "Apply"
                             height: 14,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(3)),
                           ),
                         ],
                       ),
@@ -1008,10 +821,7 @@ class JobDetailsShimmer extends StatelessWidget {
                       height: 48,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.blue.withOpacity(0.3),
-                          width: 1.5,
-                        ),
+                        border: Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 1.5),
                         borderRadius: BorderRadius.circular(24),
                       ),
                       child: Row(
@@ -1020,19 +830,13 @@ class JobDetailsShimmer extends StatelessWidget {
                           Container(
                             width: 18,
                             height: 18,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
+                            decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(3)),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             width: 60, // "Visit Site"
                             height: 14,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
+                            decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(3)),
                           ),
                         ],
                       ),
@@ -1047,9 +851,7 @@ class JobDetailsShimmer extends StatelessWidget {
                 height: 48,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(
-                    0.8,
-                  ), // Green for view applicants
+                  color: Colors.green.withValues(alpha: 0.8), // Green for view applicants
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Row(
@@ -1058,19 +860,13 @@ class JobDetailsShimmer extends StatelessWidget {
                     Container(
                       width: 20,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(3)),
                     ),
                     const SizedBox(width: 12),
                     Container(
                       width: 120, // "View Applicants"
                       height: 16,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(3)),
                     ),
                   ],
                 ),

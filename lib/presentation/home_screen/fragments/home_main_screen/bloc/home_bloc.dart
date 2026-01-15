@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -41,17 +39,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _startConnectivityMonitoring() {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
-      List<ConnectivityResult> results,
-    ) {
-      final hasConnection = results.any(
-        (result) => result != ConnectivityResult.none,
-      );
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      final hasConnection = results.any((result) => result != ConnectivityResult.none);
 
       if (hasConnection && _pendingLikeRequests.isNotEmpty) {
-        print(
-          '📶 Network reconnected - retrying ${_pendingLikeRequests.length} pending likes',
-        );
+        print('📶 Network reconnected - retrying ${_pendingLikeRequests.length} pending likes');
         retryPendingLikeRequests();
       }
     });
@@ -63,17 +55,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     return super.close();
   }
 
-  _onGetPosts(PostLoadPageEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onGetPosts(PostLoadPageEvent event, Emitter<HomeState> emit) async {
     if (event.page == 1) {
       postList.clear();
       pageNumber = 1;
       emit(PostPaginationLoadingState());
     }
     try {
-      var response1 = await apiManager.getPosts(
-        'Bearer ${AppData.userToken}',
-        '$pageNumber',
-      );
+      var response1 = await apiManager.getPosts('Bearer ${AppData.userToken}', '$pageNumber');
       final response = PostDataModel.fromJson(response1.response.data!);
       if (response1.response.statusCode == 302) {
         print(' Error 302 ${response1.response.data}');
@@ -94,21 +83,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  _onGetDetailsPosts(DetailsPostEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onGetDetailsPosts(DetailsPostEvent event, Emitter<HomeState> emit) async {
     emit(PostPaginationLoadingState());
 
     try {
       if (event.commentId != 0) {
         print(event.commentId);
-        postData = await apiManager.getDetailsPosts(
-          'Bearer ${AppData.userToken}',
-          event.commentId.toString(),
-        );
+        postData = await apiManager.getDetailsPosts('Bearer ${AppData.userToken}', event.commentId.toString());
       } else {
-        postData = await apiManager.getDetailsLikesPosts(
-          'Bearer ${AppData.userToken}',
-          event.postId.toString(),
-        );
+        postData = await apiManager.getDetailsLikesPosts('Bearer ${AppData.userToken}', event.postId.toString());
       }
       print('post $postData');
       emit(PostPaginationLoadedState());
@@ -120,18 +103,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  _onGetSearchPosts(LoadSearchPageEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onGetSearchPosts(LoadSearchPageEvent event, Emitter<HomeState> emit) async {
     if (event.page == 1) {
       postList.clear();
       pageNumber = 1;
       emit(PostPaginationLoadingState());
     }
     try {
-      PostDataModel response = await apiManager.getSearchPostList(
-        'Bearer ${AppData.userToken}',
-        '$pageNumber',
-        event.search ?? '',
-      );
+      PostDataModel response = await apiManager.getSearchPostList('Bearer ${AppData.userToken}', '$pageNumber', event.search ?? '');
       print(response.toJson());
       numberOfPage = response.posts?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
@@ -149,11 +128,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  _onPostLike(PostLikeEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onPostLike(PostLikeEvent event, Emitter<HomeState> emit) async {
     // Find the post in the list
-    int index = postList.indexWhere(
-      (element) => element.id.toString() == event.postId.toString(),
-    );
+    int index = postList.indexWhere((element) => element.id.toString() == event.postId.toString());
 
     if (index < 0) {
       print('⚠️ Post not found in list: ${event.postId}');
@@ -161,24 +138,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     // Determine current like state
-    bool wasLiked = postList[index].likes!
-        .where(
-          (element) =>
-              element.userId.toString() == AppData.logInUserId.toString(),
-        )
-        .isNotEmpty;
+    bool wasLiked = postList[index].likes!.where((element) => element.userId.toString() == AppData.logInUserId.toString()).isNotEmpty;
 
-    print(
-      '👍 Optimistic like/unlike for post ${event.postId}, wasLiked: $wasLiked',
-    );
+    print('👍 Optimistic like/unlike for post ${event.postId}, wasLiked: $wasLiked');
 
     // OPTIMISTIC UPDATE: Update UI immediately
     if (wasLiked) {
       // Remove like optimistically
-      postList[index].likes!.removeWhere(
-        (element) =>
-            element.userId.toString() == AppData.logInUserId.toString(),
-      );
+      postList[index].likes!.removeWhere((element) => element.userId.toString() == AppData.logInUserId.toString());
     } else {
       // Add like optimistically
       postList[index].likes!.add(
@@ -195,10 +162,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     // Now make the API call in the background
     try {
-      var response = await apiManager.like(
-        'Bearer ${AppData.userToken}',
-        event.postId.toString(),
-      );
+      var response = await apiManager.like('Bearer ${AppData.userToken}', event.postId.toString());
       print('✅ Like API success: ${response.data}');
 
       // API succeeded - UI already reflects correct state
@@ -208,36 +172,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       print('❌ Like API failed: $e');
 
       // ROLLBACK: Revert the optimistic update on failure
-      int currentIndex = postList.indexWhere(
-        (element) => element.id.toString() == event.postId.toString(),
-      );
+      int currentIndex = postList.indexWhere((element) => element.id.toString() == event.postId.toString());
 
       if (currentIndex >= 0) {
         if (wasLiked) {
           // Restore the like
-          postList[currentIndex].likes!.add(
-            Likes(
-              id: 1,
-              userId: AppData.logInUserId,
-              postId: event.postId.toString(),
-            ),
-          );
+          postList[currentIndex].likes!.add(Likes(id: 1, userId: AppData.logInUserId, postId: event.postId.toString()));
         } else {
           // Remove the optimistic like
-          postList[currentIndex].likes!.removeWhere(
-            (element) =>
-                element.userId.toString() == AppData.logInUserId.toString(),
-          );
+          postList[currentIndex].likes!.removeWhere((element) => element.userId.toString() == AppData.logInUserId.toString());
         }
 
         // Emit state with rolled-back data
         emit(PostPaginationLoadedState());
 
         // Queue for retry if it's a network error
-        if (e.toString().contains('SocketException') ||
-            e.toString().contains('TimeoutException') ||
-            e.toString().contains('Network') ||
-            e.toString().contains('Connection')) {
+        if (e.toString().contains('SocketException') || e.toString().contains('TimeoutException') || e.toString().contains('Network') || e.toString().contains('Connection')) {
           print('📝 Queuing like request for retry when network returns');
           _queueFailedLikeRequest(event.postId.toString(), !wasLiked);
         }
@@ -272,15 +222,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  _onDeletePost(DeletePostEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onDeletePost(DeletePostEvent event, Emitter<HomeState> emit) async {
     // try {
-    var response = await apiManager.deletePost(
-      'Bearer ${AppData.userToken}',
-      event.postId.toString(),
-    );
-    postList.removeAt(
-      postList.indexWhere((element) => element.id == event.postId),
-    );
+    var response = await apiManager.deletePost('Bearer ${AppData.userToken}', event.postId.toString());
+    postList.removeAt(postList.indexWhere((element) => element.id == event.postId));
     // int index=postList.indexWhere((element) => element.id.toString()==event.postId.toString());
     // bool isLike=postList[index].likes!.where((element) => element.postId.toString()==event.postId.toString()).isEmpty;
     // if(isLike) {
@@ -315,100 +260,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     // }
   }
 
-  Future<void> _adsSettingApi(
-    AdsSettingEvent event,
-    Emitter<HomeState> emit,
-  ) async {
+  Future<void> _adsSettingApi(AdsSettingEvent event, Emitter<HomeState> emit) async {
     print('call ads api');
     try {
-      AppData.adsSettingModel = await apiManager.advertisementSetting(
-        'Bearer ${AppData.userToken}',
-      );
+      AppData.adsSettingModel = await apiManager.advertisementSetting('Bearer ${AppData.userToken}');
       print("ads data  ${AppData.adsSettingModel.toJson()}");
-      AppData.listAdsType = await apiManager.advertisementTypes(
-        'Bearer ${AppData.userToken}',
-      );
+      AppData.listAdsType = await apiManager.advertisementTypes('Bearer ${AppData.userToken}');
 
       // banner ads
       AppData.isShowGoogleBannerAds =
-          (AppData.listAdsType
-              .where(
-                (element) =>
-                    element.type == 'banner' && element.provider == 'Google',
-              )
-              .isNotEmpty) &&
-          ((AppData.adsSettingModel.data
-                  ?.where(
-                    (element) =>
-                        element.advertisementType == 'banner' &&
-                        element.provider == 'Google' &&
-                        element.isAdvertisementOn == 1,
-                  )
-                  .isNotEmpty ??
-              false));
-      AppData.androidBannerAdsId = AppData.listAdsType
-          .where(
-            (element) =>
-                element.type == 'banner' && element.provider == 'Google',
-          )
-          .firstOrNull
-          ?.androidId;
-      AppData.iosBannerAdsId = AppData.listAdsType
-          .where(
-            (element) =>
-                element.type == 'banner' && element.provider == 'Google',
-          )
-          .firstOrNull
-          ?.iosId;
+          (AppData.listAdsType.where((element) => element.type == 'banner' && element.provider == 'Google').isNotEmpty) &&
+          ((AppData.adsSettingModel.data?.where((element) => element.advertisementType == 'banner' && element.provider == 'Google' && element.isAdvertisementOn == 1).isNotEmpty ?? false));
+      AppData.androidBannerAdsId = AppData.listAdsType.where((element) => element.type == 'banner' && element.provider == 'Google').firstOrNull?.androidId;
+      AppData.iosBannerAdsId = AppData.listAdsType.where((element) => element.type == 'banner' && element.provider == 'Google').firstOrNull?.iosId;
       // native ads
       AppData.isShowGoogleNativeAds =
-          (AppData.listAdsType
-              .where(
-                (element) =>
-                    element.type == 'native' && element.provider == 'Google',
-              )
-              .isNotEmpty) &&
-          ((AppData.adsSettingModel.data
-                  ?.where(
-                    (element) =>
-                        element.advertisementType == 'native' &&
-                        element.provider == 'Google' &&
-                        element.isAdvertisementOn == 1,
-                  )
-                  .isNotEmpty ??
-              false));
-      AppData.androidNativeAdsId = AppData.listAdsType
-          .where(
-            (element) =>
-                element.type == 'native' && element.provider == 'Google',
-          )
-          .firstOrNull
-          ?.androidId;
-      AppData.iosNativeAdsId = AppData.listAdsType
-          .where(
-            (element) =>
-                element.type == 'native' && element.provider == 'Google',
-          )
-          .firstOrNull
-          ?.iosId;
-      print(
-        AppData.listAdsType
-            .where(
-              (element) =>
-                  element.type == 'native' && element.provider == 'Google',
-            )
-            .isNotEmpty,
-      );
-      print(
-        AppData.adsSettingModel.data
-            ?.where(
-              (element) =>
-                  element.advertisementType == 'native' &&
-                  element.provider == 'Google' &&
-                  element.isAdvertisementOn == '1',
-            )
-            .isNotEmpty,
-      );
+          (AppData.listAdsType.where((element) => element.type == 'native' && element.provider == 'Google').isNotEmpty) &&
+          ((AppData.adsSettingModel.data?.where((element) => element.advertisementType == 'native' && element.provider == 'Google' && element.isAdvertisementOn == 1).isNotEmpty ?? false));
+      AppData.androidNativeAdsId = AppData.listAdsType.where((element) => element.type == 'native' && element.provider == 'Google').firstOrNull?.androidId;
+      AppData.iosNativeAdsId = AppData.listAdsType.where((element) => element.type == 'native' && element.provider == 'Google').firstOrNull?.iosId;
+      print(AppData.listAdsType.where((element) => element.type == 'native' && element.provider == 'Google').isNotEmpty);
+      print(AppData.adsSettingModel.data?.where((element) => element.advertisementType == 'native' && element.provider == 'Google' && element.isAdvertisementOn == '1').isNotEmpty);
       print("dot1 ${AppData.isShowGoogleBannerAds}");
       print("dot ${AppData.isShowGoogleNativeAds}");
       print("dot ${AppData.androidBannerAdsId}");

@@ -6,14 +6,7 @@ class ChatGPTResponse {
   final String createdAt;
   final String updatedAt;
 
-  ChatGPTResponse({
-    required this.id,
-    required this.gptSessionId,
-    required this.question,
-    required this.response,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+  ChatGPTResponse({required this.id, required this.gptSessionId, required this.question, required this.response, required this.createdAt, required this.updatedAt});
 
   factory ChatGPTResponse.fromJson(Map<String, dynamic> json) {
     final rawSessionId = json['gptSessionId'] ?? json['session_id'];

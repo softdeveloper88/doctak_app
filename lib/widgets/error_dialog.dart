@@ -22,29 +22,19 @@ class ErrorDialog extends StatelessWidget {
           Expanded(
             child: Text(
               translation(context).lbl_validation_error,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: theme.textPrimary),
             ),
           ),
         ],
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _buildErrorWidgets(theme),
-      ),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: _buildErrorWidgets(theme)),
       actions: [
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
           style: FilledButton.styleFrom(
             backgroundColor: theme.primary,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           ),
           child: Text(translation(context).lbl_ok),
@@ -66,10 +56,7 @@ class ErrorDialog extends StatelessWidget {
                 Icon(Icons.circle, size: 6, color: theme.error),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    '$field: $errorMessage',
-                    style: TextStyle(fontSize: 14, color: theme.textSecondary),
-                  ),
+                  child: Text('$field: $errorMessage', style: TextStyle(fontSize: 14, color: theme.textSecondary)),
                 ),
               ],
             ),

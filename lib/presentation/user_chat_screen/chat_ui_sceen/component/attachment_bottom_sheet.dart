@@ -8,11 +8,8 @@ import 'debug_attachment_helper.dart';
 
 class AttachmentBottomSheet extends StatefulWidget {
   final Function(File file, String type) onFileSelected;
-  
-  const AttachmentBottomSheet({
-    Key? key,
-    required this.onFileSelected,
-  }) : super(key: key);
+
+  const AttachmentBottomSheet({super.key, required this.onFileSelected});
 
   @override
   State<AttachmentBottomSheet> createState() => _AttachmentBottomSheetState();
@@ -24,45 +21,19 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
   List<AssetEntity> _mediaList = [];
   bool _isLoading = true;
   int _currentIndex = 0;
-  
+
   final List<AttachmentOption> _options = [
-    AttachmentOption(
-      icon: Icons.photo_library_rounded,
-      label: 'Gallery',
-      color: const Color(0xFF6B4EFF),
-      type: AttachmentType.gallery,
-    ),
-    AttachmentOption(
-      icon: Icons.camera_alt_rounded,
-      label: 'Camera',
-      color: const Color(0xFF00C853),
-      type: AttachmentType.camera,
-    ),
-    AttachmentOption(
-      icon: Icons.videocam_rounded,
-      label: 'Video',
-      color: const Color(0xFFFF4757),
-      type: AttachmentType.video,
-    ),
-    AttachmentOption(
-      icon: Icons.insert_drive_file_rounded,
-      label: 'Document',
-      color: const Color(0xFF2196F3),
-      type: AttachmentType.document,
-    ),
+    AttachmentOption(icon: Icons.photo_library_rounded, label: 'Gallery', color: const Color(0xFF6B4EFF), type: AttachmentType.gallery),
+    AttachmentOption(icon: Icons.camera_alt_rounded, label: 'Camera', color: const Color(0xFF00C853), type: AttachmentType.camera),
+    AttachmentOption(icon: Icons.videocam_rounded, label: 'Video', color: const Color(0xFFFF4757), type: AttachmentType.video),
+    AttachmentOption(icon: Icons.insert_drive_file_rounded, label: 'Document', color: const Color(0xFF2196F3), type: AttachmentType.document),
   ];
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _animation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    );
+    _animationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _animation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
     _animationController.forward();
     _loadMedia();
   }
@@ -79,27 +50,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
         type: RequestType.common,
         filterOption: FilterOptionGroup(
-          imageOption: const FilterOption(
-            sizeConstraint: SizeConstraint(
-              minWidth: 0,
-              minHeight: 0,
-            ),
-          ),
+          imageOption: const FilterOption(sizeConstraint: SizeConstraint(minWidth: 0, minHeight: 0)),
           videoOption: const FilterOption(
-            durationConstraint: DurationConstraint(
-              min: Duration.zero,
-              max: Duration(hours: 24),
-            ),
+            durationConstraint: DurationConstraint(min: Duration.zero, max: Duration(hours: 24)),
           ),
         ),
       );
 
       if (albums.isNotEmpty) {
-        final List<AssetEntity> media = await albums[0].getAssetListPaged(
-          page: 0,
-          size: 50,
-        );
-        
+        final List<AssetEntity> media = await albums[0].getAssetListPaged(page: 0, size: 50);
+
         if (mounted) {
           setState(() {
             _mediaList = media;
@@ -120,15 +80,10 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
       animation: _animation,
       builder: (context, child) {
         return Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.85,
-            minHeight: MediaQuery.of(context).size.height * 0.5,
-          ),
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85, minHeight: MediaQuery.of(context).size.height * 0.5),
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -137,23 +92,15 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                 width: 40,
                 height: 4,
                 margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[400],
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: Colors.grey[400], borderRadius: BorderRadius.circular(2)),
               ),
-              
+
               // Tab bar
               Container(
                 height: 50,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: appStore.isDarkMode 
-                    ? Colors.grey[800] 
-                    : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(25),
-                ),
+                decoration: BoxDecoration(color: appStore.isDarkMode ? Colors.grey[800] : Colors.grey[200], borderRadius: BorderRadius.circular(25)),
                 child: Row(
                   children: List.generate(
                     _options.length,
@@ -163,12 +110,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           margin: const EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: _currentIndex == index
-                              ? _options[index].color
-                              : Colors.transparent,
-                            borderRadius: BorderRadius.circular(22),
-                          ),
+                          decoration: BoxDecoration(color: _currentIndex == index ? _options[index].color : Colors.transparent, borderRadius: BorderRadius.circular(22)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
@@ -177,9 +119,9 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                                 _options[index].icon,
                                 size: 18,
                                 color: _currentIndex == index
-                                  ? Colors.white
-                                  : appStore.isDarkMode 
-                                    ? Colors.white70 
+                                    ? Colors.white
+                                    : appStore.isDarkMode
+                                    ? Colors.white70
                                     : Colors.black54,
                               ),
                               if (_currentIndex == index) ...[
@@ -187,11 +129,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                                 Flexible(
                                   child: Text(
                                     _options[index].label,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
                                   ),
@@ -205,20 +143,12 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Content area
               Expanded(
-                child: IndexedStack(
-                  index: _currentIndex,
-                  children: [
-                    _buildGalleryView(),
-                    _buildCameraOption(),
-                    _buildVideoOption(),
-                    _buildDocumentOption(),
-                  ],
-                ),
+                child: IndexedStack(index: _currentIndex, children: [_buildGalleryView(), _buildCameraOption(), _buildVideoOption(), _buildDocumentOption()]),
               ),
             ],
           ),
@@ -229,9 +159,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
 
   Widget _buildGalleryView() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_mediaList.isEmpty) {
@@ -239,19 +167,9 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.photo_library_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.photo_library_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              'No media found',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 16,
-              ),
-            ),
+            Text('No media found', style: TextStyle(color: Colors.grey[600], fontSize: 16)),
           ],
         ),
       );
@@ -261,17 +179,8 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return GridView.builder(
-      padding: EdgeInsets.only(
-        left: 4,
-        right: 4,
-        top: 4,
-        bottom: 4 + bottomPadding,
-      ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-      ),
+      padding: EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 4 + bottomPadding),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 4, mainAxisSpacing: 4),
       itemCount: _mediaList.length,
       itemBuilder: (context, index) {
         return FutureBuilder<Widget>(
@@ -281,50 +190,31 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
               return GestureDetector(
                 onTap: () async {
                   try {
-                    DebugAttachmentHelper.logAttachmentFlow('Gallery Selection', {
-                      'Asset ID': _mediaList[index].id,
-                      'Asset Type': _mediaList[index].type.toString(),
-                    });
-                    
+                    DebugAttachmentHelper.logAttachmentFlow('Gallery Selection', {'Asset ID': _mediaList[index].id, 'Asset Type': _mediaList[index].type.toString()});
+
                     final File? file = await _mediaList[index].file;
                     if (file != null && await file.exists()) {
                       DebugAttachmentHelper.logFileInfo(file, 'Selected Gallery Media');
-                      
-                      widget.onFileSelected(
-                        file, 
-                        _mediaList[index].type == AssetType.video ? 'video' : 'image'
-                      );
+
+                      widget.onFileSelected(file, _mediaList[index].type == AssetType.video ? 'video' : 'image');
                     } else {
                       debugPrint('File does not exist or is null');
                       // Show error message to user
                       if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Unable to access this media file'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to access this media file'), duration: Duration(seconds: 2)));
                       }
                     }
                   } catch (e) {
                     DebugAttachmentHelper.logImageError(e, null, 'Gallery Selection');
                     if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Failed to load media file'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to load media file'), duration: Duration(seconds: 2)));
                     }
                   }
                 },
                 child: Hero(
                   tag: 'media_$index',
                   child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.grey[300],
-                    ),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey[300]),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Stack(
@@ -336,30 +226,14 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                               bottom: 4,
                               right: 4,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(12)),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
-                                      Icons.videocam,
-                                      color: Colors.white,
-                                      size: 14,
-                                    ),
+                                    const Icon(Icons.videocam, color: Colors.white, size: 14),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      _formatDuration(_mediaList[index].videoDuration),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                      ),
-                                    ),
+                                    Text(_formatDuration(_mediaList[index].videoDuration), style: const TextStyle(color: Colors.white, fontSize: 12)),
                                   ],
                                 ),
                               ),
@@ -372,15 +246,8 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
               );
             }
             return Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                ),
-              ),
+              decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(8)),
+              child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
             );
           },
         );
@@ -390,11 +257,8 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
 
   Future<Widget> _buildMediaThumbnail(AssetEntity asset) async {
     try {
-      final thumbnail = await asset.thumbnailDataWithSize(
-        const ThumbnailSize(200, 200),
-        quality: 70,
-      );
-      
+      final thumbnail = await asset.thumbnailDataWithSize(const ThumbnailSize(200, 200), quality: 70);
+
       if (thumbnail != null) {
         return Image.memory(
           thumbnail,
@@ -403,36 +267,24 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
             debugPrint('Error loading thumbnail: $error');
             return Container(
               color: Colors.grey[300],
-              child: Icon(
-                Icons.broken_image,
-                color: Colors.grey[600],
-                size: 32,
-              ),
+              child: Icon(Icons.broken_image, color: Colors.grey[600], size: 32),
             );
           },
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
             if (wasSynchronouslyLoaded) {
               return child;
             }
-            return AnimatedOpacity(
-              opacity: frame == null ? 0 : 1,
-              duration: const Duration(milliseconds: 200),
-              child: child,
-            );
+            return AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: const Duration(milliseconds: 200), child: child);
           },
         );
       }
     } catch (e) {
       debugPrint('Error getting thumbnail for asset: $e');
     }
-    
+
     return Container(
       color: Colors.grey[300],
-      child: Icon(
-        Icons.image,
-        color: Colors.grey[600],
-        size: 32,
-      ),
+      child: Icon(Icons.image, color: Colors.grey[600], size: 32),
     );
   }
 
@@ -453,91 +305,65 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-          GestureDetector(
-            onTap: () async {
-              try {
-                debugPrint('=== CAMERA CAPTURE START ===');
+            GestureDetector(
+              onTap: () async {
+                try {
+                  debugPrint('=== CAMERA CAPTURE START ===');
 
-                debugPrint('Starting image picker...');
-                final ImagePicker picker = ImagePicker();
-                final XFile? photo = await picker.pickImage(
-                  source: ImageSource.camera,
-                  imageQuality: 85,
-                );
+                  debugPrint('Starting image picker...');
+                  final ImagePicker picker = ImagePicker();
+                  final XFile? photo = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
 
-                debugPrint('Image picker result: ${photo?.path ?? 'null'}');
+                  debugPrint('Image picker result: ${photo?.path ?? 'null'}');
 
-                if (photo != null && photo.path.isNotEmpty) {
-                  debugPrint('Creating file from path: ${photo.path}');
-                  final file = File(photo.path);
+                  if (photo != null && photo.path.isNotEmpty) {
+                    debugPrint('Creating file from path: ${photo.path}');
+                    final file = File(photo.path);
 
-                  debugPrint('Checking if file exists...');
-                  final fileExists = await file.exists();
-                  debugPrint('File exists: $fileExists');
+                    debugPrint('Checking if file exists...');
+                    final fileExists = await file.exists();
+                    debugPrint('File exists: $fileExists');
 
-                  if (fileExists) {
-                    DebugAttachmentHelper.logFileInfo(
-                        file, 'Camera Captured Image');
-                    debugPrint('About to call onFileSelected...');
+                    if (fileExists) {
+                      DebugAttachmentHelper.logFileInfo(file, 'Camera Captured Image');
+                      debugPrint('About to call onFileSelected...');
 
-                    widget.onFileSelected(file, 'image');
-                    debugPrint('onFileSelected called successfully');
+                      widget.onFileSelected(file, 'image');
+                      debugPrint('onFileSelected called successfully');
+                    } else {
+                      debugPrint('Camera file does not exist at path: ${photo.path}');
+                    }
                   } else {
-                    debugPrint(
-                        'Camera file does not exist at path: ${photo.path}');
+                    debugPrint('Camera returned null photo or empty path (user may have cancelled)');
                   }
-                } else {
-                  debugPrint(
-                      'Camera returned null photo or empty path (user may have cancelled)');
-                }
 
-                debugPrint('=== CAMERA CAPTURE END ===');
-              } catch (e, stackTrace) {
-                debugPrint('=== CAMERA CAPTURE ERROR ===');
-                debugPrint('Error taking photo: $e');
-                debugPrint('Stack trace: $stackTrace');
-                debugPrint('========================');
-              }
-            },
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: const Color(0xFF00C853),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF00C853).withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.camera_alt_rounded,
-                size: 50,
-                color: Colors.white,
+                  debugPrint('=== CAMERA CAPTURE END ===');
+                } catch (e, stackTrace) {
+                  debugPrint('=== CAMERA CAPTURE ERROR ===');
+                  debugPrint('Error taking photo: $e');
+                  debugPrint('Stack trace: $stackTrace');
+                  debugPrint('========================');
+                }
+              },
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00C853),
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: const Color(0xFF00C853).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
+                ),
+                child: const Icon(Icons.camera_alt_rounded, size: 50, color: Colors.white),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Take a photo',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: appStore.isDarkMode ? Colors.white : Colors.black87,
+            const SizedBox(height: 24),
+            Text(
+              'Take a photo',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: appStore.isDarkMode ? Colors.white : Colors.black87),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Capture and send instantly',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text('Capture and send instantly', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+          ],
         ),
       ),
     );
@@ -548,12 +374,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 16 + bottomPadding,
-      ),
+      padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16 + bottomPadding),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -570,10 +391,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
 
                         debugPrint('Starting video picker...');
                         final ImagePicker picker = ImagePicker();
-                        final XFile? video = await picker.pickVideo(
-                          source: ImageSource.camera,
-                          maxDuration: const Duration(minutes: 5),
-                        );
+                        final XFile? video = await picker.pickVideo(source: ImageSource.camera, maxDuration: const Duration(minutes: 5));
 
                         debugPrint('Video picker result: ${video?.path ?? 'null'}');
 
@@ -586,19 +404,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                           debugPrint('File exists: $fileExists');
 
                           if (fileExists) {
-                            DebugAttachmentHelper.logFileInfo(
-                                file, 'Camera Recorded Video');
+                            DebugAttachmentHelper.logFileInfo(file, 'Camera Recorded Video');
                             debugPrint('About to call onFileSelected...');
 
                             widget.onFileSelected(file, 'video');
                             debugPrint('onFileSelected called successfully');
                           } else {
-                            debugPrint(
-                                'Video file does not exist at path: ${video.path}');
+                            debugPrint('Video file does not exist at path: ${video.path}');
                           }
                         } else {
-                          debugPrint(
-                              'Video recording cancelled by user or returned empty path');
+                          debugPrint('Video recording cancelled by user or returned empty path');
                         }
 
                         debugPrint('=== VIDEO CAPTURE END ===');
@@ -615,33 +430,19 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       decoration: BoxDecoration(
                         color: const Color(0xFFFF4757),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFFFF4757).withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: const Color(0xFFFF4757).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
                       ),
-                      child: const Icon(
-                        Icons.videocam_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.videocam_rounded, size: 40, color: Colors.white),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Record',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: appStore.isDarkMode ? Colors.white : Colors.black87),
                   ),
                 ],
               ),
-              
+
               // Pick from Gallery Option
               Column(
                 children: [
@@ -652,9 +453,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
 
                         debugPrint('Starting video picker from gallery...');
                         final ImagePicker picker = ImagePicker();
-                        final XFile? video = await picker.pickVideo(
-                          source: ImageSource.gallery,
-                        );
+                        final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
 
                         debugPrint('Video picker result: ${video?.path ?? 'null'}');
 
@@ -667,19 +466,16 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                           debugPrint('File exists: $fileExists');
 
                           if (fileExists) {
-                            DebugAttachmentHelper.logFileInfo(
-                                file, 'Gallery Selected Video');
+                            DebugAttachmentHelper.logFileInfo(file, 'Gallery Selected Video');
                             debugPrint('About to call onFileSelected...');
 
                             widget.onFileSelected(file, 'video');
                             debugPrint('onFileSelected called successfully');
                           } else {
-                            debugPrint(
-                                'Video file does not exist at path: ${video.path}');
+                            debugPrint('Video file does not exist at path: ${video.path}');
                           }
                         } else {
-                          debugPrint(
-                              'Video selection cancelled by user or returned empty path');
+                          debugPrint('Video selection cancelled by user or returned empty path');
                         }
 
                         debugPrint('=== VIDEO GALLERY PICK END ===');
@@ -696,42 +492,22 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       decoration: BoxDecoration(
                         color: const Color(0xFF6B4EFF),
                         shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF6B4EFF).withOpacity(0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: const Color(0xFF6B4EFF).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))],
                       ),
-                      child: const Icon(
-                        Icons.video_library_rounded,
-                        size: 40,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.video_library_rounded, size: 40, color: Colors.white),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     'Gallery',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: appStore.isDarkMode ? Colors.white : Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: appStore.isDarkMode ? Colors.white : Colors.black87),
                   ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 24),
-          Text(
-            'Choose a video to send',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
+          Text('Choose a video to send', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
         ],
       ),
     );
@@ -742,12 +518,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     final bottomPadding = MediaQuery.of(context).viewPadding.bottom;
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: 16 + bottomPadding,
-      ),
+      padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16 + bottomPadding),
       child: Column(
         children: [
           Expanded(
@@ -757,30 +528,10 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
               crossAxisSpacing: 16,
               childAspectRatio: 1.2,
               children: [
-                _buildDocumentTypeCard(
-                  icon: Icons.picture_as_pdf,
-                  label: 'PDF',
-                  color: const Color(0xFFE53935),
-                  onTap: () => _pickDocument(['pdf']),
-                ),
-                _buildDocumentTypeCard(
-                  icon: Icons.description,
-                  label: 'Word',
-                  color: const Color(0xFF1976D2),
-                  onTap: () => _pickDocument(['doc', 'docx']),
-                ),
-                _buildDocumentTypeCard(
-                  icon: Icons.table_chart,
-                  label: 'Excel',
-                  color: const Color(0xFF388E3C),
-                  onTap: () => _pickDocument(['xls', 'xlsx']),
-                ),
-                _buildDocumentTypeCard(
-                  icon: Icons.folder_open,
-                  label: 'All Files',
-                  color: const Color(0xFF6B4EFF),
-                  onTap: () => _pickDocument(null),
-                ),
+                _buildDocumentTypeCard(icon: Icons.picture_as_pdf, label: 'PDF', color: const Color(0xFFE53935), onTap: () => _pickDocument(['pdf'])),
+                _buildDocumentTypeCard(icon: Icons.description, label: 'Word', color: const Color(0xFF1976D2), onTap: () => _pickDocument(['doc', 'docx'])),
+                _buildDocumentTypeCard(icon: Icons.table_chart, label: 'Excel', color: const Color(0xFF388E3C), onTap: () => _pickDocument(['xls', 'xlsx'])),
+                _buildDocumentTypeCard(icon: Icons.folder_open, label: 'All Files', color: const Color(0xFF6B4EFF), onTap: () => _pickDocument(null)),
               ],
             ),
           ),
@@ -789,39 +540,23 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
     );
   }
 
-  Widget _buildDocumentTypeCard({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildDocumentTypeCard({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: color.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 48,
-              color: color,
-            ),
+            Icon(icon, size: 48, color: color),
             const SizedBox(height: 12),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: color),
             ),
           ],
         ),
@@ -831,11 +566,7 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
 
   Future<void> _pickDocument(List<String>? allowedExtensions) async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: allowedExtensions != null ? FileType.custom : FileType.any,
-        allowedExtensions: allowedExtensions,
-        allowMultiple: false,
-      );
+      FilePickerResult? result = await FilePicker.platform.pickFiles(type: allowedExtensions != null ? FileType.custom : FileType.any, allowedExtensions: allowedExtensions, allowMultiple: false);
 
       if (result != null && result.files.single.path != null) {
         widget.onFileSelected(File(result.files.single.path!), 'document');
@@ -852,17 +583,7 @@ class AttachmentOption {
   final Color color;
   final AttachmentType type;
 
-  AttachmentOption({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.type,
-  });
+  AttachmentOption({required this.icon, required this.label, required this.color, required this.type});
 }
 
-enum AttachmentType {
-  gallery,
-  camera,
-  video,
-  document,
-}
+enum AttachmentType { gallery, camera, video, document }

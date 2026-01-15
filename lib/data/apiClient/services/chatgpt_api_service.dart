@@ -13,30 +13,14 @@ class ChatGptApiService {
   ChatGptApiService._internal();
 
   /// Ask question to ChatGPT with medical images
-  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithImages({
-    required String sessionId,
-    required String question,
-    required String imageType,
-    String? imageUrl1,
-    String? imageUrl2,
-  }) async {
+  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithImages({required String sessionId, required String question, required String imageType, String? imageUrl1, String? imageUrl2}) async {
     try {
-      final request = {
-        'id': sessionId,
-        'question': question,
-        'image_type': imageType,
-      };
-      
+      final request = {'id': sessionId, 'question': question, 'image_type': imageType};
+
       if (imageUrl1 != null) request['image1'] = imageUrl1;
       if (imageUrl2 != null) request['image2'] = imageUrl2;
 
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/ask-question',
-          method: networkUtils.HttpMethod.POST,
-          request: request,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/ask-question', method: networkUtils.HttpMethod.POST, request: request));
       return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -46,21 +30,9 @@ class ChatGptApiService {
   }
 
   /// Ask question to ChatGPT without images
-  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithoutImages({
-    required String sessionId,
-    required String question,
-  }) async {
+  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithoutImages({required String sessionId, required String question}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/ask-question',
-          method: networkUtils.HttpMethod.POST,
-          request: {
-            'id': sessionId,
-            'question': question,
-          },
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/ask-question', method: networkUtils.HttpMethod.POST, request: {'id': sessionId, 'question': question}));
       return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -72,12 +44,7 @@ class ChatGptApiService {
   /// Get all ChatGPT sessions
   Future<ApiResponse<ChatGptSession>> getChatGptSessions() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/gptChat-session',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/gptChat-session', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(ChatGptSession.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -87,16 +54,9 @@ class ChatGptApiService {
   }
 
   /// Get message history for a specific ChatGPT session
-  Future<ApiResponse<ChatGptMessageHistory>> getChatGptMessages({
-    required String sessionId,
-  }) async {
+  Future<ApiResponse<ChatGptMessageHistory>> getChatGptMessages({required String sessionId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/gptChat-history/$sessionId',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/gptChat-history/$sessionId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(ChatGptMessageHistory.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -108,12 +68,7 @@ class ChatGptApiService {
   /// Create a new ChatGPT session
   Future<ApiResponse<Map<String, dynamic>>> createNewChatSession() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/new-chat',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/new-chat', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -123,16 +78,9 @@ class ChatGptApiService {
   }
 
   /// Delete a ChatGPT session
-  Future<ApiResponse<Map<String, dynamic>>> deleteChatGptSession({
-    required String sessionId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteChatGptSession({required String sessionId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/delete-chatgpt-session?session_id=$sessionId',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/delete-chatgpt-session?session_id=$sessionId', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -166,10 +114,7 @@ class ChatGptApiService {
         enhancedQuestion += '\nPatient Weight: $patientWeight';
       }
 
-      return await askQuestionWithoutImages(
-        sessionId: sessionId,
-        question: enhancedQuestion,
-      );
+      return await askQuestionWithoutImages(sessionId: sessionId, question: enhancedQuestion);
     } catch (e) {
       return ApiResponse.error('Failed to ask drug question: $e');
     }
@@ -200,10 +145,7 @@ class ChatGptApiService {
         enhancedQuestion += '\nTreatment: $treatment';
       }
 
-      return await askQuestionWithoutImages(
-        sessionId: sessionId,
-        question: enhancedQuestion,
-      );
+      return await askQuestionWithoutImages(sessionId: sessionId, question: enhancedQuestion);
     } catch (e) {
       return ApiResponse.error('Failed to ask case question: $e');
     }
@@ -236,34 +178,17 @@ class ChatGptApiService {
   }
 
   /// Get GPT chat messages (backward compatibility)
-  Future<ApiResponse<ChatGptMessageHistory>> gptChatMessages({
-    required String sessionId,
-  }) async {
+  Future<ApiResponse<ChatGptMessageHistory>> gptChatMessages({required String sessionId}) async {
     return getChatGptMessages(sessionId: sessionId);
   }
 
   /// Ask question from GPT (backward compatibility)
-  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionFromGpt({
-    required String sessionId,
-    required String question,
-    required String imageType,
-    String? imageUrl1,
-    String? imageUrl2,
-  }) async {
-    return askQuestionWithImages(
-      sessionId: sessionId,
-      question: question,
-      imageType: imageType,
-      imageUrl1: imageUrl1,
-      imageUrl2: imageUrl2,
-    );
+  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionFromGpt({required String sessionId, required String question, required String imageType, String? imageUrl1, String? imageUrl2}) async {
+    return askQuestionWithImages(sessionId: sessionId, question: question, imageType: imageType, imageUrl1: imageUrl1, imageUrl2: imageUrl2);
   }
 
   /// Ask question from GPT without image (backward compatibility)
-  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionFromGptWithoutImage({
-    required String sessionId,
-    required String question,
-  }) async {
+  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionFromGptWithoutImage({required String sessionId, required String question}) async {
     return askQuestionWithoutImages(sessionId: sessionId, question: question);
   }
 }

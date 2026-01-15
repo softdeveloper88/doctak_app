@@ -1,10 +1,10 @@
 import 'dart:convert';
+
 PostCommentModel postCommentModelFromJson(String str) => PostCommentModel.fromJson(json.decode(str));
 String postCommentModelToJson(PostCommentModel data) => json.encode(data.toJson());
+
 class PostCommentModel {
-  PostCommentModel({
-      this.success, 
-      this.comments,});
+  PostCommentModel({this.success, this.comments});
 
   PostCommentModel.fromJson(dynamic json) {
     success = json['success'];
@@ -21,26 +21,13 @@ class PostCommentModel {
     }
     return map;
   }
-
 }
 
 Comments commentsFromJson(String str) => Comments.fromJson(json.decode(str));
 String commentsToJson(Comments data) => json.encode(data.toJson());
+
 class Comments {
-  Comments({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+  Comments({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
 
   Comments.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -102,16 +89,13 @@ class Comments {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
-  Links({
-      this.url, 
-      this.label, 
-      this.active,});
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -129,20 +113,13 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 PostComments dataFromJson(String str) => PostComments.fromJson(json.decode(str));
 String dataToJson(PostComments data) => json.encode(data.toJson());
+
 class PostComments {
-  PostComments({
-      this.id, 
-      this.comment, 
-      this.createdAt, 
-      this.userHasLiked, 
-      this.reactionCount, 
-      this.replyCount, 
-      this.commenter,});
+  PostComments({this.id, this.comment, this.createdAt, this.userHasLiked, this.reactionCount, this.replyCount, this.commenter});
 
   PostComments.fromJson(dynamic json) {
     id = json['id'];
@@ -174,18 +151,13 @@ class PostComments {
     }
     return map;
   }
-
 }
 
 Commenter commenterFromJson(String str) => Commenter.fromJson(json.decode(str));
 String commenterToJson(Commenter data) => json.encode(data.toJson());
+
 class Commenter {
-  Commenter({
-      this.id, 
-      this.firstName, 
-      this.lastName,
-      this.profilePic,
-  });
+  Commenter({this.id, this.firstName, this.lastName, this.profilePic});
 
   Commenter.fromJson(dynamic json) {
     id = json['id'];
@@ -206,5 +178,4 @@ class Commenter {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }

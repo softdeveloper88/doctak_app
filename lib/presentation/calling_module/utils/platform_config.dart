@@ -9,18 +9,15 @@ class PlatformConfig {
 
   /// Check if running on iOS
   static bool get isIOS => Platform.isIOS;
-  
+
   /// Check if running on Android
   static bool get isAndroid => Platform.isAndroid;
-  
+
   /// Get platform name
   static String get platformName => Platform.operatingSystem;
 
   /// Platform-specific video encoder settings
-  static Map<String, dynamic> getVideoEncoderConfig({
-    required bool isVideoCall,
-    required bool isHighQuality,
-  }) {
+  static Map<String, dynamic> getVideoEncoderConfig({required bool isVideoCall, required bool isHighQuality}) {
     if (isIOS) {
       return {
         'width': isHighQuality ? 640 : 320,
@@ -53,13 +50,7 @@ class PlatformConfig {
         'agc': true,
       };
     } else {
-      return {
-        'profile': 'audioProfileMusicHighQuality',
-        'scenario': 'audioScenarioDefault',
-        'aec': true,
-        'ns': true,
-        'agc': true,
-      };
+      return {'profile': 'audioProfileMusicHighQuality', 'scenario': 'audioScenarioDefault', 'aec': true, 'ns': true, 'agc': true};
     }
   }
 
@@ -68,15 +59,15 @@ class PlatformConfig {
     if (isIOS) {
       return {
         'connectionTimeout': 30000, // 30 seconds
-        'heartbeatInterval': 5000,  // 5 seconds
-        'reconnectDelay': 2000,     // 2 seconds
+        'heartbeatInterval': 5000, // 5 seconds
+        'reconnectDelay': 2000, // 2 seconds
         'maxReconnectAttempts': 5,
       };
     } else {
       return {
         'connectionTimeout': 25000, // 25 seconds
-        'heartbeatInterval': 4000,  // 4 seconds
-        'reconnectDelay': 1500,     // 1.5 seconds
+        'heartbeatInterval': 4000, // 4 seconds
+        'reconnectDelay': 1500, // 1.5 seconds
         'maxReconnectAttempts': 6,
       };
     }
@@ -125,19 +116,9 @@ class PlatformConfig {
   /// Platform-specific background handling
   static Map<String, bool> getBackgroundConfig() {
     if (isIOS) {
-      return {
-        'pauseVideoInBackground': true,
-        'keepAudioInBackground': true,
-        'restartPreviewOnForeground': true,
-        'delayForegroundCheck': true,
-      };
+      return {'pauseVideoInBackground': true, 'keepAudioInBackground': true, 'restartPreviewOnForeground': true, 'delayForegroundCheck': true};
     } else {
-      return {
-        'pauseVideoInBackground': true,
-        'keepAudioInBackground': false,
-        'restartPreviewOnForeground': false,
-        'delayForegroundCheck': false,
-      };
+      return {'pauseVideoInBackground': true, 'keepAudioInBackground': false, 'restartPreviewOnForeground': false, 'delayForegroundCheck': false};
     }
   }
 
@@ -167,33 +148,16 @@ class PlatformConfig {
   /// Platform-specific camera settings
   static Map<String, dynamic> getCameraConfig() {
     if (isIOS) {
-      return {
-        'defaultDirection': 'front',
-        'switchWithPreviewRestart': true,
-        'autoFocus': true,
-        'exposureCompensation': 0,
-      };
+      return {'defaultDirection': 'front', 'switchWithPreviewRestart': true, 'autoFocus': true, 'exposureCompensation': 0};
     } else {
-      return {
-        'defaultDirection': 'front',
-        'switchWithPreviewRestart': false,
-        'autoFocus': true,
-        'exposureCompensation': 0,
-      };
+      return {'defaultDirection': 'front', 'switchWithPreviewRestart': false, 'autoFocus': true, 'exposureCompensation': 0};
     }
   }
 
   /// Get recommended call settings based on device capabilities
   static Map<String, dynamic> getRecommendedCallSettings() {
     if (isIOS) {
-      return {
-        'preferredCodec': 'H264',
-        'enableHardwareAcceleration': true,
-        'enableAdaptiveBitrate': true,
-        'enableDualStream': true,
-        'maxVideoBitrate': 1200,
-        'maxAudioBitrate': 128,
-      };
+      return {'preferredCodec': 'H264', 'enableHardwareAcceleration': true, 'enableAdaptiveBitrate': true, 'enableDualStream': true, 'maxVideoBitrate': 1200, 'maxAudioBitrate': 128};
     } else {
       return {
         'preferredCodec': 'H264',
@@ -220,21 +184,9 @@ class PlatformConfig {
   /// Get platform-specific error recovery settings
   static Map<String, dynamic> getErrorRecoveryConfig() {
     if (isIOS) {
-      return {
-        'autoReconnect': true,
-        'reconnectBackoffMultiplier': 1.5,
-        'maxReconnectDelay': 10000,
-        'enableFallbackToAudio': true,
-        'cameraErrorRecoveryDelay': 500,
-      };
+      return {'autoReconnect': true, 'reconnectBackoffMultiplier': 1.5, 'maxReconnectDelay': 10000, 'enableFallbackToAudio': true, 'cameraErrorRecoveryDelay': 500};
     } else {
-      return {
-        'autoReconnect': true,
-        'reconnectBackoffMultiplier': 2.0,
-        'maxReconnectDelay': 8000,
-        'enableFallbackToAudio': true,
-        'cameraErrorRecoveryDelay': 200,
-      };
+      return {'autoReconnect': true, 'reconnectBackoffMultiplier': 2.0, 'maxReconnectDelay': 8000, 'enableFallbackToAudio': true, 'cameraErrorRecoveryDelay': 200};
     }
   }
 }

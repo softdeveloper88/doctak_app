@@ -18,11 +18,7 @@ class VirtualizedJobsList extends StatefulWidget {
   final JobsBloc jobsBloc;
   final ScrollController? scrollController;
 
-  const VirtualizedJobsList({
-    super.key,
-    required this.jobsBloc,
-    this.scrollController,
-  });
+  const VirtualizedJobsList({super.key, required this.jobsBloc, this.scrollController});
 
   @override
   State<VirtualizedJobsList> createState() => _VirtualizedJobsListState();
@@ -48,10 +44,7 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: EdgeInsets.only(
-        top: 10,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
+      padding: EdgeInsets.only(top: 10, bottom: MediaQuery.of(context).padding.bottom + 16),
       itemCount: bloc.drugsData.length,
       // Using a larger cacheExtent for smooth scrolling
       cacheExtent: 800,
@@ -81,10 +74,7 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
       },
       child: MemoryOptimizedJobItem(
         jobData: widget.jobsBloc.drugsData[index],
-        onJobTap: () => _openJobDetails(
-          context,
-          widget.jobsBloc.drugsData[index].id.toString(),
-        ),
+        onJobTap: () => _openJobDetails(context, widget.jobsBloc.drugsData[index].id.toString()),
         onShareTap: () => _shareJob(widget.jobsBloc.drugsData[index]),
         onApplyTap: (id) => _showApplyDialog(context, id),
         onLaunchLink: (url) => PostUtils.launchURL(context, url.toString()),
@@ -94,8 +84,7 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
 
   // Pagination logic
   void _triggerPaginationIfNeeded(JobsBloc bloc, int index) {
-    if (bloc.pageNumber <= bloc.numberOfPage &&
-        index == bloc.drugsData.length - bloc.nextPageTrigger) {
+    if (bloc.pageNumber <= bloc.numberOfPage && index == bloc.drugsData.length - bloc.nextPageTrigger) {
       bloc.add(JobCheckIfNeedMoreDataEvent(index: index));
     }
   }
@@ -113,8 +102,7 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
 
   // Check if shimmer loader should be shown
   bool _shouldShowShimmer(JobsBloc bloc, int index) {
-    return bloc.numberOfPage != bloc.pageNumber - 1 &&
-        index >= bloc.drugsData.length - 1;
+    return bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.drugsData.length - 1;
   }
 
   // Check if native ad should be shown
@@ -129,19 +117,11 @@ class _VirtualizedJobsListState extends State<VirtualizedJobsList> {
 
   // Share job
   void _shareJob(dynamic job) {
-    DeepLinkService.shareJob(
-      jobId: job.id?.toString() ?? '',
-      title: job.jobTitle,
-      company: job.companyName,
-      location: job.location,
-    );
+    DeepLinkService.shareJob(jobId: job.id?.toString() ?? '', title: job.jobTitle, company: job.companyName, location: job.location);
   }
 
   // Show job application dialog
   void _showApplyDialog(BuildContext context, String id) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) => DocumentUploadDialog(id),
-    );
+    showDialog(context: context, builder: (BuildContext context) => DocumentUploadDialog(id));
   }
 }

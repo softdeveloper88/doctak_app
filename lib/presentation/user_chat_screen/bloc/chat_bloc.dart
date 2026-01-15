@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -63,25 +62,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     });
     on<CheckIfNeedMoreMessageDataEvent>((event, emit) async {
       if (event.index == messagesList.length - messageNextPageTrigger) {
-        add(LoadRoomMessageEvent(
-            page: messagePageNumber,
-            userId: event.userId,
-            roomId: event.roomId));
+        add(LoadRoomMessageEvent(page: messagePageNumber, userId: event.userId, roomId: event.roomId));
       }
     });
   }
 
-  _onGetChat(LoadPageEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onGetChat(LoadPageEvent event, Emitter<ChatState> emit) async {
     if (event.page == 1) {
       contactsList.clear();
       pageNumber = 1;
       emit(PaginationLoadingState());
     }
     try {
-      ContactsModel response = await apiManager.getContacts(
-        'Bearer ${AppData.userToken}',
-        '$pageNumber',
-      );
+      ContactsModel response = await apiManager.getContacts('Bearer ${AppData.userToken}', '$pageNumber');
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
@@ -100,7 +93,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  _onGetSearchContacts(LoadContactsEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onGetSearchContacts(LoadContactsEvent event, Emitter<ChatState> emit) async {
     if (event.page == 1) {
       searchContactsList.clear();
       contactPageNumber = 1;
@@ -108,14 +101,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
     try {
       print('🔍 Searching contacts with keyword: "${event.keyword ?? ''}", page: $contactPageNumber');
-      
-      SearchContactsModel response = await apiManager.searchContacts(
-          'Bearer ${AppData.userToken}',
-          '$contactPageNumber',
-          event.keyword ?? '');
-      
+
+      SearchContactsModel response = await apiManager.searchContacts('Bearer ${AppData.userToken}', '$contactPageNumber', event.keyword ?? '');
+
       print('✅ Search response received - Success: ${response.success}, Records: ${response.records?.data?.length ?? 0}');
-      
+
       contactNumberOfPage = response.lastPage ?? 0;
       if (contactPageNumber < contactNumberOfPage + 1) {
         contactPageNumber = contactPageNumber + 1;
@@ -130,13 +120,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       emit(DataError('Failed to search contacts: $e'));
     }
   }
-  _updateChatReadStatus(ChatReadStatusEvent event, Emitter<ChatState> emit) async {
 
+  Future<void> _updateChatReadStatus(ChatReadStatusEvent event, Emitter<ChatState> emit) async {
     try {
-      if(event.roomId !='') {
-        await apiManager.updateReadStatus(
-            'Bearer ${AppData.userToken}',
-            event.userId ?? "", event.roomId ?? '');
+      if (event.roomId != '') {
+        await apiManager.updateReadStatus('Bearer ${AppData.userToken}', event.userId ?? "", event.roomId ?? '');
       }
       emit(PaginationLoadedState());
 
@@ -150,8 +138,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void addUserIfNotExists(
-      List<Messages> oldMessages, List<Messages> newMessages) {
+  void addUserIfNotExists(List<Messages> oldMessages, List<Messages> newMessages) {
     for (var message in newMessages) {
       if (!oldMessages.contains(message)) {
         oldMessages.add(message);
@@ -160,12 +147,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     messagesList = oldMessages;
   }
 
-  _onGetMessages(LoadRoomMessageEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onGetMessages(LoadRoomMessageEvent event, Emitter<ChatState> emit) async {
     print('page ${event.page}');
     if (event.page == 1) {
       messagesList.clear();
       messagePageNumber = 1;
-      if(event.isFirstLoading??false) {
+      if (event.isFirstLoading ?? false) {
         emit(PaginationLoadingState());
       }
       print('page ${event.page}');
@@ -176,16 +163,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       print(event.page);
 
-      MessageModel response = await apiManager.getRoomMessenger(
-          'Bearer ${AppData.userToken}',
-          '$messagePageNumber',
-          event.userId??"",
-          event.roomId??"");
+      MessageModel response = await apiManager.getRoomMessenger('Bearer ${AppData.userToken}', '$messagePageNumber', event.userId ?? "", event.roomId ?? "");
 
       roomId = response.roomId.toString();
-      await apiManager.updateReadStatus(
-          'Bearer ${AppData.userToken}',
-          event.userId ?? "", roomId ?? event.roomId??'');
+      await apiManager.updateReadStatus('Bearer ${AppData.userToken}', event.userId ?? "", roomId ?? event.roomId ?? '');
       print(roomId);
       messageNumberOfPage = response.lastPage ?? 0;
       if (messagePageNumber < messageNumberOfPage + 1) {
@@ -226,30 +207,32 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (!await file.exists()) {
         throw Exception('File does not exist: $filePath');
       }
-      
+
       final fileSize = await file.length();
       print("=== FILE VALIDATION ===");
       print("File exists: true");
       print("File size: $fileSize bytes");
       print("File can read: ${file.existsSync()}");
       print("====================");
-      
+
       final Dio dio = Dio();
-      
+
       // Add interceptor for debugging
-      dio.interceptors.add(LogInterceptor(
-        request: true,
-        requestBody: false, // Don't log body to avoid huge logs
-        responseBody: true,
-        requestHeader: true,
-        responseHeader: true,
-      ));
-      
+      dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestBody: false, // Don't log body to avoid huge logs
+          responseBody: true,
+          requestHeader: true,
+          responseHeader: true,
+        ),
+      );
+
       // Create FormData for file upload
       final String fileName = filePath.split('/').last;
-      
+
       // Determine simple mime type from extension for better server compatibility
-      String _mimeTypeFor(String path, String attachmentType) {
+      String mimeTypeFor(String path, String attachmentType) {
         final ext = path.split('.').last.toLowerCase();
         if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return 'image/$ext';
         if (['mp4', 'mov', 'm4v'].contains(ext)) return 'video/${ext == 'mov' ? 'quicktime' : ext}';
@@ -260,7 +243,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         return 'application/octet-stream';
       }
 
-      final mime = _mimeTypeFor(filePath, attachmentType).split('/');
+      final mime = mimeTypeFor(filePath, attachmentType).split('/');
       final contentType = MediaType(mime[0], mime[1]);
 
       final formData = FormData.fromMap({
@@ -269,25 +252,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         'receiver_id': receiverId,
         'attachment_type': attachmentType,
         'message': message,
-        'file': await MultipartFile.fromFile(
-          filePath,
-          filename: fileName,
-          contentType: contentType,
-        ),
+        'file': await MultipartFile.fromFile(filePath, filename: fileName, contentType: contentType),
       });
-      
+
       print("=== SENDING FILE UPLOAD REQUEST ===");
       print("URL: ${AppData.remoteUrl}/send-message");
       print("File path: $filePath");
       print("File name: $fileName");
       print("Attachment type: $attachmentType");
       print("Message: $message");
-      
+
       // Log FormData fields
       print("FormData fields:");
-      formData.fields.forEach((field) {
+      for (var field in formData.fields) {
         print("  ${field.key}: ${field.value}");
-      });
+      }
       print("FormData files: ${formData.files.length}");
       if (formData.files.isNotEmpty) {
         for (var file in formData.files) {
@@ -297,23 +276,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           print("  Content type: ${file.value.contentType}");
         }
       }
-      
+
       final response = await dio.post(
         '${AppData.remoteUrl}/send-message',
         data: formData,
-        options: Options(
-          headers: {
-            'Authorization': token,
-            'Accept': 'application/json',
-          },
-        ),
+        options: Options(headers: {'Authorization': token, 'Accept': 'application/json'}),
       );
-      
+
       print("=== RAW API RESPONSE ===");
       print("Status code: ${response.statusCode}");
       print("Response data: ${response.data}");
       print("=======================");
-      
+
       return SendMessageModel.fromJson(response.data);
     } catch (e) {
       print('Error in custom file upload: $e');
@@ -321,18 +295,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  _onSendMessages(SendMessageEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onSendMessages(SendMessageEvent event, Emitter<ChatState> emit) async {
     print(event.roomId);
     print(event.userId);
     print(event.receiverId);
     print(event.message);
     print(event.file);
     print(event.attachmentType);
-    
+
     try {
       print("Processing file: ${event.file}");
       SendMessageModel response;
-      
+
       if (event.file != null && event.file!.isNotEmpty) {
         // Check if file exists
         final File file = File(event.file!);
@@ -343,7 +317,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           print("File size: $fileSize bytes");
           print("Attachment type: ${event.attachmentType}");
           print("===================");
-          
+
           // Emit uploading state
           emit(FileUploadingState());
 
@@ -357,14 +331,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             message: event.message ?? '',
             filePath: file.path,
           );
-          
+
           print("=== FILE UPLOAD RESPONSE ===");
           print("Response body: ${response.body}");
           print("Response attachment: ${response.attachment}");
           print("Response attachmentType: ${response.attachmentType}");
           print("Response userId: ${response.userId}");
           print("==========================");
-          
+
           // Emit uploaded state
           emit(FileUploadedState());
         } else {
@@ -384,38 +358,31 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         if (event.attachmentType == 'text') {
           emit(FileUploadingState());
         }
-        
-        response = await apiManager.sendMessageWithoutFile(
-          'Bearer ${AppData.userToken}',
-          event.userId!,
-          event.roomId!,
-          event.receiverId!,
-          event.attachmentType!,
-          event.message!,
-        );
-        
+
+        response = await apiManager.sendMessageWithoutFile('Bearer ${AppData.userToken}', event.userId!, event.roomId!, event.receiverId!, event.attachmentType!, event.message!);
+
         if (event.attachmentType == 'text') {
           emit(FileUploadedState());
         }
       }
-      
+
       messagesList.insert(
-          0,
-          Messages(
-            id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate temporary ID
-            userId: response.userId!,
-            profile: response.profile,
-            body: response.body,
-            attachment: response.attachment,
-            attachmentType: response.attachmentType,
-            createdAt: response.createdAt,
-            seen: 0,
-          ));
+        0,
+        Messages(
+          id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate temporary ID
+          userId: response.userId!,
+          profile: response.profile,
+          body: response.body,
+          attachment: response.attachment,
+          attachmentType: response.attachmentType,
+          createdAt: response.createdAt,
+          seen: 0,
+        ),
+      );
       // Force rebuild by emitting a different state first
       emit(PaginationLoadingState());
       // Then emit the loaded state to trigger UI update
       emit(PaginationLoadedState());
-
     } catch (e) {
       print('Error sending message: $e');
 
@@ -426,24 +393,25 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       if (event.file == null || event.file!.isEmpty) {
         // Only show error for text messages
         messagesList.insert(
-            0,
-            Messages(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              userId: AppData.logInUserId,
-              profile: '',
-              body: 'Failed to send message: ${e.toString()}',
-              attachment: '',
-              attachmentType: 'text',
-              createdAt: DateTime.now().toIso8601String(),
-              seen: 0,
-            ));
+          0,
+          Messages(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            userId: AppData.logInUserId,
+            profile: '',
+            body: 'Failed to send message: ${e.toString()}',
+            attachment: '',
+            attachmentType: 'text',
+            createdAt: DateTime.now().toIso8601String(),
+            seen: 0,
+          ),
+        );
       }
 
       emit(PaginationLoadedState());
     }
   }
 
-  _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
     try {
       final messageId = (event.id ?? '').toString();
       if (messageId.isEmpty) {
@@ -452,10 +420,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         return;
       }
 
-      await apiManager.deleteMessage(
-        'Bearer ${AppData.userToken}',
-        messageId,
-      );
+      await apiManager.deleteMessage('Bearer ${AppData.userToken}', messageId);
 
       // Remove locally (handle int/string ids)
       messagesList.removeWhere((m) => m.id?.toString() == messageId);
@@ -468,7 +433,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  _selectedFile(SelectedFiles event, Emitter<ChatState> emit) async {
+  Future<void> _selectedFile(SelectedFiles event, Emitter<ChatState> emit) async {
     if (event.isRemove) {
       imagefiles.remove(event.pickedfiles);
       emit(PaginationLoadedState());

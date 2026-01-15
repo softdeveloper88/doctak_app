@@ -1,12 +1,10 @@
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../widgets/retry_widget.dart';
 import '../../components/improved_reply_comment_component.dart';
-import '../../components/SVCommentReplyComponent.dart';
 import 'bloc/comment_bloc.dart';
 
 class ImprovedReplyCommentListWidget extends StatefulWidget {
@@ -14,31 +12,19 @@ class ImprovedReplyCommentListWidget extends StatefulWidget {
   final int postId;
   final int commentId;
 
-  const ImprovedReplyCommentListWidget({
-    required this.commentBloc,
-    required this.postId,
-    required this.commentId,
-    super.key,
-  });
+  const ImprovedReplyCommentListWidget({required this.commentBloc, required this.postId, required this.commentId, super.key});
 
   @override
-  State<ImprovedReplyCommentListWidget> createState() =>
-      _ImprovedReplyCommentListWidgetState();
+  State<ImprovedReplyCommentListWidget> createState() => _ImprovedReplyCommentListWidgetState();
 }
 
-class _ImprovedReplyCommentListWidgetState
-    extends State<ImprovedReplyCommentListWidget> {
+class _ImprovedReplyCommentListWidgetState extends State<ImprovedReplyCommentListWidget> {
   final CommentBloc commentBloc = CommentBloc();
   int selectComment = -1;
 
   @override
   void initState() {
-    commentBloc.add(
-      FetchReplyComment(
-        postId: widget.postId.toString(),
-        commentId: widget.commentId.toString(),
-      ),
-    );
+    commentBloc.add(FetchReplyComment(postId: widget.postId.toString(), commentId: widget.commentId.toString()));
     super.initState();
   }
 
@@ -55,20 +41,11 @@ class _ImprovedReplyCommentListWidgetState
             padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
             child: Row(
               children: [
-                Icon(
-                  Icons.subdirectory_arrow_right_rounded,
-                  size: 16,
-                  color: theme.textSecondary,
-                ),
+                Icon(Icons.subdirectory_arrow_right_rounded, size: 16, color: theme.textSecondary),
                 const SizedBox(width: 6),
                 Text(
                   translation(context).lbl_reply,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: theme.textSecondary,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.textSecondary, fontFamily: 'Poppins'),
                 ),
               ],
             ),
@@ -87,9 +64,7 @@ class _ImprovedReplyCommentListWidgetState
                 return Container(
                   height: 150,
                   padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: CircularProgressIndicator(color: theme.primary),
-                  ),
+                  child: Center(child: CircularProgressIndicator(color: theme.primary)),
                 );
               } else if (state is PaginationLoadedState) {
                 if (commentBloc.replyCommentList.isNotEmpty) {
@@ -99,17 +74,10 @@ class _ImprovedReplyCommentListWidgetState
                 }
               } else if (state is DataError) {
                 return RetryWidget(
-                  errorMessage: translation(
-                    context,
-                  ).msg_something_went_wrong_retry,
+                  errorMessage: translation(context).msg_something_went_wrong_retry,
                   onRetry: () {
                     try {
-                      commentBloc.add(
-                        FetchReplyComment(
-                          commentId: widget.commentId.toString(),
-                          postId: widget.postId.toString(),
-                        ),
-                      );
+                      commentBloc.add(FetchReplyComment(commentId: widget.commentId.toString(), postId: widget.postId.toString()));
                     } catch (e) {
                       debugPrint(e.toString());
                     }
@@ -124,11 +92,7 @@ class _ImprovedReplyCommentListWidgetState
           if (selectComment == -1)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: ImprovedReplyInputField(
-                commentBloc: commentBloc,
-                commentId: widget.commentId,
-                postId: widget.postId,
-              ),
+              child: ImprovedReplyInputField(commentBloc: commentBloc, commentId: widget.commentId, postId: widget.postId),
             ),
         ],
       ),
@@ -146,11 +110,7 @@ class _ImprovedReplyCommentListWidgetState
           return ImprovedReplyCommentComponent(
             replyComment: commentBloc.replyCommentList[index],
             onDelete: () {
-              commentBloc.add(
-                DeleteReplyCommentEvent(
-                  commentId: commentBloc.replyCommentList[index].id.toString(),
-                ),
-              );
+              commentBloc.add(DeleteReplyCommentEvent(commentId: commentBloc.replyCommentList[index].id.toString()));
             },
             onEdit: () {
               setState(() {
@@ -164,25 +124,20 @@ class _ImprovedReplyCommentListWidgetState
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.05),
+              color: theme.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.primary.withOpacity(0.1)),
+              border: Border.all(color: theme.primary.withValues(alpha: 0.1)),
             ),
             // Using LayoutBuilder to get available width constraints
             child: LayoutBuilder(
               builder: (context, constraints) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize:
-                      MainAxisSize.min, // Take only as much space as needed
+                  mainAxisSize: MainAxisSize.min, // Take only as much space as needed
                   children: [
                     Text(
                       translation(context).lbl_update,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: theme.primary,
-                      ),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: theme.primary),
                     ),
                     const SizedBox(height: 8),
                     // Custom input field for updating comment to prevent overflow
@@ -190,22 +145,10 @@ class _ImprovedReplyCommentListWidgetState
                     SizedBox(
                       width: constraints.maxWidth, // Use available width
                       child: CustomReplyUpdateField(
-                        initialValue:
-                            commentBloc
-                                .replyCommentList[selectComment]
-                                .comment ??
-                            '',
+                        initialValue: commentBloc.replyCommentList[selectComment].comment ?? '',
                         onSubmit: (value) {
                           if (value.isNotEmpty) {
-                            commentBloc.add(
-                              UpdateReplyCommentEvent(
-                                commentId: commentBloc
-                                    .replyCommentList[selectComment]
-                                    .id
-                                    .toString(),
-                                content: value,
-                              ),
-                            );
+                            commentBloc.add(UpdateReplyCommentEvent(commentId: commentBloc.replyCommentList[selectComment].id.toString(), content: value));
                             selectComment = -1;
                             setState(() {});
                           }
@@ -233,16 +176,10 @@ class ImprovedReplyInputField extends StatefulWidget {
   final int commentId;
   final int postId;
 
-  const ImprovedReplyInputField({
-    required this.commentBloc,
-    required this.commentId,
-    required this.postId,
-    super.key,
-  });
+  const ImprovedReplyInputField({required this.commentBloc, required this.commentId, required this.postId, super.key});
 
   @override
-  State<ImprovedReplyInputField> createState() =>
-      _ImprovedReplyInputFieldState();
+  State<ImprovedReplyInputField> createState() => _ImprovedReplyInputFieldState();
 }
 
 class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
@@ -268,13 +205,12 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
         boxShadow: theme.cardShadow,
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment
-            .end, // Align items to bottom for multi-line input
+        crossAxisAlignment: CrossAxisAlignment.end, // Align items to bottom for multi-line input
         children: [
           // User Avatar (small)
           CircleAvatar(
             radius: 18,
-            backgroundColor: theme.primary.withOpacity(0.08),
+            backgroundColor: theme.primary.withValues(alpha: 0.08),
             child: Icon(Icons.person_rounded, size: 20, color: theme.primary),
           ),
 
@@ -291,22 +227,12 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   hintText: translation(context).lbl_write_a_comment,
-                  hintStyle: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 15,
-                    color: theme.textTertiary,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textTertiary, fontWeight: FontWeight.w400),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 15,
-                  color: theme.textPrimary,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary, fontWeight: FontWeight.w400),
                 // Allow text to wrap to new lines, but limit with ConstrainedBox
                 maxLines: null,
                 minLines: 1,
@@ -323,16 +249,8 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
             margin: const EdgeInsets.only(bottom: 2.0),
             child: IconButton(
               onPressed: () => _submitReply(_replyController.text),
-              icon: const Icon(
-                Icons.send_rounded,
-                color: Colors.white,
-                size: 18,
-              ),
-              style: IconButton.styleFrom(
-                backgroundColor: theme.primary,
-                padding: const EdgeInsets.all(10),
-                shape: const CircleBorder(),
-              ),
+              icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+              style: IconButton.styleFrom(backgroundColor: theme.primary, padding: const EdgeInsets.all(10), shape: const CircleBorder()),
               constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
             ),
           ),
@@ -345,18 +263,10 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
     if (value.isNotEmpty) {
       // If commentId is 0, we're posting a main comment, not a reply
       if (widget.commentId == 0) {
-        widget.commentBloc.add(
-          PostCommentEvent(postId: widget.postId, comment: value),
-        );
+        widget.commentBloc.add(PostCommentEvent(postId: widget.postId, comment: value));
       } else {
         // Otherwise we're replying to a specific comment
-        widget.commentBloc.add(
-          ReplyComment(
-            commentId: widget.commentId.toString(),
-            postId: widget.postId.toString(),
-            commentText: value,
-          ),
-        );
+        widget.commentBloc.add(ReplyComment(commentId: widget.commentId.toString(), postId: widget.postId.toString(), commentText: value));
       }
       _replyController.clear();
       _focusNode.unfocus();
@@ -370,12 +280,7 @@ class CustomReplyUpdateField extends StatefulWidget {
   final Function(String) onSubmit;
   final Function onCancel;
 
-  const CustomReplyUpdateField({
-    required this.initialValue,
-    required this.onSubmit,
-    required this.onCancel,
-    Key? key,
-  }) : super(key: key);
+  const CustomReplyUpdateField({required this.initialValue, required this.onSubmit, required this.onCancel, super.key});
 
   @override
   State<CustomReplyUpdateField> createState() => _CustomReplyUpdateFieldState();
@@ -427,25 +332,16 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
               focusNode: _focusNode,
               maxLines: null, // Allow dynamic number of lines
               keyboardType: TextInputType.multiline, // Enable multiline input
-              textCapitalization:
-                  TextCapitalization.sentences, // Start with capital letter
+              textCapitalization: TextCapitalization.sentences, // Start with capital letter
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(12),
                 hintText: translation(context).lbl_write_a_comment,
                 border: InputBorder.none,
-                hintStyle: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  color: theme.textTertiary,
-                ),
+                hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
                 // Make sure there's no excess padding causing overflow
                 isDense: true,
               ),
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
             ),
           ),
         ),
@@ -461,21 +357,12 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
               TextButton(
                 onPressed: () => widget.onCancel(),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 child: Text(
                   translation(context).lbl_cancel,
-                  style: TextStyle(
-                    color: theme.textSecondary,
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(color: theme.textSecondary, fontSize: 14, fontFamily: 'Poppins'),
                 ),
               ),
 
@@ -483,23 +370,13 @@ class _CustomReplyUpdateFieldState extends State<CustomReplyUpdateField> {
               TextButton(
                 onPressed: () => widget.onSubmit(_controller.text),
                 style: TextButton.styleFrom(
-                  backgroundColor: theme.primary.withOpacity(0.1),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  backgroundColor: theme.primary.withValues(alpha: 0.1),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 child: Text(
                   translation(context).lbl_update,
-                  style: TextStyle(
-                    color: theme.primary,
-                    fontSize: 14,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: theme.primary, fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                 ),
               ),
             ],

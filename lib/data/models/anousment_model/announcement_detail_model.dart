@@ -1,10 +1,10 @@
 import 'dart:convert';
+
 AnnouncementDetailModel announcementDetailModelFromJson(String str) => AnnouncementDetailModel.fromJson(json.decode(str));
 String announcementDetailModelToJson(AnnouncementDetailModel data) => json.encode(data.toJson());
+
 class AnnouncementDetailModel {
-  AnnouncementDetailModel({
-      this.success, 
-      this.data,});
+  AnnouncementDetailModel({this.success, this.data});
 
   AnnouncementDetailModel.fromJson(dynamic json) {
     success = json['success'];
@@ -21,23 +21,13 @@ class AnnouncementDetailModel {
     }
     return map;
   }
-
 }
 
 AnnouncementDetailData dataFromJson(String str) => AnnouncementDetailData.fromJson(json.decode(str));
 String dataToJson(AnnouncementDetailData data) => json.encode(data.toJson());
+
 class AnnouncementDetailData {
-  AnnouncementDetailData({
-      this.id, 
-      this.userId, 
-      this.title, 
-      this.details, 
-      this.image, 
-      this.isActive, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.deletedAt, 
-      this.user,});
+  AnnouncementDetailData({this.id, this.userId, this.title, this.details, this.image, this.isActive, this.createdAt, this.updatedAt, this.deletedAt, this.user});
 
   AnnouncementDetailData.fromJson(dynamic json) {
     id = json['id'];
@@ -78,18 +68,13 @@ class AnnouncementDetailData {
     }
     return map;
   }
-
 }
 
 User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
+
 class User {
-  User({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.specialty, 
-      this.profilePic,});
+  User({this.id, this.firstName, this.lastName, this.specialty, this.profilePic});
 
   User.fromJson(dynamic json) {
     id = json['id'];
@@ -113,5 +98,4 @@ class User {
     map['profile_pic'] = profilePic;
     return map;
   }
-
 }
