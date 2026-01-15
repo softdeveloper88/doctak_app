@@ -7,6 +7,7 @@ class FileDataValues extends ImageUploadEvent {
   @override
   List<Object?> get props => [];
 }
+
 class SelectedFiles extends ImageUploadEvent {
   XFile pickedfiles;
   bool isRemove;

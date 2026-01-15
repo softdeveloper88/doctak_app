@@ -6,12 +6,10 @@ import 'package:dio/dio.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:gal/gal.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sizer/sizer.dart';
 
 import '../../../../core/utils/post_utils.dart';
 import '../../../../data/models/post_model/post_data_model.dart';
@@ -23,20 +21,13 @@ class FullScreenImagePage extends StatefulWidget {
   final int listCount;
   final List<Map<String, String>>? mediaUrls;
 
-  const FullScreenImagePage({
-    super.key,
-    required this.listCount,
-    this.imageUrl,
-    this.post,
-    this.mediaUrls,
-  });
+  const FullScreenImagePage({super.key, required this.listCount, this.imageUrl, this.post, this.mediaUrls});
 
   @override
   State<FullScreenImagePage> createState() => _FullScreenImagePageState();
 }
 
-class _FullScreenImagePageState extends State<FullScreenImagePage>
-    with TickerProviderStateMixin {
+class _FullScreenImagePageState extends State<FullScreenImagePage> with TickerProviderStateMixin {
   Map<String, double> downloadProgress = {};
   Map<String, bool> isDownloading = {};
   int _currentCarouselIndex = 0;
@@ -50,27 +41,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
   @override
   void initState() {
     super.initState();
-    _progressAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _progressAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _progressAnimationController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _progressAnimationController, curve: Curves.easeInOut));
 
-    _detailsAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 400),
-      vsync: this,
-    );
-    _detailsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _detailsAnimationController,
-        curve: Curves.easeOutBack,
-      ),
-    );
+    _detailsAnimationController = AnimationController(duration: const Duration(milliseconds: 400), vsync: this);
+    _detailsAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _detailsAnimationController, curve: Curves.easeOutBack));
   }
 
   @override
@@ -103,11 +78,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
 
     final hasPermission = await _requestPermissions();
     if (!hasPermission) {
-      _showToast(
-        "Permission denied. Please grant storage access.",
-        Icons.error,
-        Colors.red,
-      );
+      _showToast("Permission denied. Please grant storage access.", Icons.error, Colors.red);
       return;
     }
 
@@ -121,8 +92,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
     final Dio dio = Dio();
     final isVideo = _isVideoUrl(url);
     final extension = isVideo ? '.mp4' : '.jpg';
-    final fileName =
-        'DocTak_${DateTime.now().millisecondsSinceEpoch}$extension';
+    final fileName = 'DocTak_${DateTime.now().millisecondsSinceEpoch}$extension';
 
     try {
       final dir = await getTemporaryDirectory();
@@ -148,11 +118,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
         await Gal.putImage(filePath);
       }
 
-      _showToast(
-        isVideo ? "Video saved to gallery" : "Image saved to gallery",
-        Icons.check_circle,
-        Colors.green,
-      );
+      _showToast(isVideo ? "Video saved to gallery" : "Image saved to gallery", Icons.check_circle, Colors.green);
 
       // Clean up temporary file
       final file = File(filePath);
@@ -160,11 +126,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
         await file.delete();
       }
     } catch (e) {
-      _showToast(
-        "Failed to download. Please try again.",
-        Icons.error,
-        Colors.red,
-      );
+      _showToast("Failed to download. Please try again.", Icons.error, Colors.red);
     } finally {
       setState(() {
         isDownloading[url] = false;
@@ -184,11 +146,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                ),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
               ),
             ),
           ],
@@ -203,15 +161,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
   }
 
   bool _isVideoUrl(String url) {
-    final videoExtensions = [
-      '.mp4',
-      '.mov',
-      '.avi',
-      '.mkv',
-      '.wmv',
-      '.flv',
-      '.webm',
-    ];
+    final videoExtensions = ['.mp4', '.mov', '.avi', '.mkv', '.wmv', '.flv', '.webm'];
     final lowerUrl = url.toLowerCase();
     return videoExtensions.any((ext) => lowerUrl.contains(ext));
   }
@@ -219,14 +169,10 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
   bool isShown = true;
 
   Widget _buildProgressOverlay() {
-    final hasDownloading = isDownloading.values.any(
-      (downloading) => downloading,
-    );
+    final hasDownloading = isDownloading.values.any((downloading) => downloading);
     if (!hasDownloading) return const SizedBox.shrink();
 
-    final currentUrl = isDownloading.keys.firstWhere(
-      (key) => isDownloading[key] == true,
-    );
+    final currentUrl = isDownloading.keys.firstWhere((key) => isDownloading[key] == true);
     final progress = downloadProgress[currentUrl] ?? 0.0;
     final isVideo = _isVideoUrl(currentUrl);
 
@@ -245,14 +191,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
               decoration: BoxDecoration(
                 color: Colors.black87,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, -5),
-                    spreadRadius: 2,
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, -5), spreadRadius: 2)],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -261,15 +200,8 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          isVideo ? Icons.videocam : Icons.image,
-                          color: Colors.blue,
-                          size: 20,
-                        ),
+                        decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                        child: Icon(isVideo ? Icons.videocam : Icons.image, color: Colors.blue, size: 20),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -278,47 +210,26 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                           children: [
                             Text(
                               'Downloading ${isVideo ? 'video' : 'image'}...',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Poppins',
-                              ),
+                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               'Saving to gallery',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 12,
-                                fontFamily: 'Poppins',
-                              ),
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontFamily: 'Poppins'),
                             ),
                           ],
                         ),
                       ),
                       Text(
                         '${(progress * 100).toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.blue,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins',
-                        ),
+                        style: const TextStyle(color: Colors.blue, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.blue,
-                      ),
-                      minHeight: 6,
-                    ),
+                    child: LinearProgressIndicator(value: progress, backgroundColor: Colors.white.withValues(alpha: 0.2), valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue), minHeight: 6),
                   ),
                 ],
               ),
@@ -333,9 +244,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
   Widget build(BuildContext context) {
     int initialPage = 0;
     if (widget.mediaUrls != null && widget.imageUrl != null) {
-      final index = widget.mediaUrls!.indexWhere(
-        (element) => element['url'] == widget.imageUrl,
-      );
+      final index = widget.mediaUrls!.indexWhere((element) => element['url'] == widget.imageUrl);
       if (index != -1) {
         initialPage = index;
       }
@@ -380,43 +289,22 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     color: Colors.grey.shade200,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.broken_image,
-                                        size: 64,
-                                        color: Colors.grey,
-                                      ),
+                                    child: const Center(child: Icon(Icons.broken_image, size: 64, color: Colors.grey)),
+                                  );
+                                },
+                                loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
                                     ),
                                   );
                                 },
-                                loadingBuilder:
-                                    (
-                                      BuildContext context,
-                                      Widget child,
-                                      ImageChunkEvent? loadingProgress,
-                                    ) {
-                                      if (loadingProgress == null) return child;
-                                      return Center(
-                                        child: CircularProgressIndicator(
-                                          value:
-                                              loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                        .cumulativeBytesLoaded /
-                                                    loadingProgress
-                                                        .expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      );
-                                    },
                               ),
                             ),
                           );
                         } else {
-                          return Center(
-                            child: VideoPlayerWidget(videoUrl: i['url']!),
-                          );
+                          return Center(child: VideoPlayerWidget(videoUrl: i['url']!));
                         }
                       },
                     );
@@ -432,77 +320,42 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                         color: Colors.grey.shade200,
-                        child: const Center(
-                          child: Icon(
-                            Icons.broken_image,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                        ),
+                        child: const Center(child: Icon(Icons.broken_image, size: 64, color: Colors.grey)),
                       );
                     },
-                    loadingBuilder:
-                        (
-                          BuildContext context,
-                          Widget child,
-                          ImageChunkEvent? loadingProgress,
-                        ) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
+                    loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null),
+                      );
+                    },
                   ),
                 ),
           // OneUI 8.5 Style Enhanced Header
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 12.0,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // OneUI 8.5 Style back button with frosted glass effect
                   _buildOneUIButton(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
                   ),
 
                   // Download button - works for both single and multiple images
                   Row(
                     children: [
                       // Page indicator for multiple images
-                      if (widget.mediaUrls != null &&
-                          widget.mediaUrls!.length > 1)
+                      if (widget.mediaUrls != null && widget.mediaUrls!.length > 1)
                         Container(
                           margin: const EdgeInsets.only(right: 12),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(20)),
                           child: Text(
                             '${_currentCarouselIndex + 1}/${widget.mediaUrls!.length}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                           ),
                         ),
                       // Download button
@@ -546,33 +399,15 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                             duration: const Duration(milliseconds: 250),
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: _showDetails
-                                  ? Colors.white.withOpacity(0.25)
-                                  : Colors.white.withOpacity(0.15),
+                              color: _showDetails ? Colors.white.withValues(alpha: 0.25) : Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.3),
-                                width: 0.5,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 0.5),
+                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 15, offset: const Offset(0, 5), spreadRadius: 0)],
                             ),
                             child: AnimatedRotation(
                               turns: _showDetails ? 0.125 : 0,
                               duration: const Duration(milliseconds: 300),
-                              child: Icon(
-                                _showDetails
-                                    ? Icons.close_rounded
-                                    : Icons.info_outline_rounded,
-                                color: Colors.white,
-                                size: 26,
-                              ),
+                              child: Icon(_showDetails ? Icons.close_rounded : Icons.info_outline_rounded, color: Colors.white, size: 26),
                             ),
                           ),
                         ),
@@ -593,7 +428,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
           //   right: 0,
           //   child: SingleChildScrollView(
           //     child: Container(
-          //       color: Colors.white.withOpacity(0.2),
+          //       color: Colors.white.withValues(alpha: 0.2),
           //       child: Column(
           //         children: [
           //           if (isShown)
@@ -635,11 +470,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
   }
 
   // OneUI 8.5 Style button with frosted glass effect
-  Widget _buildOneUIButton({
-    required VoidCallback onTap,
-    required Widget child,
-    double padding = 12,
-  }) {
+  Widget _buildOneUIButton({required VoidCallback onTap, required Widget child, double padding = 12}) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: BackdropFilter(
@@ -652,20 +483,10 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
             child: Container(
               padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
+                color: Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
-                  width: 0.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                    spreadRadius: 0,
-                  ),
-                ],
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 0.5),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 10, offset: const Offset(0, 4), spreadRadius: 0)],
               ),
               child: child,
             ),
@@ -688,31 +509,15 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: isDownloadingCurrent
-                ? null
-                : () => _downloadMedia(url, context),
+            onTap: isDownloadingCurrent ? null : () => _downloadMedia(url, context),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: isDownloadingCurrent
-                    ? Colors.blue.withOpacity(0.25)
-                    : Colors.white.withOpacity(0.15),
+                color: isDownloadingCurrent ? Colors.blue.withValues(alpha: 0.25) : Colors.white.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isDownloadingCurrent
-                      ? Colors.blue.withOpacity(0.5)
-                      : Colors.white.withOpacity(0.2),
-                  width: 0.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                    spreadRadius: 0,
-                  ),
-                ],
+                border: Border.all(color: isDownloadingCurrent ? Colors.blue.withValues(alpha: 0.5) : Colors.white.withValues(alpha: 0.2), width: 0.5),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 10, offset: const Offset(0, 4), spreadRadius: 0)],
               ),
               child: isDownloadingCurrent
                   ? SizedBox(
@@ -724,28 +529,17 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                           CircularProgressIndicator(
                             value: currentProgress,
                             strokeWidth: 2.5,
-                            backgroundColor: Colors.white.withOpacity(0.2),
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
+                            backgroundColor: Colors.white.withValues(alpha: 0.2),
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                           Text(
                             '${(currentProgress * 100).toInt()}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 7,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Poppins',
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 7, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                           ),
                         ],
                       ),
                     )
-                  : const Icon(
-                      Icons.download_rounded,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                  : const Icon(Icons.download_rounded, color: Colors.white, size: 24),
             ),
           ),
         ),
@@ -758,9 +552,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
 
     String fullText = widget.post?.title ?? '';
     List<String> words = fullText.split(' ');
-    String textToShow = _isExpanded || words.length <= 25
-        ? fullText
-        : '${words.take(20).join(' ')}...';
+    String textToShow = _isExpanded || words.length <= 25 ? fullText : '${words.take(20).join(' ')}...';
 
     return AnimatedBuilder(
       animation: _detailsAnimation,
@@ -781,24 +573,12 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                   child: Container(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.6,
-                    ),
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.15),
-                        width: 0.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, -4),
-                          spreadRadius: 0,
-                        ),
-                      ],
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 0.5),
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, -4), spreadRadius: 0)],
                     ),
                     child: SingleChildScrollView(
                       padding: EdgeInsets.all(isTablet ? 28 : 24),
@@ -811,30 +591,16 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.blue[400]!,
-                                      Colors.purple[400]!,
-                                    ],
-                                  ),
+                                  gradient: LinearGradient(colors: [Colors.blue[400]!, Colors.purple[400]!]),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(
-                                  Icons.article_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                                child: const Icon(Icons.article_rounded, color: Colors.white, size: 20),
                               ),
                               const SizedBox(width: 12),
                               const Expanded(
                                 child: Text(
                                   'Post Details',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: 'Poppins',
-                                  ),
+                                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700, fontFamily: 'Poppins'),
                                 ),
                               ),
                             ],
@@ -847,12 +613,9 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                             width: double.infinity,
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
-                                width: 1,
-                              ),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -862,12 +625,8 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                                     fullText,
                                     onTapUrl: (link) async {
                                       if (link.contains('doctak/jobs-detail')) {
-                                        String jobID = Uri.parse(
-                                          link,
-                                        ).pathSegments.last;
-                                        JobsDetailsScreen(
-                                          jobId: jobID,
-                                        ).launch(context);
+                                        String jobID = Uri.parse(link).pathSegments.last;
+                                        JobsDetailsScreen(jobId: jobID).launch(context);
                                       } else {
                                         PostUtils.launchURL(context, link);
                                       }
@@ -877,13 +636,7 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                                 else
                                   Text(
                                     textToShow,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: 'Poppins',
-                                      height: 1.6,
-                                    ),
+                                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.w400, fontFamily: 'Poppins', height: 1.6),
                                   ),
 
                                 // Show more/less button
@@ -895,52 +648,21 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                                         _isExpanded = !_isExpanded;
                                       }),
                                       child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 20,
-                                          vertical: 10,
-                                        ),
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              Colors.blue[400]!,
-                                              Colors.purple[400]!,
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            25,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.blue.withOpacity(
-                                                0.3,
-                                              ),
-                                              blurRadius: 8,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
+                                          gradient: LinearGradient(colors: [Colors.blue[400]!, Colors.purple[400]!]),
+                                          borderRadius: BorderRadius.circular(25),
+                                          boxShadow: [BoxShadow(color: Colors.blue.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Text(
-                                              _isExpanded
-                                                  ? 'Show Less'
-                                                  : 'Show More',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                                fontFamily: 'Poppins',
-                                              ),
+                                              _isExpanded ? 'Show Less' : 'Show More',
+                                              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                                             ),
                                             const SizedBox(width: 6),
-                                            Icon(
-                                              _isExpanded
-                                                  ? Icons.expand_less
-                                                  : Icons.expand_more,
-                                              color: Colors.white,
-                                              size: 18,
-                                            ),
+                                            Icon(_isExpanded ? Icons.expand_less : Icons.expand_more, color: Colors.white, size: 18),
                                           ],
                                         ),
                                       ),
@@ -957,28 +679,13 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                             width: double.infinity,
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.blue.withOpacity(0.1),
-                                  Colors.purple.withOpacity(0.1),
-                                ],
-                              ),
+                              gradient: LinearGradient(colors: [Colors.blue.withValues(alpha: 0.1), Colors.purple.withValues(alpha: 0.1)]),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
-                                width: 1,
-                              ),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                             ),
                             child: Row(
                               children: [
-                                Expanded(
-                                  child: _buildStatItem(
-                                    Icons.favorite_rounded,
-                                    '${widget.post?.likes?.length ?? 0}',
-                                    translation(context).lbl_likes,
-                                    Colors.red[400]!,
-                                  ),
-                                ),
+                                Expanded(child: _buildStatItem(Icons.favorite_rounded, '${widget.post?.likes?.length ?? 0}', translation(context).lbl_likes, Colors.red[400]!)),
                                 Container(
                                   width: 1,
                                   height: 50,
@@ -986,22 +693,11 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.white.withOpacity(0.3),
-                                        Colors.transparent,
-                                      ],
+                                      colors: [Colors.transparent, Colors.white.withValues(alpha: 0.3), Colors.transparent],
                                     ),
                                   ),
                                 ),
-                                Expanded(
-                                  child: _buildStatItem(
-                                    Icons.chat_bubble_rounded,
-                                    '${widget.post?.comments?.length ?? 0}',
-                                    translation(context).lbl_comments,
-                                    Colors.blue[400]!,
-                                  ),
-                                ),
+                                Expanded(child: _buildStatItem(Icons.chat_bubble_rounded, '${widget.post?.comments?.length ?? 0}', translation(context).lbl_comments, Colors.blue[400]!)),
                               ],
                             ),
                           ),
@@ -1018,41 +714,23 @@ class _FullScreenImagePageState extends State<FullScreenImagePage>
     );
   }
 
-  Widget _buildStatItem(
-    IconData icon,
-    String count,
-    String label,
-    Color color,
-  ) {
+  Widget _buildStatItem(IconData icon, String count, String label, Color color) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
+          decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
           child: Icon(icon, color: color, size: 24),
         ),
         const SizedBox(height: 8),
         Text(
           count,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Poppins',
-          ),
+          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            fontFamily: 'Poppins',
-          ),
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
         ),
       ],
     );

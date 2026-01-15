@@ -19,17 +19,13 @@ class DataLoaded extends ChatGPTState {
 class MessagesDataLoaded extends ChatGPTState {
   ChatGptMessageHistory response;
 
-  MessagesDataLoaded(
-    this.response,
-  );
+  MessagesDataLoaded(this.response);
 }
 
 class QuestionResponseLoaded extends ChatGPTState {
   ChatGptAskQuestionResponse response;
 
-  QuestionResponseLoaded(
-    this.response,
-  );
+  QuestionResponseLoaded(this.response);
 }
 
 class DataError extends ChatGPTState {

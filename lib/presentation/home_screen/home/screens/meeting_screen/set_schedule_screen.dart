@@ -12,6 +12,8 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 class SetScheduleScreen extends StatefulWidget {
+  const SetScheduleScreen({super.key});
+
   @override
   _SetScheduleScreenState createState() => _SetScheduleScreenState();
 }
@@ -28,12 +30,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
 
   void _selectDate() async {
-    DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
+    DateTime? pickedDate = await showDatePicker(context: context, initialDate: DateTime.now(), firstDate: DateTime(2000), lastDate: DateTime(2100));
     if (pickedDate != null) {
       setState(() {
         dateController.text = "${pickedDate.toLocal()}".split(' ')[0];
@@ -42,10 +39,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
   }
 
   void _selectTime(TextEditingController controller) async {
-    TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
+    TimeOfDay? pickedTime = await showTimePicker(context: context, initialTime: TimeOfDay.now());
     if (pickedTime != null) {
       setState(() {
         controller.text = pickedTime.format(context);
@@ -63,26 +57,11 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
           // TabBar
           const SizedBox(height: 20),
           // Form Fields
-          CustomTextField(
-            labelText: translation(context).lbl_meeting_topic,
-            controller: topicController,
-          ),
+          CustomTextField(labelText: translation(context).lbl_meeting_topic, controller: topicController),
           const SizedBox(height: 20),
-          CustomTextField(
-            labelText: translation(context).lbl_date,
-            controller: dateController,
-            icon: Icons.calendar_today,
-            readOnly: true,
-            onTap: _selectDate,
-          ),
+          CustomTextField(labelText: translation(context).lbl_date, controller: dateController, icon: Icons.calendar_today, readOnly: true, onTap: _selectDate),
           const SizedBox(height: 20),
-          CustomTextField(
-            labelText: translation(context).lbl_time,
-            controller: startTimeController,
-            icon: Icons.access_time,
-            readOnly: true,
-            onTap: () => _selectTime(startTimeController),
-          ),
+          CustomTextField(labelText: translation(context).lbl_time, controller: startTimeController, icon: Icons.access_time, readOnly: true, onTap: () => _selectTime(startTimeController)),
 
           // Row(
           //   children: [
@@ -116,23 +95,15 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
               child: svAppButton(
                 context: context,
                 onTap: () async {
-                  if (topicController.text.isEmpty ||
-                      dateController.text.isEmpty ||
-                      startTimeController.text.isEmpty) {
+                  if (topicController.text.isEmpty || dateController.text.isEmpty || startTimeController.text.isEmpty) {
                     toast(translation(context).msg_all_fields_required);
                     return;
                   }
 
                   try {
-                    final response = await setScheduleMeeting(
-                      title: topicController.text,
-                      date: dateController.text,
-                      time: '${startTimeController.text}',
-                    );
+                    final response = await setScheduleMeeting(title: topicController.text, date: dateController.text, time: startTimeController.text);
 
-                    Map<String, dynamic> responseData = json.decode(
-                      jsonEncode(response.data),
-                    );
+                    Map<String, dynamic> responseData = json.decode(jsonEncode(response.data));
                     toast(responseData['message']);
 
                     // Clear fields after successful submission
@@ -159,17 +130,9 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
                   ProgressDialogUtils.showProgressDialog();
                   await startMeetings()
                       .then((createMeeting) async {
-                        await joinMeetings(
-                          createMeeting.data?.meeting?.meetingChannel ?? '',
-                        ).then((joinMeetingData) {
+                        await joinMeetings(createMeeting.data?.meeting?.meetingChannel ?? '').then((joinMeetingData) {
                           ProgressDialogUtils.hideProgressDialog();
-                          VideoCallScreen(
-                            meetingDetailsModel: joinMeetingData,
-                            isHost: true,
-                          ).launch(
-                            context,
-                            pageRouteAnimation: PageRouteAnimation.Slide,
-                          );
+                          VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: true).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                         });
                       })
                       .catchError((error) {
@@ -204,16 +167,11 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
     askToJoin(context, channel)
         .then((resp) async {
           print("join response ${jsonEncode(resp.data)}");
-          Map<String, dynamic> responseData = json.decode(
-            jsonEncode(resp.data),
-          );
+          Map<String, dynamic> responseData = json.decode(jsonEncode(resp.data));
           if (responseData['success'] == '1') {
             await joinMeetings(channel).then((joinMeetingData) {
               ProgressDialogUtils.hideProgressDialog();
-              VideoCallScreen(
-                meetingDetailsModel: joinMeetingData,
-                isHost: false,
-              ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
             });
           } else {
             ConnectPusher(responseData['meeting_id'], channel);
@@ -258,18 +216,15 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
 
   // Authorizer method for Pusher - required to prevent iOS crash
   // Returns null for public channels, or auth data for private/presence channels
-  Future<dynamic>? onAuthorizer(
-      String channelName, String socketId, dynamic options) async {
-    print(
-        "onAuthorizer called for channel: $channelName, socketId: $socketId");
-    
+  Future<dynamic>? onAuthorizer(String channelName, String socketId, dynamic options) async {
+    print("onAuthorizer called for channel: $channelName, socketId: $socketId");
+
     // For public channels (not starting with 'private-' or 'presence-'),
     // return null or empty object
-    if (!channelName.startsWith('private-') &&
-        !channelName.startsWith('presence-')) {
+    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
       return null;
     }
-    
+
     // For private/presence channels, you would typically make an API call
     // to your backend to get auth credentials
     // Example implementation (uncomment and modify as needed):
@@ -294,7 +249,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
       print("Pusher authorization error: $e");
     }
     */
-    
+
     return null;
   }
 
@@ -320,9 +275,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
       await pusher.connect();
 
       final pusherChannelName = "meeting-channel$meetingId";
-      print(
-        "Subscribing to Pusher channel for join approval: $pusherChannelName",
-      );
+      print("Subscribing to Pusher channel for join approval: $pusherChannelName");
 
       // Subscribe to the Pusher channel
       clientListenChannel = await pusher.subscribe(
@@ -335,13 +288,10 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
         },
         onEvent: (event) async {
           String eventName = event.eventName;
-          print(
-            "Pusher event received - name: $eventName, data: ${event.data}",
-          );
+          print("Pusher event received - name: $eventName, data: ${event.data}");
 
           // Handle internal pusher events
-          if (eventName.startsWith('pusher:') ||
-              eventName.startsWith('pusher_internal:')) {
+          if (eventName.startsWith('pusher:') || eventName.startsWith('pusher_internal:')) {
             print("Pusher internal event: $eventName");
             return;
           }
@@ -351,10 +301,7 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
               print("Join request APPROVED - navigating to meeting");
               await joinMeetings(channel).then((joinMeetingData) {
                 ProgressDialogUtils.hideProgressDialog();
-                VideoCallScreen(
-                  meetingDetailsModel: joinMeetingData,
-                  isHost: false,
-                ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+                VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
               });
               toast("Join request approved!");
               break;
@@ -376,23 +323,15 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
     }
   }
 
-  Future<void> _navigateToCallScreen(
-    BuildContext context,
-    String getChannelName,
-  ) async {
+  Future<void> _navigateToCallScreen(BuildContext context, String getChannelName) async {
     if (getChannelName.isNotEmpty) {
       checkJoinStatus(context, getChannelName);
     } else {
       ProgressDialogUtils.showProgressDialog();
       await startMeetings().then((createMeeting) async {
-        await joinMeetings(
-          createMeeting.data?.meeting?.meetingChannel ?? '',
-        ).then((joinMeetingData) {
+        await joinMeetings(createMeeting.data?.meeting?.meetingChannel ?? '').then((joinMeetingData) {
           ProgressDialogUtils.hideProgressDialog();
-          VideoCallScreen(
-            meetingDetailsModel: joinMeetingData,
-            isHost: true,
-          ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+          VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: true).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
         });
       });
     }
@@ -406,15 +345,10 @@ class _SetScheduleScreenState extends State<SetScheduleScreen> {
         title: Text(translation(context).lbl_join_meeting),
         content: TextField(
           controller: channelController,
-          decoration: InputDecoration(
-            labelText: translation(context).lbl_channel_name,
-          ),
+          decoration: InputDecoration(labelText: translation(context).lbl_channel_name),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(translation(context).lbl_cancel),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(translation(context).lbl_cancel)),
           TextButton(
             onPressed: () {
               if (channelController.text.isNotEmpty) {
@@ -439,14 +373,7 @@ class CustomTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
 
-  const CustomTextField({
-    Key? key,
-    required this.labelText,
-    required this.controller,
-    this.icon,
-    this.readOnly = false,
-    this.onTap,
-  }) : super(key: key);
+  const CustomTextField({super.key, required this.labelText, required this.controller, this.icon, this.readOnly = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -457,10 +384,7 @@ class CustomTextField extends StatelessWidget {
       children: [
         Text(
           labelText,
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
         Container(
           padding: const EdgeInsets.only(left: 10),
@@ -485,10 +409,7 @@ class CustomTextField extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey, width: 0.8),
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(8),
-                          bottomRight: Radius.circular(8),
-                        ),
+                        borderRadius: const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)),
                         color: const Color(0xFFE6E6E6),
                       ),
                       child: Icon(icon),

@@ -29,11 +29,11 @@ class AudioCacheManager {
       }
 
       _cacheDirectory = Directory('${appDir.path}/$_cacheDirectoryName');
-      
+
       if (!await _cacheDirectory!.exists()) {
         await _cacheDirectory!.create(recursive: true);
       }
-      
+
       debugPrint('Cache directory initialized: ${_cacheDirectory!.path}');
     } catch (e) {
       debugPrint('Error initializing cache directory: $e');
@@ -83,7 +83,7 @@ class AudioCacheManager {
       // Check disk cache
       final cachePath = _getCacheFilePath(url);
       final cacheFile = File(cachePath);
-      
+
       if (await cacheFile.exists()) {
         // Verify file is not corrupted
         final fileSize = await cacheFile.length();
@@ -109,29 +109,25 @@ class AudioCacheManager {
   Future<String?> _downloadAndCacheAudio(String url) async {
     try {
       final cachePath = _getCacheFilePath(url);
-      
+
       // Create a temporary file for downloading
       final tempPath = '$cachePath.tmp';
       final tempFile = File(tempPath);
 
       // Download the file
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'User-Agent': 'DocTak/1.0',
-          'Accept': 'audio/*',
-        },
-      ).timeout(
-        const Duration(minutes: 2),
-        onTimeout: () {
-          throw Exception('Download timeout');
-        },
-      );
+      final response = await http
+          .get(Uri.parse(url), headers: {'User-Agent': 'DocTak/1.0', 'Accept': 'audio/*'})
+          .timeout(
+            const Duration(minutes: 2),
+            onTimeout: () {
+              throw Exception('Download timeout');
+            },
+          );
 
       if (response.statusCode == 200) {
         // Write to temporary file
         await tempFile.writeAsBytes(response.bodyBytes);
-        
+
         // Verify the downloaded file
         final fileSize = await tempFile.length();
         if (fileSize > 0) {
@@ -159,10 +155,10 @@ class AudioCacheManager {
   Future<void> clearCache() async {
     try {
       await _initializeCacheDirectory();
-      
+
       // Clear memory cache
       _memoryCache.clear();
-      
+
       // Clear disk cache
       if (_cacheDirectory != null && await _cacheDirectory!.exists()) {
         final files = _cacheDirectory!.listSync();
@@ -172,7 +168,7 @@ class AudioCacheManager {
           }
         }
       }
-      
+
       debugPrint('Cache cleared successfully');
     } catch (e) {
       debugPrint('Error clearing cache: $e');
@@ -182,7 +178,7 @@ class AudioCacheManager {
   Future<int> getCacheSize() async {
     try {
       await _initializeCacheDirectory();
-      
+
       int totalSize = 0;
       if (_cacheDirectory != null && await _cacheDirectory!.exists()) {
         final files = _cacheDirectory!.listSync();
@@ -192,7 +188,7 @@ class AudioCacheManager {
           }
         }
       }
-      
+
       return totalSize;
     } catch (e) {
       debugPrint('Error calculating cache size: $e');
@@ -203,14 +199,14 @@ class AudioCacheManager {
   Future<void> removeCachedAudio(String url) async {
     try {
       await _initializeCacheDirectory();
-      
+
       // Remove from memory cache
       _memoryCache.remove(url);
-      
+
       // Remove from disk cache
       final cachePath = _getCacheFilePath(url);
       final cacheFile = File(cachePath);
-      
+
       if (await cacheFile.exists()) {
         await cacheFile.delete();
         debugPrint('Cached audio removed: $cachePath');
@@ -224,10 +220,10 @@ class AudioCacheManager {
   Future<void> cleanOldCache() async {
     try {
       await _initializeCacheDirectory();
-      
+
       final now = DateTime.now();
       final maxAge = const Duration(days: 30);
-      
+
       if (_cacheDirectory != null && await _cacheDirectory!.exists()) {
         final files = _cacheDirectory!.listSync();
         for (final file in files) {

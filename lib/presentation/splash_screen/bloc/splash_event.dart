@@ -1,4 +1,3 @@
-import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class SplashEvent extends Equatable {}
@@ -26,8 +25,7 @@ class LoadDropdownData extends SplashEvent {
   String countryFlag;
   String typeValue;
   String searchTerms;
-  LoadDropdownData(
-      this.countryFlag, this.typeValue, this.searchTerms, [String? placeholder]);
+  LoadDropdownData(this.countryFlag, this.typeValue, this.searchTerms, [String? placeholder]);
   @override
   List<Object?> get props => [countryFlag, typeValue, searchTerms];
 }

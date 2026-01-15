@@ -10,12 +10,7 @@ class OneUIInfoBanner extends StatelessWidget {
   final IconData icon;
   final Color? accentColor;
 
-  const OneUIInfoBanner({
-    super.key,
-    required this.message,
-    required this.icon,
-    this.accentColor,
-  });
+  const OneUIInfoBanner({super.key, required this.message, required this.icon, this.accentColor});
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +21,9 @@ class OneUIInfoBanner extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: theme.radiusL,
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -37,11 +32,7 @@ class OneUIInfoBanner extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: color,
-                fontFamily: 'Poppins',
-                fontSize: 14,
-              ),
+              style: TextStyle(color: color, fontFamily: 'Poppins', fontSize: 14),
             ),
           ),
         ],
@@ -59,15 +50,7 @@ class OneUIProfileSection extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
 
-  const OneUIProfileSection({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.child,
-    this.iconColor,
-    this.padding,
-    this.margin,
-  });
+  const OneUIProfileSection({super.key, required this.title, required this.icon, required this.child, this.iconColor, this.padding, this.margin});
 
   @override
   Widget build(BuildContext context) {
@@ -84,43 +67,27 @@ class OneUIProfileSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.08),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(theme.radiusL.topLeft.x),
-                topRight: Radius.circular(theme.radiusL.topRight.x),
-              ),
-              border: Border(
-                bottom: BorderSide(color: color.withOpacity(0.2)),
-              ),
+              color: color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(theme.radiusL.topLeft.x), topRight: Radius.circular(theme.radiusL.topRight.x)),
+              border: Border(bottom: BorderSide(color: color.withValues(alpha: 0.2))),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
-                    borderRadius: theme.radiusM,
-                  ),
+                  decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: theme.radiusM),
                   child: Icon(icon, size: 20, color: color),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: color,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: color),
                 ),
               ],
             ),
           ),
           // Section content
-          Container(
-            padding: padding ?? const EdgeInsets.all(16),
-            child: child,
-          ),
+          Container(padding: padding ?? const EdgeInsets.all(16), child: child),
         ],
       ),
     );
@@ -135,14 +102,7 @@ class OneUIProfileInfoRow extends StatelessWidget {
   final Color? iconColor;
   final bool showDivider;
 
-  const OneUIProfileInfoRow({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.iconColor,
-    this.showDivider = true,
-  });
+  const OneUIProfileInfoRow({super.key, required this.icon, required this.label, required this.value, this.iconColor, this.showDivider = true});
 
   @override
   Widget build(BuildContext context) {
@@ -157,32 +117,20 @@ class OneUIProfileInfoRow extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: theme.radiusM,
-                ),
+                decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: theme.radiusM),
                 child: Icon(icon, size: 16, color: color),
               ),
               const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  label,
-                  style: theme.bodyMedium,
-                ),
-              ),
+              Expanded(child: Text(label, style: theme.bodyMedium)),
               Flexible(
                 child: Text(
                   value.isNotEmpty ? value : 'Not Specified',
                   style: TextStyle(
-                    color: value.isNotEmpty
-                        ? theme.textPrimary
-                        : theme.textTertiary,
+                    color: value.isNotEmpty ? theme.textPrimary : theme.textTertiary,
                     fontSize: 14,
                     fontFamily: 'Poppins',
-                    fontWeight:
-                        value.isNotEmpty ? FontWeight.w500 : FontWeight.normal,
-                    fontStyle:
-                        value.isNotEmpty ? FontStyle.normal : FontStyle.italic,
+                    fontWeight: value.isNotEmpty ? FontWeight.w500 : FontWeight.normal,
+                    fontStyle: value.isNotEmpty ? FontStyle.normal : FontStyle.italic,
                   ),
                   textAlign: TextAlign.end,
                   overflow: TextOverflow.ellipsis,
@@ -192,8 +140,7 @@ class OneUIProfileInfoRow extends StatelessWidget {
             ],
           ),
         ),
-        if (showDivider)
-          Divider(color: theme.divider, thickness: 1, height: 1),
+        if (showDivider) Divider(color: theme.divider, thickness: 1, height: 1),
       ],
     );
   }
@@ -206,13 +153,7 @@ class OneUIProfileEmptyState extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;
 
-  const OneUIProfileEmptyState({
-    super.key,
-    required this.title,
-    this.subtitle,
-    required this.icon,
-    this.iconColor,
-  });
+  const OneUIProfileEmptyState({super.key, required this.title, this.subtitle, required this.icon, this.iconColor});
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +163,7 @@ class OneUIProfileEmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
       decoration: BoxDecoration(
-        color: theme.surfaceVariant.withOpacity(0.5),
+        color: theme.surfaceVariant.withValues(alpha: 0.5),
         borderRadius: theme.radiusL,
         border: Border.all(color: theme.divider),
       ),
@@ -231,26 +172,12 @@ class OneUIProfileEmptyState extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Icon(icon, size: 40, color: color),
           ),
           const SizedBox(height: 16),
-          Text(
-            title,
-            style: theme.titleSmall,
-            textAlign: TextAlign.center,
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              subtitle!,
-              style: theme.caption,
-              textAlign: TextAlign.center,
-            ),
-          ],
+          Text(title, style: theme.titleSmall, textAlign: TextAlign.center),
+          if (subtitle != null) ...[const SizedBox(height: 8), Text(subtitle!, style: theme.caption, textAlign: TextAlign.center)],
         ],
       ),
     );
@@ -262,11 +189,7 @@ class OneUIEditActionButton extends StatelessWidget {
   final bool isEditMode;
   final VoidCallback onPressed;
 
-  const OneUIEditActionButton({
-    super.key,
-    required this.isEditMode,
-    required this.onPressed,
-  });
+  const OneUIEditActionButton({super.key, required this.isEditMode, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -277,17 +200,8 @@ class OneUIEditActionButton extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
       icon: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isEditMode
-              ? theme.success.withOpacity(0.1)
-              : theme.iconButtonBg,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          isEditMode ? Icons.check : Icons.edit,
-          color: isEditMode ? theme.success : theme.primary,
-          size: 16,
-        ),
+        decoration: BoxDecoration(color: isEditMode ? theme.success.withValues(alpha: 0.1) : theme.iconButtonBg, shape: BoxShape.circle),
+        child: Icon(isEditMode ? Icons.check : Icons.edit, color: isEditMode ? theme.success : theme.primary, size: 16),
       ),
       onPressed: onPressed,
     );
@@ -298,10 +212,7 @@ class OneUIEditActionButton extends StatelessWidget {
 class OneUIAddActionButton extends StatelessWidget {
   final VoidCallback onPressed;
 
-  const OneUIAddActionButton({
-    super.key,
-    required this.onPressed,
-  });
+  const OneUIAddActionButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -312,15 +223,8 @@ class OneUIAddActionButton extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
       icon: Container(
         padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: theme.iconButtonBg,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.add,
-          color: theme.primary,
-          size: 16,
-        ),
+        decoration: BoxDecoration(color: theme.iconButtonBg, shape: BoxShape.circle),
+        child: Icon(Icons.add, color: theme.primary, size: 16),
       ),
       onPressed: onPressed,
     );
@@ -335,14 +239,7 @@ class OneUIProfilePrimaryButton extends StatelessWidget {
   final Color? color;
   final bool isLoading;
 
-  const OneUIProfilePrimaryButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.color,
-    this.isLoading = false,
-  });
+  const OneUIProfilePrimaryButton({super.key, required this.label, required this.onPressed, this.icon, this.color, this.isLoading = false});
 
   @override
   Widget build(BuildContext context) {
@@ -362,28 +259,14 @@ class OneUIProfilePrimaryButton extends StatelessWidget {
           elevation: 0,
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
+            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 18),
-                    const SizedBox(width: 8),
-                  ],
+                  if (icon != null) ...[Icon(icon, size: 18), const SizedBox(width: 8)],
                   Text(
                     label,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                   ),
                 ],
               ),
@@ -398,12 +281,7 @@ class OneUIPrivacyBadge extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const OneUIPrivacyBadge({
-    super.key,
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
+  const OneUIPrivacyBadge({super.key, required this.label, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -412,9 +290,9 @@ class OneUIPrivacyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: theme.radiusFull,
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -423,12 +301,7 @@ class OneUIPrivacyBadge extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(color: color, fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -475,18 +348,8 @@ class OneUIWorkCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.primary.withOpacity(0.08),
-                  theme.secondary.withOpacity(0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(theme.radiusL.topLeft.x),
-                topRight: Radius.circular(theme.radiusL.topRight.x),
-              ),
+              gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.08), theme.secondary.withValues(alpha: 0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(theme.radiusL.topLeft.x), topRight: Radius.circular(theme.radiusL.topRight.x)),
             ),
             child: Row(
               children: [
@@ -496,12 +359,7 @@ class OneUIWorkCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
-                          color: theme.textPrimary,
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(color: theme.textPrimary, fontSize: 16, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 4),
                       Text(subtitle, style: theme.bodySecondary),
@@ -512,30 +370,22 @@ class OneUIWorkCard extends StatelessWidget {
                   if (onEdit != null)
                     IconButton(
                       onPressed: onEdit,
-                      constraints:
-                          const BoxConstraints(minWidth: 36, minHeight: 36),
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       padding: EdgeInsets.zero,
                       icon: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.primary.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
                         child: Icon(Icons.edit, size: 16, color: theme.primary),
                       ),
                     ),
                   if (onDelete != null)
                     IconButton(
                       onPressed: onDelete,
-                      constraints:
-                          const BoxConstraints(minWidth: 36, minHeight: 36),
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       padding: EdgeInsets.zero,
                       icon: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: theme.error.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: BoxDecoration(color: theme.error.withValues(alpha: 0.1), shape: BoxShape.circle),
                         child: Icon(Icons.delete, size: 16, color: theme.error),
                       ),
                     ),
@@ -547,11 +397,7 @@ class OneUIWorkCard extends StatelessWidget {
           // Details section
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: details
-                  .map((detail) => _buildDetailRow(detail, theme))
-                  .toList(),
-            ),
+            child: Column(children: details.map((detail) => _buildDetailRow(detail, theme)).toList()),
           ),
 
           // Duration section
@@ -559,50 +405,27 @@ class OneUIWorkCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.surfaceVariant.withOpacity(0.5),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(theme.radiusL.bottomLeft.x),
-                  bottomRight: Radius.circular(theme.radiusL.bottomRight.x),
-                ),
-                border: Border(
-                  top: BorderSide(color: theme.divider),
-                ),
+                color: theme.surfaceVariant.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(theme.radiusL.bottomLeft.x), bottomRight: Radius.circular(theme.radiusL.bottomRight.x)),
+                border: Border(top: BorderSide(color: theme.divider)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.calendar_today_outlined,
-                      size: 18, color: theme.textSecondary),
+                  Icon(Icons.calendar_today_outlined, size: 18, color: theme.textSecondary),
                   const SizedBox(width: 8),
                   Text(
                     'Duration',
-                    style: TextStyle(
-                      color: theme.textSecondary,
-                      fontSize: 14,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(color: theme.textSecondary, fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                   ),
                   const Spacer(),
-                  Text(
-                    startDate ?? '',
-                    style: theme.bodyMedium,
-                  ),
+                  Text(startDate ?? '', style: theme.bodyMedium),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      'End Date',
-                      style: theme.caption,
-                    ),
+                    child: Text('End Date', style: theme.caption),
                   ),
                   Text(
                     isCurrentRole ? 'Present' : (endDate ?? ''),
-                    style: TextStyle(
-                      color:
-                          isCurrentRole ? theme.success : theme.textSecondary,
-                      fontSize: 14,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(color: isCurrentRole ? theme.success : theme.textSecondary, fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -620,10 +443,7 @@ class OneUIWorkCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: detail.iconColor.withOpacity(0.1),
-              borderRadius: theme.radiusM,
-            ),
+            decoration: BoxDecoration(color: detail.iconColor.withValues(alpha: 0.1), borderRadius: theme.radiusM),
             child: Icon(detail.icon, size: 16, color: detail.iconColor),
           ),
           const SizedBox(width: 12),
@@ -632,11 +452,7 @@ class OneUIWorkCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(detail.label, style: theme.caption),
-                if (detail.value.isNotEmpty)
-                  Text(
-                    detail.value,
-                    style: theme.bodyMedium,
-                  ),
+                if (detail.value.isNotEmpty) Text(detail.value, style: theme.bodyMedium),
               ],
             ),
           ),
@@ -653,10 +469,5 @@ class OneUIWorkCardDetail {
   final String label;
   final String value;
 
-  const OneUIWorkCardDetail({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-  });
+  const OneUIWorkCardDetail({required this.icon, required this.iconColor, required this.label, required this.value});
 }

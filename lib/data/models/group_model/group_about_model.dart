@@ -1,14 +1,10 @@
 import 'dart:convert';
 
-GroupAboutModel groupAboutModelFromJson(String str) =>
-    GroupAboutModel.fromJson(json.decode(str));
-String groupAboutModelToJson(GroupAboutModel data) =>
-    json.encode(data.toJson());
+GroupAboutModel groupAboutModelFromJson(String str) => GroupAboutModel.fromJson(json.decode(str));
+String groupAboutModelToJson(GroupAboutModel data) => json.encode(data.toJson());
 
 class GroupAboutModel {
-  GroupAboutModel({
-    this.group,
-  });
+  GroupAboutModel({this.group});
 
   GroupAboutModel.fromJson(dynamic json) {
     group = json['group'] != null ? Group.fromJson(json['group']) : null;

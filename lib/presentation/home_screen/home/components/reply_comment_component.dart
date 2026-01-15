@@ -1,17 +1,14 @@
 import 'package:doctak_app/data/models/post_comment_model/reply_comment_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
- import 'package:timeago/timeago.dart' as timeAgo;
+import 'package:timeago/timeago.dart' as timeAgo;
 import '../../../../core/utils/app/AppData.dart';
 
 class ReplyCommentComponent extends StatelessWidget {
-   ReplyCommentComponent(this.replyCommentList,this.onDeleteComment,this.onUpdateComment,{super.key});
+  ReplyCommentComponent(this.replyCommentList, this.onDeleteComment, this.onUpdateComment, {super.key});
   CommentsModel replyCommentList;
   Function? onDeleteComment;
   Function? onUpdateComment;
@@ -25,14 +22,9 @@ class ReplyCommentComponent extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              SVProfileFragment(userId: replyCommentList.commentableId??'')
-                  .launch(context);
+              SVProfileFragment(userId: replyCommentList.commentableId ?? '').launch(context);
             },
-            child: CircleAvatar(
-              backgroundImage:
-              NetworkImage(replyCommentList.commenter?.profilePic??'',),
-              radius: 20.0,
-            ),
+            child: CircleAvatar(backgroundImage: NetworkImage(replyCommentList.commenter?.profilePic ?? ''), radius: 20.0),
           ),
           const SizedBox(width: 8.0),
           Expanded(
@@ -46,31 +38,17 @@ class ReplyCommentComponent extends StatelessWidget {
                       flex: 5,
                       child: InkWell(
                         onTap: () {
-                          SVProfileFragment(userId: replyCommentList.commenterId??"")
-                              .launch(context);
+                          SVProfileFragment(userId: replyCommentList.commenterId ?? "").launch(context);
                         },
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
-                            Text(replyCommentList.commenter?.name??'',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14),
-                            ),
+                            Text(replyCommentList.commenter?.name ?? '', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
                             const Text(
                               ' · ',
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold
-                              ),
+                              style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
                             ),
-                            Image.asset(
-                              'images/socialv/icons/ic_TickSquare.png',
-                              height: 14,
-                              width: 14,
-                              fit: BoxFit.cover,
-                            ),
+                            Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
                           ],
                         ),
                         // RichText(
@@ -97,7 +75,6 @@ class ReplyCommentComponent extends StatelessWidget {
                         //       ],
                         //     )),
                       ),
-
                     ),
                     const Spacer(),
                     if (replyCommentList.commenterId == AppData.logInUserId)
@@ -106,38 +83,35 @@ class ReplyCommentComponent extends StatelessWidget {
                           itemBuilder: (context) {
                             return [
                               PopupMenuItem(
-                                child: Builder(builder: (context) {
-                                  return Column(
-                                    children: [
-                                      PopupMenuItem(
-                                        value: "Delete",
-                                        child: Text(translation(context).lbl_delete),
-                                      ),
-                                      PopupMenuItem(
-                                        value: "Update",
-                                        child: Text(translation(context).lbl_update),
-                                      ),
-                                    ],
-                                  );
-                                }),
+                                child: Builder(
+                                  builder: (context) {
+                                    return Column(
+                                      children: [
+                                        PopupMenuItem(value: "Delete", child: Text(translation(context).lbl_delete)),
+                                        PopupMenuItem(value: "Update", child: Text(translation(context).lbl_update)),
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
                             ];
                           },
                           onSelected: (value) {
                             if (value == 'Delete') {
                               showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return CustomAlertDialog(
-                                        title:
-                                        translation(context).msg_confirm_delete_comment,
-                                        callback: () {
-                                          onDeleteComment!();
-                                          Navigator.of(context).pop();
-                                        });
-                                  });
-                            }else if (value == 'Update') {
-                             onUpdateComment!();
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return CustomAlertDialog(
+                                    title: translation(context).msg_confirm_delete_comment,
+                                    callback: () {
+                                      onDeleteComment!();
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                },
+                              );
+                            } else if (value == 'Update') {
+                              onUpdateComment!();
                             }
                           },
                         ),
@@ -145,16 +119,13 @@ class ReplyCommentComponent extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 4.0),
-                Text(
-                  replyCommentList.comment ?? translation(context).lbl_no_name,
-                  style: const TextStyle(fontSize: 14.0, fontFamily:  'Poppins',),
-                ),
+                Text(replyCommentList.comment ?? translation(context).lbl_no_name, style: const TextStyle(fontSize: 14.0, fontFamily: 'Poppins')),
                 const SizedBox(height: 8.0),
-                Text(timeAgo.format(DateTime.parse(replyCommentList.createdAt!)),style: const TextStyle(fontSize: 14,color: Colors.black38,fontWeight: FontWeight.w400),),
-                const Divider(
-                  color: Colors.black12,
-                  thickness: 1,
-                )
+                Text(
+                  timeAgo.format(DateTime.parse(replyCommentList.createdAt!)),
+                  style: const TextStyle(fontSize: 14, color: Colors.black38, fontWeight: FontWeight.w400),
+                ),
+                const Divider(color: Colors.black12, thickness: 1),
               ],
             ),
           ),

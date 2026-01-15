@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
-
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
@@ -26,21 +22,16 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     on<GetMessages>(_onGetSessionMessagesList);
     on<GetNewChat>(_onGetNewChat);
   }
-  _onGetPosts(LoadDataValues event, Emitter<ChatGPTState> emit) async {
+  Future<void> _onGetPosts(LoadDataValues event, Emitter<ChatGPTState> emit) async {
     // emit(DataInitial());
     // try {
     // Load session list first
-    ChatGptSession response = await apiManager.gptChatSession(
-      'Bearer ${AppData.userToken}',
-    );
+    ChatGptSession response = await apiManager.gptChatSession('Bearer ${AppData.userToken}');
 
     // Load messages for the first session if available
     ChatGptMessageHistory response1;
     if (response.sessions?.isNotEmpty == true) {
-      response1 = await apiManager.gptChatMessages(
-        'Bearer ${AppData.userToken}',
-        response.sessions!.first.id.toString(),
-      );
+      response1 = await apiManager.gptChatMessages('Bearer ${AppData.userToken}', response.sessions!.first.id.toString());
     } else {
       // If no sessions exist, create empty message history
       response1 = ChatGptMessageHistory();
@@ -54,28 +45,17 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     // }
   }
 
-  _askQuestion(GetPost event, Emitter<ChatGPTState> emit) async {
+  Future<void> _askQuestion(GetPost event, Emitter<ChatGPTState> emit) async {
     try {
       isWait = true;
       ChatGptAskQuestionResponse response;
       print('image1 ${event.imageUrl1}');
       print('screen ${event.imageType}');
       if (event.imageUrl1?.isNotEmpty ?? false) {
-        response = await apiManager.askQuestionFromGpt(
-          'Bearer ${AppData.userToken}',
-          event.sessionId,
-          event.question,
-          event.imageType ?? "",
-          event.imageUrl1 ?? "",
-          event.imageUrl2 ?? "",
-        );
+        response = await apiManager.askQuestionFromGpt('Bearer ${AppData.userToken}', event.sessionId, event.question, event.imageType ?? "", event.imageUrl1 ?? "", event.imageUrl2 ?? "");
       } else {
         print(event.question);
-        response = await apiManager.askQuestionFromGptWithoutImage(
-          'Bearer ${AppData.userToken}',
-          event.sessionId,
-          event.question,
-        );
+        response = await apiManager.askQuestionFromGptWithoutImage('Bearer ${AppData.userToken}', event.sessionId, event.question);
       }
 
       // Validate response
@@ -94,9 +74,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
 
       // Check if current state is DataLoaded before proceeding
       if (state is! DataLoaded) {
-        print(
-          'Error: Cannot ask question, current state is not DataLoaded: ${state.runtimeType}',
-        );
+        print('Error: Cannot ask question, current state is not DataLoaded: ${state.runtimeType}');
         emit(DataError('Chat session not properly loaded'));
         return;
       }
@@ -107,28 +85,18 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       if (isLoadingHistory) {
         // If loading history, don't apply typing animation
         isWait = false;
-        emit(
-          DataLoaded(currentState.response, currentState.response1, response),
-        );
+        emit(DataLoaded(currentState.response, currentState.response1, response));
       } else {
         // Only apply typing animation for new messages
-        emit(
-          DataLoaded(currentState.response, currentState.response1, response),
-        );
+        emit(DataLoaded(currentState.response, currentState.response1, response));
         for (int i = 0; i <= response.content!.length; i++) {
-          await Future.delayed(
-            const Duration(milliseconds: 1),
-          ); // Delay to simulate typing speed
+          await Future.delayed(const Duration(milliseconds: 1)); // Delay to simulate typing speed
 
           // Check if state is still DataLoaded during animation
           if (state is! DataLoaded) break;
 
           final animationState = state as DataLoaded;
-          int index =
-              animationState.response1.messages?.indexWhere(
-                (msg) => msg.id == -1,
-              ) ??
-              0;
+          int index = animationState.response1.messages?.indexWhere((msg) => msg.id == -1) ?? 0;
           if (index != -1) {
             String typingText = response.content!.substring(0, i);
             animationState.response1.messages![index] = Messages(
@@ -184,10 +152,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     }
   }
 
-  _onGetSessionMessagesList(
-    GetMessages event,
-    Emitter<ChatGPTState> emit,
-  ) async {
+  Future<void> _onGetSessionMessagesList(GetMessages event, Emitter<ChatGPTState> emit) async {
     // Prevent concurrent loading operations
     if (state is DataLoading) {
       print('Already loading messages, ignoring request');
@@ -205,9 +170,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     } else {
       // Load session data first if we don't have it
       print('State is ${state.runtimeType}, loading session data first...');
-      sessionData = await apiManager.gptChatSession(
-        'Bearer ${AppData.userToken}',
-      );
+      sessionData = await apiManager.gptChatSession('Bearer ${AppData.userToken}');
       questionResponse = ChatGptAskQuestionResponse();
     }
 
@@ -221,10 +184,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       isWait = false;
 
       // Load messages for the specific session
-      ChatGptMessageHistory response = await apiManager.gptChatMessages(
-        'Bearer ${AppData.userToken}',
-        event.sessionId,
-      );
+      ChatGptMessageHistory response = await apiManager.gptChatMessages('Bearer ${AppData.userToken}', event.sessionId);
       ProgressDialogUtils.hideProgressDialog();
 
       // Emit the loaded state with all messages at once (no typing animation)
@@ -240,37 +200,22 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     }
   }
 
-  _onGetNewChat(GetNewChat event, Emitter<ChatGPTState> emit) async {
+  Future<void> _onGetNewChat(GetNewChat event, Emitter<ChatGPTState> emit) async {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
-      emit(
-        DataLoaded(
-          ChatGptSession(),
-          ChatGptMessageHistory(),
-          ChatGptAskQuestionResponse(),
-        ),
-      );
+      emit(DataLoaded(ChatGptSession(), ChatGptMessageHistory(), ChatGptAskQuestionResponse()));
       var response = await apiManager.newChat('Bearer ${AppData.userToken}');
-      final dynamic rawSessionId =
-          response.response.data['session_id'] ??
-          response.response.data['newSessionId'];
+      final dynamic rawSessionId = response.response.data['session_id'] ?? response.response.data['newSessionId'];
       final String sessionIdStr = rawSessionId.toString();
       newChatSessionId = int.tryParse(sessionIdStr) ?? 0;
-      ChatGptMessageHistory response1 = await apiManager.gptChatMessages(
-        'Bearer ${AppData.userToken}',
-        sessionIdStr,
-      );
-      ChatGptSession responseSession = await apiManager.gptChatSession(
-        'Bearer ${AppData.userToken}',
-      );
+      ChatGptMessageHistory response1 = await apiManager.gptChatMessages('Bearer ${AppData.userToken}', sessionIdStr);
+      ChatGptSession responseSession = await apiManager.gptChatSession('Bearer ${AppData.userToken}');
       print('New chat session created with id: $sessionIdStr');
       ProgressDialogUtils.hideProgressDialog();
       print('data');
       // Check if current state is DataLoaded, otherwise use empty response
-      final response2 = (state is DataLoaded)
-          ? (state as DataLoaded).response2
-          : ChatGptAskQuestionResponse();
+      final response2 = (state is DataLoaded) ? (state as DataLoaded).response2 : ChatGptAskQuestionResponse();
       emit(DataLoaded(responseSession, response1, response2));
     } catch (e) {
       print(e);
@@ -280,30 +225,18 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
     }
   }
 
-  _onDeleteChatSession(
-    DeleteChatSession event,
-    Emitter<ChatGPTState> emit,
-  ) async {
+  Future<void> _onDeleteChatSession(DeleteChatSession event, Emitter<ChatGPTState> emit) async {
     // emit(DataInitial());
     ProgressDialogUtils.showProgressDialog();
     try {
-      var response = await apiManager.deleteChatgptSession(
-        'Bearer ${AppData.userToken}',
-        event.sessionId.toString(),
-      );
+      var response = await apiManager.deleteChatgptSession('Bearer ${AppData.userToken}', event.sessionId.toString());
       print(response.response.data);
-      ChatGptSession response1 = await apiManager.gptChatSession(
-        'Bearer ${AppData.userToken}',
-      );
+      ChatGptSession response1 = await apiManager.gptChatSession('Bearer ${AppData.userToken}');
       print('data');
       ProgressDialogUtils.hideProgressDialog();
       // Check if current state is DataLoaded, otherwise use empty responses
-      final messageHistory = (state is DataLoaded)
-          ? (state as DataLoaded).response1
-          : ChatGptMessageHistory();
-      final questionResponse = (state is DataLoaded)
-          ? (state as DataLoaded).response2
-          : ChatGptAskQuestionResponse();
+      final messageHistory = (state is DataLoaded) ? (state as DataLoaded).response1 : ChatGptMessageHistory();
+      final questionResponse = (state is DataLoaded) ? (state as DataLoaded).response2 : ChatGptAskQuestionResponse();
       emit(DataLoaded(response1, messageHistory, questionResponse));
     } catch (e) {
       print(e);

@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
-import '../presentation/home_screen/utils/SVCommon.dart';
 import '../main.dart';
 import '../core/utils/video_utils.dart';
 
 class DisplayVideo extends StatefulWidget {
   final File selectedByte;
 
-  const DisplayVideo({Key? key, required this.selectedByte}) : super(key: key);
+  const DisplayVideo({super.key, required this.selectedByte});
 
   @override
   State<DisplayVideo> createState() => DisplayVideoState();
@@ -26,25 +25,25 @@ class DisplayVideoState extends State<DisplayVideo> {
     super.initState();
     _initializeVideo();
   }
-  
+
   Future<void> _initializeVideo() async {
     try {
       _controller = VideoPlayerController.file(widget.selectedByte);
       await _controller.initialize();
-      
+
       if (mounted) {
         // Check video resolution
         final videoInfo = _controller.value;
         final resolution = videoInfo.size;
-        
+
         // Log video information using utility
         VideoUtils.logVideoInfo(videoInfo, 'Local Video');
-        
+
         // Check if resolution is supported
         if (!VideoUtils.isResolutionSupported(resolution)) {
           debugPrint('WARNING: Local video resolution may not be supported - ${VideoUtils.getVideoQuality(resolution)}');
         }
-        
+
         _controller.setLooping(true);
         setState(() {});
       }
@@ -58,7 +57,7 @@ class DisplayVideoState extends State<DisplayVideo> {
       }
     }
   }
-  
+
   String _getErrorMessage(dynamic error) {
     return VideoUtils.getVideoErrorMessage(error);
   }
@@ -74,19 +73,12 @@ class DisplayVideoState extends State<DisplayVideo> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  color: appStore.isDarkMode ? Colors.white70 : Colors.black54,
-                  size: 48,
-                ),
+                Icon(Icons.error_outline, color: appStore.isDarkMode ? Colors.white70 : Colors.black54, size: 48),
                 const SizedBox(height: 8),
                 Text(
                   _errorMessage,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: appStore.isDarkMode ? Colors.white70 : Colors.black54,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: appStore.isDarkMode ? Colors.white70 : Colors.black54, fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 ElevatedButton.icon(
@@ -99,10 +91,7 @@ class DisplayVideoState extends State<DisplayVideo> {
                   },
                   icon: const Icon(Icons.refresh),
                   label: const Text('Retry'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
                 ),
               ],
             ),
@@ -110,7 +99,7 @@ class DisplayVideoState extends State<DisplayVideo> {
         ),
       );
     }
-    
+
     return _controller.value.isInitialized
         ? AspectRatio(
             aspectRatio: _controller.value.aspectRatio,
@@ -120,7 +109,7 @@ class DisplayVideoState extends State<DisplayVideo> {
                 VideoPlayer(_controller),
                 ClosedCaption(text: _controller.value.caption.text),
                 VideoProgressIndicator(
-                  _controller, 
+                  _controller,
                   allowScrubbing: true,
                   colors: const VideoProgressColors(
                     playedColor: Colors.blue,
@@ -136,11 +125,7 @@ class DisplayVideoState extends State<DisplayVideo> {
             height: 200,
             child: Container(
               color: appStore.isDarkMode ? Colors.black : Colors.grey[900],
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: appStore.isDarkMode ? Colors.white : Colors.blue,
-                ),
-              ),
+              child: Center(child: CircularProgressIndicator(color: appStore.isDarkMode ? Colors.white : Colors.blue)),
             ),
           );
   }

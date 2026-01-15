@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 
 // TODO: app_links temporarily disabled due to SDK compatibility
 // import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
@@ -19,7 +16,7 @@ import 'package:sizer/sizer.dart';
 import '../home_screen/SVDashboardScreen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
@@ -36,7 +33,7 @@ class LightBeamPainter extends CustomPainter {
       ..shader = LinearGradient(
         begin: Alignment.topRight,
         end: Alignment.bottomLeft,
-        colors: [color.withOpacity(0.7), color.withOpacity(0.05)],
+        colors: [color.withValues(alpha: 0.7), color.withValues(alpha: 0.05)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
@@ -45,12 +42,7 @@ class LightBeamPainter extends CustomPainter {
     // Draw a gentle curve from top right to center
     path.moveTo(size.width, 0);
     path.lineTo(size.width, size.height * 0.2);
-    path.quadraticBezierTo(
-      size.width * 0.7,
-      size.height * 0.4,
-      size.width * 0.5,
-      size.height * 0.5,
-    );
+    path.quadraticBezierTo(size.width * 0.7, size.height * 0.4, size.width * 0.5, size.height * 0.5);
 
     canvas.drawPath(path, paint);
   }
@@ -122,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen> {
     String? userId = await prefs.getString('userId');
 
     String? name = await prefs.getString('name');
-    String? profile_pic = await prefs.getString('profile_pic');
+    String? profilePic = await prefs.getString('profile_pic');
     String? background = await prefs.getString('background');
     String? email = await prefs.getString('email');
     String? specialty = await prefs.getString('specialty');
@@ -137,7 +129,7 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.userToken = userToken;
       AppData.logInUserId = userId;
       AppData.name = name ?? '';
-      AppData.profile_pic = profile_pic ?? '';
+      AppData.profile_pic = profilePic ?? '';
       // AppData.background= background!;
       AppData.background = background ?? '';
       AppData.email = email ?? '';
@@ -184,20 +176,14 @@ class _SplashScreenState extends State<SplashScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Colors.blue.shade50.withOpacity(0.8),
-              Colors.blue.shade100.withOpacity(0.5),
-            ],
+            colors: [Colors.white, Colors.blue.shade50.withValues(alpha: 0.8), Colors.blue.shade100.withValues(alpha: 0.5)],
             stops: const [0.2, 0.6, 1.0],
           ),
         ),
         child: Stack(
           children: [
             // Background animated patterns
-            Positioned.fill(
-              child: Opacity(opacity: 0.1, child: _buildBackgroundPatterns()),
-            ),
+            Positioned.fill(child: Opacity(opacity: 0.1, child: _buildBackgroundPatterns())),
 
             // Decorative top design element
             Positioned(
@@ -210,14 +196,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.2),
-                      theme.colorScheme.primary.withOpacity(0.05),
-                    ],
+                    colors: [theme.colorScheme.primary.withValues(alpha: 0.2), theme.colorScheme.primary.withValues(alpha: 0.05)],
                   ),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(300),
-                  ),
+                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(300)),
                 ),
               ),
             ),
@@ -229,9 +210,7 @@ class _SplashScreenState extends State<SplashScreen> {
               right: 0,
               bottom: 0,
               child: CustomPaint(
-                painter: LightBeamPainter(
-                  color: theme.colorScheme.primary.withOpacity(0.06),
-                ),
+                painter: LightBeamPainter(color: theme.colorScheme.primary.withValues(alpha: 0.06)),
                 child: Container(),
               ),
             ),
@@ -244,19 +223,11 @@ class _SplashScreenState extends State<SplashScreen> {
                   // Logo with scale and fade animations
                   Padding(
                     padding: const EdgeInsets.all(15),
-                    child:
-                        Image.asset(
-                              'assets/logo/logo.png',
-                              width: 50.w,
-                              fit: BoxFit.contain,
-                            )
-                            .animate()
-                            .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1.0, 1.0),
-                              duration: 600.ms,
-                            ),
+                    child: Image.asset(
+                      'assets/logo/logo.png',
+                      width: 50.w,
+                      fit: BoxFit.contain,
+                    ).animate().fadeIn(duration: 800.ms, curve: Curves.easeOutQuad).scale(begin: const Offset(0.8, 0.8), end: const Offset(1.0, 1.0), duration: 600.ms),
                   ),
                   const SizedBox(height: 35),
 
@@ -268,12 +239,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   // Tagline
                   Text(
                     "Your medical community",
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 16, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
                   ).animate().fadeIn(delay: 400.ms, duration: 600.ms),
 
                   const SizedBox(height: 16),
@@ -295,14 +261,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   gradient: LinearGradient(
                     begin: Alignment.bottomLeft,
                     end: Alignment.topRight,
-                    colors: [
-                      theme.colorScheme.primary.withOpacity(0.2),
-                      theme.colorScheme.primary.withOpacity(0.05),
-                    ],
+                    colors: [theme.colorScheme.primary.withValues(alpha: 0.2), theme.colorScheme.primary.withValues(alpha: 0.05)],
                   ),
-                  borderRadius: const BorderRadius.only(
-                    topRight: Radius.circular(200),
-                  ),
+                  borderRadius: const BorderRadius.only(topRight: Radius.circular(200)),
                 ),
               ),
             ),
@@ -315,21 +276,11 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.verified_rounded,
-                    size: 16,
-                    color: theme.colorScheme.primary.withOpacity(0.7),
-                  ),
+                  Icon(Icons.verified_rounded, size: 16, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
                   const SizedBox(width: 8),
                   Text(
                     "Powered by DocTak.net",
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Poppins',
-                      letterSpacing: 0.5,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.w500, fontFamily: 'Poppins', letterSpacing: 0.5),
                   ),
                 ],
               ).animate().fadeIn(delay: 600.ms, duration: 800.ms),
@@ -347,49 +298,17 @@ class _SplashScreenState extends State<SplashScreen> {
         Positioned(
           top: 100,
           left: 20,
-          child:
-              Icon(
-                    Icons.medical_services_outlined,
-                    size: 40,
-                    color: Colors.blue.shade300,
-                  )
-                  .animate()
-                  .fadeIn(duration: 1500.ms)
-                  .slideY(
-                    begin: 0.1,
-                    end: 0,
-                    duration: const Duration(seconds: 2),
-                  ),
+          child: Icon(Icons.medical_services_outlined, size: 40, color: Colors.blue.shade300).animate().fadeIn(duration: 1500.ms).slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
         ),
         Positioned(
           bottom: 120,
           right: 30,
-          child:
-              Icon(
-                    Icons.health_and_safety_outlined,
-                    size: 36,
-                    color: Colors.blue.shade300,
-                  )
-                  .animate()
-                  .fadeIn(duration: 1800.ms)
-                  .slideY(
-                    begin: 0.1,
-                    end: 0,
-                    duration: const Duration(seconds: 2),
-                  ),
+          child: Icon(Icons.health_and_safety_outlined, size: 36, color: Colors.blue.shade300).animate().fadeIn(duration: 1800.ms).slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
         ),
         Positioned(
           top: MediaQuery.of(context).size.height * 0.4,
           left: MediaQuery.of(context).size.width * 0.7,
-          child:
-              Icon(Icons.favorite_border, size: 32, color: Colors.blue.shade300)
-                  .animate()
-                  .fadeIn(duration: 2000.ms)
-                  .slideY(
-                    begin: 0.1,
-                    end: 0,
-                    duration: const Duration(seconds: 2),
-                  ),
+          child: Icon(Icons.favorite_border, size: 32, color: Colors.blue.shade300).animate().fadeIn(duration: 2000.ms).slideY(begin: 0.1, end: 0, duration: const Duration(seconds: 2)),
         ),
       ],
     );
@@ -406,40 +325,21 @@ class _SplashScreenState extends State<SplashScreen> {
           Container(
             height: 6,
             width: 60,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(3),
-            ),
+            decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(3)),
           ),
 
           // Animated loading dot
           Positioned(
             left: 0,
-            child:
-                Container(
-                      height: 12,
-                      width: 12,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            theme.colorScheme.primary,
-                            theme.colorScheme.primary.withOpacity(0.7),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(6),
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withOpacity(0.4),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    )
-                    .animate(onPlay: (controller) => controller.repeat())
-                    .moveX(begin: 0, end: 48, duration: 1500.ms)
-                    .then()
-                    .moveX(begin: 48, end: 0, duration: 1500.ms),
+            child: Container(
+              height: 12,
+              width: 12,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.7)]),
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: [BoxShadow(color: theme.colorScheme.primary.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 2))],
+              ),
+            ).animate(onPlay: (controller) => controller.repeat()).moveX(begin: 0, end: 48, duration: 1500.ms).then().moveX(begin: 48, end: 0, duration: 1500.ms),
           ),
         ],
       ),
@@ -452,27 +352,18 @@ class _SplashScreenState extends State<SplashScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
+        color: Colors.white.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.info_outline_rounded,
-            size: 14,
-            color: theme.colorScheme.primary.withOpacity(0.7),
-          ),
+          Icon(Icons.info_outline_rounded, size: 14, color: theme.colorScheme.primary.withValues(alpha: 0.7)),
           const SizedBox(width: 4),
           Text(
             "v$versionNumber",
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade600,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey.shade600, fontFamily: 'Poppins'),
           ),
         ],
       ),

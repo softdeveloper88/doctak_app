@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class VoiceRecorderField extends StatelessWidget {
-  const VoiceRecorderField({Key? key}) : super(key: key);
+  const VoiceRecorderField({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +15,7 @@ class VoiceRecorderField extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Icon(
-                  Icons.mic,
-                  color: Colors.red,
-                  size: 24,
-                ),
+                child: Icon(Icons.mic, color: Colors.red, size: 24),
               ),
               const SizedBox(width: 12),
               Text(
@@ -45,7 +41,7 @@ class VoiceRecorderField extends StatelessWidget {
 }
 
 class VoiceRecorder extends StatelessWidget {
-  const VoiceRecorder({Key? key}) : super(key: key);
+  const VoiceRecorder({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -65,20 +61,13 @@ class VoiceRecorder extends StatelessWidget {
                 onTap: () {
                   // Handle delete action
                 },
-                child: const Icon(
-                  Icons.delete,
-                  size: 36,
-                ),
+                child: const Icon(Icons.delete, size: 36),
               ),
               InkWell(
                 onTap: () {
                   // Handle pause/resume action
                 },
-                child: const Icon(
-                  Icons.mic,
-                  color: Colors.red,
-                  size: 30,
-                ),
+                child: const Icon(Icons.mic, color: Colors.red, size: 30),
               ),
               InkWell(
                 onTap: () {
@@ -87,14 +76,11 @@ class VoiceRecorder extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 21,
                   backgroundColor: Colors.green, // Adjust color as needed
-                  child: const Icon(
-                    Icons.send,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.send, color: Colors.white),
                 ),
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );

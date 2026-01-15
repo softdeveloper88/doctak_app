@@ -13,18 +13,12 @@ class DataLoaded extends DropdownState {
   bool isDoctorRole;
   bool isSubmit;
   Map<String, dynamic> response;
-  DataLoaded(
-    this.isPasswordVisible,
-    this.isDoctorRole,
-    this.isSubmit,
-    this.response,
-  );
+  DataLoaded(this.isPasswordVisible, this.isDoctorRole, this.isSubmit, this.response);
 }
+
 class DataCompleteLoaded extends DropdownState {
   Map<String, dynamic> response;
-  DataCompleteLoaded(
-    this.response,
-  );
+  DataCompleteLoaded(this.response);
 }
 
 class DropdownError extends DropdownState {

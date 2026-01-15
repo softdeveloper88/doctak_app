@@ -32,7 +32,7 @@ class CallProvider extends ChangeNotifier {
   // Timers
   Timer? _callTimer;
   Timer? _controlsAutoHideTimer;
-  Map<int, Timer?> _speakingTimers = {};
+  final Map<int, Timer?> _speakingTimers = {};
 
   // Additional reconnection handling
   int _reconnectionAttempts = 0;
@@ -40,7 +40,7 @@ class CallProvider extends ChangeNotifier {
   Timer? _connectionHealthTimer;
   Timer? _syncTimer;
   int _lastKnownConnectionState = -1;
-  
+
   // PiP/Background transition tracking
   DateTime? _lastBackgroundTime;
   bool _isTransitioningFromBackground = false;
@@ -53,7 +53,7 @@ class CallProvider extends ChangeNotifier {
   static const int _waitingForRemoteUserTimeoutSeconds = 60; // Auto-disconnect if remote user doesn't join in 60 seconds
 
   // Call end reason tracking for proper UI feedback
-  CallEndReason _callEndReason = CallEndReason.none;
+  final CallEndReason _callEndReason = CallEndReason.none;
 
   // Disposed state tracking
   bool _disposed = false;
@@ -74,10 +74,7 @@ class CallProvider extends ChangeNotifier {
        _localUser = localUser,
        _remoteUser = remoteUser,
        _channelToken = token,
-       _callState = CallState(
-         callId: callId,
-         callType: isVideoCall ? CallType.video : CallType.audio,
-       ) {
+       _callState = CallState(callId: callId, callType: isVideoCall ? CallType.video : CallType.audio) {
     // Log call initialization
     CallDebugUtils.logCallInitialization(
       callId: callId,
@@ -88,9 +85,7 @@ class CallProvider extends ChangeNotifier {
     );
 
     // Start performance monitoring
-    _performanceMonitor = CallDebugUtils.startPerformanceMonitoring(
-      () => _callState,
-    );
+    _performanceMonitor = CallDebugUtils.startPerformanceMonitoring(() => _callState);
   }
 
   // Getters
@@ -98,10 +93,8 @@ class CallProvider extends ChangeNotifier {
   UserModel get localUser => _localUser;
   UserModel get remoteUser => _remoteUser;
   bool get isVideoCall => _callState.callType == CallType.video;
-  bool get isConnected =>
-      _callState.connectionState == CallConnectionState.connected;
-  bool get isReconnecting =>
-      _callState.connectionState == CallConnectionState.reconnecting;
+  bool get isConnected => _callState.connectionState == CallConnectionState.connected;
+  bool get isReconnecting => _callState.connectionState == CallConnectionState.reconnecting;
 
   // Get Agora Engine (used in VideoView)
   RtcEngine? getAgoraEngine() {
@@ -186,10 +179,7 @@ class CallProvider extends ChangeNotifier {
 
   // Handle app going to background with platform-specific optimizations
   void handleAppBackground() {
-    CallDebugUtils.logInfo(
-      'LIFECYCLE',
-      'App going to background on ${Platform.operatingSystem}',
-    );
+    CallDebugUtils.logInfo('LIFECYCLE', 'App going to background on ${Platform.operatingSystem}');
     _isInBackground = true;
     _lastBackgroundTime = DateTime.now(); // Track when we went to background
 
@@ -199,9 +189,7 @@ class CallProvider extends ChangeNotifier {
       // iOS background handling - keep audio and video active for PiP
       if (_agoraService.isInitialized()) {
         // Keep audio session active for background
-        _agoraService.getEngine()?.setParameters(
-          '{"che.audio.keep_audiosession": true}',
-        );
+        _agoraService.getEngine()?.setParameters('{"che.audio.keep_audiosession": true}');
         // Don't mute video - let PiP handle it
         _resourceManager.setHighPerformanceMode(false);
       }
@@ -216,10 +204,7 @@ class CallProvider extends ChangeNotifier {
 
   // Handle app coming to foreground with platform-specific optimizations
   void handleAppForeground() {
-    CallDebugUtils.logInfo(
-      'LIFECYCLE',
-      'App coming to foreground on ${Platform.operatingSystem}',
-    );
+    CallDebugUtils.logInfo('LIFECYCLE', 'App coming to foreground on ${Platform.operatingSystem}');
     _isInBackground = false;
     _isTransitioningFromBackground = true;
 
@@ -262,15 +247,9 @@ class CallProvider extends ChangeNotifier {
 
   // Event handlers - updated to use new callback types
   void _handleJoinChannelSuccess(int uid, String channelId, int elapsed) {
-    CallDebugUtils.logCallTimeline(
-      'LOCAL_USER_JOINED',
-      data: {'uid': uid, 'channelId': channelId, 'elapsed': '${elapsed}ms'},
-    );
+    CallDebugUtils.logCallTimeline('LOCAL_USER_JOINED', data: {'uid': uid, 'channelId': channelId, 'elapsed': '${elapsed}ms'});
 
-    _updateCallState(
-      isLocalUserJoined: true,
-      connectionState: CallConnectionState.connected,
-    );
+    _updateCallState(isLocalUserJoined: true, connectionState: CallConnectionState.connected);
 
     // Initialize media state properly for both video and audio calls
     if (isVideoCall) {
@@ -283,7 +262,7 @@ class CallProvider extends ChangeNotifier {
     // Enable audio by default
     _agoraService.muteLocalAudioStream(false);
     CallDebugUtils.logDebug('MEDIA', 'Local audio enabled');
-    
+
     // Verify call is still active on the server after joining
     // This helps detect if caller cancelled while we were connecting
     _verifyCallStillActive();
@@ -313,10 +292,7 @@ class CallProvider extends ChangeNotifier {
   //   });
   // }
 
-  void _handleAudioVolumeIndication(
-    List<Map<String, dynamic>> speakers,
-    int totalVolume,
-  ) {
+  void _handleAudioVolumeIndication(List<Map<String, dynamic>> speakers, int totalVolume) {
     if (speakers.isEmpty) return;
 
     // Efficient UI updates with debouncing
@@ -405,16 +381,10 @@ class CallProvider extends ChangeNotifier {
   void _handleIOSNetworkQuality(int quality) {
     if (quality > 4 && isVideoCall && !_callState.isUsingLowerVideoQuality) {
       // Poor network on iOS - reduce video quality (only for very poor quality)
-      CallDebugUtils.logWarning(
-        'NETWORK',
-        'Poor network on iOS, reducing video quality',
-      );
+      CallDebugUtils.logWarning('NETWORK', 'Poor network on iOS, reducing video quality');
       _agoraService.getEngine()?.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
-          dimensions: VideoDimensions(
-            width: 480,
-            height: 360,
-          ), // Less aggressive reduction
+          dimensions: VideoDimensions(width: 480, height: 360), // Less aggressive reduction
           frameRate: 12, // Maintain reasonable framerate
           bitrate: 600, // Conservative bitrate
           orientationMode: OrientationMode.orientationModeAdaptive,
@@ -424,10 +394,7 @@ class CallProvider extends ChangeNotifier {
       _updateCallState(isUsingLowerVideoQuality: true);
     } else if (quality <= 2 && _callState.isUsingLowerVideoQuality) {
       // Network improved on iOS - restore video quality
-      CallDebugUtils.logSuccess(
-        'NETWORK',
-        'Network improved on iOS, restoring video quality',
-      );
+      CallDebugUtils.logSuccess('NETWORK', 'Network improved on iOS, restoring video quality');
       _agoraService.getEngine()?.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
           dimensions: VideoDimensions(width: 640, height: 480),
@@ -445,16 +412,10 @@ class CallProvider extends ChangeNotifier {
   void _handleAndroidNetworkQuality(int quality) {
     if (quality > 4 && isVideoCall && !_callState.isUsingLowerVideoQuality) {
       // Poor network on Android - prioritize framerate (only for very poor quality)
-      CallDebugUtils.logWarning(
-        'NETWORK',
-        'Poor network on Android, prioritizing framerate',
-      );
+      CallDebugUtils.logWarning('NETWORK', 'Poor network on Android, prioritizing framerate');
       _agoraService.getEngine()?.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
-          dimensions: VideoDimensions(
-            width: 480,
-            height: 360,
-          ), // Less aggressive reduction
+          dimensions: VideoDimensions(width: 480, height: 360), // Less aggressive reduction
           frameRate: 12, // Maintain reasonable framerate
           bitrate: 500, // Conservative bitrate
           orientationMode: OrientationMode.orientationModeAdaptive,
@@ -464,10 +425,7 @@ class CallProvider extends ChangeNotifier {
       _updateCallState(isUsingLowerVideoQuality: true);
     } else if (quality <= 2 && _callState.isUsingLowerVideoQuality) {
       // Network improved on Android - restore video quality
-      CallDebugUtils.logSuccess(
-        'NETWORK',
-        'Network improved on Android, restoring video quality',
-      );
+      CallDebugUtils.logSuccess('NETWORK', 'Network improved on Android, restoring video quality');
       _agoraService.getEngine()?.setVideoEncoderConfiguration(
         const VideoEncoderConfiguration(
           dimensions: VideoDimensions(width: 640, height: 480),
@@ -486,12 +444,9 @@ class CallProvider extends ChangeNotifier {
     _lastKnownConnectionState = state;
 
     // Add connection stability check - don't react to rapid state changes
-    if (_callState.connectionState == CallConnectionState.connected &&
-        state == 2) {
+    if (_callState.connectionState == CallConnectionState.connected && state == 2) {
       // If we just connected and immediately see connecting again, wait a moment
-      print(
-        'ℹ️ Ignoring rapid CONNECTING state after CONNECTED - likely temporary',
-      );
+      print('ℹ️ Ignoring rapid CONNECTING state after CONNECTED - likely temporary');
       return;
     }
 
@@ -521,10 +476,7 @@ class CallProvider extends ChangeNotifier {
         break;
       case 5: // Failed
         print('❌ Connection failed (reason: $reason)');
-        _updateCallState(
-          connectionState: CallConnectionState.failed,
-          callEndReason: CallEndReason.callFailed,
-        );
+        _updateCallState(connectionState: CallConnectionState.failed, callEndReason: CallEndReason.callFailed);
         _stopConnectionHealthMonitoring();
         _stopNetworkDisconnectTimer();
         // Auto-end call after showing failed message
@@ -535,12 +487,7 @@ class CallProvider extends ChangeNotifier {
     }
   }
 
-  void _handleFirstRemoteVideoFrame(
-    int uid,
-    int width,
-    int height,
-    int elapsed,
-  ) {
+  void _handleFirstRemoteVideoFrame(int uid, int width, int height, int elapsed) {
     if (isVideoCall) {
       _updateCallState(isControlsVisible: true);
       _startControlsAutoHideTimer();
@@ -652,10 +599,7 @@ class CallProvider extends ChangeNotifier {
     if (!isVideoCall) return;
 
     try {
-      CallDebugUtils.logInfo(
-        'CAMERA',
-        'Switching camera on ${Platform.operatingSystem}',
-      );
+      CallDebugUtils.logInfo('CAMERA', 'Switching camera on ${Platform.operatingSystem}');
 
       if (Platform.isIOS) {
         // iOS camera switching with preview restart
@@ -679,9 +623,7 @@ class CallProvider extends ChangeNotifier {
   void swapLocalAndRemoteVideo() {
     if (!isVideoCall || !_callState.isRemoteUserJoined) return;
 
-    _updateCallState(
-      isLocalVideoFullScreen: !_callState.isLocalVideoFullScreen,
-    );
+    _updateCallState(isLocalVideoFullScreen: !_callState.isLocalVideoFullScreen);
     showControls();
   }
 
@@ -691,25 +633,14 @@ class CallProvider extends ChangeNotifier {
       if (isVideoCall) {
         // Switch to audio
         await _agoraService.switchToAudioCall();
-        _updateCallState(
-          callType: CallType.audio,
-          isLocalVideoEnabled: false,
-          isSpeakerOn: false,
-          isControlsVisible: true,
-        );
+        _updateCallState(callType: CallType.audio, isLocalVideoEnabled: false, isSpeakerOn: false, isControlsVisible: true);
 
         // Cancel auto-hide timer for controls
         _controlsAutoHideTimer?.cancel();
       } else {
         // Switch to video
         await _agoraService.switchToVideoCall();
-        _updateCallState(
-          callType: CallType.video,
-          isLocalVideoEnabled: true,
-          isSpeakerOn: true,
-          isLocalVideoFullScreen: false,
-          isControlsVisible: true,
-        );
+        _updateCallState(callType: CallType.video, isLocalVideoEnabled: true, isSpeakerOn: true, isLocalVideoFullScreen: false, isControlsVisible: true);
 
         // Start control auto-hide timer
         _startControlsAutoHideTimer();
@@ -728,7 +659,7 @@ class CallProvider extends ChangeNotifier {
         print('📞 CallProvider: Skipping connection check - still in transition from background');
         return;
       }
-      
+
       // Check if we just came from background (within grace period)
       if (_lastBackgroundTime != null) {
         final timeSinceBackground = DateTime.now().difference(_lastBackgroundTime!).inMilliseconds;
@@ -737,7 +668,7 @@ class CallProvider extends ChangeNotifier {
           return;
         }
       }
-      
+
       final connectionState = await _agoraService.getConnectionState();
       print('📞 CallProvider: Connection state check: $connectionState');
 
@@ -765,9 +696,7 @@ class CallProvider extends ChangeNotifier {
   }
 
   void _attemptReconnection() {
-    if (_callState.connectionState == CallConnectionState.reconnecting ||
-        _isRecoveringConnection)
-      return;
+    if (_callState.connectionState == CallConnectionState.reconnecting || _isRecoveringConnection) return;
 
     print('🔄 Starting reconnection attempt');
     _isRecoveringConnection = true;
@@ -810,12 +739,7 @@ class CallProvider extends ChangeNotifier {
 
       // Rejoin channel with fresh token
       final channelToken = await _getAgoraToken();
-      final bool joined = await _agoraService.joinChannel(
-        channelId: _callState.callId,
-        uid: 0,
-        token: channelToken,
-        isVideoCall: isVideoCall,
-      );
+      final bool joined = await _agoraService.joinChannel(channelId: _callState.callId, uid: 0, token: channelToken, isVideoCall: isVideoCall);
 
       if (joined) {
         print('✅ Successfully rejoined channel');
@@ -833,10 +757,7 @@ class CallProvider extends ChangeNotifier {
         print('❌ Failed to rejoin channel, will retry');
         // Try again after exponential backoff delay
         if (mounted) {
-          Future.delayed(
-            Duration(seconds: 2 + (_reconnectionAttempts * 2)),
-            _continueReconnection,
-          );
+          Future.delayed(Duration(seconds: 2 + (_reconnectionAttempts * 2)), _continueReconnection);
         }
       }
     } catch (e) {
@@ -844,10 +765,7 @@ class CallProvider extends ChangeNotifier {
 
       // Try again after exponential backoff delay
       if (mounted) {
-        Future.delayed(
-          Duration(seconds: 2 + (_reconnectionAttempts * 2)),
-          _continueReconnection,
-        );
+        Future.delayed(Duration(seconds: 2 + (_reconnectionAttempts * 2)), _continueReconnection);
       }
     }
   }
@@ -859,9 +777,7 @@ class CallProvider extends ChangeNotifier {
     if (!mounted) return;
 
     print('💓 Starting connection health monitoring');
-    _connectionHealthTimer = Timer.periodic(const Duration(seconds: 8), (
-      timer,
-    ) async {
+    _connectionHealthTimer = Timer.periodic(const Duration(seconds: 8), (timer) async {
       // Reduced frequency
       if (!mounted || _disposed) {
         timer.cancel();
@@ -872,20 +788,15 @@ class CallProvider extends ChangeNotifier {
         final currentState = await _agoraService.getConnectionState();
 
         // Only check for serious inconsistencies, allow for temporary connection states
-        if (currentState == 5 &&
-            _callState.connectionState == CallConnectionState.connected) {
+        if (currentState == 5 && _callState.connectionState == CallConnectionState.connected) {
           // Only act on FAILED state when we think we're connected
-          print(
-            '⚠️ Critical connection state mismatch detected: engine=FAILED, state=CONNECTED',
-          );
+          print('⚠️ Critical connection state mismatch detected: engine=FAILED, state=CONNECTED');
           _handleConnectionInconsistency(currentState);
         }
 
         // Log state changes without acting on them unless critical
         if (_lastKnownConnectionState != currentState) {
-          print(
-            '📊 Connection state update: $_lastKnownConnectionState -> $currentState',
-          );
+          print('📊 Connection state update: $_lastKnownConnectionState -> $currentState');
           _lastKnownConnectionState = currentState;
         }
       } catch (e) {
@@ -917,8 +828,7 @@ class CallProvider extends ChangeNotifier {
       }
 
       // Only check heartbeat if we believe we're connected and have remote user
-      if (_callState.connectionState != CallConnectionState.connected ||
-          !_callState.isRemoteUserJoined) {
+      if (_callState.connectionState != CallConnectionState.connected || !_callState.isRemoteUserJoined) {
         return;
       }
 
@@ -935,9 +845,7 @@ class CallProvider extends ChangeNotifier {
           print('💓 Heartbeat: Engine is reconnecting (normal behavior)');
         } else if (connectionState == 5 || connectionState == 1) {
           // Only trigger reconnection for failed or disconnected states
-          print(
-            '💔 Heartbeat: Connection issue detected (state: $connectionState)',
-          );
+          print('💔 Heartbeat: Connection issue detected (state: $connectionState)');
           _handleConnectionInconsistency(connectionState);
         }
       } catch (e) {
@@ -980,10 +888,7 @@ class CallProvider extends ChangeNotifier {
       if (remainingSeconds <= 0) {
         timer.cancel();
         print('⏱️ Network disconnect timer expired - auto-ending call');
-        _updateCallState(
-          callEndReason: CallEndReason.networkDisconnect,
-          connectionState: CallConnectionState.failed,
-        );
+        _updateCallState(callEndReason: CallEndReason.networkDisconnect, connectionState: CallConnectionState.failed);
         // Give UI time to show the "Connection lost" message before ending
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) endCall();
@@ -1009,25 +914,19 @@ class CallProvider extends ChangeNotifier {
 
     print('⏱️ Starting waiting for remote user timer ($_waitingForRemoteUserTimeoutSeconds seconds)');
 
-    _waitingForRemoteUserTimer = Timer(
-      Duration(seconds: _waitingForRemoteUserTimeoutSeconds),
-      () {
-        if (!mounted) return;
+    _waitingForRemoteUserTimer = Timer(Duration(seconds: _waitingForRemoteUserTimeoutSeconds), () {
+      if (!mounted) return;
 
-        // Only end if remote user still hasn't joined
-        if (!_callState.isRemoteUserJoined) {
-          print('⏱️ Remote user did not join within timeout - auto-ending call');
-          _updateCallState(
-            callEndReason: CallEndReason.remoteUserNoAnswer,
-            connectionState: CallConnectionState.failed,
-          );
-          // Give UI time to show the "No answer" message before ending
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) endCall();
-          });
-        }
-      },
-    );
+      // Only end if remote user still hasn't joined
+      if (!_callState.isRemoteUserJoined) {
+        print('⏱️ Remote user did not join within timeout - auto-ending call');
+        _updateCallState(callEndReason: CallEndReason.remoteUserNoAnswer, connectionState: CallConnectionState.failed);
+        // Give UI time to show the "No answer" message before ending
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) endCall();
+        });
+      }
+    });
   }
 
   /// Stop the waiting for remote user timer
@@ -1048,39 +947,39 @@ class CallProvider extends ChangeNotifier {
   /// might still be propagating on the server side
   Future<void> _verifyCallStillActive() async {
     if (!mounted) return;
-    
+
     // Longer delay to allow for server-side state propagation
     // This is critical for incoming calls where status updates may take time
     await Future.delayed(const Duration(milliseconds: 3000));
-    
+
     if (!mounted || _callState.isRemoteUserJoined) {
       // If remote user already joined, no need to verify
       return;
     }
-    
+
     // Also skip if we're already in connected state
     if (_callState.connectionState == CallConnectionState.connected) {
       print('📞 Skipping call verification - already connected');
       return;
     }
-    
+
     try {
       final apiService = CallApiService(baseUrl: AppData.remoteUrl3);
       final result = await apiService.checkCallActive(callId: _callState.callId);
-      
+
       if (!mounted) return;
-      
+
       // Double-check remote user hasn't joined during the API call
       if (_callState.isRemoteUserJoined) {
         print('📞 Remote user joined during verification - skipping');
         return;
       }
-      
+
       final isActive = result['is_active'] == true;
       final status = result['status']?.toString() ?? 'unknown';
-      
+
       print('📞 Call status verification: isActive=$isActive, status=$status');
-      
+
       // Only end the call for DEFINITIVE ended states
       // Be very conservative to avoid false positives
       if (!isActive && (status == 'cancelled' || status == 'ended' || status == 'rejected')) {
@@ -1096,12 +995,9 @@ class CallProvider extends ChangeNotifier {
           endReason = CallEndReason.remoteUserEnded;
           print('📞 Call was ended - ending gracefully');
         }
-        
-        _updateCallState(
-          callEndReason: endReason,
-          connectionState: CallConnectionState.failed,
-        );
-        
+
+        _updateCallState(callEndReason: endReason, connectionState: CallConnectionState.failed);
+
         // Give UI time to show the message before ending
         Future.delayed(const Duration(seconds: 2), () {
           if (mounted) endCall();
@@ -1240,22 +1136,12 @@ class CallProvider extends ChangeNotifier {
 
   /// Public method to update call end reason (called from CallScreen when remote cancels)
   void setCallEndReason(CallEndReason reason, {CallConnectionState? connectionState}) {
-    _updateCallState(
-      callEndReason: reason,
-      connectionState: connectionState ?? CallConnectionState.failed,
-    );
+    _updateCallState(callEndReason: reason, connectionState: connectionState ?? CallConnectionState.failed);
   }
 
   // Enhanced user joined handler with better synchronization
   void _handleUserJoined(int remoteUid, int elapsed) {
-    CallDebugUtils.logCallTimeline(
-      'REMOTE_USER_JOINED',
-      data: {
-        'uid': remoteUid,
-        'elapsed': '${elapsed}ms',
-        'callDuration': _callState.callDuration,
-      },
-    );
+    CallDebugUtils.logCallTimeline('REMOTE_USER_JOINED', data: {'uid': remoteUid, 'elapsed': '${elapsed}ms', 'callDuration': _callState.callDuration});
 
     // Stop waiting timer - remote user has joined!
     _stopWaitingForRemoteUserTimer();
@@ -1300,10 +1186,7 @@ class CallProvider extends ChangeNotifier {
         if (mounted) {
           notifyListeners();
           _startControlsAutoHideTimer();
-          CallDebugUtils.logDebug(
-            'UI',
-            'Video call controls auto-hide timer started',
-          );
+          CallDebugUtils.logDebug('UI', 'Video call controls auto-hide timer started');
           print('🔄 Final UI refresh for video rendering');
         }
       });
@@ -1326,37 +1209,22 @@ class CallProvider extends ChangeNotifier {
         while (!configured && attempts < 3) {
           try {
             // Force subscribe to remote video stream
-            await _agoraService.getEngine()?.muteRemoteVideoStream(
-              uid: remoteUid,
-              mute: false,
-            );
+            await _agoraService.getEngine()?.muteRemoteVideoStream(uid: remoteUid, mute: false);
 
             // Set high quality video stream
-            await _agoraService.getEngine()?.setRemoteVideoStreamType(
-              uid: remoteUid,
-              streamType: VideoStreamType.videoStreamHigh,
-            );
+            await _agoraService.getEngine()?.setRemoteVideoStreamType(uid: remoteUid, streamType: VideoStreamType.videoStreamHigh);
 
             // Configure rendering mode for better display
-            await _agoraService.getEngine()?.setRemoteRenderMode(
-              uid: remoteUid,
-              renderMode: RenderModeType.renderModeFit,
-              mirrorMode: VideoMirrorModeType.videoMirrorModeDisabled,
-            );
+            await _agoraService.getEngine()?.setRemoteRenderMode(uid: remoteUid, renderMode: RenderModeType.renderModeFit, mirrorMode: VideoMirrorModeType.videoMirrorModeDisabled);
 
             // CRITICAL: Set remote subscription for this specific user
             await _agoraService.getEngine()?.setRemoteVideoSubscriptionOptions(
               uid: remoteUid,
-              options: VideoSubscriptionOptions(
-                type: VideoStreamType.videoStreamHigh,
-                encodedFrameOnly: false,
-              ),
+              options: VideoSubscriptionOptions(type: VideoStreamType.videoStreamHigh, encodedFrameOnly: false),
             );
 
             configured = true;
-            print(
-              '✅ Enhanced video configuration set for user $remoteUid on attempt ${attempts + 1}',
-            );
+            print('✅ Enhanced video configuration set for user $remoteUid on attempt ${attempts + 1}');
           } catch (e) {
             attempts++;
             print('❌ Video config attempt $attempts failed: $e');
@@ -1369,15 +1237,9 @@ class CallProvider extends ChangeNotifier {
 
       // Subscribe to remote audio/video with retry logic
       try {
-        await _agoraService.getEngine()?.muteRemoteAudioStream(
-          uid: remoteUid,
-          mute: false,
-        );
+        await _agoraService.getEngine()?.muteRemoteAudioStream(uid: remoteUid, mute: false);
         if (isVideoCall) {
-          await _agoraService.getEngine()?.muteRemoteVideoStream(
-            uid: remoteUid,
-            mute: false,
-          );
+          await _agoraService.getEngine()?.muteRemoteVideoStream(uid: remoteUid, mute: false);
         }
         print('✅ Remote media streams subscribed successfully');
       } catch (e) {
@@ -1385,15 +1247,9 @@ class CallProvider extends ChangeNotifier {
         // Retry after a delay
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
-            _agoraService.getEngine()?.muteRemoteAudioStream(
-              uid: remoteUid,
-              mute: false,
-            );
+            _agoraService.getEngine()?.muteRemoteAudioStream(uid: remoteUid, mute: false);
             if (isVideoCall) {
-              _agoraService.getEngine()?.muteRemoteVideoStream(
-                uid: remoteUid,
-                mute: false,
-              );
+              _agoraService.getEngine()?.muteRemoteVideoStream(uid: remoteUid, mute: false);
             }
           }
         });
@@ -1467,9 +1323,7 @@ class CallProvider extends ChangeNotifier {
 
           // Generate or get secure token
           final channelToken = await _getAgoraToken();
-          print(
-            '  🔑 Using token: ${channelToken.isEmpty ? "EMPTY (Development mode)" : "PROVIDED (${channelToken.length} chars)"}',
-          );
+          print('  🔑 Using token: ${channelToken.isEmpty ? "EMPTY (Development mode)" : "PROVIDED (${channelToken.length} chars)"}');
 
           joined = await _agoraService.joinChannel(
             channelId: _callState.callId,
@@ -1478,9 +1332,7 @@ class CallProvider extends ChangeNotifier {
             isVideoCall: isVideoCall,
           );
           if (joined) {
-            print(
-              '✅ Successfully joined channel "${_callState.callId}" on attempt ${attempts + 1}',
-            );
+            print('✅ Successfully joined channel "${_callState.callId}" on attempt ${attempts + 1}');
           }
         } catch (e) {
           attempts++;
@@ -1497,13 +1349,9 @@ class CallProvider extends ChangeNotifier {
 
       // Start timer to wait for remote user to join (auto-disconnect if no answer)
       _startWaitingForRemoteUserTimer();
-
     } catch (e) {
       print('❌ Call initialization error: $e');
-      _updateCallState(
-        connectionState: CallConnectionState.failed,
-        callEndReason: CallEndReason.callFailed,
-      );
+      _updateCallState(connectionState: CallConnectionState.failed, callEndReason: CallEndReason.callFailed);
 
       // Try to clean up any partial initialization
       try {
@@ -1522,15 +1370,7 @@ class CallProvider extends ChangeNotifier {
   // Enhanced user offline handler with better reason handling
   void _handleUserOffline(int remoteUid, int reason) {
     String disconnectReason = _getDisconnectReason(reason);
-    CallDebugUtils.logCallTimeline(
-      'REMOTE_USER_LEFT',
-      data: {
-        'uid': remoteUid,
-        'reason': reason,
-        'reasonText': disconnectReason,
-        'callDuration': _callState.callDuration,
-      },
-    );
+    CallDebugUtils.logCallTimeline('REMOTE_USER_LEFT', data: {'uid': remoteUid, 'reason': reason, 'reasonText': disconnectReason, 'callDuration': _callState.callDuration});
 
     // Stop heartbeat and connection monitoring
     _stopHeartbeat();
@@ -1549,35 +1389,22 @@ class CallProvider extends ChangeNotifier {
       // USER_OFFLINE_QUIT - User deliberately left
       endReason = CallEndReason.remoteUserEnded;
       delay = const Duration(seconds: 1);
-      CallDebugUtils.logInfo(
-        'DISCONNECT',
-        'User deliberately left, ending call quickly',
-      );
+      CallDebugUtils.logInfo('DISCONNECT', 'User deliberately left, ending call quickly');
     } else if (reason == 2) {
       // USER_OFFLINE_DROPPED - Connection dropped
       endReason = CallEndReason.networkDisconnect;
       delay = const Duration(seconds: 3);
-      CallDebugUtils.logWarning(
-        'DISCONNECT',
-        'Remote user connection dropped',
-      );
+      CallDebugUtils.logWarning('DISCONNECT', 'Remote user connection dropped');
     } else {
       endReason = CallEndReason.remoteUserEnded;
       delay = const Duration(seconds: 2);
     }
 
-    _updateCallState(
-      remoteUid: null,
-      isRemoteUserJoined: false,
-      callEndReason: endReason,
-    );
+    _updateCallState(remoteUid: null, isRemoteUserJoined: false, callEndReason: endReason);
 
     Future.delayed(delay, () {
       if (mounted && !_callState.isRemoteUserJoined) {
-        CallDebugUtils.logCallTimeline(
-          'AUTO_END_CALL',
-          data: {'delaySeconds': delay.inSeconds, 'reason': endReason.name},
-        );
+        CallDebugUtils.logCallTimeline('AUTO_END_CALL', data: {'delaySeconds': delay.inSeconds, 'reason': endReason.name});
         endCall();
       }
     });

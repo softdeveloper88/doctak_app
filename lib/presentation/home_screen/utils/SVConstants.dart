@@ -1,4 +1,3 @@
-
 const double SVAppContainerRadius = 32;
 const double SVAppCommonRadius = 12;
 const svAppName = "SocialV";
@@ -18,4 +17,4 @@ class SVPostType {
   static String text = 'text';
 }
 
-var svFontRoboto =  'Poppins';
+var svFontRoboto = 'Poppins';

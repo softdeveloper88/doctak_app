@@ -17,8 +17,8 @@ import '../../../theme/one_ui_theme.dart';
 
 class CreateDiscussionScreen extends StatefulWidget {
   final CaseDiscussion? existingCase; // For edit mode
-  
-  const CreateDiscussionScreen({Key? key, this.existingCase}) : super(key: key);
+
+  const CreateDiscussionScreen({super.key, this.existingCase});
 
   @override
   State<CreateDiscussionScreen> createState() => _CreateDiscussionScreenState();
@@ -30,7 +30,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   final _descriptionController = TextEditingController();
   final _clinicalKeywordsController = TextEditingController();
   final _ageController = TextEditingController();
-  
+
   String _selectedSpecialty = 'General';
   String _selectedSpecialtyId = '1';
   String? _selectedGender;
@@ -39,15 +39,15 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   String _selectedTeachingValue = 'low';
   // Remove medical history - ethnicity is now in patient demographics
   bool _isAnonymized = false;
-  
-  List<File> _selectedImages = [];
+
+  final List<File> _selectedImages = [];
   List<String> _selectedImageNames = [];
   List<String> _existingFileUrls = []; // Track existing file URLs for edit mode
   List<String> _clinicalTags = []; // Track clinical tags for better UI
-  
+
   final ImagePicker _imagePicker = ImagePicker();
   late CaseDiscussionRepository _repository;
-  
+
   // Specialty options from API
   List<SpecialtyFilter> _specialties = [];
   bool _isLoadingSpecialties = true;
@@ -55,18 +55,15 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   @override
   void initState() {
     super.initState();
-    _repository = CaseDiscussionRepository(
-      baseUrl: AppData.base,
-      getAuthToken: () => AppData.userToken ?? "",
-    );
+    _repository = CaseDiscussionRepository(baseUrl: AppData.base, getAuthToken: () => AppData.userToken ?? "");
     print('Repository initialized with baseUrl: ${AppData.base}');
     print('Auth token available: ${AppData.userToken != null && AppData.userToken!.isNotEmpty}');
-    
+
     // Initialize form with existing data if in edit mode
     if (widget.existingCase != null) {
       _initializeEditMode();
     }
-    
+
     _loadSpecialties();
   }
 
@@ -82,27 +79,27 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   void _initializeEditMode() {
     final existingCase = widget.existingCase!;
-    
+
     // Set basic fields
     _titleController.text = existingCase.title;
     _descriptionController.text = existingCase.description;
-    
+
     // Set specialty
     _selectedSpecialty = existingCase.specialty;
     if (existingCase.specialtyId != null) {
       _selectedSpecialtyId = existingCase.specialtyId.toString();
     }
-    
+
     // Parse and set existing tags
     if (existingCase.symptoms != null && existingCase.symptoms!.isNotEmpty) {
       _clinicalTags = existingCase.symptoms!;
       _updateTagsController();
     }
-    
+
     // Extract patient demographics from metadata
     if (existingCase.metadata != null && existingCase.metadata!['patient_demographics'] != null) {
       final demographics = existingCase.metadata!['patient_demographics'] as Map<String, dynamic>;
-      
+
       if (demographics['age'] != null) {
         _ageController.text = demographics['age'].toString();
       }
@@ -113,7 +110,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         _selectedEthnicity = demographics['ethnicity'].toString();
       }
     }
-    
+
     // Set clinical metadata
     if (existingCase.metadata != null) {
       if (existingCase.metadata!['clinical_complexity'] != null) {
@@ -126,7 +123,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         _isAnonymized = existingCase.metadata!['is_anonymized'] as bool;
       }
     }
-    
+
     // Handle existing attached files
     if (existingCase.attachments != null && existingCase.attachments!.isNotEmpty) {
       _selectedImageNames = existingCase.attachments!
@@ -138,7 +135,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
           .map((attachment) => attachment.url)
           .toList();
     }
-    
+
     print('=== Edit Mode Initialized ===');
     print('Title: ${_titleController.text}');
     print('Description: ${_descriptionController.text}');
@@ -158,11 +155,11 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       final filterData = await _repository.getFilterData();
       print('Filter data keys: ${filterData.keys}');
       print('Specialties type: ${filterData['specialties'].runtimeType}');
-      
+
       if (filterData['specialties'] is List<SpecialtyFilter>) {
         final specialties = filterData['specialties'] as List<SpecialtyFilter>;
         print('Specialties count: ${specialties.length}');
-        
+
         if (specialties.isNotEmpty) {
           setState(() {
             _specialties = specialties;
@@ -174,7 +171,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
           return;
         }
       }
-      
+
       print('❌ No valid specialties found, using defaults');
       _useDefaultSpecialties();
     } catch (e, stackTrace) {
@@ -211,9 +208,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     final theme = OneUITheme.of(context);
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) {
         final innerTheme = OneUITheme.of(context);
         return Container(
@@ -223,34 +218,15 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
             children: [
               Text(
                 AppLocalizations.of(context)!.lbl_select_attachment,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: innerTheme.primary,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: innerTheme.primary),
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildAttachmentOption(
-                    icon: Icons.camera_alt,
-                    label: AppLocalizations.of(context)!.lbl_camera,
-                    onTap: () => _pickImageFromCamera(),
-                    theme: innerTheme,
-                  ),
-                  _buildAttachmentOption(
-                    icon: Icons.photo_library,
-                    label: AppLocalizations.of(context)!.lbl_gallery,
-                    onTap: () => _pickImageFromGallery(),
-                    theme: innerTheme,
-                  ),
-                  _buildAttachmentOption(
-                    icon: Icons.attach_file,
-                    label: AppLocalizations.of(context)!.lbl_file,
-                    onTap: () => _pickDocument(),
-                    theme: innerTheme,
-                  ),
+                  _buildAttachmentOption(icon: Icons.camera_alt, label: AppLocalizations.of(context)!.lbl_camera, onTap: () => _pickImageFromCamera(), theme: innerTheme),
+                  _buildAttachmentOption(icon: Icons.photo_library, label: AppLocalizations.of(context)!.lbl_gallery, onTap: () => _pickImageFromGallery(), theme: innerTheme),
+                  _buildAttachmentOption(icon: Icons.attach_file, label: AppLocalizations.of(context)!.lbl_file, onTap: () => _pickDocument(), theme: innerTheme),
                 ],
               ),
               const SizedBox(height: 20),
@@ -261,12 +237,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     );
   }
 
-  Widget _buildAttachmentOption({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required OneUITheme theme,
-  }) {
+  Widget _buildAttachmentOption({required IconData icon, required String label, required VoidCallback onTap, required OneUITheme theme}) {
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
@@ -275,9 +246,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: theme.primary.withOpacity(0.1),
+          color: theme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.primary.withOpacity(0.3)),
+          border: Border.all(color: theme.primary.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -285,11 +256,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
             const SizedBox(height: 8),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: theme.primary,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: theme.primary),
             ),
           ],
         ),
@@ -307,9 +274,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')));
     }
   }
 
@@ -335,20 +300,14 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_image}: $e')));
       }
     }
   }
 
   Future<void> _pickDocument() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'],
-        allowMultiple: true,
-      );
+      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'], allowMultiple: true);
 
       if (result != null && result.files.isNotEmpty) {
         setState(() {
@@ -361,9 +320,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_file}: $e')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${AppLocalizations.of(context)!.msg_error_picking_file}: $e')));
     }
   }
 
@@ -377,15 +334,12 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   // Helper method to format tags as JSON string
   String? _formatTagsAsJson(String tagsInput) {
     if (tagsInput.trim().isEmpty) return null;
-    
+
     // Split by comma and clean up
-    final tags = tagsInput.split(',')
-        .map((tag) => tag.trim())
-        .where((tag) => tag.isNotEmpty)
-        .toList();
-    
+    final tags = tagsInput.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList();
+
     if (tags.isEmpty) return null;
-    
+
     // Format as JSON array with value objects
     final tagObjects = tags.map((tag) => {'value': tag}).toList();
     return jsonEncode(tagObjects);
@@ -394,7 +348,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   // Helper method to parse existing tags from JSON format
   List<String> _parseTagsFromJson(String? tagsJson) {
     if (tagsJson == null || tagsJson.isEmpty) return [];
-    
+
     try {
       if (tagsJson.startsWith('[') && tagsJson.endsWith(']')) {
         final List<dynamic> parsed = jsonDecode(tagsJson);
@@ -448,21 +402,16 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     }
   }
 
-
   void _submitForm() {
     final theme = OneUITheme.of(context);
     if (_formKey.currentState!.validate()) {
       if (!_isAnonymized) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.msg_confirm_patient_info_removed),
-            backgroundColor: theme.warning,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.msg_confirm_patient_info_removed), backgroundColor: theme.warning, duration: const Duration(seconds: 3)));
         return;
       }
-      
+
       print('=== Form Validation Passed ===');
       print('📝 Title: ${_titleController.text.trim()}');
       print('📄 Description: ${_descriptionController.text.trim()}');
@@ -475,7 +424,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       print('📚 Teaching Value: $_selectedTeachingValue');
       print('🔒 Anonymized: $_isAnonymized');
       print('📸 Medical Images: ${_selectedImages.length} files');
-      
+
       // Create patient demographics object
       final patientDemographics = {
         'age': _ageController.text.trim().isNotEmpty ? int.tryParse(_ageController.text.trim()) ?? 0 : 0,
@@ -485,24 +434,22 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
       // Combine existing file URLs with new file paths
       final allFiles = <String>[];
-      
+
       // Add existing file URLs (for edit mode) - filter out invalid URLs
       if (widget.existingCase != null) {
-        final validExistingUrls = _existingFileUrls
-            .where((url) => url.isNotEmpty && url != '[]' && !url.startsWith('"') && !url.contains('null'))
-            .toList();
+        final validExistingUrls = _existingFileUrls.where((url) => url.isNotEmpty && url != '[]' && !url.startsWith('"') && !url.contains('null')).toList();
         allFiles.addAll(validExistingUrls);
       }
-      
+
       // Add new file paths
       allFiles.addAll(_selectedImages.map((file) => file.path).toList());
-      
+
       print('📎 All files being sent: $allFiles');
 
       // Format tags as JSON string in the required format
       final formattedTags = _formatTagsAsJson(_clinicalKeywordsController.text.trim());
       print('🏷️ Formatted Tags JSON: $formattedTags');
-      
+
       final request = CreateCaseRequest(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
@@ -538,30 +485,18 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
-        title: widget.existingCase != null 
-            ? translation(context).lbl_edit_case_discussion 
-            : AppLocalizations.of(context)!.lbl_create_case_discussion,
+        title: widget.existingCase != null ? translation(context).lbl_edit_case_discussion : AppLocalizations.of(context)!.lbl_create_case_discussion,
         titleIcon: Icons.medical_information_rounded,
         actions: [
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: IconButton(
               padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(
-                minWidth: 36,
-                minHeight: 36,
-              ),
+              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               icon: Container(
                 padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: theme.primary.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.help_outline,
-                  color: theme.primary,
-                  size: 14,
-                ),
+                decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+                child: Icon(Icons.help_outline, color: theme.primary, size: 14),
               ),
               onPressed: () {
                 // Show help dialog
@@ -569,15 +504,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text(AppLocalizations.of(context)!.lbl_create_case_discussion),
-                    content: Text(
-                      AppLocalizations.of(context)!.msg_create_case_discussion_description,
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(AppLocalizations.of(context)!.lbl_got_it),
-                      ),
-                    ],
+                    content: Text(AppLocalizations.of(context)!.msg_create_case_discussion_description),
+                    actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text(AppLocalizations.of(context)!.lbl_got_it))],
                   ),
                 );
               },
@@ -594,9 +522,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   children: [
                     Icon(Icons.check_circle, color: theme.cardBackground),
                     const SizedBox(width: 12),
-                    Text(state.isUpdate 
-                        ? translation(context).msg_case_discussion_updated 
-                        : AppLocalizations.of(context)!.msg_case_discussion_created),
+                    Text(state.isUpdate ? translation(context).msg_case_discussion_updated : AppLocalizations.of(context)!.msg_case_discussion_created),
                   ],
                 ),
                 backgroundColor: theme.success,
@@ -612,20 +538,13 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                     Icon(Icons.error_outline, color: theme.cardBackground),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text(
-                        '${AppLocalizations.of(context)!.msg_failed_to_create_discussion}: ${state.message}',
-                        style: TextStyle(color: theme.cardBackground),
-                      ),
+                      child: Text('${AppLocalizations.of(context)!.msg_failed_to_create_discussion}: ${state.message}', style: TextStyle(color: theme.cardBackground)),
                     ),
                   ],
                 ),
                 backgroundColor: theme.error,
                 duration: const Duration(seconds: 5),
-                action: SnackBarAction(
-                  label: AppLocalizations.of(context)!.lbl_retry,
-                  textColor: theme.cardBackground,
-                  onPressed: _submitForm,
-                ),
+                action: SnackBarAction(label: AppLocalizations.of(context)!.lbl_retry, textColor: theme.cardBackground, onPressed: _submitForm),
               ),
             );
           }
@@ -643,30 +562,18 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   decoration: BoxDecoration(
                     color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: theme.primary.withOpacity(0.2)),
+                    border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
                   ),
                   child: AppTextField(
                     controller: _titleController,
                     textFieldType: TextFieldType.NAME,
-                    textStyle: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: theme.textPrimary,
-                    ),
+                    textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: '${AppLocalizations.of(context)!.lbl_case_title} *',
-                      hintStyle: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: theme.textTertiary,
-                      ),
+                      hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
                       contentPadding: const EdgeInsets.all(16),
-                      prefixIcon: Icon(
-                        Icons.title_rounded,
-                        color: theme.primary.withOpacity(0.6),
-                        size: 20,
-                      ),
+                      prefixIcon: Icon(Icons.title_rounded, color: theme.primary.withValues(alpha: 0.6), size: 20),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -683,31 +590,19 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   decoration: BoxDecoration(
                     color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: theme.primary.withOpacity(0.2)),
+                    border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
                   ),
                   child: AppTextField(
                     controller: _descriptionController,
                     textFieldType: TextFieldType.MULTILINE,
                     maxLines: 5,
-                    textStyle: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: theme.textPrimary,
-                    ),
+                    textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: '${AppLocalizations.of(context)!.lbl_case_description} *',
-                      hintStyle: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: theme.textTertiary,
-                      ),
+                      hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
                       contentPadding: const EdgeInsets.all(16),
-                      prefixIcon: Icon(
-                        Icons.description_rounded,
-                        color: theme.primary.withOpacity(0.6),
-                        size: 20,
-                      ),
+                      prefixIcon: Icon(Icons.description_rounded, color: theme.primary.withValues(alpha: 0.6), size: 20),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -725,14 +620,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   decoration: BoxDecoration(
                     color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.primary.withOpacity(0.15)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.primary.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    border: Border.all(color: theme.primary.withValues(alpha: 0.15)),
+                    boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -741,41 +630,25 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: theme.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.person_rounded,
-                              color: theme.primary,
-                              size: 20,
-                            ),
+                            decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                            child: Icon(Icons.person_rounded, color: theme.primary, size: 20),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.lbl_patient_demographics,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 15,
-                              color: theme.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Age Field
                       Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         child: AppTextField(
                           controller: _ageController,
                           textFieldType: TextFieldType.NUMBER,
-                          textStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: theme.textPrimary,
-                          ),
+                          textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -790,16 +663,12 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                               borderSide: BorderSide(color: theme.primary, width: 1.5),
                             ),
                             hintText: translation(context).lbl_age_years,
-                            hintStyle: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: theme.textTertiary,
-                            ),
+                            hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
                             contentPadding: const EdgeInsets.all(12),
                           ),
                         ),
                       ),
-                      
+
                       // Gender and Ethnicity Row
                       Row(
                         children: [
@@ -819,11 +688,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                     value: gender,
                                     child: Text(
                                       gender,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        color: theme.textPrimary,
-                                      ),
+                                      style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                                     ),
                                   );
                                 }).toList(),
@@ -848,19 +713,24 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                 contentPadding: const EdgeInsets.all(12),
                                 hintText: AppLocalizations.of(context)!.lbl_select_ethnicity,
                                 labelText: AppLocalizations.of(context)!.lbl_ethnicity,
-                                items: [AppLocalizations.of(context)!.lbl_not_specified, AppLocalizations.of(context)!.lbl_caucasian, AppLocalizations.of(context)!.lbl_african_american, AppLocalizations.of(context)!.lbl_asian, AppLocalizations.of(context)!.lbl_hispanic_latino, AppLocalizations.of(context)!.lbl_middle_eastern, AppLocalizations.of(context)!.lbl_other].map((ethnicity) {
-                                  return DropdownMenuItem<String>(
-                                    value: ethnicity,
-                                    child: Text(
-                                      ethnicity,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        color: theme.textPrimary,
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
+                                items:
+                                    [
+                                      AppLocalizations.of(context)!.lbl_not_specified,
+                                      AppLocalizations.of(context)!.lbl_caucasian,
+                                      AppLocalizations.of(context)!.lbl_african_american,
+                                      AppLocalizations.of(context)!.lbl_asian,
+                                      AppLocalizations.of(context)!.lbl_hispanic_latino,
+                                      AppLocalizations.of(context)!.lbl_middle_eastern,
+                                      AppLocalizations.of(context)!.lbl_other,
+                                    ].map((ethnicity) {
+                                      return DropdownMenuItem<String>(
+                                        value: ethnicity,
+                                        child: Text(
+                                          ethnicity,
+                                          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                                        ),
+                                      );
+                                    }).toList(),
                                 onChanged: (value) {
                                   if (value != null) {
                                     setState(() {
@@ -873,7 +743,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           ),
                         ],
                       ),
-                      
+
                       // Medical history removed - ethnicity is now in patient demographics
                     ],
                   ),
@@ -886,14 +756,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   decoration: BoxDecoration(
                     color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.warning.withOpacity(0.2)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.warning.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    border: Border.all(color: theme.warning.withValues(alpha: 0.2)),
+                    boxShadow: [BoxShadow(color: theme.warning.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -902,39 +766,23 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: theme.warning.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.sell_rounded,
-                              color: theme.warning,
-                              size: 20,
-                            ),
+                            decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                            child: Icon(Icons.sell_rounded, color: theme.warning, size: 20),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.lbl_clinical_keywords,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 15,
-                              color: theme.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Text(
                         translation(context).msg_clinical_keywords_hint,
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          color: theme.textSecondary,
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: theme.textSecondary),
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // Tags input field
                       Container(
                         decoration: BoxDecoration(
@@ -947,35 +795,22 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           textFieldType: TextFieldType.MULTILINE,
                           maxLines: 2,
                           onChanged: _onTagsChanged,
-                          textStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: theme.textPrimary,
-                          ),
+                          textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                           decoration: InputDecoration(
                             border: InputBorder.none,
                             hintText: translation(context).msg_clinical_keywords_example,
-                            hintStyle: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                              color: theme.textTertiary,
-                            ),
+                            hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
                             contentPadding: const EdgeInsets.all(12),
                           ),
                         ),
                       ),
-                      
+
                       // Display current tags as chips
                       if (_clinicalTags.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         Text(
                           translation(context).lbl_current_tags,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: theme.textSecondary,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: theme.textSecondary, fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 8),
                         Wrap(
@@ -987,32 +822,21 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                             return Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: theme.warning.withOpacity(0.15),
+                                color: theme.warning.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: theme.warning.withOpacity(0.3),
-                                ),
+                                border: Border.all(color: theme.warning.withValues(alpha: 0.3)),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     tag,
-                                    style: TextStyle(
-                                      color: theme.warning,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'Poppins',
-                                    ),
+                                    style: TextStyle(color: theme.warning, fontSize: 12, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                                   ),
                                   const SizedBox(width: 6),
                                   GestureDetector(
                                     onTap: () => _removeTag(index),
-                                    child: Icon(
-                                      Icons.close_rounded,
-                                      size: 14,
-                                      color: theme.warning,
-                                    ),
+                                    child: Icon(Icons.close_rounded, size: 14, color: theme.warning),
                                   ),
                                 ],
                               ),
@@ -1031,14 +855,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   decoration: BoxDecoration(
                     color: theme.surfaceVariant,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.success.withOpacity(0.2)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.success.withOpacity(0.05),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    border: Border.all(color: theme.success.withValues(alpha: 0.2)),
+                    boxShadow: [BoxShadow(color: theme.success.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1047,78 +865,46 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: theme.success.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.photo_library_rounded,
-                              color: theme.success,
-                              size: 20,
-                            ),
+                            decoration: BoxDecoration(color: theme.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                            child: Icon(Icons.photo_library_rounded, color: theme.success, size: 20),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             AppLocalizations.of(context)!.lbl_attach_medical_images,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 15,
-                              color: theme.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Add Images Button
                       GestureDetector(
                         onTap: _pickFile,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                theme.success.withOpacity(0.15),
-                                theme.success.withOpacity(0.08),
-                              ],
-                            ),
+                            gradient: LinearGradient(colors: [theme.success.withValues(alpha: 0.15), theme.success.withValues(alpha: 0.08)]),
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: theme.success.withOpacity(0.3),
-                              width: 1.5,
-                            ),
+                            border: Border.all(color: theme.success.withValues(alpha: 0.3), width: 1.5),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: theme.success.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.add_photo_alternate_rounded,
-                                  color: theme.success,
-                                  size: 22,
-                                ),
+                                decoration: BoxDecoration(color: theme.success.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
+                                child: Icon(Icons.add_photo_alternate_rounded, color: theme.success, size: 22),
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 AppLocalizations.of(context)!.lbl_add_medical_images,
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  color: theme.success,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.success, fontWeight: FontWeight.w600),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      
+
                       // Display selected images
                       if (_selectedImages.isNotEmpty) ...[
                         const SizedBox(height: 12),
@@ -1129,42 +915,26 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: theme.success.withOpacity(0.1),
+                                color: theme.success.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: theme.success.withOpacity(0.3)),
+                                border: Border.all(color: theme.success.withValues(alpha: 0.3)),
                               ),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.image_outlined,
-                                    color: theme.success,
-                                    size: 20,
-                                  ),
+                                  Icon(Icons.image_outlined, color: theme.success, size: 20),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
                                       _selectedImageNames[index],
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12,
-                                        color: theme.success,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                      style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: theme.success, fontWeight: FontWeight.w500),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   IconButton(
                                     onPressed: () => _removeAttachment(index),
-                                    icon: Icon(
-                                      Icons.close_rounded,
-                                      color: theme.error,
-                                      size: 18,
-                                    ),
+                                    icon: Icon(Icons.close_rounded, color: theme.error, size: 18),
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(
-                                      minWidth: 32,
-                                      minHeight: 32,
-                                    ),
+                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                   ),
                                 ],
                               ),
@@ -1180,43 +950,37 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   child: _isLoadingSpecialties
-                    ? const SpecialtyLoadingShimmer()
-                    : OneUIDropdownFormField<String>(
-                        value: _specialties.isNotEmpty ? _selectedSpecialtyId : null,
-                        hintText: translation(context).lbl_select_specialty,
-                        labelText: translation(context).lbl_medical_specialty,
-                        contentPadding: const EdgeInsets.all(16),
-                        prefixIcon: Icons.medical_services_rounded,
-                        items: _specialties.map((specialty) {
-                          return DropdownMenuItem<String>(
-                            value: specialty.id.toString(),
-                            child: Text(
-                              specialty.name,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                color: theme.textPrimary,
+                      ? const SpecialtyLoadingShimmer()
+                      : OneUIDropdownFormField<String>(
+                          value: _specialties.isNotEmpty ? _selectedSpecialtyId : null,
+                          hintText: translation(context).lbl_select_specialty,
+                          labelText: translation(context).lbl_medical_specialty,
+                          contentPadding: const EdgeInsets.all(16),
+                          prefixIcon: Icons.medical_services_rounded,
+                          items: _specialties.map((specialty) {
+                            return DropdownMenuItem<String>(
+                              value: specialty.id.toString(),
+                              child: Text(
+                                specialty.name,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedSpecialtyId = value;
-                              _selectedSpecialty = _specialties.firstWhere(
-                                (s) => s.id.toString() == value,
-                              ).name;
-                            });
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return translation(context).msg_please_select_specialty;
-                          }
-                          return null;
-                        },
-                      ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() {
+                                _selectedSpecialtyId = value;
+                                _selectedSpecialty = _specialties.firstWhere((s) => s.id.toString() == value).name;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return translation(context).msg_please_select_specialty;
+                            }
+                            return null;
+                          },
+                        ),
                 ),
 
                 // Clinical Complexity and Teaching Value Row
@@ -1233,9 +997,27 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           contentPadding: const EdgeInsets.all(16),
                           prefixIcon: Icons.assessment_outlined,
                           items: [
-                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
-                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
-                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
+                            DropdownMenuItem(
+                              value: 'low',
+                              child: Text(
+                                AppLocalizations.of(context)!.lbl_low,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'medium',
+                              child: Text(
+                                AppLocalizations.of(context)!.lbl_medium,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'high',
+                              child: Text(
+                                AppLocalizations.of(context)!.lbl_high,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                              ),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -1258,9 +1040,27 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           contentPadding: const EdgeInsets.all(16),
                           prefixIcon: Icons.school_outlined,
                           items: [
-                            DropdownMenuItem(value: 'low', child: Text(AppLocalizations.of(context)!.lbl_low, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
-                            DropdownMenuItem(value: 'medium', child: Text(AppLocalizations.of(context)!.lbl_medium, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
-                            DropdownMenuItem(value: 'high', child: Text(AppLocalizations.of(context)!.lbl_high, style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary))),
+                            DropdownMenuItem(
+                              value: 'low',
+                              child: Text(
+                                AppLocalizations.of(context)!.lbl_low,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'medium',
+                              child: Text(
+                                AppLocalizations.of(context)!.lbl_medium,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                              ),
+                            ),
+                            DropdownMenuItem(
+                              value: 'high',
+                              child: Text(
+                                AppLocalizations.of(context)!.lbl_high,
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
+                              ),
+                            ),
                           ],
                           onChanged: (value) {
                             if (value != null) {
@@ -1280,30 +1080,16 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        theme.warning.withOpacity(0.08),
-                        theme.warning.withOpacity(0.03),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    gradient: LinearGradient(colors: [theme.warning.withValues(alpha: 0.08), theme.warning.withValues(alpha: 0.03)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme.warning.withOpacity(0.25)),
+                    border: Border.all(color: theme.warning.withValues(alpha: 0.25)),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: theme.warning.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Icons.security_rounded,
-                          color: theme.warning,
-                          size: 22,
-                        ),
+                        decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(12)),
+                        child: Icon(Icons.security_rounded, color: theme.warning, size: 22),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -1315,13 +1101,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           },
                           child: Text(
                             AppLocalizations.of(context)!.msg_confirm_patient_info_removed_checkbox,
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 13,
-                              color: theme.warning,
-                              fontWeight: FontWeight.w500,
-                              height: 1.4,
-                            ),
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.warning, fontWeight: FontWeight.w500, height: 1.4),
                           ),
                         ),
                       ),
@@ -1335,8 +1115,8 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                               _isAnonymized = value;
                             });
                           },
-                          activeColor: theme.warning,
-                          activeTrackColor: theme.warning.withOpacity(0.4),
+                          activeThumbColor: theme.warning,
+                          activeTrackColor: theme.warning.withValues(alpha: 0.4),
                         ),
                       ),
                     ],
@@ -1353,26 +1133,9 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       margin: const EdgeInsets.symmetric(horizontal: 24),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        gradient: isDisabled 
-                            ? null 
-                            : LinearGradient(
-                                colors: [
-                                  theme.primary,
-                                  theme.primary.withOpacity(0.85),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                        gradient: isDisabled ? null : LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.85)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                         color: isDisabled ? theme.surfaceVariant : null,
-                        boxShadow: isDisabled 
-                            ? null 
-                            : [
-                                BoxShadow(
-                                  color: theme.primary.withOpacity(0.3),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                        boxShadow: isDisabled ? null : [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
                       ),
                       child: Material(
                         color: Colors.transparent,
@@ -1386,12 +1149,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                     child: SizedBox(
                                       height: 22,
                                       width: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          isDisabled ? theme.textSecondary : theme.buttonPrimaryText,
-                                        ),
-                                      ),
+                                      child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(isDisabled ? theme.textSecondary : theme.buttonPrimaryText)),
                                     ),
                                   )
                                 : Row(
@@ -1399,23 +1157,16 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: (isDisabled ? theme.textSecondary : Colors.white).withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
+                                        decoration: BoxDecoration(color: (isDisabled ? theme.textSecondary : Colors.white).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
                                         child: Icon(
-                                          widget.existingCase != null 
-                                              ? Icons.update_rounded 
-                                              : Icons.send_rounded,
+                                          widget.existingCase != null ? Icons.update_rounded : Icons.send_rounded,
                                           size: 18,
                                           color: isDisabled ? theme.textSecondary : theme.buttonPrimaryText,
                                         ),
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        widget.existingCase != null 
-                                            ? translation(context).lbl_update_case 
-                                            : AppLocalizations.of(context)!.lbl_submit_case,
+                                        widget.existingCase != null ? translation(context).lbl_update_case : AppLocalizations.of(context)!.lbl_submit_case,
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 16,

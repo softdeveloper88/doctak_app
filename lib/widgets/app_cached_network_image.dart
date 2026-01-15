@@ -65,12 +65,7 @@ class AppCachedNetworkImage extends StatelessWidget {
 
     // Avoid throwing/stream errors for empty or obviously invalid URLs.
     if (safeUrl.isEmpty || safeUrl.toLowerCase() == 'null') {
-      return (errorWidget ??
-          (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme))(
-        context,
-        safeUrl,
-        'Empty/invalid image url',
-      );
+      return (errorWidget ?? (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme))(context, safeUrl, 'Empty/invalid image url');
     }
 
     return CachedNetworkImage(
@@ -82,11 +77,8 @@ class AppCachedNetworkImage extends StatelessWidget {
       colorBlendMode: colorBlendMode,
       cacheManager: CustomCacheManager(),
       httpHeaders: httpHeaders ?? defaultHeaders,
-      placeholder:
-          placeholder ?? (ctx, url) => _defaultPlaceholder(ctx, url, theme),
-      errorWidget:
-          errorWidget ??
-          (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme),
+      placeholder: placeholder ?? (ctx, url) => _defaultPlaceholder(ctx, url, theme),
+      errorWidget: errorWidget ?? (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme),
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
       imageBuilder: imageBuilder,
@@ -100,70 +92,32 @@ class AppCachedNetworkImage extends StatelessWidget {
     );
   }
 
-  Widget _defaultPlaceholder(
-    BuildContext context,
-    String url,
-    OneUITheme theme,
-  ) {
+  Widget _defaultPlaceholder(BuildContext context, String url, OneUITheme theme) {
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: theme.surfaceVariant,
-        borderRadius: borderRadius ?? BorderRadius.circular(8),
-      ),
+      decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: borderRadius ?? BorderRadius.circular(8)),
       child: Center(
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-          ),
-        ),
+        child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.primary))),
       ),
     );
   }
 
-  Widget _defaultErrorWidget(
-    BuildContext context,
-    String url,
-    dynamic error,
-    OneUITheme theme,
-  ) {
+  Widget _defaultErrorWidget(BuildContext context, String url, dynamic error, OneUITheme theme) {
     debugPrint('\ud83d\udea8 AppCachedNetworkImage error for URL: $url');
     debugPrint('\ud83d\udea8 Error: $error');
 
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: theme.surfaceVariant,
-        borderRadius: borderRadius ?? BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: Icon(
-          Icons.broken_image_rounded,
-          color: theme.textTertiary,
-          size: 32,
-        ),
-      ),
+      decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: borderRadius ?? BorderRadius.circular(8)),
+      child: Center(child: Icon(Icons.broken_image_rounded, color: theme.textTertiary, size: 32)),
     );
   }
 }
 
 /// Extension to easily use CachedNetworkImageProvider with our custom cache manager
 class AppCachedNetworkImageProvider extends CachedNetworkImageProvider {
-  AppCachedNetworkImageProvider(
-    String url, {
-    Map<String, String>? headers,
-    int? maxWidth,
-    int? maxHeight,
-  }) : super(
-         url.trim(),
-         headers: headers ?? AppCachedNetworkImage.defaultHeaders,
-         cacheManager: CustomCacheManager(),
-         maxWidth: maxWidth,
-         maxHeight: maxHeight,
-       );
+  AppCachedNetworkImageProvider(String url, {Map<String, String>? headers, int? maxWidth, int? maxHeight})
+    : super(url.trim(), headers: headers ?? AppCachedNetworkImage.defaultHeaders, cacheManager: CustomCacheManager(), maxWidth: maxWidth, maxHeight: maxHeight);
 }

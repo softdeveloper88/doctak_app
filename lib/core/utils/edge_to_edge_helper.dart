@@ -46,10 +46,7 @@ class EdgeToEdgeHelper {
   /// Get safe bottom padding (for bottom navigation/input areas)
   /// Returns bottom padding + additional padding for better spacing
   /// Use this instead of SafeArea for bottom UI elements
-  static double getSafeBottomPadding(
-    BuildContext context, {
-    double additionalPadding = 0.0,
-  }) {
+  static double getSafeBottomPadding(BuildContext context, {double additionalPadding = 0.0}) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     return bottomPadding + additionalPadding;
   }
@@ -61,32 +58,14 @@ class EdgeToEdgeHelper {
 
   /// Create EdgeInsets for bottom padding that respects safe area
   /// Example: padding: EdgeToEdgeHelper.bottomSafePadding(context, horizontal: 16, vertical: 8)
-  static EdgeInsets bottomSafePadding(
-    BuildContext context, {
-    double horizontal = 0.0,
-    double vertical = 0.0,
-  }) {
+  static EdgeInsets bottomSafePadding(BuildContext context, {double horizontal = 0.0, double vertical = 0.0}) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    return EdgeInsets.only(
-      left: horizontal,
-      right: horizontal,
-      top: vertical,
-      bottom: bottomPadding + vertical,
-    );
+    return EdgeInsets.only(left: horizontal, right: horizontal, top: vertical, bottom: bottomPadding + vertical);
   }
 
   /// Create EdgeInsets for all-around safe area padding
-  static EdgeInsets allSafePadding(
-    BuildContext context, {
-    double horizontal = 0.0,
-    double vertical = 0.0,
-  }) {
+  static EdgeInsets allSafePadding(BuildContext context, {double horizontal = 0.0, double vertical = 0.0}) {
     final padding = MediaQuery.of(context).padding;
-    return EdgeInsets.only(
-      left: padding.left + horizontal,
-      right: padding.right + horizontal,
-      top: padding.top + vertical,
-      bottom: padding.bottom + vertical,
-    );
+    return EdgeInsets.only(left: padding.left + horizontal, right: padding.right + horizontal, top: padding.top + vertical, bottom: padding.bottom + vertical);
   }
 }

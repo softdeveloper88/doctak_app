@@ -16,11 +16,7 @@ class MeetingDetailScreen extends StatefulWidget {
   final Session sessions;
   final String date;
 
-  const MeetingDetailScreen({
-    required this.sessions,
-    required this.date,
-    super.key,
-  });
+  const MeetingDetailScreen({required this.sessions, required this.date, super.key});
 
   @override
   State<MeetingDetailScreen> createState() => _MeetingDetailScreenState();
@@ -44,17 +40,10 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
         title: Text(
           translation(context).lbl_meeting_detail,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: theme.textPrimary,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
         ),
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: theme.textPrimary,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.textPrimary),
           onPressed: () => Navigator.of(context).pop(),
         ),
         elevation: 0,
@@ -71,49 +60,20 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
                 decoration: BoxDecoration(
                   color: theme.cardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.isDark
-                        ? theme.surfaceVariant
-                        : Colors.transparent,
-                    width: 1,
-                  ),
-                  boxShadow: theme.isDark
-                      ? []
-                      : [
-                          BoxShadow(
-                            color: theme.primary.withOpacity(0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                  border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
+                  boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      _buildDetailRow(
-                        theme,
-                        translation(context).lbl_date,
-                        widget.date,
-                      ),
+                      _buildDetailRow(theme, translation(context).lbl_date, widget.date),
                       _buildDivider(theme),
-                      _buildDetailRow(
-                        theme,
-                        translation(context).lbl_time,
-                        widget.sessions.time,
-                      ),
+                      _buildDetailRow(theme, translation(context).lbl_time, widget.sessions.time),
                       _buildDivider(theme),
-                      _buildDetailRow(
-                        theme,
-                        translation(context).lbl_topic,
-                        widget.sessions.title,
-                      ),
+                      _buildDetailRow(theme, translation(context).lbl_topic, widget.sessions.title),
                       _buildDivider(theme),
-                      _buildDetailRow(
-                        theme,
-                        translation(context).lbl_meeting_id,
-                        widget.sessions.channel,
-                      ),
+                      _buildDetailRow(theme, translation(context).lbl_meeting_id, widget.sessions.channel),
                     ],
                   ),
                 ),
@@ -124,17 +84,9 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
                 width: double.infinity,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [theme.primary, theme.primary.withOpacity(0.8)],
-                    ),
+                    gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)]),
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.primary.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
                   ),
                   child: Material(
                     color: Colors.transparent,
@@ -144,29 +96,14 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
                         askToJoin(context, widget.sessions.channel)
                             .then((resp) async {
                               print("join response ${jsonEncode(resp.data)}");
-                              Map<String, dynamic> responseData = json.decode(
-                                jsonEncode(resp.data),
-                              );
+                              Map<String, dynamic> responseData = json.decode(jsonEncode(resp.data));
                               if (responseData['success'] == '1') {
-                                await joinMeetings(
-                                  widget.sessions.channel,
-                                ).then((joinMeetingData) {
+                                await joinMeetings(widget.sessions.channel).then((joinMeetingData) {
                                   ProgressDialogUtils.hideProgressDialog();
-                                  VideoCallScreen(
-                                    meetingDetailsModel: joinMeetingData,
-                                    isHost: false,
-                                  ).launch(
-                                    context,
-                                    pageRouteAnimation:
-                                        PageRouteAnimation.Slide,
-                                  );
+                                  VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                                 });
                               } else {
-                                ConnectPusher(
-                                  context,
-                                  responseData['meeting_id'],
-                                  widget.sessions.channel,
-                                );
+                                ConnectPusher(context, responseData['meeting_id'], widget.sessions.channel);
                               }
                             })
                             .catchError((error) {
@@ -181,18 +118,11 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
-                              Icons.videocam_rounded,
-                              color: Colors.white,
-                            ),
+                            const Icon(Icons.videocam_rounded, color: Colors.white),
                             const SizedBox(width: 8),
                             Text(
                               translation(context).lbl_join,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -220,11 +150,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
             flex: 2,
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(fontSize: 16, color: theme.textSecondary, fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(width: 16),
@@ -233,11 +159,7 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16, color: theme.textPrimary, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -276,17 +198,12 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
   void onSubscriptionCount(String channelName, int subscriptionCount) {}
 
   // Authorizer method for Pusher - required to prevent iOS crash
-  Future<dynamic>? onAuthorizer(
-    String channelName,
-    String socketId,
-    dynamic options,
-  ) async {
+  Future<dynamic>? onAuthorizer(String channelName, String socketId, dynamic options) async {
     print("onAuthorizer called for channel: $channelName, socketId: $socketId");
 
     // For public channels (not starting with 'private-' or 'presence-'),
     // return null
-    if (!channelName.startsWith('private-') &&
-        !channelName.startsWith('presence-')) {
+    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
       return null;
     }
 
@@ -313,52 +230,41 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
 
       pusher.connect();
 
-      if (pusher != null) {
-        // Successfully created and connected to Pusher
-        clientListenChannel = await pusher.subscribe(
-          channelName: "meeting-channel$meetingId",
-          onMemberAdded: (member) {
-            // print("Member added: $member");
-          },
-          onMemberRemoved: (member) {
-            print("Member removed: $member");
-          },
-          onEvent: (event) async {
-            String eventName = event.eventName;
-            print(eventName);
-            switch (eventName) {
-              case 'new-user-allowed':
-                await joinMeetings(channel).then((joinMeetingData) {
-                  ProgressDialogUtils.hideProgressDialog();
-                  VideoCallScreen(
-                    meetingDetailsModel: joinMeetingData,
-                    isHost: false,
-                  ).launch(
-                    context,
-                    pageRouteAnimation: PageRouteAnimation.Slide,
-                  );
-                });
-                print("eventName $eventName");
-                toast(translation(context).msg_user_allowed);
-                break;
-              case 'new-user-rejected':
+      // Successfully created and connected to Pusher
+      clientListenChannel = await pusher.subscribe(
+        channelName: "meeting-channel$meetingId",
+        onMemberAdded: (member) {
+          // print("Member added: $member");
+        },
+        onMemberRemoved: (member) {
+          print("Member removed: $member");
+        },
+        onEvent: (event) async {
+          String eventName = event.eventName;
+          print(eventName);
+          switch (eventName) {
+            case 'new-user-allowed':
+              await joinMeetings(channel).then((joinMeetingData) {
                 ProgressDialogUtils.hideProgressDialog();
+                VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              });
+              print("eventName $eventName");
+              toast(translation(context).msg_user_allowed);
+              break;
+            case 'new-user-rejected':
+              ProgressDialogUtils.hideProgressDialog();
 
-                print("eventName $eventName");
-                toast(translation(context).msg_user_rejected);
-                break;
-              default:
-                // Handle unknown event types or ignore them
-                break;
-            }
-          },
-        );
+              print("eventName $eventName");
+              toast(translation(context).msg_user_rejected);
+              break;
+            default:
+              // Handle unknown event types or ignore them
+              break;
+          }
+        },
+      );
 
-        // Attach an event listener to the channel
-      } else {
-        // Handle the case where Pusher connection failed
-        // print("Failed to connect to Pusher");
-      }
+      // Attach an event listener to the channel
     } catch (e) {
       print('eee $e');
     }

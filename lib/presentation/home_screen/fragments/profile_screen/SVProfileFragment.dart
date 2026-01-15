@@ -1,6 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -8,21 +7,19 @@ import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/profile_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../profile/components/SVProfileHeaderComponent.dart';
 import 'bloc/profile_state.dart';
 
 class SVProfileFragment extends StatefulWidget {
-  const SVProfileFragment({this.userId, Key? key}) : super(key: key);
+  const SVProfileFragment({this.userId, super.key});
   final String? userId;
 
   @override
   State<SVProfileFragment> createState() => _SVProfileFragmentState();
 }
 
-class _SVProfileFragmentState extends State<SVProfileFragment>
-    with SingleTickerProviderStateMixin {
+class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTickerProviderStateMixin {
   ProfileBloc profileBloc = ProfileBloc();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -39,19 +36,11 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
     }
 
     // Initialize fade animation for a smoother experience
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
-    );
+    _fadeController = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
-    );
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     super.initState();
   }
 
@@ -64,7 +53,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
       body: BlocConsumer<ProfileBloc, ProfileState>(
@@ -81,11 +70,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
             return FadeTransition(
               opacity: _fadeAnimation,
               child: SizedBox.expand(
-                child: SVProfileHeaderComponent(
-                  userProfile: profileBloc.userProfile,
-                  profileBoc: profileBloc,
-                  isMe: widget.userId == null,
-                ),
+                child: SVProfileHeaderComponent(userProfile: profileBloc.userProfile, profileBoc: profileBloc, isMe: widget.userId == null),
               ),
             );
           } else if (state is DataError) {
@@ -94,13 +79,9 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
               onRetry: () {
                 try {
                   if (widget.userId == null) {
-                    profileBloc.add(
-                      LoadPageEvent(userId: AppData.logInUserId, page: 1),
-                    );
+                    profileBloc.add(LoadPageEvent(userId: AppData.logInUserId, page: 1));
                   } else {
-                    profileBloc.add(
-                      LoadPageEvent(userId: widget.userId, page: 1),
-                    );
+                    profileBloc.add(LoadPageEvent(userId: widget.userId, page: 1));
                   }
                 } catch (e) {
                   debugPrint(e.toString());
@@ -109,10 +90,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
             );
           } else {
             return Center(
-              child: Text(
-                '${translation(context).lbl_unknown_state}: ${state.toString()}',
-                style: TextStyle(color: theme.error),
-              ),
+              child: Text('${translation(context).lbl_unknown_state}: ${state.toString()}', style: TextStyle(color: theme.error)),
             );
           }
         },

@@ -33,11 +33,11 @@ abstract class AppStoreBase with Store {
     try {
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
-      
+
       // Check if user has manually set a theme preference
       final themeSource = await prefs.getString(_themeSourceKey);
       final savedDarkMode = await prefs.getBool(_darkModeKey);
-      
+
       if (themeSource == 'user' && savedDarkMode != null) {
         // User has manually chosen a theme, use their preference
         isUsingSystemTheme = false;
@@ -57,7 +57,7 @@ abstract class AppStoreBase with Store {
       await toggleDarkMode(value: systemIsDark, save: false, isUserChoice: false);
     }
   }
-  
+
   /// Update theme based on system theme change (only if using system theme)
   @action
   Future<void> updateFromSystemTheme() async {
@@ -80,7 +80,7 @@ abstract class AppStoreBase with Store {
         final prefs = SecureStorageService.instance;
         await prefs.initialize();
         await prefs.setBool(_darkModeKey, isDarkMode);
-        
+
         // Mark that user has manually chosen a theme (no longer following system)
         if (isUserChoice) {
           isUsingSystemTheme = false;
@@ -98,7 +98,7 @@ abstract class AppStoreBase with Store {
 
       defaultLoaderBgColorGlobal = Colors.white;
       shadowColorGlobal = Colors.white12;
-      
+
       // Configure edge-to-edge for dark mode
       EdgeToEdgeHelper.configureEdgeToEdgeDark();
     } else {
@@ -108,7 +108,7 @@ abstract class AppStoreBase with Store {
       defaultLoaderBgColorGlobal = Colors.white;
       appButtonBackgroundColorGlobal = SVAppColorPrimary;
       shadowColorGlobal = Colors.black12;
-      
+
       // Configure edge-to-edge for light mode
       EdgeToEdgeHelper.configureEdgeToEdge();
     }
@@ -120,12 +120,12 @@ abstract class AppStoreBase with Store {
     try {
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
-      
+
       // Remove user preference and set to system mode
       await prefs.remove(_themeSourceKey);
       await prefs.remove(_darkModeKey);
       isUsingSystemTheme = true;
-      
+
       // Apply current system theme
       final systemIsDark = _getSystemIsDarkMode();
       await toggleDarkMode(value: systemIsDark, save: false, isUserChoice: false);

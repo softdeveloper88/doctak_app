@@ -3,16 +3,7 @@ import 'package:flutter/material.dart';
 
 /// OneUI 8.5 styled floating action button
 class CustomFloatingButton extends StatelessWidget {
-  const CustomFloatingButton({
-    Key? key,
-    this.alignment,
-    this.backgroundColor,
-    this.onTap,
-    this.width,
-    this.height,
-    this.decoration,
-    this.child,
-  }) : super(key: key);
+  const CustomFloatingButton({super.key, this.alignment, this.backgroundColor, this.onTap, this.width, this.height, this.decoration, this.child});
 
   final Alignment? alignment;
   final Color? backgroundColor;
@@ -26,12 +17,7 @@ class CustomFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return alignment != null
-        ? Align(
-            alignment: alignment ?? Alignment.center,
-            child: _buildFab(theme),
-          )
-        : _buildFab(theme);
+    return alignment != null ? Align(alignment: alignment ?? Alignment.center, child: _buildFab(theme)) : _buildFab(theme);
   }
 
   Widget _buildFab(OneUITheme theme) {
@@ -40,13 +26,7 @@ class CustomFloatingButton extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       onPressed: onTap,
-      child: Container(
-        alignment: Alignment.center,
-        width: width ?? 56,
-        height: height ?? 56,
-        decoration: decoration,
-        child: child,
-      ),
+      child: Container(alignment: Alignment.center, width: width ?? 56, height: height ?? 56, decoration: decoration, child: child),
     );
   }
 }

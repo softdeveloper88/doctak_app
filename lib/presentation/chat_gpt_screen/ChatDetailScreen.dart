@@ -11,14 +11,11 @@ import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
-import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_message_history.dart';
-import 'widgets/card_intro.dart';
-import 'widgets/typing_indicators.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   bool isFromMainScreen;
@@ -84,9 +81,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
       isWriting = false;
       // });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -130,8 +125,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             print('response ${state1.response.toString()}');
 
             // Handle drugs list prompts first
-            if (!widget.isFromMainScreen &&
-                (widget.question?.isNotEmpty ?? false)) {
+            if (!widget.isFromMainScreen && (widget.question?.isNotEmpty ?? false)) {
               // Always show chat UI for drug questions
               isEmpty = false;
 
@@ -155,34 +149,20 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   // Chat history button
                   IconButton(
                     padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                     icon: Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.history_rounded,
-                        color: theme.primary,
-                        size: 16,
-                      ),
+                      decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+                      child: Icon(Icons.history_rounded, color: theme.primary, size: 16),
                     ),
                     onPressed: () {
                       ChatHistoryScreen(
                         onNewSessionTap: () {
                           try {
-                            BlocProvider.of<ChatGPTBloc>(
-                              context,
-                            ).add(GetNewChat());
+                            BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
                             Navigator.of(context).pop();
 
-                            selectedSessionId = BlocProvider.of<ChatGPTBloc>(
-                              context,
-                            ).newChatSessionId;
+                            selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
                           } catch (e) {
                             print(e);
                           }
@@ -192,11 +172,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           isEmptyPage = false;
                           selectedSessionId = session.id;
                           isLoadingMessages = true;
-                          BlocProvider.of<ChatGPTBloc>(context).add(
-                            GetMessages(
-                              sessionId: selectedSessionId.toString(),
-                            ),
-                          );
+                          BlocProvider.of<ChatGPTBloc>(context).add(GetMessages(sessionId: selectedSessionId.toString()));
                           Navigator.of(context).pop();
                         },
                       ).launch(context);
@@ -207,30 +183,16 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     margin: const EdgeInsets.only(right: 16),
                     child: IconButton(
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minWidth: 36,
-                        minHeight: 36,
-                      ),
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       icon: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.green[600],
-                          size: 16,
-                        ),
+                        decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
+                        child: Icon(Icons.add, color: Colors.green[600], size: 16),
                       ),
                       onPressed: () {
                         try {
-                          BlocProvider.of<ChatGPTBloc>(
-                            context,
-                          ).add(GetNewChat());
-                          selectedSessionId = BlocProvider.of<ChatGPTBloc>(
-                            context,
-                          ).newChatSessionId;
+                          BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                          selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
                         } catch (e) {
                           print(e);
                         }
@@ -249,15 +211,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: theme.isDark
-                                ? [
-                                    theme.scaffoldBackground,
-                                    theme.cardBackground,
-                                  ]
-                                : [
-                                    theme.scaffoldBackground,
-                                    theme.primary.withAlpha(13),
-                                  ],
+                            colors: theme.isDark ? [theme.scaffoldBackground, theme.cardBackground] : [theme.scaffoldBackground, theme.primary.withAlpha(13)],
                           ),
                         ),
                         child: SafeArea(
@@ -274,53 +228,23 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   height: 120,
                                   margin: const EdgeInsets.only(bottom: 32),
                                   decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        theme.primary.withOpacity(0.8),
-                                        theme.primary,
-                                      ],
-                                    ),
+                                    gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary.withValues(alpha: 0.8), theme.primary]),
                                     shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: theme.primary.withAlpha(77),
-                                        spreadRadius: 3,
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 8),
-                                      ),
-                                    ],
+                                    boxShadow: [BoxShadow(color: theme.primary.withAlpha(77), spreadRadius: 3, blurRadius: 20, offset: const Offset(0, 8))],
                                   ),
-                                  child: const Center(
-                                    child: Icon(
-                                      Icons.psychology_rounded,
-                                      color: Colors.white,
-                                      size: 60,
-                                    ),
-                                  ),
+                                  child: const Center(child: Icon(Icons.psychology_rounded, color: Colors.white, size: 60)),
                                 ),
 
                                 // Welcome Text
                                 Text(
                                   'Welcome, Doctor!',
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w700,
-                                    fontFamily: 'Poppins',
-                                    color: theme.textPrimary,
-                                  ),
+                                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: theme.textPrimary),
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
                                   'Your AI-powered medical assistant is ready to help with diagnostics, treatments, and medical insights.',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: 'Poppins',
-                                    color: theme.textSecondary,
-                                    height: 1.5,
-                                  ),
+                                  style: TextStyle(fontSize: 16, fontFamily: 'Poppins', color: theme.textSecondary, height: 1.5),
                                 ),
                                 const SizedBox(height: 32),
 
@@ -338,44 +262,28 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       'Identify CPT or ICD codes',
                                       Icons.code_rounded,
                                       Colors.purple,
-                                      () => _executeSuggestion(
-                                        'Code Detection: Identify CPT or ICD codes',
-                                        state1,
-                                        context,
-                                      ),
+                                      () => _executeSuggestion('Code Detection: Identify CPT or ICD codes', state1, context),
                                     ),
                                     _buildSuggestionCard(
                                       'Diagnostic Suggestions',
                                       'Based on symptoms',
                                       Icons.medical_information_rounded,
                                       Colors.green,
-                                      () => _executeSuggestion(
-                                        'Diagnostic Suggestions: Request suggestions based on symptoms',
-                                        state1,
-                                        context,
-                                      ),
+                                      () => _executeSuggestion('Diagnostic Suggestions: Request suggestions based on symptoms', state1, context),
                                     ),
                                     _buildSuggestionCard(
                                       'Drug Information',
                                       'Dosage & interactions',
                                       Icons.medication_rounded,
                                       Colors.orange,
-                                      () => _executeSuggestion(
-                                        'Drug Information: Provide dosage and interaction details',
-                                        state1,
-                                        context,
-                                      ),
+                                      () => _executeSuggestion('Drug Information: Provide dosage and interaction details', state1, context),
                                     ),
                                     _buildSuggestionCard(
                                       'Treatment Plans',
                                       'Evidence-based care',
                                       Icons.healing_rounded,
                                       Colors.blue,
-                                      () => _executeSuggestion(
-                                        'Treatment Plans: Suggest evidence-based treatment options',
-                                        state1,
-                                        context,
-                                      ),
+                                      () => _executeSuggestion('Treatment Plans: Suggest evidence-based treatment options', state1, context),
                                     ),
                                   ],
                                 ),
@@ -386,11 +294,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 Text(
                                   'Ready to start? Type your question below or choose a suggested topic.',
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'Poppins',
-                                    color: theme.textSecondary,
-                                  ),
+                                  style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary),
                                 ),
                                 const SizedBox(height: 10),
                               ],
@@ -405,17 +309,10 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                         controller: _scrollController,
                         itemCount: state1.response1.messages?.length,
                         itemBuilder: (context, index) {
-                          Messages message =
-                              state1.response1.messages?[index] ?? Messages();
+                          Messages message = state1.response1.messages?[index] ?? Messages();
                           return Column(
                             children: [
-                              ChatBubble(
-                                text: message.question ?? '',
-                                isUserMessage: true,
-                                imageUrl1: null,
-                                responseImageUrl1: message.imageUrl1 ?? '',
-                                imageUrl2: null,
-                              ),
+                              ChatBubble(text: message.question ?? '', isUserMessage: true, imageUrl1: null, responseImageUrl1: message.imageUrl1 ?? '', imageUrl2: null),
                               ChatBubble(
                                 text: message.response ?? "",
                                 isUserMessage: false,
@@ -430,8 +327,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   setState(() {
                                     var myMessage = Messages(
                                       id: -1,
-                                      gptSessionId: selectedSessionId
-                                          .toString(),
+                                      gptSessionId: selectedSessionId.toString(),
                                       question: question,
                                       imageUrl1: message.imageUrl1,
                                       response: 'Generating response...',
@@ -541,9 +437,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     isWriting = false;
                                     // });
                                   } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Error: $e')),
-                                    );
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                                   }
                                 },
                                 imageUrl2: null,
@@ -555,12 +449,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     ),
                   Container(
                     color: theme.cardBackground,
-                    padding: EdgeInsets.only(
-                      left: 10.0,
-                      right: 10.0,
-                      top: 10.0,
-                      bottom: MediaQuery.of(context).padding.bottom + 10.0,
-                    ),
+                    padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: MediaQuery.of(context).padding.bottom + 10.0),
                     child: Row(
                       children: [
                         // IconButton(
@@ -625,47 +514,24 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                         Expanded(
                           child: Container(
                             constraints: const BoxConstraints(maxHeight: 200),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: theme.inputBackground,
-                              border: Border.all(
-                                color: theme.primary.withOpacity(0.2),
-                                width: 1,
-                              ),
+                              border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1),
                               borderRadius: BorderRadius.circular(25.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: theme.primary.withOpacity(0.05),
-                                  offset: const Offset(0, 2),
-                                  blurRadius: 8,
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                              boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
                             ),
                             child: TextField(
                               focusNode: focusNode,
                               controller: textController,
                               minLines: 1,
                               maxLines: 4,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'Poppins',
-                                color: theme.textPrimary,
-                              ),
+                              style: TextStyle(fontSize: 16, fontFamily: 'Poppins', color: theme.textPrimary),
                               decoration: InputDecoration(
-                                hintStyle: TextStyle(
-                                  color: theme.textSecondary,
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                ),
+                                hintStyle: TextStyle(color: theme.textSecondary, fontSize: 16, fontFamily: 'Poppins'),
                                 hintText: 'Ask Medical AI...',
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 8),
                               ),
                             ),
                           ),
@@ -797,40 +663,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   isWriting = false;
                                   // });
                                 } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Error: $e')),
-                                  );
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                                 }
                               },
                               child: Container(
                                 width: 48,
                                 height: 48,
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      theme.primary.withOpacity(0.8),
-                                      theme.primary,
-                                    ],
-                                  ),
+                                  gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary.withValues(alpha: 0.8), theme.primary]),
                                   shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.primary.withOpacity(0.3),
-                                      offset: const Offset(0, 2),
-                                      blurRadius: 8,
-                                      spreadRadius: 0,
-                                    ),
-                                  ],
+                                  boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
                                 ),
-                                child: Icon(
-                                  isWriting
-                                      ? Icons.more_horiz
-                                      : Icons.send_rounded,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
+                                child: Icon(isWriting ? Icons.more_horiz : Icons.send_rounded, color: Colors.white, size: 20),
                               ),
                             ),
                           ),
@@ -846,13 +690,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                       direction: Axis.horizontal,
                       directionMarguee: DirectionMarguee.oneDirection,
                       textDirection: TextDirection.ltr,
-                      child: Text(
-                        'Artificial Intelligence can make mistakes. Consider checking important information.',
-                        style: TextStyle(
-                          color: theme.textSecondary,
-                          fontSize: 12,
-                        ),
-                      ),
+                      child: Text('Artificial Intelligence can make mistakes. Consider checking important information.', style: TextStyle(color: theme.textSecondary, fontSize: 12)),
                     ),
                   ),
                 ],
@@ -869,30 +707,18 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   children: [
                     Text(
                       "Error!",
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.red, fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 10),
                     const Text(
                       'Something went wrong.Please try again...',
-                      style: TextStyle(
-                        color: black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(color: black, fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                     MaterialButton(
                       onPressed: () {
                         try {
-                          BlocProvider.of<ChatGPTBloc>(
-                            context,
-                          ).add(GetNewChat());
-                          selectedSessionId = BlocProvider.of<ChatGPTBloc>(
-                            context,
-                          ).newChatSessionId;
+                          BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
+                          selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
 
                           // Session newSession = await createNewChatSession();
                           // setState(() {
@@ -904,13 +730,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                         }
                       },
                       color: appButtonBackgroundColorGlobal,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        "Try Again",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      child: const Text("Try Again", style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -924,32 +745,22 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  onSubscriptionCount(String channelName, int subscriptionCount) {}
+  void onSubscriptionCount(String channelName, int subscriptionCount) {}
 
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-        );
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
       }
     });
   }
 
-  deleteRecord(BuildContext context, int id) {}
+  void deleteRecord(BuildContext context, int id) {}
 
-  editRecord(BuildContext context, int id) {}
+  void editRecord(BuildContext context, int id) {}
 
   // Helper method to build modern suggestion cards
-  Widget _buildSuggestionCard(
-    String title,
-    String subtitle,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
+  Widget _buildSuggestionCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
     final theme = OneUITheme.of(context);
     return InkWell(
       onTap: onTap,
@@ -959,15 +770,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
         decoration: BoxDecoration(
           color: theme.cardBackground,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.withOpacity(0.2), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 12,
-              spreadRadius: 0,
-            ),
-          ],
+          border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
+          boxShadow: [BoxShadow(color: color.withValues(alpha: 0.1), offset: const Offset(0, 4), blurRadius: 12, spreadRadius: 0)],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -975,21 +779,13 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
               child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(height: 12),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -997,11 +793,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: 'Poppins',
-                color: theme.textSecondary,
-              ),
+              style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.textSecondary),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -1013,11 +805,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   }
 
   // Helper method to execute suggestions
-  void _executeSuggestion(
-    String question,
-    dynamic state1,
-    BuildContext context,
-  ) {
+  void _executeSuggestion(String question, dynamic state1, BuildContext context) {
     setState(() {
       isAlreadyAsk = true;
       isEmpty = false;

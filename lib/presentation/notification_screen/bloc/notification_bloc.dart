@@ -1,12 +1,9 @@
 import 'package:bloc/bloc.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/anousment_model/announcement_detail_model.dart';
 import 'package:doctak_app/data/models/anousment_model/announcement_model.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_state.dart';
-import 'package:doctak_app/presentation/notification_screen/notifications_provider.dart';
-import 'package:equatable/equatable.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import '../../../core/utils/app/AppData.dart';
 import '../../../data/models/notification_model/notification_model.dart';
@@ -40,10 +37,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     });
   }
 
-  _onGetNotification(
-    NotificationLoadPageEvent event,
-    Emitter<NotificationState> emit,
-  ) async {
+  Future<void> _onGetNotification(NotificationLoadPageEvent event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());
     if (event.page == 1) {
       print('object clear');
@@ -57,10 +51,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       print('status ${event.readStatus}');
 
       if (event.readStatus == '') {
-        response = await apiManager.getMyNotifications(
-          'Bearer ${AppData.userToken}',
-          '$pageNumber',
-        );
+        response = await apiManager.getMyNotifications('Bearer ${AppData.userToken}', '$pageNumber');
         print(response.toJson());
         numberOfPage = response.notifications?.lastPage ?? 0;
         if (pageNumber < numberOfPage + 1) {
@@ -68,9 +59,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
           notificationsList.addAll(response.notifications?.data ?? []);
         }
       } else if (event.readStatus == 'mark-read') {
-        var response = await apiManager.readAllSelectedNotifications(
-          'Bearer ${AppData.userToken}',
-        );
+        var response = await apiManager.readAllSelectedNotifications('Bearer ${AppData.userToken}');
         // notificationsModel.notifications?.data. where((e)=>e.isRead==1)=0;
         print(response.data);
       }
@@ -87,30 +76,18 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
-  _readNotification(
-    ReadNotificationEvent event,
-    Emitter<NotificationState> emit,
-  ) async {
+  Future<void> _readNotification(ReadNotificationEvent event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());
 
     // ProgressDialogUtils.showProgressDialog();
     try {
-      var response = await apiManager.readNotification(
-        'Bearer ${AppData.userToken}',
-        event.notificationId ?? "",
-      );
+      var response = await apiManager.readNotification('Bearer ${AppData.userToken}', event.notificationId ?? "");
 
       // totalNotifications=notificationsList.where((e)=>e.isRead!=1).length;
       if (totalNotifications > 0) {
         totalNotifications = -1;
 
-        notificationsModel
-                ?.notifications
-                ?.data?[notificationsList.indexWhere(
-                  (e) => e.id.toString() == event.notificationId,
-                )]
-                .isRead =
-            1;
+        notificationsModel?.notifications?.data?[notificationsList.indexWhere((e) => e.id.toString() == event.notificationId)].isRead = 1;
       }
       emit(PaginationLoadedState());
 
@@ -124,10 +101,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
-  _counterNotification(
-    NotificationCounter event,
-    Emitter<NotificationState> emit,
-  ) async {
+  Future<void> _counterNotification(NotificationCounter event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());
 
     // ProgressDialogUtils.showProgressDialog();
@@ -157,10 +131,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         if (response2.statusCode == 200) {
           print("check email verified");
           emailVerified = response2.data['email_verified_at'] ?? "";
-          await prefs.setString(
-            'email_verified_at',
-            response2.data['email_verified_at'] ?? '',
-          );
+          await prefs.setString('email_verified_at', response2.data['email_verified_at'] ?? '');
         } else {
           print("check email verified not");
         }
@@ -182,10 +153,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
-  _getAnnouncement(
-    AnnouncementEvent event,
-    Emitter<NotificationState> emit,
-  ) async {
+  Future<void> _getAnnouncement(AnnouncementEvent event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());
     emit(PaginationLoadingState());
 
@@ -221,10 +189,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
-  _getAnnouncementDetail(
-    AnnouncementDetailEvent event,
-    Emitter<NotificationState> emit,
-  ) async {
+  Future<void> _getAnnouncementDetail(AnnouncementDetailEvent event, Emitter<NotificationState> emit) async {
     // emit(DrugsDataInitial());
     emit(PaginationLoadingState());
 
@@ -258,10 +223,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
-  _onGetJobDetail(
-    NotificationDetailPageEvent event,
-    Emitter<NotificationState> emit,
-  ) async {
+  Future<void> _onGetJobDetail(NotificationDetailPageEvent event, Emitter<NotificationState> emit) async {
     emit(PaginationLoadingState());
     // try {
     // JobDetailModel response = await apiManager.getJobsDetails(
@@ -278,7 +240,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     // }
   }
 
-  _onGetNotification1(GetPost event, Emitter<NotificationState> emit) async {
+  Future<void> _onGetNotification1(GetPost event, Emitter<NotificationState> emit) async {
     // emit(PaginationInitialState());
     // ProgressDialogUtils.showProgressDialog();
 

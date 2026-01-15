@@ -1,10 +1,10 @@
-import 'dart:io';
-
 import 'package:doctak_app/ads_setting/ad_setting.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class NativeAdWidget extends StatefulWidget {
+  const NativeAdWidget({super.key});
+
   @override
   _NativeAdWidgetState createState() => _NativeAdWidgetState();
 }
@@ -12,17 +12,17 @@ class NativeAdWidget extends StatefulWidget {
 class _NativeAdWidgetState extends State<NativeAdWidget> {
   late NativeAd _ad;
   bool _isAdLoaded = false;
- String? adsId;
+  String? adsId;
   @override
   void initState() {
-  adsId=  AdmobSetting.nativeAdUnitId;
-  print('adsId $adsId');
+    adsId = AdmobSetting.nativeAdUnitId;
+    print('adsId $adsId');
     loadAd(adsId);
 
     super.initState();
   }
 
-  flutterNativeAdsShow() {
+  void flutterNativeAdsShow() {
     // TODO: Create a NativeAd instance
     // _ad = NativeAd(
     //   adUnitId: AdmobSetting.nativeAdUnitId,
@@ -74,53 +74,47 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   NativeAd? nativeAd;
   bool _nativeAdIsLoaded = false;
 
-
   /// Loads a native ad.
   void loadAd(String? adsId) {
     _ad = NativeAd(
-        adUnitId: adsId??'',
-        listener: NativeAdListener(
-          onAdLoaded: (ad) {
-            debugPrint('$NativeAd loaded.');
-            setState(() {
-              _nativeAdIsLoaded = true;
-            });
-          },
-          onAdFailedToLoad: (ad, error) {
-            // Dispose the ad here to free resources.
-            debugPrint('$NativeAd failed to load: $error');
-            ad.dispose();
-          },
+      adUnitId: adsId ?? '',
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          debugPrint('$NativeAd loaded.');
+          setState(() {
+            _nativeAdIsLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          // Dispose the ad here to free resources.
+          debugPrint('$NativeAd failed to load: $error');
+          ad.dispose();
+        },
+      ),
+      request: const AdRequest(),
+      // Styling
+      nativeTemplateStyle: NativeTemplateStyle(
+        // Required: Choose a template.
+        templateType: TemplateType.medium,
+        // Optional: Customize the ad's style.
+        // mainBackgroundColor: Colors.purple,
+        cornerRadius: 10.0,
+        callToActionTextStyle: NativeTemplateTextStyle(textColor: Colors.black, backgroundColor: Colors.yellow, style: NativeTemplateFontStyle.monospace, size: 16.0),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          // backgroundColor: Colors.cyan,
+          style: NativeTemplateFontStyle.italic,
+          size: 16.0,
         ),
-        request: const AdRequest(),
-        // Styling
-        nativeTemplateStyle: NativeTemplateStyle(
-            // Required: Choose a template.
-            templateType: TemplateType.medium,
-            // Optional: Customize the ad's style.
-            // mainBackgroundColor: Colors.purple,
-            cornerRadius: 10.0,
-            callToActionTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.black,
-                backgroundColor: Colors.yellow,
-                style: NativeTemplateFontStyle.monospace,
-                size: 16.0),
-            primaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.black,
-                // backgroundColor: Colors.cyan,
-                style: NativeTemplateFontStyle.italic,
-                size: 16.0),
-            secondaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.green,
-                backgroundColor: Colors.black,
-                style: NativeTemplateFontStyle.bold,
-                size: 16.0),
-            tertiaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.brown,
-                // backgroundColor: Colors.amber,
-                style: NativeTemplateFontStyle.normal,
-                size: 16.0)))
-      ..load();
+        secondaryTextStyle: NativeTemplateTextStyle(textColor: Colors.green, backgroundColor: Colors.black, style: NativeTemplateFontStyle.bold, size: 16.0),
+        tertiaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.brown,
+          // backgroundColor: Colors.amber,
+          style: NativeTemplateFontStyle.normal,
+          size: 16.0,
+        ),
+      ),
+    )..load();
   }
 
   @override
@@ -134,10 +128,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
     return _nativeAdIsLoaded
         ? Padding(
             padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              height: 350,
-              child: AdWidget(ad: _ad),
-            ),
+            child: SizedBox(height: 350, child: AdWidget(ad: _ad)),
           )
         : const SizedBox.shrink();
   }

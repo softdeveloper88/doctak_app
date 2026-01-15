@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+
 PostDetailModel postDetailModelFromJson(String str) => PostDetailModel.fromJson(json.decode(str));
 String postDetailModelToJson(PostDetailModel data) => json.encode(data.toJson());
+
 class PostDetailModel {
-  PostDetailModel({
-      this.post,});
+  PostDetailModel({this.post});
 
   PostDetailModel.fromJson(dynamic json) {
     post = json['post'] != null ? Post.fromJson(json['post']) : null;
@@ -19,20 +20,13 @@ class PostDetailModel {
     }
     return map;
   }
-
 }
+
 SpecificComment specificCommentFromJson(String str) => SpecificComment.fromJson(json.decode(str));
 String specificCommentToJson(SpecificComment data) => json.encode(data.toJson());
+
 class SpecificComment {
-  SpecificComment({
-    this.id,
-    this.userId,
-    this.postId,
-    this.comment,
-    this.createdAt,
-    this.updatedAt,
-    this.commenterName,
-    this.commenterProfilePic,});
+  SpecificComment({this.id, this.userId, this.postId, this.comment, this.createdAt, this.updatedAt, this.commenterName, this.commenterProfilePic});
 
   SpecificComment.fromJson(dynamic json) {
     id = json['id'];
@@ -65,5 +59,4 @@ class SpecificComment {
     map['commenterProfilePic'] = commenterProfilePic;
     return map;
   }
-
 }

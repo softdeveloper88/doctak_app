@@ -5,8 +5,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
-import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
-import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -26,36 +24,16 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // on<UpdateFirstDropdownValue>(_listCountryList);
   }
 
-  Future<void> _listCountryList(
-    LoadDropdownData event,
-    Emitter<SplashState> emit,
-  ) async {
+  Future<void> _listCountryList(LoadDropdownData event, Emitter<SplashState> emit) async {
     var firstDropdownValues = await _onGetCountries();
     // Check if countries data was successfully loaded
     if (firstDropdownValues != null) {
       // print("DD ${firstDropdownValues.countries!}");
       firstDropdownValues.countries?.add(
-        Countries(
-          id: -1,
-          countryName: 'Select Country',
-          createdAt: '',
-          updatedAt: '',
-          isRegistered: '',
-          countryCode: '',
-          countryMask: '',
-          currency: '',
-          flag: 'Select Country',
-        ),
+        Countries(id: -1, countryName: 'Select Country', createdAt: '', updatedAt: '', isRegistered: '', countryCode: '', countryMask: '', currency: '', flag: 'Select Country'),
       );
       getNewDeviceToken();
-      emit(
-        CountriesDataLoaded(
-          countriesModel: firstDropdownValues,
-          countryFlag: event.countryFlag,
-          typeValue: event.typeValue,
-          searchTerms: event.searchTerms,
-        ),
-      );
+      emit(CountriesDataLoaded(countriesModel: firstDropdownValues, countryFlag: event.countryFlag, typeValue: event.typeValue, searchTerms: event.searchTerms));
     }
     // If firstDropdownValues is null, _onGetCountries already emitted an error state
     // add(LoadDropdownData(event.newValue,event.typeValue));
@@ -90,7 +68,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     return null;
   }
 
-  getNewDeviceToken() async {
+  Future<void> getNewDeviceToken() async {
     try {
       // Ensure Firebase is initialized before getting token
       if (Firebase.apps.isEmpty) {
@@ -129,12 +107,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           try {
             Response response = await dio.post(
               '${AppData.remoteUrl}/update-token', // Add query parameters
-              data: FormData.fromMap({
-                'device_id': deviceId,
-                'device_type': deviceType,
-                'user_id': AppData.logInUserId,
-                'device_token': token,
-              }),
+              data: FormData.fromMap({'device_id': deviceId, 'device_type': deviceType, 'user_id': AppData.logInUserId, 'device_token': token}),
               options: Options(
                 headers: {
                   'Authorization': 'Bearer ${AppData.userToken}', // Set headers
@@ -188,10 +161,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     }
   }
 
-  Future<void> _listCountryList1(
-    LoadDropdownData1 event,
-    Emitter<SplashState> emit,
-  ) async {
+  Future<void> _listCountryList1(LoadDropdownData1 event, Emitter<SplashState> emit) async {
     try {
       final response = await apiManager
           .getConferenceCountries('Bearer ${AppData.userToken}')
@@ -204,13 +174,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           );
       print(response.data);
       List<dynamic> data = response.data['countries'];
-      emit(
-        CountriesDataLoaded1(
-          countriesModelList: data,
-          countryName: event.countryName,
-          searchTerms: event.searchTerms,
-        ),
-      );
+      emit(CountriesDataLoaded1(countriesModelList: data, countryName: event.countryName, searchTerms: event.searchTerms));
       // add(LoadDropdownData(event.newValue,event.typeValue));
     } catch (e) {
       print('Error loading conference countries: $e');

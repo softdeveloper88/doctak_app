@@ -1,19 +1,13 @@
 import 'dart:convert';
 
-SearchConferenceModel searchConferenceModelFromJson(String str) =>
-    SearchConferenceModel.fromJson(json.decode(str));
-String searchConferenceModelToJson(SearchConferenceModel data) =>
-    json.encode(data.toJson());
+SearchConferenceModel searchConferenceModelFromJson(String str) => SearchConferenceModel.fromJson(json.decode(str));
+String searchConferenceModelToJson(SearchConferenceModel data) => json.encode(data.toJson());
 
 class SearchConferenceModel {
-  SearchConferenceModel({
-    this.conferences,
-  });
+  SearchConferenceModel({this.conferences});
 
   SearchConferenceModel.fromJson(dynamic json) {
-    conferences = json['conferences'] != null
-        ? Conferences.fromJson(json['conferences'])
-        : null;
+    conferences = json['conferences'] != null ? Conferences.fromJson(json['conferences']) : null;
   }
   Conferences? conferences;
 
@@ -26,8 +20,7 @@ class SearchConferenceModel {
   }
 }
 
-Conferences conferencesFromJson(String str) =>
-    Conferences.fromJson(json.decode(str));
+Conferences conferencesFromJson(String str) => Conferences.fromJson(json.decode(str));
 String conferencesToJson(Conferences data) => json.encode(data.toJson());
 
 class Conferences {
@@ -113,11 +106,7 @@ Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
 
 class Links {
-  Links({
-    this.url,
-    this.label,
-    this.active,
-  });
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];

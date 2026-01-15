@@ -4,18 +4,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class CustomPinCodeTextField extends StatelessWidget {
-  CustomPinCodeTextField({
-    Key? key,
-    required this.context,
-    required this.onChanged,
-    this.alignment,
-    this.controller,
-    this.textStyle,
-    this.hintStyle,
-    this.validator,
-  }) : super(
-          key: key,
-        );
+  CustomPinCodeTextField({super.key, required this.context, required this.onChanged, this.alignment, this.controller, this.textStyle, this.hintStyle, this.validator});
 
   final Alignment? alignment;
 
@@ -33,35 +22,28 @@ class CustomPinCodeTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return alignment != null
-        ? Align(
-            alignment: alignment ?? Alignment.center,
-            child: pinCodeTextFieldWidget,
-          )
-        : pinCodeTextFieldWidget;
+    return alignment != null ? Align(alignment: alignment ?? Alignment.center, child: pinCodeTextFieldWidget) : pinCodeTextFieldWidget;
   }
 
   Widget get pinCodeTextFieldWidget => PinCodeTextField(
-        appContext: context,
-        controller: controller,
-        length: 4,
-        keyboardType: TextInputType.number,
-        textStyle: textStyle ?? theme.textTheme.headlineSmall,
-        hintStyle: hintStyle ?? theme.textTheme.headlineSmall,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        pinTheme: PinTheme(
-          fieldHeight: 64,
-          fieldWidth: 64,
-          shape: PinCodeFieldShape.box,
-          borderRadius: BorderRadius.circular(16),
-          selectedColor: theme.colorScheme.primary,
-          selectedFillColor: appTheme.whiteA700,
-          inactiveColor: Colors.transparent,
-          activeColor: Colors.transparent,
-        ),
-        onChanged: (value) => onChanged(value),
-        validator: validator,
-      );
+    appContext: context,
+    controller: controller,
+    length: 4,
+    keyboardType: TextInputType.number,
+    textStyle: textStyle ?? theme.textTheme.headlineSmall,
+    hintStyle: hintStyle ?? theme.textTheme.headlineSmall,
+    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+    pinTheme: PinTheme(
+      fieldHeight: 64,
+      fieldWidth: 64,
+      shape: PinCodeFieldShape.box,
+      borderRadius: BorderRadius.circular(16),
+      selectedColor: theme.colorScheme.primary,
+      selectedFillColor: appTheme.whiteA700,
+      inactiveColor: Colors.transparent,
+      activeColor: Colors.transparent,
+    ),
+    onChanged: (value) => onChanged(value),
+    validator: validator,
+  );
 }

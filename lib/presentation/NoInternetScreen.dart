@@ -6,7 +6,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 
 class NoInternetScreen extends StatefulWidget {
-   NoInternetScreen({super.key});
+  const NoInternetScreen({super.key});
 
   @override
   State<NoInternetScreen> createState() => _NoInternetScreenState();
@@ -16,9 +16,9 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     return WillPopScope(
-      onWillPop: () async{
+      onWillPop: () async {
         return false;
       },
       child: Scaffold(
@@ -31,13 +31,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                 const Spacer(flex: 2),
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: SvgPicture.string(
-                      noCoonectionIllistration,
-                      fit: BoxFit.scaleDown,
-                    ),
-                  ),
+                  child: AspectRatio(aspectRatio: 1, child: SvgPicture.string(noCoonectionIllistration, fit: BoxFit.scaleDown)),
                 ),
                 const Spacer(flex: 2),
                 ErrorInfo(
@@ -45,9 +39,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
                   description: translation(context).msg_no_internet_connection,
                   // button: you can pass your custom button,
                   // btnText: default is retry, you can pass your custom text,
-                  press: () {
-
-                  },
+                  press: () {},
                 ),
               ],
             ),
@@ -59,14 +51,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> {
 }
 
 class ErrorInfo extends StatelessWidget {
-  const ErrorInfo({
-    super.key,
-    required this.title,
-    required this.description,
-    this.button,
-    this.btnText,
-    required this.press,
-  });
+  const ErrorInfo({super.key, required this.title, required this.description, this.button, this.btnText, required this.press});
 
   final String title;
   final String description;
@@ -77,7 +62,7 @@ class ErrorInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     return Center(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
@@ -88,32 +73,24 @@ class ErrorInfo extends StatelessWidget {
           children: [
             Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.textPrimary,
-                  ),
+              style: Theme.of(context).textTheme.headlineSmall!.copyWith(fontWeight: FontWeight.bold, color: theme.textPrimary),
             ),
             const SizedBox(height: 16),
             Text(
               description,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: theme.textSecondary,
-              ),
+              style: TextStyle(color: theme.textSecondary),
             ),
             const SizedBox(height: 16 * 2.5),
             button ??
                 ElevatedButton(
                   onPressed: press,
                   style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(double.infinity, 48),
-                      backgroundColor: theme.primary,
-                      foregroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(12)))),
+                    minimumSize: const Size(double.infinity, 48),
+                    backgroundColor: theme.primary,
+                    foregroundColor: Colors.white,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+                  ),
                   child: Text(btnText ?? translation(context).lbl_retry.toUpperCase()),
                 ),
             const SizedBox(height: 16),
@@ -124,8 +101,7 @@ class ErrorInfo extends StatelessWidget {
   }
 }
 
-const noCoonectionIllistration =
-'''<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+const noCoonectionIllistration = '''<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M495.37 347.17C529.49 305.3 601.8 305.22 636.11 346.94" stroke="#0E0E0E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M572.22 752.17C632.85 752.17 682 707.533 682 652.47C682 597.407 632.85 552.77 572.22 552.77C511.59 552.77 462.44 597.407 462.44 652.47C462.44 707.533 511.59 752.17 572.22 752.17Z" fill="#D3D3D3"/>
 <path d="M661.48 426.87C648.61 485.3 705.2 572.53 710.53 651.73C711.31 783.67 431.53 787.67 431.53 651.73C431.53 579.49 479.87 496.31 469.24 430.06" stroke="#0E0E0E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>

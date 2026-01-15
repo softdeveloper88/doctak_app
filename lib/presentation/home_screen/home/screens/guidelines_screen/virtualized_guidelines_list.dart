@@ -13,15 +13,10 @@ class VirtualizedGuidelinesList extends StatefulWidget {
   final GuidelinesBloc guidelineBloc;
   final ScrollController? scrollController;
 
-  const VirtualizedGuidelinesList({
-    super.key,
-    required this.guidelineBloc,
-    this.scrollController,
-  });
+  const VirtualizedGuidelinesList({super.key, required this.guidelineBloc, this.scrollController});
 
   @override
-  State<VirtualizedGuidelinesList> createState() =>
-      _VirtualizedGuidelinesListState();
+  State<VirtualizedGuidelinesList> createState() => _VirtualizedGuidelinesListState();
 }
 
 class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
@@ -38,9 +33,7 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
   Widget build(BuildContext context) {
     final bloc = widget.guidelineBloc;
 
-    return bloc.guidelinesList.isEmpty
-        ? _buildEmptyState(context)
-        : _buildVirtualizedGuidelinesList();
+    return bloc.guidelinesList.isEmpty ? _buildEmptyState(context) : _buildVirtualizedGuidelinesList();
   }
 
   // Empty state widget with One UI 8.5 styling
@@ -54,31 +47,15 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.primary.withOpacity(0.15),
-                  theme.primary.withOpacity(0.05),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.15), theme.primary.withValues(alpha: 0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(
-              Icons.search_off_rounded,
-              size: 48,
-              color: theme.primary,
-            ),
+            child: Icon(Icons.search_off_rounded, size: 48, color: theme.primary),
           ),
           const SizedBox(height: 16),
           Text(
             translation(context).msg_no_data_found,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: theme.textSecondary,
-            ),
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w500, color: theme.textSecondary),
           ),
         ],
       ),
@@ -91,12 +68,7 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: EdgeInsets.only(
-        top: 10,
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).padding.bottom + 16,
-      ),
+      padding: EdgeInsets.only(top: 10, left: 16, right: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
       itemCount: bloc.guidelinesList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -109,13 +81,11 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
         }
 
         // Show shimmer loader at the bottom if loading more
-        if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-            index >= bloc.guidelinesList.length - 1) {
+        if (bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.guidelinesList.length - 1) {
           return const SizedBox(height: 400, child: GuidelinesShimmerLoader());
         }
         // Show ads every 5 items
-        else if ((index % 5 == 0 && index != 0) &&
-            AppData.isShowGoogleNativeAds) {
+        else if ((index % 5 == 0 && index != 0) && AppData.isShowGoogleNativeAds) {
           return NativeAdWidget();
         }
         // Regular guideline item
@@ -129,16 +99,12 @@ class _VirtualizedGuidelinesListState extends State<VirtualizedGuidelinesList> {
   // Lazy loading guideline item implementation
   Widget _buildLazyLoadGuidelineItem(int index) {
     return VisibilityDetector(
-      key: Key(
-        'guideline_visibility_${widget.guidelineBloc.guidelinesList[index].id}',
-      ),
+      key: Key('guideline_visibility_${widget.guidelineBloc.guidelinesList[index].id}'),
       onVisibilityChanged: (visibilityInfo) {
         final isVisible = visibilityInfo.visibleFraction > 0.1;
         _handleVisibilityChanged(index, isVisible);
       },
-      child: MemoryOptimizedGuidelineItem(
-        guideline: widget.guidelineBloc.guidelinesList[index],
-      ),
+      child: MemoryOptimizedGuidelineItem(guideline: widget.guidelineBloc.guidelinesList[index]),
     );
   }
 

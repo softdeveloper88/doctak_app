@@ -23,20 +23,13 @@ class AnimatedVoiceRecorder extends StatefulWidget {
   final bool shouldStopAndSend;
   final Offset? initialPointerPosition;
 
-  const AnimatedVoiceRecorder({
-    super.key,
-    required this.onStop,
-    required this.onCancel,
-    this.shouldStopAndSend = false,
-    this.initialPointerPosition,
-  });
+  const AnimatedVoiceRecorder({super.key, required this.onStop, required this.onCancel, this.shouldStopAndSend = false, this.initialPointerPosition});
 
   @override
   State<AnimatedVoiceRecorder> createState() => _AnimatedVoiceRecorderState();
 }
 
-class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
-    with TickerProviderStateMixin {
+class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with TickerProviderStateMixin {
   // Audio recorder
   final AudioRecorder _recorder = AudioRecorder();
 
@@ -97,9 +90,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
 
       // Add global pointer route to track movements
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        GestureBinding.instance.pointerRouter.addGlobalRoute(
-          _handleGlobalPointerEvent,
-        );
+        GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
       });
     }
   }
@@ -131,14 +122,8 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
     if (_isDisposed || !_gestureActive || _isLocked || _isCancelling) return;
 
     // Calculate drag distances
-    final horizontal = (_startPosition.dx - currentPosition.dx).clamp(
-      0.0,
-      _cancelThreshold + 60,
-    );
-    final vertical = (_startPosition.dy - currentPosition.dy).clamp(
-      0.0,
-      _lockThreshold + 60,
-    );
+    final horizontal = (_startPosition.dx - currentPosition.dx).clamp(0.0, _cancelThreshold + 60);
+    final vertical = (_startPosition.dy - currentPosition.dy).clamp(0.0, _lockThreshold + 60);
 
     if (_isDisposed) return;
 
@@ -202,9 +187,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
 
   void _removeGlobalPointerListener() {
     try {
-      GestureBinding.instance.pointerRouter.removeGlobalRoute(
-        _handleGlobalPointerEvent,
-      );
+      GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     } catch (e) {
       debugPrint('Error removing global pointer route: $e');
     }
@@ -212,39 +195,20 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
 
   void _initAnimations() {
     // Pulse animation for recording indicator
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
+    _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
 
     // Wave animation for audio visualization
-    _waveController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    )..repeat();
-    _waveAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_waveController);
+    _waveController = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..repeat();
+    _waveAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_waveController);
 
     // Mic button scale animation
-    _micScaleController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    _micScaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(
-      CurvedAnimation(parent: _micScaleController, curve: Curves.elasticOut),
-    );
+    _micScaleController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+    _micScaleAnimation = Tween<double>(begin: 1.0, end: 1.3).animate(CurvedAnimation(parent: _micScaleController, curve: Curves.elasticOut));
     _micScaleController.forward();
 
     // Cancel animation
-    _cancelAnimController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    );
+    _cancelAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
 
     // Start wave simulation
     _startWaveSimulation();
@@ -267,9 +231,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
   void didUpdateWidget(AnimatedVoiceRecorder oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Only auto-send if not locked - when locked, user must tap send button
-    if (widget.shouldStopAndSend &&
-        !oldWidget.shouldStopAndSend &&
-        !_isLocked) {
+    if (widget.shouldStopAndSend && !oldWidget.shouldStopAndSend && !_isLocked) {
       _sendRecording();
     }
   }
@@ -313,18 +275,10 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
 
       // Get temp directory and create file path
       final dir = await getTemporaryDirectory();
-      _recordPath =
-          '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _recordPath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       // Start recording
-      await _recorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-        ),
-        path: _recordPath!,
-      );
+      await _recorder.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000, sampleRate: 44100), path: _recordPath!);
 
       if (mounted) {
         setState(() {
@@ -451,22 +405,9 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
       child: Container(
         decoration: BoxDecoration(
           color: bgColor,
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -3),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, -3))],
         ),
-        padding: EdgeInsets.only(
-          left: 12,
-          right: 12,
-          top: 8,
-          bottom: (keyboardPadding > 0 ? 0 : bottomPadding) + 8,
-        ),
+        padding: EdgeInsets.only(left: 12, right: 12, top: 8, bottom: (keyboardPadding > 0 ? 0 : bottomPadding) + 8),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -474,8 +415,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
             _buildRecordingBar(textColor, subtleColor, isDark),
 
             // Animated lock container (slide up)
-            if (!_isLocked && _verticalDrag > 15)
-              _buildAnimatedLockContainer(bgColor, subtleColor),
+            if (!_isLocked && _verticalDrag > 15) _buildAnimatedLockContainer(bgColor, subtleColor),
 
             // Cancel overlay animation
             if (_isCancelling) _buildCancelOverlay(bgColor),
@@ -499,12 +439,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF262626) : const Color(0xFFF5F7FA),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.2),
-                width: 1,
-              ),
+              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.2), width: 1),
             ),
             child: Row(
               children: [
@@ -521,9 +456,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.red.withOpacity(
-                              0.4 * _pulseAnimation.value,
-                            ),
+                            color: Colors.red.withValues(alpha: 0.4 * _pulseAnimation.value),
                             blurRadius: 6 * _pulseAnimation.value,
                             spreadRadius: 1 * _pulseAnimation.value,
                           ),
@@ -536,22 +469,14 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
                 // Duration
                 Text(
                   _formatDuration(_recordDuration),
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
+                  style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w600, fontFeatures: const [FontFeature.tabularFigures()]),
                 ),
                 const SizedBox(width: 12),
                 // Wave visualization
                 Expanded(child: _buildWaveVisualization()),
                 const SizedBox(width: 8),
                 // Slide to cancel / Cancel button
-                if (_isLocked)
-                  _buildLockedCancelButton()
-                else
-                  _buildSlideToCancel(subtleColor, cancelProgress),
+                if (_isLocked) _buildLockedCancelButton() else _buildSlideToCancel(subtleColor, cancelProgress),
                 const SizedBox(width: 8),
               ],
             ),
@@ -579,7 +504,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
                 width: 2.5,
                 height: 6 + (amplitude * 14),
                 decoration: BoxDecoration(
-                  color: SVAppColorPrimary.withOpacity(0.5 + amplitude * 0.5),
+                  color: SVAppColorPrimary.withValues(alpha: 0.5 + amplitude * 0.5),
                   borderRadius: BorderRadius.circular(1.5),
                 ),
               );
@@ -604,28 +529,13 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
             AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: isCancelNear
-                    ? Colors.red.withOpacity(0.15)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isCancelNear
-                    ? Icons.delete_rounded
-                    : Icons.chevron_left_rounded,
-                color: isCancelNear ? Colors.red : subtleColor,
-                size: 18,
-              ),
+              decoration: BoxDecoration(color: isCancelNear ? Colors.red.withValues(alpha: 0.15) : Colors.transparent, shape: BoxShape.circle),
+              child: Icon(isCancelNear ? Icons.delete_rounded : Icons.chevron_left_rounded, color: isCancelNear ? Colors.red : subtleColor, size: 18),
             ),
             if (cancelProgress < 0.3)
               Text(
                 'Slide',
-                style: TextStyle(
-                  color: subtleColor.withOpacity(0.7),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(color: subtleColor.withValues(alpha: 0.7), fontSize: 11, fontWeight: FontWeight.w500),
               ),
           ],
         ),
@@ -639,10 +549,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -650,11 +557,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
             const SizedBox(width: 4),
             Text(
               'Cancel',
-              style: TextStyle(
-                color: Colors.red.shade400,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Colors.red.shade400, fontSize: 12, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -686,18 +589,12 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: isCancelMode
-                        ? [Colors.red, Colors.red.shade700]
-                        : [
-                            SVAppColorPrimary,
-                            SVAppColorPrimary.withOpacity(0.75),
-                          ],
+                    colors: isCancelMode ? [Colors.red, Colors.red.shade700] : [SVAppColorPrimary, SVAppColorPrimary.withValues(alpha: 0.75)],
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: (isCancelMode ? Colors.red : SVAppColorPrimary)
-                          .withOpacity(_gestureActive ? 0.5 : 0.3),
+                      color: (isCancelMode ? Colors.red : SVAppColorPrimary).withValues(alpha: _gestureActive ? 0.5 : 0.3),
                       blurRadius: _gestureActive ? 16 : 10,
                       offset: const Offset(0, 3),
                       spreadRadius: _gestureActive ? 2 : 0,
@@ -708,12 +605,8 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
-                      isCancelMode
-                          ? Icons.delete_rounded
-                          : (_isLocked ? Icons.send_rounded : Icons.mic),
-                      key: ValueKey(
-                        isCancelMode ? 'delete' : (_isLocked ? 'send' : 'mic'),
-                      ),
+                      isCancelMode ? Icons.delete_rounded : (_isLocked ? Icons.send_rounded : Icons.mic),
+                      key: ValueKey(isCancelMode ? 'delete' : (_isLocked ? 'send' : 'mic')),
                       color: Colors.white,
                       size: 24,
                     ),
@@ -740,38 +633,16 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: lockProgress > 0.7
-                ? SVAppColorPrimary
-                : (appStore.isDarkMode ? Colors.white24 : Colors.grey.shade300),
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: lockProgress > 0.7 ? SVAppColorPrimary : (appStore.isDarkMode ? Colors.white24 : Colors.grey.shade300), width: 2),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 10, offset: const Offset(0, 4))],
         ),
         child: containerHeight > 30
             ? Center(
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: lockProgress > 0.7
-                        ? SVAppColorPrimary.withOpacity(0.2)
-                        : Colors.transparent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    lockProgress > 0.7
-                        ? Icons.lock_rounded
-                        : Icons.lock_open_rounded,
-                    color: lockProgress > 0.7 ? SVAppColorPrimary : subtleColor,
-                    size: 18,
-                  ),
+                  decoration: BoxDecoration(color: lockProgress > 0.7 ? SVAppColorPrimary.withValues(alpha: 0.2) : Colors.transparent, shape: BoxShape.circle),
+                  child: Icon(lockProgress > 0.7 ? Icons.lock_rounded : Icons.lock_open_rounded, color: lockProgress > 0.7 ? SVAppColorPrimary : subtleColor, size: 18),
                 ),
               )
             : const SizedBox.shrink(),
@@ -786,7 +657,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
         builder: (context, _) {
           return Container(
             decoration: BoxDecoration(
-              color: bgColor.withOpacity(0.95 * _cancelAnimController.value),
+              color: bgColor.withValues(alpha: 0.95 * _cancelAnimController.value),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Center(
@@ -798,18 +669,11 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder>
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.15),
+                      color: Colors.red.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.red.withOpacity(0.3),
-                        width: 2,
-                      ),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 2),
                     ),
-                    child: const Icon(
-                      Icons.delete_rounded,
-                      color: Colors.red,
-                      size: 28,
-                    ),
+                    child: const Icon(Icons.delete_rounded, color: Colors.red, size: 28),
                   ),
                 ),
               ),

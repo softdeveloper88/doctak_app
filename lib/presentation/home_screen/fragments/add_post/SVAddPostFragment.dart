@@ -4,10 +4,8 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,8 +20,7 @@ import 'components/SVPostTextComponent.dart';
 import 'components/others_feature_component.dart';
 
 class SVAddPostFragment extends StatefulWidget {
-  SVAddPostFragment({required this.refresh, this.addPostBloc, Key? key})
-    : super(key: key);
+  const SVAddPostFragment({required this.refresh, this.addPostBloc, super.key});
   final Function refresh;
   final AddPostBloc? addPostBloc;
 
@@ -31,8 +28,7 @@ class SVAddPostFragment extends StatefulWidget {
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
 
-class _SVAddPostFragmentState extends State<SVAddPostFragment>
-    with WidgetsBindingObserver {
+class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindingObserver {
   String image = '';
 
   List<String> colorListHex = [
@@ -60,9 +56,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
 
   void changeColor() {
     setState(() {
-      currentColor = _hexToColor(
-        colorListHex[random.nextInt(colorListHex.length)],
-      );
+      currentColor = _hexToColor(colorListHex[random.nextInt(colorListHex.length)]);
       currentSetColor = colorListHex[random.nextInt(colorListHex.length)];
       searchPeopleBloc.backgroundColor = currentSetColor;
     });
@@ -88,9 +82,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    setStatusBarColor(
-      appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground,
-    );
+    setStatusBarColor(appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground);
     _postTextController.dispose();
     // Close the bloc if this widget created it
     if (_createdBloc) {
@@ -114,9 +106,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
       if (mounted) {
         setState(() {
           // This will trigger a rebuild with updated images
-          print(
-            'SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files',
-          );
+          print('SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files');
         });
       }
     }
@@ -168,10 +158,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                   Map<String, dynamic> jsonMap = json.decode(state.message);
 
                   // Helper function to extract message from response
-                  String extractMessage(
-                    dynamic messageData,
-                    String defaultMsg,
-                  ) {
+                  String extractMessage(dynamic messageData, String defaultMsg) {
                     if (messageData == null) return defaultMsg;
                     if (messageData is String) return messageData;
                     if (messageData is List && messageData.isNotEmpty) {
@@ -181,10 +168,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                   }
 
                   if (jsonMap['success'] == true) {
-                    final message = extractMessage(
-                      jsonMap['message'],
-                      'Post created successfully!',
-                    );
+                    final message = extractMessage(jsonMap['message'], 'Post created successfully!');
                     showToast(message);
                     print('Success: $message');
 
@@ -212,10 +196,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                       }
                     });
                   } else {
-                    final errorMsg = extractMessage(
-                      jsonMap['message'],
-                      'Failed to create post',
-                    );
+                    final errorMsg = extractMessage(jsonMap['message'], 'Failed to create post');
                     showToast(errorMsg);
                     print('Error: $errorMsg');
                   }
@@ -258,19 +239,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   elevation: 0,
                 ),
-                child: Text(
-                  translation(context).lbl_post,
-                  style: theme.buttonText,
-                ),
+                child: Text(translation(context).lbl_post, style: theme.buttonText),
               ),
             ),
           ),
@@ -292,15 +265,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                           height: 48,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: theme.avatarBorder,
-                              width: 2,
-                            ),
+                            border: Border.all(color: theme.avatarBorder, width: 2),
                             boxShadow: [
                               BoxShadow(
-                                color: theme.primary.withOpacity(
-                                  theme.isDark ? 0.2 : 0.1,
-                                ),
+                                color: theme.primary.withValues(alpha: theme.isDark ? 0.2 : 0.1),
                                 spreadRadius: 1,
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
@@ -310,28 +278,17 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(24),
                             child: CachedNetworkImage(
-                              imageUrl:
-                                  "${AppData.imageUrl}${AppData.profile_pic.validate()}",
+                              imageUrl: "${AppData.imageUrl}${AppData.profile_pic.validate()}",
                               height: 48,
                               width: 48,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 color: theme.avatarBackground,
-                                child: Center(
-                                  child: CupertinoActivityIndicator(
-                                    color: theme.primary,
-                                  ),
-                                ),
+                                child: Center(child: CupertinoActivityIndicator(color: theme.primary)),
                               ),
                               errorWidget: (context, url, error) => Container(
                                 color: theme.avatarBackground,
-                                child: Center(
-                                  child: Icon(
-                                    CupertinoIcons.person_fill,
-                                    color: theme.avatarText,
-                                    size: 22,
-                                  ),
-                                ),
+                                child: Center(child: Icon(CupertinoIcons.person_fill, color: theme.avatarText, size: 22)),
                               ),
                             ),
                           ),
@@ -341,19 +298,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                AppData.name,
-                                style: theme.titleSmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              Text(AppData.name, style: theme.titleSmall, maxLines: 1, overflow: TextOverflow.ellipsis),
                               const SizedBox(height: 2),
-                              Text(
-                                capitalizeWords(AppData.specialty),
-                                style: theme.bodySecondary,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              Text(capitalizeWords(AppData.specialty), style: theme.bodySecondary, maxLines: 1, overflow: TextOverflow.ellipsis),
                             ],
                           ),
                         ),
@@ -361,26 +308,14 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                     ),
                   ),
                   // Post Text Input Section
-                  SVPostTextComponent(
-                    textController: _postTextController,
-                    onColorChange: changeColor,
-                    colorValue: currentColor,
-                    searchPeopleBloc: searchPeopleBloc,
-                  ),
+                  SVPostTextComponent(textController: _postTextController, onColorChange: changeColor, colorValue: currentColor, searchPeopleBloc: searchPeopleBloc),
                   // Tag Friends Section - Full Width
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    child: OtherFeatureComponent(
-                      onColorChange: changeColor,
-                      colorValue: currentColor,
-                      searchPeopleBloc: searchPeopleBloc,
-                    ),
+                    child: OtherFeatureComponent(onColorChange: changeColor, colorValue: currentColor, searchPeopleBloc: searchPeopleBloc),
                   ),
                   // Media Options Section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    child: SVPostOptionsComponent(searchPeopleBloc),
-                  ),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4), child: SVPostOptionsComponent(searchPeopleBloc)),
                   const SizedBox(height: 24),
                 ],
               ),

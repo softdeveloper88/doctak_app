@@ -6,7 +6,6 @@ import 'package:doctak_app/core/utils/secure_storage_service.dart';
 class PrefUtils {
   static SecureStorageService? _secureStorage;
   static String _cachedTheme = 'primary';
-  static bool _isInitialized = false;
 
   PrefUtils() {
     // init();
@@ -24,7 +23,6 @@ class PrefUtils {
     } catch (e) {
       _cachedTheme = 'primary';
     }
-    _isInitialized = true;
     print('SecureStorage Initialized');
   }
 

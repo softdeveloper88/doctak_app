@@ -43,12 +43,7 @@ class CustomImageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return alignment != null
-        ? Align(
-            alignment: alignment!,
-            child: _buildWidget(),
-          )
-        : _buildWidget();
+    return alignment != null ? Align(alignment: alignment!, child: _buildWidget()) : _buildWidget();
   }
 
   Widget _buildWidget() {
@@ -57,35 +52,26 @@ class CustomImageView extends StatelessWidget {
       child: onTap != null
           ? Material(
               color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap,
-                child: _buildCircleImage(),
-              ),
+              child: InkWell(onTap: onTap, child: _buildCircleImage()),
             )
           : _buildCircleImage(),
     );
   }
 
   ///build the image with border radius
-  _buildCircleImage() {
+  dynamic _buildCircleImage() {
     if (radius != null) {
-      return ClipRRect(
-        borderRadius: radius ?? BorderRadius.zero,
-        child: _buildImageWithBorder(),
-      );
+      return ClipRRect(borderRadius: radius ?? BorderRadius.zero, child: _buildImageWithBorder());
     } else {
       return _buildImageWithBorder();
     }
   }
 
   ///build the image with border and border radius style
-  _buildImageWithBorder() {
+  Widget _buildImageWithBorder() {
     if (border != null) {
       return Container(
-        decoration: BoxDecoration(
-          border: border,
-          borderRadius: radius,
-        ),
+        decoration: BoxDecoration(border: border, borderRadius: radius),
         child: _buildImageView(),
       );
     } else {
@@ -105,8 +91,7 @@ class CustomImageView extends StatelessWidget {
               // height: height,
               width: width,
               fit: fit ?? BoxFit.contain,
-              colorFilter: ColorFilter.mode(
-                  color ?? Colors.transparent, BlendMode.srcIn),
+              colorFilter: ColorFilter.mode(color ?? Colors.transparent, BlendMode.srcIn),
             ),
           );
         case ImageType.file:
@@ -133,18 +118,14 @@ class CustomImageView extends StatelessWidget {
               'Cache-Control': 'no-cache',
             },
             placeholder: (context, url) => Center(
-                child: SizedBox(
-               height: height??300,
-               width: 60,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Colors.grey[300],
-                  strokeWidth: 8,
-                  strokeCap: StrokeCap.round,
-                  backgroundColor: Colors.white,
+              child: SizedBox(
+                height: height ?? 300,
+                width: 60,
+                child: Center(
+                  child: CircularProgressIndicator(color: Colors.grey[300], strokeWidth: 8, strokeCap: StrokeCap.round, backgroundColor: Colors.white),
                 ),
               ),
-            )),
+            ),
             // errorWidget: (context, url,error) =>  Center(
             //   child: SizedBox(
             //     height: 60,
@@ -162,47 +143,36 @@ class CustomImageView extends StatelessWidget {
               print('🚨 CustomImageView load error for URL: $url');
               print('🚨 Error details: $error');
               print('🚨 Error type: ${error.runtimeType}');
-              
+
               // Check if it's actually a video file being loaded as image
               final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
               final lowerUrl = url.toLowerCase();
               final isVideoFile = videoExtensions.any((ext) => lowerUrl.endsWith(ext));
-              
+
               if (isVideoFile) {
                 print('⚠️ WARNING: Attempting to load video file as image: $url');
                 print('💡 SOLUTION: Use VideoPlayerWidget instead of CustomImageView for video files');
-                
+
                 return Container(
                   width: width,
                   height: height,
-                  decoration: BoxDecoration(
-                    color: Colors.orange[100],
-                    borderRadius: radius,
-                  ),
+                  decoration: BoxDecoration(color: Colors.orange[100], borderRadius: radius),
                   child: const Stack(
                     alignment: Alignment.center,
                     children: [
-                      Icon(
-                        Icons.warning_amber_rounded,
-                        color: Colors.orange,
-                        size: 32,
-                      ),
+                      Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 32),
                       Positioned(
                         bottom: 8,
                         child: Text(
                           'VIDEO FILE',
-                          style: TextStyle(
-                            color: Colors.orange,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
                 );
               }
-              
+
               return Image.asset(
                 placeHolder,
                 // height: height,
@@ -249,7 +219,7 @@ class CustomImageView extends StatelessWidget {
           //     ],
           //   ),
           // );
-        return  VideoPlayerWidget(videoUrl: imagePath!,);
+          return VideoPlayerWidget(videoUrl: imagePath!);
         case ImageType.png:
         default:
           return Image.asset(
@@ -271,13 +241,13 @@ extension ImageTypeExtension on String {
       // Check if it's a video file
       final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
       final lowerPath = toLowerCase();
-      
+
       for (String ext in videoExtensions) {
         if (lowerPath.endsWith(ext)) {
           return ImageType.video;
         }
       }
-      
+
       return ImageType.network;
     } else if (endsWith('.svg')) {
       return ImageType.svg;

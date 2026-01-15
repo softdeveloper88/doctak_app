@@ -52,8 +52,7 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
 
     final bloc = widget.chatBloc;
     final message = bloc.messagesList[index];
-    final isLastOfOwnMessage = index == bloc.messagesList.length - 1 ||
-        bloc.messagesList[index].userId != bloc.messagesList[index + 1].userId;
+    final isLastOfOwnMessage = index == bloc.messagesList.length - 1 || bloc.messagesList[index].userId != bloc.messagesList[index + 1].userId;
 
     final messageWidget = InkWell(
       onLongPress: () {
@@ -73,9 +72,7 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
         }
       },
       child: Padding(
-        padding: EdgeInsets.only(
-          top: isLastOfOwnMessage ? 16 : 8,
-        ),
+        padding: EdgeInsets.only(top: isLastOfOwnMessage ? 16 : 8),
         child: VisibilityDetector(
           key: Key('message_$index'),
           onVisibilityChanged: (info) {
@@ -93,8 +90,8 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
             profile: message.userId == widget.userId
                 ? "${AppData.imageUrl}${AppData.profile_pic}"
                 : widget.profilePic.startsWith('http')
-                    ? widget.profilePic
-                    : "${AppData.imageUrl}${widget.profilePic}",
+                ? widget.profilePic
+                : "${AppData.imageUrl}${widget.profilePic}",
             message: message.body ?? '',
             isMe: message.userId == widget.userId ? true : false,
             attachmentJson: message.attachment,
@@ -135,9 +132,7 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
     return CustomScrollView(
       controller: widget.scrollController,
       reverse: true,
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       slivers: [
         // Messages
         SliverPadding(
@@ -150,22 +145,14 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
                   if (index == bloc.messagesList.length - bloc.messageNextPageTrigger) {
                     // Schedule pagination after build
                     SchedulerBinding.instance.addPostFrameCallback((_) {
-                      bloc.add(CheckIfNeedMoreMessageDataEvent(
-                        index: index,
-                        userId: AppData.logInUserId,
-                        roomId: widget.roomId.isEmpty ? widget.chatBloc.roomId! : widget.roomId,
-                      ));
+                      bloc.add(CheckIfNeedMoreMessageDataEvent(index: index, userId: AppData.logInUserId, roomId: widget.roomId.isEmpty ? widget.chatBloc.roomId! : widget.roomId));
                     });
                   }
                 }
 
                 // Show loader at the end
-                if (bloc.messageNumberOfPage != bloc.messagePageNumber - 1 &&
-                    index >= bloc.messagesList.length - 1) {
-                  return SizedBox(
-                    height: 100,
-                    child: ChatShimmerLoader(),
-                  );
+                if (bloc.messageNumberOfPage != bloc.messagePageNumber - 1 && index >= bloc.messagesList.length - 1) {
+                  return SizedBox(height: 100, child: ChatShimmerLoader());
                 }
 
                 return _buildMessage(index);
@@ -177,16 +164,14 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
             ),
           ),
         ),
-        
+
         // Typing indicator
         if (widget.isSomeoneTyping && widget.fromId != widget.userId)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
               child: ChatBubble(
-                profile: widget.profilePic.startsWith('http')
-                    ? widget.profilePic
-                    : "${AppData.imageUrl}${widget.profilePic}",
+                profile: widget.profilePic.startsWith('http') ? widget.profilePic : "${AppData.imageUrl}${widget.profilePic}",
                 isMe: false,
                 attachmentJson: null,
                 attachmentType: null,

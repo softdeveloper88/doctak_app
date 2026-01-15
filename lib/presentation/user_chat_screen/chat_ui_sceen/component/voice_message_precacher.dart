@@ -5,12 +5,8 @@ import 'audio_cache_manager.dart';
 class VoiceMessagePrecacher extends StatefulWidget {
   final String audioUrl;
   final Widget child;
-  
-  const VoiceMessagePrecacher({
-    Key? key,
-    required this.audioUrl,
-    required this.child,
-  }) : super(key: key);
+
+  const VoiceMessagePrecacher({super.key, required this.audioUrl, required this.child});
 
   @override
   State<VoiceMessagePrecacher> createState() => _VoiceMessagePrecacherState();
@@ -22,9 +18,9 @@ class _VoiceMessagePrecacherState extends State<VoiceMessagePrecacher> {
 
   Future<void> _precacheAudio() async {
     if (_hasPrecached) return;
-    
+
     _hasPrecached = true;
-    
+
     // Pre-cache the audio file in the background
     try {
       debugPrint('Pre-caching audio: ${widget.audioUrl}');

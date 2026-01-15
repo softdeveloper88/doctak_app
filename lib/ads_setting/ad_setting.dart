@@ -13,16 +13,13 @@ class AdmobSetting {
   /// Keep track of load time so we don't show an expired ad.
   DateTime? _appOpenLoadTime;
 
-  String adOpenUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/3419835294'
-      : 'not set for ios';
+  String adOpenUnitId = Platform.isAndroid ? 'ca-app-pub-3940256099942544/3419835294' : 'not set for ios';
 
   static String get bannerUnit {
     print("banner adsId ${AppData.androidBannerAdsId}");
     if (Platform.isAndroid) {
       // return 'ca-app-pub-3940256099942544/6300978111';
-      return AppData.androidBannerAdsId ??
-          'ca-app-pub-3940256099942544/6300978111';
+      return AppData.androidBannerAdsId ?? 'ca-app-pub-3940256099942544/6300978111';
     } else if (Platform.isIOS) {
       return AppData.iosBannerAdsId ?? 'ca-app-pub-3940256099942544/2934735716';
       // return 'ca-app-pub-3940256099942544/2934735716';
@@ -33,8 +30,7 @@ class AdmobSetting {
   static String get nativeAdUnitId {
     if (Platform.isAndroid) {
       print('native ads constant ${AppData.androidNativeAdsId}');
-      return AppData.androidNativeAdsId ??
-          'ca-app-pub-3940256099942544/2247696110';
+      return AppData.androidNativeAdsId ?? 'ca-app-pub-3940256099942544/2247696110';
     } else if (Platform.isIOS) {
       return AppData.iosNativeAdsId ?? 'ca-app-pub-3940256099942544/3986624511';
     }
@@ -84,11 +80,7 @@ class AdmobSetting {
   InterstitialAd? _interstitialAd;
   int num_of_attempt_load = 0;
 
-  static initialization() {
-    if (MobileAds.instance == null) {
-      MobileAds.instance.initialize();
-    }
-  }
+  static void initialization() {}
 
   static BannerAd getBannerAds() {
     BannerAd bAd = BannerAd(
@@ -138,11 +130,7 @@ class AdmobSetting {
     );
   }
 
-  void createInterstitialAdsButton(
-    int screen,
-    BuildContext context,
-    SecureStorageService prefs,
-  ) {
+  void createInterstitialAdsButton(int screen, BuildContext context, SecureStorageService prefs) {
     debugPrint("createInterstitialAds");
     if (_interstitialAd == null) {
       // showInterstitialAds(screen, context);
@@ -174,11 +162,7 @@ class AdmobSetting {
   }
 
   // show interstitial ads to Navigation time
-  void showInterstitialAds(
-    int screen,
-    BuildContext context,
-    SecureStorageService prefs,
-  ) {
+  void showInterstitialAds(int screen, BuildContext context, SecureStorageService prefs) {
     if (_interstitialAd == null) {
       // navigateScreenRequired(screen, context, prefs);
       return;
@@ -190,10 +174,7 @@ class AdmobSetting {
       },
       onAdDismissedFullScreenContent: (InterstitialAd ad) {
         debugPrint("ad Disposed");
-        SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.manual,
-          overlays: SystemUiOverlay.values,
-        );
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
 
         // navigateScreenRequired(screen, context, prefs);
         ad.dispose();

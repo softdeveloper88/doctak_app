@@ -18,19 +18,13 @@ class WhatsAppVoiceRecorder extends StatefulWidget {
   final VoidCallback onCancel;
   final bool shouldStopAndSend;
 
-  const WhatsAppVoiceRecorder({
-    super.key,
-    required this.onStop,
-    required this.onCancel,
-    this.shouldStopAndSend = false,
-  });
+  const WhatsAppVoiceRecorder({super.key, required this.onStop, required this.onCancel, this.shouldStopAndSend = false});
 
   @override
   State<WhatsAppVoiceRecorder> createState() => _WhatsAppVoiceRecorderState();
 }
 
-class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
-    with TickerProviderStateMixin {
+class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder> with TickerProviderStateMixin {
   // Audio recorder
   final AudioRecorder _recorder = AudioRecorder();
 
@@ -72,15 +66,9 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
   }
 
   void _initAnimations() {
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1000),
-    )..repeat(reverse: true);
+    _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat(reverse: true);
 
-    _cancelAnimController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    );
+    _cancelAnimController = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
   }
 
   @override
@@ -128,18 +116,10 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
 
       // Get temp directory and create file path
       final dir = await getTemporaryDirectory();
-      _recordPath =
-          '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _recordPath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
       // Start recording
-      await _recorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-        ),
-        path: _recordPath!,
-      );
+      await _recorder.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000, sampleRate: 44100), path: _recordPath!);
 
       if (mounted) {
         setState(() {
@@ -369,13 +349,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
         padding: EdgeInsets.only(bottom: bottomPadding > 0 ? bottomPadding : 8),
         decoration: BoxDecoration(
           color: bgColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 10, offset: const Offset(0, -2))],
         ),
         child: Stack(
           clipBehavior: Clip.none,
@@ -407,11 +381,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
       child: Row(
         children: [
           // Left side: Cancel area
-          Expanded(
-            child: _isLocked
-                ? _buildLockedCancelButton()
-                : _buildSlideToCancel(subtleColor),
-          ),
+          Expanded(child: _isLocked ? _buildLockedCancelButton() : _buildSlideToCancel(subtleColor)),
 
           // Center: Duration display
           _buildDurationDisplay(textColor),
@@ -420,12 +390,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (!_isLocked) _buildLockHint(subtleColor),
-                if (_isLocked) _buildSendButton(),
-                const SizedBox(width: 8),
-                _buildMicButton(),
-              ],
+              children: [if (!_isLocked) _buildLockHint(subtleColor), if (_isLocked) _buildSendButton(), const SizedBox(width: 8), _buildMicButton()],
             ),
           ),
         ],
@@ -451,19 +416,8 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                   child: Container(
                     width: 32,
                     height: 32,
-                    decoration: BoxDecoration(
-                      color: cancelProgress > 0.5
-                          ? Colors.red.withOpacity(0.15)
-                          : Colors.transparent,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      cancelProgress > 0.5
-                          ? Icons.delete_rounded
-                          : Icons.chevron_left_rounded,
-                      color: cancelProgress > 0.5 ? Colors.red : subtleColor,
-                      size: 22,
-                    ),
+                    decoration: BoxDecoration(color: cancelProgress > 0.5 ? Colors.red.withValues(alpha: 0.15) : Colors.transparent, shape: BoxShape.circle),
+                    child: Icon(cancelProgress > 0.5 ? Icons.delete_rounded : Icons.chevron_left_rounded, color: cancelProgress > 0.5 ? Colors.red : subtleColor, size: 22),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -471,13 +425,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                 AnimatedOpacity(
                   opacity: cancelProgress > 0.3 ? 0.0 : 1.0,
                   duration: const Duration(milliseconds: 150),
-                  child: Text(
-                    'Slide to cancel',
-                    style: TextStyle(
-                      color: subtleColor,
-                      fontSize: 13,
-                    ),
-                  ),
+                  child: Text('Slide to cancel', style: TextStyle(color: subtleColor, fontSize: 13)),
                 ),
               ],
             ),
@@ -493,10 +441,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -504,11 +449,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
             SizedBox(width: 6),
             Text(
               'Cancel',
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -533,12 +474,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                 decoration: BoxDecoration(
                   color: Colors.red,
                   shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.red.withOpacity(0.4),
-                      blurRadius: 6,
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: Colors.red.withValues(alpha: 0.4), blurRadius: 6)],
                 ),
               ),
             );
@@ -547,12 +483,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
         const SizedBox(width: 10),
         Text(
           _formatDuration(_recordDuration),
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
+          style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600, fontFeatures: const [FontFeature.tabularFigures()]),
         ),
       ],
     );
@@ -579,21 +510,9 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                   children: [
                     Transform.scale(
                       scale: 1.0 + lockProgress * 0.2,
-                      child: Icon(
-                        lockProgress > 0.5
-                            ? Icons.lock_rounded
-                            : Icons.keyboard_arrow_up_rounded,
-                        color: lockProgress > 0.5
-                            ? SVAppColorPrimary
-                            : subtleColor,
-                        size: 18,
-                      ),
+                      child: Icon(lockProgress > 0.5 ? Icons.lock_rounded : Icons.keyboard_arrow_up_rounded, color: lockProgress > 0.5 ? SVAppColorPrimary : subtleColor, size: 18),
                     ),
-                    if (lockProgress < 0.5)
-                      Text(
-                        'Lock',
-                        style: TextStyle(color: subtleColor, fontSize: 10),
-                      ),
+                    if (lockProgress < 0.5) Text('Lock', style: TextStyle(color: subtleColor, fontSize: 10)),
                   ],
                 ),
               ),
@@ -610,10 +529,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: SVAppColorPrimary,
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(color: SVAppColorPrimary, borderRadius: BorderRadius.circular(20)),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -621,11 +537,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
             SizedBox(width: 6),
             Text(
               'Send',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ],
         ),
@@ -657,30 +569,12 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: isCancelMode
-                          ? [Colors.red, Colors.red.shade700]
-                          : [
-                              SVAppColorPrimary,
-                              SVAppColorPrimary.withOpacity(0.8)
-                            ],
+                      colors: isCancelMode ? [Colors.red, Colors.red.shade700] : [SVAppColorPrimary, SVAppColorPrimary.withValues(alpha: 0.8)],
                     ),
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: (isCancelMode ? Colors.red : SVAppColorPrimary)
-                            .withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: (isCancelMode ? Colors.red : SVAppColorPrimary).withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))],
                   ),
-                  child: Icon(
-                    isCancelMode
-                        ? Icons.delete_rounded
-                        : (_isLocked ? Icons.stop_rounded : Icons.mic),
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: Icon(isCancelMode ? Icons.delete_rounded : (_isLocked ? Icons.stop_rounded : Icons.mic), color: Colors.white, size: 24),
                 ),
               ),
             );
@@ -690,8 +584,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
     );
   }
 
-  Widget _buildFloatingLockIndicator(
-      double vDrag, Color bgColor, Color subtleColor) {
+  Widget _buildFloatingLockIndicator(double vDrag, Color bgColor, Color subtleColor) {
     final lockProgress = (vDrag / _lockThreshold).clamp(0.0, 1.0);
 
     return Positioned(
@@ -706,27 +599,10 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
           decoration: BoxDecoration(
             color: lockProgress > 0.7 ? SVAppColorPrimary : bgColor,
             shape: BoxShape.circle,
-            border: Border.all(
-              color: lockProgress > 0.7
-                  ? SVAppColorPrimary
-                  : (appStore.isDarkMode
-                      ? Colors.white24
-                      : Colors.grey.shade300),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: lockProgress > 0.7 ? SVAppColorPrimary : (appStore.isDarkMode ? Colors.white24 : Colors.grey.shade300), width: 2),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
           ),
-          child: Icon(
-            Icons.lock_rounded,
-            color: lockProgress > 0.7 ? Colors.white : subtleColor,
-            size: 20,
-          ),
+          child: Icon(Icons.lock_rounded, color: lockProgress > 0.7 ? Colors.white : subtleColor, size: 20),
         ),
       ),
     );
@@ -738,7 +614,7 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
         animation: _cancelAnimController,
         builder: (context, _) {
           return Container(
-            color: bgColor.withOpacity(0.95 * _cancelAnimController.value),
+            color: bgColor.withValues(alpha: 0.95 * _cancelAnimController.value),
             child: Center(
               child: Transform.scale(
                 scale: 0.5 + _cancelAnimController.value * 0.5,
@@ -747,15 +623,8 @@ class _WhatsAppVoiceRecorderState extends State<WhatsAppVoiceRecorder>
                   child: Container(
                     width: 56,
                     height: 56,
-                    decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.delete_rounded,
-                      color: Colors.red,
-                      size: 28,
-                    ),
+                    decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.15), shape: BoxShape.circle),
+                    child: const Icon(Icons.delete_rounded, color: Colors.red, size: 28),
                   ),
                 ),
               ),

@@ -10,27 +10,15 @@ class ScreenShareService {
   factory ScreenShareService() => _instance;
   ScreenShareService._internal();
 
-  static const MethodChannel _channel = MethodChannel(
-    'com.doctak.app/screen_share',
-  );
+  static const MethodChannel _channel = MethodChannel('com.doctak.app/screen_share');
 
   /// Save the Agora configuration to the App Group for the Broadcast Extension
   /// Call this when joining a channel before the user can start screen sharing
-  Future<bool> saveChannelConfig({
-    required String appId,
-    required String channelName,
-    String? token,
-    int uid = 0,
-  }) async {
+  Future<bool> saveChannelConfig({required String appId, required String channelName, String? token, int uid = 0}) async {
     if (!Platform.isIOS) return true; // Only needed for iOS
 
     try {
-      final result = await _channel.invokeMethod<bool>('saveChannelConfig', {
-        'appId': appId,
-        'channelName': channelName,
-        'token': token ?? '',
-        'uid': uid,
-      });
+      final result = await _channel.invokeMethod<bool>('saveChannelConfig', {'appId': appId, 'channelName': channelName, 'token': token ?? '', 'uid': uid});
       debugPrint('📺 ScreenShareService: Saved channel config: $channelName');
       return result ?? false;
     } catch (e) {

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-ChatGptSession chatGptSessionFromJson(String str) =>
-    ChatGptSession.fromJson(json.decode(str));
+ChatGptSession chatGptSessionFromJson(String str) => ChatGptSession.fromJson(json.decode(str));
 String chatGptSessionToJson(ChatGptSession data) => json.encode(data.toJson());
 
 class ChatGptSession {

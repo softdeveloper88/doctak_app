@@ -10,14 +10,16 @@ import 'package:nb_utils/nb_utils.dart';
 import '../../../main.dart';
 import 'SVConstants.dart';
 
-InputDecoration svInputDecoration(BuildContext context,
-    {String? hint,
-    String? label,
-    TextStyle? hintStyle,
-    TextStyle? labelStyle,
-    Widget? prefix,
-    EdgeInsetsGeometry? contentPadding,
-    Widget? prefixIcon}) {
+InputDecoration svInputDecoration(
+  BuildContext context, {
+  String? hint,
+  String? label,
+  TextStyle? hintStyle,
+  TextStyle? labelStyle,
+  Widget? prefix,
+  EdgeInsetsGeometry? contentPadding,
+  Widget? prefixIcon,
+}) {
   return InputDecoration(
     contentPadding: contentPadding,
     labelText: label,
@@ -28,36 +30,21 @@ InputDecoration svInputDecoration(BuildContext context,
     prefixIcon: prefixIcon,
     errorMaxLines: 2,
     errorStyle: primaryTextStyle(color: Colors.red, size: 12),
-    enabledBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: SVAppBorderColor)),
-    focusedBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: SVAppColorPrimary)),
-    border: const UnderlineInputBorder(
-        borderSide: BorderSide(color: SVAppColorPrimary)),
-    focusedErrorBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 1.0)),
-    errorBorder: const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.red, width: 1.0)),
+    enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: SVAppBorderColor)),
+    focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: SVAppColorPrimary)),
+    border: const UnderlineInputBorder(borderSide: BorderSide(color: SVAppColorPrimary)),
+    focusedErrorBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.red, width: 1.0)),
+    errorBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.red, width: 1.0)),
     alignLabelWithHint: true,
   );
 }
 
-Widget svRobotoText(
-    {required String text,
-    Color? color,
-    FontStyle? fontStyle,
-    Function? onTap,
-    TextAlign? textAlign}) {
+Widget svRobotoText({required String text, Color? color, FontStyle? fontStyle, Function? onTap, TextAlign? textAlign}) {
   return Text(
     text,
-    style: secondaryTextStyle(
-      fontFamily: svFontRoboto,
-      color: color ?? svGetBodyColor(),
-      fontStyle: fontStyle ?? FontStyle.normal,
-    ),
+    style: secondaryTextStyle(fontFamily: svFontRoboto, color: color ?? svGetBodyColor(), fontStyle: fontStyle ?? FontStyle.normal),
     textAlign: textAlign ?? TextAlign.center,
-  ).onTap(onTap,
-      splashColor: Colors.transparent, highlightColor: Colors.transparent);
+  ).onTap(onTap, splashColor: Colors.transparent, highlightColor: Colors.transparent);
 }
 
 Color svGetBodyColor() {
@@ -84,41 +71,35 @@ Color svGetScaffoldColor() {
   }
 }
 
-Widget svHeaderContainer(
-    {required Widget child, required BuildContext context}) {
+Widget svHeaderContainer({required Widget child, required BuildContext context}) {
   return Stack(
     alignment: Alignment.bottomCenter,
     children: [
       Container(
         width: context.width(),
         decoration: BoxDecoration(
-            color: SVAppColorPrimary,
-            borderRadius: radiusOnly(
-                topLeft: SVAppContainerRadius, topRight: SVAppContainerRadius)),
+          color: SVAppColorPrimary,
+          borderRadius: radiusOnly(topLeft: SVAppContainerRadius, topRight: SVAppContainerRadius),
+        ),
         padding: const EdgeInsets.all(24),
         child: child,
       ),
       Container(
         height: 20,
         decoration: BoxDecoration(
-            color: context.cardColor,
-            borderRadius: radiusOnly(
-                topLeft: SVAppContainerRadius, topRight: SVAppContainerRadius)),
-      )
+          color: context.cardColor,
+          borderRadius: radiusOnly(topLeft: SVAppContainerRadius, topRight: SVAppContainerRadius),
+        ),
+      ),
     ],
   );
 }
 
-Widget svAppButton(
-    {required String text,
-    required Function onTap,
-    double? width,
-    Color? color,
-    required BuildContext context}) {
+Widget svAppButton({required String text, required Function onTap, double? width, Color? color, required BuildContext context}) {
   return AppButton(
     shapeBorder: RoundedRectangleBorder(borderRadius: radius(10)),
     text: text,
-    textStyle: boldTextStyle(color: Colors.white,weight: FontWeight.w600),
+    textStyle: boldTextStyle(color: Colors.white, weight: FontWeight.w600),
     onTap: onTap,
     elevation: 0,
     color: color ?? SVAppColorPrimary,
@@ -140,8 +121,7 @@ void svShowShareBottomSheet(BuildContext context, searchPeopleBloc) {
     enableDrag: true,
     isDismissible: true,
     backgroundColor: context.cardColor,
-    shape: RoundedRectangleBorder(
-        borderRadius: radiusOnly(topLeft: 30, topRight: 30)),
+    shape: RoundedRectangleBorder(borderRadius: radiusOnly(topLeft: 30, topRight: 30)),
     builder: (context) {
       return TagFriendsListBottomSheet(searchPeopleBloc);
     },
@@ -155,8 +135,7 @@ void checkInPlaceBottomSheet(BuildContext context, addPostBloc) {
     enableDrag: true,
     isDismissible: true,
     backgroundColor: context.cardColor,
-    shape: RoundedRectangleBorder(
-        borderRadius: radiusOnly(topLeft: 30, topRight: 30)),
+    shape: RoundedRectangleBorder(borderRadius: radiusOnly(topLeft: 30, topRight: 30)),
     builder: (context) {
       return CheckPlaceBottomSheet(addPostBloc);
     },

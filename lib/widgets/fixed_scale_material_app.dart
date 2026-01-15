@@ -39,7 +39,7 @@ class FixedScaleMaterialApp extends StatelessWidget {
   final ScrollBehavior? scrollBehavior;
 
   const FixedScaleMaterialApp({
-    Key? key,
+    super.key,
     this.navigatorKey,
     this.scaffoldMessengerKey,
     this.home,
@@ -74,7 +74,7 @@ class FixedScaleMaterialApp extends StatelessWidget {
     this.actions,
     this.restorationScopeId,
     this.scrollBehavior,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,13 +82,9 @@ class FixedScaleMaterialApp extends StatelessWidget {
       builder: (context) {
         // Get the original MediaQuery data
         final originalMediaQuery = MediaQuery.maybeOf(context);
-        
+
         // Create a custom MediaQueryData that forces fixed text scaling
-        final fixedMediaQueryData = (originalMediaQuery ?? 
-          const MediaQueryData()).copyWith(
-          textScaler: const TextScaler.linear(TextScaleHelper.fixedTextScaleFactor),
-          boldText: false,
-        );
+        final fixedMediaQueryData = (originalMediaQuery ?? const MediaQueryData()).copyWith(textScaler: const TextScaler.linear(TextScaleHelper.fixedTextScaleFactor), boldText: false);
 
         return MediaQuery(
           data: fixedMediaQueryData,
@@ -104,13 +100,10 @@ class FixedScaleMaterialApp extends StatelessWidget {
             builder: (context, child) {
               // Double-wrap with another MediaQuery to ensure text scaling is truly fixed
               final wrappedChild = MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: const TextScaler.linear(TextScaleHelper.fixedTextScaleFactor),
-                  boldText: false,
-                ),
+                data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(TextScaleHelper.fixedTextScaleFactor), boldText: false),
                 child: child!,
               );
-              
+
               return builder != null ? builder!(context, wrappedChild) : wrappedChild;
             },
             title: title,

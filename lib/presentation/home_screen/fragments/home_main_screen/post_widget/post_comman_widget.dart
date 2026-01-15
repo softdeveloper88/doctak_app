@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as html_parser;
+
 String parseHtmlString(String htmlString) {
   // Parse the HTML string
   dom.Document document = html_parser.parse(htmlString);
@@ -18,8 +17,7 @@ bool isHtml(String text) {
 }
 
 String removeHtmlTags(String htmlString) {
-  final RegExp htmlTagRegExp =
-  RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
+  final RegExp htmlTagRegExp = RegExp(r'<[^>]*>', multiLine: true, caseSensitive: true);
   return htmlString.replaceAll(htmlTagRegExp, '');
 }
 

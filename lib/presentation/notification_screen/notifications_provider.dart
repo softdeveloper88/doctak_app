@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 
 class NotificationsProvider with ChangeNotifier {
@@ -6,7 +5,7 @@ class NotificationsProvider with ChangeNotifier {
 
   int get totalNotifications => _totalNotifications;
 
-  setTotalNotifications(int total) {
+  void setTotalNotifications(int total) {
     _totalNotifications = total;
 
     notifyListeners();

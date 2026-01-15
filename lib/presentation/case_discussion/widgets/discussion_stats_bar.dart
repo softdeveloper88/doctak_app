@@ -7,39 +7,23 @@ class DiscussionStatsBar extends StatelessWidget {
   final CaseDiscussionFilters currentFilters;
   final bool isLoading;
 
-  const DiscussionStatsBar({
-    Key? key,
-    required this.discussions,
-    required this.currentFilters,
-    this.isLoading = false,
-  }) : super(key: key);
+  const DiscussionStatsBar({super.key, required this.discussions, required this.currentFilters, this.isLoading = false});
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     if (isLoading) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         color: theme.cardBackground,
         child: Row(
           children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-              ),
-            ),
+            SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.primary))),
             const SizedBox(width: 8),
             Text(
               'Loading discussions...',
-              style: TextStyle(
-                fontSize: 14,
-                fontFamily: 'Poppins',
-                color: theme.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary),
             ),
           ],
         ),
@@ -54,9 +38,7 @@ class DiscussionStatsBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: theme.cardBackground,
-        border: Border(
-          bottom: BorderSide(color: theme.divider, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: theme.divider, width: 1)),
       ),
       child: Column(
         children: [
@@ -67,29 +49,16 @@ class DiscussionStatsBar extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 '${discussions.length} discussions found',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                  color: theme.primary,
-                ),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.primary),
               ),
               if (_hasActiveFilters()) ...[
                 const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: theme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                  decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                   child: Text(
                     'Filtered',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Poppins',
-                      color: theme.primary,
-                    ),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: theme.primary),
                   ),
                 ),
               ],
@@ -97,18 +66,10 @@ class DiscussionStatsBar extends StatelessWidget {
               if (currentFilters.selectedSpecialty != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: theme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
                   child: Text(
                     currentFilters.selectedSpecialty!.name,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontFamily: 'Poppins',
-                      color: theme.primary,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 10, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
                   ),
                 ),
                 const SizedBox(width: 4),
@@ -117,19 +78,11 @@ class DiscussionStatsBar extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      currentFilters.selectedCountry!.flag,
-                      style: const TextStyle(fontSize: 12),
-                    ),
+                    Text(currentFilters.selectedCountry!.flag, style: const TextStyle(fontSize: 12)),
                     const SizedBox(width: 2),
                     Text(
                       currentFilters.selectedCountry!.name,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontFamily: 'Poppins',
-                        color: theme.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(fontSize: 10, fontFamily: 'Poppins', color: theme.textSecondary, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -147,7 +100,10 @@ class DiscussionStatsBar extends StatelessWidget {
                         children: [
                           Icon(Icons.download, size: 16, color: theme.textPrimary),
                           const SizedBox(width: 8),
-                          Text('Export Results', style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins')),
+                          Text(
+                            'Export Results',
+                            style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins'),
+                          ),
                         ],
                       ),
                     ),
@@ -157,7 +113,10 @@ class DiscussionStatsBar extends StatelessWidget {
                         children: [
                           Icon(Icons.share, size: 16, color: theme.textPrimary),
                           const SizedBox(width: 8),
-                          Text('Share Filters', style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins')),
+                          Text(
+                            'Share Filters',
+                            style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins'),
+                          ),
                         ],
                       ),
                     ),
@@ -181,44 +140,19 @@ class DiscussionStatsBar extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                _buildStatItem(
-                  icon: Icons.thumb_up_outlined,
-                  label: 'Total Likes',
-                  value: _formatNumber(totalLikes),
-                  color: theme.primary,
-                  theme: theme,
-                ),
+                _buildStatItem(icon: Icons.thumb_up_outlined, label: 'Total Likes', value: _formatNumber(totalLikes), color: theme.primary, theme: theme),
                 const SizedBox(width: 16),
-                _buildStatItem(
-                  icon: Icons.comment_outlined,
-                  label: 'Total Comments',
-                  value: _formatNumber(totalComments),
-                  color: theme.success,
-                  theme: theme,
-                ),
+                _buildStatItem(icon: Icons.comment_outlined, label: 'Total Comments', value: _formatNumber(totalComments), color: theme.success, theme: theme),
                 const SizedBox(width: 16),
-                _buildStatItem(
-                  icon: Icons.visibility_outlined,
-                  label: 'Total Views',
-                  value: _formatNumber(totalViews),
-                  color: theme.warning,
-                  theme: theme,
-                ),
+                _buildStatItem(icon: Icons.visibility_outlined, label: 'Total Views', value: _formatNumber(totalViews), color: theme.warning, theme: theme),
                 const Spacer(),
                 if (_hasActiveFilters())
                   TextButton(
                     onPressed: () => _showFilterSummary(context, theme),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      minimumSize: Size.zero,
-                    ),
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero),
                     child: Text(
                       'View Filters',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        color: theme.primary,
-                      ),
+                      style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.primary),
                     ),
                   ),
               ],
@@ -229,13 +163,7 @@ class DiscussionStatsBar extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-    required OneUITheme theme,
-  }) {
+  Widget _buildStatItem({required IconData icon, required String label, required String value, required Color color, required OneUITheme theme}) {
     return Row(
       children: [
         Icon(icon, size: 14, color: color),
@@ -245,20 +173,11 @@ class DiscussionStatsBar extends StatelessWidget {
           children: [
             Text(
               value,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: color,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: color),
             ),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 10,
-                fontFamily: 'Poppins',
-                color: theme.textTertiary,
-              ),
+              style: TextStyle(fontSize: 10, fontFamily: 'Poppins', color: theme.textTertiary),
             ),
           ],
         ),
@@ -285,15 +204,11 @@ class DiscussionStatsBar extends StatelessWidget {
   }
 
   void _exportResults(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export functionality will be implemented')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Export functionality will be implemented')));
   }
 
   void _shareFilters(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Share filters functionality will be implemented')),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Share filters functionality will be implemented')));
   }
 
   void _showFilterSummary(BuildContext context, OneUITheme theme) {
@@ -304,26 +219,17 @@ class DiscussionStatsBar extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           'Active Filters',
-          style: TextStyle(
-            color: theme.textPrimary,
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (currentFilters.searchQuery != null && currentFilters.searchQuery!.isNotEmpty)
-              _buildFilterItem('Search', currentFilters.searchQuery!, theme),
-            if (currentFilters.selectedSpecialty != null)
-              _buildFilterItem('Specialty', currentFilters.selectedSpecialty!.name, theme),
-            if (currentFilters.selectedCountry != null)
-              _buildFilterItem('Country', '${currentFilters.selectedCountry!.flag} ${currentFilters.selectedCountry!.name}', theme),
-            if (currentFilters.status != null)
-              _buildFilterItem('Status', currentFilters.status!.value.toUpperCase(), theme),
-            if (currentFilters.sortBy != null)
-              _buildFilterItem('Sort', '${currentFilters.sortBy} (${currentFilters.sortOrder ?? 'desc'})', theme),
+            if (currentFilters.searchQuery != null && currentFilters.searchQuery!.isNotEmpty) _buildFilterItem('Search', currentFilters.searchQuery!, theme),
+            if (currentFilters.selectedSpecialty != null) _buildFilterItem('Specialty', currentFilters.selectedSpecialty!.name, theme),
+            if (currentFilters.selectedCountry != null) _buildFilterItem('Country', '${currentFilters.selectedCountry!.flag} ${currentFilters.selectedCountry!.name}', theme),
+            if (currentFilters.status != null) _buildFilterItem('Status', currentFilters.status!.value.toUpperCase(), theme),
+            if (currentFilters.sortBy != null) _buildFilterItem('Sort', '${currentFilters.sortBy} (${currentFilters.sortOrder ?? 'desc'})', theme),
           ],
         ),
         actions: [
@@ -349,22 +255,13 @@ class DiscussionStatsBar extends StatelessWidget {
             width: 80,
             child: Text(
               '$label:',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-                fontFamily: 'Poppins',
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(
-                fontSize: 14,
-                fontFamily: 'Poppins',
-                color: theme.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary),
             ),
           ),
         ],

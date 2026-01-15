@@ -6,11 +6,7 @@ class TextIconWidget extends StatelessWidget {
   final Widget suffix;
   final TextStyle textStyle;
 
-  TextIconWidget({
-    required this.text,
-    required this.suffix,
-    required this.textStyle,
-  });
+  const TextIconWidget({super.key, required this.text, required this.suffix, required this.textStyle});
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +17,7 @@ class TextIconWidget extends StatelessWidget {
         children: [
           Flexible(
             fit: FlexFit.loose,
-            child: Text(
-              text,
-              style: textStyle,
-              overflow: TextOverflow.visible,
-            ),
+            child: Text(text, style: textStyle, overflow: TextOverflow.visible),
           ),
           suffix,
         ],

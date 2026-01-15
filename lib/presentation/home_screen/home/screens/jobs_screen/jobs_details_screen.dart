@@ -3,16 +3,13 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/job_details_shimmer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -23,11 +20,7 @@ import 'bloc/jobs_bloc.dart';
 import 'bloc/jobs_state.dart';
 
 class JobsDetailsScreen extends StatefulWidget {
-  const JobsDetailsScreen({
-    required this.jobId,
-    this.isFromSplash = false,
-    super.key,
-  });
+  const JobsDetailsScreen({required this.jobId, this.isFromSplash = false, super.key});
 
   final String jobId;
   final bool isFromSplash;
@@ -55,15 +48,8 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   bool _invalidJobId = false;
 
-  Countries findModelByNameOrDefault(
-    List<Countries> countries,
-    String name,
-    Countries defaultCountry,
-  ) {
-    return countries.firstWhere(
-      (country) => country.countryName?.toLowerCase() == name.toLowerCase(),
-      orElse: () => defaultCountry,
-    );
+  Countries findModelByNameOrDefault(List<Countries> countries, String name, Countries defaultCountry) {
+    return countries.firstWhere((country) => country.countryName?.toLowerCase() == name.toLowerCase(), orElse: () => defaultCountry);
   }
 
   @override
@@ -85,10 +71,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           },
         ),
         body: Center(
-          child: Text(
-            'This job is no longer available',
-            style: TextStyle(color: theme.textSecondary),
-          ),
+          child: Text('This job is no longer available', style: TextStyle(color: theme.textSecondary)),
         ),
       );
     }
@@ -111,25 +94,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             child: IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.primary.withAlpha(25),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.share_outlined,
-                  color: theme.primary,
-                  size: 16,
-                ),
+                decoration: BoxDecoration(color: theme.primary.withAlpha(25), shape: BoxShape.circle),
+                child: Icon(Icons.share_outlined, color: theme.primary, size: 16),
               ),
               onPressed: () {
                 if (jobsBloc.jobDetailModel.job != null) {
                   final job = jobsBloc.jobDetailModel.job!;
-                  DeepLinkService.shareJob(
-                    jobId: job.id?.toString() ?? widget.jobId,
-                    title: job.jobTitle,
-                    company: job.companyName,
-                    location: job.location,
-                  );
+                  DeepLinkService.shareJob(jobId: job.id?.toString() ?? widget.jobId, title: job.jobTitle, company: job.companyName, location: job.location);
                 }
               },
             ),
@@ -151,9 +122,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           } else if (state is DataError) {
             return Center(child: Text(state.errorMessage));
           } else {
-            return Center(
-              child: Text(translation(context).msg_something_went_wrong),
-            );
+            return Center(child: Text(translation(context).msg_something_went_wrong));
           }
         },
       ),
@@ -168,12 +137,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: EdgeInsets.only(
-          left: 16.0,
-          right: 16.0,
-          top: 16.0,
-          bottom: MediaQuery.of(context).padding.bottom + 16.0,
-        ),
+        padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: MediaQuery.of(context).padding.bottom + 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -196,10 +160,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             const SizedBox(height: 16),
 
             // Specialties Card
-            if (job.specialties?.isNotEmpty ?? false) ...[
-              _buildSpecialtiesCard(job),
-              const SizedBox(height: 16),
-            ],
+            if (job.specialties?.isNotEmpty ?? false) ...[_buildSpecialtiesCard(job), const SizedBox(height: 16)],
 
             // Description Card
             _buildDescriptionCard(job),
@@ -230,19 +191,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           if (jobsBloc.jobDetailModel.hasApplied ?? false)
             Chip(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              backgroundColor: Colors.green.withOpacity(0.1),
+              backgroundColor: Colors.green.withValues(alpha: 0.1),
               side: const BorderSide(color: Colors.green),
-              avatar: const Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 18,
-              ),
+              avatar: const Icon(Icons.check_circle_outline, color: Colors.green, size: 18),
               label: Text(
                 translation(context).lbl_applied,
-                style: const TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w500),
               ),
             ),
         ],
@@ -250,55 +204,30 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     );
   }
 
-  Widget _buildDateInfo({
-    required String title,
-    required String? date,
-    required IconData icon,
-    bool isExpired = false,
-  }) {
+  Widget _buildDateInfo({required String title, required String? date, required IconData icon, bool isExpired = false}) {
     final theme = OneUITheme.of(context);
-    String formattedDate = date != null
-        ? DateFormat('MMM dd, yyyy').format(DateTime.parse(date))
-        : translation(context).lbl_not_available;
+    String formattedDate = date != null ? DateFormat('MMM dd, yyyy').format(DateTime.parse(date)) : translation(context).lbl_not_available;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: theme.textSecondary,
-          ),
+          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
         ),
         const SizedBox(height: 4),
         Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: isExpired
-                    ? theme.error.withOpacity(0.1)
-                    : theme.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 14,
-                color: isExpired ? theme.error : theme.primary,
-              ),
+              decoration: BoxDecoration(color: isExpired ? theme.error.withValues(alpha: 0.1) : theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(icon, size: 14, color: isExpired ? theme.error : theme.primary),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 formattedDate,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: isExpired ? theme.error : theme.textPrimary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w500, color: isExpired ? theme.error : theme.textPrimary),
               ),
             ),
           ],
@@ -307,21 +236,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     );
   }
 
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
+  Widget _buildDetailRow({required IconData icon, required String title, required String value}) {
     final theme = OneUITheme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
           child: Icon(icon, color: theme.primary, size: 16),
         ),
         const SizedBox(width: 16),
@@ -331,22 +253,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             children: [
               Text(
                 title,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  color: theme.textSecondary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
-                  color: theme.textPrimary,
-                ),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w500, height: 1.4, color: theme.textPrimary),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -364,28 +276,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: theme.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          translation(context).lbl_leave_app,
-          style: TextStyle(color: theme.textPrimary),
-        ),
-        content: Text(
-          translation(context).msg_open_link_confirm,
-          style: TextStyle(color: theme.textSecondary),
-        ),
+        title: Text(translation(context).lbl_leave_app, style: TextStyle(color: theme.textPrimary)),
+        content: Text(translation(context).msg_open_link_confirm, style: TextStyle(color: theme.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              translation(context).lbl_no_answer,
-              style: TextStyle(color: theme.textSecondary),
-            ),
+            child: Text(translation(context).lbl_no_answer, style: TextStyle(color: theme.textSecondary)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              translation(context).lbl_yes,
-              style: TextStyle(color: theme.primary),
-            ),
+            child: Text(translation(context).lbl_yes, style: TextStyle(color: theme.primary)),
           ),
         ],
       ),
@@ -397,11 +297,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${translation(context).lbl_error}: ${e.toString()}'),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${translation(context).lbl_error}: ${e.toString()}')));
       }
     }
   }
@@ -411,21 +307,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     final theme = OneUITheme.of(context);
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [theme.primary, theme.primary.withOpacity(0.8)],
-        ),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary, theme.primary.withValues(alpha: 0.8)]),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: theme.isDark
-            ? null
-            : [
-                BoxShadow(
-                  color: theme.primary.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+        boxShadow: theme.isDark ? null : [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -437,25 +321,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 Expanded(
                   child: Text(
                     job.jobTitle ?? "",
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
-                if ((job.promoted is bool && job.promoted == true) ||
-                    (job.promoted is int && job.promoted != 0))
+                if ((job.promoted is bool && job.promoted == true) || (job.promoted is int && job.promoted != 0))
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.warning,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: theme.warning, borderRadius: BorderRadius.circular(20)),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -463,12 +335,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                         const SizedBox(width: 4),
                         Text(
                           translation(context).lbl_sponsored,
-                          style: const TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600),
                         ),
                       ],
                     ),
@@ -480,26 +347,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.business,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.business, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     job.companyName ?? translation(context).lbl_not_available,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
                   ),
                 ),
               ],
@@ -509,25 +364,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.location_on,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                  child: const Icon(Icons.location_on, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     job.location ?? translation(context).lbl_not_available,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.white),
                   ),
                 ),
               ],
@@ -538,25 +382,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.attach_money,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                    child: const Icon(Icons.attach_money, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       job.salaryRange!,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ],
@@ -581,54 +414,26 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           children: [
             Text(
               translation(context).lbl_job_detail,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
             ),
             const SizedBox(height: 20),
-            _buildDetailRow(
-              icon: Icons.work_outline,
-              title: translation(context).lbl_experience,
-              value: job.experience ?? translation(context).lbl_not_available,
-            ),
+            _buildDetailRow(icon: Icons.work_outline, title: translation(context).lbl_experience, value: job.experience ?? translation(context).lbl_not_available),
             const SizedBox(height: 20),
-            _buildDetailRow(
-              icon: Icons.language,
-              title: translation(context).lbl_preferred_language,
-              value:
-                  job.preferredLanguage ??
-                  translation(context).lbl_not_available,
-            ),
+            _buildDetailRow(icon: Icons.language, title: translation(context).lbl_preferred_language, value: job.preferredLanguage ?? translation(context).lbl_not_available),
             const SizedBox(height: 20),
-            _buildDetailRow(
-              icon: Icons.numbers,
-              title: "Number of Jobs",
-              value: job.noOfJobs ?? translation(context).lbl_not_available,
-            ),
+            _buildDetailRow(icon: Icons.numbers, title: "Number of Jobs", value: job.noOfJobs ?? translation(context).lbl_not_available),
             const SizedBox(height: 20),
             Divider(color: theme.divider),
             const SizedBox(height: 20),
             Text(
               translation(context).lbl_apply_date,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w600, color: theme.textPrimary),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: _buildDateInfo(
-                    title: translation(context).lbl_date_from,
-                    date: job.createdAt,
-                    icon: Icons.date_range_outlined,
-                  ),
+                  child: _buildDateInfo(title: translation(context).lbl_date_from, date: job.createdAt, icon: Icons.date_range_outlined),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -636,11 +441,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     title: translation(context).lbl_date_to,
                     date: job.lastDate,
                     icon: Icons.date_range_outlined,
-                    isExpired: job.lastDate != null
-                        ? DateTime.parse(
-                            job.lastDate ?? '',
-                          ).isBefore(DateTime.now())
-                        : false,
+                    isExpired: job.lastDate != null ? DateTime.parse(job.lastDate ?? '').isBefore(DateTime.now()) : false,
                   ),
                 ),
               ],
@@ -664,39 +465,19 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           children: [
             Text(
               "Job Statistics",
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
             ),
             const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.visibility,
-                    label: "Views",
-                    value: "${job.views ?? 0}",
-                    color: theme.primary,
-                  ),
+                  child: _buildStatItem(icon: Icons.visibility, label: "Views", value: "${job.views ?? 0}", color: theme.primary),
                 ),
                 Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.mouse,
-                    label: "Clicks",
-                    value: "${job.clicks ?? 0}",
-                    color: theme.success,
-                  ),
+                  child: _buildStatItem(icon: Icons.mouse, label: "Clicks", value: "${job.clicks ?? 0}", color: theme.success),
                 ),
                 Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.people,
-                    label: "Applicants",
-                    value: "${jobsBloc.jobDetailModel.totalApplicants ?? 0}",
-                    color: theme.warning,
-                  ),
+                  child: _buildStatItem(icon: Icons.people, label: "Applicants", value: "${jobsBloc.jobDetailModel.totalApplicants ?? 0}", color: theme.warning),
                 ),
               ],
             ),
@@ -706,19 +487,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     );
   }
 
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
+  Widget _buildStatItem({required IconData icon, required String label, required String value, required Color color}) {
     return Container(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -730,21 +506,11 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold, color: color),
           ),
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 12, color: color, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -767,25 +533,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.medical_services,
-                    color: accentColor,
-                    size: 20,
-                  ),
+                  decoration: BoxDecoration(color: accentColor.withValues(alpha: 0.1), shape: BoxShape.circle),
+                  child: Icon(Icons.medical_services, color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   "Medical Specialties",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textPrimary,
-                  ),
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
                 ),
               ],
             ),
@@ -794,29 +548,20 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               spacing: 8,
               runSpacing: 8,
               children: (job.specialties ?? []).map<Widget>((specialty) {
-                String displayText =
-                    specialty.name ?? "Specialty ${specialty.id ?? 'Unknown'}";
+                String displayText = specialty.name ?? "Specialty ${specialty.id ?? 'Unknown'}";
                 if (displayText.trim().isEmpty) {
                   displayText = "Specialty ${specialty.id ?? 'Unknown'}";
                 }
                 return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
+                    color: accentColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: accentColor.withOpacity(0.3)),
+                    border: Border.all(color: accentColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     displayText,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: accentColor,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: accentColor, fontWeight: FontWeight.w500),
                   ),
                 );
               }).toList(),
@@ -843,42 +588,25 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: accentColor.withValues(alpha: 0.1), shape: BoxShape.circle),
                   child: Icon(Icons.description, color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   translation(context).lbl_description,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textPrimary,
-                  ),
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              constraints: BoxConstraints(
-                maxHeight: _isDescriptionExpanded ? 1000 : 200,
-              ),
+              constraints: BoxConstraints(maxHeight: _isDescriptionExpanded ? 1000 : 200),
               child: SingleChildScrollView(
-                physics: _isDescriptionExpanded
-                    ? const AlwaysScrollableScrollPhysics()
-                    : const NeverScrollableScrollPhysics(),
+                physics: _isDescriptionExpanded ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
                 child: HtmlWidget(
                   job.description ?? "",
-                  textStyle: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    height: 1.5,
-                    color: theme.textPrimary,
-                  ),
+                  textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, height: 1.5, color: theme.textPrimary),
                 ),
               ),
             ),
@@ -888,20 +616,10 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   _isDescriptionExpanded = !_isDescriptionExpanded;
                 });
               },
-              icon: Icon(
-                _isDescriptionExpanded
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                color: accentColor,
-              ),
+              icon: Icon(_isDescriptionExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: accentColor),
               label: Text(
-                _isDescriptionExpanded
-                    ? translation(context).lbl_show_less
-                    : translation(context).lbl_show_more,
-                style: TextStyle(
-                  color: accentColor,
-                  fontWeight: FontWeight.w600,
-                ),
+                _isDescriptionExpanded ? translation(context).lbl_show_less : translation(context).lbl_show_more,
+                style: TextStyle(color: accentColor, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -926,21 +644,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: accentColor.withValues(alpha: 0.1), shape: BoxShape.circle),
                   child: Icon(Icons.person, color: accentColor, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   "Posted By",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textPrimary,
-                  ),
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
                 ),
               ],
             ),
@@ -952,25 +662,14 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   height: 60,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: accentColor.withOpacity(0.3),
-                      width: 2,
-                    ),
+                    border: Border.all(color: accentColor.withValues(alpha: 0.3), width: 2),
                   ),
                   child: ClipOval(
-                    child:
-                        user.profilePic != null && user.profilePic!.isNotEmpty
-                        ? CustomImageView(
-                            imagePath: '${AppData.imageUrl}${user.profilePic!}',
-                            fit: BoxFit.cover,
-                          )
+                    child: user.profilePic != null && user.profilePic!.isNotEmpty
+                        ? CustomImageView(imagePath: '${AppData.imageUrl}${user.profilePic!}', fit: BoxFit.cover)
                         : Container(
-                            color: accentColor.withOpacity(0.1),
-                            child: Icon(
-                              Icons.person,
-                              color: accentColor,
-                              size: 30,
-                            ),
+                            color: accentColor.withValues(alpha: 0.1),
+                            child: Icon(Icons.person, color: accentColor, size: 30),
                           ),
                   ),
                 ),
@@ -981,21 +680,12 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                     children: [
                       Text(
                         user.name ?? "Anonymous User",
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: theme.textPrimary,
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         "Job Poster",
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          color: theme.textSecondary,
-                        ),
+                        style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
                       ),
                     ],
                   ),
@@ -1024,21 +714,13 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.success.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: BoxDecoration(color: theme.success.withValues(alpha: 0.1), shape: BoxShape.circle),
                   child: Icon(Icons.touch_app, color: theme.success, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   translation(context).lbl_actions,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: theme.textPrimary,
-                  ),
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold, color: theme.textPrimary),
                 ),
               ],
             ),
@@ -1048,10 +730,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             _buildMainActionRow(job),
 
             // View applicants button (for job creator)
-            if (job.user?.id == AppData.logInUserId) ...[
-              const SizedBox(height: 16),
-              _buildViewApplicantsButton(),
-            ],
+            if (job.user?.id == AppData.logInUserId) ...[const SizedBox(height: 16), _buildViewApplicantsButton()],
           ],
         ),
       ),
@@ -1084,9 +763,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 backgroundColor: theme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
               child: Row(
@@ -1096,11 +773,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   const SizedBox(width: 8),
                   Text(
                     translation(context).lbl_apply,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                   ),
                 ],
               ),
@@ -1131,9 +804,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                 backgroundColor: theme.error,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                 elevation: 0,
               ),
               child: Row(
@@ -1143,11 +814,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   const SizedBox(width: 8),
                   Text(
                     translation(context).lbl_withdraw,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                   ),
                 ],
               ),
@@ -1171,14 +838,9 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: theme.primary,
-                side: BorderSide(
-                  color: theme.primary.withOpacity(0.3),
-                  width: 1.5,
-                ),
+                side: BorderSide(color: theme.primary.withValues(alpha: 0.3), width: 1.5),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1187,11 +849,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   const SizedBox(width: 8),
                   Text(
                     translation(context).lbl_visit_site,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                   ),
                 ],
               ),
@@ -1214,9 +872,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           backgroundColor: theme.success,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           elevation: 0,
         ),
         child: Row(
@@ -1226,11 +882,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             const SizedBox(width: 12),
             Text(
               translation(context).lbl_view_applicants,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
             ),
           ],
         ),

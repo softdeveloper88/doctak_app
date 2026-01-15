@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
@@ -107,19 +106,14 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     await _loadPersistedFiles();
   }
 
-  _checkInSearch(PlaceAddEvent event, Emitter<AddPostState> emit) async {
+  Future<void> _checkInSearch(PlaceAddEvent event, Emitter<AddPostState> emit) async {
     if (event.page == 1) {
       searchPeopleData.clear();
       pageNumber = 1;
       emit(PaginationLoadingState());
     }
     try {
-      CheckInSearchModel response = await apiManager.checkInSearch(
-          'Bearer ${AppData.userToken}',
-          '$pageNumber',
-          event.name ?? '',
-          event.latitude ?? '',
-          event.longitude ?? '');
+      CheckInSearchModel response = await apiManager.checkInSearch('Bearer ${AppData.userToken}', '$pageNumber', event.name ?? '', event.latitude ?? '', event.longitude ?? '');
       placeList.clear();
       placeList.addAll(response.data ?? []);
       emit(PaginationLoadedState());
@@ -128,7 +122,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     }
   }
 
-  _onGetUserInfo(LoadPageEvent event, Emitter<AddPostState> emit) async {
+  Future<void> _onGetUserInfo(LoadPageEvent event, Emitter<AddPostState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
@@ -139,8 +133,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     }
     // ProgressDialogUtils.showProgressDialog();
     // try {
-    SearchUserTagModel response = await apiManager.searchTagFriend(
-        'Bearer ${AppData.userToken}', '$pageNumber', event.name ?? '');
+    SearchUserTagModel response = await apiManager.searchTagFriend('Bearer ${AppData.userToken}', '$pageNumber', event.name ?? '');
     numberOfPage = response.data!.lastPage ?? 0;
     if (pageNumber < numberOfPage + 1) {
       pageNumber = pageNumber + 1;
@@ -159,12 +152,10 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     // }
   }
 
-  _selectedTagFriend(
-      SelectFriendEvent event, Emitter<AddPostState> emit) async {
+  Future<void> _selectedTagFriend(SelectFriendEvent event, Emitter<AddPostState> emit) async {
     try {
       if (event.isAdd ?? true) {
-        var userInfo = selectedSearchPeopleData
-            .where((element) => element.id == event.userData!.id!);
+        var userInfo = selectedSearchPeopleData.where((element) => element.id == event.userData!.id!);
         if (userInfo.isEmpty) {
           selectedSearchPeopleData.add(event.userData!);
         }
@@ -186,7 +177,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     }
   }
 
-  _selectedLocation(SelectedLocation event, Emitter<AddPostState> emit) async {
+  Future<void> _selectedLocation(SelectedLocation event, Emitter<AddPostState> emit) async {
     // try {
 
     locationName = event.name ?? '';
@@ -200,7 +191,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     // emit(DataLoaded(searchPeopleData));
   }
 
-  _SelectedFile(SelectedFiles event, Emitter<AddPostState> emit) async {
+  Future<void> _SelectedFile(SelectedFiles event, Emitter<AddPostState> emit) async {
     if (event.isRemove) {
       print('AddPostBloc: Removing image ${event.pickedfiles.path}');
       // Try to remove the file object matching the path
@@ -260,7 +251,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     }
   }
 
-  _addPostData(AddPostDataEvent event, Emitter<AddPostState> emit) async {
+  Future<void> _addPostData(AddPostDataEvent event, Emitter<AddPostState> emit) async {
     print('object $state');
     // if (state is PaginationLoadedState) {
 
@@ -283,11 +274,10 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     ProgressDialogUtils.showProgressDialog();
     print(tagFriends.toString());
 
-    await _uploadPost(title, locationName, latitude, longitude, backgroundColor,
-      tagFriends.toString(), feeling ?? '', emit);
+    await _uploadPost(title, locationName, latitude, longitude, backgroundColor, tagFriends.toString(), feeling ?? '', emit);
   }
 
-  _addTitle(TextFieldEvent event, Emitter<AddPostState> emit) async {
+  Future<void> _addTitle(TextFieldEvent event, Emitter<AddPostState> emit) async {
     print('object $state');
     // if (state is PaginationLoadedState) {
     title = event.text;
@@ -303,15 +293,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     // );
   }
 
-    Future<void> _uploadPost(
-      String title,
-      String locationName,
-      String lat,
-      String lng,
-      String backgroundColor,
-      String tagging,
-      String feeling,
-      Emitter<AddPostState> emit) async {
+  Future<void> _uploadPost(String title, String locationName, String lat, String lng, String backgroundColor, String tagging, String feeling, Emitter<AddPostState> emit) async {
     var uri = Uri.parse("${AppData.remoteUrl}/new_post");
     var request = http.MultipartRequest('POST', uri)
       ..fields['title'] = title
@@ -321,30 +303,19 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       ..fields['background_color'] = backgroundColor
       ..fields['tagging'] = tagging
       ..fields['feeling'] = feeling
-      ..headers['Authorization'] =
-          'Bearer ${AppData.userToken}'; // Add token bearer header
+      ..headers['Authorization'] = 'Bearer ${AppData.userToken}'; // Add token bearer header
 
-    print(
-        '$title,$locationName,$latitude,$longitude,$backgroundColor,$tagging,$feeling');
+    print('$title,$locationName,$latitude,$longitude,$backgroundColor,$tagging,$feeling');
     for (var xFile in imagefiles) {
-      String filePath =
-          xFile.path; // Use the path property to get the file path
+      String filePath = xFile.path; // Use the path property to get the file path
       String mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
-      String fileField =
-          mimeType.startsWith('image/') ? 'images[]' : 'videos[]';
+      String fileField = mimeType.startsWith('image/') ? 'images[]' : 'videos[]';
 
       File file = File(filePath);
 
       if (await file.exists()) {
         List<int> bytes = await file.readAsBytes();
-        request.files.add(
-          http.MultipartFile.fromBytes(
-            fileField,
-            bytes,
-            filename: basename(filePath),
-            contentType: MediaType.parse(mimeType),
-          ),
-        );
+        request.files.add(http.MultipartFile.fromBytes(fileField, bytes, filename: basename(filePath), contentType: MediaType.parse(mimeType)));
       } else {
         print('File does not exist at path: $filePath');
       }
@@ -355,10 +326,10 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       var streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       print('hiii${response.body}');
-      
+
       // Always hide progress dialog after getting response (success or failure)
       ProgressDialogUtils.hideProgressDialog();
-      
+
       if (response.statusCode == 200) {
         // emit(ResponseLoadedState(response.body));
         // selectedFiles.clear(); // Clear all selected files
@@ -395,7 +366,6 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
         // );
       }
       emit(ResponseLoadedState(response.body));
-
     } catch (e) {
       // Ensure dialog is hidden on exception too
       ProgressDialogUtils.hideProgressDialog();
@@ -407,37 +377,37 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
     }
   }
 
-// _setUserFollow(SetUserFollow event, Emitter<AddPostState> emit) async {
-//   // emit(DrugsDataInitial());
-//   // ProgressDialogUtils.showProgressDialog();
-//   try {
-//     emit(PaginationLoadedState());
-//   } catch (e) {
-//     print(e);
-//
-//     emit(DataError('No Data Found'));
-//   }
-// }
-// _onGetUserInfo1(GetPost event, Emitter<AddPostState> emit) async {
-//   // emit(PaginationInitialState());
-//   // ProgressDialogUtils.showProgressDialog();
-//
-//   // emit(PaginationLoadingState());
-//   try {
-//     SearchUserTagModel response = await apiManager.getSearchPeople(
-//       'Bearer ${AppData.userToken}',
-//       "1",
-//       '',
-//     );
-//     print("ddd${response.data!.length}");
-//     searchPeopleData.clear();
-//     searchPeopleData.addAll(response.data ?? []);
-//     emit(PaginationLoadedState());
-//     // emit(DataLoaded(searchPeopleData));
-//   } catch (e) {
-//     // ProgressDialogUtils.hideProgressDialog();
-//     print(e);
-//     emit(DataError('No Data Found'));
-//   }
-// }
+  // _setUserFollow(SetUserFollow event, Emitter<AddPostState> emit) async {
+  //   // emit(DrugsDataInitial());
+  //   // ProgressDialogUtils.showProgressDialog();
+  //   try {
+  //     emit(PaginationLoadedState());
+  //   } catch (e) {
+  //     print(e);
+  //
+  //     emit(DataError('No Data Found'));
+  //   }
+  // }
+  // _onGetUserInfo1(GetPost event, Emitter<AddPostState> emit) async {
+  //   // emit(PaginationInitialState());
+  //   // ProgressDialogUtils.showProgressDialog();
+  //
+  //   // emit(PaginationLoadingState());
+  //   try {
+  //     SearchUserTagModel response = await apiManager.getSearchPeople(
+  //       'Bearer ${AppData.userToken}',
+  //       "1",
+  //       '',
+  //     );
+  //     print("ddd${response.data!.length}");
+  //     searchPeopleData.clear();
+  //     searchPeopleData.addAll(response.data ?? []);
+  //     emit(PaginationLoadedState());
+  //     // emit(DataLoaded(searchPeopleData));
+  //   } catch (e) {
+  //     // ProgressDialogUtils.hideProgressDialog();
+  //     print(e);
+  //     emit(DataError('No Data Found'));
+  //   }
+  // }
 }

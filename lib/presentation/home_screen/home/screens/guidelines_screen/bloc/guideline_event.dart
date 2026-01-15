@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 abstract class GuidelineEvent extends Equatable {}
 
@@ -13,8 +12,7 @@ class GetPost extends GuidelineEvent {
   final String countryId;
   final String searchTerm;
 
-  GetPost(
-      {required this.page, required this.countryId, required this.searchTerm});
+  GetPost({required this.page, required this.countryId, required this.searchTerm});
   @override
   List<Object> get props => [page, countryId, searchTerm];
 }

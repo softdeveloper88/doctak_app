@@ -1,11 +1,10 @@
 import 'dart:convert';
+
 MeetingDetailsModel meetingDetailsModelFromJson(String str) => MeetingDetailsModel.fromJson(json.decode(str));
 String meetingDetailsModelToJson(MeetingDetailsModel data) => json.encode(data.toJson());
+
 class MeetingDetailsModel {
-  MeetingDetailsModel({
-      this.success, 
-      this.data, 
-      this.message,});
+  MeetingDetailsModel({this.success, this.data, this.message});
 
   MeetingDetailsModel.fromJson(dynamic json) {
     success = json['success'];
@@ -25,16 +24,13 @@ class MeetingDetailsModel {
     map['message'] = message;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
-  Data({
-      this.meeting, 
-      this.settings, 
-      this.users,});
+  Data({this.meeting, this.settings, this.users});
 
   Data.fromJson(dynamic json) {
     meeting = json['meeting'] != null ? Meeting.fromJson(json['meeting']) : null;
@@ -63,19 +59,13 @@ class Data {
     }
     return map;
   }
-
 }
 
 Users usersFromJson(String str) => Users.fromJson(json.decode(str));
 String usersToJson(Users data) => json.encode(data.toJson());
+
 class Users {
-  Users({
-      this.id, 
-      this.firstName, 
-      this.lastName, 
-      this.specialty, 
-      this.profilePic, 
-      this.meetingDetails,});
+  Users({this.id, this.firstName, this.lastName, this.specialty, this.profilePic, this.meetingDetails});
 
   Users.fromJson(dynamic json) {
     id = json['id'];
@@ -109,25 +99,26 @@ class Users {
     }
     return map;
   }
-
 }
 
 MeetingDetails meetingDetailsFromJson(String str) => MeetingDetails.fromJson(json.decode(str));
 String meetingDetailsToJson(MeetingDetails data) => json.encode(data.toJson());
+
 class MeetingDetails {
   MeetingDetails({
-      this.id, 
-      this.meetingId, 
-      this.userId, 
-      this.joinedAt, 
-      this.isAllowed, 
-      this.isMicOn, 
-      this.isVideoOn, 
-      this.isMeetingLeaved, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.isScreenShared, 
-      this.isHandUp,});
+    this.id,
+    this.meetingId,
+    this.userId,
+    this.joinedAt,
+    this.isAllowed,
+    this.isMicOn,
+    this.isVideoOn,
+    this.isMeetingLeaved,
+    this.createdAt,
+    this.updatedAt,
+    this.isScreenShared,
+    this.isHandUp,
+  });
 
   MeetingDetails.fromJson(dynamic json) {
     id = json['id'];
@@ -172,27 +163,28 @@ class MeetingDetails {
     map['is_hand_up'] = isHandUp;
     return map;
   }
-
 }
 
 Settings settingsFromJson(String str) => Settings.fromJson(json.decode(str));
 String settingsToJson(Settings data) => json.encode(data.toJson());
+
 class Settings {
   Settings({
-      this.id, 
-      this.meetingId, 
-      this.startStopMeeting, 
-      this.muteAll, 
-      this.unmuteAll, 
-      this.addRemoveHost, 
-      this.shareScreen, 
-      this.raisedHand, 
-      this.sendReactions, 
-      this.toggleMicrophone, 
-      this.toggleVideo, 
-      this.enableWaitingRoom, 
-      this.createdAt, 
-      this.updatedAt,});
+    this.id,
+    this.meetingId,
+    this.startStopMeeting,
+    this.muteAll,
+    this.unmuteAll,
+    this.addRemoveHost,
+    this.shareScreen,
+    this.raisedHand,
+    this.sendReactions,
+    this.toggleMicrophone,
+    this.toggleVideo,
+    this.enableWaitingRoom,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Settings.fromJson(dynamic json) {
     id = json['id'];
@@ -243,21 +235,13 @@ class Settings {
     map['updated_at'] = updatedAt;
     return map;
   }
-
 }
 
 Meeting meetingFromJson(String str) => Meeting.fromJson(json.decode(str));
 String meetingToJson(Meeting data) => json.encode(data.toJson());
+
 class Meeting {
-  Meeting({
-      this.id, 
-      this.meetingToken, 
-      this.meetingChannel, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.meetingId, 
-      this.userId, 
-      this.isEnded,});
+  Meeting({this.id, this.meetingToken, this.meetingChannel, this.createdAt, this.updatedAt, this.meetingId, this.userId, this.isEnded});
 
   Meeting.fromJson(dynamic json) {
     id = json['id'];
@@ -290,5 +274,4 @@ class Meeting {
     map['isEnded'] = isEnded;
     return map;
   }
-
 }

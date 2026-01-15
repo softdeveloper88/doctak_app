@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:developer';
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
 
 part 'followers_state.dart';
 part 'followers_event.dart';
@@ -32,8 +28,7 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
   }
 
   bool _isLoading = false;
-  final StreamController<bool> _loadingController =
-      StreamController<bool>.broadcast();
+  final StreamController<bool> _loadingController = StreamController<bool>.broadcast();
 
   // Getter for loading state stream
   Stream<bool> get loadingStream => _loadingController.stream;
@@ -49,8 +44,7 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
     _loadingController.close();
   }
 
-  _onGetUserInfo(
-      FollowersLoadPageEvent event, Emitter<FollowersState> emit) async {
+  Future<void> _onGetUserInfo(FollowersLoadPageEvent event, Emitter<FollowersState> emit) async {
     // emit(DrugsDataInitial());
     print('33 ${event.page}');
     // if (event.page == 1) {
@@ -60,12 +54,11 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
     //   print(event.searchTerm);
     // }
     try {
-      final response = await apiManager.getUserFollower(
-          'Bearer ${AppData.userToken}', event.userId.toString());
-      
+      final response = await apiManager.getUserFollower('Bearer ${AppData.userToken}', event.userId.toString());
+
       print('🔍 DEBUG: Full API Response: $response');
       print('🔍 DEBUG: Response Type: ${response.runtimeType}');
-      
+
       // Check if response is already a FollowerDataModel (from SharedApiService)
       if (response is FollowerDataModel) {
         print('✅ Response is already FollowerDataModel');
@@ -73,11 +66,11 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
         print('🔍 DEBUG: Followers count: ${followerDataModel?.followers?.length ?? 0}');
         print('🔍 DEBUG: Following count: ${followerDataModel?.following?.length ?? 0}');
         print('🔍 DEBUG: User data exists: ${followerDataModel?.user != null}');
-      } 
+      }
       // Otherwise, try to parse from Map
       else if (response is Map<String, dynamic>) {
         print('🔍 DEBUG: Response Keys: ${response.keys.toList()}');
-        
+
         try {
           // Check if response has the expected structure
           if (response.containsKey('followers') && response.containsKey('following')) {
@@ -86,13 +79,10 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
           } else {
             // Response doesn't have expected structure, adapt it
             print('🔄 DEBUG: Adapting response structure for FollowerDataModel');
-            
+
             // Create a proper structure
             final adaptedResponse = {
-              'total_follows': {
-                'total_followers': '0',
-                'total_followings': '0'
-              },
+              'total_follows': {'total_followers': '0', 'total_followings': '0'},
               'profile_picture': response['user']?['profile_pic'],
               'cover_picture': response['user']?['background'],
               'total_posts': 0,
@@ -100,7 +90,7 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
               'followers': response['followers'] ?? [],
               'following': response['following'] ?? [],
             };
-            
+
             // If there are specific followers/following arrays in the response at different keys
             if (response.containsKey('data')) {
               if (response['data'] is Map && response['data']['followers'] != null) {
@@ -110,10 +100,10 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
                 adaptedResponse['following'] = response['data']['following'];
               }
             }
-            
+
             followerDataModel = FollowerDataModel.fromJson(adaptedResponse);
           }
-          
+
           print('🔍 DEBUG: Parsed followers count: ${followerDataModel?.followers?.length ?? 0}');
           print('🔍 DEBUG: Parsed following count: ${followerDataModel?.following?.length ?? 0}');
           print('🔍 DEBUG: User data exists: ${followerDataModel?.user != null}');
@@ -144,15 +134,12 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
     // }
   }
 
-  _setUserFollow(SetUserFollow event, Emitter<FollowersState> emit) async {
+  Future<void> _setUserFollow(SetUserFollow event, Emitter<FollowersState> emit) async {
     // emit(DrugsDataInitial());
     // ProgressDialogUtils.showProgressDialog();
-    print(
-      event.userId,
-    );
+    print(event.userId);
     try {
-      var response = await apiManager.setUserFollow(
-          'Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
+      var response = await apiManager.setUserFollow('Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
       // setLoading(false);
       emit(FollowersPaginationLoadedState());
     } catch (e) {

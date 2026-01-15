@@ -11,15 +11,9 @@ class ProfileShimmer extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final shimmerColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.4)
-        : Colors.grey[200]!;
-    final baseColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.3)
-        : Colors.grey[300]!;
-    final highlightColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.5)
-        : Colors.grey[100]!;
+    final shimmerColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.4) : Colors.grey[200]!;
+    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -42,11 +36,7 @@ class ProfileShimmer extends StatelessWidget {
                     child: Container(
                       height: 260,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [shimmerColor, shimmerColor],
-                        ),
+                        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [shimmerColor, shimmerColor]),
                       ),
                     ),
                   ),
@@ -59,15 +49,9 @@ class ProfileShimmer extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, spreadRadius: 0)],
                       ),
                     ),
                   ),
@@ -80,16 +64,10 @@ class ProfileShimmer extends StatelessWidget {
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.8),
+                        color: Colors.blue.withValues(alpha: 0.8),
                         borderRadius: BorderRadius.circular(25),
                         border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 0)],
                       ),
                     ),
                   ),
@@ -103,18 +81,8 @@ class ProfileShimmer extends StatelessWidget {
                       height: 100,
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            spreadRadius: 0,
-                            offset: const Offset(0, -2),
-                          ),
-                        ],
+                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, spreadRadius: 0, offset: const Offset(0, -2))],
                       ),
                     ),
                   ),
@@ -123,7 +91,7 @@ class ProfileShimmer extends StatelessWidget {
                   Positioned(
                     left: (MediaQuery.of(context).size.width / 2) - 60,
                     top: 180,
-                    child: Container(
+                    child: SizedBox(
                       width: 120,
                       height: 120,
                       child: Stack(
@@ -137,19 +105,10 @@ class ProfileShimmer extends StatelessWidget {
                               border: Border.all(color: Colors.white, width: 4),
                               borderRadius: BorderRadius.circular(50),
                               color: shimmerColor,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 15,
-                                  spreadRadius: 0,
-                                ),
-                              ],
+                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 15, spreadRadius: 0)],
                             ),
                             child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(46),
-                              ),
+                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(46)),
                             ),
                           ),
 
@@ -161,19 +120,10 @@ class ProfileShimmer extends StatelessWidget {
                               height: 36,
                               width: 36,
                               decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.8),
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
-                                ),
+                                color: Colors.blue.withValues(alpha: 0.8),
+                                border: Border.all(color: Colors.white, width: 2),
                                 borderRadius: BorderRadius.circular(18),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 5,
-                                    spreadRadius: 0,
-                                  ),
-                                ],
+                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 5, spreadRadius: 0)],
                               ),
                             ),
                           ),
@@ -197,19 +147,13 @@ class ProfileShimmer extends StatelessWidget {
                     Container(
                       width: 180,
                       height: 20,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
                     ),
                     const SizedBox(width: 8),
                     Container(
                       width: 16,
                       height: 16,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                     ),
                   ],
                 ),
@@ -222,19 +166,13 @@ class ProfileShimmer extends StatelessWidget {
                     Container(
                       width: 14,
                       height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                     ),
                     const SizedBox(width: 4),
                     Container(
                       width: 150,
                       height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                     ),
                   ],
                 ),
@@ -247,54 +185,39 @@ class ProfileShimmer extends StatelessWidget {
                     Container(
                       width: 14,
                       height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                     ),
                     const SizedBox(width: 4),
                     Container(
                       width: 120,
                       height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
 
                 // About Me Text (3 lines)
-                Container(
+                SizedBox(
                   width: 90.w,
                   child: Column(
                     children: [
                       Container(
                         width: double.infinity,
                         height: 13,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                       ),
                       const SizedBox(height: 4),
                       Container(
                         width: double.infinity,
                         height: 13,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                       ),
                       const SizedBox(height: 4),
                       Container(
                         width: 70.w,
                         height: 13,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                       ),
                     ],
                   ),
@@ -304,24 +227,12 @@ class ProfileShimmer extends StatelessWidget {
                 // Points Card Shimmer
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 16,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.grey.withOpacity(0.2),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 5,
-                        spreadRadius: 0,
-                      ),
-                    ],
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, spreadRadius: 0)],
                   ),
                   child: Column(
                     children: [
@@ -331,19 +242,13 @@ class ProfileShimmer extends StatelessWidget {
                           Container(
                             width: 18,
                             height: 18,
-                            decoration: BoxDecoration(
-                              color: shimmerColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                           ),
                           const SizedBox(width: 4),
                           Container(
                             width: 120,
                             height: 14,
-                            decoration: BoxDecoration(
-                              color: shimmerColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                           ),
                         ],
                       ),
@@ -351,10 +256,7 @@ class ProfileShimmer extends StatelessWidget {
                       Container(
                         width: 60,
                         height: 18,
-                        decoration: BoxDecoration(
-                          color: shimmerColor,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+                        decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                       ),
                     ],
                   ),
@@ -367,21 +269,12 @@ class ProfileShimmer extends StatelessWidget {
                   children: [
                     // Message Button Shimmer
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: Offset(0, 2))],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -389,19 +282,13 @@ class ProfileShimmer extends StatelessWidget {
                           Container(
                             width: 20,
                             height: 20,
-                            decoration: BoxDecoration(
-                              color: shimmerColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                           ),
                           const SizedBox(width: 8),
                           Container(
                             width: 60,
                             height: 14,
-                            decoration: BoxDecoration(
-                              color: shimmerColor,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                           ),
                         ],
                       ),
@@ -415,13 +302,7 @@ class ProfileShimmer extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: Offset(0, 2))],
                       ),
                       child: Center(
                         child: Row(
@@ -430,19 +311,13 @@ class ProfileShimmer extends StatelessWidget {
                             Container(
                               width: 18,
                               height: 18,
-                              decoration: BoxDecoration(
-                                color: shimmerColor,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                             ),
                             const SizedBox(width: 6),
                             Container(
                               width: 50,
                               height: 14,
-                              decoration: BoxDecoration(
-                                color: shimmerColor,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                             ),
                           ],
                         ),
@@ -489,19 +364,13 @@ class ProfileShimmer extends StatelessWidget {
                           Container(
                             width: 80,
                             height: 16,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
+                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
                           ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       // Post items
-                      for (int i = 0; i < 3; i++) ...[
-                        _buildPostShimmer(shimmerColor),
-                        const SizedBox(height: 12),
-                      ],
+                      for (int i = 0; i < 3; i++) ...[_buildPostShimmer(shimmerColor), const SizedBox(height: 12)],
                     ],
                   ),
                 ),
@@ -522,19 +391,13 @@ class ProfileShimmer extends StatelessWidget {
             Container(
               width: 16,
               height: 16,
-              decoration: BoxDecoration(
-                color: shimmerColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
             ),
             const SizedBox(width: 6),
             Container(
               width: 30,
               height: 16,
-              decoration: BoxDecoration(
-                color: shimmerColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
             ),
           ],
         ),
@@ -542,10 +405,7 @@ class ProfileShimmer extends StatelessWidget {
         Container(
           width: 60,
           height: 12,
-          decoration: BoxDecoration(
-            color: shimmerColor,
-            borderRadius: BorderRadius.circular(2),
-          ),
+          decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
         ),
       ],
     );
@@ -557,14 +417,8 @@ class ProfileShimmer extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-            spreadRadius: 0,
-          ),
-        ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, spreadRadius: 0)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -575,10 +429,7 @@ class ProfileShimmer extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  color: shimmerColor,
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: shimmerColor, shape: BoxShape.circle),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -588,19 +439,13 @@ class ProfileShimmer extends StatelessWidget {
                     Container(
                       width: 120,
                       height: 14,
-                      decoration: BoxDecoration(
-                        color: shimmerColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                     ),
                     const SizedBox(height: 4),
                     Container(
                       width: 80,
                       height: 12,
-                      decoration: BoxDecoration(
-                        color: shimmerColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                     ),
                   ],
                 ),
@@ -612,28 +457,19 @@ class ProfileShimmer extends StatelessWidget {
           Container(
             width: double.infinity,
             height: 14,
-            decoration: BoxDecoration(
-              color: shimmerColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
             height: 14,
-            decoration: BoxDecoration(
-              color: shimmerColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(height: 8),
           Container(
             width: 200,
             height: 14,
-            decoration: BoxDecoration(
-              color: shimmerColor,
-              borderRadius: BorderRadius.circular(2),
-            ),
+            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
           ),
         ],
       ),

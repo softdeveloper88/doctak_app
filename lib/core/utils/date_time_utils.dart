@@ -6,10 +6,7 @@ const String dateTimeFormatPattern = 'dd/MM/yyyy';
 extension DateTimeExtension on DateTime {
   // / Return a string representing [date] formatted according to our locale
   //change done here for testing
-  String format([
-    String pattern = dateTimeFormatPattern,
-    String? locale,
-  ]) {
+  String format([String pattern = dateTimeFormatPattern, String? locale]) {
     if (locale != null && locale.isNotEmpty) {
       initializeDateFormatting(locale);
     }

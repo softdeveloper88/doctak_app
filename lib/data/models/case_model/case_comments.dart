@@ -1,10 +1,10 @@
 import 'dart:convert';
+
 CaseComments caseCommentsFromJson(String str) => CaseComments.fromJson(json.decode(str));
 String caseCommentsToJson(CaseComments data) => json.encode(data.toJson());
+
 class CaseComments {
-  CaseComments({
-      this.comments, 
-      this.offset,});
+  CaseComments({this.comments, this.offset});
 
   CaseComments.fromJson(dynamic json) {
     if (json['comments'] != null) {
@@ -26,24 +26,13 @@ class CaseComments {
     map['offset'] = offset;
     return map;
   }
-
 }
 
 Comments commentsFromJson(String str) => Comments.fromJson(json.decode(str));
 String commentsToJson(Comments data) => json.encode(data.toJson());
+
 class Comments {
-  Comments({
-      this.id, 
-      this.comment, 
-      this.likes, 
-      this.dislikes, 
-      this.userId,
-      this.createdAt,
-      this.name, 
-      this.profilePic, 
-      this.likedByUser, 
-      this.isLike=0,
-      this.actionType,});
+  Comments({this.id, this.comment, this.likes, this.dislikes, this.userId, this.createdAt, this.name, this.profilePic, this.likedByUser, this.isLike = 0, this.actionType});
 
   Comments.fromJson(dynamic json) {
     id = json['id'];
@@ -83,5 +72,4 @@ class Comments {
     map['action_type'] = actionType;
     return map;
   }
-
 }

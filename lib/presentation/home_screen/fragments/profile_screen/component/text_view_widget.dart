@@ -1,18 +1,10 @@
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 
 class TextViewWidget extends StatelessWidget {
-  TextViewWidget({
-    this.label,
-    this.value,
-    this.icon,
-    this.iconColor,
-    this.valueColor,
-    super.key
-  });
+  TextViewWidget({this.label, this.value, this.icon, this.iconColor, this.valueColor, super.key});
 
   String? label;
   String? value;
@@ -36,17 +28,8 @@ class TextViewWidget extends StatelessWidget {
               width: 32,
               height: 32,
               margin: const EdgeInsets.only(right: 12, top: 2),
-              decoration: BoxDecoration(
-                color: displayIconColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Icon(
-                  icon,
-                  size: 16,
-                  color: displayIconColor,
-                ),
-              ),
+              decoration: BoxDecoration(color: displayIconColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              child: Center(child: Icon(icon, size: 16, color: displayIconColor)),
             ),
 
           // Text content
@@ -57,12 +40,7 @@ class TextViewWidget extends StatelessWidget {
                 // Label
                 Text(
                   capitalizeWords(label ?? ''),
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.grey[600],
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: TextStyle(fontFamily: 'Poppins', color: Colors.grey[600], fontSize: 12.sp, fontWeight: FontWeight.w400),
                 ),
 
                 const SizedBox(height: 4),
@@ -70,23 +48,13 @@ class TextViewWidget extends StatelessWidget {
                 // Value
                 value != null && value!.isNotEmpty
                     ? Text(
-                  capitalizeWords(value ?? ''),
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: valueColor ?? Colors.black87,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                )
+                        capitalizeWords(value ?? ''),
+                        style: TextStyle(fontFamily: 'Poppins', color: valueColor ?? Colors.black87, fontSize: 13.sp, fontWeight: FontWeight.w500),
+                      )
                     : Text(
-                  translation(context).lbl_not_specified,
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    color: Colors.grey[500],
-                    fontSize: 12.sp,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
+                        translation(context).lbl_not_specified,
+                        style: TextStyle(fontFamily: 'Poppins', color: Colors.grey[500], fontSize: 12.sp, fontStyle: FontStyle.italic),
+                      ),
               ],
             ),
           ),

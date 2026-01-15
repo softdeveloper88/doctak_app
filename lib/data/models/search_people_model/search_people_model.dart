@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-SearchPeopleModel searchPeopleModelFromJson(String str) =>
-    SearchPeopleModel.fromJson(json.decode(str));
-String searchPeopleModelToJson(SearchPeopleModel data) =>
-    json.encode(data.toJson());
+SearchPeopleModel searchPeopleModelFromJson(String str) => SearchPeopleModel.fromJson(json.decode(str));
+String searchPeopleModelToJson(SearchPeopleModel data) => json.encode(data.toJson());
 
 class SearchPeopleModel {
   SearchPeopleModel({
@@ -88,11 +86,7 @@ Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
 
 class Links {
-  Links({
-    this.url,
-    this.label,
-    this.active,
-  });
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -116,17 +110,7 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 
 class Data {
-  Data({
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.profilePic,
-    this.userType,
-    this.specialty,
-    this.followersCount,
-    this.isFollowedByCurrentUser,
-    this.isCurrentUser,
-  });
+  Data({this.id, this.firstName, this.lastName, this.profilePic, this.userType, this.specialty, this.followersCount, this.isFollowedByCurrentUser, this.isCurrentUser});
 
   Data.fromJson(dynamic json) {
     id = json['id'];

@@ -13,7 +13,7 @@ class ProfileHeaderWidget extends StatelessWidget {
   final bool isCurrentUser;
 
   const ProfileHeaderWidget({
-    Key? key,
+    super.key,
     required this.profilePicUrl,
     required this.userName,
     this.createdAt,
@@ -21,7 +21,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     required this.onProfileTap,
     required this.onDeleteTap,
     required this.isCurrentUser,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,9 +47,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                       border: Border.all(color: theme.avatarBorder, width: 2),
                       boxShadow: [
                         BoxShadow(
-                          color: theme.primary.withOpacity(
-                            theme.isDark ? 0.2 : 0.1,
-                          ),
+                          color: theme.primary.withValues(alpha: theme.isDark ? 0.2 : 0.1),
                           spreadRadius: 1,
                           blurRadius: 6,
                           offset: const Offset(0, 2),
@@ -66,25 +64,14 @@ class ProfileHeaderWidget extends StatelessWidget {
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 color: theme.avatarBackground,
-                                child: Center(
-                                  child: CupertinoActivityIndicator(
-                                    color: theme.primary,
-                                  ),
-                                ),
+                                child: Center(child: CupertinoActivityIndicator(color: theme.primary)),
                               ),
                               errorWidget: (context, url, error) => Container(
                                 color: theme.avatarBackground,
                                 child: Center(
                                   child: Text(
-                                    userName.isNotEmpty
-                                        ? userName[0].toUpperCase()
-                                        : 'U',
-                                    style: TextStyle(
-                                      color: theme.avatarText,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Poppins',
-                                    ),
+                                    userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                    style: TextStyle(color: theme.avatarText, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                                   ),
                                 ),
                               ),
@@ -93,15 +80,8 @@ class ProfileHeaderWidget extends StatelessWidget {
                               color: theme.avatarBackground,
                               child: Center(
                                 child: Text(
-                                  userName.isNotEmpty
-                                      ? userName[0].toUpperCase()
-                                      : 'U',
-                                  style: TextStyle(
-                                    color: theme.avatarText,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Poppins',
-                                  ),
+                                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                  style: TextStyle(color: theme.avatarText, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
                                 ),
                               ),
                             ),
@@ -122,13 +102,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 userName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                  fontFamily: 'Poppins',
-                                  color: theme.textPrimary,
-                                  letterSpacing: -0.2,
-                                ),
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, fontFamily: 'Poppins', color: theme.textPrimary, letterSpacing: -0.2),
                               ),
                             ),
                             const SizedBox(width: 6),
@@ -136,26 +110,11 @@ class ProfileHeaderWidget extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    theme.verifiedBadge,
-                                    theme.verifiedBadge.withOpacity(0.8),
-                                  ],
-                                ),
+                                gradient: LinearGradient(colors: [theme.verifiedBadge, theme.verifiedBadge.withValues(alpha: 0.8)]),
                                 shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: theme.verifiedBadge.withOpacity(0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
+                                boxShadow: [BoxShadow(color: theme.verifiedBadge.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 1))],
                               ),
-                              child: const Icon(
-                                CupertinoIcons.checkmark_alt,
-                                size: 10,
-                                color: Colors.white,
-                              ),
+                              child: const Icon(CupertinoIcons.checkmark_alt, size: 10, color: Colors.white),
                             ),
                           ],
                         ),
@@ -164,23 +123,14 @@ class ProfileHeaderWidget extends StatelessWidget {
                         if (specialty != null)
                           Row(
                             children: [
-                              Icon(
-                                CupertinoIcons.heart_circle,
-                                size: 14,
-                                color: theme.textSecondary,
-                              ),
+                              Icon(CupertinoIcons.heart_circle, size: 14, color: theme.textSecondary),
                               const SizedBox(width: 6),
                               Flexible(
                                 child: Text(
                                   specialty!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: theme.textSecondary,
-                                    fontFamily: 'Poppins',
-                                  ),
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.textSecondary, fontFamily: 'Poppins'),
                                 ),
                               ),
                             ],
@@ -188,37 +138,21 @@ class ProfileHeaderWidget extends StatelessWidget {
                         else
                           Row(
                             children: [
-                              Icon(
-                                CupertinoIcons.time,
-                                size: 12,
-                                color: theme.textSecondary,
-                              ),
+                              Icon(CupertinoIcons.time, size: 12, color: theme.textSecondary),
                               const SizedBox(width: 4),
                               Text(
                                 createdAt ?? '',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: theme.textSecondary,
-                                  fontFamily: 'Poppins',
-                                ),
+                                style: TextStyle(fontSize: 12, color: theme.textSecondary, fontFamily: 'Poppins'),
                               ),
-                              if (createdAt != null &&
-                                  createdAt!.isNotEmpty) ...[
+                              if (createdAt != null && createdAt!.isNotEmpty) ...[
                                 const SizedBox(width: 6),
                                 Container(
                                   width: 3,
                                   height: 3,
-                                  decoration: BoxDecoration(
-                                    color: theme.textSecondary,
-                                    shape: BoxShape.circle,
-                                  ),
+                                  decoration: BoxDecoration(color: theme.textSecondary, shape: BoxShape.circle),
                                 ),
                                 const SizedBox(width: 6),
-                                Icon(
-                                  CupertinoIcons.globe,
-                                  size: 12,
-                                  color: theme.textSecondary,
-                                ),
+                                Icon(CupertinoIcons.globe, size: 12, color: theme.textSecondary),
                               ],
                             ],
                           ),
@@ -232,40 +166,23 @@ class ProfileHeaderWidget extends StatelessWidget {
           // One UI 8.5 More Options Button
           if (isCurrentUser)
             Container(
-              decoration: BoxDecoration(
-                color: theme.moreButtonBg,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: theme.moreButtonBg, shape: BoxShape.circle),
               child: PopupMenuButton<String>(
-                icon: Icon(
-                  CupertinoIcons.ellipsis_vertical,
-                  color: theme.iconColor,
-                  size: 18,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                icon: Icon(CupertinoIcons.ellipsis_vertical, color: theme.iconColor, size: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 color: theme.cardBackground,
                 elevation: 8,
-                shadowColor: Colors.black.withOpacity(0.2),
+                shadowColor: Colors.black.withValues(alpha: 0.2),
                 itemBuilder: (context) => [
                   PopupMenuItem(
                     value: 'Delete',
                     child: Row(
                       children: [
-                        Icon(
-                          CupertinoIcons.trash,
-                          color: theme.deleteRed,
-                          size: 20,
-                        ),
+                        Icon(CupertinoIcons.trash, color: theme.deleteRed, size: 20),
                         const SizedBox(width: 12),
                         Text(
                           'Delete',
-                          style: TextStyle(
-                            color: theme.deleteRed,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(color: theme.deleteRed, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),

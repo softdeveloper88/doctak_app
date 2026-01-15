@@ -73,10 +73,7 @@ class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionS
     on<ResetCreateDiscussion>(_onResetCreateDiscussion);
   }
 
-  Future<void> _onCreateDiscussion(
-    CreateDiscussion event,
-    Emitter<CreateDiscussionState> emit,
-  ) async {
+  Future<void> _onCreateDiscussion(CreateDiscussion event, Emitter<CreateDiscussionState> emit) async {
     emit(CreateDiscussionLoading());
 
     try {
@@ -86,9 +83,9 @@ class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionS
       print('Tags: ${event.request.tags}');
       // print('Specialty ID: ${event.request.specialtyId}');
       print('Attached File: ${event.request.attachedFiles}');
-      
+
       final discussion = await repository.createCaseDiscussion(event.request);
-      
+
       print('✅ Case discussion created successfully: ${discussion.id}');
       emit(CreateDiscussionSuccess(discussion, isUpdate: false));
     } catch (e, stackTrace) {
@@ -98,10 +95,7 @@ class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionS
     }
   }
 
-  Future<void> _onUpdateDiscussion(
-    UpdateDiscussion event,
-    Emitter<CreateDiscussionState> emit,
-  ) async {
+  Future<void> _onUpdateDiscussion(UpdateDiscussion event, Emitter<CreateDiscussionState> emit) async {
     emit(CreateDiscussionLoading());
 
     try {
@@ -111,9 +105,9 @@ class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionS
       print('Description: ${event.request.description}');
       print('Tags: ${event.request.tags}');
       print('Attached Files: ${event.request.attachedFiles}');
-      
+
       final discussion = await repository.updateCaseDiscussion(event.caseId, event.request);
-      
+
       print('✅ Case discussion updated successfully: ${discussion.id}');
       emit(CreateDiscussionSuccess(discussion, isUpdate: true));
     } catch (e, stackTrace) {
@@ -123,10 +117,7 @@ class CreateDiscussionBloc extends Bloc<CreateDiscussionEvent, CreateDiscussionS
     }
   }
 
-  void _onResetCreateDiscussion(
-    ResetCreateDiscussion event,
-    Emitter<CreateDiscussionState> emit,
-  ) {
+  void _onResetCreateDiscussion(ResetCreateDiscussion event, Emitter<CreateDiscussionState> emit) {
     emit(CreateDiscussionInitial());
   }
 }

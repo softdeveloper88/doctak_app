@@ -6,10 +6,5 @@ class SelectionPopupModel {
   dynamic value;
   bool isSelected;
 
-  SelectionPopupModel({
-    this.id,
-    required this.title,
-    this.value,
-    this.isSelected = false,
-  });
+  SelectionPopupModel({this.id, required this.title, this.value, this.isSelected = false});
 }

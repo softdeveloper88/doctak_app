@@ -11,10 +11,9 @@ class ConnectivityService extends ChangeNotifier {
   }
 
   void _initializeConnectivity() async {
-
     final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
-// This condition is for demo purposes only to explain every connection type.
-// Use conditions which work for your requirements.
+    // This condition is for demo purposes only to explain every connection type.
+    // Use conditions which work for your requirements.
     if (connectivityResult.contains(ConnectivityResult.mobile)) {
       _updateStatus(ConnectivityResult.mobile);
       // Mobile network available.
@@ -48,7 +47,6 @@ class ConnectivityService extends ChangeNotifier {
 
       // No available network types
     }
-
   }
 
   void _updateStatus(ConnectivityResult result) {

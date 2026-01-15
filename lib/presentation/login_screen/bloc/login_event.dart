@@ -15,9 +15,7 @@ class ChangePasswordVisibilityEvent extends LoginEvent {
   ChangePasswordVisibilityEvent({required this.value});
   bool value;
   @override
-  List<Object?> get props => [
-        value,
-      ];
+  List<Object?> get props => [value];
 }
 
 class LoginButtonPressed extends LoginEvent {
@@ -26,10 +24,10 @@ class LoginButtonPressed extends LoginEvent {
   final bool rememberMe;
   final String deviceToken;
 
-  LoginButtonPressed({required this.username, required this.password,required this.rememberMe,required this.deviceToken});
+  LoginButtonPressed({required this.username, required this.password, required this.rememberMe, required this.deviceToken});
 
   @override
-  List<Object> get props => [username, password,rememberMe,deviceToken];
+  List<Object> get props => [username, password, rememberMe, deviceToken];
 }
 
 class SocialLoginButtonPressed extends LoginEvent {
@@ -41,17 +39,8 @@ class SocialLoginButtonPressed extends LoginEvent {
   final String token;
   final String deviceToken;
 
-  SocialLoginButtonPressed(
-      {required this.email,
-      required this.firstName,
-      required this.lastName,
-      required this.isSocialLogin,
-      required this.provider,
-      required this.token,
-      required this.deviceToken,
-      });
+  SocialLoginButtonPressed({required this.email, required this.firstName, required this.lastName, required this.isSocialLogin, required this.provider, required this.token, required this.deviceToken});
 
   @override
-  List<Object> get props =>
-      [email, firstName, lastName, isSocialLogin, provider, token,deviceToken];
+  List<Object> get props => [email, firstName, lastName, isSocialLogin, provider, token, deviceToken];
 }

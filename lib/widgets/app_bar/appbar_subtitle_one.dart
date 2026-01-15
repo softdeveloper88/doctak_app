@@ -3,14 +3,7 @@ import 'package:doctak_app/core/app_export.dart';
 
 // ignore: must_be_immutable
 class AppbarSubtitleOne extends StatelessWidget {
-  AppbarSubtitleOne({
-    Key? key,
-    required this.text,
-    this.margin,
-    this.onTap,
-  }) : super(
-          key: key,
-        );
+  AppbarSubtitleOne({super.key, required this.text, this.margin, this.onTap});
 
   String text;
 
@@ -26,12 +19,7 @@ class AppbarSubtitleOne extends StatelessWidget {
       },
       child: Padding(
         padding: margin ?? EdgeInsets.zero,
-        child: Text(
-          text,
-          style: CustomTextStyles.titleMedium18.copyWith(
-            color: theme.colorScheme.onPrimary,
-          ),
-        ),
+        child: Text(text, style: CustomTextStyles.titleMedium18.copyWith(color: theme.colorScheme.onPrimary)),
       ),
     );
   }

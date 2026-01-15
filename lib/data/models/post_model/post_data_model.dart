@@ -3,8 +3,6 @@
 // Note: This is just an interface to match the existing model structure
 // You should use your actual model implementation here
 
-import 'dart:convert';
-
 class PostDataModel {
   Posts? posts;
 
@@ -38,21 +36,7 @@ class Posts {
   int? to;
   int? total;
 
-  Posts({
-    this.currentPage,
-    this.data,
-    this.firstPageUrl,
-    this.from,
-    this.lastPage,
-    this.lastPageUrl,
-    this.links,
-    this.nextPageUrl,
-    this.path,
-    this.perPage,
-    this.prevPageUrl,
-    this.to,
-    this.total,
-  });
+  Posts({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
 
   Posts.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
@@ -247,9 +231,7 @@ class Comments {
     deletedAt = json['deleted_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    commenter = json['commenter'] != null
-        ? Commenter.fromJson(json['commenter'])
-        : null;
+    commenter = json['commenter'] != null ? Commenter.fromJson(json['commenter']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -304,14 +286,7 @@ class Media {
   String? createdAt;
   String? updatedAt;
 
-  Media({
-    this.id,
-    this.postId,
-    this.mediaType,
-    this.mediaPath,
-    this.createdAt,
-    this.updatedAt,
-  });
+  Media({this.id, this.postId, this.mediaType, this.mediaPath, this.createdAt, this.updatedAt});
 
   Media.fromJson(Map<String, dynamic> json) {
     id = json['id'];

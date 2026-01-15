@@ -11,14 +11,14 @@ class EnhancedDiscussionSearchBar extends StatefulWidget {
   final CaseDiscussionFilters currentFilters;
 
   const EnhancedDiscussionSearchBar({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSearch,
     required this.onFiltersChanged,
     required this.specialties,
     required this.countries,
     required this.currentFilters,
-  }) : super(key: key);
+  });
 
   @override
   State<EnhancedDiscussionSearchBar> createState() => _EnhancedDiscussionSearchBarState();
@@ -45,13 +45,10 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        boxShadow: theme.cardShadow,
-      ),
+      decoration: BoxDecoration(color: theme.cardBackground, boxShadow: theme.cardShadow),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -75,22 +72,15 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                         : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: theme.border,
-                      ),
+                      borderSide: BorderSide(color: theme.border),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: theme.border,
-                      ),
+                      borderSide: BorderSide(color: theme.border),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: theme.primary,
-                        width: 2,
-                      ),
+                      borderSide: BorderSide(color: theme.primary, width: 2),
                     ),
                     filled: true,
                     fillColor: theme.inputBackground,
@@ -102,23 +92,12 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               const SizedBox(width: 8),
               Container(
                 decoration: BoxDecoration(
-                  color: _isFilterExpanded
-                      ? theme.primary
-                      : theme.surfaceVariant,
+                  color: _isFilterExpanded ? theme.primary : theme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: _isFilterExpanded
-                        ? theme.primary
-                        : theme.border,
-                  ),
+                  border: Border.all(color: _isFilterExpanded ? theme.primary : theme.border),
                 ),
                 child: IconButton(
-                  icon: Icon(
-                    Icons.tune,
-                    color: _isFilterExpanded
-                        ? theme.cardBackground
-                        : theme.textSecondary,
-                  ),
+                  icon: Icon(Icons.tune, color: _isFilterExpanded ? theme.cardBackground : theme.textSecondary),
                   onPressed: () {
                     setState(() {
                       _isFilterExpanded = !_isFilterExpanded;
@@ -133,22 +112,11 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            child: _isFilterExpanded
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 16),
-                      _buildFiltersSection(theme),
-                    ],
-                  )
-                : const SizedBox.shrink(),
+            child: _isFilterExpanded ? Column(mainAxisSize: MainAxisSize.min, children: [const SizedBox(height: 16), _buildFiltersSection(theme)]) : const SizedBox.shrink(),
           ),
 
           // Active filters chips
-          if (_hasActiveFilters()) ...[
-            const SizedBox(height: 12),
-            _buildActiveFiltersChips(theme),
-          ],
+          if (_hasActiveFilters()) ...[const SizedBox(height: 12), _buildActiveFiltersChips(theme)],
         ],
       ),
     );
@@ -173,18 +141,10 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               const SizedBox(width: 8),
               Text(
                 'Filters',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: theme.primary,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.primary),
               ),
               const Spacer(),
-              if (_hasActiveFilters())
-                TextButton(
-                  onPressed: _clearAllFilters,
-                  child: const Text('Clear All'),
-                ),
+              if (_hasActiveFilters()) TextButton(onPressed: _clearAllFilters, child: const Text('Clear All')),
             ],
           ),
           const SizedBox(height: 16),
@@ -220,9 +180,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                 backgroundColor: theme.primary,
                 foregroundColor: theme.cardBackground,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
               child: const Text('Apply Filters'),
             ),
@@ -237,44 +195,22 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Specialty',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        const Text('Specialty', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         SizedBox(
           height: 56,
           child: DropdownButtonFormField<SpecialtyFilter?>(
-            value: _localFilters.selectedSpecialty,
+            initialValue: _localFilters.selectedSpecialty,
             isExpanded: true,
             decoration: InputDecoration(
-              hintText: widget.specialties.isEmpty
-                  ? 'Loading specialties...'
-                  : 'Select specialty',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-              prefixIcon: Icon(
-                Icons.medical_services_outlined,
-                size: 16,
-                color: theme.textSecondary,
-              ),
+              hintText: widget.specialties.isEmpty ? 'Loading specialties...' : 'Select specialty',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              prefixIcon: Icon(Icons.medical_services_outlined, size: 16, color: theme.textSecondary),
             ),
             items: [
-              const DropdownMenuItem<SpecialtyFilter?>(
-                value: null,
-                child: Text('All Specialties'),
-              ),
-              ...widget.specialties
-                  .where((specialty) => specialty.isActive)
-                  .map((specialty) {
+              const DropdownMenuItem<SpecialtyFilter?>(value: null, child: Text('All Specialties')),
+              ...widget.specialties.where((specialty) => specialty.isActive).map((specialty) {
                 return DropdownMenuItem<SpecialtyFilter?>(
                   value: specialty,
                   child: Row(
@@ -282,10 +218,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
                       Container(
                         width: 8,
                         height: 8,
-                        decoration: BoxDecoration(
-                          color: _getSpecialtyColor(specialty.name, theme),
-                          shape: BoxShape.circle,
-                        ),
+                        decoration: BoxDecoration(color: _getSpecialtyColor(specialty.name, theme), shape: BoxShape.circle),
                       ),
                       const SizedBox(width: 8),
                       Expanded(child: Text(specialty.name)),
@@ -297,15 +230,11 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
             onChanged: widget.specialties.isEmpty
                 ? null
                 : (specialty) {
-                    print(
-                        'Specialty selected: ${specialty?.name} (ID: ${specialty?.id})');
+                    print('Specialty selected: ${specialty?.name} (ID: ${specialty?.id})');
                     setState(() {
-                      _localFilters = _localFilters.copyWith(
-                    selectedSpecialty: specialty,
-                        clearSpecialty: specialty == null,
-                      );
-              });
-            },
+                      _localFilters = _localFilters.copyWith(selectedSpecialty: specialty, clearSpecialty: specialty == null);
+                    });
+                  },
           ),
         ),
       ],
@@ -333,60 +262,29 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Country',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        const Text('Country', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         SizedBox(
           height: 56,
           child: DropdownButtonFormField<CountryFilter?>(
-            value: _localFilters.selectedCountry,
+            initialValue: _localFilters.selectedCountry,
             isExpanded: true,
             decoration: InputDecoration(
-              hintText: widget.countries.isEmpty
-                  ? 'Loading countries...'
-                  : 'Select country',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
-              prefixIcon: Icon(
-                Icons.public,
-                size: 16,
-                color: theme.textSecondary,
-              ),
+              hintText: widget.countries.isEmpty ? 'Loading countries...' : 'Select country',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              prefixIcon: Icon(Icons.public, size: 16, color: theme.textSecondary),
             ),
             items: [
-              const DropdownMenuItem<CountryFilter?>(
-                value: null,
-                child: Text('All Countries'),
-              ),
+              const DropdownMenuItem<CountryFilter?>(value: null, child: Text('All Countries')),
               ...widget.countries.map((country) {
                 return DropdownMenuItem<CountryFilter?>(
                   value: country,
                   child: Row(
                     children: [
-                      SizedBox(
-                        width: 24,
-                        child: Text(
-                          country.flag.isNotEmpty ? country.flag : '🌍',
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ),
+                      SizedBox(width: 24, child: Text(country.flag.isNotEmpty ? country.flag : '🌍', style: const TextStyle(fontSize: 16))),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          country.name,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                      Expanded(child: Text(country.name, overflow: TextOverflow.ellipsis)),
                     ],
                   ),
                 );
@@ -395,15 +293,11 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
             onChanged: widget.countries.isEmpty
                 ? null
                 : (country) {
-                    print(
-                        'Country selected: ${country?.name} (ID: ${country?.id})');
+                    print('Country selected: ${country?.name} (ID: ${country?.id})');
                     setState(() {
-                _localFilters = _localFilters.copyWith(
-                  selectedCountry: country,
-                        clearCountry: country == null,
-                      );
-              });
-            },
+                      _localFilters = _localFilters.copyWith(selectedCountry: country, clearCountry: country == null);
+                    });
+                  },
           ),
         ),
       ],
@@ -415,13 +309,7 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Sort By',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        const Text('Sort By', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -430,45 +318,23 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               child: SizedBox(
                 height: 56,
                 child: DropdownButtonFormField<String?>(
-                  value: _localFilters.sortBy,
+                  initialValue: _localFilters.sortBy,
                   isExpanded: true,
                   decoration: InputDecoration(
                     hintText: 'Sort by',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: const [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('Default'),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'created_at',
-                      child: Text('Date Created'),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'likes',
-                      child: Text('Likes'),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'comments',
-                      child: Text('Comments'),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'views',
-                      child: Text('Views'),
-                    ),
+                    DropdownMenuItem<String?>(value: null, child: Text('Default')),
+                    DropdownMenuItem<String>(value: 'created_at', child: Text('Date Created')),
+                    DropdownMenuItem<String>(value: 'likes', child: Text('Likes')),
+                    DropdownMenuItem<String>(value: 'comments', child: Text('Comments')),
+                    DropdownMenuItem<String>(value: 'views', child: Text('Views')),
                   ],
                   onChanged: (sortBy) {
                     setState(() {
-                      _localFilters = _localFilters.copyWith(
-                        sortBy: sortBy,
-                      );
+                      _localFilters = _localFilters.copyWith(sortBy: sortBy);
                     });
                   },
                 ),
@@ -479,33 +345,20 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
               child: SizedBox(
                 height: 56,
                 child: DropdownButtonFormField<String?>(
-                  value: _localFilters.sortOrder,
+                  initialValue: _localFilters.sortOrder,
                   isExpanded: true,
                   decoration: InputDecoration(
                     hintText: 'Order',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: const [
-                    DropdownMenuItem<String>(
-                      value: 'desc',
-                      child: Text('Desc'),
-                    ),
-                    DropdownMenuItem<String>(
-                      value: 'asc',
-                      child: Text('Asc'),
-                    ),
+                    DropdownMenuItem<String>(value: 'desc', child: Text('Desc')),
+                    DropdownMenuItem<String>(value: 'asc', child: Text('Asc')),
                   ],
                   onChanged: (sortOrder) {
                     setState(() {
-                      _localFilters = _localFilters.copyWith(
-                        sortOrder: sortOrder,
-                      );
+                      _localFilters = _localFilters.copyWith(sortOrder: sortOrder);
                     });
                   },
                 ),
@@ -522,46 +375,27 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          'Status',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        const Text('Status', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
         const SizedBox(height: 8),
         SizedBox(
           height: 56,
           child: DropdownButtonFormField<CaseStatus?>(
-            value: _localFilters.status,
+            initialValue: _localFilters.status,
             isExpanded: true,
             decoration: InputDecoration(
               hintText: 'Select status',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             items: [
-              const DropdownMenuItem<CaseStatus?>(
-                value: null,
-                child: Text('All Status'),
-              ),
+              const DropdownMenuItem<CaseStatus?>(value: null, child: Text('All Status')),
               ...CaseStatus.values.map((status) {
-                return DropdownMenuItem<CaseStatus?>(
-                  value: status,
-                  child: Text(status.value.toUpperCase()),
-                );
+                return DropdownMenuItem<CaseStatus?>(value: status, child: Text(status.value.toUpperCase()));
               }),
             ],
             onChanged: (status) {
               setState(() {
-                _localFilters = _localFilters.copyWith(
-                  status: status,
-                );
+                _localFilters = _localFilters.copyWith(status: status);
               });
             },
           ),
@@ -580,74 +414,51 @@ class _EnhancedDiscussionSearchBarState extends State<EnhancedDiscussionSearchBa
             label: Text(_localFilters.selectedSpecialty!.name),
             onDeleted: () {
               setState(() {
-                _localFilters = _localFilters.copyWith(
-                  selectedSpecialty: null,
-                  clearSpecialty: true,
-                );
+                _localFilters = _localFilters.copyWith(selectedSpecialty: null, clearSpecialty: true);
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: theme.primary.withOpacity(0.1),
+            backgroundColor: theme.primary.withValues(alpha: 0.1),
           ),
         if (_localFilters.selectedCountry != null)
           Chip(
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(_localFilters.selectedCountry!.flag),
-                const SizedBox(width: 4),
-                Text(_localFilters.selectedCountry!.name),
-              ],
-            ),
+            label: Row(mainAxisSize: MainAxisSize.min, children: [Text(_localFilters.selectedCountry!.flag), const SizedBox(width: 4), Text(_localFilters.selectedCountry!.name)]),
             onDeleted: () {
               setState(() {
-                _localFilters = _localFilters.copyWith(
-                  selectedCountry: null,
-                  clearCountry: true,
-                );
+                _localFilters = _localFilters.copyWith(selectedCountry: null, clearCountry: true);
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: theme.primary.withOpacity(0.1),
+            backgroundColor: theme.primary.withValues(alpha: 0.1),
           ),
         if (_localFilters.status != null)
           Chip(
             label: Text(_localFilters.status!.value.toUpperCase()),
             onDeleted: () {
               setState(() {
-                _localFilters = _localFilters.copyWith(
-                  status: null,
-                  clearStatus: true,
-                );
+                _localFilters = _localFilters.copyWith(status: null, clearStatus: true);
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: theme.primary.withOpacity(0.1),
+            backgroundColor: theme.primary.withValues(alpha: 0.1),
           ),
         if (_localFilters.sortBy != null)
           Chip(
             label: Text('Sort: ${_localFilters.sortBy}'),
             onDeleted: () {
               setState(() {
-                _localFilters = _localFilters.copyWith(
-                  sortBy: null,
-                  sortOrder: null,
-                  clearSort: true,
-                );
+                _localFilters = _localFilters.copyWith(sortBy: null, sortOrder: null, clearSort: true);
               });
               widget.onFiltersChanged(_localFilters);
             },
-            backgroundColor: theme.primary.withOpacity(0.1),
+            backgroundColor: theme.primary.withValues(alpha: 0.1),
           ),
       ],
     );
   }
 
   bool _hasActiveFilters() {
-    return _localFilters.selectedSpecialty != null ||
-        _localFilters.selectedCountry != null ||
-        _localFilters.status != null ||
-        _localFilters.sortBy != null;
+    return _localFilters.selectedSpecialty != null || _localFilters.selectedCountry != null || _localFilters.status != null || _localFilters.sortBy != null;
   }
 
   void _clearAllFilters() {

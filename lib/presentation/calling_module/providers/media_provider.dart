@@ -21,9 +21,7 @@ class MediaProvider extends ChangeNotifier {
   bool get isUsingLowerVideoQuality => _isUsingLowerVideoQuality;
 
   // Initialize with defaults
-  MediaProvider({
-    bool isVideoCall = false,
-  }) {
+  MediaProvider({bool isVideoCall = false}) {
     _isVideoCallActive = isVideoCall;
     _isSpeakerOn = isVideoCall; // Turn on speaker by default for video calls
   }
@@ -104,4 +102,3 @@ class MediaProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

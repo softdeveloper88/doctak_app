@@ -16,14 +16,13 @@ import 'fragments/profile_screen/SVProfileFragment.dart';
 import 'home/components/SVHomeDrawerComponent.dart';
 
 class SVDashboardScreen extends StatefulWidget {
-  const SVDashboardScreen({Key? key}) : super(key: key);
+  const SVDashboardScreen({super.key});
 
   @override
   State<SVDashboardScreen> createState() => _SVDashboardScreenState();
 }
 
-class _SVDashboardScreenState extends State<SVDashboardScreen>
-    with WidgetsBindingObserver, TickerProviderStateMixin {
+class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
   final HomeBloc homeBloc = HomeBloc();
@@ -59,19 +58,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     setStatusBarColor(Colors.transparent);
     WidgetsBinding.instance.addObserver(this);
 
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
+    _animationController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
 
     _fragments = [
-      SVHomeFragment(
-        homeBloc: homeBloc,
-        openDrawer: () => scaffoldKey.currentState?.openDrawer(),
-      ),
+      SVHomeFragment(homeBloc: homeBloc, openDrawer: () => scaffoldKey.currentState?.openDrawer()),
       SearchScreen(backPress: () => setState(() => selectedIndex = 0)),
       SVAddPostFragment(
         refresh: () {
@@ -123,13 +114,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         child: Container(
           height: 64,
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: isRTL
-                ? _buildRTLNavigationItems()
-                : _buildLTRNavigationItems(),
-          ),
+          child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, crossAxisAlignment: CrossAxisAlignment.center, children: isRTL ? _buildRTLNavigationItems() : _buildLTRNavigationItems()),
         ),
       ),
     );
@@ -137,18 +122,8 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
 
   List<Widget> _buildLTRNavigationItems() {
     return [
-      _buildNavItem(
-        0,
-        CupertinoIcons.house_fill,
-        CupertinoIcons.house,
-        translation(context).lbl_home,
-      ),
-      _buildNavItem(
-        1,
-        CupertinoIcons.search_circle_fill,
-        CupertinoIcons.search,
-        translation(context).lbl_search,
-      ),
+      _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, translation(context).lbl_home),
+      _buildNavItem(1, CupertinoIcons.search_circle_fill, CupertinoIcons.search, translation(context).lbl_search),
       _buildAddButton(),
       _buildProfileNavItem(),
       _buildAINavItem(),
@@ -160,27 +135,12 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
       _buildAINavItem(),
       _buildProfileNavItem(),
       _buildAddButton(),
-      _buildNavItem(
-        1,
-        CupertinoIcons.search_circle_fill,
-        CupertinoIcons.search,
-        translation(context).lbl_search,
-      ),
-      _buildNavItem(
-        0,
-        CupertinoIcons.house_fill,
-        CupertinoIcons.house,
-        translation(context).lbl_home,
-      ),
+      _buildNavItem(1, CupertinoIcons.search_circle_fill, CupertinoIcons.search, translation(context).lbl_search),
+      _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, translation(context).lbl_home),
     ];
   }
 
-  Widget _buildNavItem(
-    int index,
-    IconData activeIcon,
-    IconData inactiveIcon,
-    String label,
-  ) {
+  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon, String label) {
     final isSelected = selectedIndex == index;
     final theme = OneUITheme.of(context);
 
@@ -190,9 +150,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         onTap: () {
           if (selectedIndex != index) {
             setState(() => selectedIndex = index);
-            _animationController.forward().then(
-              (_) => _animationController.reverse(),
-            );
+            _animationController.forward().then((_) => _animationController.reverse());
           }
           FocusManager.instance.primaryFocus?.unfocus();
         },
@@ -204,32 +162,15 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
-              padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 20 : 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? theme.primary.withOpacity(0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                isSelected ? activeIcon : inactiveIcon,
-                size: 24,
-                color: isSelected ? theme.primary : theme.iconInactive,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: isSelected ? 20 : 12, vertical: 6),
+              decoration: BoxDecoration(color: isSelected ? theme.primary.withValues(alpha: 0.15) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
+              child: Icon(isSelected ? activeIcon : inactiveIcon, size: 24, color: isSelected ? theme.primary : theme.iconInactive),
             ),
             const SizedBox(height: 4),
             // One UI 8.5 label
             Text(
               label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? theme.primary : theme.iconInactive,
-                letterSpacing: 0.1,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500, color: isSelected ? theme.primary : theme.iconInactive, letterSpacing: 0.1),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -247,9 +188,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         behavior: HitTestBehavior.opaque,
         onTap: () {
           _fragments[2].launch(context);
-          _animationController.forward().then(
-            (_) => _animationController.reverse(),
-          );
+          _animationController.forward().then((_) => _animationController.reverse());
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Column(
@@ -261,26 +200,11 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
               width: 48,
               height: 32,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [theme.primary, theme.primary.withOpacity(0.8)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, spreadRadius: 0, offset: const Offset(0, 2))],
               ),
-              child: const Icon(
-                CupertinoIcons.plus,
-                color: Colors.white,
-                size: 22,
-              ),
+              child: const Icon(CupertinoIcons.plus, color: Colors.white, size: 22),
             ),
             const SizedBox(height: 4),
             // Empty space to align with other items
@@ -301,9 +225,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         onTap: () {
           if (selectedIndex != 3) {
             setState(() => selectedIndex = 3);
-            _animationController.forward().then(
-              (_) => _animationController.reverse(),
-            );
+            _animationController.forward().then((_) => _animationController.reverse());
           }
           FocusManager.instance.primaryFocus?.unfocus();
         },
@@ -315,38 +237,19 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
-              padding: EdgeInsets.symmetric(
-                horizontal: isSelected ? 16 : 8,
-                vertical: 4,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? theme.primary.withOpacity(0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              padding: EdgeInsets.symmetric(horizontal: isSelected ? 16 : 8, vertical: 4),
+              decoration: BoxDecoration(color: isSelected ? theme.primary.withValues(alpha: 0.15) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
               child: Container(
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? theme.primary : theme.iconInactive,
-                    width: 2,
-                  ),
+                  border: Border.all(color: isSelected ? theme.primary : theme.iconInactive, width: 2),
                 ),
                 child: ClipOval(
-                  child:
-                      (AppData.profile_pic.trim().isNotEmpty &&
-                          AppData.profile_pic.toLowerCase() != 'null')
-                      ? AppCachedNetworkImage(
-                          imageUrl: AppData.imageUrl + AppData.profile_pic,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/images/person.png',
-                          fit: BoxFit.cover,
-                        ),
+                  child: (AppData.profile_pic.trim().isNotEmpty && AppData.profile_pic.toLowerCase() != 'null')
+                      ? AppCachedNetworkImage(imageUrl: AppData.imageUrl + AppData.profile_pic, fit: BoxFit.cover)
+                      : Image.asset('assets/images/person.png', fit: BoxFit.cover),
                 ),
               ),
             ),
@@ -354,12 +257,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
             // One UI 8.5 label
             Text(
               translation(context).lbl_profile,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? theme.primary : theme.iconInactive,
-                letterSpacing: 0.1,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500, color: isSelected ? theme.primary : theme.iconInactive, letterSpacing: 0.1),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -377,9 +275,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         behavior: HitTestBehavior.opaque,
         onTap: () {
           ChatGptWithImageScreen(isFromMainScreen: true).launch(context);
-          _animationController.forward().then(
-            (_) => _animationController.reverse(),
-          );
+          _animationController.forward().then((_) => _animationController.reverse());
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Column(
@@ -389,25 +285,13 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
             // One UI 8.5 styled AI icon
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Image.asset(
-                theme.isDark
-                    ? 'assets/images/docktak_ai_light.png'
-                    : 'assets/images/docktak_ai_light.png',
-                width: 24,
-                height: 24,
-                fit: BoxFit.contain,
-              ),
+              child: Image.asset(theme.isDark ? 'assets/images/docktak_ai_light.png' : 'assets/images/docktak_ai_light.png', width: 24, height: 24, fit: BoxFit.contain),
             ),
             const SizedBox(height: 4),
             // One UI 8.5 label
             Text(
               translation(context).lbl_ai,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: theme.iconInactive,
-                letterSpacing: 0.1,
-              ),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: theme.iconInactive, letterSpacing: 0.1),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

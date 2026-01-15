@@ -10,24 +10,21 @@ class DiscussionSearchBar extends StatelessWidget {
   final Function(String?) onCountryChanged;
 
   const DiscussionSearchBar({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSearch,
     this.selectedSpecialty,
     this.selectedCountry,
     required this.onSpecialtyChanged,
     required this.onCountryChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        boxShadow: theme.cardShadow,
-      ),
+      decoration: BoxDecoration(color: theme.cardBackground, boxShadow: theme.cardShadow),
       child: Column(
         children: [
           // Search field
@@ -36,10 +33,7 @@ class DiscussionSearchBar extends StatelessWidget {
             decoration: InputDecoration(
               hintText: 'Search discussions...',
               prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
               filled: true,
               fillColor: theme.inputBackground,
             ),
@@ -52,16 +46,11 @@ class DiscussionSearchBar extends StatelessWidget {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: selectedSpecialty,
+                  initialValue: selectedSpecialty,
                   decoration: InputDecoration(
                     labelText: 'Specialty',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: const [
                     DropdownMenuItem(value: null, child: Text('All Specialties')),
@@ -78,16 +67,11 @@ class DiscussionSearchBar extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: selectedCountry,
+                  initialValue: selectedCountry,
                   decoration: InputDecoration(
                     labelText: 'Country',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
                   items: const [
                     DropdownMenuItem(value: null, child: Text('All Countries')),

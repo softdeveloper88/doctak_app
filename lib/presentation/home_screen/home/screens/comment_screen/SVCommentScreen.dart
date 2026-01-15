@@ -13,8 +13,7 @@ class SVCommentScreen extends StatefulWidget {
   final int id;
   final HomeBloc homeBloc;
 
-  const SVCommentScreen({required this.id, required this.homeBloc, Key? key})
-    : super(key: key);
+  const SVCommentScreen({required this.id, required this.homeBloc, super.key});
 
   @override
   State<SVCommentScreen> createState() => _SVCommentScreenState();
@@ -40,21 +39,13 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final systemUiOverlayStyle =
-        (isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-            .copyWith(
-              statusBarColor: Colors.transparent,
-              systemNavigationBarColor: Colors.transparent,
-            );
+    final systemUiOverlayStyle = (isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark).copyWith(statusBarColor: Colors.transparent, systemNavigationBarColor: Colors.transparent);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: systemUiOverlayStyle,
       child: Scaffold(
         backgroundColor: svGetBgColor(),
-        appBar: DoctakAppBar(
-          title: translation(context).lbl_comments,
-          titleIcon: Icons.chat_bubble_outline_rounded,
-        ),
+        appBar: DoctakAppBar(title: translation(context).lbl_comments, titleIcon: Icons.chat_bubble_outline_rounded),
         body: SafeArea(
           bottom: false,
           child: BlocConsumer<CommentBloc, CommentState>(
@@ -75,22 +66,16 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
                   selectedCommentId: selectedCommentId,
                   onReplySelected: (commentId) {
                     setState(() {
-                      selectedCommentId = (selectedCommentId == commentId)
-                          ? null
-                          : commentId;
+                      selectedCommentId = (selectedCommentId == commentId) ? null : commentId;
                     });
                   },
                 );
               } else if (state is DataError) {
                 return RetryWidget(
-                  errorMessage: translation(
-                    context,
-                  ).msg_something_went_wrong_retry,
+                  errorMessage: translation(context).msg_something_went_wrong_retry,
                   onRetry: () {
                     try {
-                      commentBloc.add(
-                        LoadPageEvent(postId: widget.id, page: 1),
-                      );
+                      commentBloc.add(LoadPageEvent(postId: widget.id, page: 1));
                     } catch (e) {
                       debugPrint(e.toString());
                     }
@@ -103,17 +88,8 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
         ),
         bottomSheet: Container(
           color: svGetBgColor(),
-          padding: EdgeInsets.only(
-            left: 12,
-            right: 12,
-            top: 6,
-            bottom: MediaQuery.of(context).padding.bottom + 6,
-          ),
-          child: ImprovedReplyInputField(
-            commentBloc: commentBloc,
-            commentId: 0,
-            postId: widget.id,
-          ),
+          padding: EdgeInsets.only(left: 12, right: 12, top: 6, bottom: MediaQuery.of(context).padding.bottom + 6),
+          child: ImprovedReplyInputField(commentBloc: commentBloc, commentId: 0, postId: widget.id),
         ),
       ),
     );

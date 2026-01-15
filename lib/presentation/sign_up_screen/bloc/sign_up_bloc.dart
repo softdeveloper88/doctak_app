@@ -30,10 +30,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     on<SocialButtonPressed>(_onSocialLoginProfileCompletePressed);
   }
 
-  void _loadDropdownValues(
-    LoadDropdownValues event,
-    Emitter<DropdownState> emit,
-  ) async {
+  void _loadDropdownValues(LoadDropdownValues event, Emitter<DropdownState> emit) async {
     try {
       // Simulate fetching dynamic values from an API or other source
 
@@ -44,35 +41,15 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     }
   }
 
-  void _changePasswordVisibility(
-    TogglePasswordVisibility event,
-    Emitter<DropdownState> emit,
-  ) {
-    emit(
-      DataLoaded(
-        !(state as DataLoaded).isPasswordVisible,
-        (state as DataLoaded).isDoctorRole,
-        false,
-        (state as DataLoaded).response,
-      ),
-    );
+  void _changePasswordVisibility(TogglePasswordVisibility event, Emitter<DropdownState> emit) {
+    emit(DataLoaded(!(state as DataLoaded).isPasswordVisible, (state as DataLoaded).isDoctorRole, false, (state as DataLoaded).response));
   }
 
   void _changeDoctorRole(ChangeDoctorRole event, Emitter<DropdownState> emit) {
-    emit(
-      DataLoaded(
-        !(state as DataLoaded).isPasswordVisible,
-        (state as DataLoaded).isDoctorRole,
-        false,
-        (state as DataLoaded).response,
-      ),
-    );
+    emit(DataLoaded(!(state as DataLoaded).isPasswordVisible, (state as DataLoaded).isDoctorRole, false, (state as DataLoaded).response));
   }
 
-  void _onSignUpButtonPressed(
-    SignUpButtonPressed event,
-    Emitter<DropdownState> emit,
-  ) async {
+  void _onSignUpButtonPressed(SignUpButtonPressed event, Emitter<DropdownState> emit) async {
     ProgressDialogUtils.showProgressDialog();
     try {
       DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -113,14 +90,8 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           final responseData = dioError.response!.data;
           if (responseData is Map && responseData['token'] != null) {
             // User was registered successfully, just email sending failed
-            print(
-              'Registration succeeded but email sending failed - bypassing email error',
-            );
-            response1 = Response(
-              requestOptions: dioError.requestOptions,
-              statusCode: 200,
-              data: responseData,
-            );
+            print('Registration succeeded but email sending failed - bypassing email error');
+            response1 = Response(requestOptions: dioError.requestOptions, statusCode: 200, data: responseData);
           } else {
             rethrow;
           }
@@ -129,9 +100,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         }
       }
 
-      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(
-        response1.data,
-      );
+      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(response1.data);
       ProgressDialogUtils.hideProgressDialog();
       print('response ${response1.data}');
 
@@ -141,18 +110,9 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       bool hasEmailError =
           responseData is Map &&
           (responseData['email_error'] != null ||
-              responseData['message']?.toString().toLowerCase().contains(
-                    'email',
-                  ) ==
-                  true ||
-              responseData['message']?.toString().toLowerCase().contains(
-                    'smtp',
-                  ) ==
-                  true ||
-              responseData['message']?.toString().toLowerCase().contains(
-                    'mail',
-                  ) ==
-                  true);
+              responseData['message']?.toString().toLowerCase().contains('email') == true ||
+              responseData['message']?.toString().toLowerCase().contains('smtp') == true ||
+              responseData['message']?.toString().toLowerCase().contains('mail') == true);
 
       // If we have a token, consider registration successful regardless of email errors
       if (hasToken || response1.statusCode == 200 && response.success == true) {
@@ -161,15 +121,9 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           await prefs.initialize();
           await prefs.setString('device_token', event.deviceToken);
           await prefs.setString('token', response.token ?? '');
-          await prefs.setString(
-            'email_verified_at',
-            response.user?.emailVerifiedAt ?? '',
-          );
+          await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
           await prefs.setString('userId', response.user?.id ?? '');
-          await prefs.setString(
-            'name',
-            '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}',
-          );
+          await prefs.setString('name', '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}');
           await prefs.setString('profile_pic', response.user?.profilePic ?? '');
           await prefs.setString('email', response.user?.email ?? '');
           await prefs.setString('phone', response.user?.phone ?? '');
@@ -178,38 +132,23 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
           await prefs.setString('title', response.user?.title ?? '');
           await prefs.setString('city', response.user?.state ?? '');
-          await prefs.setString(
-            'countryOrigin',
-            response.user?.countryOrigin ?? '',
-          );
+          await prefs.setString('countryOrigin', response.user?.countryOrigin ?? '');
           await prefs.setString('college', response.user?.college ?? '');
           await prefs.setString('clinicName', response.user?.clinicName ?? '');
           await prefs.setString('dob', response.user?.dob ?? '');
           await prefs.setString('user_type', response.user?.userType ?? '');
-          await prefs.setString(
-            'countryName',
-            response.country?.countryName ?? '',
-          );
+          await prefs.setString('countryName', response.country?.countryName ?? '');
           await prefs.setString('currency', response.country?.currency ?? '');
           if (response.university != null) {
-            await prefs.setString(
-              'university',
-              response.university?.name ?? '',
-            );
+            await prefs.setString('university', response.university?.name ?? '');
           }
-          await prefs.setString(
-            'practicingCountry',
-            response.user?.practicingCountry ?? '',
-          );
+          await prefs.setString('practicingCountry', response.user?.practicingCountry ?? '');
           await prefs.setString('gender', response.user?.gender ?? '');
-          await prefs.setString(
-            'country',
-            response.user?.country.toString() ?? '',
-          );
+          await prefs.setString('country', response.user?.country.toString() ?? '');
           String? userToken = await prefs.getString('token') ?? '';
           String? userId = await prefs.getString('userId') ?? '';
           String? name = await prefs.getString('name') ?? '';
-          String? profile_pic = await prefs.getString('profile_pic') ?? '';
+          String? profilePic = await prefs.getString('profile_pic') ?? '';
           String? background = await prefs.getString('background') ?? '';
           String? email = await prefs.getString('email') ?? '';
           String? specialty = await prefs.getString('specialty') ?? '';
@@ -223,7 +162,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
             AppData.userToken = userToken;
             AppData.logInUserId = userId;
             AppData.name = name;
-            AppData.profile_pic = profile_pic;
+            AppData.profile_pic = profilePic;
             AppData.university = university;
             AppData.userType = userType;
             AppData.background = background;
@@ -238,29 +177,13 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           final emitData = Map<String, dynamic>.from(response1.data as Map);
           emitData['success'] = true;
           if (hasEmailError) {
-            print(
-              'Email sending failed but registration succeeded - continuing to dashboard',
-            );
+            print('Email sending failed but registration succeeded - continuing to dashboard');
           }
 
-          emit(
-            DataLoaded(
-              !(state as DataLoaded).isPasswordVisible,
-              (state as DataLoaded).isDoctorRole,
-              true,
-              emitData,
-            ),
-          );
+          emit(DataLoaded(!(state as DataLoaded).isPasswordVisible, (state as DataLoaded).isDoctorRole, true, emitData));
           ProgressDialogUtils.hideProgressDialog();
         } else {
-          emit(
-            DataLoaded(
-              !(state as DataLoaded).isPasswordVisible,
-              (state as DataLoaded).isDoctorRole,
-              true,
-              response1.data,
-            ),
-          );
+          emit(DataLoaded(!(state as DataLoaded).isPasswordVisible, (state as DataLoaded).isDoctorRole, true, response1.data));
         }
       } else {
         emit(DropdownError('An error occurred'));
@@ -271,24 +194,17 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
 
       // Check if error message contains email-related keywords but might still have succeeded
       String errorStr = e.toString().toLowerCase();
-      if (errorStr.contains('email') ||
-          errorStr.contains('smtp') ||
-          errorStr.contains('mail')) {
+      if (errorStr.contains('email') || errorStr.contains('smtp') || errorStr.contains('mail')) {
         // This might be an email sending error after successful registration
         // Try to check if user was actually registered by attempting to get token
-        print(
-          'Possible email error detected - registration may have succeeded',
-        );
+        print('Possible email error detected - registration may have succeeded');
       }
 
       emit(DropdownError('An error occurred'));
     }
   }
 
-  void _onCompleteButtonPressed(
-    CompleteButtonPressed event,
-    Emitter<DropdownState> emit,
-  ) async {
+  void _onCompleteButtonPressed(CompleteButtonPressed event, Emitter<DropdownState> emit) async {
     ProgressDialogUtils.showProgressDialog();
     print(event.country);
     print(event.state);
@@ -302,11 +218,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
             'Authorization': 'Bearer ${AppData.userToken}', // Set headers
           },
         ), // Add query parameters
-        data: FormData.fromMap({
-          'country': event.country,
-          'state': event.state,
-          'specialty': event.specialty,
-        }),
+        data: FormData.fromMap({'country': event.country, 'state': event.state, 'specialty': event.specialty}),
       );
       if (response1.statusCode == 200) {
         AppData.countryName = event.country;
@@ -333,23 +245,11 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     }
   }
 
-  void _onSocialLoginProfileCompletePressed(
-    SocialButtonPressed event,
-    Emitter<DropdownState> emit,
-  ) async {
+  void _onSocialLoginProfileCompletePressed(SocialButtonPressed event, Emitter<DropdownState> emit) async {
     ProgressDialogUtils.showProgressDialog();
     try {
       print(event.token);
-      final response = await apiManager.completeProfile(
-        'Bearer ${event.token}',
-        event.firstName,
-        event.lastName,
-        '',
-        '',
-        '',
-        event.phone,
-        event.userType,
-      );
+      final response = await apiManager.completeProfile('Bearer ${event.token}', event.firstName, event.lastName, '', '', '', event.phone, event.userType);
       log(event.token);
 
       print('response ${response.toJson()}');
@@ -359,10 +259,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         await prefs.setString('device_token', event.deviceToken);
         await prefs.setString('token', response.token ?? '');
         await prefs.setString('userId', response.user?.id ?? '');
-        await prefs.setString(
-          'name',
-          '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}',
-        );
+        await prefs.setString('name', '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}');
         await prefs.setString('profile_pic', response.user?.profilePic ?? '');
         await prefs.setString('email', response.user?.email ?? '');
         await prefs.setString('phone', response.user?.phone ?? '');
@@ -371,35 +268,23 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
         await prefs.setString('title', response.user?.title ?? '');
         await prefs.setString('city', response.user?.state ?? '');
-        await prefs.setString(
-          'countryOrigin',
-          response.user?.countryOrigin ?? '',
-        );
+        await prefs.setString('countryOrigin', response.user?.countryOrigin ?? '');
         await prefs.setString('college', response.user?.college ?? '');
         await prefs.setString('clinicName', response.user?.clinicName ?? '');
         await prefs.setString('dob', response.user?.dob ?? '');
         await prefs.setString('user_type', response.user?.userType ?? '');
-        await prefs.setString(
-          'countryName',
-          response.country?.countryName ?? '',
-        );
+        await prefs.setString('countryName', response.country?.countryName ?? '');
         await prefs.setString('currency', response.country?.currency ?? '');
         if (response.university != null) {
           await prefs.setString('university', response.university?.name ?? '');
         }
-        await prefs.setString(
-          'practicingCountry',
-          response.user?.practicingCountry ?? '',
-        );
+        await prefs.setString('practicingCountry', response.user?.practicingCountry ?? '');
         await prefs.setString('gender', response.user?.gender ?? '');
-        await prefs.setString(
-          'country',
-          response.user?.country.toString() ?? '',
-        );
+        await prefs.setString('country', response.user?.country.toString() ?? '');
         String? userToken = await prefs.getString('token') ?? '';
         String? userId = await prefs.getString('userId') ?? '';
         String? name = await prefs.getString('name') ?? '';
-        String? profile_pic = await prefs.getString('profile_pic') ?? '';
+        String? profilePic = await prefs.getString('profile_pic') ?? '';
         String? background = await prefs.getString('background') ?? '';
         String? email = await prefs.getString('email') ?? '';
         String? specialty = await prefs.getString('specialty') ?? '';
@@ -412,7 +297,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
           AppData.userToken = userToken;
           AppData.logInUserId = userId;
           AppData.name = name;
-          AppData.profile_pic = profile_pic;
+          AppData.profile_pic = profilePic;
           AppData.university = university;
           AppData.userType = userType;
           AppData.background = background;
@@ -427,14 +312,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         ProgressDialogUtils.hideProgressDialog();
         print("hello${response.toJson()}");
       } else {
-        emit(
-          DataLoaded(
-            !(state as DataLoaded).isPasswordVisible,
-            (state as DataLoaded).isDoctorRole,
-            true,
-            {},
-          ),
-        );
+        emit(DataLoaded(!(state as DataLoaded).isPasswordVisible, (state as DataLoaded).isDoctorRole, true, {}));
       }
       // emit(DataLoaded( !(state as DataLoaded).isPasswordVisible,
       //     (state as DataLoaded).isDoctorRole,true, response.response.data));
@@ -449,14 +327,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
       // }
     } catch (e) {
       print(e);
-      emit(
-        DataLoaded(
-          !(state as DataLoaded).isPasswordVisible,
-          (state as DataLoaded).isDoctorRole,
-          true,
-          {},
-        ),
-      );
+      emit(DataLoaded(!(state as DataLoaded).isPasswordVisible, (state as DataLoaded).isDoctorRole, true, {}));
 
       ProgressDialogUtils.hideProgressDialog();
 

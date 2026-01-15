@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
@@ -27,7 +26,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
 
   final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
-  openImages() async {
+  Future<void> openImages() async {
     try {
       // Use pickMultipleMedia with requestFullMetadata: false for limited access support
       var pickedfiles = await imgpicker.pickMultipleMedia(
@@ -40,8 +39,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       if (pickedfiles.isNotEmpty) {
         for (var element in pickedfiles) {
           imagefiles.add(element);
-          widget.searchPeopleBloc
-              .add(SelectedFiles(pickedfiles: element, isRemove: false));
+          widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: element, isRemove: false));
         }
         if (mounted) {
           setState(() {});
@@ -54,15 +52,14 @@ class _FileUploadOptionState extends State<FileUploadOption> {
     }
   }
 
-  openVideo() async {
+  Future<void> openVideo() async {
     try {
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
       //you can use ImageCourse.camera for Camera capture
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc
-            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
         // });
@@ -74,15 +71,14 @@ class _FileUploadOptionState extends State<FileUploadOption> {
     }
   }
 
-  openCamera() async {
+  Future<void> openCamera() async {
     try {
       var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera);
       //you can use ImageCourse.camera for Camera capture
       if (pickedfiles != null) {
         // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc
-            .add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
         // });
         // setState(() {
         // });
@@ -101,8 +97,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: svGetScaffoldColor(),
-        borderRadius: radiusOnly(
-            topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
+        borderRadius: radiusOnly(topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,50 +115,45 @@ class _FileUploadOptionState extends State<FileUploadOption> {
                     height: 62,
                     width: 52,
                     color: context.cardColor,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    child: Image.asset('images/socialv/icons/ic_CameraPost.png',
-                        height: 22, width: 22, fit: BoxFit.cover),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    child: Image.asset('images/socialv/icons/ic_CameraPost.png', height: 22, width: 22, fit: BoxFit.cover),
                   ),
                 ),
-                BlocBuilder<ChatBloc, ChatState>(builder: (context, state) {
-                  if (state is PaginationLoadedState) {
-                    return imagefiles != null
-                        ? Wrap(
-                            children: widget.searchPeopleBloc.imagefiles
-                                .map((imageone) {
-                              return Stack(children: [
-                                Card(
-                                  child: SizedBox(
-                                    height: 60, width: 60,
-                                    child: buildMediaItem(File(imageone.path)),
-                                    // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
-                                  ),
+                BlocBuilder<ChatBloc, ChatState>(
+                  builder: (context, state) {
+                    if (state is PaginationLoadedState) {
+                      return Wrap(
+                        children: widget.searchPeopleBloc.imagefiles.map((imageone) {
+                          return Stack(
+                            children: [
+                              Card(
+                                child: SizedBox(
+                                  height: 60,
+                                  width: 60,
+                                  child: buildMediaItem(File(imageone.path)),
+                                  // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
                                 ),
-                                Positioned(
-                                  right: 0,
-                                  child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {});
-                                        imagefiles.remove(imageone);
-                                        widget.searchPeopleBloc.add(
-                                            SelectedFiles(
-                                                pickedfiles: imageone,
-                                                isRemove: true));
-                                      },
-                                      child: const Icon(
-                                        Icons.remove_circle_outlined,
-                                        color: Colors.red,
-                                      )),
-                                )
-                              ]);
-                            }).toList(),
-                          )
-                        : Container();
-                  } else {
-                    return Container();
-                  }
-                }),
+                              ),
+                              Positioned(
+                                right: 0,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {});
+                                    imagefiles.remove(imageone);
+                                    widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: imageone, isRemove: true));
+                                  },
+                                  child: const Icon(Icons.remove_circle_outlined, color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
                 // HorizontalList(
                 //   itemCount: list.length,
                 //   itemBuilder: (context, index) {
@@ -177,26 +167,25 @@ class _FileUploadOptionState extends State<FileUploadOption> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
-                  onTap: () {
-                    openVideo();
-                  },
-                  child: Image.asset('images/socialv/icons/ic_Video.png',
-                      height: 32, width: 32, fit: BoxFit.cover)),
+                onTap: () {
+                  openVideo();
+                },
+                child: Image.asset('images/socialv/icons/ic_Video.png', height: 32, width: 32, fit: BoxFit.cover),
+              ),
               GestureDetector(
-                  onTap: () {
-                    openCamera();
-                  },
-                  child: Image.asset('images/socialv/icons/ic_CameraPost.png',
-                      height: 32, width: 32, fit: BoxFit.cover)),
+                onTap: () {
+                  openCamera();
+                },
+                child: Image.asset('images/socialv/icons/ic_CameraPost.png', height: 32, width: 32, fit: BoxFit.cover),
+              ),
               // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
               GestureDetector(
-                  onTap: () {
-                    checkInPlaceBottomSheet(context, widget.searchPeopleBloc);
-                  },
-                  child: Image.asset('images/socialv/icons/ic_Location.png',
-                      height: 32, width: 32, fit: BoxFit.cover)),
-              Image.asset('images/socialv/icons/ic_Paper.png',
-                  height: 32, width: 32, fit: BoxFit.cover),
+                onTap: () {
+                  checkInPlaceBottomSheet(context, widget.searchPeopleBloc);
+                },
+                child: Image.asset('images/socialv/icons/ic_Location.png', height: 32, width: 32, fit: BoxFit.cover),
+              ),
+              Image.asset('images/socialv/icons/ic_Paper.png', height: 32, width: 32, fit: BoxFit.cover),
             ],
           ),
         ],

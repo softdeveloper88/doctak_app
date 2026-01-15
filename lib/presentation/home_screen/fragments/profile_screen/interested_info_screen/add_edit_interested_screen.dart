@@ -12,8 +12,7 @@ class AddEditInterestedScreen extends StatefulWidget {
   AddEditInterestedScreen({required this.profileBloc, super.key});
 
   @override
-  State<AddEditInterestedScreen> createState() =>
-      _AddEditInterestedScreenState();
+  State<AddEditInterestedScreen> createState() => _AddEditInterestedScreenState();
 }
 
 bool isEditModeMap = false;
@@ -29,21 +28,11 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
         actions: [
           IconButton(
             padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 36,
-              minHeight: 36,
-            ),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.add_circle_outline,
-                color: Colors.blue[600],
-                size: 14,
-              ),
+              decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(Icons.add_circle_outline, color: Colors.blue[600], size: 14),
             ),
             onPressed: () {
               setState(() {
@@ -56,14 +45,7 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildInterestedInfoFields(),
-              10.height,
-            ],
-          ),
-        ),
+        child: SingleChildScrollView(child: Column(children: [_buildInterestedInfoFields(), 10.height])),
       ),
     );
   }
@@ -72,70 +54,64 @@ class _AddEditInterestedScreenState extends State<AddEditInterestedScreen> {
   var focusNode2 = FocusNode();
 
   Widget _buildInterestedInfoFields() {
-    return Column(children: [
-      Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 10),
-            TextFieldEditWidget(
-              focusNode: focusNode1,
-              isEditModeMap: true,
-              icon: Icons.description,
-              index: 2,
-              label: translation(context).lbl_areas_of_interest,
-              // value: entry.interestType ?? '',
-              // onSave: (value) => entry.interestType = value,
-            ),
-            TextFieldEditWidget(
-              focusNode: focusNode2,
-              isEditModeMap: true,
-              icon: Icons.description,
-              index: 2,
-              label: translation(context).lbl_interest_details,
-              // value: entry.interestDetails ?? "",
-              // onSave: (value) => entry.interestDetails = value,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Expanded(
-                  child: svAppButton(
-                    color: Colors.grey,
-                    context: context,
-                    // style: svAppButton(text: text, onTap: onTap, context: context),
-                    onTap: () async {},
-                    text: translation(context).lbl_delete,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              TextFieldEditWidget(
+                focusNode: focusNode1,
+                isEditModeMap: true,
+                icon: Icons.description,
+                index: 2,
+                label: translation(context).lbl_areas_of_interest,
+                // value: entry.interestType ?? '',
+                // onSave: (value) => entry.interestType = value,
+              ),
+              TextFieldEditWidget(
+                focusNode: focusNode2,
+                isEditModeMap: true,
+                icon: Icons.description,
+                index: 2,
+                label: translation(context).lbl_interest_details,
+                // value: entry.interestDetails ?? "",
+                // onSave: (value) => entry.interestDetails = value,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                // mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Expanded(
+                    child: svAppButton(
+                      color: Colors.grey,
+                      context: context,
+                      // style: svAppButton(text: text, onTap: onTap, context: context),
+                      onTap: () async {},
+                      text: translation(context).lbl_delete,
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: svAppButton(
-                    context: context,
-                    // style: svAppButton(text: text, onTap: onTap, context: context),
-                    onTap: () async {},
-                    text: translation(context).lbl_add,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: svAppButton(
+                      context: context,
+                      // style: svAppButton(text: text, onTap: onTap, context: context),
+                      onTap: () async {},
+                      text: translation(context).lbl_add,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
-  Widget _buildElevatedButton({
-    required VoidCallback onPressed,
-    required String label,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(label),
-    );
+  Widget _buildElevatedButton({required VoidCallback onPressed, required String label}) {
+    return ElevatedButton(onPressed: onPressed, child: Text(label));
   }
 }

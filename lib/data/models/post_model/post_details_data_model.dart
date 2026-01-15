@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'post_data_model.dart';
+
 PostDetailsDataModel postDetailsDataModelFromJson(String str) => PostDetailsDataModel.fromJson(json.decode(str));
 String postDetailsDataModelToJson(PostDetailsDataModel data) => json.encode(data.toJson());
+
 class PostDetailsDataModel {
-  PostDetailsDataModel({
-      this.post, 
-      this.specificComment,});
+  PostDetailsDataModel({this.post, this.specificComment});
 
   PostDetailsDataModel.fromJson(dynamic json) {
     post = json['post'] != null ? Post.fromJson(json['post']) : null;
@@ -25,21 +25,13 @@ class PostDetailsDataModel {
     }
     return map;
   }
-
 }
 
 SpecificComment specificCommentFromJson(String str) => SpecificComment.fromJson(json.decode(str));
 String specificCommentToJson(SpecificComment data) => json.encode(data.toJson());
+
 class SpecificComment {
-  SpecificComment({
-      this.id, 
-      this.userId, 
-      this.postId, 
-      this.comment, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.commenterName, 
-      this.commenterProfilePic,});
+  SpecificComment({this.id, this.userId, this.postId, this.comment, this.createdAt, this.updatedAt, this.commenterName, this.commenterProfilePic});
 
   SpecificComment.fromJson(dynamic json) {
     id = json['id'];
@@ -72,5 +64,4 @@ class SpecificComment {
     map['commenterProfilePic'] = commenterProfilePic;
     return map;
   }
-
 }

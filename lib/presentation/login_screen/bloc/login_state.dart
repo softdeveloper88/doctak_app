@@ -6,20 +6,12 @@ import 'package:equatable/equatable.dart';
 // part 'login_bloc.dart';
 
 class LoginState extends Equatable {
-  LoginState({
-    this.isShowPassword = false,
-  });
+  LoginState({this.isShowPassword = false});
   bool isShowPassword;
   @override
-  List<Object?> get props => [
-        isShowPassword,
-      ];
-  LoginState copyWith({
-    bool? isShowPassword,
-  }) {
-    return LoginState(
-      isShowPassword: isShowPassword ?? this.isShowPassword,
-    );
+  List<Object?> get props => [isShowPassword];
+  LoginState copyWith({bool? isShowPassword}) {
+    return LoginState(isShowPassword: isShowPassword ?? this.isShowPassword);
   }
 }
 

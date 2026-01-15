@@ -25,30 +25,29 @@ class PiPService {
   // The pip package instance for Android
   final pip_pkg.Pip _pipAndroid = pip_pkg.Pip();
   bool _isSetup = false;
-  
+
   // Track if PiP is allowed (only during active calls)
   bool _isPiPAllowed = false;
   bool get isPiPAllowed => _isPiPAllowed;
-  
+
   // Track if we're in a resume grace period (prevent auto-PiP right after returning)
   bool _isInResumeGracePeriod = false;
   bool get isInResumeGracePeriod => _isInResumeGracePeriod;
-  
+
   // Track if we're in a permission flow (prevent PiP during permission dialogs)
   bool _isInPermissionFlow = false;
   bool get isInPermissionFlow => _isInPermissionFlow;
-  
+
   // Track when PiP started to prevent immediate stop on brief transitions
   DateTime? _pipStartTime;
   static const _minPiPDuration = Duration(milliseconds: 500);
-  
+
   // iOS Agora-specific PiP service for live video
   final IOSAgoraPiPService _iosAgoraPiPService = IOSAgoraPiPService();
   StreamSubscription<PiPState>? _iosAgoraPiPSubscription;
 
   // Stream controller for PiP status changes
-  final StreamController<PiPServiceStatus> _statusController =
-      StreamController<PiPServiceStatus>.broadcast();
+  final StreamController<PiPServiceStatus> _statusController = StreamController<PiPServiceStatus>.broadcast();
 
   /// Stream of PiP status changes - listen to this to update UI when entering/exiting PiP
   Stream<PiPServiceStatus> get statusStream => _statusController.stream;
@@ -75,7 +74,7 @@ class PiPService {
   /// Initialize/setup the PiP service
   Future<void> setup() async {
     if (_isSetup) return;
-    
+
     // Only allow setup if PiP is allowed (during calls)
     if (!_isPiPAllowed) {
       debugPrint('📺 PiP: Setup blocked - not in a call screen');
@@ -98,9 +97,7 @@ class PiPService {
         _pipAndroid.registerStateChangedObserver(
           pip_pkg.PipStateChangedObserver(
             onPipStateChanged: (state, error) {
-              debugPrint(
-                '📺 PiP Android: State changed to $state, error: $error',
-              );
+              debugPrint('📺 PiP Android: State changed to $state, error: $error');
               if (state == pip_pkg.PipState.pipStateStarted) {
                 _isPiPEnabled = true;
                 _updateStatus(PiPServiceStatus.enabled);
@@ -119,7 +116,7 @@ class PiPService {
       } else if (Platform.isIOS) {
         // Initialize iOS Agora PiP service for native AVPictureInPictureController
         await _iosAgoraPiPService.initialize();
-        
+
         // Subscribe to iOS PiP state changes
         _iosAgoraPiPSubscription = _iosAgoraPiPService.stateStream.listen((state) {
           debugPrint('📺 PiP iOS: State changed to $state');
@@ -176,17 +173,17 @@ class PiPService {
       // Mark that we're in permission flow to prevent PiP during dialog
       _isInPermissionFlow = true;
       debugPrint('📺 PiP: Permission flow STARTED - PiP blocked');
-      
+
       try {
         final result = await systemPermissionHandler.requestOverlayPermission(context);
-        
+
         // Keep permission flow flag for a bit after returning from settings
         // to prevent PiP from starting during the transition
         Future.delayed(const Duration(seconds: 2), () {
           _isInPermissionFlow = false;
           debugPrint('📺 PiP: Permission flow ENDED');
         });
-        
+
         return result;
       } catch (e) {
         _isInPermissionFlow = false;
@@ -202,33 +199,27 @@ class PiPService {
   ///
   /// Uses IOSAgoraPiPService for iOS (native AVPictureInPictureController)
   /// Uses pip package for Android (native PiP)
-  Future<bool> enablePiP({
-    String? contactName,
-    bool isVideoCall = true,
-    BuildContext? context,
-  }) async {
+  Future<bool> enablePiP({String? contactName, bool isVideoCall = true, BuildContext? context}) async {
     // Block if not in a call screen
     if (!_isPiPAllowed) {
       debugPrint('📺 PiP: enablePiP blocked - not in a call screen');
       return false;
     }
-    
+
     // Block if in resume grace period
     if (_isInResumeGracePeriod) {
       debugPrint('📺 PiP: enablePiP blocked - in resume grace period');
       return false;
     }
-    
+
     // Block if in permission flow
     if (_isInPermissionFlow) {
       debugPrint('📺 PiP: enablePiP blocked - in permission flow');
       return false;
     }
-    
+
     try {
-      debugPrint(
-        '📺 PiP: enablePiP called, platform=${Platform.operatingSystem}',
-      );
+      debugPrint('📺 PiP: enablePiP called, platform=${Platform.operatingSystem}');
 
       // Ensure setup is done
       await setup();
@@ -265,7 +256,7 @@ class PiPService {
           debugPrint('📺 PiP: Skipping PiP - user just returned from PiP');
           return false;
         }
-        
+
         // Use native iOS Agora PiP (iOS 15+)
         final nativeSupported = await _iosAgoraPiPService.isSupported();
         if (nativeSupported) {
@@ -280,7 +271,7 @@ class PiPService {
             return startResult;
           }
         }
-        
+
         // Native PiP not supported on this device
         debugPrint('📺 PiP: iOS native PiP not supported, PiP unavailable');
         return false;
@@ -302,13 +293,7 @@ class PiPService {
         await _pipAndroid.stop();
         // IMPORTANT: Disable auto-enter by calling setup with autoEnterEnabled: false
         // This prevents PiP from activating on other screens
-        await _pipAndroid.setup(
-          pip_pkg.PipOptions(
-            autoEnterEnabled: false,
-            aspectRatioX: 9,
-            aspectRatioY: 16,
-          ),
-        );
+        await _pipAndroid.setup(pip_pkg.PipOptions(autoEnterEnabled: false, aspectRatioX: 9, aspectRatioY: 16));
         debugPrint('📺 PiP: Android auto-enter DISABLED');
       } else if (Platform.isIOS) {
         // Stop native iOS PiP if active
@@ -363,7 +348,7 @@ class PiPService {
           debugPrint('📺 PiP: toggleAppState blocked - in resume grace period');
           return;
         }
-        
+
         // Start PiP when going to background
         if (Platform.isAndroid) {
           try {
@@ -377,7 +362,7 @@ class PiPService {
             debugPrint('📺 PiP: Skipping toggle - user returning from PiP');
             return;
           }
-          
+
           // Use native iOS PiP
           final nativeSupported = await _iosAgoraPiPService.isSupported();
           if (nativeSupported) {
@@ -391,9 +376,7 @@ class PiPService {
         _updateStatus(PiPServiceStatus.enabled);
       }
 
-      debugPrint(
-        '📺 PiP: Toggled to ${toForeground ? 'foreground' : 'background'}',
-      );
+      debugPrint('📺 PiP: Toggled to ${toForeground ? 'foreground' : 'background'}');
     } catch (e) {
       debugPrint('📺 PiP: Error toggling state: $e');
     }
@@ -416,24 +399,19 @@ class PiPService {
 
   /// Enable PiP automatically when going to background
   /// This sets up PiP with auto-enter enabled
-  Future<bool> enableAutoPiP({
-    bool isVideoCall = true,
-    BuildContext? context,
-  }) async {
+  Future<bool> enableAutoPiP({bool isVideoCall = true, BuildContext? context}) async {
     // Block if not in a call screen
     if (!_isPiPAllowed) {
       debugPrint('📺 PiP: enableAutoPiP blocked - not in a call screen');
       return false;
     }
-    
+
     try {
       // Ensure setup is done
       await setup();
 
       final available = await isAvailable();
-      debugPrint(
-        '📺 PiP: enableAutoPiP called, isAvailable=$available, platform=${Platform.operatingSystem}',
-      );
+      debugPrint('📺 PiP: enableAutoPiP called, isAvailable=$available, platform=${Platform.operatingSystem}');
 
       if (!available) {
         debugPrint('📺 PiP: Not available on this platform');
@@ -444,15 +422,11 @@ class PiPService {
         // Check overlay permission on Android
         final hasOverlay = await checkOverlayPermission(context);
         if (!hasOverlay) {
-          debugPrint(
-            '📺 PiP: Overlay permission denied, cannot enable auto-PiP',
-          );
+          debugPrint('📺 PiP: Overlay permission denied, cannot enable auto-PiP');
           return false;
         }
         // pip package has autoEnterEnabled in setup, which we've already configured
-        debugPrint(
-          '📺 PiP: Android Auto-PiP configured (autoEnterEnabled=true)',
-        );
+        debugPrint('📺 PiP: Android Auto-PiP configured (autoEnterEnabled=true)');
       } else if (Platform.isIOS) {
         // Setup native iOS PiP for Agora video
         final nativeSupported = await _iosAgoraPiPService.isSupported();
@@ -494,7 +468,7 @@ class PiPService {
     // Set grace period to prevent immediate re-minimizing (may already be set)
     _isInResumeGracePeriod = true;
     debugPrint('📺 PiP: Resume grace period STARTED');
-    
+
     try {
       if (Platform.isAndroid) {
         // Stop PiP first
@@ -503,17 +477,11 @@ class PiPService {
         } catch (e) {
           debugPrint('📺 PiP: Android stop error (non-fatal): $e');
         }
-        
+
         // CRITICAL: Temporarily disable auto-enter to prevent re-minimizing
         // This is the key fix for smooth PiP-to-app transition
         try {
-          await _pipAndroid.setup(
-            pip_pkg.PipOptions(
-              autoEnterEnabled: false,
-              aspectRatioX: 9,
-              aspectRatioY: 16,
-            ),
-          );
+          await _pipAndroid.setup(pip_pkg.PipOptions(autoEnterEnabled: false, aspectRatioX: 9, aspectRatioY: 16));
           debugPrint('📺 PiP: Android auto-enter DISABLED temporarily');
         } catch (e) {
           debugPrint('📺 PiP: Android setup error (non-fatal): $e');
@@ -524,13 +492,11 @@ class PiPService {
 
         // Temporarily disable auto-enter
         await _iosAgoraPiPService.setAutoEnabled(false);
-        
+
         // Only stop PiP if it's been active for a minimum duration
         // This prevents stopping PiP on brief lifecycle transitions (e.g., control center swipe)
-        final pipActiveTime = _pipStartTime != null 
-            ? DateTime.now().difference(_pipStartTime!) 
-            : Duration.zero;
-        
+        final pipActiveTime = _pipStartTime != null ? DateTime.now().difference(_pipStartTime!) : Duration.zero;
+
         if (_iosAgoraPiPService.isActive && pipActiveTime >= _minPiPDuration) {
           debugPrint('📺 PiP: iOS PiP active for ${pipActiveTime.inMilliseconds}ms - stopping');
           await _iosAgoraPiPService.stop();
@@ -540,10 +506,10 @@ class PiPService {
           _isInResumeGracePeriod = false;
           return;
         }
-        
+
         // Reset start time
         _pipStartTime = null;
-        
+
         // Reset restoration flag after a delay to allow PiP on next background
         Future.delayed(const Duration(seconds: 2), () {
           _iosAgoraPiPService.resetRestorationFlag();
@@ -552,26 +518,20 @@ class PiPService {
     } catch (e) {
       debugPrint('📺 PiP: onAppResumed error: $e');
     }
-    
+
     _updateStatus(PiPServiceStatus.disabled);
     _isPiPEnabled = false;
-    
+
     // End grace period and re-enable auto-enter after delay
     Future.delayed(const Duration(milliseconds: 1500), () async {
       _isInResumeGracePeriod = false;
       debugPrint('📺 PiP: Resume grace period ENDED');
-      
+
       // Re-enable auto-enter on Android if still in a call screen
       if (_isPiPAllowed) {
         if (Platform.isAndroid) {
           try {
-            await _pipAndroid.setup(
-              pip_pkg.PipOptions(
-                autoEnterEnabled: true,
-                aspectRatioX: 9,
-                aspectRatioY: 16,
-              ),
-            );
+            await _pipAndroid.setup(pip_pkg.PipOptions(autoEnterEnabled: true, aspectRatioX: 9, aspectRatioY: 16));
             debugPrint('📺 PiP: Android auto-enter RE-ENABLED');
           } catch (e) {
             debugPrint('📺 PiP: Android re-enable error: $e');
@@ -586,7 +546,7 @@ class PiPService {
         }
       }
     });
-    
+
     debugPrint('📺 PiP: onAppResumed - PiP stopped');
   }
 
@@ -597,19 +557,19 @@ class PiPService {
       debugPrint('📺 PiP: onAppPaused blocked - not in a call screen');
       return;
     }
-    
+
     // Don't start PiP if we're in resume grace period (prevents auto-minimize after returning)
     if (_isInResumeGracePeriod) {
       debugPrint('📺 PiP: onAppPaused blocked - in resume grace period');
       return;
     }
-    
+
     // Don't start PiP if we're in permission flow (user is granting permissions)
     if (_isInPermissionFlow) {
       debugPrint('📺 PiP: onAppPaused blocked - in permission flow');
       return;
     }
-    
+
     try {
       // Ensure setup is done
       await setup();
@@ -629,33 +589,33 @@ class PiPService {
           debugPrint('📺 PiP: Skipping PiP start - user just returned from PiP');
           return;
         }
-        
+
         // Double-check grace period before any async operations
         // (app might have resumed while we were waiting)
         if (_isInResumeGracePeriod) {
           debugPrint('📺 PiP: Skipping iOS PiP start - grace period active');
           return;
         }
-        
+
         // Use native iOS Agora PiP
         final nativeSupported = await _iosAgoraPiPService.isSupported();
-        
+
         // Check grace period again after async call
         if (_isInResumeGracePeriod) {
           debugPrint('📺 PiP: Aborting iOS PiP - grace period became active');
           return;
         }
-        
+
         if (nativeSupported && !_iosAgoraPiPService.isActive) {
           // Call setup first to ensure PiP controller is ready
           final setupResult = await _iosAgoraPiPService.setup();
-          
+
           // Check grace period again after async setup
           if (_isInResumeGracePeriod) {
             debugPrint('📺 PiP: Aborting iOS PiP after setup - grace period became active');
             return;
           }
-          
+
           if (setupResult) {
             final startResult = await _iosAgoraPiPService.start();
             if (startResult) {

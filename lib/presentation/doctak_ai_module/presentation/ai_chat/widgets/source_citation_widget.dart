@@ -6,45 +6,29 @@ import '../../../data/models/ai_chat_model/ai_chat_message_model.dart';
 class SourceCitationWidget extends StatelessWidget {
   final List<Source> sources;
 
-  const SourceCitationWidget({
-    Key? key,
-    required this.sources,
-  }) : super(key: key);
+  const SourceCitationWidget({super.key, required this.sources});
 
   @override
   Widget build(BuildContext context) {
-
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
         title: Row(
           children: [
-            Icon(
-              Icons.article_outlined,
-              size: 16,
-              color: Colors.blue[600],
-            ),
+            Icon(Icons.article_outlined, size: 16, color: Colors.blue[600]),
             const SizedBox(width: 8),
             Text(
               'Sources (${sources.length})',
-              style: TextStyle(
-                color: Colors.blue[600],
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.blue[600], fontWeight: FontWeight.w600, fontFamily: 'Poppins', fontSize: 14),
             ),
           ],
         ),
-        collapsedBackgroundColor: Colors.blue.withOpacity(0.05),
-        backgroundColor: Colors.blue.withOpacity(0.05),
+        collapsedBackgroundColor: Colors.blue.withValues(alpha: 0.05),
+        backgroundColor: Colors.blue.withValues(alpha: 0.05),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: Colors.blue.withOpacity(0.1),
-            width: 1,
-          ),
+          side: BorderSide(color: Colors.blue.withValues(alpha: 0.1), width: 1),
         ),
         children: sources.map((source) => _buildSourceItem(context, source)).toList(),
       ),
@@ -52,34 +36,20 @@ class SourceCitationWidget extends StatelessWidget {
   }
 
   Widget _buildSourceItem(BuildContext context, Source source) {
-
     return ListTile(
       dense: true,
-      leading: Icon(
-        Icons.public,
-        size: 16,
-        color: Colors.blue[600],
-      ),
+      leading: Icon(Icons.public, size: 16, color: Colors.blue[600]),
       title: Text(
         source.title ?? 'Web source',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Poppins',
-          color: Colors.black87,
-        ),
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: Colors.black87),
       ),
       subtitle: Text(
         source.url,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontSize: 12,
-          fontFamily: 'Poppins',
-          color: Colors.grey[600],
-        ),
+        style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: Colors.grey[600]),
       ),
       onTap: () async {
         try {

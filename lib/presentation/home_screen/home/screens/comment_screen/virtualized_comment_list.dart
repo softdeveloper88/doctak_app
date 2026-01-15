@@ -14,14 +14,7 @@ class VirtualizedCommentList extends StatefulWidget {
   final int? selectedCommentId;
   final Function(int) onReplySelected;
 
-  const VirtualizedCommentList({
-    super.key,
-    required this.commentBloc,
-    this.scrollController,
-    required this.postId,
-    this.selectedCommentId,
-    required this.onReplySelected,
-  });
+  const VirtualizedCommentList({super.key, required this.commentBloc, this.scrollController, required this.postId, this.selectedCommentId, required this.onReplySelected});
 
   @override
   State<VirtualizedCommentList> createState() => _VirtualizedCommentListState();
@@ -55,29 +48,16 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.chat_bubble_outline_rounded,
-              size: 64,
-              color: theme.textTertiary,
-            ),
+            Icon(Icons.chat_bubble_outline_rounded, size: 64, color: theme.textTertiary),
             const SizedBox(height: 16),
             Text(
               translation(context).msg_no_comments_yet,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: theme.textSecondary,
-                fontFamily: 'Poppins',
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: theme.textSecondary, fontFamily: 'Poppins'),
             ),
             const SizedBox(height: 8),
             Text(
               translation(context).msg_be_first_to_comment,
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.textTertiary,
-                fontFamily: 'Poppins',
-              ),
+              style: TextStyle(fontSize: 14, color: theme.textTertiary, fontFamily: 'Poppins'),
               textAlign: TextAlign.center,
             ),
           ],
@@ -87,10 +67,7 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: EdgeInsets.only(
-        top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 70,
-      ), // Safe area + input field padding
+      padding: EdgeInsets.only(top: 8, bottom: MediaQuery.of(context).padding.bottom + 70), // Safe area + input field padding
       itemCount: bloc.postList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,
@@ -98,15 +75,12 @@ class _VirtualizedCommentListState extends State<VirtualizedCommentList> {
         // Check if we need to load more data
         if (bloc.pageNumber <= bloc.numberOfPage) {
           if (index == bloc.postList.length - bloc.nextPageTrigger) {
-            bloc.add(
-              CheckIfNeedMoreDataEvent(postId: widget.postId, index: index),
-            );
+            bloc.add(CheckIfNeedMoreDataEvent(postId: widget.postId, index: index));
           }
         }
 
         // Show shimmer loader at the bottom if loading more
-        if (bloc.numberOfPage != bloc.pageNumber - 1 &&
-            index >= bloc.postList.length - 1) {
+        if (bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.postList.length - 1) {
           return const SizedBox(height: 200, child: EnhancedCommentShimmer());
         }
         // Regular comment item

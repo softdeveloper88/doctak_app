@@ -12,13 +12,7 @@ class PostMediaWidget extends StatelessWidget {
   final Function(String videoUrl) onVideoTap;
   final Function(List<Map<String, String>> mediaUrls) onExpandImageUrls;
 
-  PostMediaWidget({
-    required this.mediaList,
-    required this.imageUrlBase,
-    required this.onImageTap,
-    required this.onVideoTap,
-    required this.onExpandImageUrls,
-  });
+  const PostMediaWidget({super.key, required this.mediaList, required this.imageUrlBase, required this.onImageTap, required this.onVideoTap, required this.onExpandImageUrls});
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +56,7 @@ class PostMediaWidget extends StatelessWidget {
       return PhotoGrid(
         imageUrls: mediaUrls,
         onImageClicked: (i) => onImageTap(mediaUrls[i]["url"]!),
-        onExpandClicked: () => onExpandImageUrls(
-            mediaUrls), // You can add expand functionality here
+        onExpandClicked: () => onExpandImageUrls(mediaUrls), // You can add expand functionality here
         maxImages: 2,
       );
     } else {

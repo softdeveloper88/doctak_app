@@ -63,52 +63,31 @@ class CallDebugUtils {
     logInfo('CALL_STATE', 'State change detected:');
 
     if (oldState.connectionState != newState.connectionState) {
-      logInfo(
-        'CALL_STATE',
-        '  Connection: ${oldState.connectionState} → ${newState.connectionState}',
-      );
+      logInfo('CALL_STATE', '  Connection: ${oldState.connectionState} → ${newState.connectionState}');
     }
 
     if (oldState.isLocalUserJoined != newState.isLocalUserJoined) {
-      logInfo(
-        'CALL_STATE',
-        '  Local user joined: ${oldState.isLocalUserJoined} → ${newState.isLocalUserJoined}',
-      );
+      logInfo('CALL_STATE', '  Local user joined: ${oldState.isLocalUserJoined} → ${newState.isLocalUserJoined}');
     }
 
     if (oldState.isRemoteUserJoined != newState.isRemoteUserJoined) {
-      logInfo(
-        'CALL_STATE',
-        '  Remote user joined: ${oldState.isRemoteUserJoined} → ${newState.isRemoteUserJoined}',
-      );
+      logInfo('CALL_STATE', '  Remote user joined: ${oldState.isRemoteUserJoined} → ${newState.isRemoteUserJoined}');
     }
 
     if (oldState.remoteUid != newState.remoteUid) {
-      logInfo(
-        'CALL_STATE',
-        '  Remote UID: ${oldState.remoteUid} → ${newState.remoteUid}',
-      );
+      logInfo('CALL_STATE', '  Remote UID: ${oldState.remoteUid} → ${newState.remoteUid}');
     }
 
     if (oldState.isLocalVideoEnabled != newState.isLocalVideoEnabled) {
-      logInfo(
-        'CALL_STATE',
-        '  Local video: ${oldState.isLocalVideoEnabled} → ${newState.isLocalVideoEnabled}',
-      );
+      logInfo('CALL_STATE', '  Local video: ${oldState.isLocalVideoEnabled} → ${newState.isLocalVideoEnabled}');
     }
 
     if (oldState.isMuted != newState.isMuted) {
-      logInfo(
-        'CALL_STATE',
-        '  Muted: ${oldState.isMuted} → ${newState.isMuted}',
-      );
+      logInfo('CALL_STATE', '  Muted: ${oldState.isMuted} → ${newState.isMuted}');
     }
 
     if (oldState.networkQuality != newState.networkQuality) {
-      logInfo(
-        'CALL_STATE',
-        '  Network quality: ${oldState.networkQuality} → ${newState.networkQuality}',
-      );
+      logInfo('CALL_STATE', '  Network quality: ${oldState.networkQuality} → ${newState.networkQuality}');
     }
   }
 
@@ -124,22 +103,13 @@ class CallDebugUtils {
   }
 
   /// Log call initialization details
-  static void logCallInitialization({
-    required String callId,
-    required String localUserId,
-    required String remoteUserId,
-    required bool isVideoCall,
-    required bool isIncoming,
-  }) {
+  static void logCallInitialization({required String callId, required String localUserId, required String remoteUserId, required bool isVideoCall, required bool isIncoming}) {
     logInfo('CALL_INIT', 'Initializing call:');
     logInfo('CALL_INIT', '  Call ID: $callId');
     logInfo('CALL_INIT', '  Local user: $localUserId');
     logInfo('CALL_INIT', '  Remote user: $remoteUserId');
     logInfo('CALL_INIT', '  Type: ${isVideoCall ? 'VIDEO' : 'AUDIO'}');
-    logInfo(
-      'CALL_INIT',
-      '  Direction: ${isIncoming ? 'INCOMING' : 'OUTGOING'}',
-    );
+    logInfo('CALL_INIT', '  Direction: ${isIncoming ? 'INCOMING' : 'OUTGOING'}');
     logSystemInfo();
   }
 
@@ -154,13 +124,7 @@ class CallDebugUtils {
   }
 
   /// Log network statistics
-  static void logNetworkStats({
-    required int txBitrate,
-    required int rxBitrate,
-    required int txPacketLossRate,
-    required int rxPacketLossRate,
-    required int rtt,
-  }) {
+  static void logNetworkStats({required int txBitrate, required int rxBitrate, required int txPacketLossRate, required int rxPacketLossRate, required int rtt}) {
     if (!_verboseLogging) return;
 
     logDebug('NETWORK', 'Network statistics:');
@@ -183,9 +147,7 @@ class CallDebugUtils {
 
     buffer.writeln('=== CALL DIAGNOSTIC REPORT ===');
     buffer.writeln('Generated: $timestamp');
-    buffer.writeln(
-      'Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
-    );
+    buffer.writeln('Platform: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
     buffer.writeln('');
 
     buffer.writeln('CALL STATE:');
@@ -203,9 +165,7 @@ class CallDebugUtils {
     buffer.writeln('  Is Muted: ${callState.isMuted}');
     buffer.writeln('  Speaker On: ${callState.isSpeakerOn}');
     buffer.writeln('  Front Camera: ${callState.isFrontCamera}');
-    buffer.writeln(
-      '  Local Video Full Screen: ${callState.isLocalVideoFullScreen}',
-    );
+    buffer.writeln('  Local Video Full Screen: ${callState.isLocalVideoFullScreen}');
     buffer.writeln('  Controls Visible: ${callState.isControlsVisible}');
     buffer.writeln('');
 
@@ -213,9 +173,7 @@ class CallDebugUtils {
     buffer.writeln('  Network Quality: ${callState.networkQuality}');
     buffer.writeln('  Local User Speaking: ${callState.isLocalUserSpeaking}');
     buffer.writeln('  Remote User Speaking: ${callState.isRemoteUserSpeaking}');
-    buffer.writeln(
-      '  Using Lower Video Quality: ${callState.isUsingLowerVideoQuality}',
-    );
+    buffer.writeln('  Using Lower Video Quality: ${callState.isUsingLowerVideoQuality}');
     buffer.writeln('');
 
     buffer.writeln('=== END DIAGNOSTIC REPORT ===');
@@ -242,12 +200,8 @@ class CallDebugUtils {
       final callState = getCallState();
 
       // Auto-cancel timer if call has ended or failed
-      if (callState.connectionState == CallConnectionState.disconnected ||
-          callState.connectionState == CallConnectionState.failed) {
-        logDebug(
-          'PERFORMANCE',
-          'Call disconnected, stopping performance monitoring',
-        );
+      if (callState.connectionState == CallConnectionState.disconnected || callState.connectionState == CallConnectionState.failed) {
+        logDebug('PERFORMANCE', 'Call disconnected, stopping performance monitoring');
         timer.cancel();
         return;
       }
@@ -259,17 +213,11 @@ class CallDebugUtils {
 
       // Log potential issues
       if (callState.connectionState == CallConnectionState.reconnecting) {
-        logWarning(
-          'PERFORMANCE',
-          'Call is reconnecting - possible network issues',
-        );
+        logWarning('PERFORMANCE', 'Call is reconnecting - possible network issues');
       }
 
       if (callState.networkQuality != null && callState.networkQuality! > 3) {
-        logWarning(
-          'PERFORMANCE',
-          'Poor network quality detected: ${callState.networkQuality}',
-        );
+        logWarning('PERFORMANCE', 'Poor network quality detected: ${callState.networkQuality}');
       }
 
       if (!callState.isRemoteUserJoined && callState.callDuration > 30) {
@@ -291,24 +239,17 @@ class CallDebugUtils {
 
     // Remote user issues
     if (!callState.isRemoteUserJoined && callState.callDuration > 30) {
-      issues.add(
-        'Remote user has not joined after 30 seconds - possible network or configuration issue',
-      );
+      issues.add('Remote user has not joined after 30 seconds - possible network or configuration issue');
     }
 
     // Network quality issues
     if (callState.networkQuality != null && callState.networkQuality! > 4) {
-      issues.add(
-        'Very poor network quality - consider switching to audio-only call',
-      );
+      issues.add('Very poor network quality - consider switching to audio-only call');
     }
 
     // Media issues
-    if (callState.callType == CallType.video &&
-        !callState.isLocalVideoEnabled) {
-      issues.add(
-        'Video call but local video is disabled - check camera permissions',
-      );
+    if (callState.callType == CallType.video && !callState.isLocalVideoEnabled) {
+      issues.add('Video call but local video is disabled - check camera permissions');
     }
 
     return issues;

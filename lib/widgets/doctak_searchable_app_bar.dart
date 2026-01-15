@@ -5,8 +5,7 @@ import '../theme/one_ui_theme.dart';
 
 /// A searchable app bar that provides a search field with One UI 8.5 styling
 /// When search is active, the title hides and search field expands - similar to high-quality apps
-class DoctakSearchableAppBar extends StatefulWidget
-    implements PreferredSizeWidget {
+class DoctakSearchableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final String searchHint;
   final TextEditingController? searchController;
@@ -22,7 +21,7 @@ class DoctakSearchableAppBar extends StatefulWidget
   final bool startWithSearch;
 
   const DoctakSearchableAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.searchHint = 'Search...',
     this.searchController,
@@ -36,7 +35,7 @@ class DoctakSearchableAppBar extends StatefulWidget
     this.searchDebounce = const Duration(milliseconds: 400),
     this.customLeading,
     this.startWithSearch = false,
-  }) : super(key: key);
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(70);
@@ -45,8 +44,7 @@ class DoctakSearchableAppBar extends StatefulWidget
   State<DoctakSearchableAppBar> createState() => DoctakSearchableAppBarState();
 }
 
-class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
-    with SingleTickerProviderStateMixin {
+class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar> with SingleTickerProviderStateMixin {
   bool _isSearching = false;
   late TextEditingController _searchController;
   late AnimationController _animationController;
@@ -59,10 +57,7 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
   void initState() {
     super.initState();
     _searchController = widget.searchController ?? TextEditingController();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 250),
-    );
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 250));
 
     if (widget.startWithSearch) {
       _isSearching = true;
@@ -149,15 +144,9 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
             child: Row(
               children: [
                 // Back button - only show when searching OR when showBackButton is true and not searching
-                if (_isSearching)
-                  _buildSearchBackButton(context, theme)
-                else if (widget.showBackButton)
-                  _buildBackButton(context, theme)
-                else if (widget.customLeading != null)
-                  widget.customLeading!,
+                if (_isSearching) _buildSearchBackButton(context, theme) else if (widget.showBackButton) _buildBackButton(context, theme) else if (widget.customLeading != null) widget.customLeading!,
 
-                if (_isSearching || widget.showBackButton || widget.customLeading != null)
-                  const SizedBox(width: 8),
+                if (_isSearching || widget.showBackButton || widget.customLeading != null) const SizedBox(width: 8),
 
                 // Title or Search Field
                 Expanded(
@@ -167,17 +156,12 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
                       return FadeTransition(
                         opacity: animation,
                         child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0, 0.1),
-                            end: Offset.zero,
-                          ).animate(animation),
+                          position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(animation),
                           child: child,
                         ),
                       );
                     },
-                    child: _isSearching
-                        ? _buildSearchField(theme)
-                        : _buildTitle(theme),
+                    child: _isSearching ? _buildSearchField(theme) : _buildTitle(theme),
                   ),
                 ),
 
@@ -208,11 +192,7 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
           width: 44,
           height: 44,
           decoration: theme.iconButtonDecoration(),
-          child: Icon(
-            Icons.arrow_back_rounded,
-            color: theme.primary,
-            size: 20,
-          ),
+          child: Icon(Icons.arrow_back_rounded, color: theme.primary, size: 20),
         ),
       ),
     );
@@ -236,11 +216,7 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
           width: 44,
           height: 44,
           decoration: theme.iconButtonDecoration(),
-          child: Icon(
-            CupertinoIcons.back,
-            color: theme.primary,
-            size: 20,
-          ),
+          child: Icon(CupertinoIcons.back, color: theme.primary, size: 20),
         ),
       ),
     );
@@ -254,13 +230,7 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
         Expanded(
           child: Text(
             widget.title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Poppins',
-              color: theme.primary,
-              letterSpacing: -0.2,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.primary, letterSpacing: -0.2),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -275,14 +245,8 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
       decoration: BoxDecoration(
         color: theme.inputBackground,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: theme.primary.withOpacity(0.15), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primary.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: theme.primary.withValues(alpha: 0.15), width: 1),
+        boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Row(
         children: [
@@ -293,18 +257,10 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
             child: TextField(
               controller: _searchController,
               focusNode: _focusNode,
-              style: TextStyle(
-                fontSize: 15,
-                fontFamily: 'Poppins',
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 15, fontFamily: 'Poppins', color: theme.textPrimary),
               decoration: InputDecoration(
                 hintText: widget.searchHint,
-                hintStyle: TextStyle(
-                  fontSize: 15,
-                  fontFamily: 'Poppins',
-                  color: theme.textTertiary,
-                ),
+                hintStyle: TextStyle(fontSize: 15, fontFamily: 'Poppins', color: theme.textTertiary),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
@@ -322,11 +278,7 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
                     onTap: clearSearch,
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(
-                        CupertinoIcons.xmark_circle_fill,
-                        color: theme.textTertiary,
-                        size: 20,
-                      ),
+                      child: Icon(CupertinoIcons.xmark_circle_fill, color: theme.textTertiary, size: 20),
                     ),
                   )
                 : const SizedBox(key: ValueKey('empty'), width: 16),
@@ -369,7 +321,7 @@ class SearchableScaffold extends StatefulWidget {
   final FloatingActionButtonLocation? floatingActionButtonLocation;
 
   const SearchableScaffold({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.searchHint = 'Search...',
@@ -380,7 +332,7 @@ class SearchableScaffold extends StatefulWidget {
     this.backgroundColor,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchableScaffold> createState() => _SearchableScaffoldState();
@@ -427,7 +379,7 @@ class DoctakCollapsibleSearchField extends StatefulWidget {
   final bool autofocus;
 
   const DoctakCollapsibleSearchField({
-    Key? key,
+    super.key,
     required this.isVisible,
     this.hintText = 'Search...',
     this.controller,
@@ -438,15 +390,13 @@ class DoctakCollapsibleSearchField extends StatefulWidget {
     this.height = 72,
     this.margin = const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
     this.autofocus = true,
-  }) : super(key: key);
+  });
 
   @override
-  State<DoctakCollapsibleSearchField> createState() =>
-      _DoctakCollapsibleSearchFieldState();
+  State<DoctakCollapsibleSearchField> createState() => _DoctakCollapsibleSearchFieldState();
 }
 
-class _DoctakCollapsibleSearchFieldState
-    extends State<DoctakCollapsibleSearchField> {
+class _DoctakCollapsibleSearchFieldState extends State<DoctakCollapsibleSearchField> {
   late TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   Timer? _debounce;
@@ -521,52 +471,26 @@ class _DoctakCollapsibleSearchFieldState
             decoration: BoxDecoration(
               color: theme.inputBackground,
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: theme.primary.withOpacity(0.15),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.isDark
-                      ? Colors.black.withOpacity(0.2)
-                      : theme.primary.withOpacity(0.05),
-                  offset: const Offset(0, 2),
-                  blurRadius: 8,
-                  spreadRadius: 0,
-                ),
-              ],
+              border: Border.all(color: theme.primary.withValues(alpha: 0.15), width: 1),
+              boxShadow: [BoxShadow(color: theme.isDark ? Colors.black.withValues(alpha: 0.2) : theme.primary.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Row(
                 children: [
                   const SizedBox(width: 16),
-                  Icon(
-                    CupertinoIcons.search,
-                    color: theme.primary.withOpacity(0.6),
-                    size: 22,
-                  ),
+                  Icon(CupertinoIcons.search, color: theme.primary.withValues(alpha: 0.6), size: 22),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
                       controller: _controller,
                       focusNode: _focusNode,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 15,
-                        color: theme.textPrimary,
-                      ),
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: widget.hintText,
-                        hintStyle: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 15,
-                          color: theme.textTertiary,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 14.0,
-                        ),
+                        hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textTertiary),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
                         isDense: true,
                       ),
                       onChanged: _handleSearchChanged,
@@ -581,24 +505,14 @@ class _DoctakCollapsibleSearchFieldState
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: _clearSearch,
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(24),
-                                bottomRight: Radius.circular(24),
-                              ),
+                              borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
                               child: Container(
                                 padding: const EdgeInsets.all(14),
                                 decoration: BoxDecoration(
-                                  color: theme.primary.withOpacity(0.1),
-                                  borderRadius: const BorderRadius.only(
-                                    topRight: Radius.circular(24),
-                                    bottomRight: Radius.circular(24),
-                                  ),
+                                  color: theme.primary.withValues(alpha: 0.1),
+                                  borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
                                 ),
-                                child: Icon(
-                                  CupertinoIcons.xmark,
-                                  color: theme.primary.withOpacity(0.6),
-                                  size: 20,
-                                ),
+                                child: Icon(CupertinoIcons.xmark, color: theme.primary.withValues(alpha: 0.6), size: 20),
                               ),
                             ),
                           )
@@ -621,12 +535,7 @@ class DoctakSearchToggleButton extends StatelessWidget {
   final VoidCallback onTap;
   final double size;
 
-  const DoctakSearchToggleButton({
-    Key? key,
-    required this.isSearching,
-    required this.onTap,
-    this.size = 44,
-  }) : super(key: key);
+  const DoctakSearchToggleButton({super.key, required this.isSearching, required this.onTap, this.size = 44});
 
   @override
   Widget build(BuildContext context) {
@@ -650,12 +559,7 @@ class DoctakSearchToggleButton extends StatelessWidget {
                 child: FadeTransition(opacity: animation, child: child),
               );
             },
-            child: Icon(
-              isSearching ? CupertinoIcons.xmark : CupertinoIcons.search,
-              key: ValueKey(isSearching),
-              color: theme.primary,
-              size: 20,
-            ),
+            child: Icon(isSearching ? CupertinoIcons.xmark : CupertinoIcons.search, key: ValueKey(isSearching), color: theme.primary, size: 20),
           ),
         ),
       ),

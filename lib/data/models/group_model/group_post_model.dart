@@ -1,14 +1,10 @@
 import 'dart:convert';
 
-GroupPostModel groupPostModelFromJson(String str) =>
-    GroupPostModel.fromJson(json.decode(str));
+GroupPostModel groupPostModelFromJson(String str) => GroupPostModel.fromJson(json.decode(str));
 String groupPostModelToJson(GroupPostModel data) => json.encode(data.toJson());
 
 class GroupPostModel {
-  GroupPostModel({
-    this.posts,
-    this.offset,
-  });
+  GroupPostModel({this.posts, this.offset});
 
   GroupPostModel.fromJson(dynamic json) {
     if (json['posts'] != null) {
@@ -36,17 +32,7 @@ Posts postsFromJson(String str) => Posts.fromJson(json.decode(str));
 String postsToJson(Posts data) => json.encode(data.toJson());
 
 class Posts {
-  Posts({
-    this.id,
-    this.title,
-    this.createdAt,
-    this.feelings,
-    this.tagging,
-    this.privacy,
-    this.media,
-    this.likesCount,
-    this.commentsCount,
-  });
+  Posts({this.id, this.title, this.createdAt, this.feelings, this.tagging, this.privacy, this.media, this.likesCount, this.commentsCount});
 
   Posts.fromJson(dynamic json) {
     id = json['id'];

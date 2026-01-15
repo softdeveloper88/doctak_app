@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../core/utils/text_scale_helper.dart';
 import '../core/utils/simple_fixed_media_query.dart';
 
 /// A custom Text widget that ignores device text scaling settings
@@ -21,7 +20,7 @@ class FixedText extends StatelessWidget {
 
   const FixedText(
     this.data, {
-    Key? key,
+    super.key,
     this.style,
     this.strutStyle,
     this.textAlign,
@@ -34,7 +33,7 @@ class FixedText extends StatelessWidget {
     this.semanticsLabel,
     this.textWidthBasis,
     this.textHeightBehavior,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +72,7 @@ class FixedRichText extends StatelessWidget {
   final TextHeightBehavior? textHeightBehavior;
 
   const FixedRichText({
-    Key? key,
+    super.key,
     required this.text,
     this.textAlign,
     this.textDirection,
@@ -85,7 +84,7 @@ class FixedRichText extends StatelessWidget {
     this.strutStyle,
     this.textWidthBasis,
     this.textHeightBehavior,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

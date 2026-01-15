@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-GuidelinesModel guidelinesModelFromJson(String str) =>
-    GuidelinesModel.fromJson(json.decode(str));
-String guidelinesModelToJson(GuidelinesModel data) =>
-    json.encode(data.toJson());
+GuidelinesModel guidelinesModelFromJson(String str) => GuidelinesModel.fromJson(json.decode(str));
+String guidelinesModelToJson(GuidelinesModel data) => json.encode(data.toJson());
 
 class GuidelinesModel {
   GuidelinesModel({
@@ -88,11 +86,7 @@ Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
 
 class Links {
-  Links({
-    this.url,
-    this.label,
-    this.active,
-  });
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -116,13 +110,7 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 
 class Data {
-  Data({
-    this.id,
-    this.diseaseName,
-    this.fileName,
-    this.description,
-    this.guidelineName,
-  });
+  Data({this.id, this.diseaseName, this.fileName, this.description, this.guidelineName});
 
   Data.fromJson(dynamic json) {
     id = json['id'];

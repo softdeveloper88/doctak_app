@@ -32,23 +32,14 @@ class Source {
   final String url;
   final String? title;
 
-  Source({
-    required this.url,
-    this.title,
-  });
+  Source({required this.url, this.title});
 
   factory Source.fromJson(Map<String, dynamic> json) {
-    return Source(
-      url: json['url'],
-      title: json['title'],
-    );
+    return Source(url: json['url'], title: json['title']);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'url': url,
-      'title': title,
-    };
+    return {'url': url, 'title': title};
   }
 }
 
@@ -80,19 +71,15 @@ class AiChatMessageModel {
   factory AiChatMessageModel.fromJson(Map<String, dynamic> json) {
     List<Source>? sources;
     if (json['metadata'] != null) {
-      final metadata = json['metadata'] is String 
-          ? jsonDecode(json['metadata']) 
-          : json['metadata'];
-          
+      final metadata = json['metadata'] is String ? jsonDecode(json['metadata']) : json['metadata'];
+
       if (metadata['sources'] != null) {
-        sources = (metadata['sources'] as List)
-            .map((source) => Source.fromJson(source))
-            .toList();
+        sources = (metadata['sources'] as List).map((source) => Source.fromJson(source)).toList();
       }
     }
 
     return AiChatMessageModel(
-      id: json['id'] != null ? json['id'] : 0,
+      id: json['id'] ?? 0,
       sessionId: json['session_id'],
       role: MessageRoleExtension.fromString(json['role']),
       content: json['content'],

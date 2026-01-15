@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'callkit_service.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
-import '../screens/call_screen.dart';
 import 'call_api_service.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:clear_all_notifications/clear_all_notifications.dart';
@@ -52,7 +51,7 @@ class CallService extends ChangeNotifier {
   bool _isAcceptingCall = false;
   //
   // Timestamp of last handled notification to prevent duplicates
-  Map<String, int> _lastHandledNotification = {};
+  final Map<String, int> _lastHandledNotification = {};
   //
   // Map to track accepted calls to prevent duplicates
   final Map<String, DateTime> _acceptedCalls = {};
@@ -80,10 +79,7 @@ class CallService extends ChangeNotifier {
   bool get isAcceptingCall => _isAcceptingCall;
   //
   /// Initialize the CallService
-  Future<void> initialize({
-    required String baseUrl,
-    bool isFromCallNotification = false,
-  }) async {
+  Future<void> initialize({required String baseUrl, bool isFromCallNotification = false}) async {
     // Cancel any existing retry timer
     _initRetryTimer?.cancel();
     //
@@ -137,8 +133,7 @@ class CallService extends ChangeNotifier {
     try {
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
-      final acceptedCallsJson =
-          await prefs.getStringList('accepted_calls') ?? [];
+      final acceptedCallsJson = await prefs.getStringList('accepted_calls') ?? [];
       //
       // Clear existing entries
       _acceptedCalls.clear();
@@ -151,16 +146,12 @@ class CallService extends ChangeNotifier {
           final timestamp = int.tryParse(parts[1]) ?? 0;
           //
           if (timestamp > 0) {
-            _acceptedCalls[callId] = DateTime.fromMillisecondsSinceEpoch(
-              timestamp,
-            );
+            _acceptedCalls[callId] = DateTime.fromMillisecondsSinceEpoch(timestamp);
           }
         }
       }
       //
-      debugPrint(
-        'Loaded ${_acceptedCalls.length} accepted calls from preferences',
-      );
+      debugPrint('Loaded ${_acceptedCalls.length} accepted calls from preferences');
     } catch (e) {
       debugPrint('Error loading accepted calls: $e');
     }
@@ -175,21 +166,15 @@ class CallService extends ChangeNotifier {
       //
       // Clean up old entries (older than 5 minutes)
       final now = DateTime.now();
-      _acceptedCalls.removeWhere(
-        (_, timestamp) => now.difference(timestamp).inMinutes > 5,
-      );
+      _acceptedCalls.removeWhere((_, timestamp) => now.difference(timestamp).inMinutes > 5);
       //
       // Convert to string list
-      final acceptedCallsJson = _acceptedCalls.entries
-          .map((entry) => '${entry.key}|${entry.value.millisecondsSinceEpoch}')
-          .toList();
+      final acceptedCallsJson = _acceptedCalls.entries.map((entry) => '${entry.key}|${entry.value.millisecondsSinceEpoch}').toList();
       //
       // Save to preferences
       await prefs.setStringList('accepted_calls', acceptedCallsJson);
       //
-      debugPrint(
-        'Saved ${_acceptedCalls.length} accepted calls to preferences',
-      );
+      debugPrint('Saved ${_acceptedCalls.length} accepted calls to preferences');
     } catch (e) {
       debugPrint('Error saving accepted calls: $e');
     }
@@ -251,17 +236,13 @@ class CallService extends ChangeNotifier {
       //
       if (pendingCallId != null) {
         // Check if this call has already been accepted
-        if (_isCallAlreadyAccepted(pendingCallId) ||
-            _isRecentlyHandledNotification(pendingCallId)) {
-          debugPrint(
-            'Call already accepted or notification recently handled, ignoring: $pendingCallId',
-          );
+        if (_isCallAlreadyAccepted(pendingCallId) || _isRecentlyHandledNotification(pendingCallId)) {
+          debugPrint('Call already accepted or notification recently handled, ignoring: $pendingCallId');
           await _clearPendingCallInfo();
           return;
         }
         //
-        final pendingTimestamp =
-            await prefs.getInt('pending_call_timestamp') ?? 0;
+        final pendingTimestamp = await prefs.getInt('pending_call_timestamp') ?? 0;
         final now = DateTime.now().millisecondsSinceEpoch;
         //
         // Only consider calls within the last 30 seconds
@@ -273,20 +254,12 @@ class CallService extends ChangeNotifier {
           //
           // Extract call information
           final callerId = await prefs.getString('pending_caller_id') ?? '';
-          final callerName =
-              await prefs.getString('pending_caller_name') ?? 'Unknown';
+          final callerName = await prefs.getString('pending_caller_name') ?? 'Unknown';
           final avatar = await prefs.getString('pending_caller_avatar') ?? '';
-          final hasVideo =
-              await prefs.getBool('pending_call_has_video') ?? false;
+          final hasVideo = await prefs.getBool('pending_call_has_video') ?? false;
           //
           // Handle the call
-          await handleIncomingCall(
-            callId: pendingCallId,
-            callerId: callerId,
-            callerName: callerName,
-            callerAvatar: avatar,
-            isVideoCall: hasVideo,
-          );
+          await handleIncomingCall(callId: pendingCallId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
         } else {
           // Call info is too old, clean up
           await _clearPendingCallInfo();
@@ -334,15 +307,10 @@ class CallService extends ChangeNotifier {
     _initRetryCount++;
     final delay = Duration(milliseconds: 300 * _initRetryCount);
     //
-    debugPrint(
-      'Will retry initialization in ${delay.inMilliseconds}ms (attempt $_initRetryCount)',
-    );
+    debugPrint('Will retry initialization in ${delay.inMilliseconds}ms (attempt $_initRetryCount)');
     //
     _initRetryTimer = Timer(delay, () {
-      initialize(
-        baseUrl: baseUrl,
-        isFromCallNotification: isFromCallNotification,
-      );
+      initialize(baseUrl: baseUrl, isFromCallNotification: isFromCallNotification);
     });
   }
 
@@ -386,11 +354,8 @@ class CallService extends ChangeNotifier {
         final callId = call['id']?.toString() ?? '';
         //
         // Check if this call has already been accepted
-        if (_isCallAlreadyAccepted(callId) ||
-            _isRecentlyHandledNotification(callId)) {
-          debugPrint(
-            'Call already accepted or notification recently handled, ensuring it\'s visible: $callId',
-          );
+        if (_isCallAlreadyAccepted(callId) || _isRecentlyHandledNotification(callId)) {
+          debugPrint('Call already accepted or notification recently handled, ensuring it\'s visible: $callId');
           await callKitService.resumeCallScreenIfNeeded();
           return;
         }
@@ -428,26 +393,17 @@ class CallService extends ChangeNotifier {
         await _markCallAsAccepted(callId);
         //
         // Extract call information
-        final extra = call['extra'] is Map
-            ? Map<String, dynamic>.from(call['extra'] as Map)
-            : <String, dynamic>{};
+        final extra = call['extra'] is Map ? Map<String, dynamic>.from(call['extra'] as Map) : <String, dynamic>{};
         //
         _callerId = extra['userId']?.toString() ?? '';
         _callerName = call['nameCaller']?.toString() ?? 'Unknown';
         _callerAvatar = extra['avatar']?.toString() ?? '';
-        _isVideoCall =
-            extra['has_video'] == true || extra['has_video'] == 'true';
+        _isVideoCall = extra['has_video'] == true || extra['has_video'] == 'true';
         _currentCallId = callId;
         _hasActiveCall = true;
         //
         // Save call information for recovery
-        await _saveCallInfo(
-          callId,
-          _callerId!,
-          _callerName!,
-          _callerAvatar!,
-          _isVideoCall,
-        );
+        await _saveCallInfo(callId, _callerId!, _callerName!, _callerAvatar!, _isVideoCall);
         //
         notifyListeners();
       } else {
@@ -456,11 +412,8 @@ class CallService extends ChangeNotifier {
         //
         if (_currentCallId != null) {
           // Check if this call has already been accepted
-          if (_isCallAlreadyAccepted(_currentCallId!) ||
-              _isRecentlyHandledNotification(_currentCallId!)) {
-            debugPrint(
-              'Call already accepted or notification recently handled, ensuring it\'s visible: $_currentCallId',
-            );
+          if (_isCallAlreadyAccepted(_currentCallId!) || _isRecentlyHandledNotification(_currentCallId!)) {
+            debugPrint('Call already accepted or notification recently handled, ensuring it\'s visible: $_currentCallId');
             await callKitService.resumeCallScreenIfNeeded();
             return;
           }
@@ -537,9 +490,7 @@ class CallService extends ChangeNotifier {
       _isVideoCall = await prefs.getBool('active_call_has_video') ?? false;
       //
       if (_currentCallId != null) {
-        debugPrint(
-          'Loaded call info - Call ID: $_currentCallId, Caller: $_callerName',
-        );
+        debugPrint('Loaded call info - Call ID: $_currentCallId, Caller: $_callerName');
       }
     } catch (e) {
       debugPrint('Error loading call info: $e');
@@ -587,13 +538,7 @@ class CallService extends ChangeNotifier {
 
   //
   /// Save call information to SharedPreferences for persistence
-  Future<void> _saveCallInfo(
-    String callId,
-    String callerId,
-    String callerName,
-    String callerAvatar,
-    bool isVideoCall,
-  ) async {
+  Future<void> _saveCallInfo(String callId, String callerId, String callerName, String callerAvatar, bool isVideoCall) async {
     try {
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
@@ -604,10 +549,7 @@ class CallService extends ChangeNotifier {
       await prefs.setString('active_call_name', callerName);
       await prefs.setString('active_call_avatar', callerAvatar);
       await prefs.setBool('active_call_has_video', isVideoCall);
-      await prefs.setInt(
-        'active_call_timestamp',
-        DateTime.now().millisecondsSinceEpoch,
-      );
+      await prefs.setInt('active_call_timestamp', DateTime.now().millisecondsSinceEpoch);
       //
       // Update local state
       _currentCallId = callId;
@@ -616,9 +558,7 @@ class CallService extends ChangeNotifier {
       _callerAvatar = callerAvatar;
       _isVideoCall = isVideoCall;
       //
-      debugPrint(
-        'Call information saved - Call ID: $callId, Caller: $callerName',
-      );
+      debugPrint('Call information saved - Call ID: $callId, Caller: $callerName');
     } catch (e) {
       debugPrint('Error saving call info: $e');
     }
@@ -626,21 +566,10 @@ class CallService extends ChangeNotifier {
 
   //
   /// Handle an incoming call notification
-  Future<void> handleIncomingCall({
-    required String callId,
-    required String callerId,
-    required String callerName,
-    required String callerAvatar,
-    required bool isVideoCall,
-  }) async {
+  Future<void> handleIncomingCall({required String callId, required String callerId, required String callerName, required String callerAvatar, required bool isVideoCall}) async {
     // Check if this call has already been accepted or is currently active or recently handled
-    if (_isCallAlreadyAccepted(callId) ||
-        (_currentCallId == callId && _hasActiveCall) ||
-        _isRecentlyHandledNotification(callId) ||
-        _isAcceptingCall) {
-      debugPrint(
-        'Call already accepted or notification recently handled, updating UI for: $callId',
-      );
+    if (_isCallAlreadyAccepted(callId) || (_currentCallId == callId && _hasActiveCall) || _isRecentlyHandledNotification(callId) || _isAcceptingCall) {
+      debugPrint('Call already accepted or notification recently handled, updating UI for: $callId');
       //
       // Just ensure the call screen is visible
       await callKitService.resumeCallScreenIfNeeded();
@@ -655,13 +584,7 @@ class CallService extends ChangeNotifier {
     _markNotificationHandled(callId);
     //
     // First, save call info to preferences immediately regardless of initialization state
-    await _saveCallInfoToPreferences(
-      callId,
-      callerId,
-      callerName,
-      callerAvatar,
-      isVideoCall,
-    );
+    await _saveCallInfoToPreferences(callId, callerId, callerName, callerAvatar, isVideoCall);
     //
     // Use a lock to prevent duplicate handling of the same call
     final lockKey = 'incoming_$callId';
@@ -674,21 +597,13 @@ class CallService extends ChangeNotifier {
     _isHandlingIncomingCall = true;
     //
     try {
-      debugPrint(
-        'Handling incoming call: $callId from $callerName (video: $isVideoCall)',
-      );
+      debugPrint('Handling incoming call: $callId from $callerName (video: $isVideoCall)');
       //
       // Save current app state
       String previousAppState = _appState;
       //
       // Save call information for persistence
-      await _saveCallInfo(
-        callId,
-        callerId,
-        callerName,
-        callerAvatar,
-        isVideoCall,
-      );
+      await _saveCallInfo(callId, callerId, callerName, callerAvatar, isVideoCall);
       //
       // Update state
       _hasActiveCall = true;
@@ -699,10 +614,7 @@ class CallService extends ChangeNotifier {
         try {
           // Only call if we haven't recently called it
           if (!_hasRecentlyCalledApi('ringing_$callId')) {
-            await _callApiService!.callRinging(
-              callId: callId,
-              callerId: callerId,
-            );
+            await _callApiService!.callRinging(callId: callId, callerId: callerId);
             _markApiCallTimestamp('ringing_$callId');
             debugPrint('Called ringing API for call: $callId');
           } else {
@@ -731,24 +643,12 @@ class CallService extends ChangeNotifier {
       if (!callAlreadyActive) {
         // Show incoming call UI via CallKit
         try {
-          await callKitService.displayIncomingCall(
-            uuid: callId,
-            callerName: callerName,
-            callerId: callerId,
-            avatar: callerAvatar,
-            hasVideo: isVideoCall,
-          );
+          await callKitService.displayIncomingCall(uuid: callId, callerName: callerName, callerId: callerId, avatar: callerAvatar, hasVideo: isVideoCall);
           debugPrint('Successfully displayed incoming call UI');
         } catch (e) {
           debugPrint('Error displaying incoming call UI: $e');
           // Try with a delay
-          _retryDisplayIncomingCall(
-            callId,
-            callerName,
-            callerId,
-            callerAvatar,
-            isVideoCall,
-          );
+          _retryDisplayIncomingCall(callId, callerName, callerId, callerAvatar, isVideoCall);
         }
       } else {
         debugPrint('Call already active in CallKit, not showing duplicate UI');
@@ -777,23 +677,14 @@ class CallService extends ChangeNotifier {
 
   //
   // Save call info to SharedPreferences directly (for use when service is not initialized)
-  Future<void> _saveCallInfoToPreferences(
-    String callId,
-    String callerId,
-    String callerName,
-    String callerAvatar,
-    bool isVideoCall,
-  ) async {
+  Future<void> _saveCallInfoToPreferences(String callId, String callerId, String callerName, String callerAvatar, bool isVideoCall) async {
     try {
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
       //
       // Save pending call information for later handling
       await prefs.setString('pending_call_id', callId);
-      await prefs.setInt(
-        'pending_call_timestamp',
-        DateTime.now().millisecondsSinceEpoch,
-      );
+      await prefs.setInt('pending_call_timestamp', DateTime.now().millisecondsSinceEpoch);
       await prefs.setString('pending_caller_id', callerId);
       await prefs.setString('pending_caller_name', callerName);
       await prefs.setString('pending_caller_avatar', callerAvatar);
@@ -807,22 +698,10 @@ class CallService extends ChangeNotifier {
 
   //
   // Retry displaying incoming call UI
-  void _retryDisplayIncomingCall(
-    String callId,
-    String callerName,
-    String callerId,
-    String callerAvatar,
-    bool isVideoCall,
-  ) {
+  void _retryDisplayIncomingCall(String callId, String callerName, String callerId, String callerAvatar, bool isVideoCall) {
     Future.delayed(Duration(milliseconds: 500), () {
       try {
-        callKitService.displayIncomingCall(
-          uuid: callId,
-          callerName: callerName,
-          callerId: callerId,
-          avatar: callerAvatar,
-          hasVideo: isVideoCall,
-        );
+        callKitService.displayIncomingCall(uuid: callId, callerName: callerName, callerId: callerId, avatar: callerAvatar, hasVideo: isVideoCall);
         debugPrint('Successfully displayed incoming call UI on retry');
       } catch (e) {
         debugPrint('Retry also failed to display incoming call UI: $e');
@@ -884,12 +763,7 @@ class CallService extends ChangeNotifier {
 
   //
   /// Make an outgoing call
-  Future<Map<String, dynamic>> makeCall({
-    required String userId,
-    required String userName,
-    required String userAvatar,
-    required bool isVideoCall,
-  }) async {
+  Future<Map<String, dynamic>> makeCall({required String userId, required String userName, required String userAvatar, required bool isVideoCall}) async {
     // Check initialization
     if (!_isInitialized || _callApiService == null) {
       debugPrint('CallService not initialized for outgoing call');
@@ -935,12 +809,7 @@ class CallService extends ChangeNotifier {
       }
       //
       // Call the CallKit service to initiate the call
-      final result = await callKitService.startOutgoingCall(
-        userId: userId,
-        calleeName: userName,
-        avatar: userAvatar,
-        hasVideo: isVideoCall,
-      );
+      final result = await callKitService.startOutgoingCall(userId: userId, calleeName: userName, avatar: userAvatar, hasVideo: isVideoCall);
       //
       if (result['success'] == true && result['callId'] != null) {
         final callId = result['callId'].toString();
@@ -1030,9 +899,7 @@ class CallService extends ChangeNotifier {
           await _callApiService!.endCall(callId: callId);
           debugPrint('API call successful to end call: $callId');
         } catch (e) {
-          debugPrint(
-            'Error with API call to end call: $e, continuing with UI cleanup',
-          );
+          debugPrint('Error with API call to end call: $e, continuing with UI cleanup');
           // Continue with cleanup even if API call fails
         }
       }
@@ -1042,9 +909,7 @@ class CallService extends ChangeNotifier {
         await callKitService.endCall(callId);
         debugPrint('Successfully ended call in CallKit: $callId');
       } catch (e) {
-        debugPrint(
-          'Error ending call in CallKit: $e, continuing with UI cleanup',
-        );
+        debugPrint('Error ending call in CallKit: $e, continuing with UI cleanup');
         // Fallback to direct method if CallKitService fails
         try {
           await FlutterCallkitIncoming.endCall(callId);
@@ -1158,9 +1023,7 @@ class CallService extends ChangeNotifier {
         }
       }
       //
-      final isInCallKit = activeCalls.any(
-        (call) => call['id'] == _currentCallId,
-      );
+      final isInCallKit = activeCalls.any((call) => call['id'] == _currentCallId);
       //
       if (!isInCallKit) {
         debugPrint('Call not found in CallKit on resume: $_currentCallId');
@@ -1177,9 +1040,7 @@ class CallService extends ChangeNotifier {
       bool isActive = await _verifyCallWithServer(_currentCallId!);
       //
       if (!isActive) {
-        debugPrint(
-          'Call not active according to server on resume: $_currentCallId',
-        );
+        debugPrint('Call not active according to server on resume: $_currentCallId');
         await callKitService.endCall(_currentCallId!);
         await _clearCallInfo();
         //
@@ -1188,9 +1049,7 @@ class CallService extends ChangeNotifier {
         await _saveAcceptedCalls();
       } else {
         // Call is still active, ensure call screen is visible
-        debugPrint(
-          'Call still active on resume, ensuring call screen is visible',
-        );
+        debugPrint('Call still active on resume, ensuring call screen is visible');
         await callKitService.resumeCallScreenIfNeeded();
       }
     } catch (e) {
@@ -1222,11 +1081,8 @@ class CallService extends ChangeNotifier {
         final callId = call['id']?.toString() ?? '';
         //
         // Check if this call has already been accepted or recently handled
-        if (_isCallAlreadyAccepted(callId) ||
-            _isRecentlyHandledNotification(callId)) {
-          debugPrint(
-            'Call already accepted or notification recently handled, ensuring it\'s visible: $callId',
-          );
+        if (_isCallAlreadyAccepted(callId) || _isRecentlyHandledNotification(callId)) {
+          debugPrint('Call already accepted or notification recently handled, ensuring it\'s visible: $callId');
           await callKitService.resumeCallScreenIfNeeded();
           return;
         }
@@ -1244,26 +1100,17 @@ class CallService extends ChangeNotifier {
           await _markCallAsAccepted(callId);
           //
           // Update state with call information
-          final extra = call['extra'] is Map
-              ? Map<String, dynamic>.from(call['extra'] as Map)
-              : <String, dynamic>{};
+          final extra = call['extra'] is Map ? Map<String, dynamic>.from(call['extra'] as Map) : <String, dynamic>{};
           //
           _callerId = extra['userId']?.toString() ?? '';
           _callerName = call['nameCaller']?.toString() ?? 'Unknown';
           _callerAvatar = extra['avatar']?.toString() ?? '';
-          _isVideoCall =
-              extra['has_video'] == true || extra['has_video'] == 'true';
+          _isVideoCall = extra['has_video'] == true || extra['has_video'] == 'true';
           _currentCallId = callId;
           _hasActiveCall = true;
           //
           // Save call information
-          await _saveCallInfo(
-            callId,
-            _callerId!,
-            _callerName!,
-            _callerAvatar!,
-            _isVideoCall,
-          );
+          await _saveCallInfo(callId, _callerId!, _callerName!, _callerAvatar!, _isVideoCall);
           //
           notifyListeners();
           //
@@ -1289,13 +1136,7 @@ class CallService extends ChangeNotifier {
 
   //
   /// Navigate to call screen (when accepting a call)
-  Future<void> navigateToCallScreen({
-    required String callId,
-    required String userId,
-    required String userName,
-    required String avatar,
-    required bool isVideoCall,
-  }) async {
+  Future<void> navigateToCallScreen({required String callId, required String userId, required String userName, required String avatar, required bool isVideoCall}) async {
     // Mark this call as accepted before navigating
     await _markCallAsAccepted(callId);
     //
@@ -1327,19 +1168,11 @@ class CallService extends ChangeNotifier {
   //
   /// Method to update an existing call instead of creating a new one
   /// This is used when a subsequent notification for the same call arrives
-  Future<void> updateExistingCall({
-    required String callId,
-    required String callerId,
-    required String callerName,
-    required String callerAvatar,
-    required bool isVideoCall,
-  }) async {
+  Future<void> updateExistingCall({required String callId, required String callerId, required String callerName, required String callerAvatar, required bool isVideoCall}) async {
     try {
       // Check if notification was recently handled
       if (_isRecentlyHandledNotification(callId)) {
-        debugPrint(
-          'Notification recently handled, ignoring duplicate: $callId',
-        );
+        debugPrint('Notification recently handled, ignoring duplicate: $callId');
         return;
       }
       //
@@ -1375,9 +1208,7 @@ class CallService extends ChangeNotifier {
       //
       if (isInCallKit) {
         // We have the call in CallKit but not as active - update our state
-        debugPrint(
-          'Call found in CallKit but not active in service, updating state: $callId',
-        );
+        debugPrint('Call found in CallKit but not active in service, updating state: $callId');
         //
         // Update local state
         _callerId = callerId;
@@ -1388,13 +1219,7 @@ class CallService extends ChangeNotifier {
         _hasActiveCall = true;
         //
         // Save call information for persistence
-        await _saveCallInfo(
-          callId,
-          callerId,
-          callerName,
-          callerAvatar,
-          isVideoCall,
-        );
+        await _saveCallInfo(callId, callerId, callerName, callerAvatar, isVideoCall);
         //
         // Mark as accepted
         await _markCallAsAccepted(callId);
@@ -1412,13 +1237,7 @@ class CallService extends ChangeNotifier {
       debugPrint('Call not found in active state, handling as update: $callId');
       //
       // Save call information
-      await _saveCallInfo(
-        callId,
-        callerId,
-        callerName,
-        callerAvatar,
-        isVideoCall,
-      );
+      await _saveCallInfo(callId, callerId, callerName, callerAvatar, isVideoCall);
       //
       // Update state
       _currentCallId = callId;
@@ -1433,24 +1252,12 @@ class CallService extends ChangeNotifier {
       //
       // Use CallKit to update the call state if needed
       try {
-        await callKitService.updateCallState(
-          callId: callId,
-          callerName: callerName,
-          callerId: callerId,
-          avatar: callerAvatar,
-          hasVideo: isVideoCall,
-        );
+        await callKitService.updateCallState(callId: callId, callerName: callerName, callerId: callerId, avatar: callerAvatar, hasVideo: isVideoCall);
       } catch (e) {
         debugPrint('Error updating call state: $e');
         // If updating fails, try to display a new call
         try {
-          await callKitService.displayIncomingCall(
-            uuid: callId,
-            callerName: callerName,
-            callerId: callerId,
-            avatar: callerAvatar,
-            hasVideo: isVideoCall,
-          );
+          await callKitService.displayIncomingCall(uuid: callId, callerName: callerName, callerId: callerId, avatar: callerAvatar, hasVideo: isVideoCall);
         } catch (e2) {
           debugPrint('Error displaying call: $e2');
         }

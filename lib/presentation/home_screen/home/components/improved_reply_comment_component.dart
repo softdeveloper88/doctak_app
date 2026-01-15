@@ -14,12 +14,7 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
   final Function? onDelete;
   final Function? onEdit;
 
-  const ImprovedReplyCommentComponent({
-    required this.replyComment,
-    this.onDelete,
-    this.onEdit,
-    super.key,
-  });
+  const ImprovedReplyCommentComponent({required this.replyComment, this.onDelete, this.onEdit, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,23 +42,14 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 6.0),
                   child: Text(
                     replyComment.comment ?? translation(context).lbl_no_name,
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: 'Poppins',
-                      color: theme.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 14.0, fontFamily: 'Poppins', color: theme.textPrimary),
                   ),
                 ),
 
                 // Timestamp
                 Text(
                   timeAgo.format(DateTime.parse(replyComment.createdAt!)),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.textTertiary,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: TextStyle(fontSize: 12, color: theme.textTertiary, fontFamily: 'Poppins', fontWeight: FontWeight.w400),
                 ),
               ],
             ),
@@ -77,20 +63,13 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
   Widget _buildAvatar(BuildContext context, OneUITheme theme) {
     return InkWell(
       onTap: () {
-        SVProfileFragment(
-          userId: replyComment.commenterId ?? '',
-        ).launch(context);
+        SVProfileFragment(userId: replyComment.commenterId ?? '').launch(context);
       },
       child: Container(
         width: 32,
         height: 32,
-        decoration: BoxDecoration(
-          color: theme.primary.withOpacity(0.1),
-          shape: BoxShape.circle,
-        ),
-        child:
-            replyComment.commenter?.profilePic != null &&
-                replyComment.commenter!.profilePic!.isNotEmpty
+        decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+        child: replyComment.commenter?.profilePic != null && replyComment.commenter!.profilePic!.isNotEmpty
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
@@ -100,11 +79,7 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
                     return Center(
                       child: Text(
                         (replyComment.commenter?.name ?? '')[0].toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: theme.primary,
-                        ),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.primary),
                       ),
                     );
                   },
@@ -113,11 +88,7 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
             : Center(
                 child: Text(
                   (replyComment.commenter?.name ?? '')[0].toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primary,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.primary),
                 ),
               ),
       ),
@@ -133,28 +104,16 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
         Expanded(
           child: InkWell(
             onTap: () {
-              SVProfileFragment(
-                userId: replyComment.commenterId ?? "",
-              ).launch(context);
+              SVProfileFragment(userId: replyComment.commenterId ?? "").launch(context);
             },
             child: Row(
               children: [
                 Text(
                   replyComment.commenter?.name ?? '',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: theme.primary,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: theme.primary, fontFamily: 'Poppins'),
                 ),
                 const SizedBox(width: 4),
-                Image.asset(
-                  'images/socialv/icons/ic_TickSquare.png',
-                  height: 12,
-                  width: 12,
-                  fit: BoxFit.cover,
-                ),
+                Image.asset('images/socialv/icons/ic_TickSquare.png', height: 12, width: 12, fit: BoxFit.cover),
               ],
             ),
           ),
@@ -165,9 +124,7 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
           PopupMenuButton(
             padding: EdgeInsets.zero,
             icon: Icon(Icons.more_vert, color: theme.textSecondary, size: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             itemBuilder: (context) {
               return [
                 // Edit option
@@ -180,11 +137,7 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         translation(context).lbl_update,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          color: theme.textPrimary,
-                        ),
+                        style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
                       ),
                     ],
                   ),
@@ -199,11 +152,7 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         translation(context).lbl_delete,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: 'Poppins',
-                          color: theme.textPrimary,
-                        ),
+                        style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
                       ),
                     ],
                   ),

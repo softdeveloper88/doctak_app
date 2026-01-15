@@ -7,12 +7,11 @@ class CommentListShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  ListView.builder(
-        itemCount: 20, // Number of shimmer placeholders
-        itemBuilder: (context, index) {
-          return const CommentShimmer();
-        },
-      
+    return ListView.builder(
+      itemCount: 20, // Number of shimmer placeholders
+      itemBuilder: (context, index) {
+        return const CommentShimmer();
+      },
     );
   }
 }
@@ -24,10 +23,10 @@ class CommentShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final baseColor = isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
-    final highlightColor = isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
-    
+
+    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -40,10 +39,7 @@ class CommentShimmer extends StatelessWidget {
             child: Container(
               width: 40.0,
               height: 40.0,
-              decoration: BoxDecoration(
-                color: baseColor,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: baseColor, shape: BoxShape.circle),
             ),
           ),
           const SizedBox(width: 12.0),
@@ -58,10 +54,7 @@ class CommentShimmer extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     height: 12.0,
-                    decoration: BoxDecoration(
-                      color: baseColor,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(4)),
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -71,10 +64,7 @@ class CommentShimmer extends StatelessWidget {
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.6,
                     height: 12.0,
-                    decoration: BoxDecoration(
-                      color: baseColor,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+                    decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(4)),
                   ),
                 ),
               ],

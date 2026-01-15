@@ -30,69 +30,56 @@ class _MyGroupsScreenState extends State<MyGroupsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: svGetScaffoldColor(),
+      appBar: AppBar(
         backgroundColor: svGetScaffoldColor(),
-        appBar: AppBar(
-          backgroundColor: svGetScaffoldColor(),
-          surfaceTintColor: svGetScaffoldColor(),
-          iconTheme: IconThemeData(color: context.iconColor),
-          title: Text('My Groups', style: boldTextStyle(size: 20)),
-          elevation: 0,
-          centerTitle: true,
-          leading: IconButton(
-            icon:
-                Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: Image.asset(
-                'assets/images/search.png',
-                height: 20,
-                width: 20,
-              ),
-            )
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
+        surfaceTintColor: svGetScaffoldColor(),
+        iconTheme: IconThemeData(color: context.iconColor),
+        title: Text('My Groups', style: boldTextStyle(size: 20)),
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
           onPressed: () {
-            const GroupCreateScreen().launch(context);
-            // Add functionality to start a new chat
+            Navigator.pop(context);
           },
-          child: const Icon(Icons.group),
         ),
-        body: BlocConsumer<GroupBloc, GroupState>(
-            listener: (BuildContext context, GroupState state) {},
-            bloc: groupBloc,
-            builder: (context, state) {
-              if (state is PaginationLoadingState) {
-                return Center(
-                    child: CircularProgressIndicator(
-                  color: svGetBodyColor(),
-                ));
-              } else if (state is PaginationLoadedState) {
-                return ListView.builder(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
-                  itemCount: groupBloc.groupListModel?.groups?.length ??
-                      0, // Replace with the actual number of items
-                  itemBuilder: (context, index) {
-                    return GroupListItem(
-                        group: groupBloc.groupListModel!.groups![index]);
-                  },
-                );
-              } else {
-                return Container();
-              }
-            }));
+        actions: [IconButton(onPressed: () {}, icon: Image.asset('assets/images/search.png', height: 20, width: 20))],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          const GroupCreateScreen().launch(context);
+          // Add functionality to start a new chat
+        },
+        child: const Icon(Icons.group),
+      ),
+      body: BlocConsumer<GroupBloc, GroupState>(
+        listener: (BuildContext context, GroupState state) {},
+        bloc: groupBloc,
+        builder: (context, state) {
+          if (state is PaginationLoadingState) {
+            return Center(child: CircularProgressIndicator(color: svGetBodyColor()));
+          } else if (state is PaginationLoadedState) {
+            return ListView.builder(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
+              itemCount: groupBloc.groupListModel?.groups?.length ?? 0, // Replace with the actual number of items
+              itemBuilder: (context, index) {
+                return GroupListItem(group: groupBloc.groupListModel!.groups![index]);
+              },
+            );
+          } else {
+            return Container();
+          }
+        },
+      ),
+    );
   }
 }
 
 class GroupListItem extends StatelessWidget {
   final Groups group;
 
-  GroupListItem({required this.group});
+  const GroupListItem({super.key, required this.group});
 
   @override
   Widget build(BuildContext context) {
@@ -107,12 +94,7 @@ class GroupListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CachedNetworkImage(
-                imageUrl: "${AppData.imageUrl}${group.logo}",
-                height: 50,
-                width: 50,
-                fit: BoxFit.cover,
-              ).cornerRadiusWithClipRRect(20),
+              CachedNetworkImage(imageUrl: "${AppData.imageUrl}${group.logo}", height: 50, width: 50, fit: BoxFit.cover).cornerRadiusWithClipRRect(20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -120,32 +102,20 @@ class GroupListItem extends StatelessWidget {
                   children: [
                     Text(
                       group.name ?? '',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      group?.description ?? '',
-                      style: const TextStyle(fontSize: 14),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    Text(group.description ?? '', style: const TextStyle(fontSize: 14), maxLines: 2, overflow: TextOverflow.ellipsis),
                     // SizedBox(height: 4),
                     // Text(
                     //   'Specialty Focus: ${group!.specialtyFocus?.map((e) => e.value).join(', ')}',
                     //   style: TextStyle(fontSize: 14, color: Colors.grey),
                     // ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Privacy: ${group.privacySetting}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
+                    Text('Privacy: ${group.privacySetting}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
                     const SizedBox(height: 4),
-                    Text(
-                      'Member Limit: ${group.memberLimit}',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
+                    Text('Member Limit: ${group.memberLimit}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
                   ],
                 ),
               ),

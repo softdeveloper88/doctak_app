@@ -15,7 +15,7 @@ import 'bloc/drugs_event.dart';
 import 'bloc/drugs_state.dart';
 
 class DrugsListScreen extends StatefulWidget {
-  const DrugsListScreen({Key? key}) : super(key: key);
+  const DrugsListScreen({super.key});
 
   @override
   State<DrugsListScreen> createState() => _DrugsListScreenState();
@@ -29,9 +29,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
 
   @override
   void initState() {
-    drugsBloc.add(
-      LoadPageEvent(page: 1, countryId: '1', searchTerm: '', type: 'Brand'),
-    );
+    drugsBloc.add(LoadPageEvent(page: 1, countryId: '1', searchTerm: '', type: 'Brand'));
     super.initState();
   }
 
@@ -60,16 +58,12 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Center(child: Text(translation(context).lbl_loading)),
-                  ],
+                  children: [Center(child: Text(translation(context).lbl_loading))],
                 );
               } else if (state is CountriesDataLoaded) {
                 for (var element in state.countriesModel.countries!) {
                   if (element.flag == state.countryFlag) {
-                    selectedValue =
-                        state.countriesModel.countries?.first.flag ??
-                        element.flag;
+                    selectedValue = state.countriesModel.countries?.first.flag ?? element.flag;
                   }
                 }
                 return Column(
@@ -90,9 +84,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                 drugsBloc.add(
                                   LoadPageEvent(
                                     page: 1,
-                                    countryId: state.countryFlag != ''
-                                        ? state.countryFlag
-                                        : '${state.countriesModel.countries?.first.id ?? 1}',
+                                    countryId: state.countryFlag != '' ? state.countryFlag : '${state.countriesModel.countries?.first.id ?? 1}',
                                     searchTerm: '',
                                     type: state.typeValue,
                                   ),
@@ -104,9 +96,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                         const SizedBox(width: 4),
                         // Country dropdown
                         PopupMenuButton<Countries>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           offset: const Offset(0, 50),
                           tooltip: 'Select Country',
                           elevation: 8,
@@ -118,89 +108,44 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             child: Center(
                               child: Text(
                                 state.countryFlag != ''
-                                    ? state.countriesModel.countries!
-                                              .firstWhere(
-                                                (element) =>
-                                                    element.id.toString() ==
-                                                    state.countryFlag,
-                                                orElse: () => state
-                                                    .countriesModel
-                                                    .countries!
-                                                    .first,
-                                              )
-                                              .flag ??
+                                    ? state.countriesModel.countries!.firstWhere((element) => element.id.toString() == state.countryFlag, orElse: () => state.countriesModel.countries!.first).flag ??
                                           ''
-                                    : state
-                                              .countriesModel
-                                              .countries!
-                                              .first
-                                              .flag ??
-                                          '',
+                                    : state.countriesModel.countries!.first.flag ?? '',
                                 style: const TextStyle(fontSize: 18),
                               ),
                             ),
                           ),
-                            itemBuilder: (BuildContext context) {
-                              return state.countriesModel.countries?.map((
-                                    Countries item,
-                                  ) {
-                                    return PopupMenuItem<Countries>(
-                                      value: item,
-                                      height: 48,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                item.countryName ?? '',
-                                                style: TextStyle(
-                                                  color: theme.textPrimary,
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                          itemBuilder: (BuildContext context) {
+                            return state.countriesModel.countries?.map((Countries item) {
+                                  return PopupMenuItem<Countries>(
+                                    value: item,
+                                    height: 48,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              item.countryName ?? '',
+                                              style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 16),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              item.flag ?? '',
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(item.flag ?? '', style: const TextStyle(fontSize: 16)),
+                                        ],
                                       ),
-                                    );
-                                  }).toList() ??
-                                  [];
-                            },
-                            onSelected: (Countries newValue) {
-                              BlocProvider.of<SplashBloc>(context).add(
-                                LoadDropdownData(
-                                  newValue.id.toString(),
-                                  state.typeValue,
-                                  state.searchTerms ?? '',
-                                  '',
-                                ),
-                              );
-                              drugsBloc.add(
-                                LoadPageEvent(
-                                  page: 1,
-                                  countryId: newValue.id.toString(),
-                                  searchTerm: state.searchTerms ?? "",
-                                  type: state.typeValue,
-                                ),
-                              );
-                            },
-                          ),
+                                    ),
+                                  );
+                                }).toList() ??
+                                [];
+                          },
+                          onSelected: (Countries newValue) {
+                            BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(newValue.id.toString(), state.typeValue, state.searchTerms ?? '', ''));
+                            drugsBloc.add(LoadPageEvent(page: 1, countryId: newValue.id.toString(), searchTerm: state.searchTerms ?? "", type: state.typeValue));
+                          },
+                        ),
                         const SizedBox(width: 8),
                       ],
                     ),
@@ -214,25 +159,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                             hintText: translation(context).lbl_search,
                             controller: searchController,
                             height: 72,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 12.0,
-                            ),
+                            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                             onChanged: (searchTxt) {
-                              BlocProvider.of<SplashBloc>(context).add(
-                                LoadDropdownData(
-                                  state.countryFlag,
-                                  state.typeValue,
-                                  searchTxt,
-                                  '',
-                                ),
-                              );
+                              BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(state.countryFlag, state.typeValue, searchTxt, ''));
                               drugsBloc.add(
                                 LoadPageEvent(
                                   page: 1,
-                                  countryId: state.countryFlag != ''
-                                      ? state.countryFlag
-                                      : '${state.countriesModel.countries?.first.id ?? 1}',
+                                  countryId: state.countryFlag != '' ? state.countryFlag : '${state.countriesModel.countries?.first.id ?? 1}',
                                   searchTerm: searchTxt,
                                   type: state.typeValue,
                                 ),
@@ -242,9 +175,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                               drugsBloc.add(
                                 LoadPageEvent(
                                   page: 1,
-                                  countryId: state.countryFlag != ''
-                                      ? state.countryFlag
-                                      : '${state.countriesModel.countries?.first.id ?? 1}',
+                                  countryId: state.countryFlag != '' ? state.countryFlag : '${state.countriesModel.countries?.first.id ?? 1}',
                                   searchTerm: '',
                                   type: state.typeValue,
                                 ),
@@ -287,15 +218,9 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                           //   ),
                           // ),
                           Container(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 8.0,
-                            ),
+                            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                             height: 48,
-                            decoration: BoxDecoration(
-                              color: theme.surfaceVariant,
-                              borderRadius: BorderRadius.circular(25),
-                            ),
+                            decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(25)),
                             child: Row(
                               children: [
                                 Expanded(
@@ -304,66 +229,32 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                       setState(() {
                                         selectedIndex = 0;
                                       });
-                                      BlocProvider.of<SplashBloc>(context).add(
-                                        LoadDropdownData(
-                                          state.countryFlag,
-                                          "Brand",
-                                          state.searchTerms ?? '',
-                                          '',
-                                        ),
-                                      );
+                                      BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(state.countryFlag, "Brand", state.searchTerms ?? '', ''));
                                       drugsBloc.add(
                                         LoadPageEvent(
                                           page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
+                                          countryId: state.countryFlag != '' ? state.countryFlag : '${state.countriesModel.countries?.first.id ?? 1}',
                                           searchTerm: state.searchTerms ?? '',
                                           type: 'Brand',
                                         ),
                                       );
                                     },
                                     child: Container(
-                                      decoration: BoxDecoration(
-                                        color: selectedIndex == 0
-                                            ? theme.primary
-                                            : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
+                                      decoration: BoxDecoration(color: selectedIndex == 0 ? theme.primary : Colors.transparent, borderRadius: BorderRadius.circular(25)),
                                       child: Center(
                                         child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             if (selectedIndex == 0)
                                               Container(
-                                                padding: const EdgeInsets.all(
-                                                  4,
-                                                ),
-                                                margin: const EdgeInsets.only(
-                                                  right: 8,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: theme.cardBackground,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Icon(
-                                                  Icons
-                                                      .medical_services_outlined,
-                                                  size: 14,
-                                                  color: theme.primary,
-                                                ),
+                                                padding: const EdgeInsets.all(4),
+                                                margin: const EdgeInsets.only(right: 8),
+                                                decoration: BoxDecoration(color: theme.cardBackground, shape: BoxShape.circle),
+                                                child: Icon(Icons.medical_services_outlined, size: 14, color: theme.primary),
                                               ),
                                             Text(
                                               translation(context).lbl_brand,
-                                              style: TextStyle(
-                                                color: selectedIndex == 0
-                                                    ? theme.cardBackground
-                                                    : theme.textPrimary,
-                                                fontSize: 14,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                              style: TextStyle(color: selectedIndex == 0 ? theme.cardBackground : theme.textPrimary, fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                                             ),
                                           ],
                                         ),
@@ -377,65 +268,32 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                                       setState(() {
                                         selectedIndex = 1;
                                       });
-                                      BlocProvider.of<SplashBloc>(context).add(
-                                        LoadDropdownData(
-                                          state.countryFlag,
-                                          "Generic",
-                                          state.searchTerms ?? '',
-                                          '',
-                                        ),
-                                      );
+                                      BlocProvider.of<SplashBloc>(context).add(LoadDropdownData(state.countryFlag, "Generic", state.searchTerms ?? '', ''));
                                       drugsBloc.add(
                                         LoadPageEvent(
                                           page: 1,
-                                          countryId: state.countryFlag != ''
-                                              ? state.countryFlag
-                                              : '${state.countriesModel.countries?.first.id ?? 1}',
+                                          countryId: state.countryFlag != '' ? state.countryFlag : '${state.countriesModel.countries?.first.id ?? 1}',
                                           searchTerm: state.searchTerms ?? '',
                                           type: 'Generic',
                                         ),
                                       );
                                     },
                                     child: Container(
-                                      decoration: BoxDecoration(
-                                        color: selectedIndex == 1
-                                            ? theme.primary
-                                            : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
+                                      decoration: BoxDecoration(color: selectedIndex == 1 ? theme.primary : Colors.transparent, borderRadius: BorderRadius.circular(25)),
                                       child: Center(
                                         child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             if (selectedIndex == 1)
                                               Container(
-                                                padding: const EdgeInsets.all(
-                                                  4,
-                                                ),
-                                                margin: const EdgeInsets.only(
-                                                  right: 8,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: theme.cardBackground,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Icon(
-                                                  Icons.local_pharmacy_outlined,
-                                                  size: 14,
-                                                  color: theme.primary,
-                                                ),
+                                                padding: const EdgeInsets.all(4),
+                                                margin: const EdgeInsets.only(right: 8),
+                                                decoration: BoxDecoration(color: theme.cardBackground, shape: BoxShape.circle),
+                                                child: Icon(Icons.local_pharmacy_outlined, size: 14, color: theme.primary),
                                               ),
                                             Text(
                                               translation(context).lbl_generic,
-                                              style: TextStyle(
-                                                color: selectedIndex == 1
-                                                    ? theme.cardBackground
-                                                    : theme.textPrimary,
-                                                fontSize: 14,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                              style: TextStyle(color: selectedIndex == 1 ? theme.cardBackground : theme.textPrimary, fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
                                             ),
                                           ],
                                         ),
@@ -452,23 +310,13 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                   ],
                 );
               } else if (state is CountriesDataError) {
-                BlocProvider.of<SplashBloc>(
-                  context,
-                ).add(LoadDropdownData('', '', '', ''));
+                BlocProvider.of<SplashBloc>(context).add(LoadDropdownData('', '', '', ''));
 
-                return Center(
-                  child: Text(
-                    '${translation(context).lbl_error}: ${state.errorMessage}',
-                  ),
-                );
+                return Center(child: Text('${translation(context).lbl_error}: ${state.errorMessage}'));
               } else {
-                BlocProvider.of<SplashBloc>(
-                  context,
-                ).add(LoadDropdownData('', '', '', ''));
+                BlocProvider.of<SplashBloc>(context).add(LoadDropdownData('', '', '', ''));
 
-                return Center(
-                  child: Text(translation(context).lbl_unknown_state),
-                );
+                return Center(child: Text(translation(context).lbl_unknown_state));
               }
             },
           ),
@@ -484,19 +332,12 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
                 return Expanded(child: DrugsShimmerLoader());
               } else if (state is PaginationLoadedState) {
                 return Expanded(
-                  child: VirtualizedDrugsList(
-                    drugsBloc: drugsBloc,
-                    scrollController: _scrollController,
-                  ),
+                  child: VirtualizedDrugsList(drugsBloc: drugsBloc, scrollController: _scrollController),
                 );
               } else if (state is DataError) {
                 return Expanded(child: Center(child: Text(state.errorMessage)));
               } else {
-                return Expanded(
-                  child: Center(
-                    child: Text(translation(context).msg_something_went_wrong),
-                  ),
-                );
+                return Expanded(child: Center(child: Text(translation(context).msg_something_went_wrong)));
               }
             },
           ),
@@ -507,11 +348,7 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
   }
 
   // Bottom sheet for drug details
-  void _showBottomSheet(
-    BuildContext context,
-    String genericName,
-    String question,
-  ) {
+  void _showBottomSheet(BuildContext context, String genericName, String question) {
     showModalBottomSheet(
       showDragHandle: true,
       enableDrag: true,
@@ -526,16 +363,12 @@ class _DrugsListScreenState extends State<DrugsListScreen> {
               minChildSize: 0.9,
               maxChildSize: 1.0,
               expand: false,
-              builder:
-                  (BuildContext context, ScrollController scrollController) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: ChatDetailScreen(
-                        isFromMainScreen: false,
-                        question: '$question $genericName',
-                      ),
-                    );
-                  },
+              builder: (BuildContext context, ScrollController scrollController) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ChatDetailScreen(isFromMainScreen: false, question: '$question $genericName'),
+                );
+              },
             );
           },
         );

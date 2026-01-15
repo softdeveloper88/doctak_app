@@ -62,12 +62,7 @@ class AgoraService {
       print('  📱 App ID Length: ${AppConstants.agoraAppId.length}');
       print('  🔄 Channel Profile: COMMUNICATION');
 
-      await _engine?.initialize(
-        const RtcEngineContext(
-          appId: AppConstants.agoraAppId,
-          channelProfile: ChannelProfileType.channelProfileCommunication,
-        ),
-      );
+      await _engine?.initialize(const RtcEngineContext(appId: AppConstants.agoraAppId, channelProfile: ChannelProfileType.channelProfileCommunication));
 
       print('✅ Agora engine initialized successfully');
 
@@ -87,107 +82,58 @@ class AgoraService {
     _engine?.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
-          print(
-            '✅ onJoinChannelSuccess: channel="${connection.channelId}", uid=${connection.localUid}, elapsed=${elapsed}ms',
-          );
+          print('✅ onJoinChannelSuccess: channel="${connection.channelId}", uid=${connection.localUid}, elapsed=${elapsed}ms');
           print('🔴 CRITICAL: Successfully joined Agora channel!');
           print('  📍 Channel Name: "${connection.channelId}"');
           print('  👤 My UID: ${connection.localUid}');
           print('  ⏱️ Time taken: ${elapsed}ms');
           if (_onJoinChannelSuccess != null) {
-            _onJoinChannelSuccess!(
-              connection.localUid ?? 0,
-              connection.channelId ?? "",
-              elapsed,
-            );
+            _onJoinChannelSuccess!(connection.localUid ?? 0, connection.channelId ?? "", elapsed);
           }
         },
         onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
-          print(
-            '👥 onUserJoined: uid=$remoteUid, channel=${connection.channelId}, elapsed=${elapsed}ms',
-          );
+          print('👥 onUserJoined: uid=$remoteUid, channel=${connection.channelId}, elapsed=${elapsed}ms');
           if (_onUserJoined != null) {
             _onUserJoined!(remoteUid, elapsed);
           }
         },
-        onUserOffline:
-            (
-              RtcConnection connection,
-              int remoteUid,
-              UserOfflineReasonType reason,
-            ) {
-              print(
-                '👋 onUserOffline: uid=$remoteUid, channel=${connection.channelId}, reason=${reason.index}',
-              );
-              if (_onUserOffline != null) {
-                _onUserOffline!(remoteUid, reason.index);
-              }
-            },
-        onAudioVolumeIndication:
-            (
-              RtcConnection connection,
-              List<AudioVolumeInfo> speakers,
-              int totalVolume,
-              int s,
-            ) {
-              if (speakers.isEmpty || _onAudioVolumeIndication == null) return;
+        onUserOffline: (RtcConnection connection, int remoteUid, UserOfflineReasonType reason) {
+          print('👋 onUserOffline: uid=$remoteUid, channel=${connection.channelId}, reason=${reason.index}');
+          if (_onUserOffline != null) {
+            _onUserOffline!(remoteUid, reason.index);
+          }
+        },
+        onAudioVolumeIndication: (RtcConnection connection, List<AudioVolumeInfo> speakers, int totalVolume, int s) {
+          if (speakers.isEmpty || _onAudioVolumeIndication == null) return;
 
-              // Convert speakers list to a more usable format
-              try {
-                final List<Map<String, dynamic>> speakersData = speakers.map((
-                  speaker,
-                ) {
-                  return {
-                    'uid': speaker.uid,
-                    'volume': speaker.volume ?? 0,
-                    'vad': speaker.vad ?? 0,
-                  };
-                }).toList();
+          // Convert speakers list to a more usable format
+          try {
+            final List<Map<String, dynamic>> speakersData = speakers.map((speaker) {
+              return {'uid': speaker.uid, 'volume': speaker.volume ?? 0, 'vad': speaker.vad ?? 0};
+            }).toList();
 
-                _onAudioVolumeIndication!(speakersData, totalVolume);
-              } catch (e) {
-                debugPrint('Error processing audio volume indication: $e');
-              }
-            },
-        onNetworkQuality:
-            (
-              RtcConnection connection,
-              int uid,
-              QualityType txQuality,
-              QualityType rxQuality,
-            ) {
-              if (_onNetworkQuality != null) {
-                _onNetworkQuality!(uid, txQuality.index, rxQuality.index);
-              }
-            },
-        onConnectionStateChanged:
-            (
-              RtcConnection connection,
-              ConnectionStateType state,
-              ConnectionChangedReasonType reason,
-            ) {
-              print(
-                '🔄 onConnectionStateChanged: state=${state.index}(${_getConnectionStateName(state.index)}), reason=${reason.index}(${_getConnectionReasonName(reason.index)})',
-              );
-              if (_onConnectionStateChanged != null) {
-                _onConnectionStateChanged!(state.index, reason.index);
-              }
-            },
-        onFirstRemoteVideoFrame:
-            (
-              RtcConnection connection,
-              int remoteUid,
-              int width,
-              int height,
-              int elapsed,
-            ) {
-              print(
-                '📹 onFirstRemoteVideoFrame: uid=$remoteUid, size=${width}x$height, elapsed=${elapsed}ms',
-              );
-              if (_onFirstRemoteVideoFrame != null) {
-                _onFirstRemoteVideoFrame!(remoteUid, width, height, elapsed);
-              }
-            },
+            _onAudioVolumeIndication!(speakersData, totalVolume);
+          } catch (e) {
+            debugPrint('Error processing audio volume indication: $e');
+          }
+        },
+        onNetworkQuality: (RtcConnection connection, int uid, QualityType txQuality, QualityType rxQuality) {
+          if (_onNetworkQuality != null) {
+            _onNetworkQuality!(uid, txQuality.index, rxQuality.index);
+          }
+        },
+        onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
+          print('🔄 onConnectionStateChanged: state=${state.index}(${_getConnectionStateName(state.index)}), reason=${reason.index}(${_getConnectionReasonName(reason.index)})');
+          if (_onConnectionStateChanged != null) {
+            _onConnectionStateChanged!(state.index, reason.index);
+          }
+        },
+        onFirstRemoteVideoFrame: (RtcConnection connection, int remoteUid, int width, int height, int elapsed) {
+          print('📹 onFirstRemoteVideoFrame: uid=$remoteUid, size=${width}x$height, elapsed=${elapsed}ms');
+          if (_onFirstRemoteVideoFrame != null) {
+            _onFirstRemoteVideoFrame!(remoteUid, width, height, elapsed);
+          }
+        },
         onError: (ErrorCodeType err, String msg) {
           print('❌ onError: code=${err.value}, message=$msg');
           if (_onError != null) {
@@ -195,50 +141,18 @@ class AgoraService {
           }
         },
         // Additional event handlers for better debugging
-        onRemoteVideoStateChanged:
-            (
-              RtcConnection connection,
-              int remoteUid,
-              RemoteVideoState state,
-              RemoteVideoStateReason reason,
-              int elapsed,
-            ) {
-              print(
-                '📺 onRemoteVideoStateChanged: uid=$remoteUid, state=${state.index}, reason=${reason.index}, elapsed=${elapsed}ms',
-              );
-            },
-        onRemoteAudioStateChanged:
-            (
-              RtcConnection connection,
-              int remoteUid,
-              RemoteAudioState state,
-              RemoteAudioStateReason reason,
-              int elapsed,
-            ) {
-              print(
-                '🔊 onRemoteAudioStateChanged: uid=$remoteUid, state=${state.index}, reason=${reason.index}, elapsed=${elapsed}ms',
-              );
-            },
-        onLocalVideoStateChanged:
-            (
-              VideoSourceType source,
-              LocalVideoStreamState state,
-              LocalVideoStreamReason reason,
-            ) {
-              print(
-                '📱 onLocalVideoStateChanged: source=${source.index}, state=${state.index}, reason=${reason.index}',
-              );
-            },
-        onLocalAudioStateChanged:
-            (
-              RtcConnection connection,
-              LocalAudioStreamState state,
-              LocalAudioStreamReason reason,
-            ) {
-              print(
-                '🎤 onLocalAudioStateChanged: state=${state.index}, reason=${reason.index}',
-              );
-            },
+        onRemoteVideoStateChanged: (RtcConnection connection, int remoteUid, RemoteVideoState state, RemoteVideoStateReason reason, int elapsed) {
+          print('📺 onRemoteVideoStateChanged: uid=$remoteUid, state=${state.index}, reason=${reason.index}, elapsed=${elapsed}ms');
+        },
+        onRemoteAudioStateChanged: (RtcConnection connection, int remoteUid, RemoteAudioState state, RemoteAudioStateReason reason, int elapsed) {
+          print('🔊 onRemoteAudioStateChanged: uid=$remoteUid, state=${state.index}, reason=${reason.index}, elapsed=${elapsed}ms');
+        },
+        onLocalVideoStateChanged: (VideoSourceType source, LocalVideoStreamState state, LocalVideoStreamReason reason) {
+          print('📱 onLocalVideoStateChanged: source=${source.index}, state=${state.index}, reason=${reason.index}');
+        },
+        onLocalAudioStateChanged: (RtcConnection connection, LocalAudioStreamState state, LocalAudioStreamReason reason) {
+          print('🎤 onLocalAudioStateChanged: state=${state.index}, reason=${reason.index}');
+        },
       ),
     );
   }
@@ -283,9 +197,7 @@ class AgoraService {
       throw Exception('Agora engine not initialized');
     }
 
-    print(
-      '🎥 Configuring media settings: isVideoCall=$isVideoCall, platform=${Platform.operatingSystem}',
-    );
+    print('🎥 Configuring media settings: isVideoCall=$isVideoCall, platform=${Platform.operatingSystem}');
 
     try {
       // CRITICAL FIX: Check and request permissions BEFORE configuring media
@@ -298,9 +210,7 @@ class AgoraService {
 
       // STEP 1: Set client role first (this is critical and must succeed)
       try {
-        await _engine!.setClientRole(
-          role: ClientRoleType.clientRoleBroadcaster,
-        );
+        await _engine!.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
         print('✅ Client role set to broadcaster');
       } catch (e) {
         print('❌ FAILED at setClientRole: $e');
@@ -310,10 +220,7 @@ class AgoraService {
       // STEP 2: Configure basic audio settings first
       try {
         // Use simple, standard audio configuration
-        await _engine!.setAudioProfile(
-          profile: AudioProfileType.audioProfileDefault,
-          scenario: AudioScenarioType.audioScenarioDefault,
-        );
+        await _engine!.setAudioProfile(profile: AudioProfileType.audioProfileDefault, scenario: AudioScenarioType.audioScenarioDefault);
         print('✅ Basic audio profile set');
       } catch (e) {
         print('❌ FAILED at setAudioProfile: $e');
@@ -377,11 +284,7 @@ class AgoraService {
 
         // STEP 8: Set basic camera configuration
         try {
-          await _engine!.setCameraCapturerConfiguration(
-            const CameraCapturerConfiguration(
-              cameraDirection: CameraDirection.cameraFront,
-            ),
-          );
+          await _engine!.setCameraCapturerConfiguration(const CameraCapturerConfiguration(cameraDirection: CameraDirection.cameraFront));
           print('✅ Camera configuration set');
         } catch (e) {
           print('❌ FAILED at setCameraCapturerConfiguration: $e');
@@ -505,24 +408,10 @@ class AgoraService {
         );
 
         // Update media options
-        await _engine!.updateChannelMediaOptions(
-          const ChannelMediaOptions(
-            publishCameraTrack: true,
-            publishMicrophoneTrack: true,
-            autoSubscribeAudio: true,
-            autoSubscribeVideo: true,
-          ),
-        );
+        await _engine!.updateChannelMediaOptions(const ChannelMediaOptions(publishCameraTrack: true, publishMicrophoneTrack: true, autoSubscribeAudio: true, autoSubscribeVideo: true));
       } else {
         // Restore audio settings
-        await _engine!.updateChannelMediaOptions(
-          const ChannelMediaOptions(
-            publishCameraTrack: false,
-            publishMicrophoneTrack: true,
-            autoSubscribeAudio: true,
-            autoSubscribeVideo: false,
-          ),
-        );
+        await _engine!.updateChannelMediaOptions(const ChannelMediaOptions(publishCameraTrack: false, publishMicrophoneTrack: true, autoSubscribeAudio: true, autoSubscribeVideo: false));
       }
     } catch (e) {
       print('Error restoring media settings: $e');
@@ -579,14 +468,7 @@ class AgoraService {
     await _engine!.stopPreview();
 
     // Update media options
-    await _engine!.updateChannelMediaOptions(
-      const ChannelMediaOptions(
-        publishCameraTrack: false,
-        publishMicrophoneTrack: true,
-        autoSubscribeAudio: true,
-        autoSubscribeVideo: false,
-      ),
-    );
+    await _engine!.updateChannelMediaOptions(const ChannelMediaOptions(publishCameraTrack: false, publishMicrophoneTrack: true, autoSubscribeAudio: true, autoSubscribeVideo: false));
 
     // Switch to earpiece for audio calls
     await _engine!.setEnableSpeakerphone(false);
@@ -796,9 +678,7 @@ class AgoraService {
 
     try {
       final connectionState = await _engine!.getConnectionState();
-      print(
-        '📊 Engine connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})',
-      );
+      print('📊 Engine connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})');
     } catch (e) {
       print('❌ Error getting engine state: $e');
     }
@@ -813,9 +693,7 @@ class AgoraService {
     if (_engine != null) {
       try {
         final connectionState = await _engine!.getConnectionState();
-        print(
-          '  - Connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})',
-        );
+        print('  - Connection state: ${connectionState.index} (${_getConnectionStateName(connectionState.index)})');
       } catch (e) {
         print('  - Connection state: ERROR - $e');
       }
@@ -843,13 +721,7 @@ class AgoraService {
   }
 
   // Enhanced join channel with optimized media options and retry logic
-  Future<bool> joinChannel({
-    required String channelId,
-    required int uid,
-    String? token,
-    required bool isVideoCall,
-    int maxRetries = 3,
-  }) async {
+  Future<bool> joinChannel({required String channelId, required int uid, String? token, required bool isVideoCall, int maxRetries = 3}) async {
     if (!_isEngineValid()) {
       print('❌ Cannot join channel: Agora engine not initialized');
       return false;
@@ -858,9 +730,7 @@ class AgoraService {
     // CRITICAL FIX: Check current connection state and cleanup if needed
     try {
       final currentState = await _engine!.getConnectionState();
-      print(
-        '📊 Current connection state: ${currentState.index} (${_getConnectionStateName(currentState.index)})',
-      );
+      print('📊 Current connection state: ${currentState.index} (${_getConnectionStateName(currentState.index)})');
 
       // If already connected or connecting, leave first
       if (currentState == ConnectionStateType.connectionStateConnected ||
@@ -886,9 +756,7 @@ class AgoraService {
 
     while (retryCount < maxRetries) {
       try {
-        print(
-          '🚀 Joining Agora channel (attempt ${retryCount + 1}/$maxRetries):',
-        );
+        print('🚀 Joining Agora channel (attempt ${retryCount + 1}/$maxRetries):');
         print('  📍 Channel ID: "$channelId" (length: ${channelId.length})');
         print('  👤 UID: $uid');
         print('  🎥 Is Video Call: $isVideoCall');
@@ -971,19 +839,13 @@ class AgoraService {
       }
     }
 
-    print(
-      '❌ Failed to join channel after $maxRetries attempts. Last error: $lastError',
-    );
+    print('❌ Failed to join channel after $maxRetries attempts. Last error: $lastError');
     return false;
   }
 
   /// CRITICAL FIX: Validate and request permissions before media configuration
-  Future<void> _validateAndRequestPermissions({
-    required bool isVideoCall,
-  }) async {
-    print(
-      '🔒 Validating permissions for ${isVideoCall ? 'video' : 'audio'} call...',
-    );
+  Future<void> _validateAndRequestPermissions({required bool isVideoCall}) async {
+    print('🔒 Validating permissions for ${isVideoCall ? 'video' : 'audio'} call...');
 
     try {
       // Check microphone permission (required for all calls)
@@ -1012,8 +874,7 @@ class AgoraService {
 
       // Additional notification permission for Android 13+
       if (Platform.isAndroid) {
-        PermissionStatus notificationStatus =
-            await Permission.notification.status;
+        PermissionStatus notificationStatus = await Permission.notification.status;
         if (!notificationStatus.isGranted) {
           print('🔔 Requesting notification permission...');
           await Permission.notification.request();

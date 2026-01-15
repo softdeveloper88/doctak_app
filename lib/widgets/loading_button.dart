@@ -67,7 +67,7 @@ class LoadingButton extends StatefulWidget {
   final EdgeInsetsGeometry? margin;
 
   const LoadingButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.width,
@@ -83,7 +83,7 @@ class LoadingButton extends StatefulWidget {
     this.isLoading,
     this.padding,
     this.margin,
-  }) : super(key: key);
+  });
 
   @override
   State<LoadingButton> createState() => _LoadingButtonState();
@@ -104,8 +104,7 @@ enum LoadingButtonVariant {
   tonal,
 }
 
-class _LoadingButtonState extends State<LoadingButton>
-    with SingleTickerProviderStateMixin {
+class _LoadingButtonState extends State<LoadingButton> with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -113,14 +112,8 @@ class _LoadingButtonState extends State<LoadingButton>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.96,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -131,8 +124,7 @@ class _LoadingButtonState extends State<LoadingButton>
 
   bool get isLoading => widget.isLoading ?? _isLoading;
 
-  bool get isEnabled =>
-      widget.enabled && !isLoading && widget.onPressed != null;
+  bool get isEnabled => widget.enabled && !isLoading && widget.onPressed != null;
 
   Future<void> _handlePress() async {
     if (!isEnabled) return;
@@ -158,10 +150,7 @@ class _LoadingButtonState extends State<LoadingButton>
         onTapDown: isEnabled ? (_) => _controller.forward() : null,
         onTapUp: isEnabled ? (_) => _controller.reverse() : null,
         onTapCancel: isEnabled ? () => _controller.reverse() : null,
-        child: ScaleTransition(
-          scale: _scaleAnimation,
-          child: _buildButton(context, theme),
-        ),
+        child: ScaleTransition(scale: _scaleAnimation, child: _buildButton(context, theme)),
       ),
     );
   }
@@ -188,40 +177,21 @@ class _LoadingButtonState extends State<LoadingButton>
       width: widget.width ?? double.infinity,
       height: widget.height ?? 52,
       decoration: BoxDecoration(
-        gradient: isEnabled
-            ? LinearGradient(
-                colors: [bgColor, bgColor.withOpacity(0.85)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
+        gradient: isEnabled ? LinearGradient(colors: [bgColor, bgColor.withValues(alpha: 0.85)], begin: Alignment.topLeft, end: Alignment.bottomRight) : null,
         color: isEnabled ? null : theme.surfaceVariant,
         borderRadius: BorderRadius.circular(widget.borderRadius),
-        boxShadow: isEnabled
-            ? [
-                BoxShadow(
-                  color: bgColor.withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
+        boxShadow: isEnabled ? [BoxShadow(color: bgColor.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))] : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: isEnabled ? _handlePress : null,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          splashColor: fgColor.withOpacity(0.1),
-          highlightColor: fgColor.withOpacity(0.05),
+          splashColor: fgColor.withValues(alpha: 0.1),
+          highlightColor: fgColor.withValues(alpha: 0.05),
           child: Padding(
-            padding:
-                widget.padding ??
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            child: _buildButtonContent(
-              fgColor: isEnabled ? fgColor : theme.textTertiary,
-              theme: theme,
-            ),
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            child: _buildButtonContent(fgColor: isEnabled ? fgColor : theme.textTertiary, theme: theme),
           ),
         ),
       ),
@@ -239,26 +209,18 @@ class _LoadingButtonState extends State<LoadingButton>
       decoration: BoxDecoration(
         color: isEnabled ? Colors.transparent : theme.surfaceVariant,
         borderRadius: BorderRadius.circular(widget.borderRadius),
-        border: Border.all(
-          color: isEnabled ? borderColor : theme.border,
-          width: 1.5,
-        ),
+        border: Border.all(color: isEnabled ? borderColor : theme.border, width: 1.5),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: isEnabled ? _handlePress : null,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          splashColor: borderColor.withOpacity(0.1),
-          highlightColor: borderColor.withOpacity(0.05),
+          splashColor: borderColor.withValues(alpha: 0.1),
+          highlightColor: borderColor.withValues(alpha: 0.05),
           child: Padding(
-            padding:
-                widget.padding ??
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            child: _buildButtonContent(
-              fgColor: isEnabled ? fgColor : theme.textTertiary,
-              theme: theme,
-            ),
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            child: _buildButtonContent(fgColor: isEnabled ? fgColor : theme.textTertiary, theme: theme),
           ),
         ),
       ),
@@ -276,16 +238,11 @@ class _LoadingButtonState extends State<LoadingButton>
         child: InkWell(
           onTap: isEnabled ? _handlePress : null,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          splashColor: fgColor.withOpacity(0.1),
-          highlightColor: fgColor.withOpacity(0.05),
+          splashColor: fgColor.withValues(alpha: 0.1),
+          highlightColor: fgColor.withValues(alpha: 0.05),
           child: Padding(
-            padding:
-                widget.padding ??
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: _buildButtonContent(
-              fgColor: isEnabled ? fgColor : theme.textTertiary,
-              theme: theme,
-            ),
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: _buildButtonContent(fgColor: isEnabled ? fgColor : theme.textTertiary, theme: theme),
           ),
         ),
       ),
@@ -293,52 +250,36 @@ class _LoadingButtonState extends State<LoadingButton>
   }
 
   Widget _buildTonalButton(OneUITheme theme) {
-    final bgColor = (widget.color ?? theme.primary).withOpacity(0.12);
+    final bgColor = (widget.color ?? theme.primary).withValues(alpha: 0.12);
     final fgColor = widget.textColor ?? theme.primary;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       width: widget.width ?? double.infinity,
       height: widget.height ?? 52,
-      decoration: BoxDecoration(
-        color: isEnabled ? bgColor : theme.surfaceVariant,
-        borderRadius: BorderRadius.circular(widget.borderRadius),
-      ),
+      decoration: BoxDecoration(color: isEnabled ? bgColor : theme.surfaceVariant, borderRadius: BorderRadius.circular(widget.borderRadius)),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: isEnabled ? _handlePress : null,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          splashColor: fgColor.withOpacity(0.1),
-          highlightColor: fgColor.withOpacity(0.05),
+          splashColor: fgColor.withValues(alpha: 0.1),
+          highlightColor: fgColor.withValues(alpha: 0.05),
           child: Padding(
-            padding:
-                widget.padding ??
-                const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            child: _buildButtonContent(
-              fgColor: isEnabled ? fgColor : theme.textTertiary,
-              theme: theme,
-            ),
+            padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            child: _buildButtonContent(fgColor: isEnabled ? fgColor : theme.textTertiary, theme: theme),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildButtonContent({
-    required Color fgColor,
-    required OneUITheme theme,
-  }) {
+  Widget _buildButtonContent({required Color fgColor, required OneUITheme theme}) {
     if (widget.child != null && !isLoading) {
       return widget.child!;
     }
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: isLoading
-          ? _buildLoadingIndicator(fgColor)
-          : _buildTextContent(fgColor),
-    );
+    return AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: isLoading ? _buildLoadingIndicator(fgColor) : _buildTextContent(fgColor));
   }
 
   Widget _buildLoadingIndicator(Color color) {
@@ -347,22 +288,11 @@ class _LoadingButtonState extends State<LoadingButton>
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
-          width: 20,
-          height: 20,
-          child: CupertinoActivityIndicator(color: color),
-        ),
+        SizedBox(width: 20, height: 20, child: CupertinoActivityIndicator(color: color)),
         const SizedBox(width: 12),
         Text(
           'Please wait...',
-          style:
-              widget.textStyle?.copyWith(color: color) ??
-              TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: color,
-              ),
+          style: widget.textStyle?.copyWith(color: color) ?? TextStyle(fontSize: 15, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: color),
         ),
       ],
     );
@@ -374,20 +304,10 @@ class _LoadingButtonState extends State<LoadingButton>
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (widget.icon != null) ...[
-          Icon(widget.icon, size: 20, color: color),
-          const SizedBox(width: 8),
-        ],
+        if (widget.icon != null) ...[Icon(widget.icon, size: 20, color: color), const SizedBox(width: 8)],
         Text(
           widget.text,
-          style:
-              widget.textStyle?.copyWith(color: color) ??
-              TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Poppins',
-                color: color,
-              ),
+          style: widget.textStyle?.copyWith(color: color) ?? TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: color),
         ),
       ],
     );
@@ -404,16 +324,7 @@ class LoadingIconButton extends StatefulWidget {
   final String? tooltip;
   final bool? isLoading;
 
-  const LoadingIconButton({
-    Key? key,
-    required this.icon,
-    this.onPressed,
-    this.color,
-    this.size = 24,
-    this.enabled = true,
-    this.tooltip,
-    this.isLoading,
-  }) : super(key: key);
+  const LoadingIconButton({super.key, required this.icon, this.onPressed, this.color, this.size = 24, this.enabled = true, this.tooltip, this.isLoading});
 
   @override
   State<LoadingIconButton> createState() => _LoadingIconButtonState();
@@ -423,8 +334,7 @@ class _LoadingIconButtonState extends State<LoadingIconButton> {
   bool _isLoading = false;
 
   bool get isLoading => widget.isLoading ?? _isLoading;
-  bool get isEnabled =>
-      widget.enabled && !isLoading && widget.onPressed != null;
+  bool get isEnabled => widget.enabled && !isLoading && widget.onPressed != null;
 
   Future<void> _handlePress() async {
     if (!isEnabled) return;
@@ -454,19 +364,10 @@ class _LoadingIconButtonState extends State<LoadingIconButton> {
               height: widget.size,
               child: CupertinoActivityIndicator(color: iconColor),
             )
-          : Icon(
-              key: const ValueKey('icon'),
-              widget.icon,
-              size: widget.size,
-              color: isEnabled ? iconColor : theme.textTertiary,
-            ),
+          : Icon(key: const ValueKey('icon'), widget.icon, size: widget.size, color: isEnabled ? iconColor : theme.textTertiary),
     );
 
-    child = IconButton(
-      onPressed: isEnabled ? _handlePress : null,
-      icon: child,
-      splashRadius: widget.size + 8,
-    );
+    child = IconButton(onPressed: isEnabled ? _handlePress : null, icon: child, splashRadius: widget.size + 8);
 
     if (widget.tooltip != null) {
       child = Tooltip(message: widget.tooltip!, child: child);
@@ -488,14 +389,6 @@ extension LoadingButtonExtension on BuildContext {
     double? width,
     double? height,
   }) {
-    return LoadingButton(
-      text: text,
-      onPressed: onPressed,
-      variant: variant,
-      icon: icon,
-      enabled: enabled,
-      width: width,
-      height: height,
-    );
+    return LoadingButton(text: text, onPressed: onPressed, variant: variant, icon: icon, enabled: enabled, width: width, height: height);
   }
 }

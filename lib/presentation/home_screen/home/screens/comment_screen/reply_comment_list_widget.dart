@@ -15,12 +15,7 @@ class ReplyCommentListWidget extends StatefulWidget {
   int postId;
   int commentId;
 
-  ReplyCommentListWidget({
-    required this.commentBloc,
-    required this.postId,
-    required this.commentId,
-    super.key,
-  });
+  ReplyCommentListWidget({required this.commentBloc, required this.postId, required this.commentId, super.key});
 
   @override
   State<ReplyCommentListWidget> createState() => _ReplyCommentListWidgetState();
@@ -33,12 +28,7 @@ class _ReplyCommentListWidgetState extends State<ReplyCommentListWidget> {
   void initState() {
     print(widget.postId);
     print(widget.commentId);
-    commentBloc.add(
-      FetchReplyComment(
-        postId: widget.postId.toString(),
-        commentId: widget.commentId.toString(),
-      ),
-    );
+    commentBloc.add(FetchReplyComment(postId: widget.postId.toString(), commentId: widget.commentId.toString()));
     super.initState();
   }
 
@@ -87,12 +77,7 @@ class _ReplyCommentListWidgetState extends State<ReplyCommentListWidget> {
                       return ReplyCommentComponent(
                         commentBloc.replyCommentList[index],
                         () {
-                          commentBloc.add(
-                            DeleteReplyCommentEvent(
-                              commentId: commentBloc.replyCommentList[index].id
-                                  .toString(),
-                            ),
-                          );
+                          commentBloc.add(DeleteReplyCommentEvent(commentId: commentBloc.replyCommentList[index].id.toString()));
                         },
                         () {
                           setState(() {
@@ -105,33 +90,17 @@ class _ReplyCommentListWidgetState extends State<ReplyCommentListWidget> {
                         color: svGetBgColor(),
                         margin: const EdgeInsets.only(bottom: 20),
                         padding: const EdgeInsets.only(bottom: 16),
-                        child: SVCommentReplyComponent(
-                          commentValue: commentBloc
-                              .replyCommentList[selectComment]
-                              .comment,
-                          width: 60.w,
-                          commentBloc,
-                          widget.commentId ?? 0,
-                          (value) {
-                            if (value.isNotEmpty) {
-                              print('response comment');
-                              commentBloc.add(
-                                UpdateReplyCommentEvent(
-                                  commentId: commentBloc
-                                      .replyCommentList[selectComment]
-                                      .id
-                                      .toString(),
-                                  content: value,
-                                ),
-                              );
-                              value = '';
-                              selectComment = -1;
-                              setState(() {});
-                              // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
-                              //  homeBloc.postList[index].comments!.add(Comments());
-                            }
-                          },
-                        ),
+                        child: SVCommentReplyComponent(commentValue: commentBloc.replyCommentList[selectComment].comment, width: 60.w, commentBloc, widget.commentId ?? 0, (value) {
+                          if (value.isNotEmpty) {
+                            print('response comment');
+                            commentBloc.add(UpdateReplyCommentEvent(commentId: commentBloc.replyCommentList[selectComment].id.toString(), content: value));
+                            value = '';
+                            selectComment = -1;
+                            setState(() {});
+                            // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
+                            //  homeBloc.postList[index].comments!.add(Comments());
+                          }
+                        }),
                       );
                     }
                   },
@@ -141,17 +110,10 @@ class _ReplyCommentListWidgetState extends State<ReplyCommentListWidget> {
               }
             } else if (state is DataError) {
               return RetryWidget(
-                errorMessage: translation(
-                  context,
-                ).msg_something_went_wrong_retry,
+                errorMessage: translation(context).msg_something_went_wrong_retry,
                 onRetry: () {
                   try {
-                    commentBloc.add(
-                      FetchReplyComment(
-                        commentId: widget.commentId.toString(),
-                        postId: '',
-                      ),
-                    );
+                    commentBloc.add(FetchReplyComment(commentId: widget.commentId.toString(), postId: ''));
                   } catch (e) {
                     debugPrint(e.toString());
                   }
@@ -166,26 +128,15 @@ class _ReplyCommentListWidgetState extends State<ReplyCommentListWidget> {
             color: svGetBgColor(),
             margin: const EdgeInsets.only(bottom: 20),
             padding: const EdgeInsets.only(bottom: 16),
-            child: SVCommentReplyComponent(
-              width: 60.w,
-              commentBloc,
-              widget.commentId ?? 0,
-              (value) {
-                if (value.isNotEmpty) {
-                  print('response comment');
-                  commentBloc.add(
-                    ReplyComment(
-                      commentId: widget.commentId.toString() ?? '',
-                      postId: widget.postId.toString(),
-                      commentText: value,
-                    ),
-                  );
-                  value = '';
-                  // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
-                  //  homeBloc.postList[index].comments!.add(Comments());
-                }
-              },
-            ),
+            child: SVCommentReplyComponent(width: 60.w, commentBloc, widget.commentId ?? 0, (value) {
+              if (value.isNotEmpty) {
+                print('response comment');
+                commentBloc.add(ReplyComment(commentId: widget.commentId.toString() ?? '', postId: widget.postId.toString(), commentText: value));
+                value = '';
+                // int index= homeBloc.postList.indexWhere((post)=>post.id==id);
+                //  homeBloc.postList[index].comments!.add(Comments());
+              }
+            }),
           ),
       ],
     );

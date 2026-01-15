@@ -14,10 +14,10 @@ class PostShimmerLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    final baseColor = isDark ? theme.surfaceVariant.withOpacity(0.3) : Colors.grey[300]!;
-    final highlightColor = isDark ? theme.surfaceVariant.withOpacity(0.5) : Colors.grey[100]!;
-    
+
+    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
+
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -31,10 +31,7 @@ class PostShimmerLoader extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(
-                    radius: 20,
-                    backgroundColor: baseColor,
-                  ),
+                  leading: CircleAvatar(radius: 20, backgroundColor: baseColor),
                   title: _ShimmerBox(height: 10, color: baseColor),
                   subtitle: _ShimmerBox(height: 10, color: baseColor),
                 ),
@@ -53,18 +50,15 @@ class PostShimmerLoader extends StatelessWidget {
 class _ShimmerBox extends StatelessWidget {
   final double height;
   final Color color;
-  
+
   const _ShimmerBox({required this.height, required this.color});
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(4.0),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4.0)),
     );
   }
 }

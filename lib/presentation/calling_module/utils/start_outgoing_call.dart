@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
@@ -15,28 +14,17 @@ import '../../user_chat_screen/chat_ui_sceen/call_loading_screen.dart';
 // Use PusherService singleton which handles initialization and connection
 PusherService get pusherService => PusherService();
 
-Future<void> startOutgoingCall(
-  String userId,
-  String username,
-  String profilePic,
-  bool isVideoCall,
-) async {
+Future<void> startOutgoingCall(String userId, String username, String profilePic, bool isVideoCall) async {
   // Get the current context for permission dialogs
   final context = NavigatorService.navigatorKey.currentState?.context;
 
   // Check and request permissions before starting the call
   if (context != null) {
-    final hasPermissions = await callPermissionHandler.hasCallPermissions(
-      isVideoCall: isVideoCall,
-    );
+    final hasPermissions = await callPermissionHandler.hasCallPermissions(isVideoCall: isVideoCall);
 
     if (!hasPermissions) {
       // Request permissions with professional UI
-      final granted = await callPermissionHandler.requestWithUI(
-        context,
-        isVideoCall: isVideoCall,
-        showRationale: true,
-      );
+      final granted = await callPermissionHandler.requestWithUI(context, isVideoCall: isVideoCall, showRationale: true);
 
       if (!granted) {
         // User denied permissions, don't start the call
@@ -46,8 +34,7 @@ Future<void> startOutgoingCall(
   }
 
   // Create a key to access the loading screen state
-  final GlobalKey<CallLoadingScreenState> loadingScreenKey =
-      GlobalKey<CallLoadingScreenState>();
+  final GlobalKey<CallLoadingScreenState> loadingScreenKey = GlobalKey<CallLoadingScreenState>();
 
   // Reference to the Pusher channel name
   String? channelName;
@@ -59,9 +46,7 @@ Future<void> startOutgoingCall(
 
   // Function to clean up resources (only for failed/cancelled calls)
   Future<void> cleanupResources({bool forceEnd = false}) async {
-    debugPrint(
-      '📞 cleanupResources() called - callAccepted: $callAccepted, forceEnd: $forceEnd',
-    );
+    debugPrint('📞 cleanupResources() called - callAccepted: $callAccepted, forceEnd: $forceEnd');
 
     // Don't cleanup if call was accepted and navigated to call screen
     if (callAccepted && callNavigatedToScreen && !forceEnd) {
@@ -134,25 +119,18 @@ Future<void> startOutgoingCall(
       loadingScreenKey.currentState?.updateStatus(CallStatus.calling);
 
       debugPrint('📞 Calling CallKitService().startOutgoingCall...');
-      final response = await CallKitService().startOutgoingCall(
-        userId: userId,
-        calleeName: username,
-        avatar: "${AppData.imageUrl}$profilePic",
-        hasVideo: isVideoCall,
-      );
+      final response = await CallKitService().startOutgoingCall(userId: userId, calleeName: username, avatar: "${AppData.imageUrl}$profilePic", hasVideo: isVideoCall);
       debugPrint('📞 CallKitService response: $response');
 
       // Response is already Map<String, dynamic>
       callData = response;
     } catch (e) {
       print('Error calling CallKitService.startOutgoingCall: $e');
-      throw e;
+      rethrow;
     }
 
     // Handle success - subscribe to Pusher for call status updates
-    debugPrint(
-      '📞 Checking callData success: ${callData['success']}, callId: ${callData['callId']}',
-    );
+    debugPrint('📞 Checking callData success: ${callData['success']}, callId: ${callData['callId']}');
     if (callData['success'] == true && callData['callId'] != null) {
       callId = callData['callId'].toString();
       debugPrint('📞 Call initiated successfully with callId: $callId');
@@ -204,14 +182,11 @@ Future<void> startOutgoingCall(
           String? callStatus;
 
           // Try different paths to find the status
-          if (eventDataMap.containsKey('callData') &&
-              eventDataMap['callData'] is Map) {
+          if (eventDataMap.containsKey('callData') && eventDataMap['callData'] is Map) {
             callStatus = eventDataMap['callData']['status']?.toString();
             print('📞 Found status in callData: $callStatus');
           }
-          if (callStatus == null &&
-              eventDataMap.containsKey('statusData') &&
-              eventDataMap['statusData'] is Map) {
+          if (callStatus == null && eventDataMap.containsKey('statusData') && eventDataMap['statusData'] is Map) {
             callStatus = eventDataMap['statusData']['status']?.toString();
             print('📞 Found status in statusData: $callStatus');
           }
@@ -224,13 +199,9 @@ Future<void> startOutgoingCall(
             print('📞 Found status in call_status: $callStatus');
           }
           // Also check for data wrapper
-          if (callStatus == null &&
-              eventDataMap.containsKey('data') &&
-              eventDataMap['data'] is Map) {
+          if (callStatus == null && eventDataMap.containsKey('data') && eventDataMap['data'] is Map) {
             final dataMap = eventDataMap['data'] as Map;
-            callStatus =
-                dataMap['status']?.toString() ??
-                dataMap['call_status']?.toString();
+            callStatus = dataMap['status']?.toString() ?? dataMap['call_status']?.toString();
             print('📞 Found status in data wrapper: $callStatus');
           }
 
@@ -259,8 +230,7 @@ Future<void> startOutgoingCall(
               loadingScreenKey.currentState?.updateStatus(CallStatus.timeout);
               // Close the loading screen after showing no answer
               Future.delayed(const Duration(seconds: 2), () {
-                if (NavigatorService.navigatorKey.currentState != null &&
-                    !callNavigatedToScreen) {
+                if (NavigatorService.navigatorKey.currentState != null && !callNavigatedToScreen) {
                   NavigatorService.navigatorKey.currentState?.pop();
                   cleanupResources();
                 }
@@ -276,8 +246,7 @@ Future<void> startOutgoingCall(
               loadingScreenKey.currentState?.updateStatus(CallStatus.accepted);
 
               // Navigate to call screen immediately without delay
-              if (NavigatorService.navigatorKey.currentState != null &&
-                  !callNavigatedToScreen) {
+              if (NavigatorService.navigatorKey.currentState != null && !callNavigatedToScreen) {
                 callNavigatedToScreen = true;
                 debugPrint('📞 Navigating to CallScreen with callId: $callId');
                 NavigatorService.navigatorKey.currentState!.pushReplacement(
@@ -321,8 +290,7 @@ Future<void> startOutgoingCall(
             case 'missed':
             case 'offline':
               // Only handle if not already navigated to CallScreen
-              if (!callNavigatedToScreen &&
-                  NavigatorService.navigatorKey.currentState != null) {
+              if (!callNavigatedToScreen && NavigatorService.navigatorKey.currentState != null) {
                 // Show appropriate status
                 if (normalizedStatus == 'offline') {
                   loadingScreenKey.currentState?.updateStatus(CallStatus.offline);
@@ -331,8 +299,7 @@ Future<void> startOutgoingCall(
                 }
                 // Give time to show the status
                 Future.delayed(const Duration(seconds: 2), () {
-                  if (!callNavigatedToScreen &&
-                      NavigatorService.navigatorKey.currentState != null) {
+                  if (!callNavigatedToScreen && NavigatorService.navigatorKey.currentState != null) {
                     NavigatorService.navigatorKey.currentState?.pop();
                     cleanupResources();
                   }
@@ -357,8 +324,7 @@ Future<void> startOutgoingCall(
           callAccepted = true;
           loadingScreenKey.currentState?.updateStatus(CallStatus.accepted);
 
-          if (NavigatorService.navigatorKey.currentState != null &&
-              !callNavigatedToScreen) {
+          if (NavigatorService.navigatorKey.currentState != null && !callNavigatedToScreen) {
             callNavigatedToScreen = true;
             debugPrint('📞 Navigating to CallScreen from call.accepted event');
             NavigatorService.navigatorKey.currentState!.pushReplacement(
@@ -384,8 +350,7 @@ Future<void> startOutgoingCall(
           callAccepted = true;
           loadingScreenKey.currentState?.updateStatus(CallStatus.accepted);
 
-          if (NavigatorService.navigatorKey.currentState != null &&
-              !callNavigatedToScreen) {
+          if (NavigatorService.navigatorKey.currentState != null && !callNavigatedToScreen) {
             callNavigatedToScreen = true;
             debugPrint('📞 Navigating to CallScreen from Call_Accepted event');
             NavigatorService.navigatorKey.currentState!.pushReplacement(
@@ -417,13 +382,10 @@ Future<void> startOutgoingCall(
         });
 
         pusherService.registerEventListener('call.ended', (data) {
-          print(
-            '📞 Received call.ended event - callAccepted: $callAccepted, callNavigatedToScreen: $callNavigatedToScreen',
-          );
+          print('📞 Received call.ended event - callAccepted: $callAccepted, callNavigatedToScreen: $callNavigatedToScreen');
           // Only handle if call wasn't accepted and navigated to CallScreen
           // CallScreen handles its own call.ended events
-          if (!callNavigatedToScreen &&
-              NavigatorService.navigatorKey.currentState != null) {
+          if (!callNavigatedToScreen && NavigatorService.navigatorKey.currentState != null) {
             NavigatorService.navigatorKey.currentState?.pop();
             cleanupResources();
           }
@@ -443,10 +405,7 @@ Future<void> startOutgoingCall(
 
         // Register a generic event handler for unknown event names
         // This will be called when PusherService can't find exact match but data contains status
-        pusherService.registerEventListener(
-          '__call_status_fallback__',
-          handleCallEvent,
-        );
+        pusherService.registerEventListener('__call_status_fallback__', handleCallEvent);
 
         // Set a timeout for ringing status
         Future.delayed(Duration(seconds: 30), () {
@@ -457,16 +416,13 @@ Future<void> startOutgoingCall(
           }
 
           // If still in ringing status after 30 seconds, assume timeout/no answer
-          if (loadingScreenKey.currentState?.status == CallStatus.ringing ||
-              loadingScreenKey.currentState?.status == CallStatus.calling) {
+          if (loadingScreenKey.currentState?.status == CallStatus.ringing || loadingScreenKey.currentState?.status == CallStatus.calling) {
             print('📞 Call timeout after 30 seconds - showing no answer');
             loadingScreenKey.currentState?.updateStatus(CallStatus.timeout);
 
             Future.delayed(Duration(seconds: 2), () {
               // Double-check call wasn't accepted during the delay
-              if (!callAccepted &&
-                  !callNavigatedToScreen &&
-                  NavigatorService.navigatorKey.currentState != null) {
+              if (!callAccepted && !callNavigatedToScreen && NavigatorService.navigatorKey.currentState != null) {
                 print('📞 Closing loading screen after no answer timeout');
                 NavigatorService.navigatorKey.currentState?.pop();
                 cleanupResources();
@@ -482,24 +438,15 @@ Future<void> startOutgoingCall(
       }
     } else {
       // Handle API error
-      NavigatorService.navigatorKey.currentState
-          ?.pop(); // Remove loading screen
-      _showCallError(
-        translation(
-          NavigatorService.navigatorKey.currentState!.context,
-        ).lbl_failed_to_establish_call,
-      );
+      NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
+      _showCallError(translation(NavigatorService.navigatorKey.currentState!.context).lbl_failed_to_establish_call);
       cleanupResources();
     }
   } catch (error) {
     print('Error starting outgoing call: $error');
 
     NavigatorService.navigatorKey.currentState?.pop(); // Remove loading screen
-    _showCallError(
-      translation(
-        NavigatorService.navigatorKey.currentState!.context,
-      ).lbl_error_starting_call,
-    );
+    _showCallError(translation(NavigatorService.navigatorKey.currentState!.context).lbl_error_starting_call);
 
     // Make sure any partial call state is cleaned up
     cleanupResources();
@@ -510,12 +457,6 @@ Future<void> startOutgoingCall(
 void _showCallError(String message) {
   final context = NavigatorService.navigatorKey.currentState?.overlay?.context;
   if (context != null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 3),
-      ),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red, duration: Duration(seconds: 3)));
   }
 }

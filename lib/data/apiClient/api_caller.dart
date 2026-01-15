@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,26 +11,19 @@ class ApiCaller {
   // Default timeout of 20 seconds for all requests
   static const Duration defaultTimeout = Duration(seconds: 20);
 
-  Future<dynamic> callApi({
-    required String endpoint,
-    required HttpMethod method,
-    Map<String, dynamic>? params,
-    Map<String, String>? headers,
-    dynamic body,
-    Duration timeout = defaultTimeout,
-  }) async {
+  Future<dynamic> callApi({required String endpoint, required HttpMethod method, Map<String, dynamic>? params, Map<String, String>? headers, dynamic body, Duration timeout = defaultTimeout}) async {
     // Construct URL
     Uri fullUri = Uri.parse('${AppData.remoteUrl2}/').resolve(endpoint);
-    
+
     // Add query parameters
     if (params != null && params.isNotEmpty) {
       final queryParams = Map<String, String>.from(fullUri.queryParameters);
       queryParams.addAll(params.map((k, v) => MapEntry(k, v.toString())));
       fullUri = fullUri.replace(queryParameters: queryParams);
     }
-    
+
     debugPrint('📡 API Request: ${method.toString().split('.').last.toUpperCase()} $fullUri');
-    
+
     // Prepare headers
     final requestHeaders = Map<String, String>.from({'Authorization': 'Bearer ${AppData.userToken}'});
     if (headers != null) requestHeaders.addAll(headers);
@@ -54,20 +46,13 @@ class ApiCaller {
     // Execute request with timeout
     final client = http.Client();
     final Stopwatch stopwatch = Stopwatch()..start();
-    
+
     try {
-      final response = await _executeRequest(
-        method: method,
-        uri: fullUri,
-        headers: requestHeaders,
-        body: bodyJson,
-        client: client,
-        timeout: timeout,
-      );
+      final response = await _executeRequest(method: method, uri: fullUri, headers: requestHeaders, body: bodyJson, client: client, timeout: timeout);
 
       stopwatch.stop();
       debugPrint('✅ API Response: ${response.statusCode} (${stopwatch.elapsedMilliseconds}ms)');
-      
+
       return _handleResponse(response);
     } on TimeoutException catch (e) {
       stopwatch.stop();
@@ -81,25 +66,16 @@ class ApiCaller {
     } on SocketException catch (e) {
       stopwatch.stop();
       debugPrint('🌐 Network Error: ${e.message} (${stopwatch.elapsedMilliseconds}ms)');
-      throw ApiException(
-        statusCode: 0,
-        message: 'Network connection error',
-        response: {'error': 'network', 'details': e.toString()},
-        isNetworkError: true,
-      );
+      throw ApiException(statusCode: 0, message: 'Network connection error', response: {'error': 'network', 'details': e.toString()}, isNetworkError: true);
     } catch (e) {
       stopwatch.stop();
       debugPrint('❌ API Error: $e (${stopwatch.elapsedMilliseconds}ms)');
-      
+
       if (e is ApiException) {
         rethrow;
       }
-      
-      throw ApiException(
-        statusCode: 0,
-        message: 'Unknown error occurred',
-        response: {'error': 'unknown', 'details': e.toString()},
-      );
+
+      throw ApiException(statusCode: 0, message: 'Unknown error occurred', response: {'error': 'unknown', 'details': e.toString()});
     } finally {
       client.close();
     }
@@ -140,11 +116,7 @@ class ApiCaller {
       } catch (_) {
         errorBody = response.body;
       }
-      throw ApiException(
-        statusCode: response.statusCode,
-        message: 'Request failed with status code ${response.statusCode}',
-        response: errorBody,
-      );
+      throw ApiException(statusCode: response.statusCode, message: 'Request failed with status code ${response.statusCode}', response: errorBody);
     }
   }
 }
@@ -156,13 +128,7 @@ class ApiException implements Exception {
   final bool isTimeout;
   final bool isNetworkError;
 
-  ApiException({
-    required this.statusCode,
-    required this.message,
-    this.response,
-    this.isTimeout = false,
-    this.isNetworkError = false,
-  });
+  ApiException({required this.statusCode, required this.message, this.response, this.isTimeout = false, this.isNetworkError = false});
 
   bool get isServerError => statusCode >= 500 && statusCode < 600;
   bool get isClientError => statusCode >= 400 && statusCode < 500;

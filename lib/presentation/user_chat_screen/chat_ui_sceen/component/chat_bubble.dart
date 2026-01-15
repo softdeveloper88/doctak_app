@@ -18,16 +18,7 @@ class ChatBubble extends StatefulWidget {
   final String? createAt;
   final int? seen;
 
-  const ChatBubble({
-    Key? key,
-    required this.message,
-    required this.isMe,
-    required this.createAt,
-    required this.profile,
-    this.attachmentJson,
-    this.attachmentType,
-    this.seen,
-  }) : super(key: key);
+  const ChatBubble({super.key, required this.message, required this.isMe, required this.createAt, required this.profile, this.attachmentJson, this.attachmentType, this.seen});
 
   @override
   State<ChatBubble> createState() => _ChatBubbleState();
@@ -42,40 +33,18 @@ class _ChatBubbleState extends State<ChatBubble> {
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: widget.isMe
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
           if (widget.isMe)
             Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [theme.primary, theme.primary.withOpacity(0.9)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                  bottomLeft: Radius.circular(18),
-                  bottomRight: Radius.circular(4),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.primary.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.9)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(18), topRight: Radius.circular(18), bottomLeft: Radius.circular(18), bottomRight: Radius.circular(4)),
+                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.2), blurRadius: 6, offset: const Offset(0, 2))],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -83,19 +52,11 @@ class _ChatBubbleState extends State<ChatBubble> {
                     if (widget.message.isNotEmpty)
                       Text(
                         widget.message,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.0,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                          height: 1.4,
-                        ),
+                        style: const TextStyle(color: Colors.white, fontSize: 15.0, fontFamily: 'Poppins', fontWeight: FontWeight.w400, height: 1.4),
                       ),
                     if (widget.attachmentJson != null)
                       Padding(
-                        padding: EdgeInsets.only(
-                          top: widget.message.isNotEmpty ? 8 : 0,
-                        ),
+                        padding: EdgeInsets.only(top: widget.message.isNotEmpty ? 8 : 0),
                         child: _buildAttachment(context),
                       ),
                     const SizedBox(height: 4),
@@ -103,27 +64,12 @@ class _ChatBubbleState extends State<ChatBubble> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          timeAgo.format(
-                            DateTime.parse(widget.createAt.toString()),
-                          ),
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 11.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white.withOpacity(0.8),
-                          ),
+                          timeAgo.format(DateTime.parse(widget.createAt.toString())),
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 11.0, fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.8)),
                         ),
                         const SizedBox(width: 6),
                         if (widget.isMe)
-                          Icon(
-                            widget.seen == 1
-                                ? Icons.done_all_rounded
-                                : Icons.done_rounded,
-                            size: 16,
-                            color: widget.seen == 1
-                                ? Colors.lightBlueAccent
-                                : Colors.white.withOpacity(0.7),
-                          ),
+                          Icon(widget.seen == 1 ? Icons.done_all_rounded : Icons.done_rounded, size: 16, color: widget.seen == 1 ? Colors.lightBlueAccent : Colors.white.withValues(alpha: 0.7)),
                       ],
                     ),
                   ],
@@ -132,32 +78,14 @@ class _ChatBubbleState extends State<ChatBubble> {
             )
           else
             Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
               decoration: BoxDecoration(
                 color: theme.surfaceVariant,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                  bottomRight: Radius.circular(18),
-                  bottomLeft: Radius.circular(4),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.isDark
-                        ? Colors.black.withOpacity(0.2)
-                        : Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                borderRadius: const BorderRadius.only(topLeft: Radius.circular(18), topRight: Radius.circular(18), bottomRight: Radius.circular(18), bottomLeft: Radius.circular(4)),
+                boxShadow: [BoxShadow(color: theme.isDark ? Colors.black.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))],
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 10,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,34 +93,17 @@ class _ChatBubbleState extends State<ChatBubble> {
                     if (widget.message.isNotEmpty)
                       Text(
                         widget.message,
-                        style: TextStyle(
-                          color: theme.textPrimary,
-                          fontSize: 15.0,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                          height: 1.4,
-                        ),
+                        style: TextStyle(color: theme.textPrimary, fontSize: 15.0, fontFamily: 'Poppins', fontWeight: FontWeight.w400, height: 1.4),
                       ),
                     if (widget.attachmentJson != null)
                       Padding(
-                        padding: EdgeInsets.only(
-                          top: widget.message.isNotEmpty ? 8 : 0,
-                        ),
+                        padding: EdgeInsets.only(top: widget.message.isNotEmpty ? 8 : 0),
                         child: _buildAttachment(context),
                       ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.createAt != null
-                          ? timeAgo.format(
-                              DateTime.parse(widget.createAt.toString()),
-                            )
-                          : '',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11.0,
-                        fontWeight: FontWeight.w400,
-                        color: theme.textTertiary,
-                      ),
+                      widget.createAt != null ? timeAgo.format(DateTime.parse(widget.createAt.toString())) : '',
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 11.0, fontWeight: FontWeight.w400, color: theme.textTertiary),
                     ),
                   ],
                 ),
@@ -220,19 +131,13 @@ class _ChatBubbleState extends State<ChatBubble> {
         return const SizedBox.shrink();
       }
 
-      debugPrint(
-        'Building attachment: ${widget.attachmentJson}, type: ${widget.attachmentType}',
-      );
+      debugPrint('Building attachment: ${widget.attachmentJson}, type: ${widget.attachmentType}');
 
       // Check attachmentType first (more reliable than extension)
-      final attachmentType =
-          widget.attachmentType?.toString().toLowerCase() ?? '';
+      final attachmentType = widget.attachmentType?.toString().toLowerCase() ?? '';
 
       // Handle voice/audio messages
-      if (attachmentType.contains('audio') ||
-          attachmentType.contains('voice') ||
-          attachmentType == 'audio' ||
-          attachmentType == 'voice') {
+      if (attachmentType.contains('audio') || attachmentType.contains('voice') || attachmentType == 'audio' || attachmentType == 'voice') {
         debugPrint('Rendering voice/audio message');
         final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
         return VoiceMessagePrecacher(
@@ -244,21 +149,11 @@ class _ChatBubbleState extends State<ChatBubble> {
       // Handle video messages
       if (attachmentType.contains('video') || attachmentType == 'video') {
         debugPrint('Rendering video message');
-        return VideoPlayerWidget(
-          videoUrl: '${AppData.imageUrl}${widget.attachmentJson}',
-        );
+        return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
       }
 
       // Fallback to extension-based detection if attachmentType is not available
-      final audioExtensions = [
-        'mp3',
-        'm4a',
-        'wav',
-        'aac',
-        'ogg',
-        'flac',
-        'amr',
-      ];
+      final audioExtensions = ['mp3', 'm4a', 'wav', 'aac', 'ogg', 'flac', 'amr'];
       final videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp'];
 
       // Safe file extension extraction
@@ -281,9 +176,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         );
       } else if (videoExtensions.contains(fileExtension)) {
         debugPrint('Rendering video by extension');
-        return VideoPlayerWidget(
-          videoUrl: '${AppData.imageUrl}${widget.attachmentJson}',
-        );
+        return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
       } else {
         // Default to image
         debugPrint('Rendering as image (default)');
@@ -292,54 +185,28 @@ class _ChatBubbleState extends State<ChatBubble> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FullScreenImagePage(
-                  listCount: 1,
-                  imageUrl: "${AppData.imageUrl}${widget.attachmentJson}",
-                  post: null,
-                  mediaUrls: [],
-                ),
+                builder: (context) => FullScreenImagePage(listCount: 1, imageUrl: "${AppData.imageUrl}${widget.attachmentJson}", post: null, mediaUrls: []),
               ),
             );
           },
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.65,
-                maxHeight: 300,
-              ),
+              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65, maxHeight: 300),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.isDark
-                        ? Colors.black.withOpacity(0.2)
-                        : Colors.black.withOpacity(0.08),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: theme.isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.08), blurRadius: 4, offset: const Offset(0, 2))],
               ),
               child: Stack(
                 children: [
-                  CustomImageView(
-                    imagePath: "${AppData.imageUrl}${widget.attachmentJson}",
-                    fit: BoxFit.cover,
-                  ),
+                  CustomImageView(imagePath: "${AppData.imageUrl}${widget.attachmentJson}", fit: BoxFit.cover),
                   Positioned(
                     top: 8,
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.4),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.fullscreen_rounded,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.4), shape: BoxShape.circle),
+                      child: const Icon(Icons.fullscreen_rounded, color: Colors.white, size: 18),
                     ),
                   ),
                 ],
@@ -359,9 +226,9 @@ class _ChatBubbleState extends State<ChatBubble> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.error.withOpacity(0.1),
+        color: theme.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.error.withOpacity(0.3), width: 1),
+        border: Border.all(color: theme.error.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -370,11 +237,7 @@ class _ChatBubbleState extends State<ChatBubble> {
           const SizedBox(width: 8),
           Text(
             'Unable to load attachment',
-            style: TextStyle(
-              color: theme.error,
-              fontSize: 13,
-              fontFamily: 'Poppins',
-            ),
+            style: TextStyle(color: theme.error, fontSize: 13, fontFamily: 'Poppins'),
           ),
         ],
       ),

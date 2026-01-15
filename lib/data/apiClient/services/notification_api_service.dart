@@ -11,16 +11,9 @@ class NotificationApiService {
   NotificationApiService._internal();
 
   /// Get all notifications
-  Future<ApiResponse<NotificationModel>> getNotifications({
-    required String page,
-  }) async {
+  Future<ApiResponse<NotificationModel>> getNotifications({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(NotificationModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -35,12 +28,7 @@ class NotificationApiService {
     required String readStatus, // "read", "unread", "all"
   }) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/$readStatus?page=$page',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$readStatus?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(NotificationModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -52,12 +40,7 @@ class NotificationApiService {
   /// Mark all notifications as read
   Future<ApiResponse<Map<String, dynamic>>> markAllNotificationsAsRead() async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/mark-read',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/mark-read', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -67,16 +50,9 @@ class NotificationApiService {
   }
 
   /// Mark specific notification as read
-  Future<ApiResponse<Map<String, dynamic>>> markNotificationAsRead({
-    required String notificationId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> markNotificationAsRead({required String notificationId}) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/$notificationId/mark-read',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$notificationId/mark-read', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -104,31 +80,20 @@ class NotificationApiService {
   }
 
   /// Get read notifications
-  Future<ApiResponse<NotificationModel>> getReadNotifications({
-    required String page,
-  }) async {
+  Future<ApiResponse<NotificationModel>> getReadNotifications({required String page}) async {
     return getFilteredNotifications(page: page, readStatus: 'read');
   }
 
   /// Get unread notifications
-  Future<ApiResponse<NotificationModel>> getUnreadNotifications({
-    required String page,
-  }) async {
+  Future<ApiResponse<NotificationModel>> getUnreadNotifications({required String page}) async {
     return getFilteredNotifications(page: page, readStatus: 'unread');
   }
 
   /// Delete notification (if supported)
-  Future<ApiResponse<Map<String, dynamic>>> deleteNotification({
-    required String notificationId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteNotification({required String notificationId}) async {
     try {
       // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/$notificationId/delete',
-          method: networkUtils.HttpMethod.DELETE,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$notificationId/delete', method: networkUtils.HttpMethod.DELETE));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -141,12 +106,7 @@ class NotificationApiService {
   Future<ApiResponse<Map<String, dynamic>>> clearAllNotifications() async {
     try {
       // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/clear-all',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/clear-all', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -159,12 +119,7 @@ class NotificationApiService {
   Future<ApiResponse<Map<String, dynamic>>> getNotificationSettings() async {
     try {
       // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/settings',
-          method: networkUtils.HttpMethod.GET,
-        ),
-      );
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/settings', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -174,17 +129,11 @@ class NotificationApiService {
   }
 
   /// Update notification settings (if supported)
-  Future<ApiResponse<Map<String, dynamic>>> updateNotificationSettings({
-    required Map<String, bool> settings,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> updateNotificationSettings({required Map<String, bool> settings}) async {
     try {
       // Note: This endpoint might not exist in the original API
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/settings/update',
-          method: networkUtils.HttpMethod.POST,
-          request: settings.map((key, value) => MapEntry(key, value.toString())),
-        ),
+        await networkUtils.buildHttpResponse('/notifications/settings/update', method: networkUtils.HttpMethod.POST, request: settings.map((key, value) => MapEntry(key, value.toString()))),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
@@ -197,9 +146,7 @@ class NotificationApiService {
   // ================================== BACKWARD COMPATIBILITY ==================================
 
   /// Get my notifications (backward compatibility)
-  Future<ApiResponse<NotificationModel>> getMyNotifications({
-    required String page,
-  }) async {
+  Future<ApiResponse<NotificationModel>> getMyNotifications({required String page}) async {
     return getNotifications(page: page);
   }
 
@@ -209,9 +156,7 @@ class NotificationApiService {
   }
 
   /// Read notification (backward compatibility)
-  Future<ApiResponse<Map<String, dynamic>>> readNotification({
-    required String notificationId,
-  }) async {
+  Future<ApiResponse<Map<String, dynamic>>> readNotification({required String notificationId}) async {
     return markNotificationAsRead(notificationId: notificationId);
   }
 }

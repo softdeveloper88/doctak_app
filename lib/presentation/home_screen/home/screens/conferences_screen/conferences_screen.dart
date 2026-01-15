@@ -48,9 +48,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
       _isInitialized = true;
       _splashBloc = BlocProvider.of<SplashBloc>(context);
       _splashBloc?.add(LoadDropdownData1('', ''));
-      conferenceBloc.add(
-        LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''),
-      );
+      conferenceBloc.add(LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''));
     }
   }
 
@@ -87,56 +85,34 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
               if (state is CountriesDataLoaded1) {
                 List<dynamic> list = state.countriesModelList;
                 // Get the selected country name or default to "All"
-                String selectedCountryName = state.countryName.isEmpty
-                    ? 'All'
-                    : state.countryName;
+                String selectedCountryName = state.countryName.isEmpty ? 'All' : state.countryName;
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Country selector
                     Container(
                       margin: const EdgeInsets.only(right: 2),
-                      decoration: BoxDecoration(
-                        color: theme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+                      decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                       child: PopupMenuButton<String>(
                         tooltip: translation(context).lbl_all_countries,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         offset: const Offset(0, 40),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10.0,
-                            vertical: 6.0,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
-                                Icons.public_rounded,
-                                size: 16,
-                                color: theme.primary,
-                              ),
+                              Icon(Icons.public_rounded, size: 16, color: theme.primary),
                               const SizedBox(width: 4),
                               ConstrainedBox(
                                 constraints: const BoxConstraints(maxWidth: 80),
                                 child: Text(
                                   selectedCountryName,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: theme.textPrimary,
-                                  ),
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: theme.textPrimary),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              Icon(
-                                Icons.arrow_drop_down_rounded,
-                                size: 18,
-                                color: theme.primary,
-                              ),
+                              Icon(Icons.arrow_drop_down_rounded, size: 18, color: theme.primary),
                             ],
                           ),
                         ),
@@ -147,21 +123,11 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                               value: 'all',
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.public_rounded,
-                                    size: 18,
-                                    color: theme.primary,
-                                  ),
+                                  Icon(Icons.public_rounded, size: 18, color: theme.primary),
                                   const SizedBox(width: 8),
                                   Text(
                                     translation(context).lbl_all_countries,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: selectedCountryName == 'All'
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                      color: theme.textPrimary,
-                                    ),
+                                    style: TextStyle(fontSize: 14, fontWeight: selectedCountryName == 'All' ? FontWeight.w600 : FontWeight.normal, color: theme.textPrimary),
                                   ),
                                 ],
                               ),
@@ -178,30 +144,17 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                             }
                             if (countryName.isEmpty) continue;
 
-                            final bool isSelected =
-                                countryName == selectedCountryName;
+                            final bool isSelected = countryName == selectedCountryName;
                             items.add(
                               PopupMenuItem<String>(
                                 value: countryName,
                                 child: Row(
                                   children: [
-                                    Icon(
-                                      Icons.location_on_rounded,
-                                      size: 18,
-                                      color: isSelected
-                                          ? theme.primary
-                                          : theme.textSecondary,
-                                    ),
+                                    Icon(Icons.location_on_rounded, size: 18, color: isSelected ? theme.primary : theme.textSecondary),
                                     const SizedBox(width: 8),
                                     Text(
                                       countryName,
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: isSelected
-                                            ? FontWeight.w600
-                                            : FontWeight.normal,
-                                        color: theme.textPrimary,
-                                      ),
+                                      style: TextStyle(fontSize: 14, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal, color: theme.textPrimary),
                                     ),
                                   ],
                                 ),
@@ -211,22 +164,9 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                           return items;
                         },
                         onSelected: (String newValue) {
-                          final String displayName = newValue == 'all'
-                              ? ''
-                              : newValue;
-                          conferenceBloc.add(
-                            LoadPageEvent(
-                              page: 1,
-                              countryName: newValue,
-                              searchTerm: state.searchTerms ?? '',
-                            ),
-                          );
-                          _splashBloc?.add(
-                            LoadDropdownData1(
-                              displayName,
-                              state.searchTerms ?? '',
-                            ),
-                          );
+                          final String displayName = newValue == 'all' ? '' : newValue;
+                          conferenceBloc.add(LoadPageEvent(page: 1, countryName: newValue, searchTerm: state.searchTerms ?? ''));
+                          _splashBloc?.add(LoadDropdownData1(displayName, state.searchTerms ?? ''));
                         },
                       ),
                     ),
@@ -302,28 +242,13 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
             hintText: translation(context).lbl_search_conferences,
             controller: searchController,
             height: 72,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             onChanged: (searchTxt) {
-              conferenceBloc.add(
-                LoadPageEvent(
-                  page: 1,
-                  countryName: state.countryName,
-                  searchTerm: searchTxt,
-                ),
-              );
+              conferenceBloc.add(LoadPageEvent(page: 1, countryName: state.countryName, searchTerm: searchTxt));
               _splashBloc?.add(LoadDropdownData1(state.countryName, searchTxt));
             },
             onClear: () {
-              conferenceBloc.add(
-                LoadPageEvent(
-                  page: 1,
-                  countryName: state.countryName,
-                  searchTerm: '',
-                ),
-              );
+              conferenceBloc.add(LoadPageEvent(page: 1, countryName: state.countryName, searchTerm: ''));
             },
           );
         } else if (state is DataError) {
@@ -332,9 +257,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
             errorMessage: translation(context).msg_something_went_wrong_retry,
             onRetry: () {
               try {
-                conferenceBloc.add(
-                  LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''),
-                );
+                conferenceBloc.add(LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''));
               } catch (e) {
                 debugPrint(e.toString());
               }
@@ -347,27 +270,12 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
             hintText: translation(context).lbl_search_conferences,
             controller: searchController,
             height: 72,
-            margin: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
+            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             onChanged: (searchTxt) {
-              conferenceBloc.add(
-                LoadPageEvent(
-                  page: 1,
-                  countryName: 'all',
-                  searchTerm: searchTxt,
-                ),
-              );
+              conferenceBloc.add(LoadPageEvent(page: 1, countryName: 'all', searchTerm: searchTxt));
             },
             onClear: () {
-              conferenceBloc.add(
-                LoadPageEvent(
-                  page: 1,
-                  countryName: 'all',
-                  searchTerm: '',
-                ),
-              );
+              conferenceBloc.add(LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''));
             },
           );
         }
@@ -383,8 +291,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
         if (state is DataError) {
           showDialog(
             context: context,
-            builder: (context) =>
-                AlertDialog(content: Text(state.errorMessage)),
+            builder: (context) => AlertDialog(content: Text(state.errorMessage)),
           );
         }
       },
@@ -393,19 +300,14 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
           return Expanded(child: ConferencesShimmerLoader());
         } else if (state is PaginationLoadedState) {
           return Expanded(
-            child: VirtualizedConferencesList(
-              conferenceBloc: conferenceBloc,
-              scrollController: _scrollController,
-            ),
+            child: VirtualizedConferencesList(conferenceBloc: conferenceBloc, scrollController: _scrollController),
           );
         } else if (state is DataError) {
           return RetryWidget(
             errorMessage: translation(context).msg_something_went_wrong_retry,
             onRetry: () {
               try {
-                conferenceBloc.add(
-                  LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''),
-                );
+                conferenceBloc.add(LoadPageEvent(page: 1, countryName: 'all', searchTerm: ''));
               } catch (e) {
                 debugPrint(e.toString());
               }

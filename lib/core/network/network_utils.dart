@@ -7,8 +7,6 @@ import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 
-import '../../main.dart';
-
 // Add a baseUrl for AI Chat API
 String get baseUrl => '${AppData.remoteUrl2}/api';
 
@@ -17,9 +15,9 @@ Future<Map<String, String>> getHeaders() async {
   return buildHeaderTokens(contentType: 'application/json');
 }
 
-Map<String, String> buildHeaderTokens({String? contentType='application/x-www-form-urlencoded'}) {
+Map<String, String> buildHeaderTokens({String? contentType = 'application/x-www-form-urlencoded'}) {
   Map<String, String> header = {
-    HttpHeaders.contentTypeHeader: contentType??'application/x-www-form-urlencoded',
+    HttpHeaders.contentTypeHeader: contentType ?? 'application/x-www-form-urlencoded',
     // HttpHeaders.cacheControlHeader: 'no-cache',
     // HttpHeaders.cacheControlHeader: 'no-cache',
     // HttpHeaders.contentTypeHeader: 'application/json',
@@ -27,17 +25,17 @@ Map<String, String> buildHeaderTokens({String? contentType='application/x-www-fo
     // 'Access-Control-Allow-Headers': '*',
     // 'Access-Control-Allow-Origin': '*',
   };
-  
+
   print("⚠️ AppData.logInUserId: ${AppData.logInUserId}");
   print("⚠️ AppData.userToken: ${AppData.userToken != null ? 'Token exists' : 'Token is null'}");
-  
+
   if (AppData.logInUserId != '') {
     header.putIfAbsent(HttpHeaders.authorizationHeader, () => 'Bearer ${AppData.userToken}');
     print("⚠️ Added auth header: Bearer ${AppData.userToken?.substring(0, 10)}...");
   } else {
     print("⚠️ WARNING: No user ID found, not adding authorization header!");
   }
-  
+
   log(jsonEncode(header));
   return header;
 }
@@ -50,6 +48,7 @@ Uri buildBaseUrl(String endPoint) {
 
   return url;
 }
+
 Uri buildBaseUrl3(String endPoint) {
   Uri url = Uri.parse(endPoint);
   if (!endPoint.startsWith('http')) url = Uri.parse('${AppData.remoteUrl3}$endPoint');
@@ -58,6 +57,7 @@ Uri buildBaseUrl3(String endPoint) {
 
   return url;
 }
+
 Uri buildBaseUrl1(String endPoint) {
   Uri url = Uri.parse(endPoint);
   if (!endPoint.startsWith('http')) url = Uri.parse('${AppData.remoteUrl}$endPoint');
@@ -79,7 +79,9 @@ Future<Response> buildHttpResponse1(String endPoint, {HttpMethod method = HttpMe
 
       if (method == HttpMethod.POST) {
         log('Request: $request');
-        response = await http.post(url, body:  request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await http
+            .post(url, body: request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers)
+            .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
       } else if (method == HttpMethod.DELETE) {
         response = await delete(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
       } else if (method == HttpMethod.PUT) {
@@ -101,6 +103,7 @@ Future<Response> buildHttpResponse1(String endPoint, {HttpMethod method = HttpMe
     throw 'Your internet is not working';
   }
 }
+
 Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request}) async {
   if (await isNetworkAvailable()) {
     var headers = buildHeaderTokens();
@@ -113,7 +116,9 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
 
       if (method == HttpMethod.POST) {
         log('Request: $request');
-        response = await http.post(url, body:  request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await http
+            .post(url, body: request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers)
+            .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
       } else if (method == HttpMethod.DELETE) {
         response = await delete(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
       } else if (method == HttpMethod.PUT) {
@@ -129,13 +134,13 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
 
       return response;
     } catch (e) {
-
       throw 'Something Went Wrong $e';
     }
   } else {
     throw 'Your internet is not working';
   }
 }
+
 Future<Response> buildHttpResponse2(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request}) async {
   if (await isNetworkAvailable()) {
     var headers = buildHeaderTokens();
@@ -151,7 +156,9 @@ Future<Response> buildHttpResponse2(String endPoint, {HttpMethod method = HttpMe
 
       if (method == HttpMethod.POST) {
         log('Request: $request');
-        response = await http.post(url, body:  request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await http
+            .post(url, body: request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers)
+            .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
       } else if (method == HttpMethod.DELETE) {
         response = await delete(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
       } else if (method == HttpMethod.PUT) {
@@ -167,7 +174,6 @@ Future<Response> buildHttpResponse2(String endPoint, {HttpMethod method = HttpMe
 
       return response;
     } catch (e) {
-
       throw 'Something Went Wrong $e';
     }
   } else {
@@ -182,7 +188,7 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
     throw 'Your internet is not working';
   }
   if (response.statusCode == 401) {
-    if (AppData.logInUserId ==null) {
+    if (AppData.logInUserId == null) {
       // Map req = {
       //   'emailPhone': sharedPref.getString(USER_EMAIL),
       //   'password': sharedPref.getString(USER_PASSWORD),
@@ -211,7 +217,7 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
       throw 'Server error (${response.statusCode})';
     } catch (e) {
       if (e is String) {
-        throw e; // Re-throw if it's already a formatted string
+        rethrow; // Re-throw if it's already a formatted string
       }
       log(e);
       throw 'Something went wrong. Please try again.';
@@ -224,10 +230,10 @@ String _extractErrorMessage(dynamic body) {
   if (body == null) {
     return 'An unexpected error occurred';
   }
-  
+
   // Try different common API error response formats
   String? message;
-  
+
   // Format 1: { "message": "Error text" }
   if (body is Map && body['message'] != null) {
     message = body['message'].toString();
@@ -270,12 +276,12 @@ String _extractErrorMessage(dynamic body) {
   else if (body is String) {
     message = body;
   }
-  
+
   // Clean up HTML if present and return
   if (message != null && message.isNotEmpty) {
     return parseHtmlString(message);
   }
-  
+
   return 'An unexpected error occurred';
 }
 
@@ -286,5 +292,6 @@ class TokenException implements Exception {
 
   const TokenException([this.message = ""]);
 
+  @override
   String toString() => "FormatException: $message";
 }

@@ -1,21 +1,24 @@
 import 'dart:convert';
+
 CaseDiscussModel caseDiscussModelFromJson(String str) => CaseDiscussModel.fromJson(json.decode(str));
 String caseDiscussModelToJson(CaseDiscussModel data) => json.encode(data.toJson());
+
 class CaseDiscussModel {
   CaseDiscussModel({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   CaseDiscussModel.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -76,16 +79,13 @@ class CaseDiscussModel {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
-  Links({
-      this.url, 
-      this.label, 
-      this.active,});
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -103,22 +103,13 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
-  Data({
-      this.caseId,
-      this.title, 
-      this.tags, 
-      this.likes, 
-      this.views, 
-      this.createdAt, 
-      this.name, 
-      this.profilePic, 
-      this.comments,});
+  Data({this.caseId, this.title, this.tags, this.likes, this.views, this.createdAt, this.name, this.profilePic, this.comments});
 
   Data.fromJson(dynamic json) {
     caseId = json['case_id'];
@@ -154,5 +145,4 @@ class Data {
     map['comments'] = comments;
     return map;
   }
-
 }

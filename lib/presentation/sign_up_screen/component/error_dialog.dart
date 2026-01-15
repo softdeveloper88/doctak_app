@@ -3,16 +3,12 @@ import 'package:doctak_app/localization/app_localization.dart';
 
 class ErrorDialog extends StatelessWidget {
   final Map<String, dynamic> errors;
-  ErrorDialog({required this.errors});
+  const ErrorDialog({super.key, required this.errors});
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(translation(context).lbl_validation_error),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _buildErrorWidgets(),
-      ),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: _buildErrorWidgets()),
       actions: [
         TextButton(
           onPressed: () {

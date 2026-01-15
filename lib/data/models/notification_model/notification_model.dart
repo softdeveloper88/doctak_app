@@ -1,9 +1,10 @@
 import 'dart:convert';
+
 NotificationModel notificationModelFromJson(String str) => NotificationModel.fromJson(json.decode(str));
 String notificationModelToJson(NotificationModel data) => json.encode(data.toJson());
+
 class NotificationModel {
-  NotificationModel({
-      this.notifications,});
+  NotificationModel({this.notifications});
 
   NotificationModel.fromJson(dynamic json) {
     notifications = json['notifications'] != null ? Notifications.fromJson(json['notifications']) : null;
@@ -17,26 +18,27 @@ class NotificationModel {
     }
     return map;
   }
-
 }
 
 Notifications notificationsFromJson(String str) => Notifications.fromJson(json.decode(str));
 String notificationsToJson(Notifications data) => json.encode(data.toJson());
+
 class Notifications {
   Notifications({
-      this.currentPage, 
-      this.data, 
-      this.firstPageUrl, 
-      this.from, 
-      this.lastPage, 
-      this.lastPageUrl, 
-      this.links, 
-      this.nextPageUrl, 
-      this.path, 
-      this.perPage, 
-      this.prevPageUrl, 
-      this.to, 
-      this.total,});
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   Notifications.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -98,16 +100,13 @@ class Notifications {
     map['total'] = total;
     return map;
   }
-
 }
 
 Links linksFromJson(String str) => Links.fromJson(json.decode(str));
 String linksToJson(Links data) => json.encode(data.toJson());
+
 class Links {
-  Links({
-      this.url, 
-      this.label, 
-      this.active,});
+  Links({this.url, this.label, this.active});
 
   Links.fromJson(dynamic json) {
     url = json['url'];
@@ -125,37 +124,38 @@ class Links {
     map['active'] = active;
     return map;
   }
-
 }
 
 Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
+
 class Data {
   Data({
-      this.id, 
-      this.userId, 
-      this.userName, 
-      this.groupName, 
-      this.postId, 
-      this.groupEventId, 
-      this.groupId, 
-      this.invitationId, 
-      this.text, 
-      this.url, 
-      this.image, 
-      this.isRead, 
-      this.type, 
-      this.createdAt, 
-      this.updatedAt, 
-      this.fromUserId,
-      this.senderFirstName, 
-      this.senderLastName, 
-      this.senderSpecialty, 
-      this.senderProfilePic, 
-      this.receiverFirstName, 
-      this.receiverLastName, 
-      this.receiverSpecialty, 
-      this.receiverProfilePic,});
+    this.id,
+    this.userId,
+    this.userName,
+    this.groupName,
+    this.postId,
+    this.groupEventId,
+    this.groupId,
+    this.invitationId,
+    this.text,
+    this.url,
+    this.image,
+    this.isRead,
+    this.type,
+    this.createdAt,
+    this.updatedAt,
+    this.fromUserId,
+    this.senderFirstName,
+    this.senderLastName,
+    this.senderSpecialty,
+    this.senderProfilePic,
+    this.receiverFirstName,
+    this.receiverLastName,
+    this.receiverSpecialty,
+    this.receiverProfilePic,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -236,5 +236,4 @@ class Data {
     map['receiver_profile_pic'] = receiverProfilePic;
     return map;
   }
-
 }

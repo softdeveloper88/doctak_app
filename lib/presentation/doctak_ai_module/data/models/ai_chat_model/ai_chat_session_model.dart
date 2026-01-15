@@ -9,15 +9,7 @@ class AiChatSessionModel {
   final DateTime updatedAt;
   final DateTime? deletedAt;
 
-  AiChatSessionModel({
-    required this.id,
-    required this.userId,
-    required this.name,
-    this.type,
-    required this.createdAt,
-    required this.updatedAt,
-    this.deletedAt,
-  });
+  AiChatSessionModel({required this.id, required this.userId, required this.name, this.type, required this.createdAt, required this.updatedAt, this.deletedAt});
 
   factory AiChatSessionModel.fromJson(Map<String, dynamic> json) {
     return AiChatSessionModel(
@@ -32,15 +24,7 @@ class AiChatSessionModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'name': name,
-      'type': type,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-      'deleted_at': deletedAt?.toIso8601String(),
-    };
+    return {'id': id, 'user_id': userId, 'name': name, 'type': type, 'created_at': createdAt.toIso8601String(), 'updated_at': updatedAt.toIso8601String(), 'deleted_at': deletedAt?.toIso8601String()};
   }
 
   // For local storage

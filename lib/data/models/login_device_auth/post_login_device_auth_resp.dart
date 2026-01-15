@@ -1,31 +1,19 @@
 import 'dart:convert';
 
-PostLoginDeviceAuthResp postLogingDeviceAuthReqsFromJson(String str) =>
-    PostLoginDeviceAuthResp.fromJson(json.decode(str));
+PostLoginDeviceAuthResp postLogingDeviceAuthReqsFromJson(String str) => PostLoginDeviceAuthResp.fromJson(json.decode(str));
 
-String postLogingDeviceAuthReqsToJson(PostLoginDeviceAuthResp data) =>
-    json.encode(data.toJson());
+String postLogingDeviceAuthReqsToJson(PostLoginDeviceAuthResp data) => json.encode(data.toJson());
 
 class PostLoginDeviceAuthResp {
-  PostLoginDeviceAuthResp({
-    this.success,
-    this.user,
-    this.token,
-    this.recentCreated,
-    this.university,
-    this.country,
-  });
+  PostLoginDeviceAuthResp({this.success, this.user, this.token, this.recentCreated, this.university, this.country});
 
   PostLoginDeviceAuthResp.fromJson(dynamic json) {
     success = json['success'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     token = json['token'];
     recentCreated = json['recent_created'];
-    university = json['university'] != null
-        ? University.fromJson(json['university'])
-        : null;
-    country =
-        json['country'] != null ? Country.fromJson(json['country']) : null;
+    university = json['university'] != null ? University.fromJson(json['university']) : null;
+    country = json['country'] != null ? Country.fromJson(json['country']) : null;
   }
 
   bool? success;
@@ -58,16 +46,7 @@ Country countryFromJson(String str) => Country.fromJson(json.decode(str));
 String countryToJson(Country data) => json.encode(data.toJson());
 
 class Country {
-  Country({
-    this.id,
-    this.countryName,
-    this.createdAt,
-    this.updatedAt,
-    this.isRegistered,
-    this.countryCode,
-    this.countryMask,
-    this.currency,
-  });
+  Country({this.id, this.countryName, this.createdAt, this.updatedAt, this.isRegistered, this.countryCode, this.countryMask, this.currency});
 
   Country.fromJson(dynamic json) {
     id = json['id'];
@@ -103,8 +82,7 @@ class Country {
   }
 }
 
-University universityFromJson(String str) =>
-    University.fromJson(json.decode(str));
+University universityFromJson(String str) => University.fromJson(json.decode(str));
 
 String universityToJson(University data) => json.encode(data.toJson());
 

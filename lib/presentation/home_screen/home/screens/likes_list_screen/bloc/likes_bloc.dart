@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
@@ -20,17 +19,14 @@ class LikesBloc extends Bloc<LikesEvent, LikesState> {
     on<LoadPageEvent>(_onPostUserLikes);
   }
 
-  _onPostUserLikes(LoadPageEvent event, Emitter<LikesState> emit) async {
+  Future<void> _onPostUserLikes(LoadPageEvent event, Emitter<LikesState> emit) async {
     // if (event.pos == 1) {
     //   postList.clear();
     //   pageNumber = 1;
 
     // }
     try {
-      postLikesList = await apiManager.getPostUserLikes(
-        'Bearer ${AppData.userToken}',
-        event.postId.toString(),
-      );
+      postLikesList = await apiManager.getPostUserLikes('Bearer ${AppData.userToken}', event.postId.toString());
 
       // numberOfPage = response.posts?.lastPage ?? 0;
       // if (pageNumber < numberOfPage + 1) {

@@ -10,12 +10,8 @@ class UserShimmer extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final baseColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.3)
-        : Colors.grey[200]!;
-    final highlightColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.5)
-        : Colors.grey[100]!;
+    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[200]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
 
     return ListView.builder(
       shrinkWrap: true,
@@ -30,18 +26,12 @@ class UserShimmer extends StatelessWidget {
           title: Container(
             height: 10,
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: baseColor,
-              borderRadius: BorderRadius.circular(4),
-            ),
+            decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(4)),
           ),
           subtitle: Container(
             height: 10,
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: baseColor,
-              borderRadius: BorderRadius.circular(4),
-            ),
+            decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(4)),
           ),
         ),
       ),
@@ -57,15 +47,9 @@ class NotificationShimmer extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final baseColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.3)
-        : Colors.grey[300]!;
-    final highlightColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.5)
-        : Colors.grey[100]!;
-    final shimmerColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.4)
-        : Colors.grey[300]!;
+    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
+    final shimmerColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.4) : Colors.grey[300]!;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -81,22 +65,10 @@ class NotificationShimmer extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.08),
+              color: theme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: theme.primary.withOpacity(0.2),
-                width: 1,
-              ),
-              boxShadow: isDark
-                  ? null
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        offset: const Offset(0, 2),
-                        blurRadius: 8,
-                        spreadRadius: 0,
-                      ),
-                    ],
+              border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1),
+              boxShadow: isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -110,10 +82,7 @@ class NotificationShimmer extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: shimmerColor,
                           shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.primary.withOpacity(0.2),
-                            width: 2,
-                          ),
+                          border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 2),
                         ),
                       ),
                       Positioned(
@@ -124,18 +93,12 @@ class NotificationShimmer extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _getShimmerNotificationColor(index),
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: theme.cardBackground,
-                              width: 2,
-                            ),
+                            border: Border.all(color: theme.cardBackground, width: 2),
                           ),
                           child: Container(
                             width: 8,
                             height: 8,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.7),
-                              shape: BoxShape.circle,
-                            ),
+                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), shape: BoxShape.circle),
                           ),
                         ),
                       ),
@@ -149,19 +112,13 @@ class NotificationShimmer extends StatelessWidget {
                         Container(
                           height: 14,
                           width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: shimmerColor,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                          decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                         ),
                         const SizedBox(height: 4),
                         Container(
                           height: 14,
                           width: MediaQuery.of(context).size.width * 0.45,
-                          decoration: BoxDecoration(
-                            color: shimmerColor,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+                          decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                         ),
                         const SizedBox(height: 4),
                         Row(
@@ -169,19 +126,13 @@ class NotificationShimmer extends StatelessWidget {
                             Container(
                               width: 14,
                               height: 14,
-                              decoration: BoxDecoration(
-                                color: shimmerColor,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                             ),
                             const SizedBox(width: 4),
                             Container(
                               height: 12,
                               width: 70 + (index % 3) * 15,
-                              decoration: BoxDecoration(
-                                color: shimmerColor,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                             ),
                           ],
                         ),
@@ -190,17 +141,11 @@ class NotificationShimmer extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: theme.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
                     child: Container(
                       width: 14,
                       height: 14,
-                      decoration: BoxDecoration(
-                        color: shimmerColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                      decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
                 ],
@@ -213,13 +158,7 @@ class NotificationShimmer extends StatelessWidget {
   }
 
   Color _getShimmerNotificationColor(int index) {
-    final colors = [
-      Colors.green,
-      Colors.red,
-      Colors.blue,
-      Colors.purple,
-      Colors.orange,
-    ];
+    final colors = [Colors.green, Colors.red, Colors.blue, Colors.purple, Colors.orange];
     return colors[index % colors.length];
   }
 }
@@ -232,12 +171,8 @@ class ProfileListShimmer extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final baseColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.3)
-        : Colors.grey[300]!;
-    final highlightColor = isDark
-        ? theme.surfaceVariant.withOpacity(0.5)
-        : Colors.grey[100]!;
+    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
+    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -253,16 +188,7 @@ class ProfileListShimmer extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.cardBackground,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                    ),
-                  ],
+            boxShadow: isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.03), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -279,10 +205,7 @@ class ProfileListShimmer extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: baseColor,
-                      border: Border.all(
-                        color: theme.primary.withOpacity(0.2),
-                        width: 2,
-                      ),
+                      border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 2),
                     ),
                   ),
                 ),
@@ -301,13 +224,8 @@ class ProfileListShimmer extends StatelessWidget {
                               period: const Duration(milliseconds: 1500),
                               child: Container(
                                 height: 16,
-                                constraints: BoxConstraints(
-                                  maxWidth: 120 + (index % 3) * 20,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: baseColor,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
+                                constraints: BoxConstraints(maxWidth: 120 + (index % 3) * 20),
+                                decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(4)),
                               ),
                             ),
                           ),
@@ -320,10 +238,7 @@ class ProfileListShimmer extends StatelessWidget {
                               child: Container(
                                 width: 14,
                                 height: 14,
-                                decoration: BoxDecoration(
-                                  color: baseColor,
-                                  shape: BoxShape.circle,
-                                ),
+                                decoration: BoxDecoration(color: baseColor, shape: BoxShape.circle),
                               ),
                             ),
                           ],
@@ -337,10 +252,7 @@ class ProfileListShimmer extends StatelessWidget {
                         child: Container(
                           height: 14,
                           width: 90 + (index % 4) * 20,
-                          decoration: BoxDecoration(
-                            color: baseColor,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
+                          decoration: BoxDecoration(color: baseColor, borderRadius: BorderRadius.circular(4)),
                         ),
                       ),
                     ],
@@ -357,10 +269,7 @@ class ProfileListShimmer extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: baseColor,
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: theme.primary.withOpacity(0.3),
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 1.5),
                     ),
                   ),
                 ),

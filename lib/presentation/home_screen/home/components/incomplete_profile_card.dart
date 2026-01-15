@@ -11,11 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// OneUI 8.5 styled incomplete profile and email verification cards
 /// Compact, modern design with proper theming support
 class IncompleteProfileCard extends StatelessWidget {
-  IncompleteProfileCard(
-    this.isEmailVerified,
-    this.isInCompleteProfile, {
-    Key? key,
-  }) : super(key: key);
+  const IncompleteProfileCard(this.isEmailVerified, this.isInCompleteProfile, {super.key});
 
   final bool isEmailVerified;
   final bool isInCompleteProfile;
@@ -23,64 +19,28 @@ class IncompleteProfileCard extends StatelessWidget {
   Future<void> sendVerificationLink(String email, BuildContext context) async {
     showLoadingDialog(context);
     try {
-      final response = await http.post(
-        Uri.parse('${AppData.remoteUrl}/send-verification-link'),
-        body: {'email': email},
-      );
+      final response = await http.post(Uri.parse('${AppData.remoteUrl}/send-verification-link'), body: {'email': email});
 
       Navigator.of(context).pop();
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              translation(context).msg_verification_link_sent_success,
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent_success), duration: const Duration(seconds: 2)));
       } else if (response.statusCode == 422) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_validation_error),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), duration: const Duration(seconds: 2)));
       } else if (response.statusCode == 404) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_user_already_verified),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_user_already_verified), duration: const Duration(seconds: 2)));
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation(context).msg_something_went_wrong),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_went_wrong), duration: const Duration(seconds: 2)));
       }
     } catch (e) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(translation(context).msg_something_went_wrong),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_went_wrong), duration: const Duration(seconds: 2)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (isEmailVerified) _buildEmailVerificationCard(context),
-        if (isInCompleteProfile) _buildCompleteProfileCard(context),
-      ],
-    );
+    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [if (isEmailVerified) _buildEmailVerificationCard(context), if (isInCompleteProfile) _buildCompleteProfileCard(context)]);
   }
 
   Widget _buildEmailVerificationCard(BuildContext context) {
@@ -88,12 +48,7 @@ class IncompleteProfileCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      margin: EdgeInsets.only(
-        top: 8,
-        left: 8,
-        right: 8,
-        bottom: isInCompleteProfile ? 0 : 12,
-      ),
+      margin: EdgeInsets.only(top: 8, left: 8, right: 8, bottom: isInCompleteProfile ? 0 : 12),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: theme.cardBackground,
@@ -110,41 +65,23 @@ class IncompleteProfileCard extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  theme.primary.withOpacity(isDark ? 0.25 : 0.15),
-                  theme.primary.withOpacity(isDark ? 0.15 : 0.08),
+                  theme.primary.withValues(alpha: isDark ? 0.25 : 0.15),
+                  theme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primary.withOpacity(0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))],
             ),
-            child: Center(
-              child: SvgPicture.asset(
-                'assets/images/ic_mail.svg',
-                height: 24,
-                width: 24,
-                colorFilter: ColorFilter.mode(theme.primary, BlendMode.srcIn),
-              ),
-            ),
+            child: Center(child: SvgPicture.asset('assets/images/ic_mail.svg', height: 24, width: 24, colorFilter: ColorFilter.mode(theme.primary, BlendMode.srcIn))),
           ),
           const SizedBox(width: 12),
           // Text content
           Expanded(
             child: Text(
               translation(context).msg_verify_email_continue,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Poppins',
-                color: theme.textPrimary,
-              ),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: theme.textPrimary),
             ),
           ),
           const SizedBox(width: 8),
@@ -156,18 +93,10 @@ class IncompleteProfileCard extends StatelessWidget {
               onTap: () => sendVerificationLink(AppData.email, context),
               borderRadius: BorderRadius.circular(20),
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Text(
                   translation(context).lbl_verify_email,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                 ),
               ),
             ),
@@ -182,12 +111,7 @@ class IncompleteProfileCard extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      margin: EdgeInsets.only(
-        top: isEmailVerified ? 8 : 8,
-        left: 8,
-        right: 8,
-        bottom: 12,
-      ),
+      margin: EdgeInsets.only(top: isEmailVerified ? 8 : 8, left: 8, right: 8, bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: theme.cardBackground,
@@ -208,26 +132,16 @@ class IncompleteProfileCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      theme.warning.withOpacity(isDark ? 0.25 : 0.15),
-                      theme.warning.withOpacity(isDark ? 0.15 : 0.08),
+                      theme.warning.withValues(alpha: isDark ? 0.25 : 0.15),
+                      theme.warning.withValues(alpha: isDark ? 0.15 : 0.08),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: theme.warning.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: [BoxShadow(color: theme.warning.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
-                child: Icon(
-                  Icons.person_outline_rounded,
-                  color: theme.warning,
-                  size: 22,
-                ),
+                child: Icon(Icons.person_outline_rounded, color: theme.warning, size: 22),
               ),
               const SizedBox(width: 10),
               // Title
@@ -237,21 +151,12 @@ class IncompleteProfileCard extends StatelessWidget {
                   children: [
                     Text(
                       translation(context).msg_profile_incomplete,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins',
-                        color: theme.textPrimary,
-                      ),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       translation(context).msg_complete_following,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontFamily: 'Poppins',
-                        color: theme.textSecondary,
-                      ),
+                      style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: theme.textSecondary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -263,22 +168,13 @@ class IncompleteProfileCard extends StatelessWidget {
                 color: theme.primary,
                 borderRadius: BorderRadius.circular(20),
                 child: InkWell(
-                  onTap: () =>
-                      launchScreen(context, const CompleteProfileScreen()),
+                  onTap: () => launchScreen(context, const CompleteProfileScreen()),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     child: Text(
                       translation(context).lbl_complete_profile,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Poppins',
-                      ),
+                      style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
                     ),
                   ),
                 ),
@@ -290,24 +186,9 @@ class IncompleteProfileCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildIconChip(
-                context,
-                'assets/images/ic_country.svg',
-                translation(context).lbl_set_country,
-                theme,
-              ),
-              _buildIconChip(
-                context,
-                'assets/images/ic_state.svg',
-                translation(context).lbl_set_state,
-                theme,
-              ),
-              _buildIconChip(
-                context,
-                'assets/images/ic_specialty.svg',
-                translation(context).lbl_set_specialty,
-                theme,
-              ),
+              _buildIconChip(context, 'assets/images/ic_country.svg', translation(context).lbl_set_country, theme),
+              _buildIconChip(context, 'assets/images/ic_state.svg', translation(context).lbl_set_state, theme),
+              _buildIconChip(context, 'assets/images/ic_specialty.svg', translation(context).lbl_set_specialty, theme),
             ],
           ),
         ],
@@ -315,36 +196,18 @@ class IncompleteProfileCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIconChip(
-    BuildContext context,
-    String iconPath,
-    String label,
-    OneUITheme theme,
-  ) {
+  Widget _buildIconChip(BuildContext context, String iconPath, String label, OneUITheme theme) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: theme.surfaceVariant.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(
-            iconPath,
-            height: 16,
-            width: 16,
-            colorFilter: ColorFilter.mode(theme.textSecondary, BlendMode.srcIn),
-          ),
+          SvgPicture.asset(iconPath, height: 16, width: 16, colorFilter: ColorFilter.mode(theme.textSecondary, BlendMode.srcIn)),
           const SizedBox(width: 4),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Poppins',
-              color: theme.textSecondary,
-            ),
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: theme.textSecondary),
           ),
         ],
       ),

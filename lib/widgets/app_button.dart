@@ -44,29 +44,24 @@ class AppButton extends StatefulWidget {
     this.splashColor,
     this.enableScaleAnimation,
     this.disabledTextColor,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _AppButtonState createState() => _AppButtonState();
 }
 
-class _AppButtonState extends State<AppButton>
-    with SingleTickerProviderStateMixin {
+class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMixin {
   double _scale = 1.0;
   AnimationController? _controller;
 
   @override
   void initState() {
-    if (widget.enableScaleAnimation.validate(
-      value: enableAppButtonScaleAnimationGlobal,
-    )) {
+    if (widget.enableScaleAnimation.validate(value: enableAppButtonScaleAnimationGlobal)) {
       _controller =
           AnimationController(
             vsync: this,
-            duration: Duration(
-              milliseconds: appButtonScaleAnimationDurationGlobal ?? 50,
-            ),
+            duration: Duration(milliseconds: appButtonScaleAnimationDurationGlobal ?? 50),
             lowerBound: 0.0,
             upperBound: 0.1,
           )..addListener(() {
@@ -88,9 +83,7 @@ class _AppButtonState extends State<AppButton>
       _scale = 1 - _controller!.value;
     }
 
-    if (widget.enableScaleAnimation.validate(
-      value: enableAppButtonScaleAnimationGlobal,
-    )) {
+    if (widget.enableScaleAnimation.validate(value: enableAppButtonScaleAnimationGlobal)) {
       return Listener(
         onPointerDown: (details) {
           _controller?.forward();
@@ -120,28 +113,13 @@ class _AppButtonState extends State<AppButton>
           backgroundColor: widget.color ?? theme.primary,
           foregroundColor: widget.textColor ?? Colors.white,
           disabledBackgroundColor: widget.disabledColor ?? theme.surfaceVariant,
-          disabledForegroundColor:
-              widget.disabledTextColor ?? theme.textTertiary,
-          minimumSize: Size(
-            widget.width ?? double.infinity,
-            widget.height ?? 52,
-          ),
-          padding:
-              widget.padding ??
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          disabledForegroundColor: widget.disabledTextColor ?? theme.textTertiary,
+          minimumSize: Size(widget.width ?? double.infinity, widget.height ?? 52),
+          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           elevation: widget.elevation ?? 0,
-          shape:
-              widget.shapeBorder as OutlinedBorder? ??
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
+          shape: widget.shapeBorder as OutlinedBorder? ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
         ),
-        child:
-            widget.child ??
-            Text(
-              widget.text.validate(),
-              style:
-                  widget.textStyle ??
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+        child: widget.child ?? Text(widget.text.validate(), style: widget.textStyle ?? const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
     );
   }

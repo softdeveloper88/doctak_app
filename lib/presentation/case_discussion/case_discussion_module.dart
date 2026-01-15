@@ -13,37 +13,17 @@ class CaseDiscussionModule extends StatelessWidget {
   final String baseUrl;
   final String Function() getAuthToken;
 
-  const CaseDiscussionModule({
-    Key? key,
-    required this.baseUrl,
-    required this.getAuthToken,
-  }) : super(key: key);
+  const CaseDiscussionModule({super.key, required this.baseUrl, required this.getAuthToken});
 
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider(
-      create: (context) => CaseDiscussionRepository(
-        baseUrl: baseUrl,
-        getAuthToken: getAuthToken,
-        dio: Dio(),
-      ),
+      create: (context) => CaseDiscussionRepository(baseUrl: baseUrl, getAuthToken: getAuthToken, dio: Dio()),
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) => DiscussionListBloc(
-              repository: context.read<CaseDiscussionRepository>(),
-            ),
-          ),
-          BlocProvider(
-            create: (context) => DiscussionDetailBloc(
-              repository: context.read<CaseDiscussionRepository>(),
-            ),
-          ),
-          BlocProvider(
-            create: (context) => CreateDiscussionBloc(
-              repository: context.read<CaseDiscussionRepository>(),
-            ),
-          ),
+          BlocProvider(create: (context) => DiscussionListBloc(repository: context.read<CaseDiscussionRepository>())),
+          BlocProvider(create: (context) => DiscussionDetailBloc(repository: context.read<CaseDiscussionRepository>())),
+          BlocProvider(create: (context) => CreateDiscussionBloc(repository: context.read<CaseDiscussionRepository>())),
         ],
         child: const DiscussionListScreen(),
       ),

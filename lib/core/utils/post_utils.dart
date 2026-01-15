@@ -20,7 +20,8 @@ class PostUtils {
     Uri url = Uri.parse(urlString);
 
     // Show a confirmation dialog before launching the URL
-    bool shouldLaunch = await showDialog(
+    bool shouldLaunch =
+        await showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
@@ -30,15 +31,13 @@ class PostUtils {
                 TextButton(
                   child: const Text('Cancel'),
                   onPressed: () {
-                    Navigator.of(context)
-                        .pop(false); // Return false to shouldLaunch
+                    Navigator.of(context).pop(false); // Return false to shouldLaunch
                   },
                 ),
                 TextButton(
                   child: const Text('Open'),
                   onPressed: () {
-                    Navigator.of(context)
-                        .pop(true); // Return true to shouldLaunch
+                    Navigator.of(context).pop(true); // Return true to shouldLaunch
                   },
                 ),
               ],
@@ -50,12 +49,7 @@ class PostUtils {
     if (shouldLaunch) {
       await launchUrl(url);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Leaving the app canceled.'),
-          backgroundColor: Colors.blue,
-        ),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Leaving the app canceled.'), backgroundColor: Colors.blue));
     }
   }
 

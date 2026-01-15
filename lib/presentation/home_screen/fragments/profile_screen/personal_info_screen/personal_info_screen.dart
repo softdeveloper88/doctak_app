@@ -17,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class PersonalInfoScreen extends StatefulWidget {
   final ProfileBloc profileBloc;
 
-  PersonalInfoScreen({required this.profileBloc, super.key});
+  const PersonalInfoScreen({required this.profileBloc, super.key});
 
   @override
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
@@ -33,15 +33,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
     super.initState();
   }
 
-  Countries findModelByNameOrDefault(
-    List<Countries> countries,
-    String name,
-    Countries defaultCountry,
-  ) {
-    return countries.firstWhere(
-      (country) => country.countryName?.toLowerCase() == name.toLowerCase(),
-      orElse: () => defaultCountry,
-    );
+  Countries findModelByNameOrDefault(List<Countries> countries, String name, Countries defaultCountry) {
+    return countries.firstWhere((country) => country.countryName?.toLowerCase() == name.toLowerCase(), orElse: () => defaultCountry);
   }
 
   @override
@@ -74,12 +67,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
             child: Column(
               children: [
                 // Header card
-                if (!isEditModeMap)
-                  OneUIInfoBanner(
-                    message: translation(context).msg_personal_info_desc,
-                    icon: Icons.info_outline,
-                    accentColor: theme.primary,
-                  ),
+                if (!isEditModeMap) OneUIInfoBanner(message: translation(context).msg_personal_info_desc, icon: Icons.info_outline, accentColor: theme.primary),
 
                 // Main info card
                 OneUIProfileSection(
@@ -95,20 +83,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         index: 0,
                         icon: Icons.person,
                         label: translation(context).lbl_first_name,
-                        value:
-                            widget.profileBloc.userProfile?.user?.firstName ??
-                            '',
-                        onSave: (value) =>
-                            widget.profileBloc.userProfile?.user?.firstName =
-                                value,
+                        value: widget.profileBloc.userProfile?.user?.firstName ?? '',
+                        onSave: (value) => widget.profileBloc.userProfile?.user?.firstName = value,
                       ),
-                      if (!isEditModeMap)
-                        Divider(
-                          color: theme.divider,
-                          thickness: 1,
-                          indent: 10,
-                          endIndent: 10,
-                        ),
+                      if (!isEditModeMap) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
 
                       // Last name field
                       TextFieldEditWidget(
@@ -116,20 +94,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         index: 0,
                         icon: Icons.person,
                         label: translation(context).lbl_last_name,
-                        value:
-                            widget.profileBloc.userProfile?.user?.lastName ??
-                            '',
-                        onSave: (value) =>
-                            widget.profileBloc.userProfile?.user?.lastName =
-                                value,
+                        value: widget.profileBloc.userProfile?.user?.lastName ?? '',
+                        onSave: (value) => widget.profileBloc.userProfile?.user?.lastName = value,
                       ),
-                      if (!isEditModeMap)
-                        Divider(
-                          color: theme.divider,
-                          thickness: 1,
-                          indent: 10,
-                          endIndent: 10,
-                        ),
+                      if (!isEditModeMap) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
 
                       // Phone number field - Only visible to profile owner
                       if (widget.profileBloc.isMe)
@@ -138,19 +106,10 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           index: 0,
                           icon: Icons.phone,
                           label: translation(context).lbl_phone_number,
-                          value:
-                              widget.profileBloc.userProfile?.user?.phone ?? '',
-                          onSave: (value) =>
-                              widget.profileBloc.userProfile?.user?.phone =
-                                  value,
+                          value: widget.profileBloc.userProfile?.user?.phone ?? '',
+                          onSave: (value) => widget.profileBloc.userProfile?.user?.phone = value,
                         ),
-                      if (!isEditModeMap && widget.profileBloc.isMe)
-                        Divider(
-                          color: theme.divider,
-                          thickness: 1,
-                          indent: 10,
-                          endIndent: 10,
-                        ),
+                      if (!isEditModeMap && widget.profileBloc.isMe) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
 
                       // Date of birth field - Only visible to profile owner
                       if (widget.profileBloc.isMe)
@@ -158,8 +117,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           isEditModeMap: isEditModeMap,
                           index: 0,
                           label: translation(context).lbl_date_of_birth,
-                          value:
-                              widget.profileBloc.userProfile?.user?.dob ?? '',
+                          value: widget.profileBloc.userProfile?.user?.dob ?? '',
                           onSave: (value) {
                             setState(() {
                               widget.profileBloc.userProfile?.user?.dob = value;
@@ -187,12 +145,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         iconColor: theme.success,
                         index: 0,
                         label: translation(context).lbl_license_no,
-                        value:
-                            widget.profileBloc.userProfile?.user?.licenseNo ??
-                            '',
-                        onSave: (value) =>
-                            widget.profileBloc.userProfile?.user?.licenseNo =
-                                value,
+                        value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
+                        onSave: (value) => widget.profileBloc.userProfile?.user?.licenseNo = value,
                       ),
                     ],
                   ),
@@ -201,12 +155,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                 const SizedBox(height: 8),
 
                 // Location info card
-                OneUIProfileSection(
-                  title: translation(context).lbl_location_info,
-                  icon: Icons.location_on_rounded,
-                  iconColor: theme.warning,
-                  child: _buildLocationFields(theme),
-                ),
+                OneUIProfileSection(title: translation(context).lbl_location_info, icon: Icons.location_on_rounded, iconColor: theme.warning, child: _buildLocationFields(theme)),
 
                 const SizedBox(height: 24),
 
@@ -224,25 +173,15 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                         _formKey.currentState!.save();
                       }
 
-                      widget.profileBloc.add(
-                        UpdateProfileEvent(
-                          updateProfileSection: 1,
-                          userProfile: widget.profileBloc.userProfile,
-                          userProfilePrivacyModel: UserProfilePrivacyModel(),
-                        ),
-                      );
+                      widget.profileBloc.add(UpdateProfileEvent(updateProfileSection: 1, userProfile: widget.profileBloc.userProfile, userProfilePrivacyModel: UserProfilePrivacyModel()));
 
                       // Show success message
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(
-                            translation(context).msg_profile_updated,
-                          ),
+                          content: Text(translation(context).msg_profile_updated),
                           backgroundColor: theme.success,
                           behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                       );
                     },
@@ -261,22 +200,9 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       children: [
         // Country and State in view mode
         if (!isEditModeMap) ...[
-          OneUIProfileInfoRow(
-            icon: Icons.public,
-            label: translation(context).lbl_country,
-            value: widget.profileBloc.userProfile?.user?.country ?? '',
-          ),
-          Divider(
-            color: theme.divider,
-            thickness: 1,
-            indent: 10,
-            endIndent: 10,
-          ),
-          OneUIProfileInfoRow(
-            icon: Icons.location_city,
-            label: translation(context).lbl_state,
-            value: widget.profileBloc.userProfile?.user?.state ?? '',
-          ),
+          OneUIProfileInfoRow(icon: Icons.public, label: translation(context).lbl_country, value: widget.profileBloc.userProfile?.user?.country ?? ''),
+          Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
+          OneUIProfileInfoRow(icon: Icons.location_city, label: translation(context).lbl_state, value: widget.profileBloc.userProfile?.user?.state ?? ''),
         ],
 
         // Country and State dropdown fields in edit mode
@@ -289,12 +215,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Country dropdown
-                    Text(
-                      translation(context).lbl_country,
-                      style: theme.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    Text(translation(context).lbl_country, style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
@@ -315,42 +236,23 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             Text(item.flag ?? ''),
                           ],
                         ),
-                        selectedItemBuilder: (context) =>
-                            state.firstDropdownValues.map((item) {
-                              return Container(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  item.countryName ?? '',
-                                  style: TextStyle(
-                                    color: theme.textPrimary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                        items: state.firstDropdownValues,
-                        value: findModelByNameOrDefault(
-                          state.firstDropdownValues,
-                          state.selectedFirstDropdownValue ?? '',
-                          state.firstDropdownValues.first,
-                        ),
-                        width: double.infinity,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        onChanged: (newValue) {
-                          widget.profileBloc.country =
-                              newValue?.countryName ?? '';
-                          widget.profileBloc.userProfile?.user?.country =
-                              newValue?.countryName ?? '';
-                          widget.profileBloc.add(
-                            UpdateSecondDropdownValues(
-                              newValue?.countryName ?? "",
+                        selectedItemBuilder: (context) => state.firstDropdownValues.map((item) {
+                          return Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              item.countryName ?? '',
+                              style: TextStyle(color: theme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
                             ),
                           );
+                        }).toList(),
+                        items: state.firstDropdownValues,
+                        value: findModelByNameOrDefault(state.firstDropdownValues, state.selectedFirstDropdownValue ?? '', state.firstDropdownValues.first),
+                        width: double.infinity,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        onChanged: (newValue) {
+                          widget.profileBloc.country = newValue?.countryName ?? '';
+                          widget.profileBloc.userProfile?.user?.country = newValue?.countryName ?? '';
+                          widget.profileBloc.add(UpdateSecondDropdownValues(newValue?.countryName ?? ""));
                         },
                       ),
                     ),
@@ -358,12 +260,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     const SizedBox(height: 16),
 
                     // State dropdown
-                    Text(
-                      translation(context).lbl_state,
-                      style: theme.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    Text(translation(context).lbl_state, style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
                     const SizedBox(height: 8),
                     Container(
                       decoration: BoxDecoration(
@@ -376,37 +273,23 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           style: TextStyle(color: theme.textPrimary),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        selectedItemBuilder: (context) =>
-                            state.secondDropdownValues.map((item) {
-                              return Container(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  item ?? '',
-                                  style: TextStyle(
-                                    color: theme.textPrimary,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
+                        selectedItemBuilder: (context) => state.secondDropdownValues.map((item) {
+                          return Container(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              item ?? '',
+                              style: TextStyle(color: theme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
+                            ),
+                          );
+                        }).toList(),
                         items: state.secondDropdownValues,
                         value: state.selectedSecondDropdownValue,
                         width: double.infinity,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         onChanged: (String? newValue) {
                           widget.profileBloc.stateName = newValue!;
-                          widget.profileBloc.userProfile?.user?.state =
-                              newValue;
-                          widget.profileBloc.add(
-                            UpdateSpecialtyDropdownValue(
-                              state.selectedSecondDropdownValue,
-                            ),
-                          );
+                          widget.profileBloc.userProfile?.user?.state = newValue;
+                          widget.profileBloc.add(UpdateSpecialtyDropdownValue(state.selectedSecondDropdownValue));
                         },
                       ),
                     ),
@@ -414,12 +297,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                     // Specialty dropdown for doctors
                     if (AppData.userType == "doctor") ...[
                       const SizedBox(height: 16),
-                      Text(
-                        translation(context).lbl_specialty,
-                        style: theme.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      Text(translation(context).lbl_specialty, style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
@@ -432,33 +310,22 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             style: TextStyle(color: theme.textPrimary),
                             overflow: TextOverflow.ellipsis,
                           ),
-                          selectedItemBuilder: (context) =>
-                              state.specialtyDropdownValue.map((item) {
-                                return Container(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    item ?? '',
-                                    style: TextStyle(
-                                      color: theme.textPrimary,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                          selectedItemBuilder: (context) => state.specialtyDropdownValue.map((item) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                item ?? '',
+                                style: TextStyle(color: theme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
+                              ),
+                            );
+                          }).toList(),
                           items: state.specialtyDropdownValue,
                           value: state.selectedSpecialtyDropdownValue,
                           width: double.infinity,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           onChanged: (String? newValue) {
                             widget.profileBloc.specialtyName = newValue!;
-                            widget.profileBloc.add(
-                              UpdateSpecialtyDropdownValue(newValue),
-                            );
+                            widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
                           },
                         ),
                       ),

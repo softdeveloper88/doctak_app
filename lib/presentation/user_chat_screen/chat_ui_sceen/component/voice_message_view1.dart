@@ -110,7 +110,7 @@
 //               child: Container(
 //                 width: controller.noiseWidth,
 //                 height: 6,
-//                 color: notActiveSliderColor ?? backgroundColor.withOpacity(.4),
+//                 color: notActiveSliderColor ?? backgroundColor.withValues(alpha: .4),
 //               ),
 //             );
 //           },

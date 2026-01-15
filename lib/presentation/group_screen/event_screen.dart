@@ -10,8 +10,7 @@ class EventsScreen extends StatefulWidget {
   _EventsScreenState createState() => _EventsScreenState();
 }
 
-class _EventsScreenState extends State<EventsScreen>
-    with SingleTickerProviderStateMixin {
+class _EventsScreenState extends State<EventsScreen> with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
   @override
@@ -33,10 +32,7 @@ class _EventsScreenState extends State<EventsScreen>
       children: [
         Expanded(
           child: Tab(
-            child: Text(
-              tabName,
-              style: TextStyle(color: svGetBodyColor()),
-            ),
+            child: Text(tabName, style: TextStyle(color: svGetBodyColor())),
           ),
         ),
         if (tabName == 'Upcoming Event')
@@ -44,11 +40,10 @@ class _EventsScreenState extends State<EventsScreen>
             height: 20,
             width: 1,
             decoration: BoxDecoration(
-                border: Border(
-                    right: BorderSide(
-                        color: svGetBodyColor(),
-                        width: 1,
-                        style: BorderStyle.solid))),
+              border: Border(
+                right: BorderSide(color: svGetBodyColor(), width: 1, style: BorderStyle.solid),
+              ),
+            ),
           ),
       ],
     );
@@ -65,10 +60,7 @@ class _EventsScreenState extends State<EventsScreen>
           onPressed: () => Navigator.of(context).pop(),
         ),
         centerTitle: false,
-        title: Text(
-          'Events',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
+        title: Text('Events', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
       ),
       body: Column(
         children: [
@@ -89,21 +81,19 @@ class _EventsScreenState extends State<EventsScreen>
               indicatorSize: TabBarIndicatorSize.tab,
               labelPadding: const EdgeInsets.all(4),
               indicatorColor: SVAppColorPrimary,
-              tabs: [
-                _individualTab('Upcoming Event'),
-                _individualTab('Past Event'),
-              ],
+              tabs: [_individualTab('Upcoming Event'), _individualTab('Past Event')],
             ),
           ),
           Expanded(
             child: TabBarView(
-                controller: _tabController,
-                physics: const NeverScrollableScrollPhysics(),
-                children: const [
-                  UpcomingEventsTab(),
-                  Center(child: Text('Past Events')),
-                  //
-                ]),
+              controller: _tabController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: const [
+                UpcomingEventsTab(),
+                Center(child: Text('Past Events')),
+                //
+              ],
+            ),
           ),
           // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget(),
           // Container(
@@ -142,13 +132,7 @@ class UpcomingEventsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(8.0),
-      children: const [
-        EventCard(),
-        EventCard(),
-      ],
-    );
+    return ListView(padding: const EdgeInsets.all(8.0), children: const [EventCard(), EventCard()]);
   }
 }
 
@@ -166,16 +150,9 @@ class EventCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: CustomImageView(
-                  imagePath: 'assets/images/img_event.png',
-                  fit: BoxFit.cover,
-                ),
+                child: CustomImageView(imagePath: 'assets/images/img_event.png', fit: BoxFit.cover),
               ), // Replace with your image asset
-              const Positioned(
-                top: 8.0,
-                right: 8.0,
-                child: Icon(Icons.favorite_border, color: Colors.black),
-              ),
+              const Positioned(top: 8.0, right: 8.0, child: Icon(Icons.favorite_border, color: Colors.black)),
             ],
           ),
           const Padding(
@@ -183,24 +160,18 @@ class EventCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Global Medical Conference 2024',
-                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                ),
+                Text('Global Medical Conference 2024', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8.0),
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundImage: AssetImage(
-                          'assets/images/img_avtar.png'), // Replace with your avatar asset
+                      backgroundImage: AssetImage('assets/images/img_avtar.png'), // Replace with your avatar asset
                     ),
                     CircleAvatar(
-                      backgroundImage: AssetImage(
-                          'assets/images/img_avtar.png'), // Replace with your avatar asset
+                      backgroundImage: AssetImage('assets/images/img_avtar.png'), // Replace with your avatar asset
                     ),
                     CircleAvatar(
-                      backgroundImage: AssetImage(
-                          'assets/images/img_avtar.png'), // Replace with your avatar asset
+                      backgroundImage: AssetImage('assets/images/img_avtar.png'), // Replace with your avatar asset
                     ),
                     SizedBox(width: 8.0),
                     Text('50 Participants'),
@@ -209,21 +180,9 @@ class EventCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: 8.0),
-                Row(
-                  children: [
-                    Icon(Icons.calendar_today, size: 16.0),
-                    SizedBox(width: 4.0),
-                    Text('July 15, 2024, 9:00 AM'),
-                  ],
-                ),
+                Row(children: [Icon(Icons.calendar_today, size: 16.0), SizedBox(width: 4.0), Text('July 15, 2024, 9:00 AM')]),
                 SizedBox(height: 8.0),
-                Row(
-                  children: [
-                    Icon(Icons.location_on, size: 16.0),
-                    SizedBox(width: 4.0),
-                    Text('Boston Medical Convention Center'),
-                  ],
-                ),
+                Row(children: [Icon(Icons.location_on, size: 16.0), SizedBox(width: 4.0), Text('Boston Medical Convention Center')]),
               ],
             ),
           ),

@@ -14,7 +14,7 @@ class AudioPlayerManager {
     if (_currentPlayer != null && _currentAudioUrl != audioUrl) {
       _currentPlayer!.stop();
     }
-    
+
     _currentPlayer = player;
     _currentAudioUrl = audioUrl;
   }

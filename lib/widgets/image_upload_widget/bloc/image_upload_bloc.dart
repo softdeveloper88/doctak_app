@@ -4,17 +4,14 @@ import 'package:image_picker/image_picker.dart';
 import 'image_upload_event.dart';
 import 'image_upload_state.dart';
 
-class ImageUploadBloc
-    extends Bloc<ImageUploadEvent, ImageUploadState> {
-
+class ImageUploadBloc extends Bloc<ImageUploadEvent, ImageUploadState> {
   List<XFile> imagefiles = [];
 
   ImageUploadBloc() : super(FileInitialState()) {
-
     on<SelectedFiles>(_SelectedFile);
   }
 
-  _SelectedFile(SelectedFiles event, Emitter<ImageUploadState> emit) async {
+  Future<void> _SelectedFile(SelectedFiles event, Emitter<ImageUploadState> emit) async {
     if (event.isRemove) {
       print('BLoC: Removing image ${event.pickedfiles.path}');
       imagefiles.remove(event.pickedfiles);

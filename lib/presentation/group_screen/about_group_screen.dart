@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class AboutGroupScreen extends StatelessWidget {
   AboutGroupScreen(this.groupBloc, {super.key});
   GroupBloc? groupBloc;
-  decodeDataFromJson(data) {
+  String decodeDataFromJson(data) {
     List<dynamic> decodedJson = jsonDecode(data);
 
     var values = decodedJson.map((item) => item['value'] as String).toList();
@@ -36,9 +36,7 @@ class AboutGroupScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: CachedNetworkImageProvider(
-                      groupBloc?.groupDetailsModel?.group?.logo ??
-                          ''), // Add your image asset
+                  backgroundImage: CachedNetworkImageProvider(groupBloc?.groupDetailsModel?.group?.logo ?? ''), // Add your image asset
                 ),
                 const SizedBox(width: 16),
                 Column(
@@ -46,66 +44,35 @@ class AboutGroupScreen extends StatelessWidget {
                   children: [
                     Text(
                       groupBloc?.groupAboutModel?.group?.name ?? '',
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    Text(
-                      '${groupBloc?.groupDetailsModel?.group?.privacySetting ?? ''} Group · ${groupBloc?.groupDetailsModel?.totalMembers ?? ''} members',
-                      style: TextStyle(color: Colors.grey),
-                    ),
+                    Text('${groupBloc?.groupDetailsModel?.group?.privacySetting ?? ''} Group · ${groupBloc?.groupDetailsModel?.totalMembers ?? ''} members', style: TextStyle(color: Colors.grey)),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              groupBloc?.groupAboutModel?.group?.description ?? "",
-            ),
+            Text(groupBloc?.groupAboutModel?.group?.description ?? ""),
             const SizedBox(height: 16),
-            buildListTile("assets/images/img_speciality.png", 'Specialty Focus',
-                '${decodeDataFromJson(groupBloc?.groupAboutModel?.group?.specialtyFocus)}'),
-            buildListTile('assets/images/img_privacy.png', 'Privacy Setting',
-                '${groupBloc?.groupAboutModel?.group?.privacySetting}'),
-            buildListTile('assets/images/img_tags.png', 'Tags',
-                '${decodeDataFromJson(groupBloc?.groupAboutModel?.group?.tags)}'),
-            buildListTile('assets/images/img_location.png', 'Location',
-                '${groupBloc?.groupAboutModel?.group?.location}'),
-            buildListTile('assets/images/img_interest.png', 'Interest',
-                '${decodeDataFromJson(groupBloc?.groupAboutModel?.group?.interest)}'),
+            buildListTile("assets/images/img_speciality.png", 'Specialty Focus', decodeDataFromJson(groupBloc?.groupAboutModel?.group?.specialtyFocus)),
+            buildListTile('assets/images/img_privacy.png', 'Privacy Setting', '${groupBloc?.groupAboutModel?.group?.privacySetting}'),
+            buildListTile('assets/images/img_tags.png', 'Tags', decodeDataFromJson(groupBloc?.groupAboutModel?.group?.tags)),
+            buildListTile('assets/images/img_location.png', 'Location', '${groupBloc?.groupAboutModel?.group?.location}'),
+            buildListTile('assets/images/img_interest.png', 'Interest', decodeDataFromJson(groupBloc?.groupAboutModel?.group?.interest)),
             ListTile(
               leading: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                      color: svGetBgColor(),
-                      borderRadius: BorderRadius.circular(100)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(
-                      'assets/images/img_rules.png',
-                      height: 15,
-                      width: 15,
-                    ),
-                  )),
-              title: const Text('Rules'),
-              subtitle: Text(
-                groupBloc?.groupAboutModel?.group?.rules ?? '',
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(color: svGetBgColor(), borderRadius: BorderRadius.circular(100)),
+                child: Padding(padding: const EdgeInsets.all(8.0), child: Image.asset('assets/images/img_rules.png', height: 15, width: 15)),
               ),
+              title: const Text('Rules'),
+              subtitle: Text(groupBloc?.groupAboutModel?.group?.rules ?? ''),
             ),
-            buildListTile('assets/images/img_group.png', 'Join Request',
-                groupBloc?.groupAboutModel?.group?.joinRequest ?? ''),
-            buildListTile('assets/images/img_status.png', 'Status',
-                groupBloc?.groupAboutModel?.group?.status ?? ''),
-            buildListTile(
-                'assets/images/img_language.png',
-                'Language',
-                decodeDataFromJson(
-                    groupBloc?.groupAboutModel?.group?.language)),
-            buildListTile('assets/images/img_visability.png', 'Visibility',
-                groupBloc?.groupAboutModel?.group?.visibility ?? ''),
+            buildListTile('assets/images/img_group.png', 'Join Request', groupBloc?.groupAboutModel?.group?.joinRequest ?? ''),
+            buildListTile('assets/images/img_status.png', 'Status', groupBloc?.groupAboutModel?.group?.status ?? ''),
+            buildListTile('assets/images/img_language.png', 'Language', decodeDataFromJson(groupBloc?.groupAboutModel?.group?.language)),
+            buildListTile('assets/images/img_visability.png', 'Visibility', groupBloc?.groupAboutModel?.group?.visibility ?? ''),
           ],
         ),
       ),
@@ -115,18 +82,11 @@ class AboutGroupScreen extends StatelessWidget {
   Widget buildListTile(String icon, String title, String subtitle) {
     return ListTile(
       leading: Container(
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-              color: svGetBgColor(), borderRadius: BorderRadius.circular(100)),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset(
-              icon,
-              height: 15,
-              width: 15,
-            ),
-          )),
+        height: 40,
+        width: 40,
+        decoration: BoxDecoration(color: svGetBgColor(), borderRadius: BorderRadius.circular(100)),
+        child: Padding(padding: const EdgeInsets.all(8.0), child: Image.asset(icon, height: 15, width: 15)),
+      ),
       title: Text(title),
       subtitle: Text(subtitle),
     );

@@ -22,7 +22,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool automaticallyImplyLeading;
 
   const DoctakAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.titleIcon,
     this.actions,
@@ -39,20 +39,17 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleFontWeight = FontWeight.w600,
     this.titleFontFamily = 'Poppins',
     this.automaticallyImplyLeading = true,
-  }) : super(key: key);
+  });
 
   @override
-  Size get preferredSize =>
-      Size.fromHeight(toolbarHeight + (bottom?.preferredSize.height ?? 0.0));
+  Size get preferredSize => Size.fromHeight(toolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
     return Container(
-      decoration: theme.appBarDecoration.copyWith(
-        color: backgroundColor ?? theme.appBarBackground,
-      ),
+      decoration: theme.appBarDecoration.copyWith(color: backgroundColor ?? theme.appBarBackground),
       child: AppBar(
         toolbarHeight: toolbarHeight,
         backgroundColor: Colors.transparent,
@@ -61,10 +58,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
         elevation: 0,
         centerTitle: false,
         automaticallyImplyLeading: automaticallyImplyLeading,
-        leading: automaticallyImplyLeading
-            ? customLeading ??
-                  (showBackButton ? _buildBackButton(context, theme) : null)
-            : null,
+        leading: automaticallyImplyLeading ? customLeading ?? (showBackButton ? _buildBackButton(context, theme) : null) : null,
         title: _buildTitle(context, theme),
         actions: actions,
         bottom: bottom,
@@ -103,13 +97,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
           Flexible(
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: titleFontSize,
-                fontWeight: titleFontWeight,
-                fontFamily: titleFontFamily,
-                color: effectiveTitleColor,
-                letterSpacing: -0.2,
-              ),
+              style: TextStyle(fontSize: titleFontSize, fontWeight: titleFontWeight, fontFamily: titleFontFamily, color: effectiveTitleColor, letterSpacing: -0.2),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -120,13 +108,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return Text(
       title,
-      style: TextStyle(
-        fontSize: titleFontSize,
-        fontWeight: titleFontWeight,
-        fontFamily: titleFontFamily,
-        color: effectiveTitleColor,
-        letterSpacing: -0.2,
-      ),
+      style: TextStyle(fontSize: titleFontSize, fontWeight: titleFontWeight, fontFamily: titleFontFamily, color: effectiveTitleColor, letterSpacing: -0.2),
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
     );
@@ -157,7 +139,7 @@ class DoctakSliverAppBar extends StatelessWidget {
   final double? collapsedHeight;
 
   const DoctakSliverAppBar({
-    Key? key,
+    super.key,
     required this.title,
     this.titleIcon,
     this.actions,
@@ -178,7 +160,7 @@ class DoctakSliverAppBar extends StatelessWidget {
     this.titleFontWeight = FontWeight.w600,
     this.titleFontFamily = 'Poppins',
     this.collapsedHeight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -195,9 +177,7 @@ class DoctakSliverAppBar extends StatelessWidget {
       iconTheme: IconThemeData(color: theme.iconColor),
       elevation: elevation,
       centerTitle: centerTitle,
-      leading:
-          customLeading ??
-          (showBackButton ? _buildBackButton(context, theme) : null),
+      leading: customLeading ?? (showBackButton ? _buildBackButton(context, theme) : null),
       title: _buildTitle(context, theme),
       actions: actions,
       bottom: bottom,
@@ -236,13 +216,7 @@ class DoctakSliverAppBar extends StatelessWidget {
           Flexible(
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: titleFontSize,
-                fontWeight: titleFontWeight,
-                fontFamily: titleFontFamily,
-                color: effectiveTitleColor,
-                letterSpacing: -0.2,
-              ),
+              style: TextStyle(fontSize: titleFontSize, fontWeight: titleFontWeight, fontFamily: titleFontFamily, color: effectiveTitleColor, letterSpacing: -0.2),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -253,13 +227,7 @@ class DoctakSliverAppBar extends StatelessWidget {
 
     return Text(
       title,
-      style: TextStyle(
-        fontSize: titleFontSize,
-        fontWeight: titleFontWeight,
-        fontFamily: titleFontFamily,
-        color: effectiveTitleColor,
-        letterSpacing: -0.2,
-      ),
+      style: TextStyle(fontSize: titleFontSize, fontWeight: titleFontWeight, fontFamily: titleFontFamily, color: effectiveTitleColor, letterSpacing: -0.2),
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
     );

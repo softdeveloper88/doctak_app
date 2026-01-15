@@ -16,20 +16,12 @@ class SecureStorageService {
 
   SecureStorageService._internal() {
     // Configure Android options for better security and compatibility
-    AndroidOptions androidOptions = const AndroidOptions(
-      encryptedSharedPreferences: true,
-      resetOnError: true,
-    );
+    AndroidOptions androidOptions = const AndroidOptions(encryptedSharedPreferences: true, resetOnError: true);
 
     // Configure iOS options
-    IOSOptions iosOptions = const IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
-    );
+    IOSOptions iosOptions = const IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device);
 
-    _storage = FlutterSecureStorage(
-      aOptions: androidOptions,
-      iOptions: iosOptions,
-    );
+    _storage = FlutterSecureStorage(aOptions: androidOptions, iOptions: iosOptions);
   }
 
   /// Get the singleton instance of SecureStorageService
@@ -59,8 +51,7 @@ class SecureStorageService {
       // If we get a bad base-64 error, storage is corrupted
       // We need to recreate the storage instance with different options
       // to force a clean slate
-      if (e.toString().contains('bad base-64') ||
-          e.toString().contains('Exception encountered')) {
+      if (e.toString().contains('bad base-64') || e.toString().contains('Exception encountered')) {
         debugPrint('Detected corrupted storage, recreating with resetOnError');
 
         try {
@@ -70,14 +61,9 @@ class SecureStorageService {
             resetOnError: true, // This will delete corrupted data
           );
 
-          IOSOptions iosOptions = const IOSOptions(
-            accessibility: KeychainAccessibility.first_unlock_this_device,
-          );
+          IOSOptions iosOptions = const IOSOptions(accessibility: KeychainAccessibility.first_unlock_this_device);
 
-          _storage = FlutterSecureStorage(
-            aOptions: androidOptions,
-            iOptions: iosOptions,
-          );
+          _storage = FlutterSecureStorage(aOptions: androidOptions, iOptions: iosOptions);
 
           // Try one more simple operation to trigger reset
           await _storage.write(key: '_init_test', value: 'ok');
@@ -269,10 +255,8 @@ Future<SecureStorageService> getSecureStorageWithRetry({
       debugPrint('SecureStorage attempt $attempt/$maxRetries failed: $e');
 
       // Don't retry on corruption errors - the initialize method handles them
-      if (e.toString().contains('bad base-64') ||
-          e.toString().contains('Exception encountered')) {
-        debugPrint(
-            'Storage corruption detected, initialize() will handle recovery');
+      if (e.toString().contains('bad base-64') || e.toString().contains('Exception encountered')) {
+        debugPrint('Storage corruption detected, initialize() will handle recovery');
         return storage; // Return even if initialization had issues
       }
 
@@ -286,7 +270,6 @@ Future<SecureStorageService> getSecureStorageWithRetry({
   }
 
   // All retries exhausted - return storage anyway to prevent app crash
-  debugPrint(
-      'SecureStorage failed after $maxRetries attempts, returning instance anyway');
+  debugPrint('SecureStorage failed after $maxRetries attempts, returning instance anyway');
   return storage;
 }

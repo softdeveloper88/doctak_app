@@ -10,26 +10,16 @@ class CustomOutlinedButton extends BaseButton {
     this.leftIcon,
     this.rightIcon,
     this.label,
-    VoidCallback? onPressed,
-    ButtonStyle? buttonStyle,
-    TextStyle? buttonTextStyle,
-    bool? isDisabled,
-    Alignment? alignment,
-    double? height,
-    double? width,
-    EdgeInsets? margin,
-    required String text,
-  }) : super(
-         text: text,
-         onPressed: onPressed,
-         buttonStyle: buttonStyle,
-         isDisabled: isDisabled,
-         buttonTextStyle: buttonTextStyle,
-         height: height,
-         alignment: alignment,
-         width: width,
-         margin: margin,
-       );
+    super.onPressed,
+    super.buttonStyle,
+    super.buttonTextStyle,
+    super.isDisabled,
+    super.alignment,
+    super.height,
+    super.width,
+    super.margin,
+    required super.text,
+  });
 
   final BoxDecoration? decoration;
   final Widget? leftIcon;
@@ -40,12 +30,7 @@ class CustomOutlinedButton extends BaseButton {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return alignment != null
-        ? Align(
-            alignment: alignment ?? Alignment.center,
-            child: _buildButton(context, theme),
-          )
-        : _buildButton(context, theme);
+    return alignment != null ? Align(alignment: alignment ?? Alignment.center, child: _buildButton(context, theme)) : _buildButton(context, theme);
   }
 
   Widget _buildButton(BuildContext context, OneUITheme theme) {
@@ -60,9 +45,7 @@ class CustomOutlinedButton extends BaseButton {
             OutlinedButton.styleFrom(
               foregroundColor: theme.primary,
               side: BorderSide(color: theme.primary, width: 1.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(26),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26)),
               padding: const EdgeInsets.symmetric(horizontal: 24),
             ),
         onPressed: isDisabled ?? false ? null : onPressed ?? () {},
@@ -73,13 +56,7 @@ class CustomOutlinedButton extends BaseButton {
             if (leftIcon != null) ...[leftIcon!, const SizedBox(width: 8)],
             Text(
               text,
-              style:
-                  buttonTextStyle ??
-                  TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: theme.primary,
-                  ),
+              style: buttonTextStyle ?? TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.primary),
             ),
             if (rightIcon != null) ...[const SizedBox(width: 8), rightIcon!],
           ],

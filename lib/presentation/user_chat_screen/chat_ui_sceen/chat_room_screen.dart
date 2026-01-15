@@ -4,17 +4,11 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:chewie/chewie.dart';
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
-import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/component/audio_recorder_widget.dart';
-import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -25,25 +19,16 @@ import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_5.dart';
 import 'package:record/record.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../calling_module/screens/call_screen.dart';
 import '../../calling_module/utils/start_outgoing_call.dart';
-import '../../home_screen/home/screens/meeting_screen/video_api.dart';
-import 'call_loading_screen.dart';
-import 'component/chat_bubble.dart';
 import 'component/optimized_message_list.dart';
-import 'component/chat_input_field.dart';
-import 'component/whatsapp_voice_recorder.dart';
 import 'component/enhanced_chat_input_field.dart';
 import 'component/animated_voice_recorder.dart';
 import 'component/audio_cache_manager.dart';
@@ -56,20 +41,13 @@ class ChatRoomScreen extends StatefulWidget {
   final String id;
   final String roomId;
 
-  ChatRoomScreen({
-    super.key,
-    required this.username,
-    required this.profilePic,
-    required this.id,
-    required this.roomId,
-  });
+  const ChatRoomScreen({super.key, required this.username, required this.profilePic, required this.id, required this.roomId});
 
   @override
   _ChatRoomScreenState createState() => _ChatRoomScreenState();
 }
 
-class _ChatRoomScreenState extends State<ChatRoomScreen>
-    with TickerProviderStateMixin {
+class _ChatRoomScreenState extends State<ChatRoomScreen> with TickerProviderStateMixin {
   // late UserMessagesModel userMessagesList;
   // late List<Message> messagesList = []; // Initialize it here with an empty list
   final ScrollController _scrollController = ScrollController();
@@ -84,7 +62,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   // AgoraRtmChannel? _channel;
   // LocalInvitation? _localInvitation;
   // RemoteInvitation? _remoteInvitation;
-  bool _isLogin = false;
+  final bool _isLogin = false;
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
   late PusherChannel clientListenChannel;
   late PusherChannel clientSendChannel;
@@ -111,9 +89,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   @override
   void dispose() {
     // Ensure we don't leak global pointer routes.
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(
-      _handleGlobalPointerEvent,
-    );
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
     _timer?.cancel();
     _ampTimer?.cancel();
     _timerChat?.cancel();
@@ -137,23 +113,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     super.initState();
     // Capture finger release globally while recording.
     // This fixes cases where the mic button widget is replaced before it receives onLongPressEnd.
-    GestureBinding.instance.pointerRouter.addGlobalRoute(
-      _handleGlobalPointerEvent,
-    );
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
     setStatusBarColor(svGetScaffoldColor());
     _scrollController.addListener(_checkScrollPosition);
     _initRecorder();
     // Handle completion
     // seenSenderMessage(1);
     _isRecording = false;
-    chatBloc.add(
-      LoadRoomMessageEvent(
-        page: 1,
-        userId: widget.id,
-        roomId: widget.roomId,
-        isFirstLoading: isDataLoaded,
-      ),
-    );
+    chatBloc.add(LoadRoomMessageEvent(page: 1, userId: widget.id, roomId: widget.roomId, isFirstLoading: isDataLoaded));
     chatBloc.add(ChatReadStatusEvent(userId: widget.id, roomId: widget.roomId));
     ConnectPusher();
     print("my id ${AppData.logInUserId}");
@@ -199,8 +166,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         isBottom = true;
         print('top');
       });
-    } else if (_scrollController.position.pixels ==
-        _scrollController.position.maxScrollExtent) {
+    } else if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
       setState(() {
         isBottom = false;
         print('bottom');
@@ -227,17 +193,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       }
 
       final tempDir = await getTemporaryDirectory();
-      _recordingPath =
-          '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      _recordingPath = '${tempDir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
 
-      await _audioRecorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-        ),
-        path: _recordingPath!,
-      );
+      await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000, sampleRate: 44100), path: _recordingPath!);
 
       setState(() {
         _isRecording = true;
@@ -257,14 +215,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     debugPrint(_recordingPath);
     setState(() => _isRecording = false);
     chatBloc.add(
-      SendMessageEvent(
-        userId: AppData.logInUserId,
-        roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
-        receiverId: widget.id,
-        attachmentType: 'voice',
-        file: _recordingPath,
-        message: '',
-      ),
+      SendMessageEvent(userId: AppData.logInUserId, roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId, receiverId: widget.id, attachmentType: 'voice', file: _recordingPath, message: ''),
     );
     scrollToBottom();
   }
@@ -355,153 +306,147 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
       pusher.connect();
 
-      if (pusher != null) {
-        // Successfully created and connected to Pusher
-        clientListenChannel = await pusher.subscribe(
-          channelName: 'private-chatify.${AppData.logInUserId}',
-          onMemberAdded: (member) {
-            // print("Member added: $member");
-          },
-          onMemberRemoved: (member) {
-            // print("Member removed: $member");
-          },
-          onEvent: (event) {
-            String eventName = event.eventName;
+      // Successfully created and connected to Pusher
+      clientListenChannel = await pusher.subscribe(
+        channelName: 'private-chatify.${AppData.logInUserId}',
+        onMemberAdded: (member) {
+          // print("Member added: $member");
+        },
+        onMemberRemoved: (member) {
+          // print("Member removed: $member");
+        },
+        onEvent: (event) {
+          String eventName = event.eventName;
 
-            switch (eventName) {
-              case 'client-typing':
-                onTypingStarted();
-                // If the timer is already running, cancel it
-                if (typingTimer != null && typingTimer!.isActive) {
-                  typingTimer!.cancel();
-                }
-                // Set a timer to stop typing indicator after 2 seconds
-                typingTimer = Timer(const Duration(seconds: 2), () {
-                  onTypingStopped();
-                  // chatBloc.add(LoadRoomMessageEvent(
-                  //     page: 0, userId: widget.id, roomId: widget.roomId));
-                });
-                break;
-              case 'messaging':
-                var textMessage = "";
-                var messageData = event.data;
-                messageData = json.decode(messageData);
-                var status = messageData['status'];
-                if (status == "web") {
-                  final htmlMessage = event.data;
-                  var message = json.decode(htmlMessage);
+          switch (eventName) {
+            case 'client-typing':
+              onTypingStarted();
+              // If the timer is already running, cancel it
+              if (typingTimer != null && typingTimer!.isActive) {
+                typingTimer!.cancel();
+              }
+              // Set a timer to stop typing indicator after 2 seconds
+              typingTimer = Timer(const Duration(seconds: 2), () {
+                onTypingStopped();
+                // chatBloc.add(LoadRoomMessageEvent(
+                //     page: 0, userId: widget.id, roomId: widget.roomId));
+              });
+              break;
+            case 'messaging':
+              var textMessage = "";
+              var messageData = event.data;
+              messageData = json.decode(messageData);
+              var status = messageData['status'];
+              if (status == "web") {
+                final htmlMessage = event.data;
+                var message = json.decode(htmlMessage);
 
-                  // Use the html package to parse the HTML and extract text content
-                  final document = htmlParser.parse(message['message']);
+                // Use the html package to parse the HTML and extract text content
+                final document = htmlParser.parse(message['message']);
 
-                  final messageDiv = document.querySelector('.message');
-                  final textMessageWithTime = messageDiv?.text.trim() ?? "";
+                final messageDiv = document.querySelector('.message');
+                final textMessageWithTime = messageDiv?.text.trim() ?? "";
 
-                  // Split the textMessageWithTime by the "time ago" portion
-                  final parts = textMessageWithTime.split('1 second ago');
-                  textMessage = parts.first
-                      .trim(); // Take the first part (the message)
-                }
-                if (status == "api") {
-                  var message = messageData['message'];
+                // Split the textMessageWithTime by the "time ago" portion
+                final parts = textMessageWithTime.split('1 second ago');
+                textMessage = parts.first.trim(); // Take the first part (the message)
+              }
+              if (status == "api") {
+                var message = messageData['message'];
 
-                  textMessage = message['message'];
-                  print(textMessage);
-                }
+                textMessage = message['message'];
                 print(textMessage);
-                // setState(() {
-                typingTimer = Timer(const Duration(seconds: 2), () {
-                  onTypingStopped();
-                  // chatBloc.add(LoadRoomMessageEvent(
-                  //     page: 0, userId: widget.id, roomId: widget.roomId));
-                  // });
-                  // messagesList.insert(
-                  //   0,
-                  //   Message(
-                  //     body: textMessage, // Use the extracted text content
-                  //     toId: AppData.logInUserId,
-                  //     fromId: widget.id,
-                  //   ),
-                  // );
-                  // isLoading = false;
-                });
+              }
+              print(textMessage);
+              // setState(() {
+              typingTimer = Timer(const Duration(seconds: 2), () {
+                onTypingStopped();
+                // chatBloc.add(LoadRoomMessageEvent(
+                //     page: 0, userId: widget.id, roomId: widget.roomId));
+                // });
+                // messagesList.insert(
+                //   0,
+                //   Message(
+                //     body: textMessage, // Use the extracted text content
+                //     toId: AppData.logInUserId,
+                //     fromId: widget.id,
+                //   ),
+                // );
+                // isLoading = false;
+              });
 
-                break;
+              break;
 
-              // case 'client-seen':
-              // var textMessage = "";
-              // var messageData = event.data;
-              //                 messageData = json.decode(messageData);
-              //                 var status = messageData['status'];
-              //                 if (status == "web") {
-              //                   final htmlMessage = event.data;
-              //                   var message = json.decode(htmlMessage);
-              //
-              //                   // Use the html package to parse the HTML and extract text content
-              //                   final document = htmlParser.parse(message['message']);
-              //
-              //                   final messageDiv = document.querySelector('.message');
-              //                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
-              //
-              // // Split the textMessageWithTime by the "time ago" portion
-              //                   final parts = textMessageWithTime.split('1 second ago');
-              //                   textMessage =
-              //                       parts.first.trim(); // Take the first part (the message)
-              //
-              //                 }
-              //                 if (status == "api") {
-              //                   var message = messageData['message'];
-              //
-              //                   textMessage = message['message'];
-              //                   print(textMessage);
-              //
-              //                 }
-              //                 print(textMessage);
-              //                 // setState(() {
-              //                 typingTimer = Timer(const Duration(seconds: 2), () {
-              //                   chatBloc.add(ChatReadStatusEvent(
-              //                       userId: widget.id,
-              //                       roomId: widget.roomId,));
-              // chatBloc.add(LoadRoomMessageEvent(
-              //     page: 0, userId: widget.id, roomId: widget.roomId));
-              // });
-              // messagesList.insert(
-              //   0,
-              //   Message(
-              //     body: textMessage, // Use the extracted text content
-              //     toId: AppData.logInUserId,
-              //     fromId: widget.id,
-              //   ),
-              // );
-              // isLoading = false;
-              // });
-              // break;
-              // Add more cases for other event types as needed
-              default:
-                // Handle unknown event types or ignore them
-                break;
-            }
-          },
-        );
-        print(widget.id);
-        clientSendChannel = await pusher.subscribe(
-          channelName: "private-chatify.${widget.id}",
-          onMemberAdded: (member) {
-            // print("Member added: $member");
-          },
-          onMemberRemoved: (member) {
-            // print("Member removed: $member");
-          },
-          onEvent: (event) {
-            // print("Received Event (Listen Channel): $event");
-          },
-        );
+            // case 'client-seen':
+            // var textMessage = "";
+            // var messageData = event.data;
+            //                 messageData = json.decode(messageData);
+            //                 var status = messageData['status'];
+            //                 if (status == "web") {
+            //                   final htmlMessage = event.data;
+            //                   var message = json.decode(htmlMessage);
+            //
+            //                   // Use the html package to parse the HTML and extract text content
+            //                   final document = htmlParser.parse(message['message']);
+            //
+            //                   final messageDiv = document.querySelector('.message');
+            //                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
+            //
+            // // Split the textMessageWithTime by the "time ago" portion
+            //                   final parts = textMessageWithTime.split('1 second ago');
+            //                   textMessage =
+            //                       parts.first.trim(); // Take the first part (the message)
+            //
+            //                 }
+            //                 if (status == "api") {
+            //                   var message = messageData['message'];
+            //
+            //                   textMessage = message['message'];
+            //                   print(textMessage);
+            //
+            //                 }
+            //                 print(textMessage);
+            //                 // setState(() {
+            //                 typingTimer = Timer(const Duration(seconds: 2), () {
+            //                   chatBloc.add(ChatReadStatusEvent(
+            //                       userId: widget.id,
+            //                       roomId: widget.roomId,));
+            // chatBloc.add(LoadRoomMessageEvent(
+            //     page: 0, userId: widget.id, roomId: widget.roomId));
+            // });
+            // messagesList.insert(
+            //   0,
+            //   Message(
+            //     body: textMessage, // Use the extracted text content
+            //     toId: AppData.logInUserId,
+            //     fromId: widget.id,
+            //   ),
+            // );
+            // isLoading = false;
+            // });
+            // break;
+            // Add more cases for other event types as needed
+            default:
+              // Handle unknown event types or ignore them
+              break;
+          }
+        },
+      );
+      print(widget.id);
+      clientSendChannel = await pusher.subscribe(
+        channelName: "private-chatify.${widget.id}",
+        onMemberAdded: (member) {
+          // print("Member added: $member");
+        },
+        onMemberRemoved: (member) {
+          // print("Member removed: $member");
+        },
+        onEvent: (event) {
+          // print("Received Event (Listen Channel): $event");
+        },
+      );
 
-        // Attach an event listener to the channel
-      } else {
-        // Handle the case where Pusher connection failed
-        // print("Failed to connect to Pusher");
-      }
+      // Attach an event listener to the channel
     } catch (e) {
       print(e);
     }
@@ -618,11 +563,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   void onTextFieldFocused(bool typingStatus) async {
     String eventName = "client-typing"; // Replace with your event name
     // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
-    Map<String, dynamic> eventData = {
-      "from_id": AppData.logInUserId,
-      "to_id": widget.id,
-      "typing": typingStatus,
-    };
+    Map<String, dynamic> eventData = {"from_id": AppData.logInUserId, "to_id": widget.id, "typing": typingStatus};
 
     // Convert the Map to a JSON string
     String data = jsonEncode(eventData);
@@ -640,16 +581,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     }
   }
 
-  bool _emojiShowing = false;
+  final bool _emojiShowing = false;
 
   void seenSenderMessage(int seenStatus) async {
     String eventName = "client-seen"; // Replace with your event name
     // String data = "{ \"from_id\": \"ae25c6e9-10bd-4201-a4c7-f6de15b0211a\",\"to_id\": \"2cc3375a-7681-435b-9d12-3a85a10ed355\",\"typing\": true}";
-    Map<String, dynamic> eventData = {
-      "from_id": AppData.logInUserId,
-      "to_id": widget.id,
-      "seen": seenStatus,
-    };
+    Map<String, dynamic> eventData = {"from_id": AppData.logInUserId, "to_id": widget.id, "seen": seenStatus};
     // Convert the Map to a JSON string
     String data = jsonEncode(eventData);
     // Create a PusherEvent and pass the eventData
@@ -801,8 +738,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           if (state is DataError) {
             showDialog(
               context: context,
-              builder: (context) =>
-                  AlertDialog(content: Text(state.errorMessage)),
+              builder: (context) => AlertDialog(content: Text(state.errorMessage)),
             );
           } else if (state is PaginationLoadedState) {
             setState(() {
@@ -823,11 +759,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         builder: (context, state) {
           if (state is PaginationLoadingState) {
             return ChatShimmerLoader();
-          } else if (state is PaginationLoadedState ||
-              state is FileUploadingState ||
-              state is FileUploadedState ||
-              state is DataInitial ||
-              state is PaginationInitialState) {
+          } else if (state is PaginationLoadedState || state is FileUploadingState || state is FileUploadedState || state is DataInitial || state is PaginationInitialState) {
             isDataLoaded = false;
             var bloc = chatBloc;
             return Column(
@@ -836,9 +768,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                   child: OptimizedMessageList(
                     chatBloc: bloc,
                     userId: AppData.logInUserId,
-                    roomId: widget.roomId.isEmpty
-                        ? (chatBloc.roomId ?? '')
-                        : widget.roomId,
+                    roomId: widget.roomId.isEmpty ? (chatBloc.roomId ?? '') : widget.roomId,
                     profilePic: widget.profilePic,
                     scrollController: _scrollController,
                     isSomeoneTyping: isSomeoneTyping,
@@ -854,9 +784,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           chatBloc.add(
                             SendMessageEvent(
                               userId: AppData.logInUserId,
-                              roomId: widget.roomId == ''
-                                  ? chatBloc.roomId
-                                  : widget.roomId,
+                              roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
                               receiverId: widget.id,
                               attachmentType: 'voice',
                               file: path,
@@ -889,9 +817,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           chatBloc.add(
                             SendMessageEvent(
                               userId: AppData.logInUserId,
-                              roomId: widget.roomId == ''
-                                  ? chatBloc.roomId
-                                  : widget.roomId,
+                              roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
                               receiverId: widget.id,
                               attachmentType: 'text',
                               file: '',
@@ -927,9 +853,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           }
                         },
                         onRecordStateChanged: (recording, {Offset? pointerPosition}) {
-                          print(
-                            '🎤 Record state changed: $recording, pointer: $pointerPosition',
-                          );
+                          print('🎤 Record state changed: $recording, pointer: $pointerPosition');
                           setState(() {
                             if (recording) {
                               // Start recording
@@ -939,9 +863,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                               _recordingPointerPosition = pointerPosition;
                             } else {
                               // User released - trigger stop and send
-                              print(
-                                '⏹️ User released - triggering stop and send',
-                              );
+                              print('⏹️ User released - triggering stop and send');
                               _shouldStopRecording = true;
                             }
                           });
@@ -979,12 +901,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       viewOrderConfig: const ViewOrderConfig(),
                       emojiViewConfig: EmojiViewConfig(
                         // Issue: https://github.com/flutter/flutter/issues/28894
-                        emojiSizeMax:
-                            28 *
-                            (foundation.defaultTargetPlatform ==
-                                    TargetPlatform.iOS
-                                ? 1.2
-                                : 1.0),
+                        emojiSizeMax: 28 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ? 1.2 : 1.0),
                       ),
                       skinToneConfig: const SkinToneConfig(),
                       categoryViewConfig: const CategoryViewConfig(),
@@ -1007,8 +924,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
 
   bool isPlayingMsg = false, isRecording = false, isSending = false;
   bool _shouldStopRecording = false; // Flag to trigger stop and send
-  Offset?
-  _recordingPointerPosition; // Track where user pressed to start recording
+  Offset? _recordingPointerPosition; // Track where user pressed to start recording
 
   Future<bool> checkPermission() async {
     if (!await Permission.microphone.isGranted) {
@@ -1037,14 +953,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       recordFilePath = await getFilePath();
 
       // Start recording
-      await _audioRecorder.start(
-        const RecordConfig(
-          encoder: AudioEncoder.aacLc,
-          bitRate: 128000,
-          sampleRate: 44100,
-        ),
-        path: recordFilePath ?? '',
-      );
+      await _audioRecorder.start(const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000, sampleRate: 44100), path: recordFilePath ?? '');
     } catch (e) {
       debugPrint("Error starting recording: $e");
     }
@@ -1056,14 +965,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       // recordFilePath is already set from startRecord()
       // if (!await FlutterSoundRecord().isPaused()) {
       chatBloc.add(
-        SendMessageEvent(
-          userId: AppData.logInUserId,
-          roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
-          receiverId: widget.id,
-          attachmentType: 'file',
-          file: recordFilePath,
-          message: '',
-        ),
+        SendMessageEvent(userId: AppData.logInUserId, roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId, receiverId: widget.id, attachmentType: 'file', file: recordFilePath, message: ''),
       );
       scrollToBottom();
       // }
@@ -1113,8 +1015,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           onFileSelected: (File file, String type) {
             // Safely close bottom sheet
             try {
-              if (bottomSheetNavigator != null &&
-                  bottomSheetNavigator!.mounted) {
+              if (bottomSheetNavigator != null && bottomSheetNavigator!.mounted) {
                 bottomSheetNavigator!.pop();
               } else if (bottomSheetContext.mounted) {
                 Navigator.of(bottomSheetContext).pop();
@@ -1147,9 +1048,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                             chatBloc.add(
                               SendMessageEvent(
                                 userId: AppData.logInUserId,
-                                roomId: widget.roomId == ''
-                                    ? chatBloc.roomId
-                                    : widget.roomId,
+                                roomId: widget.roomId == '' ? chatBloc.roomId : widget.roomId,
                                 receiverId: widget.id,
                                 attachmentType: attachmentType,
                                 file: sendFile.path,
@@ -1172,7 +1071,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     );
   }
 
-  onSubscriptionCount(String channelName, int subscriptionCount) {}
+  void onSubscriptionCount(String channelName, int subscriptionCount) {}
 
   Future<void> _permissionDialog(context) async {
     return showDialog(
@@ -1214,27 +1113,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   }
 
   // Replace your current outgoing call implementation with this
-  Future<dynamic> onAuthorizer(
-    String channelName,
-    String socketId,
-    dynamic options,
-  ) async {
+  Future<dynamic> onAuthorizer(String channelName, String socketId, dynamic options) async {
     try {
       final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
 
       // Build query parameters
-      final Map<String, String> queryParams = {
-        'socket_id': socketId,
-        'channel_name': channelName,
-      };
+      final Map<String, String> queryParams = {'socket_id': socketId, 'channel_name': channelName};
 
-      final response = await http.post(
-        uri.replace(queryParameters: queryParams),
-        headers: {
-          'Authorization': 'Bearer ${AppData.userToken!}',
-          'Content-Type': 'application/json',
-        },
-      );
+      final response = await http.post(uri.replace(queryParameters: queryParams), headers: {'Authorization': 'Bearer ${AppData.userToken!}', 'Content-Type': 'application/json'});
 
       if (response.statusCode == 200) {
         final String data = response.body;
@@ -1245,30 +1131,20 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         // Pusher expects a Map<String, dynamic> with 'auth' and optionally 'channel_data'
         if (decoded is Map) {
           // Convert to Map<String, dynamic> to ensure type safety
-          final Map<String, dynamic> authData = Map<String, dynamic>.from(
-            decoded,
-          );
+          final Map<String, dynamic> authData = Map<String, dynamic>.from(decoded);
 
           debugPrint('Pusher auth successful for channel: $channelName');
           debugPrint('Auth data keys: ${authData.keys}');
 
           return authData;
         } else {
-          debugPrint(
-            'Pusher auth response is not a Map: ${decoded.runtimeType}',
-          );
-          throw Exception(
-            'Invalid auth response format - expected Map but got ${decoded.runtimeType}',
-          );
+          debugPrint('Pusher auth response is not a Map: ${decoded.runtimeType}');
+          throw Exception('Invalid auth response format - expected Map but got ${decoded.runtimeType}');
         }
       } else {
-        debugPrint(
-          'Pusher auth failed with status code: ${response.statusCode}',
-        );
+        debugPrint('Pusher auth failed with status code: ${response.statusCode}');
         debugPrint('Response body: ${response.body}');
-        throw Exception(
-          'Failed to fetch Pusher auth data: ${response.statusCode}',
-        );
+        throw Exception('Failed to fetch Pusher auth data: ${response.statusCode}');
       }
     } catch (e, stackTrace) {
       debugPrint('Error in onAuthorizer: $e');
@@ -1302,9 +1178,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     setState(() {
       isSomeoneTyping = false;
     });
-    chatBloc.add(
-      LoadRoomMessageEvent(page: 0, userId: widget.id, roomId: widget.roomId),
-    );
+    chatBloc.add(LoadRoomMessageEvent(page: 0, userId: widget.id, roomId: widget.roomId));
   }
 
   void _startTimerForChat() {
@@ -1312,13 +1186,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       if (!isDataLoaded) {
         if (isBottom ?? true) {
           print('bottom');
-          chatBloc.add(
-            LoadRoomMessageEvent(
-              page: 0,
-              userId: widget.id,
-              roomId: widget.roomId,
-            ),
-          );
+          chatBloc.add(LoadRoomMessageEvent(page: 0, userId: widget.id, roomId: widget.roomId));
         }
       }
     });
@@ -1335,15 +1203,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       leading: IconButton(
         icon: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: theme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: theme.primary,
-            size: 16,
-          ),
+          decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+          child: Icon(Icons.arrow_back_ios_new_rounded, color: theme.primary, size: 16),
         ),
         onPressed: () {
           Navigator.pop(context);
@@ -1360,29 +1221,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: theme.primary.withOpacity(0.1),
-                border: Border.all(
-                  color: theme.primary.withOpacity(0.2),
-                  width: 1.5,
-                ),
+                color: theme.primary.withValues(alpha: 0.1),
+                border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1.5),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
                 child: widget.profilePic == ''
-                    ? Center(
-                        child: Icon(
-                          Icons.person_rounded,
-                          color: theme.primary,
-                          size: 22,
-                        ),
-                      )
-                    : CustomImageView(
-                        imagePath:
-                            '${AppData.imageUrl}${widget.profilePic.validate()}',
-                        height: 40,
-                        width: 40,
-                        fit: BoxFit.cover,
-                      ),
+                    ? Center(child: Icon(Icons.person_rounded, color: theme.primary, size: 22))
+                    : CustomImageView(imagePath: '${AppData.imageUrl}${widget.profilePic.validate()}', height: 40, width: 40, fit: BoxFit.cover),
               ),
             ),
             const SizedBox(width: 10),
@@ -1393,21 +1239,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 children: [
                   Text(
                     widget.username,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: theme.textPrimary,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
                   ),
                   if (isSomeoneTyping && FromId == widget.id)
                     Text(
                       translation(context).lbl_typing,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.primary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(fontSize: 12, color: theme.primary, fontWeight: FontWeight.w500),
                     ),
                 ],
               ),
@@ -1422,19 +1259,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           icon: Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Icon(Icons.phone_outlined, color: theme.primary, size: 18),
           ),
           onPressed: () async {
-            startOutgoingCall(
-              widget.id,
-              widget.username,
-              widget.profilePic,
-              false,
-            );
+            startOutgoingCall(widget.id, widget.username, widget.profilePic, false);
           },
         ),
         const SizedBox(width: 4),
@@ -1444,23 +1273,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           icon: Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: theme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.videocam_outlined,
-              color: theme.primary,
-              size: 18,
-            ),
+            decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+            child: Icon(Icons.videocam_outlined, color: theme.primary, size: 18),
           ),
           onPressed: () async {
-            startOutgoingCall(
-              widget.id,
-              widget.username,
-              widget.profilePic,
-              true,
-            );
+            startOutgoingCall(widget.id, widget.username, widget.profilePic, true);
           },
         ),
         // More Options Menu
@@ -1469,9 +1286,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             padding: const EdgeInsets.all(8),
             child: Icon(Icons.more_vert, color: theme.primary, size: 20),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           color: theme.cardBackground,
           elevation: 8,
           offset: const Offset(0, 50),
@@ -1483,18 +1298,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               value: 'media',
               child: Row(
                 children: [
-                  Icon(
-                    Icons.photo_library_outlined,
-                    size: 20,
-                    color: theme.primary,
-                  ),
+                  Icon(Icons.photo_library_outlined, size: 20, color: theme.primary),
                   const SizedBox(width: 12),
                   Text(
                     translation(context).lbl_media,
-                    style: TextStyle(
-                      color: theme.textPrimary,
-                      fontFamily: 'Poppins',
-                    ),
+                    style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins'),
                   ),
                 ],
               ),
@@ -1562,11 +1370,7 @@ class TypingIndicator extends StatelessWidget {
             children: [
               Text(
                 translation(context).lbl_typing,
-                style: TextStyle(
-                  color: theme.textSecondary,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w400,
-                ),
+                style: TextStyle(color: theme.textSecondary, fontSize: 14.0, fontWeight: FontWeight.w400),
               ),
             ],
           ),
@@ -1581,8 +1385,7 @@ class TypingIndicator extends StatelessWidget {
 class FullScreenVideoPage extends StatefulWidget {
   final VideoPlayerController videoPlayerController;
 
-  const FullScreenVideoPage({Key? key, required this.videoPlayerController})
-    : super(key: key);
+  const FullScreenVideoPage({super.key, required this.videoPlayerController});
 
   @override
   _FullScreenVideoPageState createState() => _FullScreenVideoPageState();
@@ -1629,8 +1432,7 @@ class _FullScreenVideoPageState extends State<FullScreenVideoPage> {
 }
 
 class _ControlsOverlay extends StatelessWidget {
-  const _ControlsOverlay({Key? key, required this.controller})
-    : super(key: key);
+  const _ControlsOverlay({required this.controller});
 
   final VideoPlayerController controller;
 
@@ -1648,12 +1450,7 @@ class _ControlsOverlay extends StatelessWidget {
               : Container(
                   color: theme.surfaceVariant,
                   child: Center(
-                    child: Icon(
-                      Icons.play_arrow,
-                      color: theme.primary,
-                      size: 35.0,
-                      semanticLabel: 'Play',
-                    ),
+                    child: Icon(Icons.play_arrow, color: theme.primary, size: 35.0, semanticLabel: 'Play'),
                   ),
                 ),
         ),
@@ -1664,12 +1461,7 @@ class _ControlsOverlay extends StatelessWidget {
             } else {
               // controller.play();
               // Navigate to full screen video page
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) =>
-                      FullScreenVideoPage(videoPlayerController: controller),
-                ),
-              );
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => FullScreenVideoPage(videoPlayerController: controller)));
             }
           },
         ),
@@ -1682,8 +1474,7 @@ class VoiceRecordingPainter extends CustomPainter {
   final Animation<double> animation;
   final Color color;
 
-  VoiceRecordingPainter({required this.animation, required this.color})
-    : super(repaint: animation);
+  VoiceRecordingPainter({required this.animation, required this.color}) : super(repaint: animation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1718,8 +1509,6 @@ class VoiceRecordingPainter extends CustomPainter {
 // Helper function to show error message
 void _showCallError(String message) {
   if (NavigatorService.navigatorKey.currentContext != null) {
-    ScaffoldMessenger.of(
-      NavigatorService.navigatorKey.currentContext!,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(NavigatorService.navigatorKey.currentContext!).showSnackBar(SnackBar(content: Text(message)));
   }
 }

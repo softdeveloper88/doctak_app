@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+
 abstract class NotificationEvent extends Equatable {}
 
 class LoadDataValues extends NotificationEvent {
@@ -12,8 +12,7 @@ class GetPost extends NotificationEvent {
   final String countryId;
   final String searchTerm;
 
-  GetPost(
-      {required this.page, required this.countryId, required this.searchTerm});
+  GetPost({required this.page, required this.countryId, required this.searchTerm});
   @override
   List<Object> get props => [page, countryId, searchTerm];
 }
@@ -21,10 +20,9 @@ class GetPost extends NotificationEvent {
 class NotificationLoadPageEvent extends NotificationEvent {
   int? page;
   String? readStatus;
-  NotificationLoadPageEvent(
-      {this.page,this.readStatus});
+  NotificationLoadPageEvent({this.page, this.readStatus});
   @override
-  List<Object?> get props => [page,readStatus];
+  List<Object?> get props => [page, readStatus];
 }
 
 class NotificationDetailPageEvent extends NotificationEvent {
@@ -34,12 +32,13 @@ class NotificationDetailPageEvent extends NotificationEvent {
   @override
   List<Object?> get props => [jobId];
 }
-class NotificationCounter extends NotificationEvent {
 
+class NotificationCounter extends NotificationEvent {
   NotificationCounter();
   @override
   List<Object?> get props => [];
 }
+
 class ReadNotificationEvent extends NotificationEvent {
   String? notificationId;
 
@@ -47,6 +46,7 @@ class ReadNotificationEvent extends NotificationEvent {
   @override
   List<Object?> get props => [notificationId];
 }
+
 class AnnouncementDetailEvent extends NotificationEvent {
   int? announcementId;
 
@@ -56,7 +56,6 @@ class AnnouncementDetailEvent extends NotificationEvent {
 }
 
 class AnnouncementEvent extends NotificationEvent {
-
   @override
   List<Object?> get props => [];
 }

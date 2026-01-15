@@ -7,7 +7,7 @@ import 'dart:math' as math;
 
 /// Alternative drawer header with better positioning control
 class DrawerHeaderAlternative extends StatelessWidget {
-  const DrawerHeaderAlternative({Key? key}) : super(key: key);
+  const DrawerHeaderAlternative({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +17,7 @@ class DrawerHeaderAlternative extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFFF8FAFF),
-            Color(0xFFEEF4FF),
-            Color(0xFFE0ECFF),
-            Color(0xFFD4E5FF),
-          ],
+          colors: [Color(0xFFF8FAFF), Color(0xFFEEF4FF), Color(0xFFE0ECFF), Color(0xFFD4E5FF)],
           stops: [0.0, 0.3, 0.7, 1.0],
         ),
       ),
@@ -39,27 +34,9 @@ class DrawerHeaderAlternative extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF4285F4),
-                      Color(0xFF1A73E8),
-                      Color(0xFF1557B0),
-                    ],
-                  ),
-                  border: Border.all(
-                    color: Colors.white,
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF4285F4).withOpacity(0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                      spreadRadius: 2,
-                    ),
-                  ],
+                  gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF4285F4), Color(0xFF1A73E8), Color(0xFF1557B0)]),
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: [BoxShadow(color: const Color(0xFF4285F4).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8), spreadRadius: 2)],
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(40),
@@ -69,38 +46,24 @@ class DrawerHeaderAlternative extends StatelessWidget {
                     placeholder: (context, url) => Container(
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
-                        ),
+                        gradient: LinearGradient(colors: [Color(0xFF4285F4), Color(0xFF1A73E8)]),
                       ),
                       child: Center(
                         child: Text(
                           _getInitials(AppData.name),
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                          ),
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins'),
                         ),
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
                       decoration: const BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
-                        ),
+                        gradient: LinearGradient(colors: [Color(0xFF4285F4), Color(0xFF1A73E8)]),
                       ),
                       child: Center(
                         child: Text(
                           _getInitials(AppData.name),
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            fontFamily: 'Poppins',
-                          ),
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins'),
                         ),
                       ),
                     ),
@@ -112,16 +75,8 @@ class DrawerHeaderAlternative extends StatelessWidget {
 
               // User Name
               Text(
-                AppData.userType == 'doctor'
-                    ? 'Dr. ${capitalizeWords(AppData.name)}'
-                    : capitalizeWords(AppData.name),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A365D),
-                  fontFamily: 'Poppins',
-                  letterSpacing: 0.5,
-                ),
+                AppData.userType == 'doctor' ? 'Dr. ${capitalizeWords(AppData.name)}' : capitalizeWords(AppData.name),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1A365D), fontFamily: 'Poppins', letterSpacing: 0.5),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
@@ -133,19 +88,10 @@ class DrawerHeaderAlternative extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFF4285F4).withOpacity(0.3),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF4285F4).withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  border: Border.all(color: const Color(0xFF4285F4).withValues(alpha: 0.3), width: 1),
+                  boxShadow: [BoxShadow(color: const Color(0xFF4285F4).withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
                 ),
                 child: Text(
                   AppData.userType == 'doctor'
@@ -153,13 +99,7 @@ class DrawerHeaderAlternative extends StatelessWidget {
                       : AppData.userType == 'student'
                       ? '${AppData.university} ${translation(context).lbl_student}'
                       : AppData.specialty,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF4285F4),
-                    fontFamily: 'Poppins',
-                    letterSpacing: 0.3,
-                  ),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF4285F4), fontFamily: 'Poppins', letterSpacing: 0.3),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,

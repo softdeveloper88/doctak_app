@@ -4,9 +4,7 @@ import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:clear_all_notifications/clear_all_notifications.dart';
 import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/force_updrage_page.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
-import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
@@ -18,14 +16,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:doctak_app/firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
-import 'package:nb_utils/nb_utils.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
 import '../presentation/calling_module/services/call_api_service.dart';
@@ -34,10 +28,8 @@ import '../presentation/case_discussion/screens/discussion_list_screen.dart';
 
 @pragma('vm:entry-point')
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  static final FirebaseMessaging _firebaseMessaging =
-      FirebaseMessaging.instance;
+  static final FlutterLocalNotificationsPlugin _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   static const String _payloadKey = 'type';
   static const String _payloadId = 'id';
 
@@ -55,10 +47,7 @@ class NotificationService {
   static bool _isHandlingNotification = false;
 
   // Helper method to check for active calls and send busy signal if needed
-  static Future<bool> _shouldSendBusySignal(
-    String callId,
-    String callerId,
-  ) async {
+  static Future<bool> _shouldSendBusySignal(String callId, String callerId) async {
     try {
       // Get active calls from CallKit
       final result = await FlutterCallkitIncoming.activeCalls();
@@ -68,9 +57,7 @@ class NotificationService {
       for (var call in activeCalls) {
         final activeCallId = call['id']?.toString() ?? '';
         if (activeCallId != callId && activeCallId.isNotEmpty) {
-          debugPrint(
-            'User has another active call, sending busy signal for: $callId',
-          );
+          debugPrint('User has another active call, sending busy signal for: $callId');
 
           try {
             // Create API service instance
@@ -98,9 +85,7 @@ class NotificationService {
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     // Ensure Flutter bindings and plugins are registered before using platform channels
     WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     debugPrint('PUSH RECEIVED ${message.data}');
 
     // Generate a unique notification ID
@@ -145,51 +130,27 @@ class NotificationService {
 
   // More specific methods to check and mark different notification types
   static bool _shouldSkipPushNotification(String notificationId) {
-    return _shouldSkipWithinDuration(
-      notificationId,
-      _lastHandledPushNotifications,
-      500,
-    );
+    return _shouldSkipWithinDuration(notificationId, _lastHandledPushNotifications, 500);
   }
 
   static bool _shouldSkipForegroundNotification(String notificationId) {
-    return _shouldSkipWithinDuration(
-      notificationId,
-      _lastHandledForegroundNotifications,
-      500,
-    );
+    return _shouldSkipWithinDuration(notificationId, _lastHandledForegroundNotifications, 500);
   }
 
   static bool _shouldSkipBackgroundNotification(String notificationId) {
-    return _shouldSkipWithinDuration(
-      notificationId,
-      _lastHandledBackgroundNotifications,
-      1000,
-    );
+    return _shouldSkipWithinDuration(notificationId, _lastHandledBackgroundNotifications, 1000);
   }
 
   static bool _shouldSkipScreenOpenedNotification(String notificationId) {
-    return _shouldSkipWithinDuration(
-      notificationId,
-      _lastHandledScreenOpenedNotifications,
-      1000,
-    );
+    return _shouldSkipWithinDuration(notificationId, _lastHandledScreenOpenedNotifications, 1000);
   }
 
   static bool _shouldSkipInitialNotification(String notificationId) {
-    return _shouldSkipWithinDuration(
-      notificationId,
-      _lastHandledInitialNotifications,
-      1000,
-    );
+    return _shouldSkipWithinDuration(notificationId, _lastHandledInitialNotifications, 1000);
   }
 
   // Helper method to check if a notification was handled recently
-  static bool _shouldSkipWithinDuration(
-    String notificationId,
-    Map<String, int> map,
-    int durationMs,
-  ) {
+  static bool _shouldSkipWithinDuration(String notificationId, Map<String, int> map, int durationMs) {
     final lastTimestamp = map[notificationId];
     if (lastTimestamp == null) return false;
 
@@ -199,32 +160,27 @@ class NotificationService {
 
   // Mark notifications as handled in the specific maps
   static void _markPushNotificationHandled(String notificationId) {
-    _lastHandledPushNotifications[notificationId] =
-        DateTime.now().millisecondsSinceEpoch;
+    _lastHandledPushNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
     _cleanupOldEntries(_lastHandledPushNotifications);
   }
 
   static void _markForegroundNotificationHandled(String notificationId) {
-    _lastHandledForegroundNotifications[notificationId] =
-        DateTime.now().millisecondsSinceEpoch;
+    _lastHandledForegroundNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
     _cleanupOldEntries(_lastHandledForegroundNotifications);
   }
 
   static void _markBackgroundNotificationHandled(String notificationId) {
-    _lastHandledBackgroundNotifications[notificationId] =
-        DateTime.now().millisecondsSinceEpoch;
+    _lastHandledBackgroundNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
     _cleanupOldEntries(_lastHandledBackgroundNotifications);
   }
 
   static void _markScreenOpenedNotificationHandled(String notificationId) {
-    _lastHandledScreenOpenedNotifications[notificationId] =
-        DateTime.now().millisecondsSinceEpoch;
+    _lastHandledScreenOpenedNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
     _cleanupOldEntries(_lastHandledScreenOpenedNotifications);
   }
 
   static void _markInitialNotificationHandled(String notificationId) {
-    _lastHandledInitialNotifications[notificationId] =
-        DateTime.now().millisecondsSinceEpoch;
+    _lastHandledInitialNotifications[notificationId] = DateTime.now().millisecondsSinceEpoch;
     _cleanupOldEntries(_lastHandledInitialNotifications);
   }
 
@@ -242,8 +198,7 @@ class NotificationService {
 
     // Include a timestamp in the ID to make it unique for recurring notifications
     // but don't make it too granular to allow for some deduplication
-    final int timestamp = (DateTime.now().millisecondsSinceEpoch / 10000)
-        .floor();
+    final int timestamp = (DateTime.now().millisecondsSinceEpoch / 10000).floor();
 
     return '$type:$id:${title.hashCode}:$timestamp';
   }
@@ -281,10 +236,7 @@ class NotificationService {
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
       await prefs.setString('pending_call_id', callId);
-      await prefs.setInt(
-        'pending_call_timestamp',
-        DateTime.now().millisecondsSinceEpoch,
-      );
+      await prefs.setInt('pending_call_timestamp', DateTime.now().millisecondsSinceEpoch);
       await prefs.setString('pending_caller_id', callerId);
       await prefs.setString('pending_caller_name', callerName);
       await prefs.setString('pending_caller_avatar', avatar);
@@ -299,13 +251,7 @@ class NotificationService {
       }
 
       // Handle the incoming call
-      await callService.handleIncomingCall(
-        callId: callId,
-        callerId: callerId,
-        callerName: callerName,
-        callerAvatar: avatar,
-        isVideoCall: hasVideo,
-      );
+      await callService.handleIncomingCall(callId: callId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
     } finally {
       _isHandlingNotification = false;
     }
@@ -314,38 +260,31 @@ class NotificationService {
   // Initialize the notification services (both local and FCM)
   static Future<void> initialize() async {
     // Initialize local notifications
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('ic_stat_name');
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          defaultPresentSound: true,
-          defaultPresentAlert: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-          defaultPresentBadge: true,
-          requestCriticalPermission: true, // For critical alerts on iOS
-        );
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsIOS,
-        );
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
+    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      defaultPresentSound: true,
+      defaultPresentAlert: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      defaultPresentBadge: true,
+      requestCriticalPermission: true, // For critical alerts on iOS
+    );
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     await _localNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse:
-          (NotificationResponse notificationResponse) async {
-            print('notification ${notificationResponse.payload}');
-            if (notificationResponse.payload != null) {
-              // Handle notification tap
-              _handleNotificationTap(
-                '', // Title will be populated later if needed
-                '', // Profile pic will be populated later if needed
-                notificationResponse.payload!,
-                '', // ID will be populated later if needed
-              );
-            }
-          },
+      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
+        print('notification ${notificationResponse.payload}');
+        if (notificationResponse.payload != null) {
+          // Handle notification tap
+          _handleNotificationTap(
+            '', // Title will be populated later if needed
+            '', // Profile pic will be populated later if needed
+            notificationResponse.payload!,
+            '', // ID will be populated later if needed
+          );
+        }
+      },
     );
 
     // Initialize FCM and handle background/terminated state with proper iOS permissions
@@ -374,9 +313,7 @@ class NotificationService {
 
       // Check if this foreground notification was already handled
       if (_shouldSkipForegroundNotification(notificationId)) {
-        debugPrint(
-          'Skipping duplicate foreground notification: $notificationId',
-        );
+        debugPrint('Skipping duplicate foreground notification: $notificationId');
         return;
       }
 
@@ -427,20 +364,9 @@ class NotificationService {
         final hasVideo = message.data['is_video_call'] == 'true';
         final avatar = message.data['caller_avatar'] ?? '';
 
-        await callService.handleIncomingCall(
-          callId: callId,
-          callerId: callerId,
-          callerName: callerName,
-          callerAvatar: avatar,
-          isVideoCall: hasVideo,
-        );
+        await callService.handleIncomingCall(callId: callId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
       } else {
-        _handleNotificationTap(
-          message.notification?.title ?? '',
-          message.data['image'] ?? '',
-          message.data['type'] ?? '',
-          message.data['id'] ?? '',
-        );
+        _handleNotificationTap(message.notification?.title ?? '', message.data['image'] ?? '', message.data['type'] ?? '', message.data['id'] ?? '');
       }
     });
 
@@ -452,11 +378,7 @@ class NotificationService {
   @pragma('vm:entry-point')
   static Future<void> _createCallNotificationChannel() async {
     if (Platform.isAndroid) {
-      final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
-          _localNotificationsPlugin
-              .resolvePlatformSpecificImplementation<
-                AndroidFlutterLocalNotificationsPlugin
-              >();
+      final AndroidFlutterLocalNotificationsPlugin? androidPlugin = _localNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
       if (androidPlugin != null) {
         // Create high priority channel for all notifications
@@ -472,7 +394,7 @@ class NotificationService {
             enableLights: true,
           ),
         );
-        
+
         // Create separate call channel with full screen intent
         await androidPlugin.createNotificationChannel(
           const AndroidNotificationChannel(
@@ -493,8 +415,7 @@ class NotificationService {
   @pragma('vm:entry-point')
   static Future<RemoteMessage?> getInitialNotificationRoute() async {
     // For Firebase Messaging
-    RemoteMessage? initialMessage = await FirebaseMessaging.instance
-        .getInitialMessage();
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
     print('initialMessage $initialMessage');
     if (initialMessage != null) {
       print('type ${initialMessage.data['type']}');
@@ -522,8 +443,7 @@ class NotificationService {
           return null;
         }
 
-        final callerName =
-            initialMessage.data['caller_name'] ?? 'Unknown Caller';
+        final callerName = initialMessage.data['caller_name'] ?? 'Unknown Caller';
         final hasVideo = initialMessage.data['is_video_call'] == 'true';
         final avatar = initialMessage.data['caller_avatar'] ?? '';
 
@@ -531,10 +451,7 @@ class NotificationService {
         final prefs = SecureStorageService.instance;
         await prefs.initialize();
         await prefs.setString('pending_call_id', callId);
-        await prefs.setInt(
-          'pending_call_timestamp',
-          DateTime.now().millisecondsSinceEpoch,
-        );
+        await prefs.setInt('pending_call_timestamp', DateTime.now().millisecondsSinceEpoch);
         await prefs.setString('pending_caller_id', callerId);
         await prefs.setString('pending_caller_name', callerName);
         await prefs.setString('pending_caller_avatar', avatar);
@@ -543,19 +460,10 @@ class NotificationService {
         // Try to initialize and handle the call
         try {
           final callService = CallService();
-          await callService.initialize(
-            baseUrl: AppData.remoteUrl3,
-            isFromCallNotification: true,
-          );
+          await callService.initialize(baseUrl: AppData.remoteUrl3, isFromCallNotification: true);
 
           // Handle as a new incoming call
-          await callService.handleIncomingCall(
-            callId: callId,
-            callerId: callerId,
-            callerName: callerName,
-            callerAvatar: avatar,
-            isVideoCall: hasVideo,
-          );
+          await callService.handleIncomingCall(callId: callId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
         } catch (e) {
           // The main app initialization will try again if this fails
           debugPrint('Error handling initial call notification: $e');
@@ -611,9 +519,7 @@ class NotificationService {
   }
 
   @pragma('vm:entry-point')
-  static Future<ByteArrayAndroidBitmap> _getImageFromUrl(
-    String imageUrl,
-  ) async {
+  static Future<ByteArrayAndroidBitmap> _getImageFromUrl(String imageUrl) async {
     final response = await http.get(Uri.parse(imageUrl));
     final directory = await getTemporaryDirectory();
     final filePath = '${directory.path}/user_image.png';
@@ -624,14 +530,7 @@ class NotificationService {
   }
 
   @pragma('vm:entry-point')
-  static Future<void> showNotificationWithCustomIcon(
-    notification,
-    data,
-    String title,
-    String body,
-    String imageUrl,
-    String bannerImage,
-  ) async {
+  static Future<void> showNotificationWithCustomIcon(notification, data, String title, String body, String imageUrl, String bannerImage) async {
     ByteArrayAndroidBitmap largeIcon = ByteArrayAndroidBitmap(Uint8List(0));
     if (imageUrl != '') {
       largeIcon = await _getImageFromUrl(imageUrl);
@@ -642,41 +541,28 @@ class NotificationService {
     } else {
       banner = ByteArrayAndroidBitmap(Uint8List(0));
     }
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     //
-    const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('ic_stat_name');
-    const DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
-          requestAlertPermission: true,
-          defaultPresentSound: true,
-          defaultPresentAlert: true,
-          requestBadgePermission: true,
-          requestSoundPermission: true,
-          defaultPresentBadge: true,
-          requestCriticalPermission: true, // For critical alerts
-        );
-    const InitializationSettings initializationSettings =
-        InitializationSettings(
-          android: initializationSettingsAndroid,
-          iOS: initializationSettingsIOS,
-        );
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
+    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      defaultPresentSound: true,
+      defaultPresentAlert: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      defaultPresentBadge: true,
+      requestCriticalPermission: true, // For critical alerts
+    );
+    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
     //
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
-      onDidReceiveNotificationResponse:
-          (NotificationResponse notificationResponse) async {
-            print('notificationResponse $notificationResponse');
-            if (notificationResponse.payload != null) {
-              _handleNotificationTap(
-                title,
-                imageUrl,
-                notificationResponse.payload!,
-                data['id'] ?? '',
-              );
-            }
-          },
+      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
+        print('notificationResponse $notificationResponse');
+        if (notificationResponse.payload != null) {
+          _handleNotificationTap(title, imageUrl, notificationResponse.payload!, data['id'] ?? '');
+        }
+      },
     );
     var channel = const AndroidNotificationChannel(
       'high_importance_channel', // id
@@ -685,12 +571,8 @@ class NotificationService {
       showBadge: true,
     );
 
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.createNotificationChannel(channel);
-    
+    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
+
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channel.id,
       channel.name,
@@ -708,19 +590,11 @@ class NotificationService {
       visibility: NotificationVisibility.public,
       color: Colors.transparent,
       largeIcon: largeIcon,
-      styleInformation: bannerImage != ''
-          ? BigPictureStyleInformation(
-              banner,
-              contentTitle: title,
-              summaryText: body,
-            )
-          : null,
+      styleInformation: bannerImage != '' ? BigPictureStyleInformation(banner, contentTitle: title, summaryText: body) : null,
     );
 
     // Generate a semi-unique ID for the notification to avoid overwriting previous ones
-    final int notificationId =
-        notification.hashCode +
-        DateTime.now().millisecondsSinceEpoch.toInt() % 10000;
+    final int notificationId = notification.hashCode + DateTime.now().millisecondsSinceEpoch.toInt() % 10000;
 
     _localNotificationsPlugin.show(
       notificationId,
@@ -743,12 +617,7 @@ class NotificationService {
 
   // Handle notification tap (local or FCM)
   @pragma('vm:entry-point')
-  static Future<void> _handleNotificationTap(
-    String title,
-    String profilePic,
-    String payload,
-    String id,
-  ) async {
+  static Future<void> _handleNotificationTap(String title, String profilePic, String payload, String id) async {
     // Check if we're already handling a notification tap
     if (_isHandlingNotification) {
       debugPrint('Already handling a notification tap, skipping');
@@ -795,12 +664,7 @@ class NotificationService {
   }
 
   // Navigate to the specific screen based on the payload
-  static void _navigateToScreen(
-    String username,
-    String profilePic,
-    String payload,
-    String id,
-  ) {
+  static void _navigateToScreen(String username, String profilePic, String payload, String id) {
     print('payload $payload');
     print('username $username');
     print('id $id');
@@ -810,35 +674,18 @@ class NotificationService {
         MaterialPageRoute(
           builder: (context) {
             if (payload == 'message_received') {
-              return ChatRoomScreen(
-                id: id,
-                roomId: '',
-                username: username,
-                profilePic: profilePic.replaceAll(
-                  'https://doctak-file.s3.ap-south-1.amazonaws.com/',
-                  '',
-                ),
-              );
-            } else if (payload == 'follow_request' ||
-                payload == 'follower_notification' ||
-                payload == 'un_follower_notification' ||
-                payload == 'friend_request') {
+              return ChatRoomScreen(id: id, roomId: '', username: username, profilePic: profilePic.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', ''));
+            } else if (payload == 'follow_request' || payload == 'follower_notification' || payload == 'un_follower_notification' || payload == 'friend_request') {
               return SVProfileFragment(userId: id);
-            } else if (payload == 'comments_on_posts' ||
-                payload == 'reply_to_comment' ||
-                payload == 'like_comment_on_post' ||
-                payload == 'like_comments') {
+            } else if (payload == 'comments_on_posts' || payload == 'reply_to_comment' || payload == 'like_comment_on_post' || payload == 'like_comments') {
               return PostDetailsScreen(commentId: int.parse(id));
             } else if (payload == 'new_like' || payload == 'like_on_posts') {
               return PostDetailsScreen(postId: int.parse(id));
-            } else if (payload == 'new_job_posted' ||
-                payload == 'job_update' ||
-                payload == 'job_post_notification') {
+            } else if (payload == 'new_job_posted' || payload == 'job_update' || payload == 'job_post_notification') {
               return JobsDetailsScreen(jobId: id);
             } else if (payload == 'conference_invitation') {
               return ConferencesScreen();
-            } else if (payload == 'new_discuss_case' ||
-                payload == 'discuss_case_comment') {
+            } else if (payload == 'new_discuss_case' || payload == 'discuss_case_comment') {
               return const DiscussionListScreen();
             }
             return UnifiedSplashUpgradeScreen(); // Default route if payload does not match

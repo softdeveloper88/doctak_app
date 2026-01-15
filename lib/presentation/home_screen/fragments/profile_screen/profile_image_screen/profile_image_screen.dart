@@ -7,14 +7,13 @@ import 'package:share_plus/share_plus.dart';
 class ProfileImageScreen extends StatefulWidget {
   final String imageUrl;
 
-  ProfileImageScreen({required this.imageUrl});
+  const ProfileImageScreen({super.key, required this.imageUrl});
 
   @override
   State<ProfileImageScreen> createState() => _ProfileImageScreenState();
 }
 
-class _ProfileImageScreenState extends State<ProfileImageScreen>
-    with SingleTickerProviderStateMixin {
+class _ProfileImageScreenState extends State<ProfileImageScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _slideAnimation;
@@ -25,20 +24,11 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
     super.initState();
 
     // Setup animations for UI controls
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+    _controller = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
 
-    _opacityAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
-    _slideAnimation = Tween<Offset>(
-      begin: Offset.zero,
-      end: const Offset(0.0, 1.0),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _slideAnimation = Tween<Offset>(begin: Offset.zero, end: const Offset(0.0, 1.0)).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -67,21 +57,14 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
       backgroundColor: Colors.black,
       // Always visible back button in AppBar
       appBar: AppBar(
-        backgroundColor: Colors.black.withOpacity(0.7),
+        backgroundColor: Colors.black.withValues(alpha: 0.7),
         elevation: 0,
         leading: IconButton(
           icon: Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-              size: 18,
-            ),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(18)),
+            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 18),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -103,22 +86,15 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
                   initialScale: PhotoViewComputedScale.contained,
                   filterQuality: FilterQuality.high,
                   enableRotation: true,
-                  backgroundDecoration: const BoxDecoration(
-                    color: Colors.black,
-                  ),
+                  backgroundDecoration: const BoxDecoration(color: Colors.black),
                   imageProvider: NetworkImage(widget.imageUrl),
                   loadingBuilder: (context, event) => Center(
                     child: SizedBox(
                       width: 30.0,
                       height: 30.0,
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          theme.primary,
-                        ),
-                        value: event == null
-                            ? 0
-                            : event.cumulativeBytesLoaded /
-                                  (event.expectedTotalBytes ?? 100),
+                        valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+                        value: event == null ? 0 : event.cumulativeBytesLoaded / (event.expectedTotalBytes ?? 100),
                       ),
                     ),
                   ),
@@ -136,21 +112,12 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
                 child: SlideTransition(
                   position: _slideAnimation,
                   child: Container(
-                    padding: EdgeInsets.only(
-                      left: 20.0,
-                      right: 20.0,
-                      top: 20.0,
-                      bottom: MediaQuery.of(context).padding.bottom + 20.0,
-                    ),
+                    padding: EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0, bottom: MediaQuery.of(context).padding.bottom + 20.0),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.bottomCenter,
                         end: Alignment.topCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.85),
-                          Colors.black.withOpacity(0.5),
-                          Colors.transparent,
-                        ],
+                        colors: [Colors.black.withValues(alpha: 0.85), Colors.black.withValues(alpha: 0.5), Colors.transparent],
                       ),
                     ),
                     child: Row(
@@ -176,14 +143,8 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
                                 content: Text(l10n.msg_image_saved_to_gallery),
                                 behavior: SnackBarBehavior.floating,
                                 backgroundColor: theme.primary,
-                                margin: const EdgeInsets.only(
-                                  bottom: 20.0,
-                                  left: 20.0,
-                                  right: 20.0,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
+                                margin: const EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                               ),
                             );
                           },
@@ -210,24 +171,20 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
   }
 
   // Helper method for control buttons - OneUI 8.5 styled
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildControlButton({required IconData icon, required String label, required VoidCallback onTap}) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        splashColor: Colors.white.withOpacity(0.2),
-        highlightColor: Colors.white.withOpacity(0.1),
+        splashColor: Colors.white.withValues(alpha: 0.2),
+        highlightColor: Colors.white.withValues(alpha: 0.1),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
+            color: Colors.white.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15), width: 1),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -236,12 +193,7 @@ class _ProfileImageScreenState extends State<ProfileImageScreen>
               const SizedBox(height: 6),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Poppins',
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
               ),
             ],
           ),

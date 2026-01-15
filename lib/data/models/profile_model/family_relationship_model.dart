@@ -1,20 +1,10 @@
 import 'dart:convert';
 
-FamilyRelationshipModel familyRelationshipModelFromJson(String str) =>
-    FamilyRelationshipModel.fromJson(json.decode(str));
-String familyRelationshipModelToJson(FamilyRelationshipModel data) =>
-    json.encode(data.toJson());
+FamilyRelationshipModel familyRelationshipModelFromJson(String str) => FamilyRelationshipModel.fromJson(json.decode(str));
+String familyRelationshipModelToJson(FamilyRelationshipModel data) => json.encode(data.toJson());
 
 class FamilyRelationshipModel {
-  FamilyRelationshipModel({
-    this.id,
-    this.userId,
-    this.familyMemberId,
-    this.relationshipId,
-    this.status,
-    this.createdAt,
-    this.updatedAt,
-  });
+  FamilyRelationshipModel({this.id, this.userId, this.familyMemberId, this.relationshipId, this.status, this.createdAt, this.updatedAt});
 
   FamilyRelationshipModel.fromJson(dynamic json) {
     id = json['id'];
