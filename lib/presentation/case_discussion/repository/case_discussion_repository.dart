@@ -306,9 +306,6 @@ class CaseDiscussionRepository {
           commentsData = [];
         }
 
-        // Handle metadata safely
-        final metadata = (data['metadata'] is Map<String, dynamic>) ? data['metadata'] as Map<String, dynamic>? : null;
-
         // Handle related_cases safely
         final relatedCases = (data['related_cases'] is List) ? data['related_cases'] as List : [];
 

@@ -8,7 +8,7 @@ class LoadDataValues extends FollowersEvent {
 }
 
 class FollowersLoadPageEvent extends FollowersEvent {
-  int? page;
+  final int? page;
   final String? searchTerm;
   final String? userId;
 
@@ -18,8 +18,8 @@ class FollowersLoadPageEvent extends FollowersEvent {
 }
 
 class SetUserFollow extends FollowersEvent {
-  String userId;
-  String follow;
+  final String userId;
+  final String follow;
   SetUserFollow(this.userId, this.follow);
   @override
   List<Object?> get props => [userId, follow];

@@ -50,28 +50,28 @@ Contacts contactsFromJson(String str) => Contacts.fromJson(json.decode(str));
 String contactsToJson(Contacts data) => json.encode(data.toJson());
 
 class Contacts extends Equatable {
+  final dynamic id;
+  final dynamic roomId;
+  final String? createdAt;
+  final String? firstName;
+  final String? lastName;
+  final String? profilePic;
+  final String? latestMessage;
+  final String? latestMessageTime;
+  final int? unreadCount;
+
   Contacts({this.id, this.roomId, this.createdAt, this.firstName, this.lastName, this.profilePic, this.latestMessage, this.latestMessageTime, this.unreadCount});
 
-  Contacts.fromJson(dynamic json) {
-    id = json['id'];
-    roomId = json['room_id'];
-    createdAt = json['created_at'];
-    firstName = json['first_name'];
-    lastName = json['last_name'];
-    profilePic = json['profile_pic'];
-    latestMessage = json['latest_message'];
-    latestMessageTime = json['latest_message_time'];
-    unreadCount = json['unread_count'];
-  }
-  dynamic id;
-  dynamic roomId;
-  String? createdAt;
-  String? firstName;
-  String? lastName;
-  String? profilePic;
-  String? latestMessage;
-  String? latestMessageTime;
-  int? unreadCount;
+  Contacts.fromJson(dynamic json)
+      : id = json['id'],
+        roomId = json['room_id'],
+        createdAt = json['created_at'],
+        firstName = json['first_name'],
+        lastName = json['last_name'],
+        profilePic = json['profile_pic'],
+        latestMessage = json['latest_message'],
+        latestMessageTime = json['latest_message_time'],
+        unreadCount = json['unread_count'];
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};

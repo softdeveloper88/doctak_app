@@ -12,8 +12,8 @@ class LoginInitialEvent extends LoginEvent {
 }
 
 class ChangePasswordVisibilityEvent extends LoginEvent {
+  final bool value;
   ChangePasswordVisibilityEvent({required this.value});
-  bool value;
   @override
   List<Object?> get props => [value];
 }

@@ -71,10 +71,6 @@ extension on TextStyle {
     return copyWith(fontFamily: 'Inter');
   }
 
-  TextStyle get raleway {
-    return copyWith(fontFamily: 'Raleway');
-  }
-
   TextStyle get sFProDisplay {
     return copyWith(fontFamily: 'SF Pro Display');
   }

@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import '../../core/utils/app/AppData.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  WelcomeScreen(this.email, {super.key});
-  String email;
+  final String email;
+  const WelcomeScreen(this.email, {super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(

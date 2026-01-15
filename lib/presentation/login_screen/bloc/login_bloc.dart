@@ -56,7 +56,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           await prefs.setString('token', response.token ?? '');
           await prefs.setBool('rememberMe', event.rememberMe);
           await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
-          await prefs.setString('device_token', event.deviceToken ?? '');
+          await prefs.setString('device_token', event.deviceToken);
           await prefs.setString('userId', response.user?.id ?? '');
           await prefs.setString('name', '${response.user?.firstName ?? ''} ${response.user?.lastName ?? ''}');
           await prefs.setString('profile_pic', response.user?.profilePic ?? '');
@@ -87,7 +87,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           String? profilePic = await prefs.getString('profile_pic') ?? '';
           String? background = await prefs.getString('background') ?? '';
           String? email = await prefs.getString('email') ?? '';
-          String? userType = await prefs.getString('user_type') ?? '';
           String? university = await prefs.getString('university') ?? '';
           String? specialty = await prefs.getString('specialty') ?? '';
           String? countryName = await prefs.getString('country') ?? '';
@@ -114,7 +113,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           final prefs = SecureStorageService.instance;
           await prefs.initialize();
           await prefs.setString('token', response.token ?? '');
-          String? userToken = await prefs.getString('token') ?? '';
           await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
           AppData.userToken = response.token ?? '';
           AppData.logInUserId = response.user?.id ?? '';
@@ -207,7 +205,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         final prefs = SecureStorageService.instance;
         await prefs.initialize();
         await prefs.setBool('rememberMe', true);
-        await prefs.setString('device_token', event.deviceToken ?? '');
+        await prefs.setString('device_token', event.deviceToken);
         await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
         await prefs.setString('token', response.token ?? '');
         await prefs.setString('userId', response.user?.id ?? '');

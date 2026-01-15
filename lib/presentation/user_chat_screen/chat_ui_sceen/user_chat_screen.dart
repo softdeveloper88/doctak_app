@@ -525,7 +525,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            contact.unreadCount = 0;
+            // contact.unreadCount = 0; // Field is now final
             setState(() {});
             ChatRoomScreen(username: '${contact.firstName ?? ''} ${contact.lastName ?? ''}', profilePic: '${contact.profilePic}', id: '${contact.id}', roomId: '${contact.roomId}').launch(context);
           },

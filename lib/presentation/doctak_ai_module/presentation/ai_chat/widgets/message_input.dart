@@ -80,6 +80,7 @@ class _MessageInputState extends State<MessageInput> {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -187,13 +188,18 @@ class _MessageInputState extends State<MessageInput> {
           ),
         ),
 
-        // Input field and buttons - matching ChatGPT design
+        // Input field and buttons - matching ChatGPT design with proper edge-to-edge spacing
         Container(
           decoration: BoxDecoration(
             color: theme.cardBackground,
             boxShadow: [BoxShadow(color: theme.primary.withAlpha(13), offset: const Offset(0, -3), blurRadius: 8)],
           ),
-          padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 8.0, bottom: 8.0 + MediaQuery.of(context).padding.bottom),
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 12.0,
+            bottom: bottomPadding > 0 ? bottomPadding + 8.0 : 12.0,
+          ),
           child: Column(
             children: [
               Row(
@@ -222,7 +228,7 @@ class _MessageInputState extends State<MessageInput> {
                                 hintStyle: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
                                 hintText: widget.isWaitingForResponse ? 'Waiting for AI response...' : 'Ask anything...',
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
                               ),
                               textCapitalization: TextCapitalization.sentences,
                               cursorColor: theme.primary,
@@ -257,7 +263,7 @@ class _MessageInputState extends State<MessageInput> {
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               // Disclaimer note - ChatGPT style
               Text(
                 translation(context).msg_ai_disclaimer,

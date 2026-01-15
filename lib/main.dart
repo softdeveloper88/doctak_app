@@ -1367,7 +1367,6 @@ var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 bool isHandlingCallAtStartup = false;
 
 // Toggle for Crashlytics
-const _kShouldTestAsyncErrorOnInit = false;
 bool isCurrentlyOnNoInternet = false;
 const _kTestingCrashlytics = true;
 
@@ -1745,14 +1744,9 @@ Future<void> main() async {
     // Set up Crashlytics ONLY if Firebase initialized successfully
     if (firebaseInitialized) {
       try {
-        const fatalError = true;
         FlutterError.onError = (errorDetails) {
           try {
-            if (fatalError) {
-              FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-            } else {
-              FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
-            }
+            FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
           } catch (e) {
             debugPrint('Error recording Flutter error: $e');
           }
@@ -1760,11 +1754,7 @@ Future<void> main() async {
 
         PlatformDispatcher.instance.onError = (error, stack) {
           try {
-            if (fatalError) {
-              FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-            } else {
-              FirebaseCrashlytics.instance.recordError(error, stack);
-            }
+            FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
           } catch (e) {
             debugPrint('Error recording platform error: $e');
           }
@@ -1962,10 +1952,10 @@ Future<void> main() async {
 
 class MyApp extends StatefulWidget {
   final String? initialRoute;
-  String? id;
-  RemoteMessage? message;
+  final String? id;
+  final RemoteMessage? message;
 
-  MyApp({super.key, this.message, this.initialRoute, this.id});
+  const MyApp({super.key, this.message, this.initialRoute, this.id});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -2011,14 +2001,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     debugPrint('App lifecycle state changed to: $state');
 
-    // Flag to identify if navigating back to a call
-    bool isReturningToCall = false;
-
     if (state == AppLifecycleState.resumed) {
       // Check for active calls when app comes to foreground
       if (globalCallService.hasActiveCall) {
-        isReturningToCall = true;
-
         // Verify call is still active
         _verifyAndShowCallScreen();
       } else {
@@ -2096,8 +2081,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     super.didChangeDependencies();
   }
-
-  late Future<void> _initializeFlutterFireFuture;
 
   // Define an async function to initialize FlutterFire
   Future<void> _initializeFlutterFire() async {
@@ -2184,7 +2167,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     NotificationService.clearBadgeCount(); // Clears badge when app resumes
     setFCMSetting();
     // setToken();
-    _initializeFlutterFireFuture = _initializeFlutterFire();
+    // _initializeFlutterFireFuture = _initializeFlutterFire();
+    _initializeFlutterFire();
 
     // Check if we're handling a call at startup and setup appropriate callbacks
     if (isHandlingCallAtStartup) {

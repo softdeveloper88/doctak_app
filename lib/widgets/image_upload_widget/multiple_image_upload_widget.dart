@@ -3,14 +3,13 @@ import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/robust_image_picker.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/widgets/display_video.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_bloc.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_state.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 
 import 'bloc/image_upload_event.dart';
 
@@ -201,257 +200,467 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    
     return Container(
       width: context.width(),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: svGetScaffoldColor(),
-        borderRadius: radiusOnly(topRight: SVAppContainerRadius, topLeft: SVAppContainerRadius),
+        color: theme.cardBackground,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  BlocBuilder<ImageUploadBloc, ImageUploadState>(
-                    bloc: widget.imageUploadBloc,
-                    builder: (context, state) {
-                      if (state is FileLoadedState) {
-                        return widget.imageUploadBloc.imagefiles.isNotEmpty
-                            ? Wrap(
-                                children: widget.imageUploadBloc.imagefiles.map((imageone) {
-                                  return Stack(
-                                    children: [
-                                      Card(
-                                        child: SizedBox(
-                                          height: 60,
-                                          width: 60,
-                                          child: buildMediaItem(File(imageone.path)),
-                                          // child: Image.file(File(imageone.path,),fit: BoxFit.fill,),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        right: 0,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            widget.imageUploadBloc.add(SelectedFiles(pickedfiles: imageone, isRemove: true));
-                                            setState(() {});
-                                          },
-                                          child: const Icon(Icons.remove_circle_outlined, color: Colors.red),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }).toList(),
-                              )
-                            : Container();
-                      } else {
-                        return Container();
-                      }
-                    },
-                  ),
-                  // HorizontalList(
-                  //   itemCount: list.length,
-                  //   itemBuilder: (context, index) {
-                  //     return Image.asset(list[index], height: 62, width: 52, fit: BoxFit.cover);
-                  //   },
-                  // )
-                ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Drag handle - OneUI 8.5 style
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.textSecondary.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 16),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+
+          // Title section - OneUI 8.5 style
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+            child: Row(
               children: [
-                if (widget.imageType == "CT Scan" || widget.imageType == "MRI Scan" || widget.imageType == "Mammography")
-                  const Text(
-                    "Please upload one or two of the most relevant images for analysis.",
-                    style: TextStyle(fontFamily: 'Poppins', color: Colors.black87, fontWeight: FontWeight.bold),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: theme.primary.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
                   ),
-                const SizedBox(height: 8),
-                Divider(color: Colors.grey[300]),
-                BlocBuilder<ImageUploadBloc, ImageUploadState>(
-                  bloc: widget.imageUploadBloc,
-                  builder: (context, state) {
-                    bool canAddMore = widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
-                    return Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          colors: canAddMore ? [Colors.blue[600]!, Colors.blue[700]!] : [Colors.grey[400]!, Colors.grey[500]!],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [BoxShadow(color: (canAddMore ? Colors.blue : Colors.grey).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: canAddMore
-                              ? () {
-                                  openImages();
-                                }
-                              : null,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                                  child: const Icon(Icons.photo_library_outlined, size: 24, color: Colors.white),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Choose from Gallery',
-                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white, fontSize: 16),
-                                      ),
-                                      Text(
-                                        widget.imageLimit > 0 ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected' : 'Select medical images from your device',
-                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.8), size: 16),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+                  child: Icon(
+                    Icons.add_photo_alternate_rounded,
+                    color: theme.primary,
+                    size: 20,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                BlocBuilder<ImageUploadBloc, ImageUploadState>(
-                  bloc: widget.imageUploadBloc,
-                  builder: (context, state) {
-                    bool canAddMore = widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
-                    return Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: LinearGradient(
-                          colors: canAddMore ? [Colors.teal[600]!, Colors.teal[700]!] : [Colors.grey[400]!, Colors.grey[500]!],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [BoxShadow(color: (canAddMore ? Colors.teal : Colors.grey).withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: canAddMore
-                              ? () {
-                                  openCamera();
-                                }
-                              : null,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                                  child: const Icon(Icons.camera_alt_outlined, size: 24, color: Colors.white),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'Take Photo',
-                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.white, fontSize: 16),
-                                      ),
-                                      Text(
-                                        widget.imageLimit > 0 ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected' : 'Capture medical image with camera',
-                                        style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(Icons.arrow_forward_ios, color: Colors.white.withValues(alpha: 0.8), size: 16),
-                              ],
-                            ),
-                          ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Upload Images',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: theme.textPrimary,
                         ),
                       ),
-                    );
-                  },
+                      Text(
+                        'Select medical images for analysis',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 13,
+                          color: theme.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Divider(color: Colors.grey[300]),
               ],
             ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<ImageUploadBloc, ImageUploadState>(
-                bloc: widget.imageUploadBloc,
-                builder: (context, state) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        colors: widget.imageUploadBloc.imagefiles.isNotEmpty ? [Colors.blue[600]!, Colors.blue[700]!] : [Colors.grey[300]!, Colors.grey[400]!],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      boxShadow: widget.imageUploadBloc.imagefiles.isNotEmpty ? [BoxShadow(color: Colors.blue.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))] : null,
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(16),
-                        onTap: widget.imageUploadBloc.imagefiles.isNotEmpty ? () => widget.onTap(widget.imageUploadBloc.imagefiles) : null,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (widget.imageUploadBloc.imagefiles.isNotEmpty) ...[
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                                  child: const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
-                                ),
-                                const SizedBox(width: 12),
-                              ],
-                              Text(
-                                widget.imageUploadBloc.imagefiles.isNotEmpty ? 'Continue with Images' : 'Select Images First',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w600,
-                                  color: widget.imageUploadBloc.imagefiles.isNotEmpty ? Colors.white : Colors.grey[600],
-                                  fontSize: 16,
-                                ),
+          ),
+
+          // Content area with scroll
+          Flexible(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Selected images preview
+                    BlocBuilder<ImageUploadBloc, ImageUploadState>(
+                      bloc: widget.imageUploadBloc,
+                      builder: (context, state) {
+                        if (state is FileLoadedState && widget.imageUploadBloc.imagefiles.isNotEmpty) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: theme.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: theme.primary.withValues(alpha: 0.2),
+                                width: 1,
                               ),
-                            ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.photo_library,
+                                      size: 16,
+                                      color: theme.primary,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Selected Images (${widget.imageUploadBloc.imagefiles.length})',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: theme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: widget.imageUploadBloc.imagefiles.map((imageone) {
+                                      return Container(
+                                        margin: const EdgeInsets.only(right: 8),
+                                        child: Stack(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(12),
+                                              child: Container(
+                                                width: 80,
+                                                height: 80,
+                                                decoration: BoxDecoration(
+                                                  color: theme.scaffoldBackground,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: buildMediaItem(File(imageone.path)),
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: -4,
+                                              right: -4,
+                                              child: GestureDetector(
+                                                onTap: () {
+                                                  widget.imageUploadBloc.add(
+                                                    SelectedFiles(
+                                                      pickedfiles: imageone,
+                                                      isRemove: true,
+                                                    ),
+                                                  );
+                                                  setState(() {});
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(4),
+                                                  decoration: BoxDecoration(
+                                                    color: theme.error,
+                                                    shape: BoxShape.circle,
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: theme.error.withValues(alpha: 0.3),
+                                                        blurRadius: 4,
+                                                        offset: const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.close,
+                                                    color: Colors.white,
+                                                    size: 14,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+
+                    // Special instruction for medical scans
+                    if (widget.imageType == "CT Scan" ||
+                        widget.imageType == "MRI Scan" ||
+                        widget.imageType == "Mammography")
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: theme.warning.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.warning.withValues(alpha: 0.3),
+                            width: 1,
                           ),
                         ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              size: 18,
+                              color: theme.warning,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "Please upload one or two of the most relevant images for analysis.",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12,
+                                  color: theme.textPrimary,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+
+                    // Gallery button - OneUI 8.5 style
+                    BlocBuilder<ImageUploadBloc, ImageUploadState>(
+                      bloc: widget.imageUploadBloc,
+                      builder: (context, state) {
+                        bool canAddMore = widget.imageLimit == 0 ||
+                            widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
+                        return _buildActionButton(
+                          context: context,
+                          theme: theme,
+                          icon: Icons.photo_library_outlined,
+                          title: 'Choose from Gallery',
+                          subtitle: widget.imageLimit > 0
+                              ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected'
+                              : 'Select medical images from your device',
+                          gradientColors: canAddMore
+                              ? [theme.primary.withValues(alpha: 0.85), theme.primary]
+                              : [theme.textSecondary.withValues(alpha: 0.3), theme.textSecondary.withValues(alpha: 0.4)],
+                          enabled: canAddMore,
+                          onTap: canAddMore ? openImages : null,
+                        );
+                      },
                     ),
-                  );
-                },
+
+                    const SizedBox(height: 12),
+
+                    // Camera button - OneUI 8.5 style
+                    BlocBuilder<ImageUploadBloc, ImageUploadState>(
+                      bloc: widget.imageUploadBloc,
+                      builder: (context, state) {
+                        bool canAddMore = widget.imageLimit == 0 ||
+                            widget.imageUploadBloc.imagefiles.length < widget.imageLimit;
+                        return _buildActionButton(
+                          context: context,
+                          theme: theme,
+                          icon: Icons.camera_alt_outlined,
+                          title: 'Take Photo',
+                          subtitle: widget.imageLimit > 0
+                              ? '${widget.imageUploadBloc.imagefiles.length}/${widget.imageLimit} images selected'
+                              : 'Capture medical image with camera',
+                          gradientColors: canAddMore
+                              ? [theme.success.withValues(alpha: 0.85), theme.success]
+                              : [theme.textSecondary.withValues(alpha: 0.3), theme.textSecondary.withValues(alpha: 0.4)],
+                          enabled: canAddMore,
+                          onTap: canAddMore ? openCamera : null,
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Continue button - OneUI 8.5 style
+                    BlocBuilder<ImageUploadBloc, ImageUploadState>(
+                      bloc: widget.imageUploadBloc,
+                      builder: (context, state) {
+                        final hasImages = widget.imageUploadBloc.imagefiles.isNotEmpty;
+                        return Container(
+                          width: double.infinity,
+                          height: 54,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(27),
+                            gradient: hasImages
+                                ? LinearGradient(
+                                    colors: [theme.primary.withValues(alpha: 0.9), theme.primary],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : LinearGradient(
+                                    colors: [
+                                      theme.textSecondary.withValues(alpha: 0.2),
+                                      theme.textSecondary.withValues(alpha: 0.3),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                            boxShadow: hasImages
+                                ? [
+                                    BoxShadow(
+                                      color: theme.primary.withValues(alpha: 0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(27),
+                              onTap: hasImages
+                                  ? () => widget.onTap(widget.imageUploadBloc.imagefiles)
+                                  : null,
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (hasImages) ...[
+                                      Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.25),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.check_circle,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                    ],
+                                    Text(
+                                      hasImages ? 'Continue with Images' : 'Select Images First',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w600,
+                                        color: hasImages
+                                            ? Colors.white
+                                            : theme.textSecondary.withValues(alpha: 0.6),
+                                        fontSize: 16,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+                    // Bottom safe area padding
+                    SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                  ],
+                ),
               ),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper method to build action buttons with OneUI 8.5 style
+  Widget _buildActionButton({
+    required BuildContext context,
+    required OneUITheme theme,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required List<Color> gradientColors,
+    required bool enabled,
+    required VoidCallback? onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: LinearGradient(
+          colors: gradientColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: gradientColors.first.withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : [],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 24,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontSize: 16,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white.withValues(alpha: 0.8),
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

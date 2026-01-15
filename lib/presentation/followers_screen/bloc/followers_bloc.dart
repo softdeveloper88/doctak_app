@@ -139,7 +139,7 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
     // ProgressDialogUtils.showProgressDialog();
     print(event.userId);
     try {
-      var response = await apiManager.setUserFollow('Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
+      await apiManager.setUserFollow('Bearer ${AppData.userToken}', event.userId, event.follow);
       // setLoading(false);
       emit(FollowersPaginationLoadedState());
     } catch (e) {

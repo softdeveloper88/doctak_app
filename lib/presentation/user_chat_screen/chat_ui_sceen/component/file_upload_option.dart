@@ -9,12 +9,11 @@ import 'package:doctak_app/widgets/display_video.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:video_player/video_player.dart';
 
 class FileUploadOption extends StatefulWidget {
-  ChatBloc searchPeopleBloc;
+  final ChatBloc searchPeopleBloc;
 
-  FileUploadOption(this.searchPeopleBloc, {super.key});
+  const FileUploadOption(this.searchPeopleBloc, {super.key});
 
   @override
   State<FileUploadOption> createState() => _FileUploadOptionState();
@@ -22,7 +21,6 @@ class FileUploadOption extends StatefulWidget {
 
 class _FileUploadOptionState extends State<FileUploadOption> {
   // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
-  late VideoPlayerController _controller;
 
   final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
