@@ -1312,6 +1312,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get msg_no_posts => 'Aucune publication trouvée';
 
   @override
+  String get msg_no_people_found => 'Aucune personne trouvée';
+
+  @override
   String get msg_confirm_delete_post =>
       'Êtes-vous sûr de vouloir supprimer cette publication ?';
 
@@ -3192,4 +3195,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get msg_be_first_to_comment =>
       'Soyez le premier à partager vos connaissances médicales sur ce cas.';
+
+  @override
+  String get lbl_showing_cached_data => 'Affichage des données enregistrées';
+
+  @override
+  String get lbl_tap_to_retry => 'Appuyez sur réessayer pour actualiser';
 }

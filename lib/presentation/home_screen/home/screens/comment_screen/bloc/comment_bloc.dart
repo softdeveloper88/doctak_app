@@ -164,7 +164,12 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
         userHasLiked: false,
         reactionCount: 0,
         replyCount: 0,
-        commenter: Commenter(id: AppData.logInUserId, firstName: AppData.name, lastName: ''),
+        commenter: Commenter(
+          id: AppData.logInUserId, 
+          firstName: AppData.name, 
+          lastName: '',
+          profilePic: AppData.profile_pic.isNotEmpty ? '${AppData.imageUrl}${AppData.profile_pic}' : null,
+        ),
       ),
     );
     var response = await apiManager.makeComment('Bearer ${AppData.userToken}', event.postId.toString(), event.comment ?? "");
@@ -250,7 +255,10 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           commentableId: event.postId,
           comment: event.commentText,
           createdAt: formattedDateTime,
-          commenter: ReplyCommenter(name: AppData.name, profilePic: AppData.imageUrl),
+          commenter: ReplyCommenter(
+            name: AppData.name, 
+            profilePic: AppData.profile_pic.isNotEmpty ? '${AppData.imageUrl}${AppData.profile_pic}' : null,
+          ),
         ),
       );
       emit(PaginationLoadedState());

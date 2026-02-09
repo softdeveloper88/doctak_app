@@ -193,6 +193,8 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
                         context.read<DiscussionDetailBloc>().add(LoadDiscussionDetail(widget.caseId));
                       },
                       color: theme.primary,
+                      backgroundColor: theme.surfaceVariant,
+                      strokeWidth: 2.5,
                       child: CustomScrollView(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),

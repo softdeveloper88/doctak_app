@@ -197,42 +197,41 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.border, width: 1),
-        boxShadow: theme.cardShadow,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: theme.border.withValues(alpha: 0.5), width: 1),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end, // Align items to bottom for multi-line input
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // User Avatar (small)
           CircleAvatar(
-            radius: 18,
+            radius: 16,
             backgroundColor: theme.primary.withValues(alpha: 0.08),
-            child: Icon(Icons.person_rounded, size: 20, color: theme.primary),
+            child: Icon(Icons.person_rounded, size: 18, color: theme.primary),
           ),
 
-          const SizedBox(width: 14),
+          const SizedBox(width: 10),
 
           // Text Field with constraints to prevent overflow
           Expanded(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                maxHeight: 100, // Maximum height for input field
+                maxHeight: 80, // Maximum height for input field
               ),
               child: TextField(
                 controller: _replyController,
                 focusNode: _focusNode,
                 decoration: InputDecoration(
                   hintText: translation(context).lbl_write_a_comment,
-                  hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textTertiary, fontWeight: FontWeight.w400),
+                  hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary, fontWeight: FontWeight.w400),
                   border: InputBorder.none,
                   isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
-                style: TextStyle(fontFamily: 'Poppins', fontSize: 15, color: theme.textPrimary, fontWeight: FontWeight.w400),
+                style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary, fontWeight: FontWeight.w400),
                 // Allow text to wrap to new lines, but limit with ConstrainedBox
                 maxLines: null,
                 minLines: 1,
@@ -244,15 +243,18 @@ class _ImprovedReplyInputFieldState extends State<ImprovedReplyInputField> {
             ),
           ),
 
-          // Send Button
-          Container(
-            margin: const EdgeInsets.only(bottom: 2.0),
-            child: IconButton(
-              onPressed: () => _submitReply(_replyController.text),
-              icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
-              style: IconButton.styleFrom(backgroundColor: theme.primary, padding: const EdgeInsets.all(10), shape: const CircleBorder()),
-              constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+          const SizedBox(width: 8),
+
+          // Send Button - More compact
+          IconButton(
+            onPressed: () => _submitReply(_replyController.text),
+            icon: const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+            style: IconButton.styleFrom(
+              backgroundColor: theme.primary, 
+              padding: const EdgeInsets.all(8), 
+              shape: const CircleBorder(),
             ),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
           ),
         ],
       ),

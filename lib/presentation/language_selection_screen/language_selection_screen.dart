@@ -3,15 +3,18 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
 
   @override
-  State<LanguageSelectionScreen> createState() => _LanguageSelectionScreenState();
+  State<LanguageSelectionScreen> createState() =>
+      _LanguageSelectionScreenState();
 }
 
-class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with SingleTickerProviderStateMixin {
+class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   late Animation<Offset> _slideAnimation;
@@ -19,19 +22,52 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
   String? selectedLanguageCode;
 
   final List<LanguageOption> languages = [
-    LanguageOption(code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸'),
-    LanguageOption(code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦'),
-    LanguageOption(code: 'fa', name: 'Persian', nativeName: 'فارسی', flag: '🇮🇷'),
-    LanguageOption(code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷'),
-    LanguageOption(code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸'),
-    LanguageOption(code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪'),
+    LanguageOption(
+      code: 'en',
+      name: 'English',
+      nativeName: 'English',
+      flag: '🇺🇸',
+    ),
+    LanguageOption(
+      code: 'ar',
+      name: 'Arabic',
+      nativeName: 'العربية',
+      flag: '🇸🇦',
+    ),
+    LanguageOption(
+      code: 'fa',
+      name: 'Persian',
+      nativeName: 'فارسی',
+      flag: '🇮🇷',
+    ),
+    LanguageOption(
+      code: 'fr',
+      name: 'French',
+      nativeName: 'Français',
+      flag: '🇫🇷',
+    ),
+    LanguageOption(
+      code: 'es',
+      name: 'Spanish',
+      nativeName: 'Español',
+      flag: '🇪🇸',
+    ),
+    LanguageOption(
+      code: 'de',
+      name: 'German',
+      nativeName: 'Deutsch',
+      flag: '🇩🇪',
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
     _initializePreferences();
-    _animationController = AnimationController(duration: const Duration(milliseconds: 1000), vsync: this);
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
 
     _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -40,12 +76,13 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       ),
     );
 
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
-      ),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: const Interval(0.3, 1.0, curve: Curves.elasticOut),
+          ),
+        );
 
     _animationController.forward();
   }
@@ -97,17 +134,22 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
     // Navigate to the main app flow
     if (mounted) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const UnifiedSplashUpgradeScreen()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const UnifiedSplashUpgradeScreen(),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenHeight < 700;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackground,
       body: SafeArea(
         child: AnimatedBuilder(
           animation: _animationController,
@@ -121,7 +163,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                     return SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
                       child: ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight,
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20.0),
                           child: Column(
@@ -135,11 +179,31 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                                 width: isSmallScreen ? 50 : 60,
                                 height: isSmallScreen ? 50 : 60,
                                 decoration: BoxDecoration(
-                                  gradient: const LinearGradient(colors: [Color(0xFF4A90E2), Color(0xFF357ABD)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      theme.primary,
+                                      theme.primary.withValues(alpha: 0.8),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [BoxShadow(color: const Color(0xFF4A90E2).withValues(alpha: 0.3), blurRadius: 12, spreadRadius: 0, offset: const Offset(0, 4))],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.primary.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      blurRadius: 12,
+                                      spreadRadius: 0,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
-                                child: Icon(Icons.language_rounded, size: isSmallScreen ? 24 : 28, color: Colors.white),
+                                child: Icon(
+                                  Icons.language_rounded,
+                                  size: isSmallScreen ? 24 : 28,
+                                  color: theme.buttonPrimaryText,
+                                ),
                               ),
 
                               SizedBox(height: isSmallScreen ? 12 : 16),
@@ -147,7 +211,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                               // Welcome text
                               Text(
                                 'Choose Your Language',
-                                style: TextStyle(fontSize: isSmallScreen ? 18 : 20, fontWeight: FontWeight.bold, color: const Color(0xFF1A1D29), fontFamily: 'Poppins'),
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 18 : 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.textPrimary,
+                                  fontFamily: 'Poppins',
+                                ),
                                 textAlign: TextAlign.center,
                               ),
 
@@ -155,7 +224,11 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
                               Text(
                                 'Select your preferred language to continue',
-                                style: TextStyle(fontSize: isSmallScreen ? 11 : 13, color: const Color(0xFF6B7280), fontFamily: 'Poppins'),
+                                style: TextStyle(
+                                  fontSize: isSmallScreen ? 11 : 13,
+                                  color: theme.textSecondary,
+                                  fontFamily: 'Poppins',
+                                ),
                                 textAlign: TextAlign.center,
                               ),
 
@@ -163,45 +236,95 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
                               // Language Options
                               Container(
-                                constraints: BoxConstraints(maxHeight: constraints.maxHeight * 0.6),
+                                constraints: BoxConstraints(
+                                  maxHeight: constraints.maxHeight * 0.6,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: theme.cardBackground,
                                   borderRadius: BorderRadius.circular(14),
-                                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, spreadRadius: 0, offset: const Offset(0, 2))],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.divider.withValues(
+                                        alpha: 0.08,
+                                      ),
+                                      blurRadius: 12,
+                                      spreadRadius: 0,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
                                 child: ListView.builder(
                                   itemCount: languages.length,
                                   shrinkWrap: true,
                                   physics: const BouncingScrollPhysics(),
-                                  padding: const EdgeInsets.symmetric(vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 6,
+                                  ),
                                   itemBuilder: (context, index) {
                                     LanguageOption language = languages[index];
-                                    bool isSelected = selectedLanguageCode == language.code;
+                                    bool isSelected =
+                                        selectedLanguageCode == language.code;
                                     bool isLast = index == languages.length - 1;
 
                                     return Container(
-                                      margin: EdgeInsets.only(left: 10, right: 10, bottom: isLast ? 0 : 6),
+                                      margin: EdgeInsets.only(
+                                        left: 10,
+                                        right: 10,
+                                        bottom: isLast ? 0 : 6,
+                                      ),
                                       decoration: BoxDecoration(
-                                        color: isSelected ? const Color(0xFF4A90E2).withValues(alpha: 0.1) : Colors.transparent,
+                                        color: isSelected
+                                            ? theme.primary.withValues(
+                                                alpha: 0.1,
+                                              )
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(10),
-                                        border: isSelected ? Border.all(color: const Color(0xFF4A90E2), width: 1.5) : null,
+                                        border: isSelected
+                                            ? Border.all(
+                                                color: theme.primary,
+                                                width: 1.5,
+                                              )
+                                            : null,
                                       ),
                                       child: Material(
                                         color: Colors.transparent,
                                         child: InkWell(
-                                          borderRadius: BorderRadius.circular(10),
-                                          onTap: () => _selectLanguage(language.code),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          onTap: () =>
+                                              _selectLanguage(language.code),
                                           child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 14, vertical: isSmallScreen ? 8 : 10),
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: isSmallScreen ? 8 : 10,
+                                            ),
                                             child: Row(
                                               children: [
                                                 // Flag
                                                 Container(
-                                                  width: isSmallScreen ? 28 : 32,
-                                                  height: isSmallScreen ? 28 : 32,
-                                                  decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(6)),
+                                                  width: isSmallScreen
+                                                      ? 28
+                                                      : 32,
+                                                  height: isSmallScreen
+                                                      ? 28
+                                                      : 32,
+                                                  decoration: BoxDecoration(
+                                                    color: theme.surfaceVariant,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          6,
+                                                        ),
+                                                  ),
                                                   child: Center(
-                                                    child: Text(language.flag, style: TextStyle(fontSize: isSmallScreen ? 14 : 16)),
+                                                    child: Text(
+                                                      language.flag,
+                                                      style: TextStyle(
+                                                        fontSize: isSmallScreen
+                                                            ? 14
+                                                            : 16,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
 
@@ -210,25 +333,49 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                                                 // Language names
                                                 Expanded(
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         language.name,
                                                         style: TextStyle(
-                                                          fontSize: isSmallScreen ? 12 : 13,
-                                                          fontWeight: FontWeight.w600,
-                                                          color: isSelected ? const Color(0xFF4A90E2) : const Color(0xFF1A1D29),
+                                                          fontSize:
+                                                              isSmallScreen
+                                                              ? 12
+                                                              : 13,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          color: isSelected
+                                                              ? theme.primary
+                                                              : theme
+                                                                    .textPrimary,
                                                           fontFamily: 'Poppins',
                                                         ),
                                                       ),
-                                                      if (language.name != language.nativeName) ...[
-                                                        const SizedBox(height: 1),
+                                                      if (language.name !=
+                                                          language
+                                                              .nativeName) ...[
+                                                        const SizedBox(
+                                                          height: 1,
+                                                        ),
                                                         Text(
                                                           language.nativeName,
                                                           style: TextStyle(
-                                                            fontSize: isSmallScreen ? 10 : 11,
-                                                            color: isSelected ? const Color(0xFF4A90E2).withValues(alpha: 0.8) : const Color(0xFF6B7280),
-                                                            fontFamily: 'Poppins',
+                                                            fontSize:
+                                                                isSmallScreen
+                                                                ? 10
+                                                                : 11,
+                                                            color: isSelected
+                                                                ? theme.primary
+                                                                      .withValues(
+                                                                        alpha:
+                                                                            0.8,
+                                                                      )
+                                                                : theme
+                                                                      .textSecondary,
+                                                            fontFamily:
+                                                                'Poppins',
                                                           ),
                                                         ),
                                                       ],
@@ -238,15 +385,37 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
                                                 // Selection indicator
                                                 AnimatedContainer(
-                                                  duration: const Duration(milliseconds: 200),
-                                                  width: isSmallScreen ? 16 : 18,
-                                                  height: isSmallScreen ? 16 : 18,
+                                                  duration: const Duration(
+                                                    milliseconds: 200,
+                                                  ),
+                                                  width: isSmallScreen
+                                                      ? 16
+                                                      : 18,
+                                                  height: isSmallScreen
+                                                      ? 16
+                                                      : 18,
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
-                                                    color: isSelected ? const Color(0xFF4A90E2) : Colors.transparent,
-                                                    border: Border.all(color: isSelected ? const Color(0xFF4A90E2) : const Color(0xFFD1D5DB), width: 1.5),
+                                                    color: isSelected
+                                                        ? theme.primary
+                                                        : Colors.transparent,
+                                                    border: Border.all(
+                                                      color: isSelected
+                                                          ? theme.primary
+                                                          : theme.border,
+                                                      width: 1.5,
+                                                    ),
                                                   ),
-                                                  child: isSelected ? Icon(Icons.check, size: isSmallScreen ? 8 : 10, color: Colors.white) : null,
+                                                  child: isSelected
+                                                      ? Icon(
+                                                          Icons.check,
+                                                          size: isSmallScreen
+                                                              ? 8
+                                                              : 10,
+                                                          color: theme
+                                                              .buttonPrimaryText,
+                                                        )
+                                                      : null,
                                                 ),
                                               ],
                                             ),
@@ -263,10 +432,15 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
 
                               // Skip button (optional)
                               TextButton(
-                                onPressed: () => _selectLanguage('en'), // Default to English
+                                onPressed: () =>
+                                    _selectLanguage('en'), // Default to English
                                 child: Text(
                                   'Skip (Use English)',
-                                  style: TextStyle(fontSize: isSmallScreen ? 11 : 13, color: const Color(0xFF6B7280), fontFamily: 'Poppins'),
+                                  style: TextStyle(
+                                    fontSize: isSmallScreen ? 11 : 13,
+                                    color: theme.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
                                 ),
                               ),
 
@@ -293,5 +467,10 @@ class LanguageOption {
   final String nativeName;
   final String flag;
 
-  LanguageOption({required this.code, required this.name, required this.nativeName, required this.flag});
+  LanguageOption({
+    required this.code,
+    required this.name,
+    required this.nativeName,
+    required this.flag,
+  });
 }

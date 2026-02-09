@@ -311,11 +311,7 @@ class ChatBubble extends StatelessWidget {
                             child: Center(child: CircularProgressIndicator(color: theme.primary, strokeWidth: 2)),
                           ),
                           errorWidget: (context, url, error) {
-                            // Enhanced error debugging for profile images
-                            print('🚨 Profile image load error for URL: $url');
-                            print('🚨 Error details: $error');
-                            print('🚨 Error type: ${error.runtimeType}');
-
+                            // Silently handle image load errors
                             return Container(
                               color: theme.primary.withValues(alpha: 0.2),
                               child: Center(child: Icon(Icons.person, color: theme.primary, size: 20)),

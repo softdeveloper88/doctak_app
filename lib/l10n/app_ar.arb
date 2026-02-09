@@ -484,6 +484,7 @@
   "msg_error_downloading": "حدث خطأ أثناء التنزيل.",
   "msg_permission_denied": "تم رفض الإذن",
   "msg_no_posts": "لم يتم العثور على منشورات",
+  "msg_no_people_found": "لم يتم العثور على أشخاص",
   "msg_confirm_delete_post": "هل أنت متأكد أنك تريد حذف هذا المنشور؟",
   "lbl_search_post": "بحث المنشور",
   "lbl_likes": "إعجابات",
@@ -1328,5 +1329,9 @@
   "msg_no_comments_yet": "لا توجد تعليقات بعد",
   "msg_be_first_to_comment": "كن أول من يشارك رؤاه الطبية حول هذه الحالة.",
   "msg_loading_more_comments": "جارٍ تحميل المزيد من التعليقات...",
-  "lbl_related_cases": "الحالات المرتبطة"
+  "lbl_related_cases": "الحالات المرتبطة",
+
+  "@_OFFLINE_RETRY_BANNER": {},
+  "lbl_showing_cached_data": "عرض البيانات المحفوظة",
+  "lbl_tap_to_retry": "اضغط على إعادة المحاولة للتحديث"
 }

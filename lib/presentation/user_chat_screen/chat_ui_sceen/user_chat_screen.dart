@@ -304,6 +304,8 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
       ),
       body: RefreshIndicator(
         color: theme.primary,
+        backgroundColor: theme.surfaceVariant,
+        strokeWidth: 2.5,
         onRefresh: _refresh,
         child: BlocConsumer<ChatBloc, ChatState>(
           bloc: chatBloc,

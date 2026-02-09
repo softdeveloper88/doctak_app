@@ -492,6 +492,7 @@
   "msg_error_downloading": "Fehler beim Herunterladen aufgetreten.",
   "msg_permission_denied": "Berechtigung verweigert",
   "msg_no_posts": "Keine Beiträge gefunden",
+  "msg_no_people_found": "Keine Personen gefunden",
   "msg_confirm_delete_post": "Sind Sie sicher, dass Sie diesen Beitrag löschen möchten?",
   "lbl_search_post": "Beitrag suchen",
 
@@ -1295,5 +1296,9 @@
   "msg_no_comments_yet": "Noch keine Kommentare",
   "msg_be_first_to_comment": "Seien Sie der Erste, der medizinische Erkenntnisse zu diesem Fall teilt.",
   "msg_loading_more_comments": "Weitere Kommentare laden...",
-  "lbl_related_cases": "Verwandte Fälle"
+  "lbl_related_cases": "Verwandte Fälle",
+
+  "@_OFFLINE_RETRY_BANNER": {},
+  "lbl_showing_cached_data": "Gespeicherte Daten werden angezeigt",
+  "lbl_tap_to_retry": "Tippen Sie auf Wiederholen zum Aktualisieren"
 }

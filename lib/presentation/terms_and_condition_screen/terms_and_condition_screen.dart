@@ -75,7 +75,7 @@ class _TermsAndConditionScreenState extends State<TermsAndConditionScreen> {
                             Text(
                               '''Terms of Service for DocTak.net
 
-Last Updated: July 2024
+Last Updated: January 2026
 
 Welcome to DocTak.net("Terms") govern your use of the App/web, which is developed and provided by "DocTak App developers". By accessing or using the App, you agree to be bound by these Terms. If you do not agree to these Terms, do not use the App.
 
@@ -85,20 +85,30 @@ By creating an account or otherwise using the App/web, you confirm that you have
 2. Eligibility
 The App/web is intended for use by licensed medical professionals, including doctors and other healthcare providers. By using the App/web, you represent and warrant that you are a licensed medical professional and have the right, authority, and capacity to enter into these Terms.
 
-3. User-Generated Content (UGC)
+3. User-Generated Content (UGC) and Zero Tolerance Policy
 a. Content Creation: The App/web allows users to create, upload, and share content including profiles, posts, comments, case discussions, and more ("User-Generated Content" or "UGC"). 
 
 b. Responsibility for UGC: You are solely responsible for the UGC you create and share. You agree not to post content that is defamatory, harmful, illegal, or otherwise objectionable.
 
-c. License to UGC: By posting UGC, you grant us a non-exclusive, worldwide, royalty-free, perpetual license to use, modify, reproduce, distribute, and display such content in connection with the operation of the App/web.
+c. ZERO TOLERANCE POLICY: DocTak maintains a ZERO TOLERANCE policy for objectionable content and abusive users. Any user who posts objectionable content or engages in abusive behavior will have their account immediately suspended or terminated, and their content will be removed within 24 hours of being reported.
 
-d. Prohibited Content and Behaviors: You agree not to post content that:
+d. License to UGC: By posting UGC, you grant us a non-exclusive, worldwide, royalty-free, perpetual license to use, modify, reproduce, distribute, and display such content in connection with the operation of the App/web.
+
+e. Prohibited Content and Behaviors: You agree not to post content that:
    - Violates any applicable laws or regulations
-   - Contains hate speech, harassment, or threats
-   - Is obscene, pornographic, or offensive
+   - Contains hate speech, harassment, bullying, or threats
+   - Is obscene, pornographic, or sexually explicit
+   - Is violent, dangerous, or promotes self-harm
+   - Is discriminatory based on race, ethnicity, religion, gender, sexual orientation, disability, or any protected characteristic
    - Infringes on intellectual property rights
-   - Contains false or misleading information
+   - Contains false or misleading medical information
    - Promotes illegal activities
+   - Violates patient confidentiality or HIPAA regulations
+   - Constitutes spam or commercial solicitation
+
+f. Content Moderation: We actively monitor and moderate content on our platform. Users can report objectionable content using the in-app reporting feature. All reports are reviewed by our moderation team within 24 hours, and appropriate action is taken.
+
+g. Blocking Users: Users can block other users to prevent seeing their content and receiving messages from them. Blocking a user also notifies our moderation team for review.
 
 4. Terms of Use
 a. Account Security: You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
@@ -107,8 +117,10 @@ b. Prohibited Activities: You agree not to:
    - Use the App/web for any unlawful purpose
    - Attempt to gain unauthorized access to the App/web or other accounts
    - Engage in any activity that could harm or disrupt the App/web or its users
+   - Harass, bully, or abuse other users
+   - Create fake or impersonation accounts
 
-c. Reporting Violations: If you encounter any content or activity that violates these Terms, please report it to us using the reporting mechanisms provided within the App/web or by contacting info@DocTak.net.
+c. Reporting Violations: If you encounter any content or activity that violates these Terms, please report it immediately using the reporting mechanisms provided within the App/web or by contacting info@DocTak.net. We review and act on all reports within 24 hours.
 
 5. Jobs, Conferences, CME, and MOH Updates
 a. Job Listings: The App/web may provide information on job opportunities for medical professionals. We are not responsible for the accuracy or legitimacy of job listings.
@@ -120,8 +132,13 @@ c. CME and MOH Updates: The App/web may provide updates on Continuing Medical Ed
 6. Case Discussions
 The App/web allows for the discussion of medical cases among users. You agree to respect patient confidentiality and privacy at all times and to follow all applicable laws and regulations regarding patient information.
 
-7. Termination
-We reserve the right to suspend or terminate your account and access to the App/web if you violate these Terms or engage in conduct that we determine to be inappropriate or harmful.
+7. Termination and Enforcement
+We reserve the right to suspend or terminate your account and access to the App/web immediately and without prior notice if you:
+   - Post objectionable content
+   - Engage in abusive behavior towards other users
+   - Violate these Terms
+   - Engage in conduct that we determine to be inappropriate or harmful
+Terminated users may not create new accounts. We cooperate with law enforcement when required.
 
 8. Disclaimer of Warranties
 The App/web is provided on an "as is" and "as available" basis. We do not warrant that the App/web will be uninterrupted, error-free, or free of harmful components. We disclaim all warranties, express or implied, including but not limited to the warranties of merchantability and fitness for a particular purpose.

@@ -1287,6 +1287,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_no_posts => 'لم يتم العثور على منشورات';
 
   @override
+  String get msg_no_people_found => 'لم يتم العثور على أشخاص';
+
+  @override
   String get msg_confirm_delete_post =>
       'هل أنت متأكد أنك تريد حذف هذا المنشور؟';
 
@@ -3115,4 +3118,10 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get msg_be_first_to_comment =>
       'كن أول من يشارك رؤاه الطبية حول هذه الحالة.';
+
+  @override
+  String get lbl_showing_cached_data => 'عرض البيانات المحفوظة';
+
+  @override
+  String get lbl_tap_to_retry => 'اضغط على إعادة المحاولة للتحديث';
 }

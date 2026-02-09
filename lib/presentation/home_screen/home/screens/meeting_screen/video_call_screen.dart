@@ -3285,14 +3285,31 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       if (widget.isHost ?? false) {
         // Show loading indicator
         if (mounted) {
+          final theme = OneUITheme.of(context);
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => const Center(
+            builder: (context) => Center(
               child: Card(
+                color: theme.surfaceVariant,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Ending meeting...')]),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    CircularProgressIndicator(
+                      strokeWidth: 3,
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Ending meeting...',
+                      style: TextStyle(
+                        color: theme.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ]),
                 ),
               ),
             ),

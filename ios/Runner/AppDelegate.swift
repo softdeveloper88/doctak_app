@@ -1111,4 +1111,34 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
                 print("📺 ScreenShare: Could not find root view for broadcast picker")
             }
         }
+        
+        // MARK: - Deep Link Handling (Universal Links)
+        
+        /// Handle Universal Links (https://doctak.net/...) when app is launched or brought to foreground
+        override func application(
+            _ application: UIApplication,
+            continue userActivity: NSUserActivity,
+            restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+        ) -> Bool {
+            // Handle Universal Links
+            if userActivity.activityType == NSUserActivityTypeBrowsingWeb,
+               let url = userActivity.webpageURL {
+                print("🔗 DeepLink: Universal Link received: \(url)")
+                // Let Flutter's app_links package handle the URL
+                return super.application(application, continue: userActivity, restorationHandler: restorationHandler)
+            }
+            
+            return super.application(application, continue: userActivity, restorationHandler: restorationHandler)
+        }
+        
+        /// Handle custom URL scheme (doctak://...) when app is launched from URL
+        override func application(
+            _ app: UIApplication,
+            open url: URL,
+            options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+        ) -> Bool {
+            print("🔗 DeepLink: Custom URL scheme received: \(url)")
+            // Let Flutter's app_links package handle the URL
+            return super.application(app, open: url, options: options)
+        }
     }

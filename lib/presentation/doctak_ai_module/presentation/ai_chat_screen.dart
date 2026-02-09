@@ -1,10 +1,11 @@
 import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import '../blocs/ai_chat/ai_chat_bloc.dart';
 import '../data/models/ai_chat_model/ai_chat_message_model.dart';
 import '../data/models/ai_chat_model/ai_chat_session_model.dart';
@@ -23,7 +24,6 @@ class AiChatScreen extends StatefulWidget {
 
 class _AiChatScreenState extends State<AiChatScreen> {
   final ScrollController _scrollController = ScrollController();
-  final ImagePicker _imagePicker = ImagePicker();
   TextEditingController? _inputController;
   File? _selectedImage;
   bool _showWelcomeScreen = true;
@@ -68,11 +68,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    final File? image = await UnifiedGalleryPicker.pickSingleImage(
+      context,
+      title: translation(context).lbl_choose_from_gallery,
+    );
 
     if (image != null) {
       setState(() {
-        _selectedImage = File(image.path);
+        _selectedImage = image;
         _showWelcomeScreen = false;
       });
     }
@@ -282,9 +285,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
     return Container(
       color: theme.scaffoldBackground,
-      child: SafeArea(
-        child: Column(
-          children: [
+      child: Column(
+        children: [
             // Compact Hero Header Section
             Container(
               margin: EdgeInsets.fromLTRB(24, isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 24), 24, isVerySmallScreen ? 12 : 20),
@@ -342,17 +344,16 @@ class _AiChatScreenState extends State<AiChatScreen> {
               ),
             ),
 
-            // Enhanced 4-card grid layout - no scrolling
+            // Enhanced 4-card grid layout - 2 cards per row
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: GridView.count(
                   crossAxisCount: 2,
-                  crossAxisSpacing: isSmallScreen ? 10 : 14,
-                  mainAxisSpacing: isSmallScreen ? 10 : 14,
-                  childAspectRatio: isVerySmallScreen ? 1.1 : (isSmallScreen ? 1.0 : 0.95),
-                  physics: const NeverScrollableScrollPhysics(), // Disable scrolling
-                  shrinkWrap: true,
+                  crossAxisSpacing: isSmallScreen ? 12 : 16,
+                  mainAxisSpacing: isSmallScreen ? 12 : 16,
+                  childAspectRatio: isVerySmallScreen ? 1.0 : (isSmallScreen ? 1.1 : 1.2),
+                  physics: const BouncingScrollPhysics(),
                   children: [
                     _buildEnhancedFeatureCard(
                       title: translation(context).lbl_diagnosis_support,
@@ -399,7 +400,6 @@ class _AiChatScreenState extends State<AiChatScreen> {
             SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
           ],
         ),
-      ),
     );
   }
 
@@ -941,8 +941,20 @@ class _AiChatScreenState extends State<AiChatScreen> {
                     border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 2),
                     boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.1), blurRadius: 4, offset: const Offset(0, 2))],
                   ),
-                  child: Center(
-                    child: CustomImageView(imagePath: '${AppData.imageUrl}${AppData.profile_pic}', color: theme.isDark ? Colors.white : theme.primary),
+                  child: ClipOval(
+                    child: AppData.profile_pic.isNotEmpty && AppData.profile_pic.toLowerCase() != 'null'
+                        ? AppCachedNetworkImage(
+                            imageUrl: '${AppData.imageUrl}${AppData.profile_pic}',
+                            fit: BoxFit.cover,
+                            width: 48,
+                            height: 48,
+                          )
+                        : Center(
+                            child: Text(
+                              AppData.name.isNotEmpty ? AppData.name[0].toUpperCase() : 'U',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.primary),
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -1347,6 +1359,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 title,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
                 textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 4),
 
@@ -1355,6 +1369,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 description,
                 style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: theme.textSecondary),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

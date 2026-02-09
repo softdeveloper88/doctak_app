@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/news_model/news_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/bloc/news_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -10,7 +11,6 @@ import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'bloc/news_bloc.dart';
 import 'bloc/news_event.dart';
@@ -176,41 +176,6 @@ class _NewsScreenState extends State<NewsScreen> {
   }
 
   Future<void> _launchURL(String urlString) async {
-    Uri url = Uri.parse(urlString);
-
-    // Show a confirmation dialog before launching the URL
-    bool shouldLaunch =
-        await showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(translation(context).lbl_open_link),
-              content: Text('${translation(context).msg_open_link_confirm} \n$urlString'),
-              actions: <Widget>[
-                TextButton(
-                  child: Text(translation(context).lbl_cancel),
-                  onPressed: () {
-                    Navigator.of(context).pop(false); // Return false to shouldLaunch
-                  },
-                ),
-                TextButton(
-                  child: Text(translation(context).lbl_open),
-                  onPressed: () {
-                    Navigator.of(context).pop(true); // Return true to shouldLaunch
-                  },
-                ),
-              ],
-            );
-          },
-        ) ??
-        false; // shouldLaunch will be false if the dialog is dismissed
-
-    if (shouldLaunch) {
-      await launchUrl(url);
-    } else if (!shouldLaunch) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_leaving_app_canceled), backgroundColor: Colors.blue));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${translation(context).msg_could_not_launch} $urlString'), backgroundColor: Colors.red));
-    }
+    await PostUtils.launchURL(context, urlString);
   }
 }

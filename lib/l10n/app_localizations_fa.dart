@@ -1294,6 +1294,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get msg_no_posts => 'هیچ پستی یافت نشد';
 
   @override
+  String get msg_no_people_found => 'هیچ کاربری یافت نشد';
+
+  @override
   String get msg_confirm_delete_post =>
       'آیا مطمئن هستید که می‌خواهید این پست را حذف کنید؟';
 
@@ -3136,4 +3139,10 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get msg_be_first_to_comment =>
       'اولین نفری باشید که بینش‌های پزشکی خود را درباره این مورد به اشتراک بگذارد.';
+
+  @override
+  String get lbl_showing_cached_data => 'نمایش داده‌های ذخیره شده';
+
+  @override
+  String get lbl_tap_to_retry => 'برای تازه‌سازی روی تلاش مجدد بزنید';
 }

@@ -30,13 +30,18 @@ class ChatGptWithImageScreen extends StatefulWidget {
   final bool isFromMainScreen;
   final String? question;
 
-  const ChatGptWithImageScreen({super.key, this.isFromMainScreen = true, this.question});
+  const ChatGptWithImageScreen({
+    super.key,
+    this.isFromMainScreen = true,
+    this.question,
+  });
 
   @override
   ChatGPTScreenState createState() => ChatGPTScreenState();
 }
 
-class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindingObserver {
+class ChatGPTScreenState extends State<ChatGptWithImageScreen>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
   List<ChatGPTResponse> messages = [];
   late Future<List<Session>> futureSessions;
@@ -132,14 +137,18 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
 
     state1.response1.messages!.add(myMessage);
 
-    BlocProvider.of<ChatGPTBloc>(context).add(GetPost(sessionId: selectedSessionId.toString(), question: question));
+    BlocProvider.of<ChatGPTBloc>(
+      context,
+    ).add(GetPost(sessionId: selectedSessionId.toString(), question: question));
     textController.clear();
     scrollToBottom();
 
     try {
       isWriting = false;
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -171,7 +180,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
         setState(() {
           // Sync with current BLoC state
           selectedImageFiles = List.from(imageUploadBloc.imagefiles);
-          print('Main: Force refresh - selectedImageFiles has ${selectedImageFiles.length} files');
+          print(
+            'Main: Force refresh - selectedImageFiles has ${selectedImageFiles.length} files',
+          );
         });
       }
     }
@@ -193,8 +204,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             icon: Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(Icons.history_rounded, color: theme.primary, size: 16),
+              decoration: BoxDecoration(
+                color: theme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.history_rounded,
+                color: theme.primary,
+                size: 16,
+              ),
             ),
             onPressed: () {
               ChatHistoryScreen(
@@ -205,7 +223,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                     isOneTimeImageUploaded = false;
                     selectedImageFiles.clear();
                     imageUploadBloc.imagefiles.clear();
-                    selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                    selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                      context,
+                    ).newChatSessionId;
                   } catch (e) {
                     print(e);
                   }
@@ -217,7 +237,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                   selectedSessionId = session.id;
                   isLoadingMessages = true;
                   isOneTimeImageUploaded = true;
-                  BlocProvider.of<ChatGPTBloc>(context).add(GetMessages(sessionId: selectedSessionId.toString()));
+                  BlocProvider.of<ChatGPTBloc>(
+                    context,
+                  ).add(GetMessages(sessionId: selectedSessionId.toString()));
                   Navigator.of(context).pop();
                 },
               ).launch(context);
@@ -231,8 +253,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
               constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
               icon: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: Icon(Icons.add_photo_alternate_rounded, color: theme.primary, size: 16),
+                decoration: BoxDecoration(
+                  color: theme.primary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.add_photo_alternate_rounded,
+                  color: theme.primary,
+                  size: 16,
+                ),
               ),
               onPressed: () {
                 isOneTimeImageUploaded = false;
@@ -240,7 +269,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                 imageUploadBloc.imagefiles.clear();
                 try {
                   BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                    context,
+                  ).newChatSessionId;
                 } catch (e) {
                   print(e);
                 }
@@ -253,7 +284,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
         builder: (context, state1) {
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
-            chatWithAi = state1.response.sessions?.first.name ?? translation(context).lbl_preparing_ai;
+            chatWithAi =
+                state1.response.sessions?.first.name ??
+                translation(context).lbl_preparing_ai;
           } else if (state1 is DataError) {
             showToast(translation(context).msg_something_wrong);
             if (isError) {
@@ -263,7 +296,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                 selectedImageFiles.clear();
                 imageUploadBloc.imagefiles.clear();
                 isError = false;
-                selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                  context,
+                ).newChatSessionId;
               } catch (e) {
                 // Error logging suppressed
               }
@@ -308,33 +343,70 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                 decoration: BoxDecoration(
                                   color: theme.primary,
                                   shape: BoxShape.circle,
-                                  boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), spreadRadius: 2, blurRadius: 12, offset: const Offset(0, 4))],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.primary.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      spreadRadius: 2,
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
-                                child: const Center(child: Icon(Icons.image_search_rounded, color: Colors.white, size: 40)),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_search_rounded,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                ),
                               ),
 
                               // Welcome Text - OneUI 8.5 style
                               Text(
                                 translation(context).lbl_welcome_doctor,
-                                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Poppins', letterSpacing: 0.5, color: theme.textPrimary),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 0.5,
+                                  color: theme.textPrimary,
+                                ),
                               ),
                               const SizedBox(height: 12),
 
                               // Description - OneUI 8.5 style
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 child: Text(
-                                  translation(context).msg_upload_medical_images,
+                                  translation(
+                                    context,
+                                  ).msg_upload_medical_images,
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(fontSize: 14, fontFamily: 'Poppins', height: 1.5, color: theme.textSecondary),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: 'Poppins',
+                                    height: 1.5,
+                                    color: theme.textSecondary,
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 20),
 
                               // Upload Section - OneUI 8.5 style
                               Text(
-                                translation(context).lbl_select_medical_image_type,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.primary),
+                                translation(
+                                  context,
+                                ).lbl_select_medical_image_type,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: theme.primary,
+                                ),
                               ),
                               const SizedBox(height: 16),
 
@@ -344,7 +416,16 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(24),
                                   color: theme.primary,
-                                  boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), offset: const Offset(0, 4), blurRadius: 12, spreadRadius: 0)],
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.primary.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      offset: const Offset(0, 4),
+                                      blurRadius: 12,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
                                 ),
                                 child: Material(
                                   color: Colors.transparent,
@@ -352,7 +433,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                     borderRadius: BorderRadius.circular(24),
                                     onTap: () async {
                                       if (isOneTimeImageUploaded) {
-                                        toasty(context, translation(context).lbl_only_one_image_allowed);
+                                        toasty(
+                                          context,
+                                          translation(
+                                            context,
+                                          ).lbl_only_one_image_allowed,
+                                        );
                                         return;
                                       }
 
@@ -363,36 +449,62 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                         _showBeforeFileOptions();
                                         return;
                                       } catch (e) {
-                                        debugPrint('chat_gpt: picker failed, falling back to permission request: $e');
+                                        debugPrint(
+                                          'chat_gpt: picker failed, falling back to permission request: $e',
+                                        );
                                       }
 
                                       // If picker failed, request permission and then open options.
-                                      final granted = await PermissionUtils.ensurePhotoPermission();
+                                      final granted =
+                                          await PermissionUtils.ensurePhotoPermission();
                                       if (granted) {
                                         _showBeforeFileOptions();
                                       } else {
-                                        final status = await Permission.photos.status;
+                                        final status =
+                                            await Permission.photos.status;
                                         if (status.isPermanentlyDenied) {
                                           _permissionDialog();
                                         } else {
-                                          toasty(context, 'Photo access denied. Please allow to continue.');
+                                          toasty(
+                                            context,
+                                            'Photo access denied. Please allow to continue.',
+                                          );
                                         }
                                       }
                                     },
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16.0,
+                                      ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Container(
                                             padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                                            child: const Icon(Icons.add_photo_alternate_rounded, color: Colors.white, size: 24),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              Icons.add_photo_alternate_rounded,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
                                           ),
                                           const SizedBox(width: 16),
                                           Text(
-                                            translation(context).lbl_medical_images,
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: Colors.white),
+                                            translation(
+                                              context,
+                                            ).lbl_medical_images,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: 'Poppins',
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -406,24 +518,54 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                               // Info Container - OneUI 8.5 style
                               Container(
                                 decoration: BoxDecoration(
-                                  color: theme.primary.withValues(alpha: theme.isDark ? 0.15 : 0.08),
+                                  color: theme.primary.withValues(
+                                    alpha: theme.isDark ? 0.15 : 0.08,
+                                  ),
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1.5),
-                                  boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
+                                  border: Border.all(
+                                    color: theme.primary.withValues(alpha: 0.2),
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.primary.withValues(
+                                        alpha: 0.05,
+                                      ),
+                                      offset: const Offset(0, 2),
+                                      blurRadius: 8,
+                                      spreadRadius: 0,
+                                    ),
+                                  ],
                                 ),
                                 padding: const EdgeInsets.all(12),
                                 child: Row(
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.2), shape: BoxShape.circle),
-                                      child: Icon(Icons.lightbulb_rounded, color: theme.warning, size: 16),
+                                      decoration: BoxDecoration(
+                                        color: theme.warning.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.lightbulb_rounded,
+                                        color: theme.warning,
+                                        size: 16,
+                                      ),
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        translation(context).msg_upload_images_prompt,
-                                        style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: theme.primary),
+                                        translation(
+                                          context,
+                                        ).msg_upload_images_prompt,
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.primary,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -444,7 +586,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                         padding: const EdgeInsets.all(12),
                         itemCount: state1.response1.messages?.length,
                         itemBuilder: (context, index) {
-                          Messages message = state1.response1.messages?[index] ?? Messages();
+                          Messages message =
+                              state1.response1.messages?[index] ?? Messages();
                           return Column(
                             children: [
                               ChatBubble(
@@ -462,15 +605,25 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                           ? File(selectedImageFiles.last.path)
                                           : null
                                     : null,
-                                imageBytes1: index != 0 ? null : (message.imageBytes1 ?? imageBytes1),
-                                imageBytes2: index != 0 ? null : (message.imageBytes2 ?? imageBytes2),
-                                responseImageUrl1: index != 0 ? '' : message.imageUrl1 ?? '',
-                                responseImageUrl2: index != 0 ? '' : message.imageUrl2 ?? '',
+                                imageBytes1: index != 0
+                                    ? null
+                                    : (message.imageBytes1 ?? imageBytes1),
+                                imageBytes2: index != 0
+                                    ? null
+                                    : (message.imageBytes2 ?? imageBytes2),
+                                responseImageUrl1: index != 0
+                                    ? ''
+                                    : message.imageUrl1 ?? '',
+                                responseImageUrl2: index != 0
+                                    ? ''
+                                    : message.imageUrl2 ?? '',
                               ),
                               ChatBubble(
                                 text: message.response ?? "",
                                 isUserMessage: false,
-                                imageUrl1: selectedImageFiles.isNotEmpty ? File(selectedImageFiles.first.path) : null,
+                                imageUrl1: selectedImageFiles.isNotEmpty
+                                    ? File(selectedImageFiles.first.path)
+                                    : null,
                                 imageUrl2: selectedImageFiles.isNotEmpty
                                     ? selectedImageFiles.length == 2
                                           ? File(selectedImageFiles.last.path)
@@ -487,16 +640,24 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                   setState(() {
                                     var myMessage = Messages(
                                       id: -1,
-                                      gptSessionId: selectedSessionId.toString(),
+                                      gptSessionId: selectedSessionId
+                                          .toString(),
                                       question: question,
                                       imageUrl1: message.imageUrl1,
                                       imageUrl2: message.imageUrl2,
-                                      response: translation(context).lbl_generating_response,
+                                      response: translation(
+                                        context,
+                                      ).lbl_generating_response,
                                       createdAt: DateTime.now().toString(),
                                       updatedAt: DateTime.now().toString(),
                                     );
                                     state1.response1.messages!.add(myMessage);
-                                    BlocProvider.of<ChatGPTBloc>(context).add(GetPost(sessionId: selectedSessionId.toString(), question: question));
+                                    BlocProvider.of<ChatGPTBloc>(context).add(
+                                      GetPost(
+                                        sessionId: selectedSessionId.toString(),
+                                        question: question,
+                                      ),
+                                    );
                                     textController.clear();
                                     scrollToBottom();
                                   });
@@ -504,7 +665,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                   try {
                                     isWriting = false;
                                   } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error: $e')),
+                                    );
                                   }
                                 },
                               ),
@@ -522,17 +685,38 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                 Container(
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackground,
-                    boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), offset: const Offset(0, -3), blurRadius: 8)],
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.primary.withValues(alpha: 0.05),
+                        offset: const Offset(0, -3),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: EdgeInsets.only(
+                    left: 16.0,
+                    right: 16.0,
+                    top: 8.0,
+                    bottom: 8.0 + MediaQuery.of(context).viewPadding.bottom,
+                  ),
                   child: Column(
                     children: [
                       Container(
                         decoration: BoxDecoration(
                           color: theme.inputBackground,
                           borderRadius: BorderRadius.circular(24.0),
-                          border: Border.all(color: theme.primary.withValues(alpha: 0.2), width: 1.5),
-                          boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
+                          border: Border.all(
+                            color: theme.primary.withValues(alpha: 0.2),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.primary.withValues(alpha: 0.05),
+                              offset: const Offset(0, 2),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
@@ -540,23 +724,40 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                             IconButton(
                               icon: Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                                child: Icon(Icons.attach_file_rounded, color: theme.primary, size: 20),
+                                decoration: BoxDecoration(
+                                  color: theme.primary.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.attach_file_rounded,
+                                  color: theme.primary,
+                                  size: 20,
+                                ),
                               ),
                               onPressed: () async {
                                 if (isOneTimeImageUploaded) {
-                                  toasty(context, translation(context).lbl_only_one_image_allowed);
+                                  toasty(
+                                    context,
+                                    translation(
+                                      context,
+                                    ).lbl_only_one_image_allowed,
+                                  );
                                 } else {
-                                  final granted = await PermissionUtils.ensurePhotoPermission();
+                                  final granted =
+                                      await PermissionUtils.ensurePhotoPermission();
                                   if (granted) {
                                     _showBeforeFileOptions();
                                   } else {
-                                    final status = await Permission.photos.status;
+                                    final status =
+                                        await Permission.photos.status;
                                     if (status.isPermanentlyDenied) {
                                       _permissionDialog();
                                     } else {
                                       // Fallback when user denies without permanent denial.
-                                      toasty(context, 'Photo permission denied');
+                                      toasty(
+                                        context,
+                                        'Photo permission denied',
+                                      );
                                     }
                                   }
                                 }
@@ -570,12 +771,24 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                 controller: textController,
                                 minLines: 1,
                                 maxLines: 4,
-                                style: TextStyle(fontFamily: 'Poppins', fontSize: 16, color: theme.textPrimary),
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 16,
+                                  color: theme.textPrimary,
+                                ),
                                 decoration: InputDecoration(
-                                  hintStyle: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
-                                  hintText: translation(context).msg_clinical_summary_hint,
+                                  hintStyle: TextStyle(
+                                    color: theme.textSecondary,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                  hintText: translation(
+                                    context,
+                                  ).msg_clinical_summary_hint,
                                   border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                    vertical: 16.0,
+                                  ),
                                 ),
                               ),
                             ),
@@ -586,7 +799,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: theme.primary,
-                                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.primary.withValues(alpha: 0.3),
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 8,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
                               ),
                               child: Material(
                                 color: Colors.transparent,
@@ -595,34 +815,55 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                   onTap: () async {
                                     // Dismiss keyboard reliably on both iOS and Android
                                     FocusScope.of(context).unfocus();
-                                    FocusManager.instance.primaryFocus?.unfocus();
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
 
                                     isError = true;
 
                                     if (selectedImageFiles.isEmpty) {
                                       return;
-                                    } else if (imageUploadBloc.imagefiles.isEmpty && isOneTimeImageUploaded) {
-                                      String question = textController.text.trim();
+                                    } else if (imageUploadBloc
+                                            .imagefiles
+                                            .isEmpty &&
+                                        isOneTimeImageUploaded) {
+                                      String question = textController.text
+                                          .trim();
                                       if (question != '') {
                                         setState(() {
                                           isOneTimeImageUploaded = true;
                                           var myMessage = Messages(
                                             id: -1,
-                                            gptSessionId: selectedSessionId.toString(),
+                                            gptSessionId: selectedSessionId
+                                                .toString(),
                                             question: question,
-                                            response: translation(context).lbl_generating_response,
-                                            createdAt: DateTime.now().toString(),
-                                            updatedAt: DateTime.now().toString(),
+                                            response: translation(
+                                              context,
+                                            ).lbl_generating_response,
+                                            createdAt: DateTime.now()
+                                                .toString(),
+                                            updatedAt: DateTime.now()
+                                                .toString(),
                                             imageUrl1: '',
                                             imageUrl2: '',
                                             imageBytes1: imageBytes1,
                                             imageBytes2: imageBytes2,
                                           );
-                                          state1.response1.messages!.add(myMessage);
+                                          state1.response1.messages!.add(
+                                            myMessage,
+                                          );
 
                                           BlocProvider.of<ChatGPTBloc>(
                                             context,
-                                          ).add(GetPost(sessionId: selectedSessionId.toString(), question: question, imageUrl1: null, imageUrl2: null, imageType: imageType));
+                                          ).add(
+                                            GetPost(
+                                              sessionId: selectedSessionId
+                                                  .toString(),
+                                              question: question,
+                                              imageUrl1: null,
+                                              imageUrl2: null,
+                                              imageType: imageType,
+                                            ),
+                                          );
                                           imageUploadBloc.imagefiles.clear();
                                           selectedImageFiles.clear();
                                           textController.clear();
@@ -632,13 +873,28 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                         try {
                                           isWriting = false;
                                         } catch (e) {
-                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Error: $e'),
+                                            ),
+                                          );
                                         }
                                       } else {
-                                        toasty(context, translation(context).lbl_please_ask_question);
+                                        toasty(
+                                          context,
+                                          translation(
+                                            context,
+                                          ).lbl_please_ask_question,
+                                        );
                                       }
-                                    } else if (imageUploadBloc.imagefiles.isNotEmpty && !isOneTimeImageUploaded) {
-                                      String question = textController.text.trim();
+                                    } else if (imageUploadBloc
+                                            .imagefiles
+                                            .isNotEmpty &&
+                                        !isOneTimeImageUploaded) {
+                                      String question = textController.text
+                                          .trim();
 
                                       // mark used immediately (sync); heavy work below
                                       setState(() {
@@ -650,19 +906,49 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                       List<int>? outgoingBytes1;
                                       List<int>? outgoingBytes2;
                                       try {
-                                        final path1 = imageUploadBloc.imagefiles.first.path;
-                                        outgoingBytes1 = await compute(_readFileBytesIsolate, path1);
-                                        if (imageUploadBloc.imagefiles.length > 1) {
-                                          final path2 = imageUploadBloc.imagefiles.last.path;
-                                          outgoingBytes2 = await compute(_readFileBytesIsolate, path2);
+                                        final path1 = imageUploadBloc
+                                            .imagefiles
+                                            .first
+                                            .path;
+                                        outgoingBytes1 = await compute(
+                                          _readFileBytesIsolate,
+                                          path1,
+                                        );
+                                        if (imageUploadBloc.imagefiles.length >
+                                            1) {
+                                          final path2 = imageUploadBloc
+                                              .imagefiles
+                                              .last
+                                              .path;
+                                          outgoingBytes2 = await compute(
+                                            _readFileBytesIsolate,
+                                            path2,
+                                          );
                                         }
                                       } catch (e) {
                                         try {
-                                          final f1 = File(imageUploadBloc.imagefiles.first.path);
-                                          if (await f1.exists()) outgoingBytes1 = await f1.readAsBytes();
-                                          if (imageUploadBloc.imagefiles.length > 1) {
-                                            final f2 = File(imageUploadBloc.imagefiles.last.path);
-                                            if (await f2.exists()) outgoingBytes2 = await f2.readAsBytes();
+                                          final f1 = File(
+                                            imageUploadBloc
+                                                .imagefiles
+                                                .first
+                                                .path,
+                                          );
+                                          if (await f1.exists())
+                                            outgoingBytes1 = await f1
+                                                .readAsBytes();
+                                          if (imageUploadBloc
+                                                  .imagefiles
+                                                  .length >
+                                              1) {
+                                            final f2 = File(
+                                              imageUploadBloc
+                                                  .imagefiles
+                                                  .last
+                                                  .path,
+                                            );
+                                            if (await f2.exists())
+                                              outgoingBytes2 = await f2
+                                                  .readAsBytes();
                                           }
                                         } catch (_) {
                                           outgoingBytes1 = null;
@@ -672,25 +958,54 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
 
                                       var myMessage = Messages(
                                         id: -1,
-                                        gptSessionId: selectedSessionId.toString(),
+                                        gptSessionId: selectedSessionId
+                                            .toString(),
                                         question: question,
-                                        response: translation(context).lbl_generating_response,
+                                        response: translation(
+                                          context,
+                                        ).lbl_generating_response,
                                         createdAt: DateTime.now().toString(),
                                         updatedAt: DateTime.now().toString(),
-                                        imageUrl1: imageUploadBloc.imagefiles.first.path,
-                                        imageUrl2: imageUploadBloc.imagefiles.length > 1 ? imageUploadBloc.imagefiles.last.path : imageUploadBloc.imagefiles.first.path,
-                                        imageBytes1: outgoingBytes1 ?? imageBytes1,
-                                        imageBytes2: outgoingBytes2 ?? imageBytes2,
+                                        imageUrl1: imageUploadBloc
+                                            .imagefiles
+                                            .first
+                                            .path,
+                                        imageUrl2:
+                                            imageUploadBloc.imagefiles.length >
+                                                1
+                                            ? imageUploadBloc
+                                                  .imagefiles
+                                                  .last
+                                                  .path
+                                            : imageUploadBloc
+                                                  .imagefiles
+                                                  .first
+                                                  .path,
+                                        imageBytes1:
+                                            outgoingBytes1 ?? imageBytes1,
+                                        imageBytes2:
+                                            outgoingBytes2 ?? imageBytes2,
                                       );
 
                                       // Add the optimistic message and start the request
                                       state1.response1.messages!.add(myMessage);
                                       BlocProvider.of<ChatGPTBloc>(context).add(
                                         GetPost(
-                                          sessionId: selectedSessionId.toString(),
-                                          question: question == "" ? translation(context).lbl_analyse_image : question,
-                                          imageUrl1: imageUploadBloc.imagefiles.first.path,
-                                          imageUrl2: imageUploadBloc.imagefiles.last.path,
+                                          sessionId: selectedSessionId
+                                              .toString(),
+                                          question: question == ""
+                                              ? translation(
+                                                  context,
+                                                ).lbl_analyse_image
+                                              : question,
+                                          imageUrl1: imageUploadBloc
+                                              .imagefiles
+                                              .first
+                                              .path,
+                                          imageUrl2: imageUploadBloc
+                                              .imagefiles
+                                              .last
+                                              .path,
                                           imageType: imageType,
                                         ),
                                       );
@@ -702,13 +1017,26 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                       try {
                                         isWriting = false;
                                       } catch (e) {
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(content: Text('Error: $e')),
+                                        );
                                       }
                                     }
                                   },
                                   child: Padding(
                                     padding: const EdgeInsets.all(12.0),
-                                    child: isWriting ? const TypingIndicators(color: Colors.white, size: 3.0) : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                                    child: isWriting
+                                        ? const TypingIndicators(
+                                            color: Colors.white,
+                                            size: 3.0,
+                                          )
+                                        : const Icon(
+                                            Icons.send_rounded,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
                                   ),
                                 ),
                               ),
@@ -719,7 +1047,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                       const SizedBox(height: 6),
                       Text(
                         translation(context).msg_ai_disclaimer,
-                        style: TextStyle(fontFamily: 'Poppins', fontSize: 11, color: theme.textSecondary, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11,
+                          color: theme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -739,7 +1072,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
 
   // Image Preview Widget - simplified to use selectedImageFiles directly
   Widget _buildImagePreview() {
-    print('Main: _buildImagePreview - selectedImageFiles has ${selectedImageFiles.length} images');
+    print(
+      'Main: _buildImagePreview - selectedImageFiles has ${selectedImageFiles.length} images',
+    );
     return Container(
       color: svGetScaffoldColor(),
       child: selectedImageFiles.isNotEmpty
@@ -756,10 +1091,22 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                           height: 50,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.blue.withValues(alpha: 0.2), width: 2),
-                            boxShadow: [BoxShadow(color: Colors.blue.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
+                            border: Border.all(
+                              color: Colors.blue.withValues(alpha: 0.2),
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.withValues(alpha: 0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          child: ClipRRect(borderRadius: BorderRadius.circular(10), child: buildMediaItem(File(imageone.path))),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: buildMediaItem(File(imageone.path)),
+                          ),
                         ),
                         Positioned(
                           top: -4,
@@ -768,16 +1115,31 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                             onTap: () {
                               setState(() {});
                               selectedImageFiles.remove(imageone);
-                              imageUploadBloc.add(SelectedFiles(pickedfiles: imageone, isRemove: true));
+                              imageUploadBloc.add(
+                                SelectedFiles(
+                                  pickedfiles: imageone,
+                                  isRemove: true,
+                                ),
+                              );
                             },
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 color: Colors.red[500],
                                 shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: Colors.red.withAlpha(77), blurRadius: 4, offset: const Offset(0, 2))],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.red.withAlpha(77),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              child: const Icon(Icons.close_rounded, color: Colors.white, size: 12),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white,
+                                size: 12,
+                              ),
                             ),
                           ),
                         ),
@@ -803,24 +1165,48 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
             width: 60,
             height: 60,
             margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(color: errorTheme.error.withAlpha(26), shape: BoxShape.circle),
-            child: Icon(Icons.error_outline_rounded, color: errorTheme.error, size: 30),
+            decoration: BoxDecoration(
+              color: errorTheme.error.withAlpha(26),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline_rounded,
+              color: errorTheme.error,
+              size: 30,
+            ),
           ),
           Text(
             translation(context).lbl_error,
-            style: TextStyle(color: errorTheme.error, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+            style: TextStyle(
+              color: errorTheme.error,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Poppins',
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             errorMessage,
             textAlign: TextAlign.center,
-            style: TextStyle(color: errorTheme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
+            style: TextStyle(
+              color: errorTheme.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+            ),
           ),
           const SizedBox(height: 20),
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: errorTheme.primary.withAlpha(51), offset: const Offset(0, 4), blurRadius: 8, spreadRadius: 0)],
+              boxShadow: [
+                BoxShadow(
+                  color: errorTheme.primary.withAlpha(51),
+                  offset: const Offset(0, 4),
+                  blurRadius: 8,
+                  spreadRadius: 0,
+                ),
+              ],
             ),
             child: ElevatedButton(
               onPressed: () {
@@ -829,7 +1215,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                   isOneTimeImageUploaded = false;
                   selectedImageFiles.clear();
                   imageUploadBloc.imagefiles.clear();
-                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(context).newChatSessionId;
+                  selectedSessionId = BlocProvider.of<ChatGPTBloc>(
+                    context,
+                  ).newChatSessionId;
                 } catch (e) {
                   debugPrint(e.toString());
                 }
@@ -837,12 +1225,21 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
               style: ElevatedButton.styleFrom(
                 backgroundColor: errorTheme.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
               ),
               child: Text(
                 translation(context).lbl_try_again,
-                style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 14),
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
@@ -863,7 +1260,13 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
           decoration: BoxDecoration(
             color: sheetTheme.cardBackground,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            boxShadow: [BoxShadow(color: sheetTheme.primary.withAlpha(26), blurRadius: 20, offset: const Offset(0, -5))],
+            boxShadow: [
+              BoxShadow(
+                color: sheetTheme.primary.withAlpha(26),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -873,7 +1276,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                 margin: const EdgeInsets.only(top: 12, bottom: 8),
                 width: 40,
                 height: 4,
-                decoration: BoxDecoration(color: sheetTheme.textSecondary.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(
+                  color: sheetTheme.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
               // Header
               Container(
@@ -882,8 +1288,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: sheetTheme.primary, borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.medical_services_outlined, color: Colors.white, size: 20),
+                      decoration: BoxDecoration(
+                        color: sheetTheme.primary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.medical_services_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -892,11 +1305,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                         children: [
                           Text(
                             translation(context).lbl_select_option,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: sheetTheme.textPrimary),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Poppins',
+                              color: sheetTheme.textPrimary,
+                            ),
                           ),
                           Text(
                             'Choose medical image type for AI analysis',
-                            style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: sheetTheme.textSecondary),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'Poppins',
+                              color: sheetTheme.textSecondary,
+                            ),
                           ),
                         ],
                       ),
@@ -994,7 +1416,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'AI-powered medical image analysis',
-                    style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: sheetTheme.textSecondary),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                      color: sheetTheme.textSecondary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -1006,7 +1432,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
     );
   }
 
-  Widget _buildAdvancedOption({required IconData icon, required Color color, required String title, required String subtitle, required VoidCallback onTap, bool fullWidth = false}) {
+  Widget _buildAdvancedOption({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    bool fullWidth = false,
+  }) {
     final optionTheme = OneUITheme.of(context);
     return Material(
       color: Colors.transparent,
@@ -1019,7 +1452,13 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
             color: optionTheme.cardBackground,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-            boxShadow: [BoxShadow(color: color.withValues(alpha: 0.1), blurRadius: 12, offset: const Offset(0, 4))],
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1029,20 +1468,35 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                 decoration: BoxDecoration(
                   color: color,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.4),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Icon(icon, color: Colors.white, size: 24),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: optionTheme.textPrimary),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  color: optionTheme.textPrimary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: optionTheme.textSecondary),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontFamily: 'Poppins',
+                  color: optionTheme.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1078,10 +1532,22 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
             return Container(
               decoration: BoxDecoration(
                 color: fileSheetTheme.cardBackground,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(28),
+                ),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, -8), spreadRadius: 0),
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 40, offset: const Offset(0, -20), spreadRadius: 0),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 20,
+                    offset: const Offset(0, -8),
+                    spreadRadius: 0,
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 40,
+                    offset: const Offset(0, -20),
+                    spreadRadius: 0,
+                  ),
                 ],
               ),
               child: Column(
@@ -1091,7 +1557,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                     margin: const EdgeInsets.only(top: 12, bottom: 8),
                     width: 40,
                     height: 4,
-                    decoration: BoxDecoration(color: fileSheetTheme.textSecondary.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2)),
+                    decoration: BoxDecoration(
+                      color: fileSheetTheme.textSecondary.withValues(
+                        alpha: 0.4,
+                      ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                   // Enhanced header
                   Container(
@@ -1105,9 +1576,21 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                               decoration: BoxDecoration(
                                 color: fileSheetTheme.primary,
                                 borderRadius: BorderRadius.circular(16),
-                                boxShadow: [BoxShadow(color: fileSheetTheme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: fileSheetTheme.primary.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                              child: const Icon(Icons.cloud_upload_outlined, color: Colors.white, size: 24),
+                              child: const Icon(
+                                Icons.cloud_upload_outlined,
+                                color: Colors.white,
+                                size: 24,
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -1116,11 +1599,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                                 children: [
                                   Text(
                                     'Upload $imageType Images',
-                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: fileSheetTheme.textPrimary),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: 'Poppins',
+                                      color: fileSheetTheme.textPrimary,
+                                    ),
                                   ),
                                   Text(
                                     'Select up to ${imageLimit == 0 ? 'multiple' : imageLimit} medical image${imageLimit == 1 ? '' : 's'} for AI analysis',
-                                    style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: fileSheetTheme.textSecondary),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontFamily: 'Poppins',
+                                      color: fileSheetTheme.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -1131,18 +1623,34 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: fileSheetTheme.primary.withValues(alpha: 0.08),
+                            color: fileSheetTheme.primary.withValues(
+                              alpha: 0.08,
+                            ),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: fileSheetTheme.primary.withValues(alpha: 0.2), width: 1),
+                            border: Border.all(
+                              color: fileSheetTheme.primary.withValues(
+                                alpha: 0.2,
+                              ),
+                              width: 1,
+                            ),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.info_outline, color: fileSheetTheme.primary, size: 16),
+                              Icon(
+                                Icons.info_outline,
+                                color: fileSheetTheme.primary,
+                                size: 16,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   'High-quality images provide better AI analysis results',
-                                  style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: fileSheetTheme.primary, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    color: fileSheetTheme.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
                             ],
@@ -1162,15 +1670,32 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                             decoration: BoxDecoration(
                               color: fileSheetTheme.inputBackground,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: fileSheetTheme.primary.withValues(alpha: 0.15), width: 2),
+                              border: Border.all(
+                                color: fileSheetTheme.primary.withValues(
+                                  alpha: 0.15,
+                                ),
+                                width: 2,
+                              ),
                             ),
-                            child: MultipleImageUploadWidget(imageType: imageType, imageUploadBloc, imageLimit: imageLimit, autoOpenGallery: imageType == 'X-ray', (imageFiles) {
-                              print('Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images');
-                              selectedImageFiles = List.from(imageUploadBloc.imagefiles);
-                              print('Main: selectedImageFiles updated to ${selectedImageFiles.length} images');
-                              setState(() {});
-                              Navigator.pop(context);
-                            }),
+                            child: MultipleImageUploadWidget(
+                              imageType: imageType,
+                              imageUploadBloc,
+                              imageLimit: imageLimit,
+                              autoOpenGallery: imageType == 'X-ray',
+                              (imageFiles) {
+                                print(
+                                  'Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images',
+                                );
+                                selectedImageFiles = List.from(
+                                  imageUploadBloc.imagefiles,
+                                );
+                                print(
+                                  'Main: selectedImageFiles updated to ${selectedImageFiles.length} images',
+                                );
+                                setState(() {});
+                                Navigator.pop(context);
+                              },
+                            ),
                           ),
                           const SizedBox(height: 20),
                         ],
@@ -1194,33 +1719,61 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
         final dialogTheme = OneUITheme.of(context);
         return AlertDialog(
           backgroundColor: dialogTheme.cardBackground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: dialogTheme.warning.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: Icon(Icons.photo_library_outlined, color: dialogTheme.warning, size: 24),
+                decoration: BoxDecoration(
+                  color: dialogTheme.warning.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.photo_library_outlined,
+                  color: dialogTheme.warning,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Photo Access Required',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: dialogTheme.textPrimary),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: dialogTheme.textPrimary,
+                  ),
                 ),
               ),
             ],
           ),
           content: Text(
             'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.',
-            style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: dialogTheme.textSecondary, height: 1.4),
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'Poppins',
+              color: dialogTheme.textSecondary,
+              height: 1.4,
+            ),
           ),
           actions: <Widget>[
             TextButton(
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+              ),
               child: Text(
                 translation(context).lbl_cancel,
-                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: dialogTheme.textSecondary),
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: dialogTheme.textSecondary,
+                ),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -1232,12 +1785,20 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
                 style: ElevatedButton.styleFrom(
                   backgroundColor: dialogTheme.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: const Text(
                   'Open Settings',
-                  style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 onPressed: () {
                   openAppSettings();
@@ -1254,7 +1815,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen> with WidgetsBindi
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 500), curve: Curves.easeOut);
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeOut,
+        );
       }
     });
   }

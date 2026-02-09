@@ -2,11 +2,18 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 
-ContactsModel contactsModelFromJson(String str) => ContactsModel.fromJson(json.decode(str));
+ContactsModel contactsModelFromJson(String str) =>
+    ContactsModel.fromJson(json.decode(str));
 String contactsModelToJson(ContactsModel data) => json.encode(data.toJson());
 
 class ContactsModel {
-  ContactsModel({this.success, this.groups, this.contacts, this.total, this.lastPage});
+  ContactsModel({
+    this.success,
+    this.groups,
+    this.contacts,
+    this.total,
+    this.lastPage,
+  });
 
   ContactsModel.fromJson(dynamic json) {
     success = json['success'];
@@ -60,18 +67,28 @@ class Contacts extends Equatable {
   final String? latestMessageTime;
   final int? unreadCount;
 
-  Contacts({this.id, this.roomId, this.createdAt, this.firstName, this.lastName, this.profilePic, this.latestMessage, this.latestMessageTime, this.unreadCount});
+  const Contacts({
+    this.id,
+    this.roomId,
+    this.createdAt,
+    this.firstName,
+    this.lastName,
+    this.profilePic,
+    this.latestMessage,
+    this.latestMessageTime,
+    this.unreadCount,
+  });
 
   Contacts.fromJson(dynamic json)
-      : id = json['id'],
-        roomId = json['room_id'],
-        createdAt = json['created_at'],
-        firstName = json['first_name'],
-        lastName = json['last_name'],
-        profilePic = json['profile_pic'],
-        latestMessage = json['latest_message'],
-        latestMessageTime = json['latest_message_time'],
-        unreadCount = json['unread_count'];
+    : id = json['id'],
+      roomId = json['room_id'],
+      createdAt = json['created_at'],
+      firstName = json['first_name'],
+      lastName = json['last_name'],
+      profilePic = json['profile_pic'],
+      latestMessage = json['latest_message'],
+      latestMessageTime = json['latest_message_time'],
+      unreadCount = json['unread_count'];
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -88,14 +105,29 @@ class Contacts extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, roomId, createdAt, firstName, lastName, profilePic, latestMessage, latestMessageTime];
+  List<Object?> get props => [
+    id,
+    roomId,
+    createdAt,
+    firstName,
+    lastName,
+    profilePic,
+    latestMessage,
+    latestMessageTime,
+  ];
 }
 
 Groups groupsFromJson(String str) => Groups.fromJson(json.decode(str));
 String groupsToJson(Groups data) => json.encode(data.toJson());
 
 class Groups {
-  Groups({this.roomId, this.createdAt, this.groupName, this.latestMessage, this.latestMessageTime});
+  Groups({
+    this.roomId,
+    this.createdAt,
+    this.groupName,
+    this.latestMessage,
+    this.latestMessageTime,
+  });
 
   Groups.fromJson(dynamic json) {
     roomId = json['room_id'];

@@ -15,9 +15,12 @@ Future<Map<String, String>> getHeaders() async {
   return buildHeaderTokens(contentType: 'application/json');
 }
 
-Map<String, String> buildHeaderTokens({String? contentType = 'application/x-www-form-urlencoded'}) {
+Map<String, String> buildHeaderTokens({
+  String? contentType = 'application/x-www-form-urlencoded',
+}) {
   Map<String, String> header = {
-    HttpHeaders.contentTypeHeader: contentType ?? 'application/x-www-form-urlencoded',
+    HttpHeaders.contentTypeHeader:
+        contentType ?? 'application/x-www-form-urlencoded',
     // HttpHeaders.cacheControlHeader: 'no-cache',
     // HttpHeaders.cacheControlHeader: 'no-cache',
     // HttpHeaders.contentTypeHeader: 'application/json',
@@ -27,11 +30,18 @@ Map<String, String> buildHeaderTokens({String? contentType = 'application/x-www-
   };
 
   print("⚠️ AppData.logInUserId: ${AppData.logInUserId}");
-  print("⚠️ AppData.userToken: ${AppData.userToken != null ? 'Token exists' : 'Token is null'}");
+  print(
+    "⚠️ AppData.userToken: ${AppData.userToken != null ? 'Token exists' : 'Token is null'}",
+  );
 
   if (AppData.logInUserId != '') {
-    header.putIfAbsent(HttpHeaders.authorizationHeader, () => 'Bearer ${AppData.userToken}');
-    print("⚠️ Added auth header: Bearer ${AppData.userToken?.substring(0, 10)}...");
+    header.putIfAbsent(
+      HttpHeaders.authorizationHeader,
+      () => 'Bearer ${AppData.userToken}',
+    );
+    print(
+      "⚠️ Added auth header: Bearer ${AppData.userToken?.substring(0, 10)}...",
+    );
   } else {
     print("⚠️ WARNING: No user ID found, not adding authorization header!");
   }
@@ -42,7 +52,8 @@ Map<String, String> buildHeaderTokens({String? contentType = 'application/x-www-
 
 Uri buildBaseUrl(String endPoint) {
   Uri url = Uri.parse(endPoint);
-  if (!endPoint.startsWith('http')) url = Uri.parse('${AppData.remoteUrl2}$endPoint');
+  if (!endPoint.startsWith('http'))
+    url = Uri.parse('${AppData.remoteUrl2}$endPoint');
 
   log('URL: ${url.toString()}');
 
@@ -51,7 +62,8 @@ Uri buildBaseUrl(String endPoint) {
 
 Uri buildBaseUrl3(String endPoint) {
   Uri url = Uri.parse(endPoint);
-  if (!endPoint.startsWith('http')) url = Uri.parse('${AppData.remoteUrl3}$endPoint');
+  if (!endPoint.startsWith('http'))
+    url = Uri.parse('${AppData.remoteUrl3}$endPoint');
 
   log('URL: ${url.toString()}');
 
@@ -60,14 +72,19 @@ Uri buildBaseUrl3(String endPoint) {
 
 Uri buildBaseUrl1(String endPoint) {
   Uri url = Uri.parse(endPoint);
-  if (!endPoint.startsWith('http')) url = Uri.parse('${AppData.remoteUrl}$endPoint');
+  if (!endPoint.startsWith('http'))
+    url = Uri.parse('${AppData.remoteUrl}$endPoint');
 
   log('URL: ${url.toString()}');
 
   return url;
 }
 
-Future<Response> buildHttpResponse1(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request}) async {
+Future<Response> buildHttpResponse1(
+  String endPoint, {
+  HttpMethod method = HttpMethod.GET,
+  Map? request,
+}) async {
   if (await isNetworkAvailable()) {
     var headers = buildHeaderTokens();
     Uri url = buildBaseUrl1(endPoint);
@@ -80,20 +97,48 @@ Future<Response> buildHttpResponse1(String endPoint, {HttpMethod method = HttpMe
       if (method == HttpMethod.POST) {
         log('Request: $request');
         response = await http
-            .post(url, body: request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers)
-            .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+            .post(
+              url,
+              body: request?.entries
+                  .map(
+                    (e) =>
+                        '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+                  )
+                  .join('&'),
+              headers: headers,
+            )
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
       } else if (method == HttpMethod.DELETE) {
-        response = await delete(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await delete(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
       } else if (method == HttpMethod.PUT) {
         var headers = buildHeaderTokens(contentType: 'application/json');
 
         log('Request: $request');
-        response = await put(url, body: jsonEncode(request), headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await put(url, body: jsonEncode(request), headers: headers)
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
       } else {
-        response = await get(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await get(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
       }
 
-      log('Response ($method): ${url.toString()} ${response.statusCode} ${response.body}');
+      log(
+        'Response ($method): ${url.toString()} ${response.statusCode} ${response.body}',
+      );
 
       return response;
     } catch (e) {
@@ -104,7 +149,11 @@ Future<Response> buildHttpResponse1(String endPoint, {HttpMethod method = HttpMe
   }
 }
 
-Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request}) async {
+Future<Response> buildHttpResponse(
+  String endPoint, {
+  HttpMethod method = HttpMethod.GET,
+  Map? request,
+}) async {
   if (await isNetworkAvailable()) {
     var headers = buildHeaderTokens();
     Uri url = buildBaseUrl(endPoint);
@@ -117,20 +166,48 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
       if (method == HttpMethod.POST) {
         log('Request: $request');
         response = await http
-            .post(url, body: request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers)
-            .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+            .post(
+              url,
+              body: request?.entries
+                  .map(
+                    (e) =>
+                        '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+                  )
+                  .join('&'),
+              headers: headers,
+            )
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
       } else if (method == HttpMethod.DELETE) {
-        response = await delete(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await delete(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
       } else if (method == HttpMethod.PUT) {
         var headers = buildHeaderTokens(contentType: 'application/json');
 
         log('Request: $request');
-        response = await put(url, body: jsonEncode(request), headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await put(url, body: jsonEncode(request), headers: headers)
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
       } else {
-        response = await get(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await get(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
       }
 
-      log('Response ($method): ${url.toString()} ${response.statusCode} ${response.body}');
+      log(
+        'Response ($method): ${url.toString()} ${response.statusCode} ${response.body}',
+      );
 
       return response;
     } catch (e) {
@@ -141,7 +218,11 @@ Future<Response> buildHttpResponse(String endPoint, {HttpMethod method = HttpMet
   }
 }
 
-Future<Response> buildHttpResponse2(String endPoint, {HttpMethod method = HttpMethod.GET, Map? request}) async {
+Future<Response> buildHttpResponse2(
+  String endPoint, {
+  HttpMethod method = HttpMethod.GET,
+  Map? request,
+}) async {
   if (await isNetworkAvailable()) {
     var headers = buildHeaderTokens();
     Uri url = buildBaseUrl3(endPoint);
@@ -157,20 +238,48 @@ Future<Response> buildHttpResponse2(String endPoint, {HttpMethod method = HttpMe
       if (method == HttpMethod.POST) {
         log('Request: $request');
         response = await http
-            .post(url, body: request?.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&'), headers: headers)
-            .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+            .post(
+              url,
+              body: request?.entries
+                  .map(
+                    (e) =>
+                        '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+                  )
+                  .join('&'),
+              headers: headers,
+            )
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
       } else if (method == HttpMethod.DELETE) {
-        response = await delete(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await delete(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
       } else if (method == HttpMethod.PUT) {
         var headers = buildHeaderTokens(contentType: 'application/json');
 
         log('Request: $request');
-        response = await put(url, body: jsonEncode(request), headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await put(url, body: jsonEncode(request), headers: headers)
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
       } else {
-        response = await get(url, headers: headers).timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding after 60 seconds');
+        response = await get(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
       }
 
-      log('Response ($method): ${url.toString()} ${response.statusCode} ${response.body}');
+      log(
+        'Response ($method): ${url.toString()} ${response.statusCode} ${response.body}',
+      );
 
       return response;
     } catch (e) {
@@ -187,6 +296,13 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
   if (!await isNetworkAvailable()) {
     throw 'Your internet is not working';
   }
+
+  // Check for HTML response (unauthorized redirect) which usually indicated session expiry disguised as 200 OK
+  final bodyLower = response.body.toLowerCase();
+  if (bodyLower.contains('<!doctype html') || bodyLower.contains('<html')) {
+    throw 'Session expired. Please login again.';
+  }
+
   if (response.statusCode == 401) {
     if (AppData.logInUserId == null) {
       // Map req = {
@@ -204,16 +320,39 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
     }
   }
 
-  if ((response.statusCode >= 200 && response.statusCode < 300) || response.statusCode == 403) {
-    return jsonDecode(response.body);
+  if ((response.statusCode >= 200 && response.statusCode < 300) ||
+      response.statusCode == 403) {
+    try {
+      return jsonDecode(response.body);
+    } on FormatException {
+      // If JSON decoding fails, it might be an unhandled HTML error page or empty response
+      if (bodyLower.contains('<!doctype html') || bodyLower.contains('<html')) {
+        throw 'Session expired. Please login again.';
+      }
+      // If content is not HTML but still fails to parse (e.g. empty body or plain text error),
+      // treat it as a server error rather than crashing
+      throw 'Server returned invalid response (${response.statusCode})';
+    }
   } else {
+    // Handle specific HTTP status codes
+    if (response.statusCode == 429) {
+      throw 'Too many requests. Please wait a moment and try again.';
+    } else if (response.statusCode == 503) {
+      throw 'Service temporarily unavailable. Please try again later.';
+    } else if (response.statusCode >= 500) {
+      throw 'Server error. Please try again later.';
+    }
+
     try {
       var body = jsonDecode(response.body);
       // Extract error message from various possible response structures
       String errorMessage = _extractErrorMessage(body);
       throw errorMessage;
     } on FormatException {
-      // Response body is not valid JSON
+      // Response body is not valid JSON (like HTML error pages)
+      if (response.statusCode == 429) {
+        throw 'Too many requests. Please wait a moment and try again.';
+      }
       throw 'Server error (${response.statusCode})';
     } catch (e) {
       if (e is String) {

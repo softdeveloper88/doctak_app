@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/utils/robust_image_picker.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/widgets/display_video.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_bloc.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_state.dart';
@@ -51,50 +51,26 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
   }
 
   Future<void> openImages() async {
-    debugPrint('MultiWidget: *** OPENING GALLERY with RobustImagePicker ***');
+    debugPrint('MultiWidget: *** OPENING GALLERY with UnifiedGalleryPicker ***');
     try {
-      List<XFile> pickedfiles = [];
       debugPrint('MultiWidget: Image limit: ${widget.imageLimit}');
 
-      // Use RobustImagePicker which handles limited access + has photo_manager fallback
-      try {
-        debugPrint('MultiWidget: Using RobustImagePicker.showPhotoManagerPicker...');
-        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(context, limit: widget.imageLimit > 0 ? widget.imageLimit : null, title: 'Select Photos');
-        debugPrint('MultiWidget: showPhotoManagerPicker returned ${pickedfiles.length} files');
-      } catch (e) {
-        debugPrint('MultiWidget: showPhotoManagerPicker failed: $e, trying fallback...');
+      // Use unified gallery picker for consistent experience
+      final List<File>? pickedFiles = await UnifiedGalleryPicker.pickMultipleImages(
+        context,
+        maxImages: widget.imageLimit > 0 ? widget.imageLimit : null,
+        title: translation(context).lbl_choose_from_gallery,
+      );
 
-        // Fallback to standard RobustImagePicker
-        try {
-          pickedfiles = await RobustImagePicker.pickMultipleImages(limit: widget.imageLimit > 0 ? widget.imageLimit : null);
-          debugPrint('MultiWidget: Fallback pickMultipleImages returned ${pickedfiles.length} files');
-        } catch (e2) {
-          debugPrint('MultiWidget: All pickers failed: $e2');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Failed to open gallery: ${e2.toString()}'),
-                backgroundColor: Colors.red[600],
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-            );
-          }
-          return;
-        }
-      }
+      debugPrint('MultiWidget: Picker returned: ${pickedFiles?.length ?? 0} files');
 
-      debugPrint('MultiWidget: Picker returned: ${pickedfiles.length} files');
-      if (pickedfiles.isNotEmpty) {
-        debugPrint('MultiWidget: First file path: ${pickedfiles.first.path}');
-      }
-
-      if (pickedfiles.isNotEmpty) {
-        debugPrint('Gallery: Selected ${pickedfiles.length} files from gallery');
-        for (var element in pickedfiles) {
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+        debugPrint('MultiWidget: First file path: ${pickedFiles.first.path}');
+        debugPrint('Gallery: Selected ${pickedFiles.length} files from gallery');
+        for (var element in pickedFiles) {
           if (widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
             debugPrint('Gallery: Adding image ${element.path} to BLoC');
-            widget.imageUploadBloc.add(SelectedFiles(pickedfiles: element, isRemove: false));
+            widget.imageUploadBloc.add(SelectedFiles(pickedfiles: XFile(element.path), isRemove: false));
             debugPrint('Gallery: BLoC now has ${widget.imageUploadBloc.imagefiles.length} images');
           }
         }
@@ -167,17 +143,11 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
 
   Future<void> openCamera() async {
     try {
-      // Use the professional camera permission handler
-      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
-      if (!cameraGranted) {
-        return;
-      }
+      final File? photo = await UnifiedGalleryPicker.captureFromCamera(context);
 
-      var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera, imageQuality: 85, maxWidth: 1920, maxHeight: 1080);
-
-      if (pickedfiles != null) {
+      if (photo != null) {
         if (widget.imageLimit == 0 || widget.imageUploadBloc.imagefiles.length < widget.imageLimit) {
-          widget.imageUploadBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+          widget.imageUploadBloc.add(SelectedFiles(pickedfiles: XFile(photo.path), isRemove: false));
           setState(() {});
         }
       } else {

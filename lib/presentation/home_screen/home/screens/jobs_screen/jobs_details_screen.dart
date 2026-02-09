@@ -2,6 +2,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/dynamic_link.dart';
+import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/document_upload_dialog.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../SVDashboardScreen.dart';
 import 'bloc/jobs_bloc.dart';
@@ -267,39 +267,6 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
         ),
       ],
     );
-  }
-
-  Future<bool?> _showConfirmDialog() async {
-    final theme = OneUITheme.of(context);
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(translation(context).lbl_leave_app, style: TextStyle(color: theme.textPrimary)),
-        content: Text(translation(context).msg_open_link_confirm, style: TextStyle(color: theme.textSecondary)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(translation(context).lbl_no_answer, style: TextStyle(color: theme.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(translation(context).lbl_yes, style: TextStyle(color: theme.primary)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _launchInBrowser(Uri url) async {
-    try {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${translation(context).lbl_error}: ${e.toString()}')));
-      }
-    }
   }
 
   // New Card Building Methods
@@ -830,10 +797,8 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             flex: (hasApplied || !isJobOwner) ? 1 : 1,
             child: OutlinedButton(
               onPressed: () async {
-                final shouldLeave = await _showConfirmDialog();
-                if (shouldLeave == true) {
-                  final Uri url = Uri.parse(job.link!);
-                  await _launchInBrowser(url);
+                if (job.link != null && job.link!.isNotEmpty) {
+                  await PostUtils.launchURL(context, job.link!);
                 }
               },
               style: OutlinedButton.styleFrom(

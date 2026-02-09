@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -227,11 +228,12 @@ class _PhotoManagerPickerSheetState extends State<_PhotoManagerPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -239,20 +241,20 @@ class _PhotoManagerPickerSheetState extends State<_PhotoManagerPickerSheet> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.cardBackground,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2))],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(onPressed: () => Navigator.of(context).pop(<XFile>[]), child: const Text('Cancel')),
-                Text(widget.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                TextButton(onPressed: () => Navigator.of(context).pop(<XFile>[]), child: Text('Cancel', style: TextStyle(color: theme.textSecondary))),
+                Text(widget.title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary)),
                 TextButton(
                   onPressed: _selectedIndices.isNotEmpty ? _confirmSelection : null,
                   child: Text(
                     'Done (${_selectedIndices.length})',
-                    style: TextStyle(color: _selectedIndices.isNotEmpty ? Colors.blue : Colors.grey, fontWeight: FontWeight.w600),
+                    style: TextStyle(color: _selectedIndices.isNotEmpty ? theme.primary : theme.textSecondary, fontWeight: FontWeight.w600),
                   ),
                 ),
               ],
@@ -261,9 +263,9 @@ class _PhotoManagerPickerSheetState extends State<_PhotoManagerPickerSheet> {
           // Grid
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(theme.primary)))
                 : _assets.isEmpty
-                ? const Center(child: Text('No photos found'))
+                ? Center(child: Text('No photos found', style: TextStyle(color: theme.textSecondary)))
                 : GridView.builder(
                     padding: const EdgeInsets.all(4),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 4, mainAxisSpacing: 4),
@@ -280,26 +282,26 @@ class _PhotoManagerPickerSheetState extends State<_PhotoManagerPickerSheet> {
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.waiting) {
                                   return Container(
-                                    color: Colors.grey[200],
-                                    child: const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
+                                    color: theme.divider,
+                                    child: Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(theme.primary)))),
                                   );
                                 }
                                 if (snapshot.hasError) {
                                   debugPrint('FutureBuilder error: ${snapshot.error}');
                                   return Container(
-                                    color: Colors.grey[300],
-                                    child: const Center(child: Icon(Icons.error_outline, color: Colors.grey)),
+                                    color: theme.divider,
+                                    child: Center(child: Icon(Icons.error_outline, color: theme.textSecondary)),
                                   );
                                 }
                                 if (snapshot.hasData) {
                                   return snapshot.data!;
                                 }
-                                return Container(color: Colors.grey[300]);
+                                return Container(color: theme.divider);
                               },
                             ),
                             if (isSelected)
                               Container(
-                                color: Colors.blue.withValues(alpha: 0.3),
+                                color: theme.primary.withValues(alpha: 0.3),
                                 child: const Center(child: Icon(Icons.check_circle, color: Colors.white, size: 32)),
                               ),
                           ],

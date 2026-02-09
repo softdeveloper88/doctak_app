@@ -1,4 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:doctak_app/data/apiClient/api_caller.dart';
 import 'package:doctak_app/data/apiClient/services/search_api_service.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_ask_question_response.dart';
@@ -43,13 +49,25 @@ class SharedApiService {
   // ================================== AUTH ENDPOINTS ==================================
 
   /// User login with email/password
-  Future<ApiResponse<PostLoginDeviceAuthResp>> login({required String email, required String password, required String deviceType, required String deviceId, required String deviceToken}) async {
+  Future<ApiResponse<PostLoginDeviceAuthResp>> login({
+    required String email,
+    required String password,
+    required String deviceType,
+    required String deviceId,
+    required String deviceToken,
+  }) async {
     try {
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
           '/login',
           method: networkUtils.HttpMethod.POST,
-          request: {'email': email, 'password': password, 'device_type': deviceType, 'device_id': deviceId, 'device_token': deviceToken},
+          request: {
+            'email': email,
+            'password': password,
+            'device_type': deviceType,
+            'device_id': deviceId,
+            'device_token': deviceToken,
+          },
         ),
       );
       return ApiResponse.success(PostLoginDeviceAuthResp.fromJson(response));
@@ -148,7 +166,15 @@ class SharedApiService {
         await networkUtils.buildHttpResponse(
           '/complete-profile',
           method: networkUtils.HttpMethod.POST,
-          request: {'first_name': firstName, 'last_name': lastName, 'country': country, 'state': state, 'specialty': specialty, 'phone': phone, 'user_type': userType},
+          request: {
+            'first_name': firstName,
+            'last_name': lastName,
+            'country': country,
+            'state': state,
+            'specialty': specialty,
+            'phone': phone,
+            'user_type': userType,
+          },
         ),
       );
       return ApiResponse.success(PostLoginDeviceAuthResp.fromJson(response));
@@ -160,14 +186,42 @@ class SharedApiService {
   }
 
   /// Forgot password
-  Future<ApiResponse<Map<String, dynamic>>> forgotPassword({required String email}) async {
+  Future<ApiResponse<Map<String, dynamic>>> forgotPassword({
+    required String email,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/forgot_password', method: networkUtils.HttpMethod.POST, request: {'email': email}));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/forgot_password',
+          method: networkUtils.HttpMethod.POST,
+          request: {'email': email},
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
       return ApiResponse.error('Password reset failed: $e');
+    }
+  }
+
+  /// Logout
+  Future<ApiResponse<Map<String, dynamic>>> logout({
+    required String deviceId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/logout',
+          method: networkUtils.HttpMethod.POST,
+          request: {'device_id': deviceId},
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Logout failed: $e');
     }
   }
 
@@ -177,7 +231,12 @@ class SharedApiService {
   Future<ApiResponse<CountriesModel>> getCountries() async {
     try {
       print('🌍 Attempting to fetch countries from: /country-list');
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/country-list', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/country-list',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       print('🌍 Countries API response received successfully');
       return ApiResponse.success(CountriesModel.fromJson(response));
     } on ApiException catch (e) {
@@ -227,9 +286,16 @@ class SharedApiService {
   }
 
   /// Get states by country
-  Future<ApiResponse<Map<String, dynamic>>> getStates({required String countryId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> getStates({
+    required String countryId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/get-states?country_id=$countryId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/get-states?country_id=$countryId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
 
       // API returns a List directly, wrap it in a Map for backward compatibility
       if (response is List) {
@@ -249,7 +315,12 @@ class SharedApiService {
   /// Get specialty list
   Future<ApiResponse<List<dynamic>>> getSpecialty() async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/specialty', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/specialty',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
 
       // API returns a List directly
       if (response is List) {
@@ -271,9 +342,16 @@ class SharedApiService {
   // ================================== POSTS ENDPOINTS ==================================
 
   /// Get posts feed
-  Future<ApiResponse<Map<String, dynamic>>> getPosts({required String page}) async {
+  Future<ApiResponse<Map<String, dynamic>>> getPosts({
+    required String page,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/posts?page=$page', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/posts?page=$page',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -283,9 +361,16 @@ class SharedApiService {
   }
 
   /// Get post details by ID
-  Future<ApiResponse<PostDetailsDataModel>> getPostDetails({required String postId}) async {
+  Future<ApiResponse<PostDetailsDataModel>> getPostDetails({
+    required String postId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/post-by-comment/$postId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/post-by-comment/$postId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(PostDetailsDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -295,9 +380,16 @@ class SharedApiService {
   }
 
   /// Get post details with likes
-  Future<ApiResponse<PostDetailModel>> getPostDetailsWithLikes({required String postId}) async {
+  Future<ApiResponse<PostDetailModel>> getPostDetailsWithLikes({
+    required String postId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/posts/$postId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/posts/$postId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(PostDetailModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -307,9 +399,17 @@ class SharedApiService {
   }
 
   /// Get user posts
-  Future<ApiResponse<PostDataModel>> getMyPosts({required String page, required String userId}) async {
+  Future<ApiResponse<PostDataModel>> getMyPosts({
+    required String page,
+    required String userId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/user-profile-post?page=$page&user_id=$userId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/user-profile-post?page=$page&user_id=$userId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -319,9 +419,16 @@ class SharedApiService {
   }
 
   /// Like/Unlike post
-  Future<ApiResponse<Map<String, dynamic>>> likePost({required String postId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> likePost({
+    required String postId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/like?post_id=$postId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/like?post_id=$postId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -331,9 +438,16 @@ class SharedApiService {
   }
 
   /// Delete post
-  Future<ApiResponse<Map<String, dynamic>>> deletePost({required String postId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> deletePost({
+    required String postId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/delete_post?post_id=$postId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/delete_post?post_id=$postId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -345,9 +459,16 @@ class SharedApiService {
   // ================================== COMMENTS ENDPOINTS ==================================
 
   /// Get post comments
-  Future<ApiResponse<PostCommentModel>> getPostComments({required String postId}) async {
+  Future<ApiResponse<PostCommentModel>> getPostComments({
+    required String postId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/get-post-comments?post_id=$postId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/get-post-comments?post_id=$postId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(PostCommentModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -357,9 +478,17 @@ class SharedApiService {
   }
 
   /// Add comment to post
-  Future<ApiResponse<Map<String, dynamic>>> makeComment({required String postId, required String comment}) async {
+  Future<ApiResponse<Map<String, dynamic>>> makeComment({
+    required String postId,
+    required String comment,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/post-comment?post_id=$postId&comment=$comment', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/post-comment?post_id=$postId&comment=$comment',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -369,9 +498,17 @@ class SharedApiService {
   }
 
   /// Delete comment
-  Future<ApiResponse<Map<String, dynamic>>> deleteComment({required String commentId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteComment({
+    required String commentId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/delete-comment', method: networkUtils.HttpMethod.POST, request: {'comment_id': commentId}));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/delete-comment',
+          method: networkUtils.HttpMethod.POST,
+          request: {'comment_id': commentId},
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -382,28 +519,152 @@ class SharedApiService {
 
   // ================================== CHATGPT ENDPOINTS ==================================
 
-  /// Ask question to ChatGPT with images
-  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithImages({required String sessionId, required String question, required String imageType, String? imageUrl1, String? imageUrl2}) async {
+  /// Ask question to ChatGPT with images (multipart file upload)
+  /// [imageUrl1] and [imageUrl2] should be local file paths, not URLs
+  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithImages({
+    required String sessionId,
+    required String question,
+    required String imageType,
+    String? imageUrl1,
+    String? imageUrl2,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/ask-question',
-          method: networkUtils.HttpMethod.POST,
-          request: {'id': sessionId, 'question': question, 'image_type': imageType, if (imageUrl1 != null) 'image1': imageUrl1, if (imageUrl2 != null) 'image2': imageUrl2},
-        ),
+      // Create the API URL
+      final Uri url = Uri.parse('${AppData.remoteUrl2}/ask-question');
+
+      // Create multipart request
+      var request = http.MultipartRequest('POST', url);
+
+      // Add authorization header
+      if (AppData.userToken != null) {
+        request.headers['Authorization'] = 'Bearer ${AppData.userToken}';
+      }
+
+      // Add text fields (matching PHP backend expectations)
+      request.fields['id'] = sessionId;
+      request.fields['question'] = question;
+      if (imageType.isNotEmpty) {
+        request.fields['image_type'] = imageType;
+      }
+
+      // Helper to get MIME type
+      String getMimeType(String filePath) {
+        final filename = filePath.split('/').last.toLowerCase();
+        if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+          return 'image/jpeg';
+        } else if (filename.endsWith('.png')) {
+          return 'image/png';
+        } else if (filename.endsWith('.gif')) {
+          return 'image/gif';
+        } else if (filename.endsWith('.webp')) {
+          return 'image/webp';
+        }
+        return 'image/jpeg';
+      }
+
+      // Add image1 file if provided
+      if (imageUrl1 != null && imageUrl1.isNotEmpty) {
+        final file1 = File(imageUrl1);
+        if (await file1.exists()) {
+          final fileStream1 = http.ByteStream(file1.openRead());
+          final fileLength1 = await file1.length();
+          final mimeType1 = getMimeType(imageUrl1);
+          final filename1 = imageUrl1.split('/').last;
+
+          final multipartFile1 = http.MultipartFile(
+            'image1', // Field name matching PHP: $request->hasFile('image1')
+            fileStream1,
+            fileLength1,
+            filename: filename1,
+            contentType: MediaType.parse(mimeType1),
+          );
+          request.files.add(multipartFile1);
+          print('📎 Added image1: $filename1 (${fileLength1} bytes)');
+        } else {
+          print('⚠️ Image1 file does not exist: $imageUrl1');
+        }
+      }
+
+      // Add image2 file if provided
+      if (imageUrl2 != null && imageUrl2.isNotEmpty) {
+        final file2 = File(imageUrl2);
+        if (await file2.exists()) {
+          final fileStream2 = http.ByteStream(file2.openRead());
+          final fileLength2 = await file2.length();
+          final mimeType2 = getMimeType(imageUrl2);
+          final filename2 = imageUrl2.split('/').last;
+
+          final multipartFile2 = http.MultipartFile(
+            'image2', // Field name matching PHP: $request->hasFile('image2')
+            fileStream2,
+            fileLength2,
+            filename: filename2,
+            contentType: MediaType.parse(mimeType2),
+          );
+          request.files.add(multipartFile2);
+          print('📎 Added image2: $filename2 (${fileLength2} bytes)');
+        } else {
+          print('⚠️ Image2 file does not exist: $imageUrl2');
+        }
+      }
+
+      print('🚀 Sending multipart request to: $url');
+      print('📝 Fields: ${request.fields}');
+      print('📁 Files: ${request.files.length}');
+
+      // Send the request with extended timeout for image processing
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 120),
+        onTimeout: () {
+          throw ApiException(message: 'Request timed out', statusCode: 408);
+        },
       );
-      return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(response));
+
+      // Convert streamed response to regular response
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print('📥 Response status: ${response.statusCode}');
+      print('📥 Response body: ${response.body}');
+
+      // Handle response
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final jsonResponse = jsonDecode(response.body);
+        return ApiResponse.success(
+          ChatGptAskQuestionResponse.fromJson(jsonResponse),
+        );
+      } else {
+        // Parse error message
+        String errorMessage = 'Failed to ask question with images';
+        try {
+          final errorJson = jsonDecode(response.body);
+          errorMessage =
+              errorJson['error']?['message'] ??
+              errorJson['message'] ??
+              errorMessage;
+        } catch (_) {}
+        return ApiResponse.error(errorMessage, statusCode: response.statusCode);
+      }
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
+      print('❌ Error in askQuestionWithImages: $e');
       return ApiResponse.error('Failed to ask question: $e');
     }
   }
 
   /// Ask question to ChatGPT without images
-  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithoutImages({required String sessionId, required String question}) async {
+  Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithoutImages({
+    required String sessionId,
+    required String question,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/ask-question', method: networkUtils.HttpMethod.POST, request: {'id': sessionId, 'question': question}));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/ask-question',
+          method: networkUtils.HttpMethod.POST,
+          request: {'id': sessionId, 'question': question},
+        ),
+      );
       return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -415,7 +676,12 @@ class SharedApiService {
   /// Get ChatGPT sessions
   Future<ApiResponse<ChatGptSession>> getChatGptSessions() async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/gptChat-session', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/gptChat-session',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(ChatGptSession.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -425,9 +691,16 @@ class SharedApiService {
   }
 
   /// Get ChatGPT message history
-  Future<ApiResponse<ChatGptMessageHistory>> getChatGptMessages({required String sessionId}) async {
+  Future<ApiResponse<ChatGptMessageHistory>> getChatGptMessages({
+    required String sessionId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/gptChat-history/$sessionId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/gptChat-history/$sessionId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(ChatGptMessageHistory.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -439,7 +712,12 @@ class SharedApiService {
   /// Create new ChatGPT session
   Future<ApiResponse<Map<String, dynamic>>> createNewChatSession() async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/new-chat', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/new-chat',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -449,9 +727,16 @@ class SharedApiService {
   }
 
   /// Delete ChatGPT session
-  Future<ApiResponse<Map<String, dynamic>>> deleteChatGptSession({required String sessionId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> deleteChatGptSession({
+    required String sessionId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/delete-chatgpt-session?session_id=$sessionId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/delete-chatgpt-session?session_id=$sessionId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -465,7 +750,12 @@ class SharedApiService {
   /// Get scheduled meetings
   Future<ApiResponse<GetMeetingModel>> getMeetings() async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/get-schedule-meetings', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/get-schedule-meetings',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(GetMeetingModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -477,7 +767,12 @@ class SharedApiService {
   /// Start/Create meeting
   Future<ApiResponse<CreateMeetingModel>> startMeeting() async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/create-meeting', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/create-meeting',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(CreateMeetingModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -487,9 +782,16 @@ class SharedApiService {
   }
 
   /// Join meeting by code
-  Future<ApiResponse<MeetingDetailsModel>> joinMeeting({required String meetingCode}) async {
+  Future<ApiResponse<MeetingDetailsModel>> joinMeeting({
+    required String meetingCode,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/join-meeting?meeting_channel=$meetingCode', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/join-meeting?meeting_channel=$meetingCode',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(MeetingDetailsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -499,9 +801,16 @@ class SharedApiService {
   }
 
   /// Search users for meeting invitation
-  Future<ApiResponse<SearchUserModel>> searchUsersForMeeting({required String query}) async {
+  Future<ApiResponse<SearchUserModel>> searchUsersForMeeting({
+    required String query,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/search/users?query=$query', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/search/users?query=$query',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(SearchUserModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -511,9 +820,17 @@ class SharedApiService {
   }
 
   /// End meeting
-  Future<ApiResponse<Map<String, dynamic>>> endMeeting({required String meetingId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> endMeeting({
+    required String meetingId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/close-meeting', method: networkUtils.HttpMethod.POST, request: {'meeting_id': meetingId}));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/close-meeting',
+          method: networkUtils.HttpMethod.POST,
+          request: {'meeting_id': meetingId},
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -525,10 +842,18 @@ class SharedApiService {
   // ================================== JOBS ENDPOINTS ==================================
 
   /// Get jobs list
-  Future<ApiResponse<JobsModel>> getJobsList({required String page, required String countryId, required String searchTerm, required String expiredJob}) async {
+  Future<ApiResponse<JobsModel>> getJobsList({
+    required String page,
+    required String countryId,
+    required String searchTerm,
+    required String expiredJob,
+  }) async {
     // try {
     final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/jobs?page=$page&country_id=$countryId&searchTerm=$searchTerm&expired_job=$expiredJob', method: networkUtils.HttpMethod.GET),
+      await networkUtils.buildHttpResponse(
+        '/jobs?page=$page&country_id=$countryId&searchTerm=$searchTerm&expired_job=$expiredJob',
+        method: networkUtils.HttpMethod.GET,
+      ),
     );
     return ApiResponse.success(JobsModel.fromJson(response));
     // } on ApiException catch (e) {
@@ -539,9 +864,16 @@ class SharedApiService {
   }
 
   /// Get job details
-  Future<ApiResponse<JobDetailModel>> getJobDetails({required String jobId}) async {
+  Future<ApiResponse<JobDetailModel>> getJobDetails({
+    required String jobId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/job_detail?job_id=$jobId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/job_detail?job_id=$jobId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
 
       // If the server returned a structured error (success: false) or an explicit message,
       // convert that into an ApiResponse.error so UI can display a friendly message.
@@ -549,13 +881,17 @@ class SharedApiService {
         if (response is Map) {
           // Server returned a success flag but with failure
           if (response.containsKey('success') && response['success'] == false) {
-            final serverMsg = (response['message'] ?? response['error'])?.toString() ?? 'Job not found';
+            final serverMsg =
+                (response['message'] ?? response['error'])?.toString() ??
+                'Job not found';
             return ApiResponse.error(serverMsg);
           }
 
           // Server returned without a job payload - treat as 'removed/not found'
           if (response.containsKey('job') && response['job'] == null) {
-            final serverMsg = (response['message'] ?? response['error'])?.toString() ?? 'This job is no longer available';
+            final serverMsg =
+                (response['message'] ?? response['error'])?.toString() ??
+                'This job is no longer available';
             return ApiResponse.error(serverMsg);
           }
         }
@@ -591,9 +927,16 @@ class SharedApiService {
   }
 
   /// Withdraw job application
-  Future<ApiResponse<Map<String, dynamic>>> withdrawJobApplication({required String jobId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> withdrawJobApplication({
+    required String jobId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/withdraw-job-application?job_id=$jobId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/withdraw-job-application?job_id=$jobId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -603,9 +946,16 @@ class SharedApiService {
   }
 
   /// Get job applicants
-  Future<ApiResponse<JobApplicantsModel>> getJobApplicants({required String jobId}) async {
+  Future<ApiResponse<JobApplicantsModel>> getJobApplicants({
+    required String jobId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/job-applicants?job_id=$jobId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/job-applicants?job_id=$jobId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(JobApplicantsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -617,9 +967,16 @@ class SharedApiService {
   // ================================== NOTIFICATIONS ENDPOINTS ==================================
 
   /// Get notifications
-  Future<ApiResponse<NotificationModel>> getNotifications({required String page}) async {
+  Future<ApiResponse<NotificationModel>> getNotifications({
+    required String page,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications?page=$page', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/notifications?page=$page',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(NotificationModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -629,9 +986,16 @@ class SharedApiService {
   }
 
   /// Mark notification as read
-  Future<ApiResponse<Map<String, dynamic>>> markNotificationAsRead({required String notificationId}) async {
+  Future<ApiResponse<Map<String, dynamic>>> markNotificationAsRead({
+    required String notificationId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$notificationId/mark-read', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/notifications/$notificationId/mark-read',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -645,7 +1009,12 @@ class SharedApiService {
   /// Get user profile
   Future<ApiResponse<UserProfile>> getProfile({required String userId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/profile?user_id=$userId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/profile?user_id=$userId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(UserProfile.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -728,7 +1097,13 @@ class SharedApiService {
       requestMap['city_privacy'] = cityPrivacy.trim();
       requestMap['country_origin_privacy'] = countryOriginPrivacy.trim();
 
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/profile/update', method: networkUtils.HttpMethod.POST, request: requestMap));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/profile/update',
+          method: networkUtils.HttpMethod.POST,
+          request: requestMap,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -738,11 +1113,20 @@ class SharedApiService {
   }
 
   /// Get user interests
-  Future<ApiResponse<List<InterestModel>>> getInterests({required String userId}) async {
+  Future<ApiResponse<List<InterestModel>>> getInterests({
+    required String userId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/interests?user_id=$userId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/interests?user_id=$userId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       final List<dynamic> interestsData = response as List<dynamic>;
-      final interests = interestsData.map((json) => InterestModel.fromJson(json)).toList();
+      final interests = interestsData
+          .map((json) => InterestModel.fromJson(json))
+          .toList();
       return ApiResponse.success(interests);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -752,11 +1136,20 @@ class SharedApiService {
   }
 
   /// Get user work education
-  Future<ApiResponse<List<WorkEducationModel>>> getWorkEducation({required String userId}) async {
+  Future<ApiResponse<List<WorkEducationModel>>> getWorkEducation({
+    required String userId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/work-and-education?user_id=$userId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/work-and-education?user_id=$userId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       final List<dynamic> workEducationData = response as List<dynamic>;
-      final workEducation = workEducationData.map((json) => WorkEducationModel.fromJson(json)).toList();
+      final workEducation = workEducationData
+          .map((json) => WorkEducationModel.fromJson(json))
+          .toList();
       return ApiResponse.success(workEducation);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -766,9 +1159,17 @@ class SharedApiService {
   }
 
   /// Get user followers and following
-  Future<ApiResponse<FollowerDataModel>> getUserFollowers({required String userId}) async {
+  Future<ApiResponse<FollowerDataModel>> getUserFollowers({
+    required String userId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/followers-and-following', method: networkUtils.HttpMethod.POST, request: {'user_id': userId}));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/followers-and-following',
+          method: networkUtils.HttpMethod.POST,
+          request: {'user_id': userId},
+        ),
+      );
       return ApiResponse.success(FollowerDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -783,7 +1184,12 @@ class SharedApiService {
     required String followAction, // "follow" or "unfollow"
   }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/user/$userId/$followAction', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/user/$userId/$followAction',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -797,7 +1203,12 @@ class SharedApiService {
   /// Get contacts for chat
   Future<ApiResponse<ContactsModel>> getContacts({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/get-contacts?page=$page', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/get-contacts?page=$page',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(ContactsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -807,9 +1218,18 @@ class SharedApiService {
   }
 
   /// Get chat messages
-  Future<ApiResponse<MessageModel>> getChatMessages({required String page, required String userId, required String roomId}) async {
+  Future<ApiResponse<MessageModel>> getChatMessages({
+    required String page,
+    required String userId,
+    required String roomId,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/messenger?page=$page&user_id=$userId&room_id=$roomId', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/messenger?page=$page&user_id=$userId&room_id=$roomId',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(MessageModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -819,13 +1239,24 @@ class SharedApiService {
   }
 
   /// Send text message
-  Future<ApiResponse<SendMessageModel>> sendTextMessage({required String userId, required String roomId, required String receiverId, required String message}) async {
+  Future<ApiResponse<SendMessageModel>> sendTextMessage({
+    required String userId,
+    required String roomId,
+    required String receiverId,
+    required String message,
+  }) async {
     try {
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
           '/send-message',
           method: networkUtils.HttpMethod.POST,
-          request: {'user_id': userId, 'room_id': roomId, 'receiver_id': receiverId, 'attachment_type': 'text', 'message': message},
+          request: {
+            'user_id': userId,
+            'room_id': roomId,
+            'receiver_id': receiverId,
+            'attachment_type': 'text',
+            'message': message,
+          },
         ),
       );
       return ApiResponse.success(SendMessageModel.fromJson(response));
@@ -839,9 +1270,17 @@ class SharedApiService {
   // ================================== SEARCH ENDPOINTS ==================================
 
   /// Search posts
-  Future<ApiResponse<PostDataModel>> searchPosts({required String page, required String searchTerm}) async {
+  Future<ApiResponse<PostDataModel>> searchPosts({
+    required String page,
+    required String searchTerm,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/search-post?page=$page&search=$searchTerm', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/search-post?page=$page&search=$searchTerm',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -851,9 +1290,17 @@ class SharedApiService {
   }
 
   /// Search people
-  Future<ApiResponse<SearchPeopleModel>> searchPeople({required String page, required String searchTerm}) async {
+  Future<ApiResponse<SearchPeopleModel>> searchPeople({
+    required String page,
+    required String searchTerm,
+  }) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/searchPeople?page=$page&searchTerm=$searchTerm', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/searchPeople?page=$page&searchTerm=$searchTerm',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(SearchPeopleModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -863,10 +1310,18 @@ class SharedApiService {
   }
 
   /// Search drugs
-  Future<ApiResponse<DrugsModel>> searchDrugs({required String page, required String countryId, required String searchTerm, required String type}) async {
+  Future<ApiResponse<DrugsModel>> searchDrugs({
+    required String page,
+    required String countryId,
+    required String searchTerm,
+    required String type,
+  }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse('/drug-search?page=$page&countryId=$countryId&searchTerm=$searchTerm&type=$type', method: networkUtils.HttpMethod.GET),
+        await networkUtils.buildHttpResponse(
+          '/drug-search?page=$page&countryId=$countryId&searchTerm=$searchTerm&type=$type',
+          method: networkUtils.HttpMethod.GET,
+        ),
       );
       return ApiResponse.success(DrugsModel.fromJson(response));
     } on ApiException catch (e) {
@@ -882,9 +1337,17 @@ class SharedApiService {
   Future<ApiResponse<Map<String, dynamic>>> testConnection() async {
     try {
       print('🔗 Testing API connectivity...');
-      await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/country-list', method: networkUtils.HttpMethod.GET));
+      await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/country-list',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       print('🔗 API connectivity test successful');
-      return ApiResponse.success({'status': 'connected', 'message': 'API is reachable'});
+      return ApiResponse.success({
+        'status': 'connected',
+        'message': 'API is reachable',
+      });
     } catch (e) {
       print('🔗 API connectivity test failed: $e');
       return ApiResponse.error('API connectivity failed: $e');
@@ -894,12 +1357,23 @@ class SharedApiService {
   // ================================== SEARCH ENDPOINTS ==================================
 
   /// Search conferences
-  Future<ApiResponse<SearchConferenceModel>> searchConferences({required String page, String? keyword, String? country}) async {
-    return await _searchService.searchConferences(page: page, keyword: keyword, country: country);
+  Future<ApiResponse<SearchConferenceModel>> searchConferences({
+    required String page,
+    String? keyword,
+    String? country,
+  }) async {
+    return await _searchService.searchConferences(
+      page: page,
+      keyword: keyword,
+      country: country,
+    );
   }
 
   /// Search guidelines
-  Future<ApiResponse<GuidelinesModel>> searchGuidelines({required String page, required String keyword}) async {
+  Future<ApiResponse<GuidelinesModel>> searchGuidelines({
+    required String page,
+    required String keyword,
+  }) async {
     return await _searchService.searchGuides(page: page, keyword: keyword);
   }
 }

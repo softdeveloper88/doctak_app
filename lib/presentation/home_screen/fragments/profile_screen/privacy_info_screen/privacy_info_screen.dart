@@ -21,7 +21,8 @@ class PrivacyInfoScreen extends StatefulWidget {
 
 bool isEditModeMap = false;
 
-class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTickerProviderStateMixin {
+class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -30,9 +31,14 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     isEditModeMap = false;
 
     // Setup animations
-    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
 
     _animationController.forward();
 
@@ -75,12 +81,19 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Privacy information header
-                if (!isEditModeMap) OneUIInfoBanner(message: translation(context).msg_privacy_info_desc, icon: Icons.shield_outlined, accentColor: Colors.purple),
+                if (!isEditModeMap)
+                  OneUIInfoBanner(
+                    message: translation(context).msg_privacy_info_desc,
+                    icon: Icons.shield_outlined,
+                    accentColor: theme.primary,
+                  ),
 
                 // Privacy settings
                 _buildPrivacyInfoFields(),
@@ -88,7 +101,13 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                 const SizedBox(height: 24),
 
                 // Update button
-                if (isEditModeMap) OneUIProfilePrimaryButton(label: translation(context).lbl_update, icon: Icons.check_circle, color: theme.primary, onPressed: _saveChanges),
+                if (isEditModeMap)
+                  OneUIProfilePrimaryButton(
+                    label: translation(context).lbl_update,
+                    icon: Icons.check_circle,
+                    color: theme.primary,
+                    onPressed: _saveChanges,
+                  ),
               ],
             ),
           ),
@@ -101,43 +120,108 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     final theme = OneUITheme.of(context);
 
     // Group privacy settings by category
-    final personalSettings = widget.profileBloc.userProfile!.privacySetting!.where((item) => ['dob', 'first_name', 'last_name', 'phone', 'license_no'].contains(item.recordType)).toList();
+    final personalSettings = widget.profileBloc.userProfile!.privacySetting!
+        .where(
+          (item) => [
+            'dob',
+            'first_name',
+            'last_name',
+            'phone',
+            'license_no',
+          ].contains(item.recordType),
+        )
+        .toList();
 
-    final professionalSettings = widget.profileBloc.userProfile!.privacySetting!.where((item) => ['specialty', 'about_me', 'current_workplace', 'work'].contains(item.recordType)).toList();
+    final professionalSettings = widget.profileBloc.userProfile!.privacySetting!
+        .where(
+          (item) => [
+            'specialty',
+            'about_me',
+            'current_workplace',
+            'work',
+          ].contains(item.recordType),
+        )
+        .toList();
 
-    final locationSettings = widget.profileBloc.userProfile!.privacySetting!.where((item) => ['country', 'state'].contains(item.recordType)).toList();
+    final locationSettings = widget.profileBloc.userProfile!.privacySetting!
+        .where((item) => ['country', 'state'].contains(item.recordType))
+        .toList();
 
     final otherSettings = widget.profileBloc.userProfile!.privacySetting!
-        .where((item) => !['dob', 'first_name', 'last_name', 'phone', 'license_no', 'specialty', 'about_me', 'current_workplace', 'work', 'country', 'state'].contains(item.recordType))
+        .where(
+          (item) => ![
+            'dob',
+            'first_name',
+            'last_name',
+            'phone',
+            'license_no',
+            'specialty',
+            'about_me',
+            'current_workplace',
+            'work',
+            'country',
+            'state',
+          ].contains(item.recordType),
+        )
         .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Personal information privacy
-        _buildPrivacyCategory(title: translation(context).lbl_personal_info_privacy, icon: Icons.person_outline, iconColor: theme.primary, settings: personalSettings, theme: theme),
+        _buildPrivacyCategory(
+          title: translation(context).lbl_personal_info_privacy,
+          icon: Icons.person_outline,
+          iconColor: theme.primary,
+          settings: personalSettings,
+          theme: theme,
+        ),
 
         const SizedBox(height: 16),
 
         // Professional information privacy
-        _buildPrivacyCategory(title: translation(context).lbl_professional_info_privacy, icon: Icons.work_outline, iconColor: theme.success, settings: professionalSettings, theme: theme),
+        _buildPrivacyCategory(
+          title: translation(context).lbl_professional_info_privacy,
+          icon: Icons.work_outline,
+          iconColor: theme.success,
+          settings: professionalSettings,
+          theme: theme,
+        ),
 
         const SizedBox(height: 16),
 
         // Location information privacy
-        _buildPrivacyCategory(title: translation(context).lbl_location_info_privacy, icon: Icons.location_on_outlined, iconColor: theme.warning, settings: locationSettings, theme: theme),
+        _buildPrivacyCategory(
+          title: translation(context).lbl_location_info_privacy,
+          icon: Icons.location_on_outlined,
+          iconColor: theme.warning,
+          settings: locationSettings,
+          theme: theme,
+        ),
 
         // Other privacy settings
         if (otherSettings.isNotEmpty) const SizedBox(height: 16),
 
         if (otherSettings.isNotEmpty)
-          _buildPrivacyCategory(title: translation(context).lbl_other_info_privacy, icon: Icons.more_horiz, iconColor: theme.secondary, settings: otherSettings, theme: theme),
+          _buildPrivacyCategory(
+            title: translation(context).lbl_other_info_privacy,
+            icon: Icons.more_horiz,
+            iconColor: theme.secondary,
+            settings: otherSettings,
+            theme: theme,
+          ),
       ],
     );
   }
 
   // Helper to build a category of privacy settings
-  Widget _buildPrivacyCategory({required String title, required IconData icon, required Color iconColor, required List<PrivacySetting> settings, required OneUITheme theme}) {
+  Widget _buildPrivacyCategory({
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required List<PrivacySetting> settings,
+    required OneUITheme theme,
+  }) {
     if (settings.isEmpty) return const SizedBox.shrink();
 
     return Container(
@@ -152,13 +236,20 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.1), borderRadius: theme.radiusM),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.1),
+                    borderRadius: theme.radiusM,
+                  ),
                   child: Icon(icon, color: iconColor, size: 18),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: iconColor),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: iconColor,
+                  ),
                 ),
               ],
             ),
@@ -168,7 +259,8 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
             ...settings.map((item) {
               // Handle null/empty visibility by defaulting to 'lock'
               String effectiveVisibility = item.visibility ?? 'lock';
-              if (effectiveVisibility.isEmpty || effectiveVisibility.trim().isEmpty) {
+              if (effectiveVisibility.isEmpty ||
+                  effectiveVisibility.trim().isEmpty) {
                 effectiveVisibility = 'lock';
               }
 
@@ -190,7 +282,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                       : 'public';
                   item.visibility = updateValue;
                 },
-                options: [translation(context).lbl_only_me, translation(context).lbl_friends, translation(context).lbl_public],
+                options: [
+                  translation(context).lbl_only_me,
+                  translation(context).lbl_friends,
+                  translation(context).lbl_public,
+                ],
                 colorScheme: _getColorForPrivacyLevel(selectValue),
                 theme: theme,
               );
@@ -237,12 +333,32 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
 
   // Helper to get appropriate colors for different privacy levels
   ColorScheme _getColorForPrivacyLevel(String level) {
+    final theme = OneUITheme.of(context);
+
     if (level == translation(context).lbl_only_me) {
-      return ColorScheme.fromSeed(seedColor: Colors.red, primary: Colors.red, surface: Colors.red.shade50);
+      return ColorScheme.fromSeed(
+        seedColor: Colors.red,
+        primary: Colors.red,
+        surface: theme.isDark
+            ? Colors.red.withValues(alpha: 0.15)
+            : Colors.red.shade50,
+      );
     } else if (level == translation(context).lbl_friends) {
-      return ColorScheme.fromSeed(seedColor: Colors.orange, primary: Colors.orange, surface: Colors.orange.shade50);
+      return ColorScheme.fromSeed(
+        seedColor: Colors.orange,
+        primary: Colors.orange,
+        surface: theme.isDark
+            ? Colors.orange.withValues(alpha: 0.15)
+            : Colors.orange.shade50,
+      );
     } else {
-      return ColorScheme.fromSeed(seedColor: Colors.green, primary: Colors.green, surface: Colors.green.shade50);
+      return ColorScheme.fromSeed(
+        seedColor: Colors.green,
+        primary: Colors.green,
+        surface: theme.isDark
+            ? Colors.green.withValues(alpha: 0.15)
+            : Colors.green.shade50,
+      );
     }
   }
 
@@ -255,7 +371,9 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
     required ColorScheme colorScheme,
     required OneUITheme theme,
   }) {
-    options = options.where((opt) => opt.isNotEmpty && opt.trim().isNotEmpty).toList();
+    options = options
+        .where((opt) => opt.isNotEmpty && opt.trim().isNotEmpty)
+        .toList();
 
     return isEditModeMap
         ? Padding(
@@ -268,7 +386,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     capitalizeWords(label.replaceAll('_', ' ')),
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: theme.textPrimary),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textPrimary,
+                    ),
                   ),
                 ),
                 Container(
@@ -280,13 +402,19 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                     items: options,
                     value: value,
                     width: double.infinity,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
                     itemBuilder: (item) => Row(
                       children: [
                         Container(
                           width: 24,
                           height: 24,
-                          decoration: BoxDecoration(color: _getColorForPrivacyLevel(item).surface, shape: BoxShape.circle),
+                          decoration: BoxDecoration(
+                            color: _getColorForPrivacyLevel(item).surface,
+                            shape: BoxShape.circle,
+                          ),
                           child: Center(
                             child: Icon(
                               item == translation(context).lbl_only_me
@@ -325,12 +453,22 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                   flex: 2,
                   child: Text(
                     capitalizeWords(label),
-                    style: TextStyle(color: theme.textSecondary, fontSize: 14, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: theme.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: colorScheme.surface, borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -346,7 +484,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen> with SingleTicker
                       const SizedBox(width: 4),
                       Text(
                         capitalizeWords(value),
-                        style: TextStyle(color: colorScheme.primary, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),

@@ -2536,6 +2536,12 @@ abstract class AppLocalizations {
   /// **'No posts found'**
   String get msg_no_posts;
 
+  /// No description provided for @msg_no_people_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No people found'**
+  String get msg_no_people_found;
+
   /// No description provided for @msg_confirm_delete_post.
   ///
   /// In en, this message translates to:
@@ -5961,6 +5967,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Be the first to share your medical insights on this case.'**
   String get msg_be_first_to_comment;
+
+  /// No description provided for @lbl_showing_cached_data.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing saved data'**
+  String get lbl_showing_cached_data;
+
+  /// No description provided for @lbl_tap_to_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap retry to refresh'**
+  String get lbl_tap_to_retry;
 }
 
 class _AppLocalizationsDelegate

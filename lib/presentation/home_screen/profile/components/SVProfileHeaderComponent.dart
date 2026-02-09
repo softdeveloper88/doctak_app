@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -10,10 +11,12 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/pro
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/moderation/report_content_bottom_sheet.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -26,7 +29,13 @@ class StatItem extends StatelessWidget {
   final Function() onTap;
   final IconData icon;
 
-  const StatItem({required this.count, required this.label, required this.onTap, required this.icon, super.key});
+  const StatItem({
+    required this.count,
+    required this.label,
+    required this.onTap,
+    required this.icon,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,14 +53,24 @@ class StatItem extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   count,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.primary, fontFamily: 'Poppins'),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: theme.primary,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(fontSize: 12, color: theme.textSecondary, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
+              style: TextStyle(
+                fontSize: 12,
+                color: theme.textSecondary,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
+              ),
             ),
           ],
         ),
@@ -65,10 +84,16 @@ class SVProfileHeaderComponent extends StatefulWidget {
   ProfileBloc? profileBoc;
   bool? isMe;
 
-  SVProfileHeaderComponent({this.userProfile, this.profileBoc, this.isMe, super.key});
+  SVProfileHeaderComponent({
+    this.userProfile,
+    this.profileBoc,
+    this.isMe,
+    super.key,
+  });
 
   @override
-  State<SVProfileHeaderComponent> createState() => _SVProfileHeaderComponentState();
+  State<SVProfileHeaderComponent> createState() =>
+      _SVProfileHeaderComponentState();
 }
 
 // Points card with improved design
@@ -92,14 +117,22 @@ Widget _buildPointsCard(BuildContext context) {
               const SizedBox(width: 4),
               Text(
                 translation(context).lbl_your_earned_points,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.textPrimary),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: theme.textPrimary,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 6),
           Text(
             '300',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.primary),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.primary,
+            ),
           ),
         ],
       ),
@@ -107,7 +140,8 @@ Widget _buildPointsCard(BuildContext context) {
   );
 }
 
-class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> with TickerProviderStateMixin {
+class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
+    with TickerProviderStateMixin {
   late AnimationController _controller;
   late AnimationController _headerController;
   late Animation<double> _profileImageAnimation;
@@ -123,16 +157,29 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
     super.initState();
 
     // Profile image animation
-    _controller = AnimationController(duration: const Duration(milliseconds: 800), vsync: this);
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
 
     // Header collapse animation
-    _headerController = AnimationController(duration: const Duration(milliseconds: 300), vsync: this);
+    _headerController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
 
-    _profileImageAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _profileImageAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
 
-    _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _headerController, curve: Curves.easeInOut));
+    _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _headerController, curve: Curves.easeInOut),
+    );
 
-    _headerScaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(CurvedAnimation(parent: _headerController, curve: Curves.easeOutBack));
+    _headerScaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
+      CurvedAnimation(parent: _headerController, curve: Curves.easeOutBack),
+    );
 
     // Add scroll listener for smooth header effects
     _scrollController.addListener(_onScroll);
@@ -160,6 +207,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight + 80),
       child: Column(
@@ -170,27 +218,48 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
               // Background Image with gradient overlay
               InkWell(
                 onTap: () {
-                  ProfileImageScreen(imageUrl: '${widget.userProfile?.coverPicture}').launch(context);
+                  ProfileImageScreen(
+                    imageUrl: '${widget.userProfile?.coverPicture}',
+                  ).launch(context);
                 },
                 child: Container(
                   height: 260,
                   width: double.maxFinite,
-                  decoration: BoxDecoration(
-                    // color: Colors.black,
-                  ),
+                  decoration: const BoxDecoration(),
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      // Cover image
-                      widget.userProfile?.coverPicture == null || widget.userProfile?.coverPicture == 'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
-                          ? Image.asset('assets/images/img_cover.png', width: double.maxFinite, height: 260, fit: BoxFit.cover)
-                          : CustomImageView(imagePath: widget.userProfile?.coverPicture ?? '', height: 260, width: double.maxFinite, fit: BoxFit.cover, placeHolder: 'assets/images/img_cover.png'),
+                      // Cover image - now fills entire space
+                      widget.userProfile?.coverPicture == null ||
+                              widget.userProfile?.coverPicture ==
+                                  'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
+                          ? Image.asset(
+                              'assets/images/img_cover.png',
+                              width: double.maxFinite,
+                              height: 260,
+                              fit: BoxFit.cover,
+                            )
+                          : CustomImageView(
+                              imagePath: widget.userProfile?.coverPicture ?? '',
+                              height: 260,
+                              width: double.maxFinite,
+                              fit: BoxFit.cover,
+                              placeHolder: 'assets/images/img_cover.png',
+                            ),
 
                       // Gradient overlay
                       Container(
                         width: double.maxFinite,
                         height: 260,
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.black.withValues(alpha: 0.1), Colors.black.withValues(alpha: 0.5)]),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.1),
+                              Colors.black.withValues(alpha: 0.5),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -210,14 +279,26 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                       color: theme.cardBackground,
                       borderRadius: BorderRadius.circular(40),
                       border: Border.all(color: theme.border, width: 1),
-                      boxShadow: theme.isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, spreadRadius: 0)],
+                      boxShadow: theme.isDark
+                          ? null
+                          : [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 10,
+                                spreadRadius: 0,
+                              ),
+                            ],
                     ),
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back_ios, size: 18, color: theme.textPrimary),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        size: 18,
+                        color: theme.textPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -230,7 +311,11 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                   child: IconButton(
                     onPressed: () async {
                       // Use PermissionUtils for proper permission handling on both iOS and Android
-                      final hasPermission = await PermissionUtils.requestGalleryPermissionWithUI(context, showRationale: false);
+                      final hasPermission =
+                          await PermissionUtils.requestGalleryPermissionWithUI(
+                            context,
+                            showRationale: false,
+                          );
 
                       if (hasPermission) {
                         _showFileOptions(false);
@@ -241,11 +326,26 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                       width: 50,
                       decoration: BoxDecoration(
                         color: theme.primary,
-                        border: Border.all(color: theme.scaffoldBackground, width: 2),
+                        border: Border.all(
+                          color: theme.scaffoldBackground,
+                          width: 2,
+                        ),
                         borderRadius: BorderRadius.circular(25),
-                        boxShadow: theme.isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 0)],
+                        boxShadow: theme.isDark
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 10,
+                                  spreadRadius: 0,
+                                ),
+                              ],
                       ),
-                      child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 24),
+                      child: const Icon(
+                        Icons.camera_alt_outlined,
+                        color: Colors.white,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ),
@@ -259,8 +359,20 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                   height: 100,
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackground,
-                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                    boxShadow: theme.isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, spreadRadius: 0, offset: const Offset(0, -2))],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                    boxShadow: theme.isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              spreadRadius: 0,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
                   ),
                 ),
               ),
@@ -279,21 +391,48 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                         height: 100,
                         width: 100,
                         decoration: BoxDecoration(
-                          border: Border.all(color: theme.scaffoldBackground, width: 4),
+                          border: Border.all(
+                            color: theme.scaffoldBackground,
+                            width: 4,
+                          ),
                           borderRadius: BorderRadius.circular(50),
                           color: theme.surfaceVariant,
-                          boxShadow: theme.isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 0)],
+                          boxShadow: theme.isDark
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 10,
+                                    spreadRadius: 0,
+                                  ),
+                                ],
                         ),
                         child: Hero(
                           tag: 'profile-image',
                           child: ClipOval(
                             child: widget.userProfile?.profilePicture == null
-                                ? Image.asset('images/socialv/faces/face_5.png', height: 100, width: 100, fit: BoxFit.cover)
-                                : CustomImageView(imagePath: widget.userProfile?.profilePicture ?? '', height: 100, width: 100, fit: BoxFit.cover, placeHolder: 'images/socialv/faces/face_5.png'),
+                                ? Image.asset(
+                                    'images/socialv/faces/face_5.png',
+                                    height: 100,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                  )
+                                : CustomImageView(
+                                    imagePath:
+                                        widget.userProfile?.profilePicture ??
+                                        '',
+                                    height: 100,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                    placeHolder:
+                                        'images/socialv/faces/face_5.png',
+                                  ),
                           ),
                         ),
                       ).onTap(() async {
-                        ProfileImageScreen(imageUrl: '${widget.userProfile?.profilePicture}').launch(context);
+                        ProfileImageScreen(
+                          imageUrl: '${widget.userProfile?.profilePicture}',
+                        ).launch(context);
                       }),
 
                       // Camera icon for profile picture with improved styling
@@ -306,7 +445,11 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                             child: InkWell(
                               onTap: () async {
                                 // Use PermissionUtils for proper permission handling on both iOS and Android
-                                final hasPermission = await PermissionUtils.requestGalleryPermissionWithUI(context, showRationale: false);
+                                final hasPermission =
+                                    await PermissionUtils.requestGalleryPermissionWithUI(
+                                      context,
+                                      showRationale: false,
+                                    );
 
                                 if (hasPermission) {
                                   _showFileOptions(true);
@@ -318,11 +461,28 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                                 width: 36,
                                 decoration: BoxDecoration(
                                   color: theme.primary,
-                                  border: Border.all(color: theme.scaffoldBackground, width: 2),
+                                  border: Border.all(
+                                    color: theme.scaffoldBackground,
+                                    width: 2,
+                                  ),
                                   borderRadius: BorderRadius.circular(18),
-                                  boxShadow: theme.isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 5, spreadRadius: 0)],
+                                  boxShadow: theme.isDark
+                                      ? null
+                                      : [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.2,
+                                            ),
+                                            blurRadius: 5,
+                                            spreadRadius: 0,
+                                          ),
+                                        ],
                                 ),
-                                child: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 18),
+                                child: const Icon(
+                                  Icons.camera_alt_outlined,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                               ),
                             ),
                           ),
@@ -352,7 +512,12 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                     ),
                   ), // Made font bolder
                   8.width, // More spacing
-                  Image.asset('images/socialv/icons/ic_TickSquare.png', height: 16, width: 16, fit: BoxFit.cover),
+                  Image.asset(
+                    'images/socialv/icons/ic_TickSquare.png',
+                    height: 16,
+                    width: 16,
+                    fit: BoxFit.cover,
+                  ),
                 ],
               ),
 
@@ -378,20 +543,29 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
               ),
 
               // Specialty
-              if (widget.userProfile?.user?.specialty != null && widget.userProfile!.user!.specialty!.isNotEmpty)
+              if (widget.userProfile?.user?.specialty != null &&
+                  widget.userProfile!.user!.specialty!.isNotEmpty)
                 SizedBox(
                   width: 80.w,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.medical_services_outlined, size: 14, color: theme.primary),
+                      Icon(
+                        Icons.medical_services_outlined,
+                        size: 14,
+                        color: theme.primary,
+                      ),
                       4.width,
                       Flexible(
                         child: Text(
                           widget.userProfile?.user?.specialty ?? '',
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: svGetBodyColor(), fontSize: 14, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            color: svGetBodyColor(),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -399,19 +573,29 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                 ),
 
               // About me text
-              if (widget.userProfile?.profile?.aboutMe != null && widget.userProfile!.profile!.aboutMe!.isNotEmpty)
+              if (widget.userProfile?.profile?.aboutMe != null &&
+                  widget.userProfile!.profile!.aboutMe!.isNotEmpty)
                 Container(
                   width: 90.w,
                   margin: const EdgeInsets.only(top: 8, bottom: 4),
                   child: Text(
                     widget.userProfile?.profile?.aboutMe ?? '',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: svGetBodyColor(), fontSize: 13, fontWeight: FontWeight.w400, height: 1.4),
+                    style: TextStyle(
+                      color: svGetBodyColor(),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      height: 1.4,
+                    ),
                   ),
                 ),
 
               // Points card for the user's own profile
-              if (widget.isMe ?? false) Padding(padding: const EdgeInsets.symmetric(vertical: 12.0), child: _buildPointsCard(context)),
+              if (widget.isMe ?? false)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: _buildPointsCard(context),
+                ),
 
               // Message and Follow buttons for other users' profiles
               if (widget.isMe != true)
@@ -424,28 +608,52 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                       InkWell(
                         onTap: () {
                           ChatRoomScreen(
-                            username: '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
-                            profilePic: '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                            username:
+                                '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
+                            profilePic:
+                                '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
                             id: '${widget.userProfile?.user?.id}',
                             roomId: '',
                           ).launch(context);
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: theme.cardBackground,
                             border: Border.all(color: theme.primary),
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: theme.isDark ? null : [BoxShadow(color: theme.primary.withValues(alpha: 0.1), blurRadius: 5, offset: const Offset(0, 2))],
+                            boxShadow: theme.isDark
+                                ? null
+                                : [
+                                    BoxShadow(
+                                      color: theme.primary.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SvgPicture.asset('assets/icon/ic_message.svg', color: theme.primary, width: 20, height: 20),
+                              SvgPicture.asset(
+                                'assets/icon/ic_message.svg',
+                                color: theme.primary,
+                                width: 20,
+                                height: 20,
+                              ),
                               8.width,
                               Text(
                                 translation(context).lbl_message,
-                                style: TextStyle(color: theme.primary, fontWeight: FontWeight.w600, fontSize: 14),
+                                style: TextStyle(
+                                  color: theme.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
                               ),
                             ],
                           ),
@@ -457,36 +665,167 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                       // Follow button with improved styling
                       MaterialButton(
                         height: 40.0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                         minWidth: 110,
                         onPressed: () {
                           if (widget.userProfile!.isFollowing ?? false) {
-                            widget.profileBoc?.add(SetUserFollow(widget.userProfile?.user?.id ?? '', 'unfollow'));
+                            widget.profileBoc?.add(
+                              SetUserFollow(
+                                widget.userProfile?.user?.id ?? '',
+                                'unfollow',
+                              ),
+                            );
 
                             widget.userProfile!.isFollowing = false;
                           } else {
-                            widget.profileBoc?.add(SetUserFollow(widget.userProfile?.user?.id ?? '', 'follow'));
+                            widget.profileBoc?.add(
+                              SetUserFollow(
+                                widget.userProfile?.user?.id ?? '',
+                                'follow',
+                              ),
+                            );
 
                             widget.userProfile!.isFollowing = true;
                           }
                           setState(() {});
                         },
                         elevation: theme.isDark ? 0 : 2,
-                        color: widget.userProfile?.isFollowing ?? false ? theme.surfaceVariant : SVAppColorPrimary,
+                        color: widget.userProfile?.isFollowing ?? false
+                            ? theme.surfaceVariant
+                            : SVAppColorPrimary,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              widget.userProfile?.isFollowing ?? false ? Icons.check : Icons.person_add_alt_1_rounded,
-                              color: widget.userProfile?.isFollowing ?? false ? theme.textSecondary : Colors.white,
+                              widget.userProfile?.isFollowing ?? false
+                                  ? Icons.check
+                                  : Icons.person_add_alt_1_rounded,
+                              color: widget.userProfile?.isFollowing ?? false
+                                  ? theme.textSecondary
+                                  : Colors.white,
                               size: 18,
                             ),
                             6.width,
                             Text(
-                              widget.userProfile?.isFollowing ?? false ? translation(context).lbl_following : translation(context).lbl_follow,
-                              style: TextStyle(color: widget.userProfile?.isFollowing ?? false ? theme.textSecondary : Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                              widget.userProfile?.isFollowing ?? false
+                                  ? translation(context).lbl_following
+                                  : translation(context).lbl_follow,
+                              style: TextStyle(
+                                color: widget.userProfile?.isFollowing ?? false
+                                    ? theme.textSecondary
+                                    : Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 8),
+
+                      // More options (Report/Block) button
+                      Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: theme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: theme.border),
+                        ),
+                        child: PopupMenuButton<String>(
+                          padding: EdgeInsets.zero,
+                          icon: Icon(
+                            CupertinoIcons.ellipsis,
+                            color: theme.textSecondary,
+                            size: 20,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          color: theme.cardBackground,
+                          elevation: 8,
+                          shadowColor: Colors.black.withValues(alpha: 0.2),
+                          itemBuilder: (context) => [
+                            // Report User option
+                            PopupMenuItem(
+                              value: 'Report',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.flag,
+                                    color: theme.warning,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Report User',
+                                    style: TextStyle(
+                                      color: theme.warning,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Block User option
+                            PopupMenuItem(
+                              value: 'Block',
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.hand_raised,
+                                    color: theme.deleteRed,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'Block User',
+                                    style: TextStyle(
+                                      color: theme.deleteRed,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'Report') {
+                              // Show report bottom sheet
+                              ReportContentBottomSheet.show(
+                                context: context,
+                                contentId:
+                                    int.tryParse(
+                                      widget.userProfile?.user?.id ?? '0',
+                                    ) ??
+                                    0,
+                                contentType: 'user',
+                                contentOwnerName:
+                                    '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
+                              );
+                            } else if (value == 'Block') {
+                              // Show block dialog
+                              BlockUserDialog.show(
+                                context: context,
+                                userId:
+                                    int.tryParse(
+                                      widget.userProfile?.user?.id ?? '0',
+                                    ) ??
+                                    0,
+                                userName:
+                                    '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
+                                onUserBlocked: () {
+                                  // Navigate back after blocking
+                                  Navigator.of(context).pop();
+                                },
+                              );
+                            }
+                          },
                         ),
                       ),
                     ],
@@ -509,26 +848,45 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                     // Posts stat
                     GestureDetector(
                       onTap: () {},
-                      child: StatItem(count: '${widget.userProfile?.totalPosts ?? ''}', label: translation(context).lbl_posts, onTap: () {}, icon: Icons.article_rounded),
+                      child: StatItem(
+                        count: '${widget.userProfile?.totalPosts ?? ''}',
+                        label: translation(context).lbl_posts,
+                        onTap: () {},
+                        icon: Icons.article_rounded,
+                      ),
                     ),
 
                     // Followers stat
                     GestureDetector(
                       onTap: () {
                         if (!(widget.isMe ?? false)) {
-                          FollowerScreen(isFollowersScreen: true, userId: widget.userProfile?.user?.id ?? '').launch(context);
+                          FollowerScreen(
+                            isFollowersScreen: true,
+                            userId: widget.userProfile?.user?.id ?? '',
+                          ).launch(context);
                         } else {
-                          FollowerScreen(isFollowersScreen: true, userId: AppData.logInUserId).launch(context);
+                          FollowerScreen(
+                            isFollowersScreen: true,
+                            userId: AppData.logInUserId,
+                          ).launch(context);
                         }
                       },
                       child: StatItem(
-                        count: widget.userProfile?.totalFollows?.totalFollowings ?? '',
+                        count:
+                            widget.userProfile?.totalFollows?.totalFollowings ??
+                            '',
                         label: translation(context).lbl_followers,
                         onTap: () {
                           if (!(widget.isMe ?? false)) {
-                            FollowerScreen(isFollowersScreen: true, userId: widget.userProfile?.user?.id ?? '').launch(context);
+                            FollowerScreen(
+                              isFollowersScreen: true,
+                              userId: widget.userProfile?.user?.id ?? '',
+                            ).launch(context);
                           } else {
-                            FollowerScreen(isFollowersScreen: true, userId: AppData.logInUserId).launch(context);
+                            FollowerScreen(
+                              isFollowersScreen: true,
+                              userId: AppData.logInUserId,
+                            ).launch(context);
                           }
                         },
                         icon: Icons.people_alt_rounded,
@@ -539,19 +897,33 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
                     GestureDetector(
                       onTap: () {
                         if (!(widget.isMe ?? false)) {
-                          FollowerScreen(isFollowersScreen: false, userId: widget.userProfile?.user?.id ?? '').launch(context);
+                          FollowerScreen(
+                            isFollowersScreen: false,
+                            userId: widget.userProfile?.user?.id ?? '',
+                          ).launch(context);
                         } else {
-                          FollowerScreen(isFollowersScreen: false, userId: AppData.logInUserId).launch(context);
+                          FollowerScreen(
+                            isFollowersScreen: false,
+                            userId: AppData.logInUserId,
+                          ).launch(context);
                         }
                       },
                       child: StatItem(
-                        count: widget.userProfile?.totalFollows?.totalFollowers ?? '',
+                        count:
+                            widget.userProfile?.totalFollows?.totalFollowers ??
+                            '',
                         label: translation(context).lbl_followings,
                         onTap: () {
                           if (!(widget.isMe ?? false)) {
-                            FollowerScreen(isFollowersScreen: false, userId: widget.userProfile?.user?.id ?? '').launch(context);
+                            FollowerScreen(
+                              isFollowersScreen: false,
+                              userId: widget.userProfile?.user?.id ?? '',
+                            ).launch(context);
                           } else {
-                            FollowerScreen(isFollowersScreen: false, userId: AppData.logInUserId).launch(context);
+                            FollowerScreen(
+                              isFollowersScreen: false,
+                              userId: AppData.logInUserId,
+                            ).launch(context);
                           }
                         },
                         icon: Icons.person_add_rounded,
@@ -574,106 +946,29 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent> wit
 
   var _selectedFile;
 
-  // Improved file picker bottom sheet
+  // Use unified gallery picker for consistent experience
   void _showFileOptions(bool isProfilePic) {
-    final theme = OneUITheme.of(context);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.cardBackground,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-      ),
-      builder: (BuildContext sheetContext) {
-        // Use parent context's theme to ensure consistency
-        final sheetTheme = OneUITheme.of(sheetContext);
-        // Get bottom padding for system navigation bars
-        final bottomPadding = MediaQuery.of(sheetContext).viewPadding.bottom;
-
-        return Container(
-          decoration: BoxDecoration(
-            color: sheetTheme.cardBackground,
-            borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-          ),
-          padding: EdgeInsets.only(
-            left: 24.0,
-            right: 24.0,
-            top: 24.0,
-            // Add extra padding for system navigation bars on old devices
-            bottom: 24.0 + bottomPadding,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                isProfilePic ? translation(sheetContext).lbl_update_profile_picture : translation(sheetContext).lbl_update_cover_photo,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: sheetTheme.textPrimary),
-              ),
-              const SizedBox(height: 20),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: sheetTheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                  child: Icon(Icons.photo_library, color: sheetTheme.primary),
-                ),
-                title: Text(
-                  translation(sheetContext).lbl_choose_from_gallery,
-                  style: TextStyle(fontWeight: FontWeight.w500, color: sheetTheme.textPrimary),
-                ),
-                onTap: () async {
-                  Navigator.pop(sheetContext);
-                  File? file = await _pickFile(ImageSource.gallery);
-                  if (file != null) {
-                    setState(() {
-                      _selectedFile = file;
-                      widget.profileBoc!.add(UpdateProfilePicEvent(filePath: file.path, isProfilePicture: isProfilePic));
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.camera_alt, color: Colors.green),
-                ),
-                title: Text(
-                  translation(sheetContext).lbl_take_a_picture,
-                  style: TextStyle(fontWeight: FontWeight.w500, color: sheetTheme.textPrimary),
-                ),
-                onTap: () async {
-                  Navigator.pop(sheetContext);
-
-                  // Request camera permission before opening camera
-                  final hasCameraPermission = await PermissionUtils.requestCameraPermissionWithUI(context);
-
-                  if (hasCameraPermission) {
-                    File? file = await _pickFile(ImageSource.camera);
-                    if (file != null) {
-                      setState(() {
-                        _selectedFile = file;
-                        widget.profileBoc!.add(UpdateProfilePicEvent(filePath: file.path, isProfilePicture: isProfilePic));
-                      });
-                    }
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    _pickFromUnifiedGallery(isProfilePic);
   }
 
-  Future<File?> _pickFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
+  Future<void> _pickFromUnifiedGallery(bool isProfilePic) async {
+    final File? file = await UnifiedGalleryPicker.pickSingleImage(
+      context,
+      title: isProfilePic
+          ? translation(context).lbl_update_profile_picture
+          : translation(context).lbl_update_cover_photo,
+    );
 
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
+    if (file != null) {
+      setState(() {
+        _selectedFile = file;
+        widget.profileBoc!.add(
+          UpdateProfilePicEvent(
+            filePath: file.path,
+            isProfilePicture: isProfilePic,
+          ),
+        );
+      });
     }
   }
 }

@@ -117,6 +117,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     );
   }
 
+  /// Get a safe aspect ratio, defaulting to 16:9 if invalid
+  double get _safeAspectRatio {
+    if (_controller == null) return 16 / 9;
+    final ratio = _controller!.value.aspectRatio;
+    // Check for invalid values: 0, NaN, Infinity, or very extreme ratios
+    if (ratio <= 0 || ratio.isNaN || ratio.isInfinite || ratio < 0.1 || ratio > 10) {
+      return 16 / 9; // Default to 16:9
+    }
+    return ratio;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
@@ -159,7 +170,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             )
           : Chewie(controller: chewieController!);
 
-      return widget.showMinimalControls ? videoWidget : AspectRatio(aspectRatio: _controller!.value.aspectRatio, child: videoWidget);
+      return widget.showMinimalControls ? videoWidget : AspectRatio(aspectRatio: _safeAspectRatio, child: videoWidget);
     } else {
       Widget loadingWidget = Container(
         color: appStore.isDarkMode ? Colors.black : Colors.grey[900],

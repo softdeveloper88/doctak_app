@@ -1,4 +1,4 @@
-import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -301,14 +301,8 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
             flex: widget.jobData.user?.id != null ? 2 : 1,
             child: OutlinedButton(
               onPressed: () async {
-                final Uri url = Uri.parse(widget.jobData.link ?? '');
-                final shouldLeave = await _showConfirmationDialog(context, theme);
-                if (!mounted) return;
-
-                if (shouldLeave == true) {
-                  widget.onLaunchLink(url);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_leaving_app_canceled)));
+                if (widget.jobData.link != null && widget.jobData.link!.isNotEmpty) {
+                  await PostUtils.launchURL(context, widget.jobData.link!);
                 }
               },
               style: OutlinedButton.styleFrom(
@@ -329,28 +323,6 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool?> _showConfirmationDialog(BuildContext context, OneUITheme theme) async {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: theme.radiusL),
-        title: Text(translation(context).lbl_leave_app, style: theme.titleMedium),
-        content: Text(translation(context).msg_open_link_confirm, style: theme.bodyMedium),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(translation(context).lbl_no_answer, style: TextStyle(color: theme.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(translation(context).lbl_yes, style: TextStyle(color: theme.primary)),
           ),
         ],
       ),

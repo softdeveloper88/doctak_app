@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_state.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 
@@ -916,92 +916,31 @@ class _Step3State extends State<Step3> {
   String? _selectedProfileFile;
 
   void _showFileOptions(bool isProfilePic) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text('Choose from gallery'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.gallery);
-                  if (file != null) {
-                    print("isProfilePic $isProfilePic");
-                    if (isProfilePic) {
-                      setState(() {
-                        print('profile${file.path}');
-                        widget.groupBloc.profilePicture = file.path;
-                        _selectedProfileFile = file.path;
-                      });
-                    } else {
-                      setState(() {
-                        widget.groupBloc.coverPicture = file.path;
-                        print('cover${file.path}');
-                        _selectedCoverFile = file.path;
-                      });
-                    }
-                    // widget.profileBoc!.add(UpdateProfilePicEvent(
-                    //     filePath: file.path, isProfilePicture: isProfilePic));
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Take a picture'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  File? file = await _pickFile(ImageSource.camera);
-                  if (file != null) {
-                    print("isProfilePic $isProfilePic");
-                    if (isProfilePic) {
-                      setState(() {
-                        print('profile${file.path}');
-                        widget.groupBloc.profilePicture = file.path;
-                        _selectedProfileFile = file.path;
-                      });
-                    } else {
-                      setState(() {
-                        widget.groupBloc.coverPicture = file.path;
-                        print('cover${file.path}');
-                        _selectedCoverFile = file.path;
-                      });
-                    }
-                  }
-                },
-              ),
-              // ListTile(
-              //   leading: const Icon(Icons.insert_drive_file),
-              //   title: const Text('Select a document'),
-              //   onTap: () async {
-              //     Navigator.pop(context);
-              //     File? file = await _pickFile(ImageSource.gallery);
-              //     if (file != null) {
-              //       setState(() {
-              //         _selectedFile = file;
-              //       });
-              //     }
-              //   },
-              // ),
-            ],
-          ),
-        );
-      },
-    );
+    // Use unified gallery picker directly for consistent experience
+    _pickFromGallery(isProfilePic);
   }
 
-  Future<File?> _pickFile(ImageSource source) async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
-
-    if (pickedFile != null) {
-      return File(pickedFile.path);
-    } else {
-      return null;
+  Future<void> _pickFromGallery(bool isProfilePic) async {
+    final File? file = await UnifiedGalleryPicker.pickSingleImage(
+      context,
+      title: isProfilePic ? 'Select Profile Picture' : 'Select Cover Photo',
+    );
+    
+    if (file != null) {
+      debugPrint("isProfilePic $isProfilePic");
+      if (isProfilePic) {
+        setState(() {
+          debugPrint('profile${file.path}');
+          widget.groupBloc.profilePicture = file.path;
+          _selectedProfileFile = file.path;
+        });
+      } else {
+        setState(() {
+          widget.groupBloc.coverPicture = file.path;
+          debugPrint('cover${file.path}');
+          _selectedCoverFile = file.path;
+        });
+      }
     }
   }
 

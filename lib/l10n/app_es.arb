@@ -492,6 +492,7 @@
   "msg_error_downloading": "Error al descargar.",
   "msg_permission_denied": "Permiso denegado",
   "msg_no_posts": "No se encontraron publicaciones",
+  "msg_no_people_found": "No se encontraron personas",
   "msg_confirm_delete_post": "¿Estás seguro de que quieres eliminar esta publicación?",
   "lbl_search_post": "Buscar publicación",
 
@@ -1302,5 +1303,9 @@
   "msg_no_comments_yet": "Aún no hay comentarios",
   "msg_be_first_to_comment": "Sea el primero en compartir sus conocimientos médicos sobre este caso.",
   "msg_loading_more_comments": "Cargando más comentarios...",
-  "lbl_related_cases": "Casos relacionados"
+  "lbl_related_cases": "Casos relacionados",
+
+  "@_OFFLINE_RETRY_BANNER": {},
+  "lbl_showing_cached_data": "Mostrando datos guardados",
+  "lbl_tap_to_retry": "Toque reintentar para actualizar"
 }

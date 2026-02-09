@@ -1310,6 +1310,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get msg_no_posts => 'Keine Beiträge gefunden';
 
   @override
+  String get msg_no_people_found => 'Keine Personen gefunden';
+
+  @override
   String get msg_confirm_delete_post =>
       'Sind Sie sicher, dass Sie diesen Beitrag löschen möchten?';
 
@@ -3181,4 +3184,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get msg_be_first_to_comment =>
       'Seien Sie der Erste, der medizinische Erkenntnisse zu diesem Fall teilt.';
+
+  @override
+  String get lbl_showing_cached_data => 'Gespeicherte Daten werden angezeigt';
+
+  @override
+  String get lbl_tap_to_retry => 'Tippen Sie auf Wiederholen zum Aktualisieren';
 }
