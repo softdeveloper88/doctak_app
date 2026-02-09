@@ -28,12 +28,18 @@ class CallPermissionStatus {
   final bool microphonePermanentlyDenied;
   final bool cameraPermanentlyDenied;
 
-  CallPermissionStatus({required this.microphoneGranted, required this.cameraGranted, required this.microphonePermanentlyDenied, required this.cameraPermanentlyDenied});
+  CallPermissionStatus({
+    required this.microphoneGranted,
+    required this.cameraGranted,
+    required this.microphonePermanentlyDenied,
+    required this.cameraPermanentlyDenied,
+  });
 
   bool get allGranted => microphoneGranted && cameraGranted;
   bool get audioCallGranted => microphoneGranted;
   bool get videoCallGranted => microphoneGranted && cameraGranted;
-  bool get anyPermanentlyDenied => microphonePermanentlyDenied || cameraPermanentlyDenied;
+  bool get anyPermanentlyDenied =>
+      microphonePermanentlyDenied || cameraPermanentlyDenied;
 
   List<String> get deniedPermissions {
     final denied = <String>[];
@@ -53,7 +59,8 @@ class CallPermissionStatus {
 /// Professional call permission handler for iOS and Android
 /// Handles microphone and camera permissions with smooth user experience
 class CallPermissionHandler {
-  static final CallPermissionHandler _instance = CallPermissionHandler._internal();
+  static final CallPermissionHandler _instance =
+      CallPermissionHandler._internal();
 
   factory CallPermissionHandler() => _instance;
 
@@ -78,20 +85,31 @@ class CallPermissionHandler {
   }
 
   /// Get detailed permission status
-  Future<CallPermissionStatus> getPermissionStatus({required bool isVideoCall}) async {
+  Future<CallPermissionStatus> getPermissionStatus({
+    required bool isVideoCall,
+  }) async {
     try {
       final micStatus = await Permission.microphone.status;
-      final camStatus = isVideoCall ? await Permission.camera.status : PermissionStatus.granted;
+      final camStatus = isVideoCall
+          ? await Permission.camera.status
+          : PermissionStatus.granted;
 
       return CallPermissionStatus(
         microphoneGranted: micStatus.isGranted,
         cameraGranted: isVideoCall ? camStatus.isGranted : true,
         microphonePermanentlyDenied: micStatus.isPermanentlyDenied,
-        cameraPermanentlyDenied: isVideoCall ? camStatus.isPermanentlyDenied : false,
+        cameraPermanentlyDenied: isVideoCall
+            ? camStatus.isPermanentlyDenied
+            : false,
       );
     } catch (e) {
       debugPrint('CallPermissionHandler.getPermissionStatus error: $e');
-      return CallPermissionStatus(microphoneGranted: false, cameraGranted: false, microphonePermanentlyDenied: false, cameraPermanentlyDenied: false);
+      return CallPermissionStatus(
+        microphoneGranted: false,
+        cameraGranted: false,
+        microphonePermanentlyDenied: false,
+        cameraPermanentlyDenied: false,
+      );
     }
   }
 
@@ -114,7 +132,10 @@ class CallPermissionHandler {
 
   /// Show the permission status dialog with switches
   /// This is the main entry point for permission handling
-  Future<CallPermissionResult> showPermissionStatusDialog(BuildContext context, {required bool isVideoCall}) async {
+  Future<CallPermissionResult> showPermissionStatusDialog(
+    BuildContext context, {
+    required bool isVideoCall,
+  }) async {
     // First check if already granted
     if (await hasCallPermissions(isVideoCall: isVideoCall)) {
       return CallPermissionResult.granted;
@@ -126,19 +147,27 @@ class CallPermissionHandler {
     final result = await showDialog<CallPermissionResult>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => _PermissionStatusDialog(isVideoCall: isVideoCall, handler: this),
+      builder: (dialogContext) =>
+          _PermissionStatusDialog(isVideoCall: isVideoCall, handler: this),
     );
 
     return result ?? CallPermissionResult.denied;
   }
 
   /// Show in-call permission dialog (when already in call/meeting screen)
-  Future<CallPermissionResult> showInCallPermissionDialog(BuildContext context, {required bool isVideoCall}) async {
+  Future<CallPermissionResult> showInCallPermissionDialog(
+    BuildContext context, {
+    required bool isVideoCall,
+  }) async {
     return showPermissionStatusDialog(context, isVideoCall: isVideoCall);
   }
 
   /// Request permissions with full UI handling
-  Future<bool> requestWithUI(BuildContext context, {required bool isVideoCall, bool showRationale = true}) async {
+  Future<bool> requestWithUI(
+    BuildContext context, {
+    required bool isVideoCall,
+    bool showRationale = true,
+  }) async {
     // Check if already granted
     if (await hasCallPermissions(isVideoCall: isVideoCall)) {
       return true;
@@ -146,14 +175,24 @@ class CallPermissionHandler {
 
     if (!context.mounted) return false;
 
-    final result = await showPermissionStatusDialog(context, isVideoCall: isVideoCall);
+    final result = await showPermissionStatusDialog(
+      context,
+      isVideoCall: isVideoCall,
+    );
 
     return result == CallPermissionResult.granted;
   }
 
   /// Quick permission check and request
-  Future<bool> requestQuick(BuildContext context, {required bool isVideoCall}) async {
-    return await requestWithUI(context, isVideoCall: isVideoCall, showRationale: false);
+  Future<bool> requestQuick(
+    BuildContext context, {
+    required bool isVideoCall,
+  }) async {
+    return await requestWithUI(
+      context,
+      isVideoCall: isVideoCall,
+      showRationale: false,
+    );
   }
 }
 
@@ -162,10 +201,14 @@ class _PermissionStatusDialog extends StatefulWidget {
   final bool isVideoCall;
   final CallPermissionHandler handler;
 
-  const _PermissionStatusDialog({required this.isVideoCall, required this.handler});
+  const _PermissionStatusDialog({
+    required this.isVideoCall,
+    required this.handler,
+  });
 
   @override
-  State<_PermissionStatusDialog> createState() => _PermissionStatusDialogState();
+  State<_PermissionStatusDialog> createState() =>
+      _PermissionStatusDialogState();
 }
 
 class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
@@ -195,8 +238,10 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
         // On iOS: isDenied means never asked OR denied once (can still show dialog)
         // isPermanentlyDenied means user selected "Don't Allow" - need Settings
         // On iOS 14+, after first denial, status becomes permanentlyDenied
-        _microphoneCanRequest = !micStatus.isPermanentlyDenied && !micStatus.isRestricted;
-        _cameraCanRequest = !camStatus.isPermanentlyDenied && !camStatus.isRestricted;
+        _microphoneCanRequest =
+            !micStatus.isPermanentlyDenied && !micStatus.isRestricted;
+        _cameraCanRequest =
+            !camStatus.isPermanentlyDenied && !camStatus.isRestricted;
         _isLoading = false;
       });
     }
@@ -235,7 +280,8 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
     if (mounted) {
       setState(() {
         _microphoneEnabled = status.isGranted;
-        _microphoneCanRequest = !status.isPermanentlyDenied && !status.isRestricted;
+        _microphoneCanRequest =
+            !status.isPermanentlyDenied && !status.isRestricted;
         _isRequesting = false;
       });
 
@@ -297,14 +343,25 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: Colors.orange.shade50, shape: BoxShape.circle),
-              child: Icon(Icons.settings, color: Colors.orange.shade600, size: 20),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.settings,
+                color: Colors.orange.shade600,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 '$permissionName Blocked',
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
               ),
             ),
           ],
@@ -315,7 +372,12 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
           children: [
             Text(
               '$permissionName access was previously denied. To enable it:',
-              style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: Colors.grey[700], height: 1.4),
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: Colors.grey[700],
+                height: 1.4,
+              ),
             ),
             const SizedBox(height: 16),
             _buildSettingsStep(1, 'Open Settings'),
@@ -338,11 +400,16 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(ctx, true),
             icon: const Icon(Icons.settings, size: 18),
-            label: const Text('Open Settings', style: TextStyle(fontFamily: 'Poppins')),
+            label: const Text(
+              'Open Settings',
+              style: TextStyle(fontFamily: 'Poppins'),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange.shade600,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],
@@ -365,18 +432,29 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
         Container(
           width: 20,
           height: 20,
-          decoration: BoxDecoration(color: Colors.orange.shade100, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: Colors.orange.shade100,
+            shape: BoxShape.circle,
+          ),
           child: Center(
             child: Text(
               '$step',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.orange.shade700),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.orange.shade700,
+              ),
             ),
           ),
         ),
         const SizedBox(width: 10),
         Text(
           text,
-          style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: Colors.grey[700]),
+          style: TextStyle(
+            fontSize: 13,
+            fontFamily: 'Poppins',
+            color: Colors.grey[700],
+          ),
         ),
       ],
     );
@@ -402,7 +480,7 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       contentPadding: EdgeInsets.zero,
@@ -414,7 +492,7 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 32),
-            
+
             // Header Icon
             Container(
               width: 80,
@@ -439,7 +517,9 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                widget.isVideoCall ? 'Camera & Microphone\nAccess' : 'Microphone Access',
+                widget.isVideoCall
+                    ? 'Camera & Microphone\nAccess'
+                    : 'Microphone Access',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -486,13 +566,15 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                           theme: theme,
                           icon: Icons.mic_rounded,
                           title: 'Microphone',
-                          subtitle: !_microphoneCanRequest && !_microphoneEnabled
+                          subtitle:
+                              !_microphoneCanRequest && !_microphoneEnabled
                               ? 'Tap to open Settings'
                               : _microphoneEnabled
                               ? 'Enabled'
                               : 'Tap to enable',
                           isEnabled: _microphoneEnabled,
-                          needsSettings: !_microphoneCanRequest && !_microphoneEnabled,
+                          needsSettings:
+                              !_microphoneCanRequest && !_microphoneEnabled,
                           onTap: _requestMicrophonePermission,
                         ),
 
@@ -510,7 +592,8 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                                 ? 'Enabled'
                                 : 'Tap to enable',
                             isEnabled: _cameraEnabled,
-                            needsSettings: !_cameraCanRequest && !_cameraEnabled,
+                            needsSettings:
+                                !_cameraCanRequest && !_cameraEnabled,
                             onTap: _requestCameraPermission,
                           ),
                         ],
@@ -531,7 +614,9 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: BorderSide(color: theme.border, width: 1.5),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         backgroundColor: Colors.transparent,
                       ),
                       child: Text(
@@ -548,18 +633,24 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _allRequiredPermissionsGranted ? _onContinue : null,
+                      onPressed: _allRequiredPermissionsGranted
+                          ? _onContinue
+                          : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: theme.primary,
                         disabledBackgroundColor: theme.surfaceVariant,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: theme.textTertiary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                         elevation: 0,
                       ),
                       child: Text(
-                        _allRequiredPermissionsGranted ? 'Continue' : 'Enable All',
+                        _allRequiredPermissionsGranted
+                            ? 'Continue'
+                            : 'Enable All',
                         style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
@@ -571,7 +662,7 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
           ],
         ),
@@ -594,19 +685,19 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
         : needsSettings
         ? theme.warning.withValues(alpha: 0.08)
         : theme.surfaceVariant;
-    
+
     final Color borderColor = isEnabled
         ? theme.success.withValues(alpha: 0.2)
         : needsSettings
         ? theme.warning.withValues(alpha: 0.2)
         : theme.border;
-    
+
     final Color iconBgColor = isEnabled
         ? theme.success.withValues(alpha: 0.15)
         : needsSettings
         ? theme.warning.withValues(alpha: 0.15)
         : theme.iconButtonBg;
-    
+
     final Color iconColor = isEnabled
         ? theme.success
         : needsSettings
@@ -657,7 +748,9 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                     style: TextStyle(
                       fontSize: 13,
                       fontFamily: 'Poppins',
-                      color: needsSettings ? theme.warning : theme.textSecondary,
+                      color: needsSettings
+                          ? theme.warning
+                          : theme.textSecondary,
                     ),
                   ),
                 ],
@@ -677,7 +770,13 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                       ),
                     )
                   : needsSettings && !isEnabled
-                  ? Center(child: Icon(Icons.settings_outlined, color: theme.warning, size: 24))
+                  ? Center(
+                      child: Icon(
+                        Icons.settings_outlined,
+                        color: theme.warning,
+                        size: 24,
+                      ),
+                    )
                   : isEnabled
                   // Fixed switch indicator for enabled state - prevents scroll issue
                   ? Container(
@@ -703,7 +802,7 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                   // Interactive switch for disabled state
                   : CupertinoSwitch(
                       value: false,
-                      activeColor: theme.success,
+                      activeTrackColor: theme.success,
                       onChanged: (_) => onTap(),
                     ),
             ),

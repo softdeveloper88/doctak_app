@@ -590,6 +590,8 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
                             : RefreshIndicator(
                                 onRefresh: () async => _onRefresh(),
                                 color: theme.primary,
+                                backgroundColor: theme.surfaceVariant,
+                                strokeWidth: 2.5,
                                 child: ListView.builder(
                                   controller: _scrollController,
                                   padding: EdgeInsets.only(left: 0, right: 0, top: 8, bottom: MediaQuery.of(context).padding.bottom + 16),

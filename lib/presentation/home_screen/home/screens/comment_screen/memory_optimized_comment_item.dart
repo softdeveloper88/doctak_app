@@ -4,8 +4,11 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/improved_reply_comment_list_widget.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
+import 'package:doctak_app/presentation/home_screen/home/components/moderation/report_content_bottom_sheet.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
@@ -30,71 +33,94 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
     final theme = OneUITheme.of(context);
     return RepaintBoundary(
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(16), boxShadow: theme.cardShadow),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildCommentContent(theme)]),
+        margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 12),
+        decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(14), boxShadow: theme.cardShadow),
+        child: _buildCommentContent(theme),
       ),
     );
   }
 
   Widget _buildCommentContent(OneUITheme theme) {
     return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // User Avatar
-          _buildAvatarSection(theme),
-
-          const SizedBox(width: 12),
-
-          // Comment Content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // User Info and Actions Row
-                _buildUserInfoRow(theme),
-
-                const SizedBox(height: 8),
-
-                // Comment Text
-                Text(
-                  widget.comment.comment ?? '',
-                  style: TextStyle(fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.normal, color: theme.textPrimary),
+          // Header Row: Avatar, Name, Time, Menu
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Compact Avatar
+              _buildCompactAvatar(theme),
+              const SizedBox(width: 10),
+              // Name and Time
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: GestureDetector(
+                            onTap: () {
+                              SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
+                            },
+                            child: Text(
+                              '${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}'.trim(),
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: theme.primary, fontFamily: 'Poppins'),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        if ((widget.comment.commenter?.firstName ?? '').isNotEmpty) ...[
+                          const SizedBox(width: 4),
+                          Image.asset('images/socialv/icons/ic_TickSquare.png', height: 12, width: 12, fit: BoxFit.cover),
+                        ],
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
+                      style: TextStyle(fontSize: 11, color: theme.textTertiary, fontFamily: 'Poppins'),
+                    ),
+                  ],
                 ),
-
-                const SizedBox(height: 8),
-
-                // Timestamp
-                Text(
-                  timeAgo.format(DateTime.parse(widget.comment.createdAt!)),
-                  style: TextStyle(fontSize: 12, color: theme.textTertiary, fontFamily: 'Poppins'),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Actions Row (Reply & Like)
-                _buildActionRow(theme),
-              ],
-            ),
+              ),
+              // Menu for comments (delete for own, report/block for others)
+              _buildOptionsMenu(theme),
+            ],
           ),
+          
+          const SizedBox(height: 8),
+          
+          // Comment Text
+          Text(
+            widget.comment.comment ?? '',
+            style: TextStyle(fontSize: 14, fontFamily: 'Poppins', fontWeight: FontWeight.normal, color: theme.textPrimary, height: 1.3),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Actions Row (Reply & Like) - More compact
+          _buildCompactActionRow(theme),
         ],
       ),
     );
   }
 
-  Widget _buildAvatarSection(OneUITheme theme) {
-    return InkWell(
+  Widget _buildCompactAvatar(OneUITheme theme) {
+    return GestureDetector(
       onTap: () {
         SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
       },
-      borderRadius: BorderRadius.circular(24),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(18),
         child: Container(
-          width: 48,
-          height: 48,
+          width: 36,
+          height: 36,
           decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
           child: widget.comment.commenter?.profilePic != null && widget.comment.commenter!.profilePic!.isNotEmpty
               ? Image.network(
@@ -104,7 +130,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                     return Center(
                       child: Text(
                         (widget.comment.commenter?.firstName ?? '')[0].toUpperCase(),
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.primary),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.primary),
                       ),
                     );
                   },
@@ -112,7 +138,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
               : Center(
                   child: Text(
                     (widget.comment.commenter?.firstName ?? '')[0].toUpperCase(),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.primary),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.primary),
                   ),
                 ),
         ),
@@ -120,101 +146,141 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
     );
   }
 
-  Widget _buildUserInfoRow(OneUITheme theme) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Username and badge
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
-            },
-            child: Row(
-              children: [
-                Text(
-                  '${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: theme.primary, fontFamily: 'Poppins'),
+  Widget _buildOptionsMenu(OneUITheme theme) {
+    final isOwnComment = widget.comment.commenter?.id == AppData.logInUserId;
+    
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: PopupMenuButton(
+        icon: Icon(Icons.more_vert, color: theme.textSecondary, size: 16),
+        padding: EdgeInsets.zero,
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        itemBuilder: (context) {
+          if (isOwnComment) {
+            // Show delete option for own comments
+            return [
+              PopupMenuItem(
+                value: 'delete',
+                height: 40,
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: theme.error, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      translation(context).lbl_delete,
+                      style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.textPrimary),
+                    ),
+                  ],
                 ),
-                if ((widget.comment.commenter?.firstName ?? '').isNotEmpty) ...[
-                  const SizedBox(width: 4),
-                  Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
-                ],
-              ],
-            ),
-          ),
-        ),
-
-        // Delete menu (only for own comments)
-        if (widget.comment.commenter?.id == AppData.logInUserId)
-          PopupMenuButton(
-            icon: Icon(Icons.more_vert, color: theme.textSecondary, size: 18),
-            elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: theme.error, size: 18),
-                      const SizedBox(width: 8),
-                      Text(
-                        translation(context).lbl_delete,
-                        style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
-                      ),
-                    ],
-                  ),
+              ),
+            ];
+          } else {
+            // Show report and block options for other users' comments
+            return [
+              PopupMenuItem(
+                value: 'report',
+                height: 40,
+                child: Row(
+                  children: [
+                    Icon(CupertinoIcons.flag, color: theme.warning, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Report Comment',
+                      style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.warning),
+                    ),
+                  ],
                 ),
-              ];
-            },
-            onSelected: (value) {
-              if (value == 'delete') {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CustomAlertDialog(
-                      title: translation(context).msg_confirm_delete_comment,
-                      callback: () {
-                        widget.commentBloc.add(DeleteCommentEvent(commentId: widget.comment.id.toString()));
-                        Navigator.of(context).pop();
-                      },
-                    );
+              ),
+              PopupMenuItem(
+                value: 'block',
+                height: 40,
+                child: Row(
+                  children: [
+                    Icon(CupertinoIcons.hand_raised, color: theme.error, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Block User',
+                      style: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.error),
+                    ),
+                  ],
+                ),
+              ),
+            ];
+          }
+        },
+        onSelected: (value) {
+          if (value == 'delete') {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return CustomAlertDialog(
+                  title: translation(context).msg_confirm_delete_comment,
+                  callback: () {
+                    widget.commentBloc.add(DeleteCommentEvent(commentId: widget.comment.id.toString()));
+                    Navigator.of(context).pop();
                   },
                 );
-              }
-            },
-          ),
-      ],
+              },
+            );
+          } else if (value == 'report') {
+            // Show report bottom sheet
+            ReportContentBottomSheet.show(
+              context: context,
+              contentId: widget.comment.id ?? 0,
+              contentType: 'comment',
+              contentOwnerName: '${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}'.trim(),
+            );
+          } else if (value == 'block') {
+            // Show block dialog
+            final userId = int.tryParse(widget.comment.commenter?.id ?? '0') ?? 0;
+            if (userId > 0) {
+              BlockUserDialog.show(
+                context: context,
+                userId: userId,
+                userName: '${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}'.trim(),
+              );
+            }
+          }
+        },
+      ),
     );
   }
 
-  Widget _buildActionRow(OneUITheme theme) {
+  Widget _buildCompactActionRow(OneUITheme theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           children: [
-            // Reply button
-            TextButton.icon(
-              onPressed: () {
-                widget.onReplySelected(widget.comment.id ?? 0);
-              },
-              icon: Icon(Icons.reply_outlined, size: 16, color: theme.textSecondary),
-              label: Text(
-                '${widget.comment.replyCount} ${translation(context).lbl_reply}',
-                style: TextStyle(fontSize: 13, color: theme.textSecondary, fontFamily: 'Poppins'),
+            // Reply button - more compact inline style
+            InkWell(
+              onTap: () => widget.onReplySelected(widget.comment.id ?? 0),
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.reply_outlined, size: 14, color: theme.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${widget.comment.replyCount} ${translation(context).lbl_reply}',
+                      style: TextStyle(fontSize: 12, color: theme.textSecondary, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
               ),
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             ),
 
             const SizedBox(width: 16),
 
-            // Like button
-            TextButton.icon(
-              onPressed: () {
+            // Like button - more compact inline style
+            InkWell(
+              onTap: () {
                 widget.commentBloc.add(LikeReplyComment(commentId: widget.comment.id.toString()));
-
                 setState(() {
                   if (!(widget.comment.userHasLiked ?? true)) {
                     widget.comment.reactionCount = (widget.comment.reactionCount ?? 0) + 1;
@@ -227,16 +293,32 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                   }
                 });
               },
-              icon: Icon(
-                widget.comment.userHasLiked ?? false ? Icons.favorite : Icons.favorite_border_outlined,
-                size: 16,
-                color: widget.comment.userHasLiked ?? false ? theme.likeColor : theme.textSecondary,
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      widget.comment.userHasLiked ?? false ? Icons.favorite : Icons.favorite_border_outlined,
+                      size: 14,
+                      color: widget.comment.userHasLiked ?? false ? theme.likeColor : theme.textSecondary,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      widget.comment.userHasLiked ?? false 
+                          ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}' 
+                          : '${widget.comment.reactionCount} ${translation(context).lbl_like}',
+                      style: TextStyle(
+                        fontSize: 12, 
+                        color: widget.comment.userHasLiked ?? false ? theme.likeColor : theme.textSecondary, 
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              label: Text(
-                widget.comment.userHasLiked ?? false ? '${widget.comment.reactionCount} ${translation(context).lbl_liked}' : '${widget.comment.reactionCount} ${translation(context).lbl_like}',
-                style: TextStyle(fontSize: 13, color: widget.comment.userHasLiked ?? false ? theme.likeColor : theme.textSecondary, fontFamily: 'Poppins'),
-              ),
-              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), minimumSize: Size.zero, tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             ),
           ],
         ),

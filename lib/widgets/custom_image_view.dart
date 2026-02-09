@@ -9,6 +9,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../core/network/custom_cache_manager.dart';
 import '../presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
 
+/// Safely convert a double to int, returning null if invalid (NaN, Infinity, or null)
+int? _safeToInt(double? value, {int? defaultValue}) {
+  if (value == null || value.isNaN || value.isInfinite || value <= 0) {
+    return defaultValue;
+  }
+  return value.toInt();
+}
+
 class CustomImageView extends StatelessWidget {
   ///[imagePath] is required parameter for showing image
   String? imagePath;
@@ -79,15 +87,41 @@ class CustomImageView extends StatelessWidget {
     }
   }
 
+  /// Validate and clean the image URL
+  String? _getValidImageUrl(String? url) {
+    if (url == null || url.isEmpty || url == 'null') {
+      return null;
+    }
+    
+    // Trim whitespace
+    String cleanUrl = url.trim();
+    
+    // Check if it's a valid network URL
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      // Validate URL format
+      try {
+        final uri = Uri.parse(cleanUrl);
+        if (uri.host.isEmpty) return null;
+        return cleanUrl;
+      } catch (_) {
+        return null;
+      }
+    }
+    
+    return cleanUrl; // Return as-is for local paths
+  }
+
   Widget _buildImageView() {
-    if (imagePath != null) {
-      switch (imagePath!.imageType) {
+    final validPath = _getValidImageUrl(imagePath);
+    
+    if (validPath != null) {
+      switch (validPath.imageType) {
         case ImageType.svg:
           return SizedBox(
             // height: height,
             width: width,
             child: SvgPicture.asset(
-              imagePath!,
+              validPath,
               // height: height,
               width: width,
               fit: fit ?? BoxFit.contain,
@@ -96,7 +130,7 @@ class CustomImageView extends StatelessWidget {
           );
         case ImageType.file:
           return Image.file(
-            File(imagePath!),
+            File(validPath),
             // height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
@@ -106,23 +140,28 @@ class CustomImageView extends StatelessWidget {
           return CachedNetworkImage(
             // height: height,
             width: width,
-            fit: fit,
-            imageUrl: imagePath!,
+            fit: fit ?? BoxFit.cover,
+            imageUrl: validPath,
             color: color,
             cacheManager: CustomCacheManager(),
+            fadeInDuration: const Duration(milliseconds: 150),
+            fadeOutDuration: const Duration(milliseconds: 100),
+            // Enhanced headers for better compatibility
             httpHeaders: const {
-              'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
-              'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+              'User-Agent': 'Mozilla/5.0 (compatible; DocTak/1.0)',
+              'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/jpeg,image/png,image/gif,image/*,*/*;q=0.8',
               'Accept-Encoding': 'gzip, deflate, br',
               'Connection': 'keep-alive',
-              'Cache-Control': 'no-cache',
             },
-            placeholder: (context, url) => Center(
-              child: SizedBox(
-                height: height ?? 300,
-                width: 60,
-                child: Center(
-                  child: CircularProgressIndicator(color: Colors.grey[300], strokeWidth: 8, strokeCap: StrokeCap.round, backgroundColor: Colors.white),
+            placeholder: (context, url) => Container(
+              height: height ?? 200,
+              width: width,
+              color: Colors.grey[200],
+              child: const Center(
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
                 ),
               ),
             ),
@@ -139,20 +178,19 @@ class CustomImageView extends StatelessWidget {
             //   ),
             // ),
             errorWidget: (context, url, error) {
-              // Enhanced error debugging for S3 URLs
-              print('🚨 CustomImageView load error for URL: $url');
-              print('🚨 Error details: $error');
-              print('🚨 Error type: ${error.runtimeType}');
-
+              // Log the error in debug mode
+              assert(() {
+                print('🖼️ Image load failed: $url');
+                print('🖼️ Error: $error');
+                return true;
+              }());
+              
               // Check if it's actually a video file being loaded as image
               final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
               final lowerUrl = url.toLowerCase();
               final isVideoFile = videoExtensions.any((ext) => lowerUrl.endsWith(ext));
 
               if (isVideoFile) {
-                print('⚠️ WARNING: Attempting to load video file as image: $url');
-                print('💡 SOLUTION: Use VideoPlayerWidget instead of CustomImageView for video files');
-
                 return Container(
                   width: width,
                   height: height,
@@ -219,11 +257,11 @@ class CustomImageView extends StatelessWidget {
           //     ],
           //   ),
           // );
-          return VideoPlayerWidget(videoUrl: imagePath!);
+          return VideoPlayerWidget(videoUrl: validPath);
         case ImageType.png:
         default:
           return Image.asset(
-            imagePath!,
+            validPath,
             // height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
@@ -237,19 +275,29 @@ class CustomImageView extends StatelessWidget {
 
 extension ImageTypeExtension on String {
   ImageType get imageType {
+    // Clean URL by removing query parameters
+    String cleanPath = toLowerCase();
+    final queryIndex = cleanPath.indexOf('?');
+    if (queryIndex != -1) {
+      cleanPath = cleanPath.substring(0, queryIndex);
+    }
+    
     if (startsWith('http') || startsWith('https')) {
-      // Check if it's a video file
-      final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
-      final lowerPath = toLowerCase();
+      // Comprehensive list of video extensions
+      final videoExtensions = [
+        '.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v',
+        '.3gp', '.ogv', '.mpeg', '.mpg', '.ts', '.mts', '.m2ts', '.vob',
+        '.asf', '.rm', '.rmvb', '.divx', '.f4v', '.swf', '.3g2'
+      ];
 
       for (String ext in videoExtensions) {
-        if (lowerPath.endsWith(ext)) {
+        if (cleanPath.endsWith(ext)) {
           return ImageType.video;
         }
       }
 
       return ImageType.network;
-    } else if (endsWith('.svg')) {
+    } else if (cleanPath.endsWith('.svg')) {
       return ImageType.svg;
     } else if (startsWith('file://')) {
       return ImageType.file;

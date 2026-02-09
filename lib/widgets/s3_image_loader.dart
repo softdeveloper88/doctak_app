@@ -54,17 +54,10 @@ class _S3ImageLoaderState extends State<S3ImageLoader> {
 
   Map<String, String> _getS3Headers() {
     return {
-      'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
-      'Accept': 'image/webp,image/apng,image/jpeg,image/png,image/*,*/*;q=0.8',
+      'User-Agent': 'Mozilla/5.0 (compatible; DocTak/1.0)',
+      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/jpeg,image/png,image/gif,image/*,*/*;q=0.8',
       'Accept-Encoding': 'gzip, deflate, br',
       'Connection': 'keep-alive',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'x-amz-acl': 'public-read',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     };
   }
 

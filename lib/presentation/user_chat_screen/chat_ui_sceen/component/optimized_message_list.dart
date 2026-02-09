@@ -76,13 +76,16 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
         child: VisibilityDetector(
           key: Key('message_$index'),
           onVisibilityChanged: (info) {
-            if (info.visibleFraction > 0.1) {
-              _visibleIndices.add(index);
-            } else {
-              _visibleIndices.remove(index);
-              // Clean up cache for non-visible items
-              if (_cachedMessages.length > 50 && !_visibleIndices.contains(index)) {
-                _cachedMessages.remove(index);
+            // Validate bounds before accessing visibleFraction
+            if (info.size.width > 0 && info.size.height > 0) {
+              if (info.visibleFraction > 0.1) {
+                _visibleIndices.add(index);
+              } else {
+                _visibleIndices.remove(index);
+                // Clean up cache for non-visible items
+                if (_cachedMessages.length > 50 && !_visibleIndices.contains(index)) {
+                  _cachedMessages.remove(index);
+                }
               }
             }
           },

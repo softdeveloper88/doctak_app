@@ -88,7 +88,7 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
         ),
         bottomSheet: Container(
           color: svGetBgColor(),
-          padding: EdgeInsets.only(left: 12, right: 12, top: 6, bottom: MediaQuery.of(context).padding.bottom + 6),
+          padding: EdgeInsets.only(left: 12, right: 12, top: 4, bottom: MediaQuery.of(context).padding.bottom + 4),
           child: ImprovedReplyInputField(commentBloc: commentBloc, commentId: 0, postId: widget.id),
         ),
       ),

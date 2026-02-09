@@ -498,6 +498,7 @@
  "msg_error_downloading": "Erreur lors du téléchargement.",
  "msg_permission_denied": "Permission refusée",
  "msg_no_posts": "Aucune publication trouvée",
+ "msg_no_people_found": "Aucune personne trouvée",
  "msg_confirm_delete_post": "Êtes-vous sûr de vouloir supprimer cette publication ?",
  "lbl_search_post": "Rechercher une publication",
 
@@ -1306,5 +1307,9 @@
   "msg_no_comments_yet": "Pas encore de commentaires",
   "msg_be_first_to_comment": "Soyez le premier à partager vos connaissances médicales sur ce cas.",
   "msg_loading_more_comments": "Chargement de plus de commentaires...",
-  "lbl_related_cases": "Cas liés"
+  "lbl_related_cases": "Cas liés",
+
+  "@_OFFLINE_RETRY_BANNER": {},
+  "lbl_showing_cached_data": "Affichage des données enregistrées",
+  "lbl_tap_to_retry": "Appuyez sur réessayer pour actualiser"
 }

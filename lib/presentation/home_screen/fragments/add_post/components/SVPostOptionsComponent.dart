@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/core/utils/robust_image_picker.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -60,37 +60,26 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      debugPrint("SVPostOptions: *** OPENING GALLERY with RobustImagePicker ***");
+      debugPrint("SVPostOptions: *** OPENING GALLERY with UnifiedGalleryPicker ***");
 
-      List<XFile> pickedfiles = [];
+      // Use unified gallery picker for consistent experience
+      final List<File>? pickedFiles = await UnifiedGalleryPicker.pickMultipleImages(
+        context,
+        title: translation(context).lbl_choose_from_gallery,
+      );
 
-      try {
-        debugPrint("SVPostOptions: Using RobustImagePicker.showPhotoManagerPicker...");
-        pickedfiles = await RobustImagePicker.showPhotoManagerPicker(context, title: 'Select Photos');
-        debugPrint("SVPostOptions: showPhotoManagerPicker returned ${pickedfiles.length} files");
-      } catch (e) {
-        debugPrint("SVPostOptions: showPhotoManagerPicker failed: $e, trying fallback...");
-
-        try {
-          pickedfiles = await RobustImagePicker.pickMultipleImages();
-          debugPrint("SVPostOptions: Fallback pickMultipleImages returned ${pickedfiles.length} files");
-        } catch (e2) {
-          debugPrint("SVPostOptions: All pickers failed: $e2");
-        }
-      }
-
-      if (pickedfiles.isNotEmpty) {
-        debugPrint("SVPostOptions: Processing ${pickedfiles.length} selected files");
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+        debugPrint("SVPostOptions: Processing ${pickedFiles.length} selected files");
         List<XFile> validFiles = [];
-        for (var element in pickedfiles) {
+        for (var element in pickedFiles) {
           final srcPath = element.path;
-          final srcName = element.name;
+          final srcName = srcPath.split('/').last;
           final isValid = _isValidMediaFile(srcPath) || _isValidMediaFile(srcName);
           if (isValid) {
-            validFiles.add(element);
+            validFiles.add(XFile(element.path));
             debugPrint("SVPostOptions: Valid file added: ${element.path}");
           } else {
-            debugPrint("SVPostOptions: Invalid file skipped: ${element.path} (name: ${element.name})");
+            debugPrint("SVPostOptions: Invalid file skipped: ${element.path}");
           }
         }
 
@@ -199,18 +188,11 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
     });
 
     try {
-      final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
-      if (!cameraGranted) {
-        setState(() {
-          _isPickingMedia = false;
-        });
-        return;
-      }
-
-      var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera, imageQuality: 85);
-      if (pickedfiles != null) {
-        imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+      final File? photo = await UnifiedGalleryPicker.captureFromCamera(context);
+      if (photo != null) {
+        final xfile = XFile(photo.path);
+        imagefiles.add(xfile);
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
         setState(() {});
       } else {
         debugPrint("No image is selected.");

@@ -248,14 +248,14 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                 ),
                                 const SizedBox(height: 32),
 
-                                // Modern suggestion cards
+                                // Modern suggestion cards - 3 per row
                                 GridView.count(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  childAspectRatio: 1.2,
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 0.85,
                                   children: [
                                     _buildSuggestionCard(
                                       'Code Detection',
@@ -683,7 +683,12 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: EdgeInsets.only(
+                      left: 4,
+                      right: 4,
+                      top: 4,
+                      bottom: MediaQuery.of(context).padding.bottom + 4,
+                    ),
                     color: theme.cardBackground,
                     child: Marquee(
                       pauseDuration: const Duration(milliseconds: 100),

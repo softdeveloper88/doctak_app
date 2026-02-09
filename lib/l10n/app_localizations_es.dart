@@ -1308,6 +1308,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get msg_no_posts => 'No se encontraron publicaciones';
 
   @override
+  String get msg_no_people_found => 'No se encontraron personas';
+
+  @override
   String get msg_confirm_delete_post =>
       '¿Estás seguro de que quieres eliminar esta publicación?';
 
@@ -3178,4 +3181,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get msg_be_first_to_comment =>
       'Sea el primero en compartir sus conocimientos médicos sobre este caso.';
+
+  @override
+  String get lbl_showing_cached_data => 'Mostrando datos guardados';
+
+  @override
+  String get lbl_tap_to_retry => 'Toque reintentar para actualizar';
 }

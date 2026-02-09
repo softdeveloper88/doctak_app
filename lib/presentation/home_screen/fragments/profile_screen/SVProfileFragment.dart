@@ -19,7 +19,8 @@ class SVProfileFragment extends StatefulWidget {
   State<SVProfileFragment> createState() => _SVProfileFragmentState();
 }
 
-class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTickerProviderStateMixin {
+class _SVProfileFragmentState extends State<SVProfileFragment>
+    with SingleTickerProviderStateMixin {
   ProfileBloc profileBloc = ProfileBloc();
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -36,11 +37,19 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
     }
 
     // Initialize fade animation for a smoother experience
-    _fadeController = AnimationController(duration: const Duration(milliseconds: 500), vsync: this);
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+    );
     super.initState();
   }
 
@@ -70,7 +79,11 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
             return FadeTransition(
               opacity: _fadeAnimation,
               child: SizedBox.expand(
-                child: SVProfileHeaderComponent(userProfile: profileBloc.userProfile, profileBoc: profileBloc, isMe: widget.userId == null),
+                child: SVProfileHeaderComponent(
+                  userProfile: profileBloc.userProfile,
+                  profileBoc: profileBloc,
+                  isMe: widget.userId == null,
+                ),
               ),
             );
           } else if (state is DataError) {
@@ -79,9 +92,13 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
               onRetry: () {
                 try {
                   if (widget.userId == null) {
-                    profileBloc.add(LoadPageEvent(userId: AppData.logInUserId, page: 1));
+                    profileBloc.add(
+                      LoadPageEvent(userId: AppData.logInUserId, page: 1),
+                    );
                   } else {
-                    profileBloc.add(LoadPageEvent(userId: widget.userId, page: 1));
+                    profileBloc.add(
+                      LoadPageEvent(userId: widget.userId, page: 1),
+                    );
                   }
                 } catch (e) {
                   debugPrint(e.toString());
@@ -90,7 +107,10 @@ class _SVProfileFragmentState extends State<SVProfileFragment> with SingleTicker
             );
           } else {
             return Center(
-              child: Text('${translation(context).lbl_unknown_state}: ${state.toString()}', style: TextStyle(color: theme.error)),
+              child: Text(
+                '${translation(context).lbl_unknown_state}: ${state.toString()}',
+                style: TextStyle(color: theme.error),
+              ),
             );
           }
         },

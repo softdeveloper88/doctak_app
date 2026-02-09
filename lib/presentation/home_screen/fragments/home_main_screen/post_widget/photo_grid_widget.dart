@@ -38,7 +38,6 @@ class PhotoGrid extends StatelessWidget {
   /// Helper method to build image widget with appropriate loader
   Widget _buildImageWidget(String imageUrl, double width, double height) {
     if (_isS3Url(imageUrl)) {
-      print('🔍 Using S3ImageLoader for URL: $imageUrl');
       return S3ImageLoader(imageUrl: imageUrl, width: width, height: height, fit: BoxFit.cover);
     } else {
       return CachedNetworkImage(
@@ -48,21 +47,17 @@ class PhotoGrid extends StatelessWidget {
         width: width,
         cacheManager: CustomCacheManager(),
         httpHeaders: const {
-          'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
-          'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+          'User-Agent': 'Mozilla/5.0 (compatible; DocTak/1.0)',
+          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/jpeg,image/png,image/gif,image/*,*/*;q=0.8',
           'Accept-Encoding': 'gzip, deflate, br',
           'Connection': 'keep-alive',
-          'Cache-Control': 'no-cache',
         },
         placeholder: (context, url) => Container(
           color: Colors.grey[300],
           child: const Center(child: CircularProgressIndicator(color: Colors.grey, strokeWidth: 2)),
         ),
         errorWidget: (context, url, error) {
-          print('🚨 Image load error for URL: $url');
-          print('🚨 Error details: $error');
-          print('🚨 Error type: ${error.runtimeType}');
-
+          // Silently handle image load errors
           return Container(
             color: Colors.grey[300],
             child: const Center(

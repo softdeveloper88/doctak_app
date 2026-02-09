@@ -557,6 +557,7 @@
   "msg_error_downloading": "هنگام دانلود خطایی رخ داد.",
   "msg_permission_denied": "دسترسی رد شد",
   "msg_no_posts": "هیچ پستی یافت نشد",
+  "msg_no_people_found": "هیچ کاربری یافت نشد",
   "msg_confirm_delete_post": "آیا مطمئن هستید که می‌خواهید این پست را حذف کنید؟",
   "lbl_search_post": "جستجوی پست",
   "lbl_send": "ارسال",
@@ -1475,5 +1476,9 @@
 "msg_no_comments_yet": "هنوز نظری وجود ندارد",
 "msg_be_first_to_comment": "اولین نفری باشید که بینش‌های پزشکی خود را درباره این مورد به اشتراک بگذارد.",
 "msg_loading_more_comments": "بارگیری نظرات بیشتر...",
-"lbl_related_cases": "موارد مرتبط"
+"lbl_related_cases": "موارد مرتبط",
+
+"@_OFFLINE_RETRY_BANNER": {},
+"lbl_showing_cached_data": "نمایش داده‌های ذخیره شده",
+"lbl_tap_to_retry": "برای تازه‌سازی روی تلاش مجدد بزنید"
 }

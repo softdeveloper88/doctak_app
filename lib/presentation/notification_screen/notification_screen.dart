@@ -194,42 +194,51 @@ class _NotificationScreenState extends State<NotificationScreen> {
               },
             ),
           ),
-          if (widget.notificationBloc.totalNotifications > 0 && widget.notificationBloc.notificationsList.any((n) => n.isRead != 1))
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackground,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: theme.isDark ? 0.3 : 0.05),
-                    offset: const Offset(0, -2),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (widget.notificationBloc.totalNotifications > 0) {
-                    widget.notificationBloc.add(NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'));
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.done_all, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      translation(context).lbl_mark_all_read,
-                      style: const TextStyle(color: Colors.white, fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600),
+          // Mark All as Read button - show when there are unread notifications
+          if (widget.notificationBloc.totalNotifications > 0 && 
+              widget.notificationBloc.notificationsList.any((n) => n.isRead != 1))
+            SafeArea(
+              top: false,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 12.0),
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackground,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: theme.isDark ? 0.3 : 0.05),
+                      offset: const Offset(0, -2),
+                      blurRadius: 10,
                     ),
                   ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (widget.notificationBloc.totalNotifications > 0) {
+                      widget.notificationBloc.add(NotificationLoadPageEvent(page: 1, readStatus: 'mark-read'));
+                      // Reset filter to show all after marking as read
+                      setState(() {
+                        selectedFilterIndex = 0;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.done_all, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        translation(context).lbl_mark_all_read,
+                        style: const TextStyle(color: Colors.white, fontFamily: 'Poppins', fontSize: 15, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../../l10n/app_localizations.dart';
 import '../bloc/create_discussion_bloc.dart';
@@ -13,6 +12,7 @@ import '../widgets/specialty_loading_shimmer.dart';
 import '../../../localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import '../../../core/utils/app/AppData.dart';
+import '../../../core/utils/unified_gallery_picker.dart';
 import '../../../theme/one_ui_theme.dart';
 
 class CreateDiscussionScreen extends StatefulWidget {
@@ -45,7 +45,6 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   List<String> _existingFileUrls = []; // Track existing file URLs for edit mode
   List<String> _clinicalTags = []; // Track clinical tags for better UI
 
-  final ImagePicker _imagePicker = ImagePicker();
   late CaseDiscussionRepository _repository;
 
   // Specialty options from API
@@ -266,11 +265,11 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   Future<void> _pickImageFromCamera() async {
     try {
-      final pickedFile = await _imagePicker.pickImage(source: ImageSource.camera);
-      if (pickedFile != null) {
+      final File? photo = await UnifiedGalleryPicker.captureFromCamera(context);
+      if (photo != null) {
         setState(() {
-          _selectedImages.add(File(pickedFile.path));
-          _selectedImageNames.add(pickedFile.name);
+          _selectedImages.add(photo);
+          _selectedImageNames.add(photo.path.split('/').last);
         });
       }
     } catch (e) {
@@ -280,20 +279,18 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
 
   Future<void> _pickImageFromGallery() async {
     try {
-      // Use pickMultipleMedia with requestFullMetadata: false for limited access support
-      final pickedFiles = await _imagePicker.pickMultipleMedia(
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        requestFullMetadata: false, // Critical for limited access
+      // Use unified gallery picker for consistent experience
+      final List<File>? pickedFiles = await UnifiedGalleryPicker.pickMultipleImages(
+        context,
+        title: AppLocalizations.of(context)!.lbl_gallery,
       );
 
-      if (pickedFiles.isNotEmpty) {
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
         if (mounted) {
           setState(() {
             for (var pickedFile in pickedFiles) {
-              _selectedImages.add(File(pickedFile.path));
-              _selectedImageNames.add(pickedFile.name);
+              _selectedImages.add(pickedFile);
+              _selectedImageNames.add(pickedFile.path.split('/').last);
             }
           });
         }

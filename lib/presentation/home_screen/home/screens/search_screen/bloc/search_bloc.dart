@@ -24,7 +24,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     });
   }
   Future<void> _onGetJobs(LoadPageEvent event, Emitter<SearchState> emit) async {
-    // emit(DrugsDataInitial());
     print('33 ${event.page}');
     if (event.page == 1) {
       drugsData.clear();
@@ -34,43 +33,61 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       print(event.searchTerm);
       print(event.type);
     }
-    // ProgressDialogUtils.showProgressDialog();
-    // try {
-    JobsModel response = await apiManager.getSearchJobsList('Bearer ${AppData.userToken}', '$pageNumber', event.countryId ?? "1", event.searchTerm ?? '');
-    numberOfPage = response.jobs?.lastPage ?? 0;
-    if (pageNumber < numberOfPage + 1) {
-      pageNumber = pageNumber + 1;
-      drugsData.addAll(response.jobs?.data ?? []);
+    
+    try {
+      JobsModel response = await apiManager.getSearchJobsList(
+        'Bearer ${AppData.userToken}',
+        '$pageNumber',
+        event.countryId ?? "1",
+        event.searchTerm ?? '',
+      );
+      numberOfPage = response.jobs?.lastPage ?? 0;
+      if (pageNumber < numberOfPage + 1) {
+        pageNumber = pageNumber + 1;
+        drugsData.addAll(response.jobs?.data ?? []);
+      }
+      emit(PaginationLoadedState());
+    } catch (e) {
+      print('Error loading jobs: $e');
+      // Show user-friendly error message
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Too many requests')) {
+        emit(DataError('Please wait a moment before searching again'));
+      } else if (errorMessage.contains('Server error')) {
+        emit(DataError('Server is temporarily unavailable'));
+      } else {
+        emit(DataError('Unable to load jobs. Please try again.'));
+      }
     }
-    emit(PaginationLoadedState());
-
-    // emit(DataLoaded(drugsData));
-    // } catch (e) {
-    //   print(e);
-    //
-    //   // emit(PaginationLoadedState());
-    //
-    //   emit(DataError('An error occurred $e'));
-    // }
   }
 
   Future<void> _onGetJobs1(GetPost event, Emitter<SearchState> emit) async {
-    // emit(PaginationInitialState());
-    // ProgressDialogUtils.showProgressDialog();
     print('33${event.type}');
-    // emit(PaginationLoadingState());
     try {
-      final response = await apiManager.getJobsList('Bearer ${AppData.userToken}', "1", event.countryId, event.searchTerm, '');
+      final response = await apiManager.getJobsList(
+        'Bearer ${AppData.userToken}',
+        "1",
+        event.countryId,
+        event.searchTerm,
+        '',
+      );
       print("ddd${response.jobs?.data!.length}");
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);
       emit(PaginationLoadedState());
-      // emit(DataLoaded(drugsData));
     } catch (e) {
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
-
-      emit(DataError('No Data Found'));
+      print('Error loading jobs: $e');
+      // Show user-friendly error message
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Too many requests')) {
+        emit(DataError('Please wait a moment before searching again'));
+      } else if (errorMessage.contains('Server error')) {
+        emit(DataError('Server is temporarily unavailable'));
+      } else if (errorMessage.isEmpty || errorMessage == 'null') {
+        emit(DataError('No Data Found'));
+      } else {
+        emit(DataError(errorMessage.replaceAll('Exception: ', '')));
+      }
     }
   }
 }

@@ -91,123 +91,142 @@ class _PostItemWidgetState extends State<PostItemWidget> {
     String fullText = widget.title ?? '';
     List<String> words = fullText.split(' ');
     bool isExpanded = _expandedIndex == widget.postId;
-    String textToShow = isExpanded || words.length <= 25 ? fullText : '${words.take(20).join(' ')}...';
+    String textToShow = isExpanded || words.length <= 25
+        ? fullText
+        : '${words.take(20).join(' ')}...';
     Color bgColor = PostUtils.HexColor(widget.backgroundColor ?? '#FFFFFF');
 
     Color textColor = PostUtils.contrastingTextColor(bgColor);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return GestureDetector(
-          onLongPress: () {
-            Clipboard.setData(ClipboardData(text: parseHtmlString(widget.title ?? '')));
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).lbl_text_copied)));
-          },
-          child: DecoratedBox(
-            decoration: BoxDecoration(color: (widget.image?.isNotEmpty == true || widget.media?.isNotEmpty == true) ? Colors.transparent : bgColor, borderRadius: BorderRadius.circular(5.0)),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (widget.image?.isNotEmpty == true || widget.media?.isNotEmpty == true)
-                    if (isHtml(textToShow))
-                      Center(
-                        child: HtmlWidget(
-                          textStyle: const TextStyle(),
-                          textToShow,
-                          onTapUrl: (link) async {
-                            print('link $link');
-                            if (link.contains('doctak/jobs-detail')) {
-                              String jobID = Uri.parse(link).pathSegments.last;
-                              JobsDetailsScreen(jobId: jobID).launch(context);
-                            } else {
-                              PostUtils.launchURL(context, link);
-                            }
-                            return true;
-                          },
-                        ),
-                      )
-                    else
-                      Linkify(
-                        onOpen: (link) {
-                          if (link.url.contains('doctak/jobs-detail')) {
-                            String jobID = Uri.parse(link.url).pathSegments.last;
-                            JobsDetailsScreen(jobId: jobID).launch(context);
-                          } else {
-                            PostUtils.launchURL(context, link.url);
-                          }
-                        },
-                        text: textToShow,
-                        style: TextStyle(fontSize: 14.0, color: OneUITheme.of(context).textPrimary, fontWeight: FontWeight.bold),
-                        linkStyle: const TextStyle(color: Colors.blue),
-                        textAlign: TextAlign.center,
-                      )
-                  else if (isHtml(textToShow))
-                    Container(
-                      constraints: BoxConstraints(minHeight: textToShow.length < 25 ? 200 : 0),
-                      child: Center(
-                        child: HtmlWidget(
-                          textStyle: const TextStyle(),
-                          enableCaching: true,
-                          '<div style="text-align: center;">$textToShow</div>',
-                          onTapUrl: (link) async {
-                            print(link);
-                            if (link.contains('doctak/jobs-detail')) {
-                              String jobID = Uri.parse(link).pathSegments.last;
-                              JobsDetailsScreen(jobId: jobID).launch(context);
-                            } else {
-                              PostUtils.launchURL(context, link);
-                            }
-                            return true;
-                          },
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      constraints: BoxConstraints(minHeight: textToShow.length < 25 ? 200 : 0),
-                      child: Center(
-                        child: Linkify(
-                          onOpen: (link) {
-                            if (link.url.contains('doctak/jobs-detail')) {
-                              String jobID = Uri.parse(link.url).pathSegments.last;
-                              JobsDetailsScreen(jobId: jobID).launch(context);
-                            } else {
-                              PostUtils.launchURL(context, link.url);
-                            }
-                          },
-                          text: textToShow,
-                          style: TextStyle(fontSize: 14.0, color: textColor, fontWeight: FontWeight.bold),
-                          linkStyle: const TextStyle(color: Colors.blue),
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ),
-                  if (words.length > 25)
-                    TextButton(
-                      // onPressed: () => setState(() {
-                      //   if (isExpanded) {
-                      //     _expandedIndex = -1; // Collapse if already expanded
-                      //   } else {
-                      //     _expandedIndex = index; // Expand the clicked item
-                      //   }
-                      onPressed: () {
-                        setState(() {
-                          _expandedIndex = isExpanded ? -1 : widget.postId;
-                        });
-                      },
-                      child: Text(
-                        isExpanded ? translation(context).lbl_show_less : translation(context).lbl_show_more,
-                        style: TextStyle(color: OneUITheme.of(context).primary, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
+    return GestureDetector(
+      onLongPress: () {
+        Clipboard.setData(
+          ClipboardData(text: parseHtmlString(widget.title ?? '')),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(translation(context).lbl_text_copied)),
         );
       },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color:
+              (widget.image?.isNotEmpty == true ||
+                  widget.media?.isNotEmpty == true)
+              ? Colors.transparent
+              : bgColor,
+          borderRadius: BorderRadius.circular(5.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget.image?.isNotEmpty == true ||
+                  widget.media?.isNotEmpty == true)
+                if (isHtml(textToShow))
+                  Center(
+                    child: HtmlWidget(
+                      textStyle: const TextStyle(),
+                      textToShow,
+                      onTapUrl: (link) async {
+                        if (link.contains('doctak/jobs-detail')) {
+                          String jobID = Uri.parse(link).pathSegments.last;
+                          JobsDetailsScreen(jobId: jobID).launch(context);
+                        } else {
+                          PostUtils.launchURL(context, link);
+                        }
+                        return true;
+                      },
+                    ),
+                  )
+                else
+                  Linkify(
+                    onOpen: (link) {
+                      if (link.url.contains('doctak/jobs-detail')) {
+                        String jobID = Uri.parse(link.url).pathSegments.last;
+                        JobsDetailsScreen(jobId: jobID).launch(context);
+                      } else {
+                        PostUtils.launchURL(context, link.url);
+                      }
+                    },
+                    text: textToShow,
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      color: OneUITheme.of(context).textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    linkStyle: const TextStyle(color: Colors.blue),
+                    textAlign: TextAlign.center,
+                  )
+              else if (isHtml(textToShow))
+                Container(
+                  constraints: BoxConstraints(
+                    minHeight: textToShow.length < 25 ? 200 : 0,
+                  ),
+                  child: Center(
+                    child: HtmlWidget(
+                      textStyle: const TextStyle(),
+                      enableCaching: true,
+                      '<div style="text-align: center;">$textToShow</div>',
+                      onTapUrl: (link) async {
+                        if (link.contains('doctak/jobs-detail')) {
+                          String jobID = Uri.parse(link).pathSegments.last;
+                          JobsDetailsScreen(jobId: jobID).launch(context);
+                        } else {
+                          PostUtils.launchURL(context, link);
+                        }
+                        return true;
+                      },
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  constraints: BoxConstraints(
+                    minHeight: textToShow.length < 25 ? 200 : 0,
+                  ),
+                  child: Center(
+                    child: Linkify(
+                      onOpen: (link) {
+                        if (link.url.contains('doctak/jobs-detail')) {
+                          String jobID = Uri.parse(link.url).pathSegments.last;
+                          JobsDetailsScreen(jobId: jobID).launch(context);
+                        } else {
+                          PostUtils.launchURL(context, link.url);
+                        }
+                      },
+                      text: textToShow,
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      linkStyle: const TextStyle(color: Colors.blue),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+              if (words.length > 25)
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _expandedIndex = isExpanded ? -1 : widget.postId;
+                    });
+                  },
+                  child: Text(
+                    isExpanded
+                        ? translation(context).lbl_show_less
+                        : translation(context).lbl_show_more,
+                    style: TextStyle(
+                      color: OneUITheme.of(context).primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -220,8 +239,15 @@ class _PostItemWidgetState extends State<PostItemWidget> {
         List<Map<String, String>> mediaUrls = [];
         if (widget.media != null) {
           for (var media in widget.media!) {
+            // Skip invalid media paths
+            final mediaPath = media.mediaPath;
+            if (mediaPath == null || mediaPath.isEmpty || mediaPath == 'null') {
+              continue;
+            }
             // Ensure correct URL construction
-            String fullUrl = AppData.imageUrl + media.mediaPath.toString();
+            String fullUrl = mediaPath.startsWith('http')
+                ? mediaPath
+                : AppData.imageUrl + mediaPath;
             mediaUrls.add({"url": fullUrl, "type": media.mediaType ?? "image"});
           }
         }
@@ -398,9 +424,16 @@ class InteractionRowWidget extends StatelessWidget {
                 onTap: onViewLikesTap,
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.heart_fill, size: 14, color: likes > 0 ? theme.likeColor : theme.textSecondary),
+                    Icon(
+                      CupertinoIcons.heart_fill,
+                      size: 14,
+                      color: likes > 0 ? theme.likeColor : theme.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text(AppLocalizations.of(context)!.lbl_likes_count(likes), style: theme.bodySecondary),
+                    Text(
+                      AppLocalizations.of(context)!.lbl_likes_count(likes),
+                      style: theme.bodySecondary,
+                    ),
                   ],
                 ),
               ),
@@ -408,9 +441,18 @@ class InteractionRowWidget extends StatelessWidget {
                 onTap: onViewCommentsTap,
                 child: Row(
                   children: [
-                    Icon(CupertinoIcons.chat_bubble_fill, size: 14, color: theme.textSecondary),
+                    Icon(
+                      CupertinoIcons.chat_bubble_fill,
+                      size: 14,
+                      color: theme.textSecondary,
+                    ),
                     const SizedBox(width: 4),
-                    Text(AppLocalizations.of(context)!.lbl_comments_count(comments), style: theme.bodySecondary),
+                    Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.lbl_comments_count(comments),
+                      style: theme.bodySecondary,
+                    ),
                   ],
                 ),
               ),
@@ -428,7 +470,9 @@ class InteractionRowWidget extends StatelessWidget {
               // Like Button
               Expanded(
                 child: theme.buildActionButton(
-                  icon: isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+                  icon: isLiked
+                      ? CupertinoIcons.heart_fill
+                      : CupertinoIcons.heart,
                   label: translation(context).lbl_like,
                   onTap: onLikeTap,
                   isActive: isLiked,
@@ -439,13 +483,21 @@ class InteractionRowWidget extends StatelessWidget {
               theme.buildVerticalDivider(),
               // Comment Button
               Expanded(
-                child: theme.buildActionButton(icon: CupertinoIcons.chat_bubble, label: translation(context).lbl_comment, onTap: onToggleComment),
+                child: theme.buildActionButton(
+                  icon: CupertinoIcons.chat_bubble,
+                  label: translation(context).lbl_comment,
+                  onTap: onToggleComment,
+                ),
               ),
               // Vertical Divider
               theme.buildVerticalDivider(),
               // Send/Share Button
               Expanded(
-                child: theme.buildActionButton(icon: CupertinoIcons.paperplane, label: translation(context).lbl_send, onTap: onShareTap),
+                child: theme.buildActionButton(
+                  icon: CupertinoIcons.paperplane,
+                  label: translation(context).lbl_send,
+                  onTap: onShareTap,
+                ),
               ),
             ],
           ),

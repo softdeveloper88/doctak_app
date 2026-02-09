@@ -1,4 +1,4 @@
-import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:intl/intl.dart';
@@ -105,12 +105,8 @@ class JobCardWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 16),
                   child: TextButton(
                     onPressed: () async {
-                      final Uri url = Uri.parse(jobData.link ?? '');
-                      final shouldLeave = await _showConfirmationDialog(context);
-                      if (shouldLeave == true) {
-                        onLaunchLink(url);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_leaving_app_canceled)));
+                      if (jobData.link != null && jobData.link!.isNotEmpty) {
+                        await PostUtils.launchURL(context, jobData.link!);
                       }
                     },
                     child: const Text(
@@ -140,20 +136,6 @@ class JobCardWidget extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-
-  Future<bool?> _showConfirmationDialog(BuildContext context) async {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(translation(context).lbl_leave_app),
-        content: Text(translation(context).msg_open_link_confirm),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(translation(context).lbl_no_answer)),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: Text(translation(context).lbl_yes)),
-        ],
-      ),
     );
   }
 }

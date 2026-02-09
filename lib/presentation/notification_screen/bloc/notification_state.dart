@@ -1,18 +1,39 @@
-abstract class NotificationState {}
+import 'package:equatable/equatable.dart';
+
+abstract class NotificationState extends Equatable {
+  const NotificationState();
+
+  @override
+  List<Object?> get props => [];
+}
 
 class DrugsDataInitial extends NotificationState {}
 
 class DataError extends NotificationState {
   final String errorMessage;
-  DataError(this.errorMessage);
+  const DataError(this.errorMessage);
+
+  @override
+  List<Object?> get props => [errorMessage];
 }
 
 class PaginationInitialState extends NotificationState {
-  PaginationInitialState();
+  const PaginationInitialState();
 }
 
-class PaginationLoadedState extends NotificationState {}
+class PaginationLoadedState extends NotificationState {
+  final int notificationCount;
 
-class PaginationLoadingState extends NotificationState {}
+  const PaginationLoadedState({this.notificationCount = 0});
 
-class PaginationErrorState extends NotificationState {}
+  @override
+  List<Object?> get props => [notificationCount];
+}
+
+class PaginationLoadingState extends NotificationState {
+  const PaginationLoadingState();
+}
+
+class PaginationErrorState extends NotificationState {
+  const PaginationErrorState();
+}

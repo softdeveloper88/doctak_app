@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
@@ -20,24 +21,22 @@ class FileUploadOption extends StatefulWidget {
 }
 
 class _FileUploadOptionState extends State<FileUploadOption> {
-  // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
-
   final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
+
   Future<void> openImages() async {
     try {
-      // Use pickMultipleMedia with requestFullMetadata: false for limited access support
-      var pickedfiles = await imgpicker.pickMultipleMedia(
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-        requestFullMetadata: false, // Critical for limited access
+      // Use unified gallery picker for consistent experience
+      final List<File>? pickedFiles = await UnifiedGalleryPicker.pickMultipleImages(
+        context,
+        title: translation(context).lbl_choose_from_gallery,
       );
 
-      if (pickedfiles.isNotEmpty) {
-        for (var element in pickedfiles) {
-          imagefiles.add(element);
-          widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: element, isRemove: false));
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+        for (var element in pickedFiles) {
+          final xfile = XFile(element.path);
+          imagefiles.add(xfile);
+          widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
         }
         if (mounted) {
           setState(() {});
@@ -53,38 +52,29 @@ class _FileUploadOptionState extends State<FileUploadOption> {
   Future<void> openVideo() async {
     try {
       var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
-      //you can use ImageCourse.camera for Camera capture
       if (pickedfiles != null) {
-        // pickedfiles.forEach((element) {
         imagefiles.add(pickedfiles);
         widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
-        // });
-        // setState(() {
-        // });
       } else {
-        print(translation(context).msg_no_image_selected);
+        debugPrint(translation(context).msg_no_image_selected);
       }
     } catch (e) {
-      print("${translation(context).msg_error_picking_file} $e");
+      debugPrint("${translation(context).msg_error_picking_file} $e");
     }
   }
 
   Future<void> openCamera() async {
     try {
-      var pickedfiles = await imgpicker.pickImage(source: ImageSource.camera);
-      //you can use ImageCourse.camera for Camera capture
-      if (pickedfiles != null) {
-        // pickedfiles.forEach((element) {
-        imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
-        // });
-        // setState(() {
-        // });
+      final File? photo = await UnifiedGalleryPicker.captureFromCamera(context);
+      if (photo != null) {
+        final xfile = XFile(photo.path);
+        imagefiles.add(xfile);
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
       } else {
-        print(translation(context).msg_no_image_selected);
+        debugPrint(translation(context).msg_no_image_selected);
       }
     } catch (e) {
-      print("${translation(context).msg_error_picking_file} $e");
+      debugPrint("${translation(context).msg_error_picking_file} $e");
     }
   }
 

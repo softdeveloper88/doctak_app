@@ -62,6 +62,16 @@ class DisplayVideoState extends State<DisplayVideo> {
     return VideoUtils.getVideoErrorMessage(error);
   }
 
+  /// Get a safe aspect ratio, defaulting to 16:9 if invalid
+  double get _safeAspectRatio {
+    final ratio = _controller.value.aspectRatio;
+    // Check for invalid values: 0, NaN, Infinity, or very extreme ratios
+    if (ratio <= 0 || ratio.isNaN || ratio.isInfinite || ratio < 0.1 || ratio > 10) {
+      return 16 / 9; // Default to 16:9
+    }
+    return ratio;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_hasError) {
@@ -102,7 +112,7 @@ class DisplayVideoState extends State<DisplayVideo> {
 
     return _controller.value.isInitialized
         ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
+            aspectRatio: _safeAspectRatio,
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: <Widget>[

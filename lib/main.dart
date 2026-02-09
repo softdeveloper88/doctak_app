@@ -1330,6 +1330,7 @@ import 'package:provider/provider.dart';
 
 import 'ads_setting/ad_setting.dart';
 import 'core/app_export.dart';
+import 'core/app_bloc_observer.dart';
 import 'core/network/my_https_override.dart';
 import 'core/notification_service.dart';
 import 'core/utils/common_navigator.dart';
@@ -1622,6 +1623,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   debugPrint('=== DOCTAK APP STARTING ===');
 
+  // Set up BlocObserver for debugging bloc errors
+  Bloc.observer = const AppBlocObserver();
+  debugPrint('BlocObserver configured');
+
   // Variables to track initialization state
   bool firebaseInitialized = false;
   RemoteMessage? initialRoute;
@@ -1745,6 +1750,25 @@ Future<void> main() async {
     if (firebaseInitialized) {
       try {
         FlutterError.onError = (errorDetails) {
+          // Filter out non-critical image loading errors to reduce noise
+          final errorString = errorDetails.exception.toString().toLowerCase();
+          final libraryName = errorDetails.library?.toLowerCase() ?? '';
+          
+          // Skip image loading errors (404s, network issues, etc.)
+          final isImageError = errorString.contains('httpclient') ||
+              errorString.contains('404') ||
+              errorString.contains('image') ||
+              errorString.contains('codec') ||
+              errorString.contains('cachednetworkimage') ||
+              libraryName.contains('image') ||
+              libraryName.contains('painting');
+          
+          if (isImageError) {
+            // Log image errors locally but don't send to Crashlytics
+            debugPrint('🖼️ Image load error (non-fatal): ${errorDetails.exceptionAsString()}');
+            return;
+          }
+          
           try {
             FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
           } catch (e) {
@@ -1753,6 +1777,21 @@ Future<void> main() async {
         };
 
         PlatformDispatcher.instance.onError = (error, stack) {
+          // Filter out non-critical errors
+          final errorString = error.toString().toLowerCase();
+          
+          // Skip image/network loading errors
+          final isImageError = errorString.contains('httpclient') ||
+              errorString.contains('404') ||
+              errorString.contains('image') ||
+              errorString.contains('codec') ||
+              errorString.contains('socket');
+          
+          if (isImageError) {
+            debugPrint('🖼️ Image/Network error (non-fatal): $error');
+            return true;
+          }
+          
           try {
             FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
           } catch (e) {

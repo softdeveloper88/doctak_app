@@ -84,3 +84,25 @@ class AdsSettingEvent extends HomeEvent {
   @override
   List<Object?> get props => [];
 }
+
+/// Event to trigger a manual refresh (pull-to-refresh)
+class RefreshPostsEvent extends HomeEvent {
+  RefreshPostsEvent();
+  @override
+  List<Object?> get props => [];
+}
+
+/// Event to update posts from cache (background sync completed)
+class UpdatePostsFromCacheEvent extends HomeEvent {
+  final List<Post> posts;
+  UpdatePostsFromCacheEvent({required this.posts});
+  @override
+  List<Object?> get props => [posts];
+}
+
+/// Event to manually retry loading posts after failure (user-initiated)
+class ManualRetryEvent extends HomeEvent {
+  ManualRetryEvent();
+  @override
+  List<Object?> get props => [];
+}
