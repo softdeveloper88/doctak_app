@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 UserProfile profileModelFromJson(String str) => UserProfile.fromJson(json.decode(str));
 String profileModelToJson(UserProfile data) => json.encode(data.toJson());
@@ -8,8 +9,8 @@ class UserProfile {
 
   UserProfile.fromJson(dynamic json) {
     totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
-    profilePicture = json['profile_picture'];
-    coverPicture = json['cover_picture'];
+    profilePicture = AppData.fullImageUrl(json['profile_picture']);
+    coverPicture = AppData.fullImageUrl(json['cover_picture']);
     isFollowing = json['isFollowing'];
     totalPosts = json['total_posts'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
@@ -165,7 +166,7 @@ User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
 
 class User {
-  User({this.role, this.country, this.firstName, this.lastName, this.licenseNo, this.specialty, this.clinicName, this.phone, this.college, this.city, this.state, this.dob, this.id});
+  User({this.role, this.country, this.firstName, this.lastName, this.licenseNo, this.specialty, this.clinicName, this.phone, this.college, this.city, this.state, this.dob, this.id, this.gender, this.createdAt, this.email, this.username});
 
   User.fromJson(dynamic json) {
     role = json['role'];
@@ -181,6 +182,10 @@ class User {
     state = json['state'];
     dob = json['dob'];
     id = json['id'];
+    gender = json['gender'];
+    createdAt = json['created_at'];
+    email = json['email'];
+    username = json['username'];
   }
   String? role;
   String? country;
@@ -195,6 +200,10 @@ class User {
   String? state;
   String? dob;
   String? id;
+  String? gender;
+  String? createdAt;
+  String? email;
+  String? username;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -211,6 +220,10 @@ class User {
     map['state'] = state;
     map['dob'] = dob;
     map['id'] = id;
+    map['gender'] = gender;
+    map['created_at'] = createdAt;
+    map['email'] = email;
+    map['username'] = username;
     return map;
   }
 }

@@ -80,6 +80,16 @@ Uri buildBaseUrl1(String endPoint) {
   return url;
 }
 
+Uri buildBaseUrlV6(String endPoint) {
+  Uri url = Uri.parse(endPoint);
+  if (!endPoint.startsWith('http'))
+    url = Uri.parse('${AppData.remoteUrlV6}$endPoint');
+
+  log('URL (v6): ${url.toString()}');
+
+  return url;
+}
+
 Future<Response> buildHttpResponse1(
   String endPoint, {
   HttpMethod method = HttpMethod.GET,
@@ -279,6 +289,74 @@ Future<Response> buildHttpResponse2(
 
       log(
         'Response ($method): ${url.toString()} ${response.statusCode} ${response.body}',
+      );
+
+      return response;
+    } catch (e) {
+      throw 'Something Went Wrong $e';
+    }
+  } else {
+    throw 'Your internet is not working';
+  }
+}
+
+Future<Response> buildHttpResponseV6(
+  String endPoint, {
+  HttpMethod method = HttpMethod.GET,
+  Map? request,
+}) async {
+  if (await isNetworkAvailable()) {
+    var headers = buildHeaderTokens();
+    Uri url = buildBaseUrlV6(endPoint);
+
+    log('🔵 V6 API $method: ${url.toString()}');
+
+    try {
+      Response response;
+
+      if (method == HttpMethod.POST) {
+        log('Request: $request');
+        response = await http
+            .post(
+              url,
+              body: request?.entries
+                  .map(
+                    (e) =>
+                        '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+                  )
+                  .join('&'),
+              headers: headers,
+            )
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
+      } else if (method == HttpMethod.DELETE) {
+        response = await delete(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
+      } else if (method == HttpMethod.PUT) {
+        var headers = buildHeaderTokens(contentType: 'application/json');
+        log('Request: $request');
+        response = await put(url, body: jsonEncode(request), headers: headers)
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
+      } else {
+        response = await get(url, headers: headers).timeout(
+          const Duration(seconds: 60),
+          onTimeout: () =>
+              throw 'Timeout - Server not responding after 60 seconds',
+        );
+      }
+
+      log(
+        'Response (v6 $method): ${url.toString()} ${response.statusCode} ${response.body}',
       );
 
       return response;

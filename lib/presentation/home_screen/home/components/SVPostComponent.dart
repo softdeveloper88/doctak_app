@@ -323,7 +323,7 @@ class _SVPostComponentState extends State<SVPostComponent>
 
     return PostItemWidget(
       postData: post,
-      profilePicUrl: '${AppData.imageUrl}${post.user?.profilePic}',
+      profilePicUrl: AppData.fullImageUrl(post.user?.profilePic),
       userName: post.user?.name ?? '',
       createdAt: timeAgoStr,
       title: post.title,

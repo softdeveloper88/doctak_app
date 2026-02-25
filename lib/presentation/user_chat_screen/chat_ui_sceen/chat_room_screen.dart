@@ -28,6 +28,9 @@ import 'package:sizer/sizer.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../calling_module/utils/start_outgoing_call.dart';
+import 'package:doctak_app/widgets/communication/communication_gate.dart';
+import 'package:doctak_app/data/apiClient/services/communication_service.dart';
+import 'package:doctak_app/widgets/communication/communication_restriction_sheet.dart';
 import 'component/optimized_message_list.dart';
 import 'component/enhanced_chat_input_field.dart';
 import 'component/animated_voice_recorder.dart';
@@ -89,6 +92,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   String? _recordingPath;
   bool? isBottom = true;
 
+  // Communication permission check
+  CommunicationPermission? _communicationPermission;
+  bool _isCommunicationAllowed = true;
+
   @override
   void dispose() {
     // Ensure we don't leak global pointer routes.
@@ -145,6 +152,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     // Clean old cache files on startup
     _cleanOldAudioCache();
 
+    // Check communication permission (connection + block status)
+    _checkCommunicationPermission();
+
     // fetchMessages();
     // _createClient();
   }
@@ -172,6 +182,73 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     } catch (e) {
       debugPrint('Error cleaning audio cache: $e');
     }
+  }
+
+  /// Check whether the current user can communicate with the target user.
+  Future<void> _checkCommunicationPermission() async {
+    try {
+      final permission = await CommunicationService().checkPermission(widget.id);
+      if (mounted) {
+        setState(() {
+          _communicationPermission = permission;
+          _isCommunicationAllowed = permission.canMessage;
+        });
+      }
+    } catch (e) {
+      debugPrint('Communication permission check failed: $e');
+    }
+  }
+
+  /// Build a banner shown when communication is restricted.
+  Widget _buildRestrictionBanner(OneUITheme theme) {
+    final permission = _communicationPermission;
+    if (permission == null) return const SizedBox.shrink();
+
+    final isBlocked = permission.reasonCode == 'blocked';
+    final icon = isBlocked ? Icons.block_rounded : Icons.lock_outline_rounded;
+    final color = isBlocked ? Colors.red : Colors.orange;
+    final text = permission.reason ?? 'Communication is restricted.';
+
+    return GestureDetector(
+      onTap: () {
+        CommunicationRestrictionSheet.show(
+          context: context,
+          permission: permission,
+          targetUserName: widget.username,
+          targetUserId: widget.id,
+          onActionDone: () {
+            // Re-check after user action
+            _checkCommunicationPermission();
+          },
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          border: Border(top: BorderSide(color: color.withValues(alpha: 0.2))),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: theme.textSecondary,
+                  fontFamily: 'Inter',
+                  height: 1.4,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: theme.textSecondary, size: 20),
+          ],
+        ),
+      ),
+    );
   }
 
   void _checkScrollPosition() {
@@ -734,8 +811,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     fromId: FromId,
                   ),
                 ),
-                isRecording
-                    ? AnimatedVoiceRecorder(
+                // Show restriction banner when communication is not allowed
+                if (!_isCommunicationAllowed && _communicationPermission != null)
+                  _buildRestrictionBanner(theme)
+                else if (isRecording)
+                  AnimatedVoiceRecorder(
                         shouldStopAndSend: _shouldStopRecording,
                         initialPointerPosition: _recordingPointerPosition,
                         onStop: (path) {
@@ -769,7 +849,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                           });
                         },
                       )
-                    : EnhancedChatInputField(
+                else
+                  EnhancedChatInputField(
                         controller: textController,
                         onSubmitted: (message) {
                           setState(() {
@@ -1222,7 +1303,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       )
                     : CustomImageView(
                         imagePath:
-                            '${AppData.imageUrl}${widget.profilePic.validate()}',
+                            AppData.fullImageUrl(widget.profilePic.validate()),
                         height: 40,
                         width: 40,
                         fit: BoxFit.cover,
@@ -1273,11 +1354,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             child: Icon(Icons.phone_outlined, color: theme.primary, size: 18),
           ),
           onPressed: () async {
-            startOutgoingCall(
-              widget.id,
-              widget.username,
-              widget.profilePic,
-              false,
+            CommunicationGate.guardCall(
+              context: context,
+              targetUserId: widget.id,
+              targetUserName: widget.username,
+              onAllowed: () {
+                startOutgoingCall(
+                  widget.id,
+                  widget.username,
+                  widget.profilePic,
+                  false,
+                );
+              },
             );
           },
         ),
@@ -1299,11 +1387,18 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             ),
           ),
           onPressed: () async {
-            startOutgoingCall(
-              widget.id,
-              widget.username,
-              widget.profilePic,
-              true,
+            CommunicationGate.guardCall(
+              context: context,
+              targetUserId: widget.id,
+              targetUserName: widget.username,
+              onAllowed: () {
+                startOutgoingCall(
+                  widget.id,
+                  widget.username,
+                  widget.profilePic,
+                  true,
+                );
+              },
             );
           },
         ),

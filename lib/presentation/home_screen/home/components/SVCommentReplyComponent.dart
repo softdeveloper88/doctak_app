@@ -49,7 +49,7 @@ class _SVCommentReplyComponentState extends State<SVCommentReplyComponent> {
             children: [
               CircleAvatar(
                 backgroundColor: theme.primary.withValues(alpha: 0.1),
-                child: CustomImageView(imagePath: AppData.imageUrl + AppData.profile_pic, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
+                child: CustomImageView(imagePath: AppData.profilePicUrl, height: 40, width: 40, fit: BoxFit.cover).cornerRadiusWithClipRRect(50),
               ),
               10.width,
               Container(

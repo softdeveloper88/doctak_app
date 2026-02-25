@@ -1,19 +1,28 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sizer/sizer.dart';
 
+/// Skeleton loading placeholder that mirrors the actual
+/// [SVProfileHeaderComponent] layout (OneUI 8.5 style).
 class ProfileShimmer extends StatelessWidget {
   const ProfileShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.isDark;
 
-    final shimmerColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.4) : Colors.grey[200]!;
-    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
-    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
+    final baseColor = isDark
+        ? theme.surfaceVariant.withValues(alpha: 0.3)
+        : Colors.grey[300]!;
+    final highlightColor = isDark
+        ? theme.surfaceVariant.withValues(alpha: 0.5)
+        : Colors.grey[100]!;
+    final bone = isDark
+        ? theme.surfaceVariant.withValues(alpha: 0.4)
+        : Colors.grey[200]!;
+    final cardBg = theme.cardBackground;
+    final borderColor = theme.border;
 
     return Shimmer.fromColors(
       baseColor: baseColor,
@@ -21,456 +30,309 @@ class ProfileShimmer extends StatelessWidget {
       period: const Duration(milliseconds: 1500),
       child: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Stack with proper z-index management
+            // ═══════════════════════════════════════
+            //  COVER + AVATAR (matches header Stack)
+            // ═══════════════════════════════════════
             SizedBox(
-              height: 330, // Fixed height container to avoid overlaps
+              // 200px cover + 60px overflow for avatar/buttons
+              height: 260,
+              width: double.infinity,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // Cover Image Shimmer
+                  // ── Cover image placeholder ──
                   Positioned(
                     top: 0,
                     left: 0,
                     right: 0,
-                    child: Container(
-                      height: 260,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [shimmerColor, shimmerColor]),
-                      ),
-                    ),
+                    child: Container(height: 200, color: bone),
                   ),
 
-                  // Back Button Shimmer
+                  // ── Back button circle ──
                   Positioned(
-                    top: 40,
+                    top: MediaQuery.of(context).padding.top + 8,
                     left: 16,
                     child: Container(
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, spreadRadius: 0)],
+                        color: cardBg,
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
 
-                  // Camera Button Shimmer (top right)
-                  Positioned(
-                    top: 40,
-                    right: 16,
+                  // ── Avatar (left-aligned, overlapping cover) ──
+                  PositionedDirectional(
+                    top: 200 - 56, // half of 112px avatar hangs over cover
+                    start: 20,
                     child: Container(
-                      height: 50,
-                      width: 50,
+                      width: 112,
+                      height: 112,
                       decoration: BoxDecoration(
-                        color: Colors.blue.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(25),
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 0)],
+                        shape: BoxShape.circle,
+                        color: bone,
+                        border: Border.all(color: cardBg, width: 4),
                       ),
                     ),
                   ),
 
-                  // Curved Container Shimmer - positioned to avoid overlap
-                  Positioned(
-                    top: 230,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, spreadRadius: 0, offset: const Offset(0, -2))],
-                      ),
-                    ),
-                  ),
-
-                  // Profile Picture Shimmer - positioned higher to avoid overlap
-                  Positioned(
-                    left: (MediaQuery.of(context).size.width / 2) - 60,
-                    top: 180,
-                    child: SizedBox(
-                      width: 120,
-                      height: 120,
-                      child: Stack(
-                        children: [
-                          // Main Profile Picture
-                          Container(
-                            margin: const EdgeInsets.all(10),
-                            height: 100,
-                            width: 100,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white, width: 4),
-                              borderRadius: BorderRadius.circular(50),
-                              color: shimmerColor,
-                              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 15, spreadRadius: 0)],
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(46)),
-                            ),
+                  // ── Action buttons placeholder (right side) ──
+                  PositionedDirectional(
+                    top: 200 + 8,
+                    end: 20,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 80,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: bone,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-
-                          // Camera Icon Shimmer
-                          Positioned(
-                            top: 10,
-                            right: 5,
-                            child: Container(
-                              height: 36,
-                              width: 36,
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withValues(alpha: 0.8),
-                                border: Border.all(color: Colors.white, width: 2),
-                                borderRadius: BorderRadius.circular(18),
-                                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 5, spreadRadius: 0)],
-                              ),
-                            ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 80,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: bone,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Content Section
-            Column(
-              children: [
-                const SizedBox(height: 30),
+            // ═══════════════════════════════════════
+            //  NAME + POINTS BADGE
+            // ═══════════════════════════════════════
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 8),
+              child: Row(
+                children: [
+                  // Name bone
+                  Container(
+                    width: 160,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: bone,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Points badge bone
+                  Container(
+                    width: 60,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: bone,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-                // User Name with Verification Badge
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+            // ═══════════════════════════════════════
+            //  SPECIALTY + LOCATION ROW
+            // ═══════════════════════════════════════
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 6),
+              child: Row(
+                children: [
+                  // Specialty icon
+                  Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: bone,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Container(
+                    width: 100,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: bone,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Dot separator
+                  Container(
+                    width: 4,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: bone,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Location
+                  Container(
+                    width: 80,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: bone,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ═══════════════════════════════════════
+            //  STATS CARD (Posts / Connections / Followers)
+            // ═══════════════════════════════════════
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Row(
                   children: [
-                    Container(
-                      width: 180,
-                      height: 20,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                    ),
+                    _buildStatBone(bone),
+                    _buildStatBone(bone),
+                    _buildStatBone(bone),
                   ],
                 ),
-                const SizedBox(height: 12),
+              ),
+            ),
 
-                // Location Info
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                    ),
-                    const SizedBox(width: 4),
-                    Container(
-                      width: 150,
-                      height: 14,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Specialty Info
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                    ),
-                    const SizedBox(width: 4),
-                    Container(
-                      width: 120,
-                      height: 14,
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // About Me Text (3 lines)
-                SizedBox(
-                  width: 90.w,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: 13,
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: double.infinity,
-                        height: 13,
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        width: 70.w,
-                        height: 13,
-                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Points Card Shimmer
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, spreadRadius: 0)],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                          ),
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 120,
-                            height: 14,
-                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        width: 60,
-                        height: 18,
-                        decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Message and Follow Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Message Button Shimmer
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: Offset(0, 2))],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            width: 60,
-                            height: 14,
-                            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Follow Button Shimmer
-                    Container(
-                      height: 40,
-                      width: 110,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, offset: Offset(0, 2))],
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 18,
-                              height: 18,
-                              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                            ),
-                            const SizedBox(width: 6),
-                            Container(
-                              width: 50,
-                              height: 14,
-                              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                            ),
-                          ],
+            // ═══════════════════════════════════════
+            //  TAB BAR PLACEHOLDER
+            // ═══════════════════════════════════════
+            Container(
+              height: 48,
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: Row(
+                children: List.generate(
+                  4,
+                  (_) => Expanded(
+                    child: Center(
+                      child: Container(
+                        width: 50,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: bone,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Stats Row Shimmer (Posts, Followers, Following)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border(
-                      top: BorderSide(color: Colors.grey.shade200, width: 1),
-                      bottom: BorderSide(color: Colors.grey.shade200, width: 1),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // Posts Stat
-                      _buildStatShimmer(shimmerColor),
-                      // Followers Stat
-                      _buildStatShimmer(shimmerColor),
-                      // Following Stat
-                      _buildStatShimmer(shimmerColor),
-                    ],
                   ),
                 ),
-
-                // Background Separator
-                Container(color: Colors.grey[100], height: 10),
-
-                // Posts Section Shimmer
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      // Section header
-                      Row(
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 16,
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Post items
-                      for (int i = 0; i < 3; i++) ...[_buildPostShimmer(shimmerColor), const SizedBox(height: 12)],
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
+
+            const SizedBox(height: 20),
+
+            // ═══════════════════════════════════════
+            //  SECTION CARD PLACEHOLDERS
+            // ═══════════════════════════════════════
+            for (int i = 0; i < 2; i++) ...[
+              _buildSectionCardBone(bone, cardBg, borderColor),
+              const SizedBox(height: 12),
+            ],
+
+            const SizedBox(height: 80),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStatShimmer(Color shimmerColor) {
-    return Column(
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 16,
-              height: 16,
-              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
+  /// A single stat column matching [StatItem] layout.
+  Widget _buildStatBone(Color bone) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 30,
+            height: 18,
+            decoration: BoxDecoration(
+              color: bone,
+              borderRadius: BorderRadius.circular(4),
             ),
-            const SizedBox(width: 6),
-            Container(
-              width: 30,
-              height: 16,
-              decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
+          ),
+          const SizedBox(height: 4),
+          Container(
+            width: 55,
+            height: 10,
+            decoration: BoxDecoration(
+              color: bone,
+              borderRadius: BorderRadius.circular(4),
             ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Container(
-          width: 60,
-          height: 12,
-          decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildPostShimmer(Color shimmerColor) {
+  /// A card placeholder for About / Contact / Professional sections.
+  Widget _buildSectionCardBone(
+      Color bone, Color cardBg, Color borderColor) {
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5, spreadRadius: 0)],
+        color: cardBg,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Post header
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(color: shimmerColor, shape: BoxShape.circle),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 14,
-                      decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      width: 80,
-                      height: 12,
-                      decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ],
+          // Section title bone
+          Container(
+            width: 120,
+            height: 16,
+            decoration: BoxDecoration(
+              color: bone,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Row bones
+          for (int i = 0; i < 3; i++) ...[
+            Row(
+              children: [
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: bone,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Post content
-          Container(
-            width: double.infinity,
-            height: 14,
-            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            height: 14,
-            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            width: 200,
-            height: 14,
-            decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(2)),
-          ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 80 + (i * 20),
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: bone,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ],
+            ),
+            if (i < 2) const SizedBox(height: 12),
+          ],
         ],
       ),
     );

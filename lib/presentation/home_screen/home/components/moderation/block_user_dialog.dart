@@ -8,7 +8,7 @@ import 'package:nb_utils/nb_utils.dart';
 /// Confirms blocking a user and explains the consequences
 /// Apple App Store Guideline 1.2 Compliance
 class BlockUserDialog extends StatefulWidget {
-  final int userId;
+  final String userId;
   final String userName;
   final String? userProfilePic;
   final VoidCallback? onUserBlocked;
@@ -24,7 +24,7 @@ class BlockUserDialog extends StatefulWidget {
   /// Show the block user confirmation dialog
   static Future<bool?> show({
     required BuildContext context,
-    required int userId,
+    required String userId,
     required String userName,
     String? userProfilePic,
     VoidCallback? onUserBlocked,
@@ -270,7 +270,7 @@ class _BlockUserDialogState extends State<BlockUserDialog> {
 class ContentModerationBottomSheet extends StatelessWidget {
   final int contentId;
   final String contentType;
-  final int? userId;
+  final String? userId;
   final String? userName;
   final bool isCurrentUser;
   final VoidCallback? onDelete;
@@ -293,7 +293,7 @@ class ContentModerationBottomSheet extends StatelessWidget {
     required BuildContext context,
     required int contentId,
     required String contentType,
-    int? userId,
+    String? userId,
     String? userName,
     bool isCurrentUser = false,
     VoidCallback? onDelete,
@@ -494,7 +494,7 @@ class ContentModerationBottomSheet extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => _ReportContentBottomSheetWrapper(
-        contentId: contentId,
+        contentId: contentId.toString(),
         contentType: contentType,
         contentOwnerName: userName,
         onReportSubmitted: onReportSubmitted,
@@ -516,7 +516,7 @@ class ContentModerationBottomSheet extends StatelessWidget {
 
 /// Wrapper to avoid circular imports
 class _ReportContentBottomSheetWrapper extends StatefulWidget {
-  final int contentId;
+  final String contentId;
   final String contentType;
   final String? contentOwnerName;
   final VoidCallback? onReportSubmitted;
@@ -570,7 +570,7 @@ class _ReportContentBottomSheetWrapperState extends State<_ReportContentBottomSh
       switch (widget.contentType) {
         case 'post':
           await moderationService.reportPost(
-            postId: widget.contentId,
+            postId: int.tryParse(widget.contentId) ?? 0,
             reason: _selectedReason!.value,
             description: _descriptionController.text.isNotEmpty 
                 ? _descriptionController.text 
@@ -579,7 +579,7 @@ class _ReportContentBottomSheetWrapperState extends State<_ReportContentBottomSh
           break;
         case 'comment':
           await moderationService.reportComment(
-            commentId: widget.contentId,
+            commentId: int.tryParse(widget.contentId) ?? 0,
             reason: _selectedReason!.value,
             description: _descriptionController.text.isNotEmpty 
                 ? _descriptionController.text 

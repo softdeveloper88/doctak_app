@@ -317,14 +317,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     if (typeNotification == 'message') {
                       ChatRoomScreen(
                         username: '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''}',
-                        profilePic: '${notification.senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                        profilePic: '${notification.senderProfilePic ?? ''}',
                         id: '${notification.userId}',
                         roomId: '',
                       ).launch(context);
                     } else if (typeNotification == 'message_received') {
                       ChatRoomScreen(
                         username: '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''}',
-                        profilePic: '${notification.senderProfilePic?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
+                        profilePic: '${notification.senderProfilePic ?? ''}',
                         id: '${notification.fromUserId}',
                         roomId: '',
                       ).launch(context);
@@ -368,7 +368,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(25),
-                                  child: CustomImageView(fit: BoxFit.cover, width: 50, height: 50, imagePath: '${AppData.imageUrl}${notification.senderProfilePic ?? ''}'),
+                                  child: CustomImageView(fit: BoxFit.cover, width: 50, height: 50, imagePath: AppData.fullImageUrl(notification.senderProfilePic)),
                                 ),
                               ),
                             ),

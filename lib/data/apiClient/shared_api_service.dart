@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:http/http.dart' as http;
@@ -58,7 +59,7 @@ class SharedApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/login',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -91,8 +92,8 @@ class SharedApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/login',
+        await networkUtils.buildHttpResponseV6(
+          '/social-login',
           method: networkUtils.HttpMethod.POST,
           request: {
             'email': email,
@@ -101,9 +102,8 @@ class SharedApiService {
             'device_type': deviceType,
             'device_id': deviceId,
             'device_token': deviceToken,
-            'isSocialLogin': 'true',
             'provider': provider,
-            'token': token,
+            'id_token': token,
           },
         ),
       );
@@ -128,7 +128,7 @@ class SharedApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/register',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -163,7 +163,7 @@ class SharedApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/complete-profile',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -517,10 +517,37 @@ class SharedApiService {
     }
   }
 
-  // ================================== CHATGPT ENDPOINTS ==================================
+  // ================================== CHATGPT / MEDICAL IMAGE ANALYSIS (API v6) ==================================
+  // All AI endpoints now use v6 to include citation sources per Apple Guideline 1.4.1
 
-  /// Ask question to ChatGPT with images (multipart file upload)
-  /// [imageUrl1] and [imageUrl2] should be local file paths, not URLs
+  /// Maps display image-type labels to v6 analysis_type slugs
+  static String _toAnalysisType(String imageType) {
+    switch (imageType.toLowerCase().trim()) {
+      case 'x-ray':
+      case 'xray':
+        return 'xray';
+      case 'ecg':
+      case 'ekg':
+        return 'ecg';
+      case 'ct scan':
+      case 'ctscan':
+        return 'ctscan';
+      case 'mri':
+      case 'mri scan':
+        return 'mri';
+      case 'mammography':
+      case 'mammogram':
+        return 'mammogram';
+      case 'dermatological':
+      case 'dermatology':
+        return 'dermatology';
+      default:
+        return 'general';
+    }
+  }
+
+  /// Analyze a medical image using v6 endpoint.
+  /// Returns response with `sources` citations (Apple Guideline 1.4.1).
   Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithImages({
     required String sessionId,
     required String question,
@@ -529,156 +556,103 @@ class SharedApiService {
     String? imageUrl2,
   }) async {
     try {
-      // Create the API URL
-      final Uri url = Uri.parse('${AppData.remoteUrl2}/ask-question');
+      // v6 endpoint for medical image analysis
+      final Uri url = Uri.parse('${AppData.remoteUrlV6}/medical-image-analysis/analyze');
 
-      // Create multipart request
       var request = http.MultipartRequest('POST', url);
 
-      // Add authorization header
       if (AppData.userToken != null) {
         request.headers['Authorization'] = 'Bearer ${AppData.userToken}';
       }
+      // Tell Laravel to return JSON errors (not HTML 404 pages)
+      request.headers['Accept'] = 'application/json';
 
-      // Add text fields (matching PHP backend expectations)
-      request.fields['id'] = sessionId;
-      request.fields['question'] = question;
-      if (imageType.isNotEmpty) {
-        request.fields['image_type'] = imageType;
-      }
+      // v6 field names: session_id, message, file, analysis_type
+      request.fields['session_id']    = sessionId;
+      request.fields['message']       = question;
+      request.fields['analysis_type'] = _toAnalysisType(imageType);
 
-      // Helper to get MIME type
       String getMimeType(String filePath) {
-        final filename = filePath.split('/').last.toLowerCase();
-        if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
-          return 'image/jpeg';
-        } else if (filename.endsWith('.png')) {
-          return 'image/png';
-        } else if (filename.endsWith('.gif')) {
-          return 'image/gif';
-        } else if (filename.endsWith('.webp')) {
-          return 'image/webp';
-        }
+        final name = filePath.split('/').last.toLowerCase();
+        if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+        if (name.endsWith('.png')) return 'image/png';
+        if (name.endsWith('.gif')) return 'image/gif';
+        if (name.endsWith('.webp')) return 'image/webp';
         return 'image/jpeg';
       }
 
-      // Add image1 file if provided
+      // v6 accepts a single `file` field
       if (imageUrl1 != null && imageUrl1.isNotEmpty) {
         final file1 = File(imageUrl1);
         if (await file1.exists()) {
-          final fileStream1 = http.ByteStream(file1.openRead());
-          final fileLength1 = await file1.length();
-          final mimeType1 = getMimeType(imageUrl1);
-          final filename1 = imageUrl1.split('/').last;
-
-          final multipartFile1 = http.MultipartFile(
-            'image1', // Field name matching PHP: $request->hasFile('image1')
-            fileStream1,
-            fileLength1,
-            filename: filename1,
-            contentType: MediaType.parse(mimeType1),
-          );
-          request.files.add(multipartFile1);
-          print('📎 Added image1: $filename1 (${fileLength1} bytes)');
-        } else {
-          print('⚠️ Image1 file does not exist: $imageUrl1');
+          final mimeType = getMimeType(imageUrl1);
+          request.files.add(http.MultipartFile(
+            'file',
+            http.ByteStream(file1.openRead()),
+            await file1.length(),
+            filename: imageUrl1.split('/').last,
+            contentType: MediaType.parse(mimeType),
+          ));
+          debugPrint('📎 Medical image v6: added file');
         }
       }
 
-      // Add image2 file if provided
-      if (imageUrl2 != null && imageUrl2.isNotEmpty) {
-        final file2 = File(imageUrl2);
-        if (await file2.exists()) {
-          final fileStream2 = http.ByteStream(file2.openRead());
-          final fileLength2 = await file2.length();
-          final mimeType2 = getMimeType(imageUrl2);
-          final filename2 = imageUrl2.split('/').last;
+      debugPrint('🚀 Medical image v6 analyze → $url');
 
-          final multipartFile2 = http.MultipartFile(
-            'image2', // Field name matching PHP: $request->hasFile('image2')
-            fileStream2,
-            fileLength2,
-            filename: filename2,
-            contentType: MediaType.parse(mimeType2),
-          );
-          request.files.add(multipartFile2);
-          print('📎 Added image2: $filename2 (${fileLength2} bytes)');
-        } else {
-          print('⚠️ Image2 file does not exist: $imageUrl2');
-        }
-      }
-
-      print('🚀 Sending multipart request to: $url');
-      print('📝 Fields: ${request.fields}');
-      print('📁 Files: ${request.files.length}');
-
-      // Send the request with extended timeout for image processing
       final streamedResponse = await request.send().timeout(
         const Duration(seconds: 120),
-        onTimeout: () {
-          throw ApiException(message: 'Request timed out', statusCode: 408);
-        },
+        onTimeout: () => throw ApiException(message: 'Request timed out', statusCode: 408),
       );
-
-      // Convert streamed response to regular response
       final response = await http.Response.fromStream(streamedResponse);
 
-      print('📥 Response status: ${response.statusCode}');
-      print('📥 Response body: ${response.body}');
+      debugPrint('📥 v6 analyze status: ${response.statusCode}');
+      debugPrint('📥 v6 analyze body: ${response.body}');
 
-      // Handle response
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        final jsonResponse = jsonDecode(response.body);
-        return ApiResponse.success(
-          ChatGptAskQuestionResponse.fromJson(jsonResponse),
-        );
+        return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(jsonDecode(response.body)));
       } else {
-        // Parse error message
-        String errorMessage = 'Failed to ask question with images';
+        String errorMessage = 'Failed to analyze image';
         try {
           final errorJson = jsonDecode(response.body);
-          errorMessage =
-              errorJson['error']?['message'] ??
-              errorJson['message'] ??
-              errorMessage;
+          errorMessage = errorJson['message'] ?? errorJson['error']?['message'] ?? errorMessage;
         } catch (_) {}
         return ApiResponse.error(errorMessage, statusCode: response.statusCode);
       }
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
-      print('❌ Error in askQuestionWithImages: $e');
-      return ApiResponse.error('Failed to ask question: $e');
+      debugPrint('❌ Error in askQuestionWithImages (v6): $e');
+      return ApiResponse.error('Failed to analyze image: $e');
     }
   }
 
-  /// Ask question to ChatGPT without images
+  /// Continue a text-only conversation in the medical image session (v6)
   Future<ApiResponse<ChatGptAskQuestionResponse>> askQuestionWithoutImages({
     required String sessionId,
     required String question,
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/ask-question',
+        await networkUtils.buildHttpResponseV6(
+          '/medical-image-analysis/chat',
           method: networkUtils.HttpMethod.POST,
-          request: {'id': sessionId, 'question': question},
+          request: {'session_id': sessionId, 'message': question},
         ),
       );
       return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
-      return ApiResponse.error('Failed to ask question: $e');
+      return ApiResponse.error('Failed to continue chat: $e');
     }
   }
 
-  /// Get ChatGPT sessions
+  /// Get medical image analysis sessions (v6)
   Future<ApiResponse<ChatGptSession>> getChatGptSessions() async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/gptChat-session',
+        await networkUtils.buildHttpResponseV6(
+          '/medical-image-analysis/sessions',
           method: networkUtils.HttpMethod.GET,
         ),
       );
@@ -690,14 +664,14 @@ class SharedApiService {
     }
   }
 
-  /// Get ChatGPT message history
+  /// Get messages for a medical image analysis session (v6)
   Future<ApiResponse<ChatGptMessageHistory>> getChatGptMessages({
     required String sessionId,
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/gptChat-history/$sessionId',
+        await networkUtils.buildHttpResponseV6(
+          '/medical-image-analysis/sessions/$sessionId/messages',
           method: networkUtils.HttpMethod.GET,
         ),
       );
@@ -709,32 +683,40 @@ class SharedApiService {
     }
   }
 
-  /// Create new ChatGPT session
+  /// Create a new medical image analysis session (v6)
   Future<ApiResponse<Map<String, dynamic>>> createNewChatSession() async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/new-chat',
-          method: networkUtils.HttpMethod.GET,
+        await networkUtils.buildHttpResponseV6(
+          '/medical-image-analysis/sessions',
+          method: networkUtils.HttpMethod.POST,
+          request: {},
         ),
       );
-      return ApiResponse.success(Map<String, dynamic>.from(response));
+      // Map v6 create-session response to legacy format expected by BLoC
+      final Map<String, dynamic> result = Map<String, dynamic>.from(response);
+      if (result.containsKey('session')) {
+        final session = result['session'] as Map<String, dynamic>;
+        result['newSessionId'] = session['id'];
+        result['session_id']   = session['id'];
+      }
+      return ApiResponse.success(result);
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
-      return ApiResponse.error('Failed to create new session: $e');
+      return ApiResponse.error('Failed to create session: $e');
     }
   }
 
-  /// Delete ChatGPT session
+  /// Delete a medical image analysis session (v6)
   Future<ApiResponse<Map<String, dynamic>>> deleteChatGptSession({
     required String sessionId,
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/delete-chatgpt-session?session_id=$sessionId',
-          method: networkUtils.HttpMethod.POST,
+        await networkUtils.buildHttpResponseV6(
+          '/medical-image-analysis/sessions/$sessionId',
+          method: networkUtils.HttpMethod.DELETE,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -744,6 +726,7 @@ class SharedApiService {
       return ApiResponse.error('Failed to delete session: $e');
     }
   }
+
 
   // ================================== MEETING ENDPOINTS ==================================
 
@@ -1084,6 +1067,7 @@ class SharedApiService {
       put('gender', gender);
       put('country', country);
       put('city', city);
+      put('state', city);
       put('country_origin', countryOrigin);
 
       // Privacy fields (include even if blank)

@@ -169,7 +169,7 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
     try {
       await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
       AppData.chatMessages.add(
-        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: "${AppData.imageUrl}${AppData.profile_pic}"),
+        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: AppData.profilePicUrl),
       );
       setState(() {});
       _messageController.clear();

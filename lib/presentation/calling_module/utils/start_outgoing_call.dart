@@ -8,6 +8,8 @@ import 'package:doctak_app/presentation/calling_module/services/callkit_service.
 import 'package:doctak_app/presentation/calling_module/services/call_api_service.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/data/apiClient/services/communication_service.dart';
+import 'package:doctak_app/widgets/communication/communication_restriction_sheet.dart';
 
 import '../../user_chat_screen/chat_ui_sceen/call_loading_screen.dart';
 
@@ -17,6 +19,22 @@ PusherService get pusherService => PusherService();
 Future<void> startOutgoingCall(String userId, String username, String profilePic, bool isVideoCall) async {
   // Get the current context for permission dialogs
   final context = NavigatorService.navigatorKey.currentState?.context;
+
+  // ── Communication permission check (connection + block) ──
+  if (context != null) {
+    final permission = await CommunicationService().checkPermission(userId);
+    if (!permission.canCall) {
+      if (context.mounted) {
+        CommunicationRestrictionSheet.show(
+          context: context,
+          permission: permission,
+          targetUserName: username,
+          targetUserId: userId,
+        );
+      }
+      return;
+    }
+  }
 
   // Check and request permissions before starting the call
   if (context != null) {
@@ -97,7 +115,7 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
       builder: (context) => CallLoadingScreen(
         key: loadingScreenKey,
         contactName: username,
-        contactAvatar: "${AppData.imageUrl}$profilePic",
+        contactAvatar: AppData.fullImageUrl(profilePic),
         isVideoCall: isVideoCall,
         onCancel: () {
           // Pop the loading screen
@@ -119,7 +137,7 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
       loadingScreenKey.currentState?.updateStatus(CallStatus.calling);
 
       debugPrint('📞 Calling CallKitService().startOutgoingCall...');
-      final response = await CallKitService().startOutgoingCall(userId: userId, calleeName: username, avatar: "${AppData.imageUrl}$profilePic", hasVideo: isVideoCall);
+      final response = await CallKitService().startOutgoingCall(userId: userId, calleeName: username, avatar: AppData.fullImageUrl(profilePic), hasVideo: isVideoCall);
       debugPrint('📞 CallKitService response: $response');
 
       // Response is already Map<String, dynamic>
@@ -256,7 +274,7 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
                       callId: callId!,
                       contactId: userId,
                       contactName: username,
-                      contactAvatar: "${AppData.imageUrl}$profilePic",
+                      contactAvatar: AppData.fullImageUrl(profilePic),
                       isIncoming: false,
                       isVideoCall: isVideoCall,
                       token: callData['token']?.toString(),
@@ -334,7 +352,7 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
                   callId: callId!,
                   contactId: userId,
                   contactName: username,
-                  contactAvatar: "${AppData.imageUrl}$profilePic",
+                  contactAvatar: AppData.fullImageUrl(profilePic),
                   isIncoming: false,
                   isVideoCall: isVideoCall,
                   token: callData['token']?.toString(),
@@ -360,7 +378,7 @@ Future<void> startOutgoingCall(String userId, String username, String profilePic
                   callId: callId!,
                   contactId: userId,
                   contactName: username,
-                  contactAvatar: "${AppData.imageUrl}$profilePic",
+                  contactAvatar: AppData.fullImageUrl(profilePic),
                   isIncoming: false,
                   isVideoCall: isVideoCall,
                   token: callData['token']?.toString(),

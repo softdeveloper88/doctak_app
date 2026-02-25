@@ -21,10 +21,11 @@ class ProfessionalInfoScreen extends StatefulWidget {
   State<ProfessionalInfoScreen> createState() => _ProfessionalInfoScreenState();
 }
 
-bool isEditModeMap = false;
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
 class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with SingleTickerProviderStateMixin {
+  bool _isEditMode = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
+
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -32,20 +33,17 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
   FocusNode focusNode2 = FocusNode();
   FocusNode focusNode3 = FocusNode();
   FocusNode focusNode4 = FocusNode();
+  FocusNode focusNode5 = FocusNode();
 
   @override
   void initState() {
-    isEditModeMap = false;
+    super.initState();
+    _isEditMode = false;
     widget.profileBloc.add(UpdateSpecialtyDropdownValue(''));
 
-    // Setup animations
     _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeIn));
-
     _animationController.forward();
-
-    super.initState();
   }
 
   @override
@@ -55,6 +53,7 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
     focusNode2.dispose();
     focusNode3.dispose();
     focusNode4.dispose();
+    focusNode5.dispose();
     super.dispose();
   }
 
@@ -65,285 +64,231 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
       appBar: DoctakAppBar(
-        title: translation(context).lbl_professional_summary,
-        titleIcon: Icons.medical_services_outlined,
+        title: 'About Me',
+        titleIcon: Icons.info_outline_rounded,
         actions: [
           if (widget.profileBloc.isMe)
             OneUIEditActionButton(
-              isEditMode: isEditModeMap,
+              isEditMode: _isEditMode,
               onPressed: () {
                 setState(() {
-                  isEditModeMap = !isEditModeMap;
-                  if (!isEditModeMap) {
-                    _saveChanges();
-                  }
+                  _isEditMode = !_isEditMode;
                 });
               },
             ),
           const SizedBox(width: 16),
         ],
       ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
-              child: Column(
-                children: [
-                  // Information card
-                  if (!isEditModeMap) OneUIInfoBanner(message: translation(context).msg_professional_info_desc, icon: Icons.info_outline, accentColor: theme.primary),
+      body: BlocListener<ProfileBloc, ProfileState>(
+        bloc: widget.profileBloc,
+        listener: (context, state) {
+          if (_isSaving && (state is PaginationLoadedState || state is FullProfileLoadedState)) {
+            setState(() {
+              _isSaving = false;
+            });
+          }
+        },
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
+                child: Column(
+                  children: [
+                    // Information banner
+                    if (!_isEditMode)
+                      OneUIInfoBanner(
+                        message: 'Update your about me information, address, and personal details.',
+                        icon: Icons.info_outline,
+                        accentColor: theme.primary,
+                      ),
 
-                  // Specialty section
-                  Card(
-                    elevation: 0,
-                    color: theme.cardBackground,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: theme.border),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Card header
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                                child: Icon(Icons.medical_services_outlined, color: Colors.blue[700], size: 18),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                translation(context).lbl_specialty_info,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue[700]),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Specialty dropdown if in edit mode
-                          if (isEditModeMap)
-                            BlocBuilder<ProfileBloc, ProfileState>(
-                              bloc: widget.profileBloc,
-                              builder: (context, state) {
-                                if (state is PaginationLoadedState) {
-                                  return Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      if (AppData.userType == "doctor") const SizedBox(height: 10),
-                                      if (AppData.userType == "doctor") Text(translation(context).lbl_specialty, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                                      if (AppData.userType == "doctor")
-                                        Container(
-                                          margin: const EdgeInsets.only(top: 8),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: theme.border),
-                                          ),
-                                          child: CustomDropdownButtonFormField(
-                                            itemBuilder: (item) => Text(item, style: TextStyle(color: theme.textPrimary)),
-                                            items: state.specialtyDropdownValue,
-                                            value: state.selectedSpecialtyDropdownValue,
-                                            width: double.infinity,
-                                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                            onChanged: (String? newValue) {
-                                              print(newValue);
-                                              print("Specialty $newValue");
-                                              widget.profileBloc.specialtyName = newValue!;
-                                              widget.profileBloc.userProfile?.user?.specialty = newValue;
-                                              widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
-                                            },
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                } else {
-                                  return Text(translation(context).lbl_unknown_state);
-                                }
-                              },
-                            ),
-
-                          // Title and specialization in view mode
-                          if (!isEditModeMap)
-                            TextFieldEditWidget(
-                              index: 0,
-                              label: translation(context).lbl_title_and_specialization,
-                              value: widget.profileBloc.userProfile?.user?.specialty ?? '',
-                              onSave: (value) => widget.profileBloc.userProfile?.user?.specialty = value,
-                            ),
-                        ],
+                    // About Me section
+                    OneUIProfileSection(
+                      title: 'About Me',
+                      icon: Icons.description_outlined,
+                      iconColor: Colors.blue[700],
+                      child: TextFieldEditWidget(
+                        isEditModeMap: _isEditMode,
+                        icon: Icons.person_outline,
+                        index: 1,
+                        textInputAction: TextInputAction.newline,
+                        textInputType: TextInputType.multiline,
+                        focusNode: focusNode1,
+                        hints: 'Tell others about yourself...',
+                        label: 'About Me',
+                        value: widget.profileBloc.userProfile?.profile?.aboutMe ?? '',
+                        onSave: (value) => widget.profileBloc.userProfile?.profile?.aboutMe = value,
+                        maxLines: 4,
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 8),
 
-                  // Workplace and experience card
-                  Card(
-                    elevation: 0,
-                    color: theme.cardBackground,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: theme.border),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                    // Specialty section (doctors only)
+                    if (AppData.userType == "doctor")
+                      OneUIProfileSection(
+                        title: 'Specialty',
+                        icon: Icons.medical_services_outlined,
+                        iconColor: Colors.purple[700],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_isEditMode)
+                              BlocBuilder<ProfileBloc, ProfileState>(
+                                bloc: widget.profileBloc,
+                                builder: (context, state) {
+                                  List<String> specialties = [];
+                                  String selectedSpecialty = '';
+                                  bool isLoaded = false;
+
+                                  if (state is PaginationLoadedState) {
+                                    specialties = state.specialtyDropdownValue;
+                                    selectedSpecialty = state.selectedSpecialtyDropdownValue;
+                                    isLoaded = true;
+                                  } else if (state is FullProfileLoadedState) {
+                                    specialties = state.specialtyDropdownValue;
+                                    selectedSpecialty = state.selectedSpecialtyDropdownValue;
+                                    isLoaded = true;
+                                  }
+
+                                  if (isLoaded) {
+                                    return Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: theme.border),
+                                      ),
+                                      child: CustomDropdownButtonFormField(
+                                        itemBuilder: (item) => Text(item, style: TextStyle(color: theme.textPrimary)),
+                                        items: specialties,
+                                        value: selectedSpecialty,
+                                        width: double.infinity,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                        onChanged: (String? newValue) {
+                                          widget.profileBloc.specialtyName = newValue!;
+                                          widget.profileBloc.userProfile?.user?.specialty = newValue;
+                                          widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
+                                        },
+                                      ),
+                                    );
+                                  } else {
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
+                                },
+                              ),
+
+                            if (!_isEditMode)
+                              TextFieldEditWidget(
+                                index: 0,
+                                label: 'Specialty',
+                                value: widget.profileBloc.userProfile?.user?.specialty ?? '',
+                                onSave: (value) => widget.profileBloc.userProfile?.user?.specialty = value,
+                              ),
+                          ],
+                        ),
+                      ),
+
+                    if (AppData.userType == "doctor") const SizedBox(height: 8),
+
+                    // Address & Location section
+                    OneUIProfileSection(
+                      title: 'Location & Contact',
+                      icon: Icons.location_on_outlined,
+                      iconColor: Colors.orange[700],
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Card header
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                                child: Icon(Icons.business_center_outlined, color: Colors.orange[700], size: 18),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                translation(context).lbl_workplace_info,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.orange[700]),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Current workplace field
+                          // Address
                           TextFieldEditWidget(
-                            isEditModeMap: isEditModeMap,
-                            icon: Icons.location_on,
+                            isEditModeMap: _isEditMode,
+                            icon: Icons.home_outlined,
                             index: 1,
-                            textInputAction: TextInputAction.newline,
-                            textInputType: TextInputType.multiline,
-                            focusNode: focusNode1,
-                            hints: translation(context).hint_workplace,
-                            label: translation(context).lbl_current_workplace,
+                            textInputAction: TextInputAction.next,
+                            textInputType: TextInputType.text,
+                            focusNode: focusNode2,
+                            hints: 'Your address',
+                            label: 'Address',
                             value: widget.profileBloc.userProfile?.profile?.address ?? '',
                             onSave: (value) => widget.profileBloc.userProfile?.profile?.address = value,
                           ),
 
-                          if (!isEditModeMap) Divider(color: theme.border, thickness: 1, indent: 10, endIndent: 10),
+                          if (!_isEditMode) Divider(color: theme.border, thickness: 1, indent: 10, endIndent: 10),
 
-                          // Years of experience field
+                          // Lives In
                           TextFieldEditWidget(
-                            isEditModeMap: isEditModeMap,
-                            icon: Icons.account_circle,
+                            isEditModeMap: _isEditMode,
+                            icon: Icons.apartment_outlined,
                             index: 1,
-                            textInputType: TextInputType.multiline,
-                            textInputAction: TextInputAction.newline,
-                            hints: translation(context).hint_years_experience,
-                            focusNode: focusNode2,
-                            label: translation(context).lbl_years_experience,
-                            value: widget.profileBloc.userProfile?.profile?.aboutMe ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile!.profile?.aboutMe = value,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Achievements and location card
-                  Card(
-                    elevation: 0,
-                    color: theme.cardBackground,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(color: theme.border),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Card header
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                                child: Icon(Icons.emoji_events_outlined, color: Colors.green[700], size: 18),
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                translation(context).lbl_achievements_and_location,
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green[700]),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Notable achievements field
-                          TextFieldEditWidget(
-                            isEditModeMap: isEditModeMap,
-                            icon: Icons.star_border_rounded,
-                            index: 1,
-                            textInputAction: TextInputAction.newline,
-                            hints: translation(context).hint_notable_achievements,
+                            textInputAction: TextInputAction.next,
+                            textInputType: TextInputType.text,
                             focusNode: focusNode3,
-                            label: translation(context).lbl_notable_achievements,
-                            value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile!.profile?.birthplace = value,
-                            textInputType: TextInputType.multiline,
+                            hints: 'City or place where you live',
+                            label: 'Lives In',
+                            value: widget.profileBloc.userProfile?.profile?.livesIn ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile?.profile?.livesIn = value,
                           ),
 
-                          if (!isEditModeMap) Divider(color: theme.border, thickness: 1, indent: 10, endIndent: 10),
+                          if (!_isEditMode) Divider(color: theme.border, thickness: 1, indent: 10, endIndent: 10),
 
-                          // Location field
+                          // Birthplace
                           TextFieldEditWidget(
-                            isEditModeMap: isEditModeMap,
-                            icon: Icons.location_on_outlined,
+                            isEditModeMap: _isEditMode,
+                            icon: Icons.place_outlined,
                             index: 1,
-                            textInputAction: TextInputAction.newline,
-                            textInputType: TextInputType.multiline,
+                            textInputAction: TextInputAction.next,
+                            textInputType: TextInputType.text,
                             focusNode: focusNode4,
-                            hints: translation(context).hint_location,
-                            label: translation(context).lbl_location,
-                            value: widget.profileBloc.userProfile?.profile?.hobbies ?? '',
-                            onSave: (value) => widget.profileBloc.userProfile!.profile?.hobbies = value,
-                            maxLines: 1,
+                            hints: 'Where you were born',
+                            label: 'Birthplace',
+                            value: widget.profileBloc.userProfile?.profile?.birthplace ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile?.profile?.birthplace = value,
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 8),
 
-                  // Update button
-                  if (isEditModeMap)
-                    Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: ElevatedButton(
-                        onPressed: _saveChanges,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          elevation: 2,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.check_circle, color: Colors.white),
-                            const SizedBox(width: 10),
-                            Text(
-                              translation(context).lbl_update,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                          ],
-                        ),
+                    // Languages section
+                    OneUIProfileSection(
+                      title: 'Languages',
+                      icon: Icons.language_rounded,
+                      iconColor: Colors.green[700],
+                      child: TextFieldEditWidget(
+                        isEditModeMap: _isEditMode,
+                        icon: Icons.translate_rounded,
+                        index: 1,
+                        textInputAction: TextInputAction.done,
+                        textInputType: TextInputType.text,
+                        focusNode: focusNode5,
+                        hints: 'e.g. English, Arabic, Urdu',
+                        label: 'Languages',
+                        value: widget.profileBloc.userProfile?.profile?.languages ?? '',
+                        onSave: (value) => widget.profileBloc.userProfile?.profile?.languages = value,
                       ),
                     ),
-                ],
+
+                    const SizedBox(height: 24),
+
+                    // Update button
+                    if (_isEditMode)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(bottom: 20),
+                        child: _isSaving
+                            ? const Center(child: CircularProgressIndicator())
+                            : OneUIProfilePrimaryButton(
+                                label: 'Update',
+                                icon: Icons.check_circle,
+                                color: theme.primary,
+                                onPressed: _saveChanges,
+                              ),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -356,6 +301,11 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
     }
+
+    setState(() {
+      _isSaving = true;
+      _isEditMode = false;
+    });
 
     widget.profileBloc.add(
       UpdateProfileEvent(

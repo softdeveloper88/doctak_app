@@ -159,7 +159,7 @@ class _UserAnnouncementScreenState extends State<UserAnnouncementScreen> {
                                             shape: BoxShape.circle,
                                             border: Border.all(color: Colors.white.withAlpha(77), width: 2),
                                             image: DecorationImage(
-                                              image: NetworkImage("${AppData.imageUrl}${announcementData[index].user?.profilePic ?? ""}"),
+                                              image: NetworkImage(AppData.fullImageUrl(announcementData[index].user?.profilePic)),
                                               fit: BoxFit.cover,
                                               onError: (exception, stackTrace) {},
                                             ),

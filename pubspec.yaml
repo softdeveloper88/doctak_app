@@ -138,6 +138,7 @@ dependencies:
   shorebird_code_push: ^2.0.5
   bloc_concurrency: ^0.3.0
   stream_transform: ^2.1.1
+  qr_flutter: ^4.1.0
 
 dependency_overrides:
   # Quill packages commented out - flutter_quill is not used

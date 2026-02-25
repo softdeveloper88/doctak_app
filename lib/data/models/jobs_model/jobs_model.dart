@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 JobsModel jobsModelFromJson(String str) => JobsModel.fromJson(json.decode(str));
 String jobsModelToJson(JobsModel data) => json.encode(data.toJson());
@@ -253,7 +254,7 @@ class User {
   User.fromJson(dynamic json) {
     id = json['id']?.toString();
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   String? id;
   dynamic name;
@@ -330,7 +331,7 @@ class Applicants {
     clinicName = json['clinic_name'];
     college = json['college'];
     countryOrigin = json['country_origin'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     practicingCountry = json['practicing_country'];
     otpCode = json['otp_code'];
     balance = json['balance'];
@@ -345,7 +346,7 @@ class Applicants {
     darkMode = json['dark_mode'];
     messengerColor = json['messenger_color'];
     isPremium = json['is_premium'];
-    background = json['background'];
+    background = AppData.fullImageUrl(json['background']);
     lastActivity = json['last_activity'];
     pivot = json['pivot'] != null ? Pivot.fromJson(json['pivot']) : null;
   }

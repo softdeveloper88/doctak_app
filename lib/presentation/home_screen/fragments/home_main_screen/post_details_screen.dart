@@ -74,7 +74,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                 children: [
                   // Reuse PostItemWidget to avoid code duplication
                   PostItemWidget(
-                    profilePicUrl: "${AppData.imageUrl}${post.user?.profilePic ?? ''}",
+                    profilePicUrl: AppData.fullImageUrl(post.user?.profilePic),
                     userName: post.user?.name ?? '',
                     createdAt: post.createdAt ?? '',
                     title: post.title,
@@ -181,7 +181,7 @@ class _PostDetailsScreenState extends State<PostDetailsScreen> {
                     shape: BoxShape.circle,
                     border: Border.all(color: theme.primary.withValues(alpha: 0.3), width: 2),
                   ),
-                  child: CircleAvatar(radius: 18, backgroundImage: NetworkImage('${AppData.imageUrl}${specificComment.commenterProfilePic ?? ''}')),
+                  child: CircleAvatar(radius: 18, backgroundImage: NetworkImage(AppData.fullImageUrl(specificComment.commenterProfilePic))),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

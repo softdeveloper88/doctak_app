@@ -75,7 +75,7 @@ class _SVSearchCardComponentState extends State<SVSearchCardComponent> {
                   ),
                 )
               : CachedNetworkImage(
-                  imageUrl: '${AppData.imageUrl}${widget.element.profilePic.validate()}',
+                  imageUrl: AppData.fullImageUrl(widget.element.profilePic.validate()),
                   height: 56,
                   width: 56,
                   fit: BoxFit.cover,

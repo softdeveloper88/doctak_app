@@ -355,7 +355,7 @@ class _TagFriendsListBottomSheetState extends State<TagFriendsListBottomSheet> {
                     borderRadius: BorderRadius.circular(25),
                     child: person.profilePic?.isNotEmpty == true
                         ? CachedNetworkImage(
-                            imageUrl: '${AppData.imageUrl}${person.profilePic}',
+                            imageUrl: AppData.fullImageUrl(person.profilePic),
                             height: 50,
                             width: 50,
                             fit: BoxFit.cover,

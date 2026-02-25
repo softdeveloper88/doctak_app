@@ -1,4 +1,5 @@
 // lib/data/models/post_data_model.dart
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 // Note: This is just an interface to match the existing model structure
 // You should use your actual model implementation here
@@ -266,7 +267,7 @@ class Commenter {
   Commenter.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
 
   Map<String, dynamic> toJson() {

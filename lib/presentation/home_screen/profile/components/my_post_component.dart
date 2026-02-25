@@ -131,7 +131,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
         }
       },
       builder: (context, state) {
-        if (state is PaginationLoadedState) {
+        if (state is PaginationLoadedState || state is FullProfileLoadedState) {
           return widget.profileBloc.postList.isEmpty
               ? SizedBox(height: 200, child: Center(child: Text(translation(context).msg_no_post_found)))
               : ListView.builder(
@@ -516,7 +516,7 @@ class _MyPostComponentState extends State<MyPostComponent> {
                       final post = widget.profileBloc.postList[index];
 
                       return PostItemWidget(
-                        profilePicUrl: '${AppData.imageUrl}${post.user?.profilePic}',
+                        profilePicUrl: AppData.fullImageUrl(post.user?.profilePic),
                         userName: post.user?.name ?? '',
                         createdAt: timeAgo.format(DateTime.parse(post.createdAt!)),
                         title: post.title,
@@ -588,9 +588,21 @@ class _MyPostComponentState extends State<MyPostComponent> {
                   },
                 );
         } else if (state is DataError) {
-          return Expanded(child: Center(child: Text(state.errorMessage)));
+          return SizedBox(
+            height: 200,
+            child: Center(
+              child: Text(
+                state.errorMessage,
+                style: TextStyle(color: Colors.red.shade300, fontFamily: 'Poppins', fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          );
         } else {
-          return const Expanded(child: Center(child: Text('Something went wrong')));
+          return const SizedBox(
+            height: 200,
+            child: Center(child: Text('Loading posts...', style: TextStyle(fontFamily: 'Poppins', fontSize: 14))),
+          );
         }
       },
     );

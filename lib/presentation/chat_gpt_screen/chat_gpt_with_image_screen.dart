@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
+import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
@@ -12,8 +13,8 @@ import 'package:doctak_app/presentation/chat_gpt_screen/chat_history_screen.dart
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/widgets/ai_quota_banner.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -22,8 +23,8 @@ import '../../data/models/chat_gpt_model/chat_gpt_message_history/chat_gpt_messa
 import '../../widgets/image_upload_widget/bloc/image_upload_bloc.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_event.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_state.dart';
-import '../../widgets/image_upload_widget/multiple_image_upload_widget.dart';
 import '../../widgets/shimmer_widget/chat_shimmer_loader.dart';
+import 'widgets/medical_citation_widget.dart';
 
 @immutable
 class ChatGptWithImageScreen extends StatefulWidget {
@@ -282,34 +283,54 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
       ),
       body: BlocBuilder<ChatGPTBloc, ChatGPTState>(
         builder: (context, state1) {
+          final bloc = BlocProvider.of<ChatGPTBloc>(context);
+
           if (selectedSessionId == 0 && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi =
-                state1.response.sessions?.first.name ??
+                (state1.response.sessions?.isNotEmpty == true
+                    ? state1.response.sessions!.first.name
+                    : null) ??
                 translation(context).lbl_preparing_ai;
-          } else if (state1 is DataError) {
-            showToast(translation(context).msg_something_wrong);
-            if (isError) {
-              try {
-                BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
-                isOneTimeImageUploaded = false;
-                selectedImageFiles.clear();
-                imageUploadBloc.imagefiles.clear();
-                isError = false;
-                selectedSessionId = BlocProvider.of<ChatGPTBloc>(
-                  context,
-                ).newChatSessionId;
-              } catch (e) {
-                // Error logging suppressed
+          }
+
+          // Show SnackBar for question errors (lastError set by _askQuestion)
+          // without leaving DataLoaded state — chat UI stays visible.
+          if (state1 is DataLoaded && bloc.lastError != null) {
+            final error = bloc.lastError!;
+            bloc.lastError = null;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(error),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.red[700],
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
               }
-            }
+            });
           }
 
           if (state1 is DataInitial || state1 is DataLoading) {
             return ChatShimmerLoader();
           } else if (state1 is DataLoaded) {
-            // Check if messages exist and are not null
-            isEmpty = state1.response1.messages?.isEmpty ?? true;
+            // Only recalculate isEmpty when not actively sending a message
+            // (otherwise mid-send BLoC emissions can flicker back to empty state)
+            final bool hasMessages = state1.response1.messages?.isNotEmpty ?? false;
+            if (hasMessages) {
+              isEmpty = false;
+            } else if (!bloc.isWait) {
+              isEmpty = true;
+            }
+
+            // Reset send-button loading indicator when BLoC finishes
+            if (isWriting && !bloc.isWait) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) setState(() => isWriting = false);
+              });
+            }
 
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
@@ -327,252 +348,77 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                   Expanded(
                     child: Container(
                       color: theme.scaffoldBackground,
-                      child: SafeArea(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 20),
-
-                              // Hero Icon - OneUI 8.5 style
-                              Container(
-                                width: 80,
-                                height: 80,
-                                margin: const EdgeInsets.only(bottom: 20),
-                                decoration: BoxDecoration(
-                                  color: theme.primary,
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.primary.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      spreadRadius: 2,
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image_search_rounded,
-                                    color: Colors.white,
-                                    size: 40,
-                                  ),
-                                ),
-                              ),
-
-                              // Welcome Text - OneUI 8.5 style
-                              Text(
-                                translation(context).lbl_welcome_doctor,
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Poppins',
-                                  letterSpacing: 0.5,
-                                  color: theme.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-
-                              // Description - OneUI 8.5 style
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                child: Text(
-                                  translation(
-                                    context,
-                                  ).msg_upload_medical_images,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: 'Poppins',
-                                    height: 1.5,
-                                    color: theme.textSecondary,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-
-                              // Upload Section - OneUI 8.5 style
-                              Text(
-                                translation(
-                                  context,
-                                ).lbl_select_medical_image_type,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  fontFamily: 'Poppins',
-                                  color: theme.primary,
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-
-                              // Upload Button - OneUI 8.5 style
-                              Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  color: theme.primary,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.primary.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                      offset: const Offset(0, 4),
-                                      blurRadius: 12,
-                                      spreadRadius: 0,
-                                    ),
-                                  ],
-                                ),
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(24),
-                                    onTap: () async {
-                                      if (isOneTimeImageUploaded) {
-                                        toasty(
-                                          context,
-                                          translation(
-                                            context,
-                                          ).lbl_only_one_image_allowed,
-                                        );
-                                        return;
-                                      }
-
-                                      // Try opening the picker/options directly first.
-                                      // On iOS PHPicker does not require explicit photo permission
-                                      // and will present the system UI.
-                                      try {
-                                        _showBeforeFileOptions();
-                                        return;
-                                      } catch (e) {
-                                        debugPrint(
-                                          'chat_gpt: picker failed, falling back to permission request: $e',
-                                        );
-                                      }
-
-                                      // If picker failed, request permission and then open options.
-                                      final granted =
-                                          await PermissionUtils.ensurePhotoPermission();
-                                      if (granted) {
-                                        _showBeforeFileOptions();
-                                      } else {
-                                        final status =
-                                            await Permission.photos.status;
-                                        if (status.isPermanentlyDenied) {
-                                          _permissionDialog();
-                                        } else {
-                                          toasty(
-                                            context,
-                                            'Photo access denied. Please allow to continue.',
-                                          );
-                                        }
-                                      }
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 16.0,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(6),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.2,
-                                              ),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: const Icon(
-                                              Icons.add_photo_alternate_rounded,
-                                              color: Colors.white,
-                                              size: 24,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 16),
-                                          Text(
-                                            translation(
-                                              context,
-                                            ).lbl_medical_images,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: 'Poppins',
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(height: 20),
-
-                              // Info Container - OneUI 8.5 style
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: theme.primary.withValues(
-                                    alpha: theme.isDark ? 0.15 : 0.08,
-                                  ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: theme.primary.withValues(alpha: 0.2),
-                                    width: 1.5,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: theme.primary.withValues(
-                                        alpha: 0.05,
-                                      ),
-                                      offset: const Offset(0, 2),
-                                      blurRadius: 8,
-                                      spreadRadius: 0,
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(12),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: theme.warning.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.lightbulb_rounded,
-                                        color: theme.warning,
-                                        size: 16,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        translation(
-                                          context,
-                                        ).msg_upload_images_prompt,
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: theme.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Usage/Plan banner
+                            if (state1.response.usage != null) ...[  
+                              const SizedBox(height: 6),
+                              _buildUsageBanner(theme, state1.response.usage!),
                             ],
-                          ),
+                            const SizedBox(height: 8),
+
+                            // Hero Icon
+                            Container(
+                              width: 52,
+                              height: 52,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: theme.primary,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.primary.withValues(alpha: 0.3),
+                                    spreadRadius: 2,
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: const Center(
+                                child: Icon(Icons.image_search_rounded, color: Colors.white, size: 28),
+                              ),
+                            ),
+
+                            // Title
+                            Text(
+                              'Medical Image Analysis',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                                color: theme.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              'Upload a medical image and select the analysis type for AI-powered diagnostic insights.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 11, fontFamily: 'Poppins', height: 1.4, color: theme.textSecondary),
+                            ),
+                            const SizedBox(height: 10),
+
+                            // Analysis Type Cards Grid — fills remaining space
+                            Expanded(
+                              child: GridView.count(
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                                childAspectRatio: 0.88,
+                                padding: const EdgeInsets.only(bottom: 8),
+                                children: [
+                                  _buildAnalysisCard(theme, Icons.medical_services, 'X-Ray Analysis', 'Analyze chest, bone & joint X-rays', 'X-ray'),
+                                  _buildAnalysisCard(theme, Icons.monitor_heart_outlined, 'ECG Interpretation', 'Interpret ECG / EKG tracings', 'ECG'),
+                                  _buildAnalysisCard(theme, Icons.scanner, 'CT Scan Review', 'Review CT scan images & cross-sections', 'CT Scan'),
+                                  _buildAnalysisCard(theme, Icons.psychology_rounded, 'MRI Analysis', 'Analyze MRI images for abnormalities', 'MRI Scan'),
+                                  _buildAnalysisCard(theme, Icons.favorite_border_rounded, 'Mammogram Review', 'Evaluate mammogram findings', 'Mammography'),
+                                  _buildAnalysisCard(theme, Icons.face_retouching_natural, 'Dermatology', 'Analyze skin lesions & conditions', 'Dermatological'),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -581,7 +427,16 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                   Expanded(
                     child: Container(
                       color: theme.scaffoldBackground,
-                      child: ListView.builder(
+                      child: Column(
+                        children: [
+                          // Compact usage banner in chat view
+                          if (state1.response.usage != null)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+                              child: _buildUsageBanner(theme, state1.response.usage!),
+                            ),
+                          Expanded(
+                            child: ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(12),
                         itemCount: state1.response1.messages?.length,
@@ -671,18 +526,35 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                   }
                                 },
                               ),
+                              // Apple Guideline 1.4.1: show medical citation sources
+                              if ((message.sources?.isNotEmpty ?? false))
+                                MedicalCitationWidget(sources: message.sources!),
+                              // Disclaimer on every AI response
+                              if ((message.response?.isNotEmpty ?? false) &&
+                                  message.response != translation(context).lbl_generating_response)
+                                const MedicalDisclaimerBanner(),
                             ],
                           );
                         },
                       ),
+                    ),
+                  ],
+                  ),
                     ),
                   ),
 
                 // Image Preview Section - redesigned
                 _buildImagePreview(),
 
+                // Quota banner — shared component, shows warning/block/upgrade button
+                AiQuotaBanner(usage: state1.response.usage),
+
                 // Input Section - completely redesigned using drugs_list pattern
-                Container(
+                IgnorePointer(
+                  ignoring: state1.response.usage != null && !state1.response.usage!.canUse,
+                  child: Opacity(
+                    opacity: (state1.response.usage != null && !state1.response.usage!.canUse) ? 0.4 : 1.0,
+                    child: Container(
                   decoration: BoxDecoration(
                     color: theme.scaffoldBackground,
                     boxShadow: [
@@ -701,6 +573,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                   ),
                   child: Column(
                     children: [
+                      // Analysis type chips — hidden (selection via cards on empty state)
+                      // Uncomment to restore horizontal chip row:
+                      // SizedBox(height: 36, child: ListView(...)),
+                      // const SizedBox(height: 6),
+
                       Container(
                         decoration: BoxDecoration(
                           color: theme.inputBackground,
@@ -734,32 +611,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                   size: 20,
                                 ),
                               ),
-                              onPressed: () async {
+                              onPressed: () {
                                 if (isOneTimeImageUploaded) {
                                   toasty(
                                     context,
-                                    translation(
-                                      context,
-                                    ).lbl_only_one_image_allowed,
+                                    translation(context).lbl_only_one_image_allowed,
                                   );
                                 } else {
-                                  final granted =
-                                      await PermissionUtils.ensurePhotoPermission();
-                                  if (granted) {
-                                    _showBeforeFileOptions();
-                                  } else {
-                                    final status =
-                                        await Permission.photos.status;
-                                    if (status.isPermanentlyDenied) {
-                                      _permissionDialog();
-                                    } else {
-                                      // Fallback when user denies without permanent denial.
-                                      toasty(
-                                        context,
-                                        'Photo permission denied',
-                                      );
-                                    }
-                                  }
+                                  _showFileOptions();
                                 }
                               },
                             ),
@@ -773,13 +632,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                 maxLines: 4,
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 16,
+                                  fontSize: 13,
                                   color: theme.textPrimary,
                                 ),
                                 decoration: InputDecoration(
                                   hintStyle: TextStyle(
                                     color: theme.textSecondary,
                                     fontFamily: 'Poppins',
+                                    fontSize: 12,
                                   ),
                                   hintText: translation(
                                     context,
@@ -787,7 +647,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                   border: InputBorder.none,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 8.0,
-                                    vertical: 16.0,
+                                    vertical: 10.0,
                                   ),
                                 ),
                               ),
@@ -820,16 +680,60 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
                                     isError = true;
 
-                                    if (selectedImageFiles.isEmpty) {
-                                      return;
-                                    } else if (imageUploadBloc
-                                            .imagefiles
-                                            .isEmpty &&
+                                    if (selectedImageFiles.isEmpty &&
+                                        imageUploadBloc.imagefiles.isEmpty &&
+                                        !isOneTimeImageUploaded) {
+                                      // No image selected and no previous image uploaded
+                                      // Allow text-only message if field is not empty
+                                      String question = textController.text.trim();
+                                      if (question.isEmpty) {
+                                        toasty(
+                                          context,
+                                          translation(context).lbl_please_ask_question,
+                                        );
+                                        return;
+                                      }
+                                      setState(() {
+                                        isWriting = true;
+                                        isOneTimeImageUploaded = false;
+                                        isEmpty = false;
+                                        var myMessage = Messages(
+                                          id: -1,
+                                          gptSessionId: selectedSessionId.toString(),
+                                          question: question,
+                                          response: translation(context).lbl_generating_response,
+                                          createdAt: DateTime.now().toString(),
+                                          updatedAt: DateTime.now().toString(),
+                                        );
+                                        state1.response1.messages ??= [];
+                                        state1.response1.messages!.add(myMessage);
+                                        BlocProvider.of<ChatGPTBloc>(context).add(
+                                          GetPost(
+                                            sessionId: selectedSessionId.toString(),
+                                            question: question,
+                                            imageUrl1: null,
+                                            imageUrl2: null,
+                                            imageType: imageType.isEmpty ? 'General' : imageType,
+                                          ),
+                                        );
+                                        textController.clear();
+                                        scrollToBottom();
+                                      });
+                                      try {
+                                        isWriting = false;
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Error: $e')),
+                                        );
+                                      }
+                                    } else if (selectedImageFiles.isEmpty &&
+                                        imageUploadBloc.imagefiles.isEmpty &&
                                         isOneTimeImageUploaded) {
                                       String question = textController.text
                                           .trim();
                                       if (question != '') {
                                         setState(() {
+                                          isWriting = true;
                                           isOneTimeImageUploaded = true;
                                           var myMessage = Messages(
                                             id: -1,
@@ -898,6 +802,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
                                       // mark used immediately (sync); heavy work below
                                       setState(() {
+                                        isWriting = true;
                                         isOneTimeImageUploaded = true;
                                       });
 
@@ -988,7 +893,11 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                       );
 
                                       // Add the optimistic message and start the request
-                                      state1.response1.messages!.add(myMessage);
+                                      setState(() {
+                                        isEmpty = false;
+                                        state1.response1.messages ??= [];
+                                        state1.response1.messages!.add(myMessage);
+                                      });
                                       BlocProvider.of<ChatGPTBloc>(context).add(
                                         GetPost(
                                           sessionId: selectedSessionId
@@ -1058,6 +967,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                     ],
                   ),
                 ),
+                  ),
+                ),
               ],
             );
           } else if (state1 is DataError) {
@@ -1066,6 +977,159 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
             return Text(translation(context).lbl_error);
           }
         },
+      ),
+    );
+  }
+
+  // ── Analysis Type Card (for empty state grid) ──────────────────────────
+  Widget _buildAnalysisCard(
+    dynamic theme,
+    IconData icon,
+    String title,
+    String subtitle,
+    String type,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        if (isOneTimeImageUploaded) {
+          toasty(context, translation(context).lbl_only_one_image_allowed);
+          return;
+        }
+        imageType = type;
+        _showFileOptions();
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.cardBackground,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: theme.primary.withValues(alpha: 0.15)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: theme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: theme.primary, size: 22),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: theme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Usage / Plan Banner (like website) ────────────────────────────────
+  Widget _buildUsageBanner(dynamic theme, AiUsageInfo usage) {
+    final isFreePlan = !usage.isPaid;
+    final percent = usage.dailyLimit > 0
+        ? (usage.dailyUsed / usage.dailyLimit).clamp(0.0, 1.0)
+        : 0.0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isFreePlan
+            ? theme.warning.withValues(alpha: 0.10)
+            : theme.primary.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isFreePlan
+              ? theme.warning.withValues(alpha: 0.30)
+              : theme.primary.withValues(alpha: 0.30),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isFreePlan ? Icons.workspace_premium : Icons.verified,
+                size: 18,
+                color: isFreePlan ? theme.warning : theme.primary,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                usage.planName.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Poppins',
+                  color: isFreePlan ? theme.warning : theme.primary,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${usage.dailyRemaining} left today',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: theme.textSecondary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: percent,
+              minHeight: 5,
+              backgroundColor: theme.textSecondary.withValues(alpha: 0.15),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isFreePlan ? theme.warning : theme.primary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${usage.dailyUsed} of ${usage.dailyLimit} analyses used today',
+            style: TextStyle(
+              fontSize: 10,
+              fontFamily: 'Poppins',
+              color: theme.textSecondary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1105,7 +1169,12 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
-                            child: buildMediaItem(File(imageone.path)),
+                            child: Image.file(
+                              File(imageone.path),
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         Positioned(
@@ -1248,182 +1317,151 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
     );
   }
 
-  // File Options Dialog - redesigned using drugs_list pattern
-  void _showBeforeFileOptions() {
+  // ── Native image picker (Gallery / Camera) ────────────────────────────
+  void _showFileOptions() {
+    // X-ray and Mammography allow 2 images; everything else is limited to 1
+    final int imageLimit =
+        (imageType == 'X-ray' || imageType == 'Mammography') ? 2 : 1;
+    final String typeName =
+        imageType.isEmpty ? 'Medical' : imageType;
+    final String limitDesc = imageLimit == 1
+        ? 'Select up to 1 image for AI analysis'
+        : 'Select up to $imageLimit images for AI analysis';
+
     showModalBottomSheet(
-      isScrollControlled: true,
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        final sheetTheme = OneUITheme.of(context);
+      isDismissible: true,
+      enableDrag: true,
+      builder: (ctx) {
+        final t = OneUITheme.of(ctx);
         return Container(
           decoration: BoxDecoration(
-            color: sheetTheme.cardBackground,
+            color: t.cardBackground,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
             boxShadow: [
               BoxShadow(
-                color: sheetTheme.primary.withAlpha(26),
-                blurRadius: 20,
-                offset: const Offset(0, -5),
+                color: Colors.black.withValues(alpha: 0.14),
+                blurRadius: 18,
+                offset: const Offset(0, -6),
               ),
             ],
+          ),
+          padding: EdgeInsets.fromLTRB(
+            20, 16, 20, 24 + MediaQuery.of(ctx).viewPadding.bottom,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Handle bar
+              // Drag handle
               Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
                 width: 40,
                 height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: sheetTheme.textSecondary.withValues(alpha: 0.3),
+                  color: t.textSecondary.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              // Header
+              // Title + limit description
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: t.primary,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: t.primary.withValues(alpha: 0.28),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Upload $typeName Image${imageLimit > 1 ? 's' : ''}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Poppins',
+                            color: t.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          limitDesc,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                            color: t.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Info tip banner
               Container(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                decoration: BoxDecoration(
+                  color: t.primary.withValues(alpha: 0.07),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: t.primary.withValues(alpha: 0.18)),
+                ),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: sheetTheme.primary,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.medical_services_outlined,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    Icon(Icons.info_outline_rounded, color: t.primary, size: 15),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            translation(context).lbl_select_option,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'Poppins',
-                              color: sheetTheme.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            'Choose medical image type for AI analysis',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              color: sheetTheme.textSecondary,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'High-quality images provide better AI analysis results',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontFamily: 'Poppins',
+                          color: t.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-              // Options Grid
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildAdvancedOption(
-                            icon: Icons.face_retouching_natural,
-                            color: Colors.pink[600]!,
-                            title: 'Dermatological',
-                            subtitle: 'Skin analysis',
-                            onTap: () {
-                              Navigator.pop(context);
-                              imageType = 'Dermatological';
-                              _showFileOptions();
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildAdvancedOption(
-                            icon: Icons.medical_services,
-                            color: sheetTheme.primary,
-                            title: 'X-Ray',
-                            subtitle: 'Radiograph scan',
-                            onTap: () {
-                              Navigator.pop(context);
-                              imageType = 'X-ray';
-                              _showFileOptions();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildAdvancedOption(
-                            icon: Icons.scanner,
-                            color: sheetTheme.primary,
-                            title: 'CT Scan',
-                            subtitle: 'Tomography',
-                            onTap: () {
-                              Navigator.pop(context);
-                              imageType = 'CT Scan';
-                              _showFileOptions();
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildAdvancedOption(
-                            icon: Icons.document_scanner_sharp,
-                            color: Colors.teal[600]!,
-                            title: 'MRI',
-                            subtitle: 'Magnetic scan',
-                            onTap: () {
-                              Navigator.pop(context);
-                              imageType = 'MRI Scan';
-                              _showFileOptions();
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _buildAdvancedOption(
-                      icon: Icons.medical_information,
-                      color: Colors.orange[600]!,
-                      title: 'Mammography',
-                      subtitle: 'Breast tissue analysis',
-                      fullWidth: true,
-                      onTap: () {
-                        Navigator.pop(context);
-                        imageType = 'Mammography';
-                        _showFileOptions();
-                      },
-                    ),
-                  ],
-                ),
+              const SizedBox(height: 16),
+              _pickerOption(
+                t,
+                Icons.photo_library_rounded,
+                'Choose from Gallery',
+                imageLimit > 1
+                    ? 'Pick up to $imageLimit images from your device'
+                    : 'Pick an existing photo from your device',
+                () async {
+                  Navigator.pop(ctx);
+                  await _pickImages(ImageSource.gallery, imageLimit);
+                },
               ),
-              SafeArea(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'AI-powered medical image analysis',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      color: sheetTheme.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              const SizedBox(height: 12),
+              _pickerOption(
+                t,
+                Icons.camera_alt_rounded,
+                'Take a Photo',
+                'Use your camera to capture a medical image',
+                () async {
+                  Navigator.pop(ctx);
+                  await _pickImages(ImageSource.camera, 1);
+                },
               ),
             ],
           ),
@@ -1432,384 +1470,108 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
     );
   }
 
-  Widget _buildAdvancedOption({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-    bool fullWidth = false,
-  }) {
-    final optionTheme = OneUITheme.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: optionTheme.cardBackground,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.1),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+  Widget _pickerOption(
+    dynamic theme,
+    IconData icon,
+    String title,
+    String subtitle,
+    Future<void> Function() onTap,
+  ) {
+    return GestureDetector(
+      onTap: () => onTap(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: theme.inputBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.primary.withValues(alpha: 0.15)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: theme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: color.withValues(alpha: 0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+              child: Icon(icon, color: theme.primary, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: theme.textPrimary,
                     ),
-                  ],
-                ),
-                child: Icon(icon, color: Colors.white, size: 24),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontFamily: 'Poppins',
+                      color: theme.textSecondary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Poppins',
-                  color: optionTheme.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontFamily: 'Poppins',
-                  color: optionTheme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: theme.textSecondary, size: 20),
+          ],
         ),
       ),
     );
   }
 
-  void _showFileOptions() {
-    int imageLimit = 0;
-    if (imageType == 'X-ray' || imageType == 'Mammography') {
-      imageLimit = 2;
-    } else {
-      imageLimit = 1;
+  Future<void> _pickImages(ImageSource source, int limit) async {
+    try {
+      final picker = ImagePicker();
+      List<XFile> picked = [];
+
+      if (source == ImageSource.camera || limit == 1) {
+        // Camera always produces a single shot; Gallery with limit=1 also single
+        final XFile? file = await picker.pickImage(
+          source: source,
+          imageQuality: 90,
+        );
+        if (file != null) picked = [file];
+      } else {
+        // Gallery multi-select (X-ray / Mammography allow up to 2)
+        // Note: limit parameter not universally supported on Android — enforce via sublist
+        final List<XFile> files = await picker.pickMultiImage(
+          imageQuality: 90,
+        );
+        picked = files;
+      }
+
+      if (picked.isEmpty || !mounted) return;
+
+      // Enforce hard limit
+      if (picked.length > limit) picked = picked.sublist(0, limit);
+
+      imageUploadBloc.imagefiles
+        ..clear()
+        ..addAll(picked);
+      setState(() {
+        selectedImageFiles = List.from(picked);
+      });
+      await _readImageBytes();
+    } catch (e) {
+      debugPrint('Image pick error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open image picker: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      isDismissible: true,
-      enableDrag: true,
-      useSafeArea: true,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.75,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          expand: false,
-          builder: (context, scrollController) {
-            final fileSheetTheme = OneUITheme.of(context);
-            return Container(
-              decoration: BoxDecoration(
-                color: fileSheetTheme.cardBackground,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(28),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 20,
-                    offset: const Offset(0, -8),
-                    spreadRadius: 0,
-                  ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 40,
-                    offset: const Offset(0, -20),
-                    spreadRadius: 0,
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Enhanced drag handle
-                  Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: fileSheetTheme.textSecondary.withValues(
-                        alpha: 0.4,
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  // Enhanced header
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: fileSheetTheme.primary,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: fileSheetTheme.primary.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.cloud_upload_outlined,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Upload $imageType Images',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      fontFamily: 'Poppins',
-                                      color: fileSheetTheme.textPrimary,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Select up to ${imageLimit == 0 ? 'multiple' : imageLimit} medical image${imageLimit == 1 ? '' : 's'} for AI analysis',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontFamily: 'Poppins',
-                                      color: fileSheetTheme.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: fileSheetTheme.primary.withValues(
-                              alpha: 0.08,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: fileSheetTheme.primary.withValues(
-                                alpha: 0.2,
-                              ),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                color: fileSheetTheme.primary,
-                                size: 16,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'High-quality images provide better AI analysis results',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: 'Poppins',
-                                    color: fileSheetTheme.primary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Upload area with enhanced styling
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: fileSheetTheme.inputBackground,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: fileSheetTheme.primary.withValues(
-                                  alpha: 0.15,
-                                ),
-                                width: 2,
-                              ),
-                            ),
-                            child: MultipleImageUploadWidget(
-                              imageType: imageType,
-                              imageUploadBloc,
-                              imageLimit: imageLimit,
-                              autoOpenGallery: imageType == 'X-ray',
-                              (imageFiles) {
-                                print(
-                                  'Main: Continue callback - BLoC has ${imageUploadBloc.imagefiles.length} images',
-                                );
-                                selectedImageFiles = List.from(
-                                  imageUploadBloc.imagefiles,
-                                );
-                                print(
-                                  'Main: selectedImageFiles updated to ${selectedImageFiles.length} images',
-                                );
-                                setState(() {});
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> _permissionDialog() async {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        final dialogTheme = OneUITheme.of(context);
-        return AlertDialog(
-          backgroundColor: dialogTheme.cardBackground,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: dialogTheme.warning.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.photo_library_outlined,
-                  color: dialogTheme.warning,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Photo Access Required',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: dialogTheme.textPrimary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            'DocTak AI needs access to your photos to analyze medical images. Please enable photo permissions in your device settings.',
-            style: TextStyle(
-              fontSize: 14,
-              fontFamily: 'Poppins',
-              color: dialogTheme.textSecondary,
-              height: 1.4,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-              child: Text(
-                translation(context).lbl_cancel,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: dialogTheme.textSecondary,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 8),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: dialogTheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Open Settings',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                onPressed: () {
-                  openAppSettings();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   void scrollToBottom() {

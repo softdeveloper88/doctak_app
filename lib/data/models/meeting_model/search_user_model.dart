@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 SearchUserModel searchUserModelFromJson(String str) => SearchUserModel.fromJson(json.decode(str));
 String searchUserModelToJson(SearchUserModel data) => json.encode(data.toJson());
@@ -77,7 +78,7 @@ class SearchData {
     firstName = json['first_name'];
     lastName = json['last_name'];
     specialty = json['specialty'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   String? id;
   String? firstName;

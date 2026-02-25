@@ -24,7 +24,7 @@ class ReplyCommentComponent extends StatelessWidget {
             onTap: () {
               SVProfileFragment(userId: replyCommentList.commentableId ?? '').launch(context);
             },
-            child: CircleAvatar(backgroundImage: NetworkImage(replyCommentList.commenter?.profilePic ?? ''), radius: 20.0),
+            child: CircleAvatar(backgroundImage: NetworkImage(AppData.fullImageUrl(replyCommentList.commenter?.profilePic ?? '')), radius: 20.0),
           ),
           const SizedBox(width: 8.0),
           Expanded(

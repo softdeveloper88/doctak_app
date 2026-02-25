@@ -135,6 +135,7 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.logInUserId = userId;
       AppData.name = name ?? '';
       AppData.profile_pic = profilePic ?? '';
+      AppData.profilePicNotifier.value = AppData.profilePicUrl;
       // AppData.background= background!;
       AppData.background = background ?? '';
       AppData.email = email ?? '';

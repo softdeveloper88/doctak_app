@@ -662,7 +662,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get lbl_date_of_birth => 'Date de naissance';
 
   @override
-  String get lbl_license_no => 'Numéro de licence';
+  String get lbl_license_no => 'N° de licence';
 
   @override
   String get lbl_country => 'Pays';
@@ -1460,7 +1460,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get lbl_notable_achievements => 'Réalisations notables';
 
   @override
-  String get lbl_location => 'Localisation';
+  String get lbl_location => 'Lieu';
 
   @override
   String get hint_workplace =>
@@ -1606,6 +1606,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get msg_privacy_settings_updated =>
       'Paramètres de confidentialité mis à jour avec succès';
+
+  @override
+  String get msg_privacy_restricted => 'Ces informations sont privées';
+
+  @override
+  String get msg_privacy_restricted_detail =>
+      'L\'utilisateur a choisi de garder ces informations privées';
 
   @override
   String get lbl_specialty_info => 'Informations de spécialité';
@@ -2559,6 +2566,71 @@ class AppLocalizationsFr extends AppLocalizations {
       'Quel code ICD-10 dois-je utiliser pour le diabète de type 2 avec complications?';
 
   @override
+  String get lbl_patient_education => 'Patient Education';
+
+  @override
+  String get lbl_patient_friendly_explanations =>
+      'Patient-friendly explanations';
+
+  @override
+  String get msg_patient_education_prompt =>
+      'Explain treatment options for type 2 diabetes in simple terms for a patient';
+
+  @override
+  String get lbl_guidelines_summary => 'Guidelines';
+
+  @override
+  String get lbl_latest_clinical_guidelines => 'Latest clinical guidelines';
+
+  @override
+  String get msg_guidelines_summary_prompt =>
+      'Summarize the latest treatment guidelines for hypertension';
+
+  @override
+  String get lbl_elaborate => 'Elaborate';
+
+  @override
+  String get lbl_summarize => 'Summarize';
+
+  @override
+  String get lbl_simpler_terms => 'Simpler terms';
+
+  @override
+  String get msg_simpler_terms_prompt => 'Explain this in simpler terms';
+
+  @override
+  String get lbl_risks_side_effects => 'Risks & side effects';
+
+  @override
+  String get msg_risks_prompt =>
+      'What are the potential risks or side effects?';
+
+  @override
+  String get lbl_treatment_options => 'Treatment options';
+
+  @override
+  String get msg_treatment_options_prompt =>
+      'What treatment options are available?';
+
+  @override
+  String get lbl_patient_education_chip => 'Patient education';
+
+  @override
+  String get msg_patient_education_chip_prompt =>
+      'Can you provide a patient-friendly explanation?';
+
+  @override
+  String lbl_messages_left_5h(Object limit, Object remaining) {
+    return '$remaining/$limit left (5h)';
+  }
+
+  @override
+  String get lbl_free_plan => 'Free Plan';
+
+  @override
+  String get lbl_upgrade_unlimited => 'Upgrade for unlimited →';
+
+  @override
   String get lbl_try_it => 'Essayez';
 
   @override
@@ -3201,4 +3273,553 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get lbl_tap_to_retry => 'Appuyez sur réessayer pour actualiser';
+
+  @override
+  String get lbl_portfolio => 'Portfolio';
+
+  @override
+  String get lbl_research => 'Recherche';
+
+  @override
+  String get lbl_education => 'Formation';
+
+  @override
+  String get lbl_contact_info => 'Coordonnées';
+
+  @override
+  String get lbl_about_me => 'À propos de moi';
+
+  @override
+  String get lbl_professional_information => 'Informations professionnelles';
+
+  @override
+  String get lbl_personal_details => 'Détails personnels';
+
+  @override
+  String get lbl_medical_licenses => 'Licences médicales';
+
+  @override
+  String get lbl_social_links => 'Liens sociaux';
+
+  @override
+  String get lbl_business_hours => 'Heures d\'ouverture';
+
+  @override
+  String get lbl_awards_and_recognitions => 'Prix et distinctions';
+
+  @override
+  String get lbl_publications => 'Publications scientifiques';
+
+  @override
+  String get lbl_my_network => 'Mon réseau';
+
+  @override
+  String get lbl_interests_hobbies => 'Intérêts et loisirs';
+
+  @override
+  String get lbl_privacy_settings => 'Paramètres de confidentialité';
+
+  @override
+  String get lbl_clinic_workplace => 'Clinique / Lieu de travail';
+
+  @override
+  String get lbl_birthday => 'Date de naissance';
+
+  @override
+  String get lbl_from => 'De';
+
+  @override
+  String get lbl_lives_in => 'Vit à';
+
+  @override
+  String get lbl_address => 'Adresse';
+
+  @override
+  String get lbl_languages => 'Langues';
+
+  @override
+  String get lbl_country_of_origin => 'Pays d\'origine';
+
+  @override
+  String get lbl_joined => 'Inscrit';
+
+  @override
+  String get lbl_license => 'Licence';
+
+  @override
+  String get lbl_position => 'Poste';
+
+  @override
+  String get lbl_closed => 'Fermé';
+
+  @override
+  String get lbl_profile_completion => 'Profil complété';
+
+  @override
+  String get lbl_share_profile => 'Partager le profil';
+
+  @override
+  String get lbl_impact_factor_short => 'FI';
+
+  @override
+  String get lbl_citations => 'Citations';
+
+  @override
+  String get msg_no_contact_info => 'Aucune information de contact disponible';
+
+  @override
+  String get msg_tell_about_yourself => 'Parlez de vous aux autres...';
+
+  @override
+  String get msg_add_professional_info =>
+      'Ajoutez vos informations professionnelles';
+
+  @override
+  String get msg_add_personal_details => 'Ajoutez vos détails personnels';
+
+  @override
+  String get msg_add_social_profiles =>
+      'Ajoutez vos profils sociaux pour vous connecter avec vos collègues';
+
+  @override
+  String get msg_no_business_hours => 'Aucune heure d\'ouverture ajoutée';
+
+  @override
+  String get msg_no_experience => 'Aucune expérience ajoutée';
+
+  @override
+  String get msg_no_education => 'Aucune formation ajoutée';
+
+  @override
+  String get msg_no_awards => 'Aucun prix ajouté';
+
+  @override
+  String get msg_no_licenses => 'Aucune licence ajoutée';
+
+  @override
+  String get msg_no_publications => 'Aucune publication ajoutée';
+
+  @override
+  String get msg_scan_profile_qr =>
+      'Scannez pour voir votre profil public ou copiez le lien';
+
+  @override
+  String get msg_profile_link_copied => 'Lien du profil copié !';
+
+  @override
+  String msg_share_profile_text(String url) {
+    return 'Consultez mon profil sur DocTak : $url';
+  }
+
+  @override
+  String msg_remove_social_link(String platform) {
+    return 'Supprimer le lien $platform ?';
+  }
+
+  @override
+  String get lbl_delete_social_link => 'Supprimer le lien social';
+
+  @override
+  String get msg_select_start_date => 'Veuillez sélectionner une date de début';
+
+  @override
+  String get lbl_edit_contact_info => 'Modifier les coordonnées';
+
+  @override
+  String get lbl_edit_about_me => 'Modifier À propos de moi';
+
+  @override
+  String get lbl_edit_professional_info =>
+      'Modifier les infos professionnelles';
+
+  @override
+  String get lbl_edit_personal_details => 'Modifier les détails personnels';
+
+  @override
+  String get lbl_edit_experience => 'Modifier l\'expérience';
+
+  @override
+  String get lbl_add_education => 'Ajouter une formation';
+
+  @override
+  String get lbl_edit_education => 'Modifier la formation';
+
+  @override
+  String get lbl_add_publication => 'Ajouter une publication';
+
+  @override
+  String get lbl_edit_publication => 'Modifier la publication';
+
+  @override
+  String get lbl_add_social_link => 'Ajouter un lien social';
+
+  @override
+  String get lbl_edit_social_link => 'Modifier le lien social';
+
+  @override
+  String get lbl_add_award => 'Ajouter un prix';
+
+  @override
+  String get lbl_edit_award => 'Modifier le prix';
+
+  @override
+  String get lbl_add_license => 'Ajouter une licence';
+
+  @override
+  String get lbl_edit_license => 'Modifier la licence';
+
+  @override
+  String get lbl_add_business_hour => 'Ajouter des heures d\'ouverture';
+
+  @override
+  String get lbl_edit_business_hour => 'Modifier les heures d\'ouverture';
+
+  @override
+  String get lbl_state_province => 'État / Province';
+
+  @override
+  String get lbl_license_number => 'Numéro de licence';
+
+  @override
+  String get lbl_education_college => 'Formation / Université';
+
+  @override
+  String get lbl_first_name_required => 'Prénom *';
+
+  @override
+  String get lbl_last_name_required => 'Nom de famille *';
+
+  @override
+  String get lbl_birthplace => 'Lieu de naissance';
+
+  @override
+  String get lbl_position_required => 'Poste *';
+
+  @override
+  String get lbl_company_required => 'Entreprise / Organisation *';
+
+  @override
+  String get lbl_start_date_required => 'Date de début *';
+
+  @override
+  String get lbl_end_date_present => 'Date de fin (laisser vide pour Présent)';
+
+  @override
+  String get lbl_degree_required => 'Diplôme *';
+
+  @override
+  String get lbl_field_of_study => 'Domaine d\'études';
+
+  @override
+  String get lbl_institution_required => 'Établissement *';
+
+  @override
+  String get lbl_grade_gpa => 'Moyenne/GPA';
+
+  @override
+  String get lbl_start_year_required => 'Année de début *';
+
+  @override
+  String get lbl_end_year => 'Année de fin';
+
+  @override
+  String get lbl_currently_studying => 'J\'étudie actuellement ici';
+
+  @override
+  String get lbl_specialization => 'Spécialisation';
+
+  @override
+  String get lbl_activities_societies => 'Activités et associations';
+
+  @override
+  String get lbl_honors_awards => 'Honneurs et prix';
+
+  @override
+  String get lbl_title_required => 'Titre *';
+
+  @override
+  String get lbl_journal_name_required => 'Nom du journal *';
+
+  @override
+  String get lbl_publication_date => 'Date de publication';
+
+  @override
+  String get lbl_co_authors => 'Co-auteurs';
+
+  @override
+  String get lbl_abstract => 'Résumé';
+
+  @override
+  String get lbl_keywords_comma => 'Mots-clés (séparés par des virgules)';
+
+  @override
+  String get lbl_impact_factor => 'Facteur d\'impact';
+
+  @override
+  String get lbl_doi_link => 'Lien DOI';
+
+  @override
+  String get lbl_platform_required => 'Plateforme *';
+
+  @override
+  String get lbl_profile_url_required => 'URL du profil *';
+
+  @override
+  String get lbl_username_optional => 'Nom d\'utilisateur (facultatif)';
+
+  @override
+  String get lbl_visible_to_others => 'Visible par les autres';
+
+  @override
+  String get lbl_award_name_required => 'Nom du prix *';
+
+  @override
+  String get lbl_awarding_body => 'Organisme décernant';
+
+  @override
+  String get lbl_date_received => 'Date de réception';
+
+  @override
+  String get lbl_level_hint => 'Niveau (national, international, etc.)';
+
+  @override
+  String get lbl_license_type_required => 'Type de licence *';
+
+  @override
+  String get lbl_license_number_required => 'Numéro de licence *';
+
+  @override
+  String get lbl_issuing_authority_required => 'Autorité émettrice *';
+
+  @override
+  String get lbl_issue_date => 'Date d\'émission';
+
+  @override
+  String get lbl_expiry_date => 'Date d\'expiration';
+
+  @override
+  String get lbl_location_name_required => 'Nom du lieu *';
+
+  @override
+  String get lbl_location_address => 'Adresse du lieu';
+
+  @override
+  String get lbl_day_of_week_required => 'Jour de la semaine *';
+
+  @override
+  String get lbl_start_time_required => 'Heure de début *';
+
+  @override
+  String get lbl_end_time_required => 'Heure de fin *';
+
+  @override
+  String get lbl_available => 'Disponible';
+
+  @override
+  String get lbl_notes => 'Notes';
+
+  @override
+  String lbl_select_value(String label) {
+    return 'Sélectionner $label';
+  }
+
+  @override
+  String get lbl_search_hint => 'Rechercher...';
+
+  @override
+  String lbl_use_custom_value(String value) {
+    return 'Utiliser \"$value\"';
+  }
+
+  @override
+  String get msg_type_own_value => 'Saisissez votre propre valeur';
+
+  @override
+  String get msg_type_custom_value =>
+      'Tapez pour saisir une valeur personnalisée';
+
+  @override
+  String get msg_no_results_found => 'Aucun résultat trouvé';
+
+  @override
+  String get lbl_other_gender => 'Autre';
+
+  @override
+  String lbl_field_prefix(String value) {
+    return 'Domaine : $value';
+  }
+
+  @override
+  String lbl_grade_gpa_prefix(String value) {
+    return 'Moyenne : $value';
+  }
+
+  @override
+  String lbl_specialization_prefix(String value) {
+    return 'Spécialisation : $value';
+  }
+
+  @override
+  String lbl_honors_awards_prefix(String value) {
+    return 'Honneurs et prix : $value';
+  }
+
+  @override
+  String lbl_activities_prefix(String value) {
+    return 'Activités : $value';
+  }
+
+  @override
+  String lbl_issued_prefix(String value) {
+    return 'Émis : $value';
+  }
+
+  @override
+  String lbl_expires_prefix(String value) {
+    return 'Expire : $value';
+  }
+
+  @override
+  String lbl_published_prefix(String value) {
+    return 'Publié : $value';
+  }
+
+  @override
+  String lbl_co_authors_prefix(String value) {
+    return 'Co-auteurs : $value';
+  }
+
+  @override
+  String get lbl_education_info => 'Formation';
+
+  @override
+  String get lbl_connections_short => 'Connexions';
+
+  @override
+  String get lbl_report_user => 'Signaler l\'utilisateur';
+
+  @override
+  String get lbl_block_user => 'Bloquer l\'utilisateur';
+
+  @override
+  String lbl_points_format(String count) {
+    return '$count pts';
+  }
+
+  @override
+  String get lbl_section_about_me => 'À propos de moi';
+
+  @override
+  String get lbl_section_professional => 'Professionnel';
+
+  @override
+  String get lbl_section_basic_info => 'Infos de base';
+
+  @override
+  String get lbl_section_skills => 'Compétences';
+
+  @override
+  String get lbl_section_social_links => 'Liens sociaux';
+
+  @override
+  String get lbl_section_photo => 'Photo';
+
+  @override
+  String get lbl_platform_website => 'Site web';
+
+  @override
+  String get lbl_platform_other => 'Autre';
+
+  @override
+  String get lbl_connection_requests => 'Demandes de connexion';
+
+  @override
+  String get lbl_people_you_may_know =>
+      'Personnes que vous connaissez peut-être';
+
+  @override
+  String get lbl_your_connections => 'Vos connexions';
+
+  @override
+  String get lbl_no_pending_requests => 'Aucune demande en attente';
+
+  @override
+  String get lbl_no_suggestions => 'Aucune suggestion pour le moment';
+
+  @override
+  String get lbl_no_connections => 'Pas encore de connexions';
+
+  @override
+  String get lbl_ignore => 'Ignorer';
+
+  @override
+  String get lbl_connect => 'Se connecter';
+
+  @override
+  String get lbl_pending => 'En attente';
+
+  @override
+  String get lbl_search_network => 'Rechercher dans le réseau...';
+
+  @override
+  String get lbl_search_network_hint =>
+      'Rechercher des personnes dans votre réseau';
+
+  @override
+  String get lbl_mutual_connections => 'connexions mutuelles';
+
+  @override
+  String get lbl_no_results_found => 'Aucun résultat trouvé';
+
+  @override
+  String get lbl_clear => 'Clear';
+
+  @override
+  String get lbl_results => 'results';
+
+  @override
+  String get msg_try_different_keywords_or_adjust_filters =>
+      'Try different keywords or adjust filters';
+
+  @override
+  String get msg_check_back_later_for_new_suggestions =>
+      'Check back later for new suggestions';
+
+  @override
+  String get lbl_create_story => 'Créer une story';
+
+  @override
+  String get lbl_text => 'Texte';
+
+  @override
+  String get lbl_photo => 'Photo';
+
+  @override
+  String get lbl_type_your_story => 'Écris ta story...';
+
+  @override
+  String get lbl_select_photo => 'Sélectionner une photo';
+
+  @override
+  String get lbl_select_video => 'Sélectionner une vidéo';
+
+  @override
+  String get lbl_share_story => 'Partager la story';
+
+  @override
+  String lbl_hours_format(String count) {
+    return '$count heures';
+  }
+
+  @override
+  String get msg_enter_story_text =>
+      'Veuillez entrer du texte pour votre story';
+
+  @override
+  String msg_select_media(String type) {
+    return 'Veuillez sélectionner $type pour votre story';
+  }
+
+  @override
+  String get msg_pick_media_failed => 'Échec de la sélection du média';
 }

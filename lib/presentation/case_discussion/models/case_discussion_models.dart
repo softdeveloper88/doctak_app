@@ -1,5 +1,6 @@
 // Models for the Case Discussion module
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 // Separate model for discussion list items (simplified data)
 class CaseDiscussionListItem {
@@ -42,7 +43,7 @@ class CaseDiscussionListItem {
       promoted: json['promoted'] ?? 0,
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
       name: json['name'] ?? 'Unknown User',
-      profilePic: json['profile_pic'],
+      profilePic: AppData.fullImageUrl(json['profile_pic']),
       specialty: json['specialty'],
       comments: json['comments'] ?? 0,
     );
@@ -287,7 +288,7 @@ class CaseAuthor {
   CaseAuthor({required this.id, required this.name, required this.specialty, this.profilePic});
 
   factory CaseAuthor.fromJson(Map<String, dynamic> json) {
-    return CaseAuthor(id: json['id'] ?? 0, name: json['name'] ?? '', specialty: json['specialty'] ?? '', profilePic: json['profile_pic']);
+    return CaseAuthor(id: json['id'] ?? 0, name: json['name'] ?? '', specialty: json['specialty'] ?? '', profilePic: AppData.fullImageUrl(json['profile_pic']));
   }
 
   Map<String, dynamic> toJson() {

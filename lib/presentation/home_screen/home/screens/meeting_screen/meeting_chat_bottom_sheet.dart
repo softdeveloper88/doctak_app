@@ -108,7 +108,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
     switch (eventName) {
       case 'new-message':
         if (AppData.logInUserId != jsonMap['user_id']) {
-          AppData.chatMessages.add(Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: jsonMap['profile_pic'], name: '', timestamp: DateTime.timestamp(), isSentByMe: false));
+          AppData.chatMessages.add(Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: AppData.fullImageUrl(jsonMap['profile_pic']), name: '', timestamp: DateTime.timestamp(), isSentByMe: false));
         }
         if (mounted) setState(() {});
         break;
@@ -125,7 +125,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
     try {
       await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
       AppData.chatMessages.add(
-        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: "${AppData.imageUrl}${AppData.profile_pic}"),
+        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: AppData.profilePicUrl),
       );
       _messageController.clear();
       if (mounted) setState(() {});
@@ -327,7 +327,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
       child: CircleAvatar(
         radius: 16,
         backgroundColor: theme.inputBackground,
-        backgroundImage: profilePic.isNotEmpty ? NetworkImage(profilePic) : null,
+        backgroundImage: profilePic.isNotEmpty ? NetworkImage(AppData.fullImageUrl(profilePic)) : null,
         child: profilePic.isEmpty ? Icon(Icons.person, color: theme.textSecondary, size: 18) : null,
       ),
     );

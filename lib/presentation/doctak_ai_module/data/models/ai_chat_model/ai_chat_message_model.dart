@@ -121,4 +121,20 @@ class AiChatMessageModel {
   factory AiChatMessageModel.fromJsonString(String jsonString) {
     return AiChatMessageModel.fromJson(jsonDecode(jsonString));
   }
+
+  /// Returns a copy of this message with [sources] replaced.
+  AiChatMessageModel withSources(List<Source> newSources) {
+    return AiChatMessageModel(
+      id: id,
+      sessionId: sessionId,
+      role: role,
+      content: content,
+      filePath: filePath,
+      mimeType: mimeType,
+      feedback: feedback,
+      sources: newSources,
+      createdAt: createdAt,
+      fileBytes: fileBytes,
+    );
+  }
 }

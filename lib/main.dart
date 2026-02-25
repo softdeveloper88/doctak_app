@@ -2442,7 +2442,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             id: widget.id.toString(),
                             roomId: '',
                             username: widget.message?.notification?.title ?? "",
-                            profilePic: widget.message?.data['image'] ?? ''.replaceAll(AppData.imageUrl, ''),
+                            profilePic: widget.message?.data['image'] ?? '',
                           ),
                         );
                       }
@@ -2463,7 +2463,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         id: widget.id.toString(),
                         roomId: '',
                         username: widget.message?.notification?.title ?? "",
-                        profilePic: widget.message?.data['image'] ?? ''.replaceAll(AppData.imageUrl, ''),
+                        profilePic: widget.message?.data['image'] ?? '',
                       ),
                       '/comments_on_posts': (context) => PostDetailsScreen(commentId: int.parse(widget.id ?? '0')),
                       '/reply_to_comment': (context) => PostDetailsScreen(commentId: int.parse(widget.id ?? '0')),

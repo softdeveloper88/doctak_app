@@ -23,14 +23,15 @@ class PersonalInfoScreen extends StatefulWidget {
   State<PersonalInfoScreen> createState() => _PersonalInfoScreenState();
 }
 
-bool isEditModeMap = false;
-final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
 class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
+  bool _isEditMode = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
+
   @override
   void initState() {
-    isEditModeMap = false;
     super.initState();
+    _isEditMode = false;
   }
 
   Countries findModelByNameOrDefault(List<Countries> countries, String name, Countries defaultCountry) {
@@ -49,147 +50,185 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
         actions: [
           if (widget.profileBloc.isMe)
             OneUIEditActionButton(
-              isEditMode: isEditModeMap,
+              isEditMode: _isEditMode,
               onPressed: () {
                 setState(() {
-                  isEditModeMap = !isEditModeMap;
+                  _isEditMode = !_isEditMode;
                 });
               },
             ),
           const SizedBox(width: 16),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Header card
-                if (!isEditModeMap) OneUIInfoBanner(message: translation(context).msg_personal_info_desc, icon: Icons.info_outline, accentColor: theme.primary),
+      body: BlocListener<ProfileBloc, ProfileState>(
+        bloc: widget.profileBloc,
+        listener: (context, state) {
+          // When profile finishes updating (emits loaded state after update), hide saving indicator
+          if (_isSaving && (state is PaginationLoadedState || state is FullProfileLoadedState)) {
+            setState(() {
+              _isSaving = false;
+            });
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  // Header card
+                  if (!_isEditMode)
+                    OneUIInfoBanner(
+                      message: translation(context).msg_personal_info_desc,
+                      icon: Icons.info_outline,
+                      accentColor: theme.primary,
+                    ),
 
-                // Main info card
-                OneUIProfileSection(
-                  title: translation(context).lbl_basic_info,
-                  icon: Icons.person_rounded,
-                  iconColor: theme.primary,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // First name field
-                      TextFieldEditWidget(
-                        isEditModeMap: isEditModeMap,
-                        index: 0,
-                        icon: Icons.person,
-                        label: translation(context).lbl_first_name,
-                        value: widget.profileBloc.userProfile?.user?.firstName ?? '',
-                        onSave: (value) => widget.profileBloc.userProfile?.user?.firstName = value,
-                      ),
-                      if (!isEditModeMap) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
-
-                      // Last name field
-                      TextFieldEditWidget(
-                        isEditModeMap: isEditModeMap,
-                        index: 0,
-                        icon: Icons.person,
-                        label: translation(context).lbl_last_name,
-                        value: widget.profileBloc.userProfile?.user?.lastName ?? '',
-                        onSave: (value) => widget.profileBloc.userProfile?.user?.lastName = value,
-                      ),
-                      if (!isEditModeMap) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
-
-                      // Phone number field - Only visible to profile owner
-                      if (widget.profileBloc.isMe)
+                  // Main info card
+                  OneUIProfileSection(
+                    title: translation(context).lbl_basic_info,
+                    icon: Icons.person_rounded,
+                    iconColor: theme.primary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // First name field
                         TextFieldEditWidget(
-                          isEditModeMap: isEditModeMap,
+                          isEditModeMap: _isEditMode,
                           index: 0,
-                          icon: Icons.phone,
-                          label: translation(context).lbl_phone_number,
-                          value: widget.profileBloc.userProfile?.user?.phone ?? '',
-                          onSave: (value) => widget.profileBloc.userProfile?.user?.phone = value,
+                          icon: Icons.person,
+                          label: translation(context).lbl_first_name,
+                          value: widget.profileBloc.userProfile?.user?.firstName ?? '',
+                          onSave: (value) => widget.profileBloc.userProfile?.user?.firstName = value,
+                          required: true,
                         ),
-                      if (!isEditModeMap && widget.profileBloc.isMe) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
+                        if (!_isEditMode) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
 
-                      // Date of birth field - Only visible to profile owner
-                      if (widget.profileBloc.isMe)
-                        ProfileDateWidget(
-                          isEditModeMap: isEditModeMap,
+                        // Last name field
+                        TextFieldEditWidget(
+                          isEditModeMap: _isEditMode,
                           index: 0,
-                          label: translation(context).lbl_date_of_birth,
-                          value: widget.profileBloc.userProfile?.user?.dob ?? '',
-                          onSave: (value) {
-                            setState(() {
-                              widget.profileBloc.userProfile?.user?.dob = value;
-                            });
-                          },
+                          icon: Icons.person,
+                          label: translation(context).lbl_last_name,
+                          value: widget.profileBloc.userProfile?.user?.lastName ?? '',
+                          onSave: (value) => widget.profileBloc.userProfile?.user?.lastName = value,
+                          required: true,
                         ),
-                    ],
+                        if (!_isEditMode) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
+
+                        // Phone number field - Only visible to profile owner
+                        if (widget.profileBloc.isMe)
+                          TextFieldEditWidget(
+                            isEditModeMap: _isEditMode,
+                            index: 0,
+                            icon: Icons.phone,
+                            textInputType: TextInputType.phone,
+                            label: translation(context).lbl_phone_number,
+                            value: widget.profileBloc.userProfile?.user?.phone ?? '',
+                            onSave: (value) => widget.profileBloc.userProfile?.user?.phone = value,
+                          ),
+                        if (!_isEditMode && widget.profileBloc.isMe) Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
+
+                        // Date of birth field - Only visible to profile owner
+                        if (widget.profileBloc.isMe)
+                          ProfileDateWidget(
+                            isEditModeMap: _isEditMode,
+                            index: 0,
+                            label: translation(context).lbl_date_of_birth,
+                            value: widget.profileBloc.userProfile?.user?.dob ?? '',
+                            onSave: (value) {
+                              setState(() {
+                                widget.profileBloc.userProfile?.user?.dob = value;
+                              });
+                            },
+                          ),
+                      ],
+                    ),
                   ),
-                ),
 
-                const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                // License info card
-                OneUIProfileSection(
-                  title: translation(context).lbl_license_info,
-                  icon: Icons.badge_rounded,
-                  iconColor: theme.success,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // License number field
-                      TextFieldEditWidget(
-                        isEditModeMap: isEditModeMap,
-                        icon: Icons.numbers_rounded,
-                        iconColor: theme.success,
-                        index: 0,
-                        label: translation(context).lbl_license_no,
-                        value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
-                        onSave: (value) => widget.profileBloc.userProfile?.user?.licenseNo = value,
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Location info card
-                OneUIProfileSection(title: translation(context).lbl_location_info, icon: Icons.location_on_rounded, iconColor: theme.warning, child: _buildLocationFields(theme)),
-
-                const SizedBox(height: 24),
-
-                // Update button
-                if (isEditModeMap)
-                  OneUIProfilePrimaryButton(
-                    label: translation(context).lbl_update,
-                    icon: Icons.check_circle,
-                    color: theme.primary,
-                    onPressed: () {
-                      setState(() {
-                        isEditModeMap = false;
-                      });
-                      if (_formKey.currentState!.validate()) {
-                        _formKey.currentState!.save();
-                      }
-
-                      widget.profileBloc.add(UpdateProfileEvent(updateProfileSection: 1, userProfile: widget.profileBloc.userProfile, userProfilePrivacyModel: UserProfilePrivacyModel()));
-
-                      // Show success message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(translation(context).msg_profile_updated),
-                          backgroundColor: theme.success,
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  // License info card
+                  OneUIProfileSection(
+                    title: translation(context).lbl_license_info,
+                    icon: Icons.badge_rounded,
+                    iconColor: theme.success,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // License number field
+                        TextFieldEditWidget(
+                          isEditModeMap: _isEditMode,
+                          icon: Icons.numbers_rounded,
+                          iconColor: theme.success,
+                          index: 0,
+                          label: translation(context).lbl_license_no,
+                          value: widget.profileBloc.userProfile?.user?.licenseNo ?? '',
+                          onSave: (value) => widget.profileBloc.userProfile?.user?.licenseNo = value,
                         ),
-                      );
-                    },
+                      ],
+                    ),
                   ),
-              ],
+
+                  const SizedBox(height: 8),
+
+                  // Location info card
+                  OneUIProfileSection(
+                    title: translation(context).lbl_location_info,
+                    icon: Icons.location_on_rounded,
+                    iconColor: theme.warning,
+                    child: _buildLocationFields(theme),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Update button
+                  if (_isEditMode)
+                    SizedBox(
+                      width: double.infinity,
+                      child: _isSaving
+                          ? const Center(child: CircularProgressIndicator())
+                          : OneUIProfilePrimaryButton(
+                              label: translation(context).lbl_update,
+                              icon: Icons.check_circle,
+                              color: theme.primary,
+                              onPressed: _handleSave,
+                            ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _handleSave() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+    }
+
+    setState(() {
+      _isSaving = true;
+      _isEditMode = false;
+    });
+
+    widget.profileBloc.add(UpdateProfileEvent(
+      updateProfileSection: 1,
+      userProfile: widget.profileBloc.userProfile,
+      userProfilePrivacyModel: UserProfilePrivacyModel(),
+    ));
+
+    // Show success message
+    final theme = OneUITheme.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(translation(context).msg_profile_updated),
+        backgroundColor: theme.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -199,18 +238,45 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Country and State in view mode
-        if (!isEditModeMap) ...[
+        if (!_isEditMode) ...[
           OneUIProfileInfoRow(icon: Icons.public, label: translation(context).lbl_country, value: widget.profileBloc.userProfile?.user?.country ?? ''),
           Divider(color: theme.divider, thickness: 1, indent: 10, endIndent: 10),
           OneUIProfileInfoRow(icon: Icons.location_city, label: translation(context).lbl_state, value: widget.profileBloc.userProfile?.user?.state ?? ''),
         ],
 
         // Country and State dropdown fields in edit mode
-        if (isEditModeMap)
+        if (_isEditMode)
           BlocBuilder<ProfileBloc, ProfileState>(
             bloc: widget.profileBloc,
             builder: (context, state) {
+              // Extract dropdown data from either loaded state
+              List<Countries> countries = [];
+              String selectedCountry = '';
+              List<String> states = [];
+              String selectedState = '';
+              List<String> specialties = [];
+              String selectedSpecialty = '';
+              bool isLoaded = false;
+
               if (state is PaginationLoadedState) {
+                countries = state.firstDropdownValues;
+                selectedCountry = state.selectedFirstDropdownValue;
+                states = state.secondDropdownValues;
+                selectedState = state.selectedSecondDropdownValue;
+                specialties = state.specialtyDropdownValue;
+                selectedSpecialty = state.selectedSpecialtyDropdownValue;
+                isLoaded = true;
+              } else if (state is FullProfileLoadedState) {
+                countries = state.firstDropdownValues;
+                selectedCountry = state.selectedFirstDropdownValue;
+                states = state.secondDropdownValues;
+                selectedState = state.selectedSecondDropdownValue;
+                specialties = state.specialtyDropdownValue;
+                selectedSpecialty = state.selectedSpecialtyDropdownValue;
+                isLoaded = true;
+              }
+
+              if (isLoaded) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -236,7 +302,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             Text(item.flag ?? ''),
                           ],
                         ),
-                        selectedItemBuilder: (context) => state.firstDropdownValues.map((item) {
+                        selectedItemBuilder: (context) => countries.map((item) {
                           return Container(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -245,8 +311,8 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ),
                           );
                         }).toList(),
-                        items: state.firstDropdownValues,
-                        value: findModelByNameOrDefault(state.firstDropdownValues, state.selectedFirstDropdownValue ?? '', state.firstDropdownValues.first),
+                        items: countries,
+                        value: findModelByNameOrDefault(countries, selectedCountry, countries.isNotEmpty ? countries.first : Countries()),
                         width: double.infinity,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         onChanged: (newValue) {
@@ -273,7 +339,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                           style: TextStyle(color: theme.textPrimary),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        selectedItemBuilder: (context) => state.secondDropdownValues.map((item) {
+                        selectedItemBuilder: (context) => states.map((item) {
                           return Container(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -282,14 +348,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             ),
                           );
                         }).toList(),
-                        items: state.secondDropdownValues,
-                        value: state.selectedSecondDropdownValue,
+                        items: states,
+                        value: selectedState,
                         width: double.infinity,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         onChanged: (String? newValue) {
                           widget.profileBloc.stateName = newValue!;
                           widget.profileBloc.userProfile?.user?.state = newValue;
-                          widget.profileBloc.add(UpdateSpecialtyDropdownValue(state.selectedSecondDropdownValue));
                         },
                       ),
                     ),
@@ -310,7 +375,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                             style: TextStyle(color: theme.textPrimary),
                             overflow: TextOverflow.ellipsis,
                           ),
-                          selectedItemBuilder: (context) => state.specialtyDropdownValue.map((item) {
+                          selectedItemBuilder: (context) => specialties.map((item) {
                             return Container(
                               alignment: Alignment.centerLeft,
                               child: Text(
@@ -319,12 +384,13 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                               ),
                             );
                           }).toList(),
-                          items: state.specialtyDropdownValue,
-                          value: state.selectedSpecialtyDropdownValue,
+                          items: specialties,
+                          value: selectedSpecialty,
                           width: double.infinity,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           onChanged: (String? newValue) {
                             widget.profileBloc.specialtyName = newValue!;
+                            widget.profileBloc.userProfile?.user?.specialty = newValue;
                             widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
                           },
                         ),
@@ -333,7 +399,7 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   ],
                 );
               } else {
-                return Text(translation(context).msg_something_wrong);
+                return const Center(child: CircularProgressIndicator());
               }
             },
           ),

@@ -1,7 +1,10 @@
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/chat_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/post_api_service.dart';
+import 'package:doctak_app/data/apiClient/services/profile_api_service.dart';
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
@@ -39,6 +42,9 @@ class ApiServiceManager {
 
   /// Chat API service (non-retrofit endpoints)
   ChatApiService get chatApi => ChatApiService();
+
+  /// Profile API service
+  ProfileApiService get profileApi => ProfileApiService();
 
   // ================================== QUICK ACCESS METHODS ==================================
 
@@ -436,24 +442,52 @@ class ApiServiceManager {
     }
   }
 
-  /// Upload profile picture (backward compatibility)
+  /// Upload profile picture using real multipart file upload
   Future<dynamic> uploadProfilePicture(String token, String filePath) async {
     try {
-      // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return MockHttpResponse(
-        response: MockResponse(data: {'success': true, 'message': 'Profile picture uploaded successfully', 'profile_picture_url': 'https://example.com/profile.jpg'}, statusCode: 200),
+      final dioClient = dio.Dio();
+      final formData = dio.FormData.fromMap({
+        'profile_pic': await dio.MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+      final response = await dioClient.post(
+        '${AppData.remoteUrl2}/upload-profile-pic',
+        data: formData,
+        options: dio.Options(headers: {
+          'Authorization': token,
+          'Accept': 'application/json',
+        }),
       );
+      return response;
     } catch (e) {
+      print('Error uploading profile picture: $e');
       rethrow;
     }
   }
 
-  /// Upload cover picture (backward compatibility)
+  /// Upload cover picture using real multipart file upload
   Future<dynamic> uploadCoverPicture(String token, String filePath) async {
     try {
-      // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return MockHttpResponse(response: MockResponse(data: {'success': true, 'message': 'Cover picture uploaded successfully', 'cover_picture_url': 'https://example.com/cover.jpg'}, statusCode: 200));
+      final dioClient = dio.Dio();
+      final formData = dio.FormData.fromMap({
+        'background': await dio.MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+      final response = await dioClient.post(
+        '${AppData.remoteUrl2}/upload-cover-pic',
+        data: formData,
+        options: dio.Options(headers: {
+          'Authorization': token,
+          'Accept': 'application/json',
+        }),
+      );
+      return response;
     } catch (e) {
+      print('Error uploading cover picture: $e');
       rethrow;
     }
   }
@@ -1006,27 +1040,42 @@ class ApiServiceManager {
     }
   }
 
-  /// Update about me (matches BLoC usage with 12 parameters)
+  /// Update about me (calls real profile API service)
   Future<dynamic> updateAboutMe(
     String token,
-    String firstName,
-    String lastName,
-    String phone,
-    String licenseNo,
-    String specialty,
-    String dob,
-    String gender,
-    String country,
-    String city,
-    String countryOrigin,
     String aboutMe,
+    String address,
+    String birthplace,
+    String livesIn,
+    String languages,
+    String aboutMePrivacy,
+    String addressPrivacy,
+    String birthplacePrivacy,
+    String languagesPrivacy,
+    String livesInPrivacy,
+    String phonePrivacy,
   ) async {
     try {
-      // This would need to be implemented in profile service
-      // For now, return a mock response
-      return {'success': true, 'message': 'About me updated'};
+      final response = await profileApi.updateAboutMe(
+        aboutMe: aboutMe,
+        address: address,
+        birthplace: birthplace,
+        liveIn: livesIn,
+        languages: languages,
+        aboutMePrivacy: aboutMePrivacy,
+        addressPrivacy: addressPrivacy,
+        birthplacePrivacy: birthplacePrivacy,
+        languagesPrivacy: languagesPrivacy,
+        livesInPrivacy: livesInPrivacy,
+        phonePrivacy: phonePrivacy,
+      );
+      if (response.success) {
+        return response.data ?? {'success': true, 'message': 'About me updated'};
+      } else {
+        throw Exception(response.message);
+      }
     } catch (e) {
-      throw Exception('Update about me failed: ${e.toString()}');
+      rethrow;
     }
   }
 

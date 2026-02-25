@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 GroupMemberRequestModel groupMemberRequestModelFromJson(String str) => GroupMemberRequestModel.fromJson(json.decode(str));
 String groupMemberRequestModelToJson(GroupMemberRequestModel data) => json.encode(data.toJson());
@@ -37,7 +38,7 @@ class GroupMembers {
     joinedAt = json['joined_at'];
     adminType = json['admin_type'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   int? id;
   String? userId;

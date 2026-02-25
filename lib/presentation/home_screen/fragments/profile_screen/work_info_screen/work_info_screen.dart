@@ -81,7 +81,7 @@ class _WorkInfoScreenState extends State<WorkInfoScreen> with SingleTickerProvid
       body: BlocConsumer<ProfileBloc, ProfileState>(
         bloc: widget.profileBloc,
         builder: (BuildContext context, ProfileState state) {
-          if (state is PaginationLoadedState) {
+          if (state is PaginationLoadedState || state is FullProfileLoadedState) {
             workList = widget.profileBloc.workEducationList!.where((work) => work.workType == 'work').toList();
 
             return FadeTransition(

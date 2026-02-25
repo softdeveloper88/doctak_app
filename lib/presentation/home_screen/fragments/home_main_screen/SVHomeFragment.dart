@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/incomplete_profile_card.dart';
-import 'package:doctak_app/presentation/home_screen/home/components/user_chat_component.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/story_bubbles_row.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
@@ -244,7 +245,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                   false, // Disable for better memory management
               addRepaintBoundaries: true, // Enable for paint isolation
               children: [
-                const UserChatComponent(),
+                const StoryBubblesRow(),
                 if (showIncompleteProfile)
                   IncompleteProfileCard(
                     emailVerified == '',
@@ -264,37 +265,41 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     final theme = OneUITheme.of(context);
 
     return PreferredSize(
-      preferredSize: const Size.fromHeight(70),
+      preferredSize: const Size.fromHeight(60),
       child: Container(
-        decoration: theme.appBarDecoration,
+        decoration: BoxDecoration(
+          color: theme.appBarBackground,
+          border: Border(bottom: BorderSide(color: theme.divider, width: 1)),
+        ),
         child: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 70,
-          leading: Container(
-            margin: const EdgeInsets.only(left: 8, top: 8, bottom: 8),
-            child: theme.buildIconButton(
-              child: Image.asset(
-                'images/socialv/icons/ic_More.png',
-                width: 16,
-                height: 16,
-                fit: BoxFit.cover,
-                color: theme.iconColor,
-              ),
-              onPressed: () {
-                widget.openDrawer();
-                FocusManager.instance.primaryFocus?.unfocus();
-              },
-            ),
+          toolbarHeight: 60,
+          leading: IconButton(
+            icon: Icon(Icons.menu, size: 22, color: theme.iconColor),
+            onPressed: () {
+              widget.openDrawer();
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
           ),
           title: Text(translation(context).lbl_home, style: theme.appBarTitle),
           actions: [
+            IconButton(
+              icon: Icon(CupertinoIcons.search, size: 20, color: theme.iconColor),
+              onPressed: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => SearchScreen(backPress: () => Navigator.of(context).pop()),
+                  ),
+                );
+              },
+            ),
             _buildNotificationButton(context, theme),
-            const SizedBox(width: 8),
-            theme.buildIconButton(
-              child: SvgPicture.asset(
-                height: 24,
-                width: 24,
+            IconButton(
+              icon: SvgPicture.asset(
+                height: 22,
+                width: 22,
                 icChat,
                 color: theme.iconColor,
               ),
@@ -303,7 +308,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                 UserChatScreen().launch(context);
               },
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 8),
           ],
         ),
       ),
@@ -311,13 +316,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   }
 
   Widget _buildNotificationButton(BuildContext context, OneUITheme theme) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: () {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IconButton(
+          icon: Icon(CupertinoIcons.bell, size: 20, color: theme.iconColor),
+          onPressed: () {
             FocusManager.instance.primaryFocus?.unfocus();
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -325,59 +329,47 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
               ),
             );
           },
-          customBorder: const CircleBorder(),
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: theme.iconButtonDecoration(),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(CupertinoIcons.bell, size: 22, color: theme.iconColor),
-                BlocBuilder<NotificationBloc, NotificationState>(
-                  bloc: notificationBloc,
-                  buildWhen: (previous, current) =>
-                      previous != current && current is PaginationLoadedState,
-                  builder: (context, state) {
-                    if (state is PaginationLoadedState &&
-                        notificationBloc.totalNotifications > 0) {
-                      return Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 18,
-                            minHeight: 18,
-                          ),
-                          child: Center(
-                            child: Text(
-                              notificationBloc.totalNotifications > 99
-                                  ? '99+'
-                                  : '${notificationBloc.totalNotifications}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ],
-            ),
-          ),
         ),
-      ),
+        BlocBuilder<NotificationBloc, NotificationState>(
+          bloc: notificationBloc,
+          buildWhen: (previous, current) =>
+              previous != current && current is PaginationLoadedState,
+          builder: (context, state) {
+            if (state is PaginationLoadedState &&
+                notificationBloc.totalNotifications > 0) {
+              return Positioned(
+                right: 4,
+                top: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Center(
+                    child: Text(
+                      notificationBloc.totalNotifications > 99
+                          ? '99+'
+                          : '${notificationBloc.totalNotifications}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ],
     );
   }
 }

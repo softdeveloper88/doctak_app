@@ -19,6 +19,13 @@ class _ProfileImageScreenState extends State<ProfileImageScreen> with SingleTick
   late Animation<Offset> _slideAnimation;
   bool _showControls = true;
 
+  bool get _hasValidImageUrl {
+    final raw = widget.imageUrl.trim();
+    if (raw.isEmpty) return false;
+    final uri = Uri.tryParse(raw);
+    return uri != null && uri.hasScheme && uri.host.isNotEmpty;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -80,25 +87,30 @@ class _ProfileImageScreenState extends State<ProfileImageScreen> with SingleTick
             Positioned.fill(
               child: Hero(
                 tag: 'profile-image',
-                child: PhotoView(
-                  minScale: PhotoViewComputedScale.contained * 0.8,
-                  maxScale: PhotoViewComputedScale.covered * 2.0,
-                  initialScale: PhotoViewComputedScale.contained,
-                  filterQuality: FilterQuality.high,
-                  enableRotation: true,
-                  backgroundDecoration: const BoxDecoration(color: Colors.black),
-                  imageProvider: NetworkImage(widget.imageUrl),
-                  loadingBuilder: (context, event) => Center(
-                    child: SizedBox(
-                      width: 30.0,
-                      height: 30.0,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
-                        value: event == null ? 0 : event.cumulativeBytesLoaded / (event.expectedTotalBytes ?? 100),
-                      ),
-                    ),
-                  ),
-                ),
+                child: _hasValidImageUrl
+                    ? PhotoView(
+                        minScale: PhotoViewComputedScale.contained * 0.8,
+                        maxScale: PhotoViewComputedScale.covered * 2.0,
+                        initialScale: PhotoViewComputedScale.contained,
+                        filterQuality: FilterQuality.high,
+                        enableRotation: true,
+                        backgroundDecoration: const BoxDecoration(color: Colors.black),
+                        imageProvider: NetworkImage(widget.imageUrl),
+                        loadingBuilder: (context, event) => Center(
+                          child: SizedBox(
+                            width: 30.0,
+                            height: 30.0,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
+                              value: event == null || event.expectedTotalBytes == null || event.expectedTotalBytes == 0
+                                  ? null
+                                  : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+                            ),
+                          ),
+                        ),
+                        errorBuilder: (context, error, stackTrace) => _buildImageErrorState(theme),
+                      )
+                    : _buildImageErrorState(theme),
               ),
             ),
 
@@ -128,7 +140,20 @@ class _ProfileImageScreenState extends State<ProfileImageScreen> with SingleTick
                           icon: Icons.share_rounded,
                           label: l10n.lbl_share,
                           onTap: () {
-                            Share.shareUri(Uri.parse(widget.imageUrl));
+                            final uri = Uri.tryParse(widget.imageUrl.trim());
+                            if (uri != null && uri.hasScheme && uri.host.isNotEmpty) {
+                              SharePlus.instance.share(ShareParams(uri: uri));
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Invalid image link'),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: theme.error,
+                                  margin: const EdgeInsets.only(bottom: 20.0, left: 20.0, right: 20.0),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                                ),
+                              );
+                            }
                           },
                         ),
 
@@ -198,6 +223,32 @@ class _ProfileImageScreenState extends State<ProfileImageScreen> with SingleTick
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildImageErrorState(OneUITheme theme) {
+    return Container(
+      color: Colors.black,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.broken_image_outlined, color: Colors.white.withValues(alpha: 0.85), size: 52),
+          const SizedBox(height: 12),
+          Text(
+            'Unable to load image',
+            textAlign: TextAlign.center,
+            style: theme.titleSmall.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Please try again',
+            textAlign: TextAlign.center,
+            style: theme.bodySecondary.copyWith(color: Colors.white70),
+          ),
+        ],
       ),
     );
   }

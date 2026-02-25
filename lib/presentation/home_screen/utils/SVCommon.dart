@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/components/check_place_bottom_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/components/tag_friends_list_bottom_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../main.dart';
@@ -106,12 +103,6 @@ Widget svAppButton({required String text, required Function onTap, double? width
     width: width ?? context.width() - 32,
     height: 50,
   );
-}
-
-Future<File> svGetImageSource() async {
-  final picker = ImagePicker();
-  final pickedImage = await picker.pickImage(source: ImageSource.camera);
-  return File(pickedImage!.path);
 }
 
 void svShowShareBottomSheet(BuildContext context, searchPeopleBloc) {

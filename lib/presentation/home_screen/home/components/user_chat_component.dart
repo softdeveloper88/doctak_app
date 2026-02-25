@@ -65,7 +65,7 @@ class _UserChatComponentState extends State<UserChatComponent> {
                               padding: const EdgeInsets.all(2),
                               child: ClipOval(
                                 child: hasProfilePic
-                                    ? AppCachedNetworkImage(imageUrl: '${AppData.imageUrl}${contact.profilePic}', height: 50, width: 50, fit: BoxFit.cover)
+                                    ? AppCachedNetworkImage(imageUrl: AppData.fullImageUrl(contact.profilePic), height: 50, width: 50, fit: BoxFit.cover)
                                     : Container(
                                         width: 50,
                                         height: 50,

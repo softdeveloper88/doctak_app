@@ -94,7 +94,7 @@ class _UserAnnouncementDetailScreenState extends State<UserAnnouncementDetailScr
                                 child: ClipOval(
                                   child: announcementData.user?.profilePic != null
                                       ? Image.network(
-                                          "${AppData.imageUrl}${announcementData.user?.profilePic ?? ""}",
+                                          AppData.fullImageUrl(announcementData.user?.profilePic),
                                           fit: BoxFit.cover,
                                           errorBuilder: (context, error, stackTrace) {
                                             return Center(

@@ -31,6 +31,7 @@ Future<void> initializeAsync() async {
         AppData.logInUserId = userId;
         AppData.name = name ?? '';
         AppData.profile_pic = profilePic ?? '';
+        AppData.profilePicNotifier.value = AppData.profilePicUrl;
         AppData.background = background ?? '';
         AppData.email = email ?? '';
         AppData.specialty = specialty ?? '';

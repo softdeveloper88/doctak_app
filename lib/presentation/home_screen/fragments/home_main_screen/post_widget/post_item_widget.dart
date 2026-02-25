@@ -245,9 +245,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
               continue;
             }
             // Ensure correct URL construction
-            String fullUrl = mediaPath.startsWith('http')
-                ? mediaPath
-                : AppData.imageUrl + mediaPath;
+            String fullUrl = AppData.fullImageUrl(mediaPath);
             mediaUrls.add({"url": fullUrl, "type": media.mediaType ?? "image"});
           }
         }
@@ -270,8 +268,8 @@ class _PostItemWidgetState extends State<PostItemWidget> {
 
     return RepaintBoundary(
       child: Container(
-        padding: const EdgeInsets.only(top: 12),
-        margin: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
+        padding: const EdgeInsets.only(top: 8),
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: theme.cardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,96 +406,97 @@ class InteractionRowWidget extends StatelessWidget {
     required this.comments,
   });
 
+  Widget _buildActionBtn(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
     return Column(
       children: [
-        // Likes and Comments Count Row
+        // Stats Row - likes left, comments right
         Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 10.0, bottom: 10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
                 onTap: onViewLikesTap,
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.heart_fill,
-                      size: 14,
-                      color: likes > 0 ? theme.likeColor : theme.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      AppLocalizations.of(context)!.lbl_likes_count(likes),
-                      style: theme.bodySecondary,
-                    ),
-                  ],
+                child: Text(
+                  '❤️ ${AppLocalizations.of(context)!.lbl_likes_count(likes)}',
+                  style: TextStyle(fontSize: 13, color: theme.textSecondary),
                 ),
               ),
               InkWell(
                 onTap: onViewCommentsTap,
-                child: Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.chat_bubble_fill,
-                      size: 14,
-                      color: theme.textSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      AppLocalizations.of(
-                        context,
-                      )!.lbl_comments_count(comments),
-                      style: theme.bodySecondary,
-                    ),
-                  ],
+                child: Text(
+                  AppLocalizations.of(context)!.lbl_comments_count(comments),
+                  style: TextStyle(fontSize: 13, color: theme.textSecondary),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        // One UI 8.5 Divider
-        theme.buildDivider(indent: 12, endIndent: 12),
+        // Divider
+        Divider(height: 1, thickness: 0.5, color: theme.divider),
         // Action Buttons Row
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // Like Button
-              Expanded(
-                child: theme.buildActionButton(
-                  icon: isLiked
-                      ? CupertinoIcons.heart_fill
-                      : CupertinoIcons.heart,
-                  label: translation(context).lbl_like,
-                  onTap: onLikeTap,
-                  isActive: isLiked,
-                  activeColor: theme.likeColor,
-                ),
+              _buildActionBtn(
+                context,
+                icon: isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
+                label: translation(context).lbl_like,
+                onTap: onLikeTap,
+                color: isLiked ? theme.likeColor : theme.textSecondary,
               ),
-              // Vertical Divider
-              theme.buildVerticalDivider(),
               // Comment Button
-              Expanded(
-                child: theme.buildActionButton(
-                  icon: CupertinoIcons.chat_bubble,
-                  label: translation(context).lbl_comment,
-                  onTap: onToggleComment,
-                ),
+              _buildActionBtn(
+                context,
+                icon: CupertinoIcons.chat_bubble,
+                label: translation(context).lbl_comment,
+                onTap: onToggleComment,
+                color: theme.textSecondary,
               ),
-              // Vertical Divider
-              theme.buildVerticalDivider(),
-              // Send/Share Button
-              Expanded(
-                child: theme.buildActionButton(
-                  icon: CupertinoIcons.paperplane,
-                  label: translation(context).lbl_send,
-                  onTap: onShareTap,
-                ),
+              // Send Button
+              _buildActionBtn(
+                context,
+                icon: CupertinoIcons.paperplane,
+                label: translation(context).lbl_send,
+                onTap: onShareTap,
+                color: theme.textSecondary,
               ),
             ],
           ),

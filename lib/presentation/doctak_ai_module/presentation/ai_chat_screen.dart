@@ -1,10 +1,14 @@
-import 'dart:io';
+ import 'dart:io';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
+import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/ai_quota_banner.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
+import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:flutter/services.dart';
 import '../blocs/ai_chat/ai_chat_bloc.dart';
 import '../data/models/ai_chat_model/ai_chat_message_model.dart';
@@ -33,6 +37,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
   double _temperature = 0.7;
   int _maxTokens = 1024;
   bool _isWaitingForResponse = false; // Track if we're waiting for a response
+  AiUsageInfo? _quotaInfo; // Current quota state for AI chat
 
   @override
   void initState() {
@@ -352,7 +357,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   crossAxisCount: 2,
                   crossAxisSpacing: isSmallScreen ? 12 : 16,
                   mainAxisSpacing: isSmallScreen ? 12 : 16,
-                  childAspectRatio: isVerySmallScreen ? 1.0 : (isSmallScreen ? 1.1 : 1.2),
+                  childAspectRatio: isVerySmallScreen ? 1.0 : (isSmallScreen ? 1.05 : 1.1),
                   physics: const BouncingScrollPhysics(),
                   children: [
                     _buildEnhancedFeatureCard(
@@ -391,6 +396,24 @@ class _AiChatScreenState extends State<AiChatScreen> {
                       isSmallScreen: isSmallScreen,
                       isVerySmallScreen: isVerySmallScreen,
                     ),
+                    _buildEnhancedFeatureCard(
+                      title: translation(context).lbl_patient_education,
+                      description: translation(context).lbl_patient_friendly_explanations,
+                      icon: Icons.groups_rounded,
+                      gradientColors: [theme.primary.withValues(alpha: 0.5), theme.primary.withValues(alpha: 0.9)],
+                      prompt: translation(context).msg_patient_education_prompt,
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
+                    ),
+                    _buildEnhancedFeatureCard(
+                      title: translation(context).lbl_guidelines_summary,
+                      description: translation(context).lbl_latest_clinical_guidelines,
+                      icon: Icons.menu_book_rounded,
+                      gradientColors: [theme.primary.withValues(alpha: 0.6), theme.primary],
+                      prompt: translation(context).msg_guidelines_summary_prompt,
+                      isSmallScreen: isSmallScreen,
+                      isVerySmallScreen: isVerySmallScreen,
+                    ),
                   ],
                 ),
               ),
@@ -425,6 +448,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
           setState(() {
             _showWelcomeScreen = false; // Always hide welcome screen after message activity
             _isWaitingForResponse = false;
+            if (state is MessageSent) _quotaInfo = state.quotaInfo;
+            if (state is MessageSendError && state.isQuotaError) _quotaInfo = state.quotaInfo;
           });
 
           // Only scroll if message was sent successfully
@@ -711,6 +736,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           streamingContent: streamingContent,
           webSearch: _webSearchEnabled,
           scrollController: _scrollController,
+          onSuggestionTap: (prompt) => _sendMessage(prompt),
           onFeedbackSubmitted: (messageId, feedback) {
             context.read<AiChatBloc>().add(SubmitFeedback(messageId: messageId, feedback: feedback));
           },
@@ -881,11 +907,14 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 ),
               ),
 
+            // Quota banner — shown above input when quota is limited or exhausted
+            AiQuotaBanner(usage: _quotaInfo),
+
             // Input area
             MessageInput(
               controller: _inputController = TextEditingController(),
-              onSendMessage: _isWaitingForResponse ? null : _sendMessage, // Disable when waiting
-              onAttachImage: _isWaitingForResponse ? null : _pickImage, // Disable when waiting
+              onSendMessage: (_isWaitingForResponse || _quotaInfo?.canUse == false) ? null : _sendMessage,
+              onAttachImage: (_isWaitingForResponse || _quotaInfo?.canUse == false) ? null : _pickImage,
               selectedModel: _selectedModel,
               isWaitingForResponse: _isWaitingForResponse, // Pass waiting state to input
               onModelChanged: (model) {
@@ -944,7 +973,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                   child: ClipOval(
                     child: AppData.profile_pic.isNotEmpty && AppData.profile_pic.toLowerCase() != 'null'
                         ? AppCachedNetworkImage(
-                            imageUrl: '${AppData.imageUrl}${AppData.profile_pic}',
+                            imageUrl: AppData.profilePicUrl,
                             fit: BoxFit.cover,
                             width: 48,
                             height: 48,
@@ -989,6 +1018,46 @@ class _AiChatScreenState extends State<AiChatScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Divider(color: theme.primary.withValues(alpha: 0.2), height: 1),
           ),
+
+          // Quota / plan info bar (shown for free users)
+          if (_quotaInfo != null && !(_quotaInfo!.isPaid))
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [Colors.amber.shade50, Colors.amber.shade100]),
+                border: Border(bottom: BorderSide(color: Colors.amber.shade300)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(color: Colors.amber.shade200, borderRadius: BorderRadius.circular(9999)),
+                        child: Text(translation(context).lbl_free_plan, style: TextStyle(fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.orange.shade900)),
+                      ),
+                      Text(
+                        '${_quotaInfo!.dailyRemaining}/${_quotaInfo!.dailyLimit} left (5h)',
+                        style: TextStyle(fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.orange.shade800),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context); // close drawer
+                      const SubscriptionScreen().launch(context);
+                    },
+                    child: Text(
+                      translation(context).lbl_upgrade_unlimited,
+                      style: TextStyle(fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Colors.blue.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           // New Chat Button - OneUI 8.5 style
           Padding(

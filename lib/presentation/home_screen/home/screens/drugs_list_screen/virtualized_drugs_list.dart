@@ -1,7 +1,6 @@
 import 'package:doctak_app/ads_setting/ads_widget/native_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/chat_gpt_screen/ChatDetailScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/memory_optimized_drug_item.dart';
@@ -13,8 +12,14 @@ import 'package:visibility_detector/visibility_detector.dart';
 class VirtualizedDrugsList extends StatefulWidget {
   final DrugsBloc drugsBloc;
   final ScrollController? scrollController;
+  final String currency;
 
-  const VirtualizedDrugsList({super.key, required this.drugsBloc, this.scrollController});
+  const VirtualizedDrugsList({
+    super.key,
+    required this.drugsBloc,
+    this.scrollController,
+    this.currency = '',
+  });
 
   @override
   State<VirtualizedDrugsList> createState() => _VirtualizedDrugsListState();
@@ -102,7 +107,10 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
         final isVisible = visibilityInfo.visibleFraction > 0.1;
         _handleVisibilityChanged(index, isVisible);
       },
-      child: MemoryOptimizedDrugItem(drug: widget.drugsBloc.drugsData[index], onShowBottomSheet: _showBottomSheet),
+      child: MemoryOptimizedDrugItem(
+        drug: widget.drugsBloc.drugsData[index],
+        currency: widget.currency,
+      ),
     );
   }
 
@@ -117,32 +125,5 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
     // Can be used for analytics or optimization in the future
   }
 
-  // Bottom sheet for drug details
-  void _showBottomSheet(BuildContext context, String genericName, String question) {
-    showModalBottomSheet(
-      showDragHandle: true,
-      enableDrag: true,
-      isScrollControlled: true,
-      isDismissible: false,
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return DraggableScrollableSheet(
-              initialChildSize: 0.9,
-              minChildSize: 0.9,
-              maxChildSize: 1.0,
-              expand: false,
-              builder: (BuildContext context, ScrollController scrollController) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: ChatDetailScreen(isFromMainScreen: false, question: '$question $genericName'),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
+  // Navigation now handled directly in MemoryOptimizedDrugItem
 }

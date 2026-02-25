@@ -17,7 +17,6 @@ import 'package:sizer/sizer.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import '../home_screen/fragments/profile_screen/bloc/profile_state.dart';
 import 'bloc/sign_up_bloc.dart';
-import 'component/error_dialog.dart';
 
 // ignore_for_file: must_be_immutable
 class SignUpScreen extends StatefulWidget {
@@ -38,6 +37,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   DropdownBloc dropdownBloc = DropdownBloc();
   ProfileBloc profileBloc = ProfileBloc();
   bool _isChecked = false;
+  Map<String, String> _fieldErrors = {};
 
   @override
   void initState() {
@@ -190,6 +190,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               builder: (context, state) {
                                 if (state is DataLoaded) {
                                   return _buildFormFields(context, state, oneUI);
+                                } else if (state is DropdownError) {
+                                  // Keep form visible even on error
+                                  return _buildFormFields(context, null, oneUI);
                                 } else {
                                   return Center(child: CupertinoActivityIndicator(color: oneUI.primary));
                                 }
@@ -232,11 +235,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_login_success), backgroundColor: oneUI.success));
                                       launchScreen(context, const SVDashboardScreen(), isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
                                     } else {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(SnackBar(content: Text(state.response['message'] ?? translation(context).msg_something_wrong), backgroundColor: oneUI.error));
+                                      // Parse API validation errors and show inline below each field
                                       if (state.response['errors'] != null) {
-                                        _showErrorDialog(state.response['errors']);
+                                        final errors = state.response['errors'] as Map<String, dynamic>;
+                                        setState(() {
+                                          _fieldErrors = {};
+                                          errors.forEach((key, value) {
+                                            if (value is List && value.isNotEmpty) {
+                                              _fieldErrors[key] = value.first.toString();
+                                            } else if (value is String) {
+                                              _fieldErrors[key] = value;
+                                            }
+                                          });
+                                        });
+                                      } else {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(state.response['message'] ?? translation(context).msg_something_wrong), backgroundColor: oneUI.error),
+                                        );
                                       }
                                     }
                                   }
@@ -268,13 +283,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _buildFormFields(BuildContext context, DataLoaded state, OneUITheme oneUI) {
+  Widget _buildFieldError(String? error, OneUITheme oneUI) {
+    if (error == null || error.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 14),
+      child: Text(error, style: TextStyle(color: oneUI.error, fontSize: 12, fontWeight: FontWeight.w500)),
+    );
+  }
+
+  Widget _buildFormFields(BuildContext context, DataLoaded? state, OneUITheme oneUI) {
+    final isPasswordVisible = state?.isPasswordVisible ?? true;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
         // First & Last Name Row
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Column(
@@ -283,6 +308,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Text(translation(context).lbl_enter_first_name, style: oneUI.authLabelStyle),
                   const SizedBox(height: 8),
                   _buildNameField(context, firstnameController!, focusNode1, translation(context).lbl_enter_your_name1, oneUI),
+                  _buildFieldError(_fieldErrors['first_name'], oneUI),
                 ],
               ),
             ),
@@ -294,6 +320,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Text(translation(context).lbl_enter_last_name, style: oneUI.authLabelStyle),
                   const SizedBox(height: 8),
                   _buildNameField(context, lastNameController!, focusNode2, translation(context).lbl_enter_your_name2, oneUI),
+                  _buildFieldError(_fieldErrors['last_name'], oneUI),
                 ],
               ),
             ),
@@ -305,17 +332,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
           Text(translation(context).lbl_enter_email, style: oneUI.authLabelStyle),
           const SizedBox(height: 8),
           _buildEmailField(context, oneUI),
+          _buildFieldError(_fieldErrors['email'], oneUI),
           const SizedBox(height: 16),
         ],
         // Password Fields
         if (widget.isSocialLogin == false) ...[
           Text(translation(context).lbl_create_password, style: oneUI.authLabelStyle),
           const SizedBox(height: 8),
-          _buildPasswordField(context, passwordController, focusNode4, translation(context).lbl_create_password, state.isPasswordVisible, oneUI),
+          _buildPasswordField(context, passwordController, focusNode4, translation(context).lbl_create_password, isPasswordVisible, oneUI),
+          _buildFieldError(_fieldErrors['password'], oneUI),
           const SizedBox(height: 16),
           Text('Confirm Password:', style: oneUI.authLabelStyle),
           const SizedBox(height: 8),
-          _buildPasswordField(context, confirmPasswordController, focusNode5, translation(context).msg_confirm_password, state.isPasswordVisible, oneUI, isConfirm: true),
+          _buildPasswordField(context, confirmPasswordController, focusNode5, translation(context).msg_confirm_password, isPasswordVisible, oneUI, isConfirm: true),
         ],
       ],
     );
@@ -420,15 +449,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void _showErrorDialog(Map<String, dynamic> errors) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return ErrorDialog(errors: errors);
-      },
-    );
-  }
-
   /// Displays a dialog with the [SignUpSuccessDialog] content.
   Future<void> onTapSignUp(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -439,6 +459,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     try {
+      // Clear previous field errors
+      setState(() {
+        _fieldErrors = {};
+      });
+
       final token = await _getSafeFcmToken();
 
       if (passwordController.text != confirmPasswordController.text) {

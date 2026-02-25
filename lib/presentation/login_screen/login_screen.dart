@@ -737,19 +737,22 @@ class LoginScreenState extends State<LoginScreen> {
     // Request credential for the currently signed in Apple account.
     final appleCredential = await SignInWithApple.getAppleIDCredential(scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName], nonce: nonce);
 
+    // The actual Apple identity token (JWT) for server-side verification
+    final appleIdToken = appleCredential.identityToken;
+
     // Create an `OAuthCredential` from the credential returned by Apple.
-    final oauthCredential = OAuthProvider('apple.com').credential(idToken: appleCredential.identityToken, rawNonce: rawNonce);
+    final oauthCredential = OAuthProvider('apple.com').credential(idToken: appleIdToken, rawNonce: rawNonce);
     String token = await _getSafeFcmToken();
     var response = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-    if (token.isNotEmpty) {
+    if (token.isNotEmpty && appleIdToken != null) {
       loginBloc.add(
         SocialLoginButtonPressed(
           email: response.user?.email ?? ' ',
-          firstName: response.user?.displayName?.split(' ').first ?? ' ',
-          lastName: response.user?.displayName?.split(' ').last ?? ' ',
+          firstName: appleCredential.givenName ?? response.user?.displayName?.split(' ').first ?? ' ',
+          lastName: appleCredential.familyName ?? response.user?.displayName?.split(' ').last ?? ' ',
           isSocialLogin: true,
           provider: 'apple',
-          token: response.user?.uid ?? '',
+          token: appleIdToken,
           deviceToken: token,
         ),
       );

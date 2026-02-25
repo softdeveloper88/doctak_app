@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 SearchContactsModel searchContactsModelFromJson(String str) => SearchContactsModel.fromJson(json.decode(str));
 String searchContactsModelToJson(SearchContactsModel data) => json.encode(data.toJson());
@@ -131,7 +132,7 @@ class Data {
     id = json['id'];
     firstName = json['first_name'];
     lastName = json['last_name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   String? id;
   String? firstName;

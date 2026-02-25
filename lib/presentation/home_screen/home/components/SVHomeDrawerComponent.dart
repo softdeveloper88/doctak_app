@@ -28,6 +28,8 @@ import 'dart:math' as math;
 import '../../../../localization/app_localization.dart';
 import '../../../doctak_ai_module/presentation/ai_chat_screen.dart';
 import '../screens/meeting_screen/manage_meeting_screen.dart';
+import '../screens/moderation_screen/moderation_privacy_screen.dart';
+import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
@@ -182,12 +184,24 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             l10n.desc_settings,
           ),
           MenuItemData(
+            12,
+            Icons.shield_rounded,
+            'Moderation & Privacy',
+            'Blocked users, reports & safety',
+          ),
+          MenuItemData(
             9,
             Icons.shield_outlined,
             l10n.lbl_privacy,
             l10n.desc_privacy,
           ),
           MenuItemData(10, Icons.info_outline, l10n.lbl_about, l10n.desc_about),
+          MenuItemData(
+            13,
+            Icons.workspace_premium_rounded,
+            'My Subscription',
+            'Manage your plan & features',
+          ),
           MenuItemData(
             11,
             Icons.logout,
@@ -322,29 +336,35 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
-                  child: AppCachedNetworkImage(
-                    imageUrl: AppData.imageUrl + AppData.profile_pic,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Center(
-                      child: Text(
-                        _getInitials(AppData.name),
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: AppData.profilePicNotifier,
+                    builder: (context, picUrl, __) {
+                      final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                      return AppCachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Center(
+                          child: Text(
+                            _getInitials(AppData.name),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Center(
-                      child: Text(
-                        _getInitials(AppData.name),
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                        errorWidget: (context, url, error) => Center(
+                          child: Text(
+                            _getInitials(AppData.name),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -416,6 +436,52 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                const SizedBox(height: 6),
+                // Premium / Free plan badge
+                Builder(
+                  builder: (ctx) {
+                    final isPremium = AppData.isPremium;
+                    final planLabel = isPremium
+                        ? ((AppData.planName?.isNotEmpty == true) ? AppData.planName! : 'Premium')
+                        : 'Free Plan';
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isPremium
+                            ? const Color(0xFFFFD700).withValues(alpha: 0.15)
+                            : (_isDark
+                                ? _oneUIPrimary.withValues(alpha: 0.12)
+                                : const Color(0xFFEFF6FF)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isPremium
+                                ? Icons.workspace_premium_rounded
+                                : Icons.person_outline_rounded,
+                            size: 12,
+                            color: isPremium
+                                ? const Color(0xFFD4A017)
+                                : (_isDark ? _oneUIPrimaryLight : const Color(0xFF1D4ED8)),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            planLabel,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: isPremium
+                                  ? const Color(0xFFD4A017)
+                                  : (_isDark ? _oneUIPrimaryLight : const Color(0xFF1D4ED8)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -808,13 +874,19 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(26),
-                      child: AppCachedNetworkImage(
-                        imageUrl: AppData.imageUrl + AppData.profile_pic,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            _buildColorfulInitialsAvatar(),
-                        errorWidget: (context, url, error) =>
-                            _buildColorfulInitialsAvatar(),
+                      child: ValueListenableBuilder<String>(
+                        valueListenable: AppData.profilePicNotifier,
+                        builder: (context, picUrl, __) {
+                          final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                          return AppCachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                _buildColorfulInitialsAvatar(),
+                            errorWidget: (context, url, error) =>
+                                _buildColorfulInitialsAvatar(),
+                          );
+                        },
                       ),
                     ),
                   ),
@@ -1039,49 +1111,55 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(35),
-                    child: AppCachedNetworkImage(
-                      imageUrl: AppData.imageUrl + AppData.profile_pic,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _getInitials(AppData.name),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                              letterSpacing: 1.0,
+                    child: ValueListenableBuilder<String>(
+                      valueListenable: AppData.profilePicNotifier,
+                      builder: (context, picUrl, __) {
+                        final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                        return AppCachedNetworkImage(
+                          imageUrl: url,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _getInitials(AppData.name),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _getInitials(AppData.name),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              fontFamily: 'Poppins',
-                              letterSpacing: 1.0,
+                          errorWidget: (context, url, error) => Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [Color(0xFF4285F4), Color(0xFF1A73E8)],
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _getInitials(AppData.name),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  letterSpacing: 1.0,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -2127,6 +2205,12 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
         case 11:
           // Logout
           logoutAccount(context);
+          break;
+        case 12:
+          const ModerationPrivacyScreen().launch(context);
+          break;
+        case 13:
+          const SubscriptionScreen().launch(context);
           break;
       }
     });

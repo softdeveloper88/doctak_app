@@ -37,7 +37,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                 onTap: () {
                   SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
                 },
-                child: CircleAvatar(backgroundImage: NetworkImage(widget.comment.commenter?.profilePic ?? ''), radius: 24.0),
+                child: CircleAvatar(backgroundImage: NetworkImage(AppData.fullImageUrl(widget.comment.commenter?.profilePic ?? '')), radius: 24.0),
               ),
               const SizedBox(width: 12.0),
               Expanded(

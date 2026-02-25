@@ -36,7 +36,7 @@ class DiscussionHeader extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 28,
                     backgroundColor: theme.avatarBackground,
-                    backgroundImage: discussion.author.profilePic != null ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}") : null,
+                    backgroundImage: discussion.author.profilePic != null ? CachedNetworkImageProvider(AppData.fullImageUrl(discussion.author.profilePic)) : null,
                     child: discussion.author.profilePic == null
                         ? Text(
                             discussion.author.name.isNotEmpty ? discussion.author.name[0].toUpperCase() : '?',
@@ -262,7 +262,7 @@ class DiscussionHeader extends StatelessWidget {
                                 ? ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: CachedNetworkImage(
-                                      imageUrl: attachment.url.startsWith('http') ? attachment.url : "${AppData.imageUrl}${attachment.url}",
+                                      imageUrl: AppData.fullImageUrl(attachment.url),
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) => Icon(Icons.image_rounded, color: theme.secondary, size: 20),
                                       errorWidget: (context, url, error) => Icon(Icons.broken_image_rounded, color: theme.secondary, size: 20),

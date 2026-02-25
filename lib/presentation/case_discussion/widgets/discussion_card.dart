@@ -46,7 +46,7 @@ class DiscussionCard extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 22,
                           backgroundColor: theme.avatarBackground,
-                          backgroundImage: discussion.author.profilePic != null ? CachedNetworkImageProvider("${AppData.imageUrl}${discussion.author.profilePic!}") : null,
+                          backgroundImage: discussion.author.profilePic != null ? CachedNetworkImageProvider(AppData.fullImageUrl(discussion.author.profilePic)) : null,
                           child: discussion.author.profilePic == null
                               ? Text(
                                   discussion.author.name.isNotEmpty ? discussion.author.name[0].toUpperCase() : '?',

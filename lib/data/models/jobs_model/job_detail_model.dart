@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 JobDetailModel jobDetailModelFromJson(String str) => JobDetailModel.fromJson(json.decode(str));
 String jobDetailModelToJson(JobDetailModel data) => json.encode(data.toJson());
@@ -167,7 +168,7 @@ class User {
   User.fromJson(dynamic json) {
     id = json['id'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   dynamic id;
   dynamic name;

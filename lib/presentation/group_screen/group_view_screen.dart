@@ -310,7 +310,7 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                image: DecorationImage(image: CachedNetworkImageProvider(AppData.imageUrl + AppData.profile_pic), fit: BoxFit.cover),
+                                image: DecorationImage(image: CachedNetworkImageProvider(AppData.profilePicUrl), fit: BoxFit.cover),
                                 color: svGetBgColor(),
                                 border: Border.all(color: Colors.grey),
                                 borderRadius: BorderRadius.circular(100),

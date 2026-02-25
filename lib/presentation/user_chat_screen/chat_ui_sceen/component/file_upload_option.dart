@@ -8,7 +8,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVConstants.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/widgets/display_video.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:nb_utils/nb_utils.dart';
 
 class FileUploadOption extends StatefulWidget {
@@ -21,7 +21,6 @@ class FileUploadOption extends StatefulWidget {
 }
 
 class _FileUploadOptionState extends State<FileUploadOption> {
-  final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
 
   Future<void> openImages() async {
@@ -51,10 +50,11 @@ class _FileUploadOptionState extends State<FileUploadOption> {
 
   Future<void> openVideo() async {
     try {
-      var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
-      if (pickedfiles != null) {
-        imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+      final File? video = await UnifiedGalleryPicker.captureVideoFromCamera(context);
+      if (video != null) {
+        final xfile = XFile(video.path);
+        imagefiles.add(xfile);
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
       } else {
         debugPrint(translation(context).msg_no_image_selected);
       }

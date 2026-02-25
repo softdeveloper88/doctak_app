@@ -96,7 +96,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                               ),
                               child: CustomImageView(
                                 placeHolder: 'images/socialv/faces/face_5.png',
-                                imagePath: '${AppData.imageUrl}${user?.profilePic.validate()}',
+                                imagePath: AppData.fullImageUrl(user?.profilePic.validate()),
                                 height: 60,
                                 width: 60,
                                 fit: BoxFit.cover,

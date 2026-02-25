@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 CaseComments caseCommentsFromJson(String str) => CaseComments.fromJson(json.decode(str));
 String caseCommentsToJson(CaseComments data) => json.encode(data.toJson());
@@ -42,7 +43,7 @@ class Comments {
     dislikes = json['dislikes'];
     createdAt = json['created_at'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     likedByUser = json['liked_by_user'];
     actionType = json['action_type'];
   }

@@ -1327,7 +1327,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_date_of_birth.
   ///
   /// In en, this message translates to:
-  /// **'Date of birth'**
+  /// **'Date of Birth'**
   String get lbl_date_of_birth;
 
   /// No description provided for @lbl_license_no.
@@ -3093,6 +3093,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Privacy settings updated successfully'**
   String get msg_privacy_settings_updated;
+
+  /// No description provided for @msg_privacy_restricted.
+  ///
+  /// In en, this message translates to:
+  /// **'This information is private'**
+  String get msg_privacy_restricted;
+
+  /// No description provided for @msg_privacy_restricted_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'The user has chosen to keep this information private'**
+  String get msg_privacy_restricted_detail;
 
   /// No description provided for @lbl_specialty_info.
   ///
@@ -4870,6 +4882,120 @@ abstract class AppLocalizations {
   /// **'What ICD-10 code should I use for Type 2 diabetes with complications?'**
   String get msg_medical_codes_prompt;
 
+  /// No description provided for @lbl_patient_education.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient Education'**
+  String get lbl_patient_education;
+
+  /// No description provided for @lbl_patient_friendly_explanations.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient-friendly explanations'**
+  String get lbl_patient_friendly_explanations;
+
+  /// No description provided for @msg_patient_education_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain treatment options for type 2 diabetes in simple terms for a patient'**
+  String get msg_patient_education_prompt;
+
+  /// No description provided for @lbl_guidelines_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Guidelines'**
+  String get lbl_guidelines_summary;
+
+  /// No description provided for @lbl_latest_clinical_guidelines.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest clinical guidelines'**
+  String get lbl_latest_clinical_guidelines;
+
+  /// No description provided for @msg_guidelines_summary_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarize the latest treatment guidelines for hypertension'**
+  String get msg_guidelines_summary_prompt;
+
+  /// No description provided for @lbl_elaborate.
+  ///
+  /// In en, this message translates to:
+  /// **'Elaborate'**
+  String get lbl_elaborate;
+
+  /// No description provided for @lbl_summarize.
+  ///
+  /// In en, this message translates to:
+  /// **'Summarize'**
+  String get lbl_summarize;
+
+  /// No description provided for @lbl_simpler_terms.
+  ///
+  /// In en, this message translates to:
+  /// **'Simpler terms'**
+  String get lbl_simpler_terms;
+
+  /// No description provided for @msg_simpler_terms_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain this in simpler terms'**
+  String get msg_simpler_terms_prompt;
+
+  /// No description provided for @lbl_risks_side_effects.
+  ///
+  /// In en, this message translates to:
+  /// **'Risks & side effects'**
+  String get lbl_risks_side_effects;
+
+  /// No description provided for @msg_risks_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What are the potential risks or side effects?'**
+  String get msg_risks_prompt;
+
+  /// No description provided for @lbl_treatment_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Treatment options'**
+  String get lbl_treatment_options;
+
+  /// No description provided for @msg_treatment_options_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'What treatment options are available?'**
+  String get msg_treatment_options_prompt;
+
+  /// No description provided for @lbl_patient_education_chip.
+  ///
+  /// In en, this message translates to:
+  /// **'Patient education'**
+  String get lbl_patient_education_chip;
+
+  /// No description provided for @msg_patient_education_chip_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Can you provide a patient-friendly explanation?'**
+  String get msg_patient_education_chip_prompt;
+
+  /// No description provided for @lbl_messages_left_5h.
+  ///
+  /// In en, this message translates to:
+  /// **'{remaining}/{limit} left (5h)'**
+  String lbl_messages_left_5h(Object limit, Object remaining);
+
+  /// No description provided for @lbl_free_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Plan'**
+  String get lbl_free_plan;
+
+  /// No description provided for @lbl_upgrade_unlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade for unlimited →'**
+  String get lbl_upgrade_unlimited;
+
   /// No description provided for @lbl_try_it.
   ///
   /// In en, this message translates to:
@@ -5979,6 +6105,1020 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap retry to refresh'**
   String get lbl_tap_to_retry;
+
+  /// No description provided for @lbl_portfolio.
+  ///
+  /// In en, this message translates to:
+  /// **'Portfolio'**
+  String get lbl_portfolio;
+
+  /// No description provided for @lbl_research.
+  ///
+  /// In en, this message translates to:
+  /// **'Research'**
+  String get lbl_research;
+
+  /// No description provided for @lbl_education.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get lbl_education;
+
+  /// No description provided for @lbl_contact_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Info'**
+  String get lbl_contact_info;
+
+  /// No description provided for @lbl_about_me.
+  ///
+  /// In en, this message translates to:
+  /// **'About Me'**
+  String get lbl_about_me;
+
+  /// No description provided for @lbl_professional_information.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional Information'**
+  String get lbl_professional_information;
+
+  /// No description provided for @lbl_personal_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Details'**
+  String get lbl_personal_details;
+
+  /// No description provided for @lbl_medical_licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Licenses'**
+  String get lbl_medical_licenses;
+
+  /// No description provided for @lbl_social_links.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Links'**
+  String get lbl_social_links;
+
+  /// No description provided for @lbl_business_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'Business Hours'**
+  String get lbl_business_hours;
+
+  /// No description provided for @lbl_awards_and_recognitions.
+  ///
+  /// In en, this message translates to:
+  /// **'Awards & Recognitions'**
+  String get lbl_awards_and_recognitions;
+
+  /// No description provided for @lbl_publications.
+  ///
+  /// In en, this message translates to:
+  /// **'Publications'**
+  String get lbl_publications;
+
+  /// No description provided for @lbl_my_network.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get lbl_my_network;
+
+  /// No description provided for @lbl_interests_hobbies.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests & Hobbies'**
+  String get lbl_interests_hobbies;
+
+  /// No description provided for @lbl_privacy_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Settings'**
+  String get lbl_privacy_settings;
+
+  /// No description provided for @lbl_clinic_workplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic / Workplace'**
+  String get lbl_clinic_workplace;
+
+  /// No description provided for @lbl_birthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday'**
+  String get lbl_birthday;
+
+  /// No description provided for @lbl_from.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get lbl_from;
+
+  /// No description provided for @lbl_lives_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Lives in'**
+  String get lbl_lives_in;
+
+  /// No description provided for @lbl_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get lbl_address;
+
+  /// No description provided for @lbl_languages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get lbl_languages;
+
+  /// No description provided for @lbl_country_of_origin.
+  ///
+  /// In en, this message translates to:
+  /// **'Country of Origin'**
+  String get lbl_country_of_origin;
+
+  /// No description provided for @lbl_joined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get lbl_joined;
+
+  /// No description provided for @lbl_license.
+  ///
+  /// In en, this message translates to:
+  /// **'License'**
+  String get lbl_license;
+
+  /// No description provided for @lbl_position.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get lbl_position;
+
+  /// No description provided for @lbl_closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get lbl_closed;
+
+  /// No description provided for @lbl_profile_completion.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Completion'**
+  String get lbl_profile_completion;
+
+  /// No description provided for @lbl_share_profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Profile'**
+  String get lbl_share_profile;
+
+  /// No description provided for @lbl_impact_factor_short.
+  ///
+  /// In en, this message translates to:
+  /// **'IF'**
+  String get lbl_impact_factor_short;
+
+  /// No description provided for @lbl_citations.
+  ///
+  /// In en, this message translates to:
+  /// **'Citations'**
+  String get lbl_citations;
+
+  /// No description provided for @msg_no_contact_info.
+  ///
+  /// In en, this message translates to:
+  /// **'No contact information available'**
+  String get msg_no_contact_info;
+
+  /// No description provided for @msg_tell_about_yourself.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell others about yourself...'**
+  String get msg_tell_about_yourself;
+
+  /// No description provided for @msg_add_professional_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your professional information'**
+  String get msg_add_professional_info;
+
+  /// No description provided for @msg_add_personal_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your personal details'**
+  String get msg_add_personal_details;
+
+  /// No description provided for @msg_add_social_profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your social profiles to connect with colleagues'**
+  String get msg_add_social_profiles;
+
+  /// No description provided for @msg_no_business_hours.
+  ///
+  /// In en, this message translates to:
+  /// **'No business hours added yet'**
+  String get msg_no_business_hours;
+
+  /// No description provided for @msg_no_experience.
+  ///
+  /// In en, this message translates to:
+  /// **'No experience added yet'**
+  String get msg_no_experience;
+
+  /// No description provided for @msg_no_education.
+  ///
+  /// In en, this message translates to:
+  /// **'No education added yet'**
+  String get msg_no_education;
+
+  /// No description provided for @msg_no_awards.
+  ///
+  /// In en, this message translates to:
+  /// **'No awards added yet'**
+  String get msg_no_awards;
+
+  /// No description provided for @msg_no_licenses.
+  ///
+  /// In en, this message translates to:
+  /// **'No licenses added yet'**
+  String get msg_no_licenses;
+
+  /// No description provided for @msg_no_publications.
+  ///
+  /// In en, this message translates to:
+  /// **'No publications added yet'**
+  String get msg_no_publications;
+
+  /// No description provided for @msg_scan_profile_qr.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to view your public profile or copy the link'**
+  String get msg_scan_profile_qr;
+
+  /// No description provided for @msg_profile_link_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile link copied!'**
+  String get msg_profile_link_copied;
+
+  /// No description provided for @msg_share_profile_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out my profile on DocTak: {url}'**
+  String msg_share_profile_text(String url);
+
+  /// No description provided for @msg_remove_social_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {platform} link?'**
+  String msg_remove_social_link(String platform);
+
+  /// No description provided for @lbl_delete_social_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Social Link'**
+  String get lbl_delete_social_link;
+
+  /// No description provided for @msg_select_start_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a start date'**
+  String get msg_select_start_date;
+
+  /// No description provided for @lbl_edit_contact_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Contact Info'**
+  String get lbl_edit_contact_info;
+
+  /// No description provided for @lbl_edit_about_me.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit About Me'**
+  String get lbl_edit_about_me;
+
+  /// No description provided for @lbl_edit_professional_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Professional Info'**
+  String get lbl_edit_professional_info;
+
+  /// No description provided for @lbl_edit_personal_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Personal Details'**
+  String get lbl_edit_personal_details;
+
+  /// No description provided for @lbl_edit_experience.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Experience'**
+  String get lbl_edit_experience;
+
+  /// No description provided for @lbl_add_education.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Education'**
+  String get lbl_add_education;
+
+  /// No description provided for @lbl_edit_education.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Education'**
+  String get lbl_edit_education;
+
+  /// No description provided for @lbl_add_publication.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Publication'**
+  String get lbl_add_publication;
+
+  /// No description provided for @lbl_edit_publication.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Publication'**
+  String get lbl_edit_publication;
+
+  /// No description provided for @lbl_add_social_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Social Link'**
+  String get lbl_add_social_link;
+
+  /// No description provided for @lbl_edit_social_link.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Social Link'**
+  String get lbl_edit_social_link;
+
+  /// No description provided for @lbl_add_award.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Award'**
+  String get lbl_add_award;
+
+  /// No description provided for @lbl_edit_award.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Award'**
+  String get lbl_edit_award;
+
+  /// No description provided for @lbl_add_license.
+  ///
+  /// In en, this message translates to:
+  /// **'Add License'**
+  String get lbl_add_license;
+
+  /// No description provided for @lbl_edit_license.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit License'**
+  String get lbl_edit_license;
+
+  /// No description provided for @lbl_add_business_hour.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Business Hour'**
+  String get lbl_add_business_hour;
+
+  /// No description provided for @lbl_edit_business_hour.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Business Hour'**
+  String get lbl_edit_business_hour;
+
+  /// No description provided for @lbl_state_province.
+  ///
+  /// In en, this message translates to:
+  /// **'State / Province'**
+  String get lbl_state_province;
+
+  /// No description provided for @lbl_license_number.
+  ///
+  /// In en, this message translates to:
+  /// **'License Number'**
+  String get lbl_license_number;
+
+  /// No description provided for @lbl_education_college.
+  ///
+  /// In en, this message translates to:
+  /// **'Education / College'**
+  String get lbl_education_college;
+
+  /// No description provided for @lbl_first_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'First Name *'**
+  String get lbl_first_name_required;
+
+  /// No description provided for @lbl_last_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Name *'**
+  String get lbl_last_name_required;
+
+  /// No description provided for @lbl_birthplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthplace'**
+  String get lbl_birthplace;
+
+  /// No description provided for @lbl_position_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Position *'**
+  String get lbl_position_required;
+
+  /// No description provided for @lbl_company_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Company / Organization *'**
+  String get lbl_company_required;
+
+  /// No description provided for @lbl_start_date_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date *'**
+  String get lbl_start_date_required;
+
+  /// No description provided for @lbl_end_date_present.
+  ///
+  /// In en, this message translates to:
+  /// **'End Date (leave blank for Present)'**
+  String get lbl_end_date_present;
+
+  /// No description provided for @lbl_degree_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Degree *'**
+  String get lbl_degree_required;
+
+  /// No description provided for @lbl_field_of_study.
+  ///
+  /// In en, this message translates to:
+  /// **'Field of Study'**
+  String get lbl_field_of_study;
+
+  /// No description provided for @lbl_institution_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Institution *'**
+  String get lbl_institution_required;
+
+  /// No description provided for @lbl_grade_gpa.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade/GPA'**
+  String get lbl_grade_gpa;
+
+  /// No description provided for @lbl_start_year_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Year *'**
+  String get lbl_start_year_required;
+
+  /// No description provided for @lbl_end_year.
+  ///
+  /// In en, this message translates to:
+  /// **'End Year'**
+  String get lbl_end_year;
+
+  /// No description provided for @lbl_currently_studying.
+  ///
+  /// In en, this message translates to:
+  /// **'I currently study here'**
+  String get lbl_currently_studying;
+
+  /// No description provided for @lbl_specialization.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialization'**
+  String get lbl_specialization;
+
+  /// No description provided for @lbl_activities_societies.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities & Societies'**
+  String get lbl_activities_societies;
+
+  /// No description provided for @lbl_honors_awards.
+  ///
+  /// In en, this message translates to:
+  /// **'Honors & Awards'**
+  String get lbl_honors_awards;
+
+  /// No description provided for @lbl_title_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Title *'**
+  String get lbl_title_required;
+
+  /// No description provided for @lbl_journal_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Journal Name *'**
+  String get lbl_journal_name_required;
+
+  /// No description provided for @lbl_publication_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication Date'**
+  String get lbl_publication_date;
+
+  /// No description provided for @lbl_co_authors.
+  ///
+  /// In en, this message translates to:
+  /// **'Co-Authors'**
+  String get lbl_co_authors;
+
+  /// No description provided for @lbl_abstract.
+  ///
+  /// In en, this message translates to:
+  /// **'Abstract'**
+  String get lbl_abstract;
+
+  /// No description provided for @lbl_keywords_comma.
+  ///
+  /// In en, this message translates to:
+  /// **'Keywords (comma separated)'**
+  String get lbl_keywords_comma;
+
+  /// No description provided for @lbl_impact_factor.
+  ///
+  /// In en, this message translates to:
+  /// **'Impact Factor'**
+  String get lbl_impact_factor;
+
+  /// No description provided for @lbl_doi_link.
+  ///
+  /// In en, this message translates to:
+  /// **'DOI Link'**
+  String get lbl_doi_link;
+
+  /// No description provided for @lbl_platform_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform *'**
+  String get lbl_platform_required;
+
+  /// No description provided for @lbl_profile_url_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile URL *'**
+  String get lbl_profile_url_required;
+
+  /// No description provided for @lbl_username_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Username (optional)'**
+  String get lbl_username_optional;
+
+  /// No description provided for @lbl_visible_to_others.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible to others'**
+  String get lbl_visible_to_others;
+
+  /// No description provided for @lbl_award_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Award Name *'**
+  String get lbl_award_name_required;
+
+  /// No description provided for @lbl_awarding_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Awarding Body'**
+  String get lbl_awarding_body;
+
+  /// No description provided for @lbl_date_received.
+  ///
+  /// In en, this message translates to:
+  /// **'Date Received'**
+  String get lbl_date_received;
+
+  /// No description provided for @lbl_level_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Level (national, international, etc.)'**
+  String get lbl_level_hint;
+
+  /// No description provided for @lbl_license_type_required.
+  ///
+  /// In en, this message translates to:
+  /// **'License Type *'**
+  String get lbl_license_type_required;
+
+  /// No description provided for @lbl_license_number_required.
+  ///
+  /// In en, this message translates to:
+  /// **'License Number *'**
+  String get lbl_license_number_required;
+
+  /// No description provided for @lbl_issuing_authority_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuing Authority *'**
+  String get lbl_issuing_authority_required;
+
+  /// No description provided for @lbl_issue_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Date'**
+  String get lbl_issue_date;
+
+  /// No description provided for @lbl_expiry_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get lbl_expiry_date;
+
+  /// No description provided for @lbl_location_name_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Name *'**
+  String get lbl_location_name_required;
+
+  /// No description provided for @lbl_location_address.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Address'**
+  String get lbl_location_address;
+
+  /// No description provided for @lbl_day_of_week_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Day of Week *'**
+  String get lbl_day_of_week_required;
+
+  /// No description provided for @lbl_start_time_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time *'**
+  String get lbl_start_time_required;
+
+  /// No description provided for @lbl_end_time_required.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time *'**
+  String get lbl_end_time_required;
+
+  /// No description provided for @lbl_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get lbl_available;
+
+  /// No description provided for @lbl_notes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get lbl_notes;
+
+  /// No description provided for @lbl_select_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Select {label}'**
+  String lbl_select_value(String label);
+
+  /// No description provided for @lbl_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get lbl_search_hint;
+
+  /// No description provided for @lbl_use_custom_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Use \"{value}\"'**
+  String lbl_use_custom_value(String value);
+
+  /// No description provided for @msg_type_own_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your own value'**
+  String get msg_type_own_value;
+
+  /// No description provided for @msg_type_custom_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Type to enter a custom value'**
+  String get msg_type_custom_value;
+
+  /// No description provided for @msg_no_results_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get msg_no_results_found;
+
+  /// No description provided for @lbl_other_gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get lbl_other_gender;
+
+  /// No description provided for @lbl_field_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Field: {value}'**
+  String lbl_field_prefix(String value);
+
+  /// No description provided for @lbl_grade_gpa_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Grade/GPA: {value}'**
+  String lbl_grade_gpa_prefix(String value);
+
+  /// No description provided for @lbl_specialization_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Specialization: {value}'**
+  String lbl_specialization_prefix(String value);
+
+  /// No description provided for @lbl_honors_awards_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Honors & Awards: {value}'**
+  String lbl_honors_awards_prefix(String value);
+
+  /// No description provided for @lbl_activities_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities: {value}'**
+  String lbl_activities_prefix(String value);
+
+  /// No description provided for @lbl_issued_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued: {value}'**
+  String lbl_issued_prefix(String value);
+
+  /// No description provided for @lbl_expires_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires: {value}'**
+  String lbl_expires_prefix(String value);
+
+  /// No description provided for @lbl_published_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Published: {value}'**
+  String lbl_published_prefix(String value);
+
+  /// No description provided for @lbl_co_authors_prefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Co-authors: {value}'**
+  String lbl_co_authors_prefix(String value);
+
+  /// No description provided for @lbl_education_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get lbl_education_info;
+
+  /// No description provided for @lbl_connections_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Conns'**
+  String get lbl_connections_short;
+
+  /// No description provided for @lbl_report_user.
+  ///
+  /// In en, this message translates to:
+  /// **'Report User'**
+  String get lbl_report_user;
+
+  /// No description provided for @lbl_block_user.
+  ///
+  /// In en, this message translates to:
+  /// **'Block User'**
+  String get lbl_block_user;
+
+  /// No description provided for @lbl_points_format.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pts'**
+  String lbl_points_format(String count);
+
+  /// No description provided for @lbl_section_about_me.
+  ///
+  /// In en, this message translates to:
+  /// **'About Me'**
+  String get lbl_section_about_me;
+
+  /// No description provided for @lbl_section_professional.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get lbl_section_professional;
+
+  /// No description provided for @lbl_section_basic_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Info'**
+  String get lbl_section_basic_info;
+
+  /// No description provided for @lbl_section_skills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get lbl_section_skills;
+
+  /// No description provided for @lbl_section_social_links.
+  ///
+  /// In en, this message translates to:
+  /// **'Social Links'**
+  String get lbl_section_social_links;
+
+  /// No description provided for @lbl_section_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get lbl_section_photo;
+
+  /// No description provided for @lbl_platform_website.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get lbl_platform_website;
+
+  /// No description provided for @lbl_platform_other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get lbl_platform_other;
+
+  /// No description provided for @lbl_connection_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection Requests'**
+  String get lbl_connection_requests;
+
+  /// No description provided for @lbl_people_you_may_know.
+  ///
+  /// In en, this message translates to:
+  /// **'People You May Know'**
+  String get lbl_people_you_may_know;
+
+  /// No description provided for @lbl_your_connections.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Connections'**
+  String get lbl_your_connections;
+
+  /// No description provided for @lbl_no_pending_requests.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending requests'**
+  String get lbl_no_pending_requests;
+
+  /// No description provided for @lbl_no_suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'No suggestions right now'**
+  String get lbl_no_suggestions;
+
+  /// No description provided for @lbl_no_connections.
+  ///
+  /// In en, this message translates to:
+  /// **'No connections yet'**
+  String get lbl_no_connections;
+
+  /// No description provided for @lbl_ignore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get lbl_ignore;
+
+  /// No description provided for @lbl_connect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get lbl_connect;
+
+  /// No description provided for @lbl_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get lbl_pending;
+
+  /// No description provided for @lbl_search_network.
+  ///
+  /// In en, this message translates to:
+  /// **'Search network...'**
+  String get lbl_search_network;
+
+  /// No description provided for @lbl_search_network_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search people in your network'**
+  String get lbl_search_network_hint;
+
+  /// No description provided for @lbl_mutual_connections.
+  ///
+  /// In en, this message translates to:
+  /// **'mutual connections'**
+  String get lbl_mutual_connections;
+
+  /// No description provided for @lbl_no_results_found.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get lbl_no_results_found;
+
+  /// No description provided for @lbl_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get lbl_clear;
+
+  /// No description provided for @lbl_results.
+  ///
+  /// In en, this message translates to:
+  /// **'results'**
+  String get lbl_results;
+
+  /// No description provided for @msg_try_different_keywords_or_adjust_filters.
+  ///
+  /// In en, this message translates to:
+  /// **'Try different keywords or adjust filters'**
+  String get msg_try_different_keywords_or_adjust_filters;
+
+  /// No description provided for @msg_check_back_later_for_new_suggestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Check back later for new suggestions'**
+  String get msg_check_back_later_for_new_suggestions;
+
+  /// No description provided for @lbl_create_story.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Story'**
+  String get lbl_create_story;
+
+  /// No description provided for @lbl_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get lbl_text;
+
+  /// No description provided for @lbl_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get lbl_photo;
+
+  /// No description provided for @lbl_type_your_story.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your story...'**
+  String get lbl_type_your_story;
+
+  /// No description provided for @lbl_select_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a photo'**
+  String get lbl_select_photo;
+
+  /// No description provided for @lbl_select_video.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a video'**
+  String get lbl_select_video;
+
+  /// No description provided for @lbl_share_story.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Story'**
+  String get lbl_share_story;
+
+  /// No description provided for @lbl_hours_format.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours'**
+  String lbl_hours_format(String count);
+
+  /// No description provided for @msg_enter_story_text.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter some text for your story'**
+  String get msg_enter_story_text;
+
+  /// No description provided for @msg_select_media.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select {type} for your story'**
+  String msg_select_media(String type);
+
+  /// No description provided for @msg_pick_media_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick media'**
+  String get msg_pick_media_failed;
 }
 
 class _AppLocalizationsDelegate

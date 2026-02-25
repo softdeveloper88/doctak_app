@@ -251,7 +251,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
                   child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
                 )
               : CachedNetworkImage(
-                  imageUrl: '${AppData.imageUrl}${contact.profilePic!}',
+                  imageUrl: AppData.fullImageUrl(contact.profilePic!),
                   height: 52,
                   width: 52,
                   fit: BoxFit.cover,

@@ -56,16 +56,16 @@ class TypingIndicatorState extends State<TypingIndicators> with TickerProviderSt
         .toList();
 
     // Start controllers with slight delay to create wave effect
-    Future.delayed(Duration(milliseconds: 100), () {
-      _controllers[0].forward();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) _controllers[0].forward();
     });
 
-    Future.delayed(Duration(milliseconds: 200), () {
-      _controllers[1].forward();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _controllers[1].forward();
     });
 
-    Future.delayed(Duration(milliseconds: 300), () {
-      _controllers[2].forward();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) _controllers[2].forward();
     });
   }
 
@@ -114,6 +114,7 @@ class TypingIndicatorState extends State<TypingIndicators> with TickerProviderSt
   @override
   void dispose() {
     for (var controller in _controllers) {
+      controller.stop();
       controller.dispose();
     }
     super.dispose();

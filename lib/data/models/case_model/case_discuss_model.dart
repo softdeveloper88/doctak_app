@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 CaseDiscussModel caseDiscussModelFromJson(String str) => CaseDiscussModel.fromJson(json.decode(str));
 String caseDiscussModelToJson(CaseDiscussModel data) => json.encode(data.toJson());
@@ -119,7 +120,7 @@ class Data {
     views = json['views'];
     createdAt = json['created_at'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     comments = json['comments'];
   }
   int? caseId;

@@ -2338,7 +2338,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       joinName: '${jsonMap['first_name']} ${jsonMap['last_name']}',
                       title: ' wants to join the meeting?',
                       yesButtonText: "Accept",
-                      profilePic: '${AppData.imageUrl}${jsonMap['profile_pic']}',
+                      profilePic: AppData.fullImageUrl(jsonMap['profile_pic']),
                       callback: () async {
                         // Allow join request via API call.
                         ProgressDialogUtils.showProgressDialog(context: context);
@@ -2375,7 +2375,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             case 'new-message':
               if (AppData.logInUserId != jsonMap['user_id']) {
                 AppData.chatMessages.add(
-                  Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: jsonMap['profile_pic'], name: '', timestamp: DateTime.timestamp(), isSentByMe: false),
+                  Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: AppData.fullImageUrl(jsonMap['profile_pic']), name: '', timestamp: DateTime.timestamp(), isSentByMe: false),
                 );
               }
               setState(() {});
@@ -3835,7 +3835,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             else
               Center(
                 child: AppData.profile_pic.isNotEmpty
-                    ? CircleAvatar(radius: 30, backgroundColor: Colors.grey.shade700, backgroundImage: NetworkImage('${AppData.imageUrl}${AppData.profile_pic}'), onBackgroundImageError: (_, __) {})
+                    ? CircleAvatar(radius: 30, backgroundColor: Colors.grey.shade700, backgroundImage: NetworkImage(AppData.profilePicUrl), onBackgroundImageError: (_, __) {})
                     : CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.blueGrey.shade600,
@@ -4091,7 +4091,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                   : Container(
                       color: color,
                       child: Center(
-                        child: CircleAvatar(radius: isFocused ? 80 : 40, backgroundImage: NetworkImage('${AppData.imageUrl}${videoData.joinUser?.profilePic}')),
+                        child: CircleAvatar(radius: isFocused ? 80 : 40, backgroundImage: NetworkImage(AppData.fullImageUrl(videoData.joinUser?.profilePic))),
                       ),
                     ),
             ),
@@ -4441,7 +4441,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                                 ? CircleAvatar(
                                     radius: 40,
                                     backgroundColor: Colors.grey.shade700,
-                                    backgroundImage: NetworkImage('${AppData.imageUrl}${AppData.profile_pic}'),
+                                    backgroundImage: NetworkImage(AppData.profilePicUrl),
                                     onBackgroundImageError: (_, __) {},
                                   )
                                 : CircleAvatar(

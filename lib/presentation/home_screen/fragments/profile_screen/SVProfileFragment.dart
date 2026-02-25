@@ -12,8 +12,9 @@ import '../../profile/components/SVProfileHeaderComponent.dart';
 import 'bloc/profile_state.dart';
 
 class SVProfileFragment extends StatefulWidget {
-  const SVProfileFragment({this.userId, super.key});
+  const SVProfileFragment({this.userId, this.viewAsPublic = false, super.key});
   final String? userId;
+  final bool viewAsPublic;
 
   @override
   State<SVProfileFragment> createState() => _SVProfileFragmentState();
@@ -28,12 +29,13 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
   @override
   void initState() {
     print(widget.userId);
+    // Use v5 LoadFullProfileEvent instead of legacy LoadPageEvent
     if (widget.userId == null) {
       print('object1 ${AppData.logInUserId}');
-      profileBloc.add(LoadPageEvent(userId: AppData.logInUserId, page: 1));
+      profileBloc.add(LoadFullProfileEvent(userId: AppData.logInUserId));
     } else {
       print('object ${widget.userId}');
-      profileBloc.add(LoadPageEvent(userId: widget.userId, page: 1));
+      profileBloc.add(LoadFullProfileEvent(userId: widget.userId));
     }
 
     // Initialize fade animation for a smoother experience
@@ -67,7 +69,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
       backgroundColor: theme.scaffoldBackground,
       body: BlocConsumer<ProfileBloc, ProfileState>(
         listener: (BuildContext context, ProfileState state) {
-          if (state is PaginationLoadedState) {
+          if (state is FullProfileLoadedState || state is PaginationLoadedState) {
             _fadeController.forward();
           }
         },
@@ -75,14 +77,18 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
         builder: (context, state) {
           if (state is PaginationLoadingState) {
             return Center(child: ProfileShimmer());
-          } else if (state is PaginationLoadedState) {
+          } else if (state is FullProfileLoadedState || state is PaginationLoadedState) {
+            // When viewAsPublic, override isMe to false so the profile
+            // is rendered as if viewed by another user.
+            final isOwn = widget.viewAsPublic ? false : (widget.userId == null);
             return FadeTransition(
               opacity: _fadeAnimation,
               child: SizedBox.expand(
                 child: SVProfileHeaderComponent(
                   userProfile: profileBloc.userProfile,
                   profileBoc: profileBloc,
-                  isMe: widget.userId == null,
+                  isMe: isOwn,
+                  viewAsPublic: widget.viewAsPublic,
                 ),
               ),
             );
@@ -93,11 +99,11 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
                 try {
                   if (widget.userId == null) {
                     profileBloc.add(
-                      LoadPageEvent(userId: AppData.logInUserId, page: 1),
+                      LoadFullProfileEvent(userId: AppData.logInUserId),
                     );
                   } else {
                     profileBloc.add(
-                      LoadPageEvent(userId: widget.userId, page: 1),
+                      LoadFullProfileEvent(userId: widget.userId),
                     );
                   }
                 } catch (e) {

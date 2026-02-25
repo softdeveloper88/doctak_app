@@ -8,7 +8,7 @@ import 'package:nb_utils/nb_utils.dart';
 /// Allows users to report objectionable content (posts, comments, users)
 /// Apple App Store Guideline 1.2 Compliance
 class ReportContentBottomSheet extends StatefulWidget {
-  final int contentId;
+  final String contentId;
   final String contentType; // 'post', 'comment', 'user'
   final String? contentOwnerName;
   final VoidCallback? onReportSubmitted;
@@ -24,7 +24,7 @@ class ReportContentBottomSheet extends StatefulWidget {
   /// Show the report bottom sheet
   static Future<void> show({
     required BuildContext context,
-    required int contentId,
+    required String contentId,
     required String contentType,
     String? contentOwnerName,
     VoidCallback? onReportSubmitted,
@@ -84,7 +84,7 @@ class _ReportContentBottomSheetState extends State<ReportContentBottomSheet> {
       switch (widget.contentType) {
         case 'post':
           await moderationService.reportPost(
-            postId: widget.contentId,
+            postId: int.tryParse(widget.contentId) ?? 0,
             reason: _selectedReason!.value,
             description: _descriptionController.text.isNotEmpty 
                 ? _descriptionController.text 
@@ -93,7 +93,7 @@ class _ReportContentBottomSheetState extends State<ReportContentBottomSheet> {
           break;
         case 'comment':
           await moderationService.reportComment(
-            commentId: widget.contentId,
+            commentId: int.tryParse(widget.contentId) ?? 0,
             reason: _selectedReason!.value,
             description: _descriptionController.text.isNotEmpty 
                 ? _descriptionController.text 

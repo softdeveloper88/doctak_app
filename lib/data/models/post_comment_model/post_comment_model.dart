@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 PostCommentModel postCommentModelFromJson(String str) => PostCommentModel.fromJson(json.decode(str));
 String postCommentModelToJson(PostCommentModel data) => json.encode(data.toJson());
@@ -163,7 +164,7 @@ class Commenter {
     id = json['id'];
     firstName = json['first_name'];
     lastName = json['last_name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   dynamic id;
   String? firstName;

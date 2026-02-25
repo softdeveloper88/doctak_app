@@ -253,7 +253,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(26),
                           child: CachedNetworkImage(
-                            imageUrl: '${AppData.imageUrl}${contact.profilePic.validate()}',
+                            imageUrl: AppData.fullImageUrl(contact.profilePic.validate()),
                             width: 52,
                             height: 52,
                             fit: BoxFit.cover,

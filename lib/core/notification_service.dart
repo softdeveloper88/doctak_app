@@ -664,7 +664,7 @@ class NotificationService {
         MaterialPageRoute(
           builder: (context) {
             if (payload == 'message_received') {
-              return ChatRoomScreen(id: id, roomId: '', username: username, profilePic: profilePic.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', ''));
+              return ChatRoomScreen(id: id, roomId: '', username: username, profilePic: profilePic);
             } else if (payload == 'follow_request' || payload == 'follower_notification' || payload == 'un_follower_notification' || payload == 'friend_request') {
               return SVProfileFragment(userId: id);
             } else if (payload == 'comments_on_posts' || payload == 'reply_to_comment' || payload == 'like_comment_on_post' || payload == 'like_comments') {

@@ -13,6 +13,7 @@ class VirtualizedMessageList extends StatefulWidget {
   final bool isLoading;
   final bool webSearch;
   final Function(String, String) onFeedbackSubmitted;
+  final Function(String prompt)? onSuggestionTap;
   final ScrollController scrollController;
   final bool isStreaming;
   final String streamingContent;
@@ -24,6 +25,7 @@ class VirtualizedMessageList extends StatefulWidget {
     this.isLoading = false,
     this.webSearch = false,
     required this.onFeedbackSubmitted,
+    this.onSuggestionTap,
     this.isStreaming = false,
     this.streamingContent = '',
   });
@@ -110,6 +112,9 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
           // Determine if we should show the avatar based on consecutive messages
           final showAvatar = index == 0 || (index > 0 && widget.messages[index - 1].role != message.role);
 
+          // Determine if this is the last AI message (for suggestion chips)
+          final isLastAiMessage = !widget.isLoading && !widget.isStreaming && message.role == MessageRole.assistant && _isLastAiMessage(index);
+
           // Create the appropriate message bubble based on role
           Widget messageBubble;
           if (message.role == MessageRole.user) {
@@ -119,6 +124,8 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
               message: message,
               showAvatar: showAvatar,
               isNewMessage: isNewMessage,
+              isLastAiMessage: isLastAiMessage,
+              onSuggestionTap: widget.onSuggestionTap,
               onFeedbackSubmitted: (feedback) {
                 widget.onFeedbackSubmitted(message.id.toString(), feedback);
               },
@@ -143,5 +150,15 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
         cacheExtent: 1000, // Cache more items for smoother scrolling
       ),
     );
+  }
+
+  /// Returns true if the message at [index] is the very last assistant message in the list.
+  bool _isLastAiMessage(int index) {
+    for (int i = widget.messages.length - 1; i >= 0; i--) {
+      if (widget.messages[i].role == MessageRole.assistant) {
+        return i == index;
+      }
+    }
+    return false;
   }
 }

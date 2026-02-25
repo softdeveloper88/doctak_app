@@ -15,8 +15,8 @@ import 'package:nb_utils/nb_utils.dart';
 import '../models/ai_chat_model/ai_chat_message_model.dart';
 import '../models/ai_chat_model/ai_chat_session_model.dart';
 
-// Base URL constant to avoid string concatenation issues
-String get baseUrl => AppData.remoteUrl3;
+// Base URL constant — v6 API
+String get baseUrl => AppData.remoteUrlV6;
 
 // Timeout durations
 const Duration defaultTimeout = Duration(seconds: 45);
@@ -69,41 +69,46 @@ String _getMimeType(File file) {
   return 'application/octet-stream';
 }
 
-/// Get all chat sessions
+/// Get all chat sessions (v6)
 Future<List<AiChatSessionModel>> getChatSessions() async {
   try {
-    final rawResponse = await networkUtils.buildHttpResponse2('/chat/sessions', method: networkUtils.HttpMethod.GET);
-
+    final rawResponse = await networkUtils.buildHttpResponseV6('/chat/sessions', method: networkUtils.HttpMethod.GET);
     final response = await networkUtils.handleResponse(rawResponse);
-
     return (response['data'] as List).map((session) => AiChatSessionModel.fromJson(session)).toList();
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
 }
 
-/// Create a new chat session
+/// Get current AI chat quota usage (v6)
+Future<Map<String, dynamic>?> getQuotaUsage() async {
+  try {
+    final rawResponse = await networkUtils.buildHttpResponseV6('/chat/usage', method: networkUtils.HttpMethod.GET);
+    final response = await networkUtils.handleResponse(rawResponse);
+    return response['usage'] as Map<String, dynamic>?;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Create a new chat session (v6)
 Future<AiChatSessionModel> createChatSession({String? name}) async {
   try {
     final Map<String, dynamic> request = {};
     if (name != null) request['name'] = name;
-
-    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse2('/chat/sessions', method: networkUtils.HttpMethod.POST, request: request));
-
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/chat/sessions', method: networkUtils.HttpMethod.POST, request: request));
     return AiChatSessionModel.fromJson(response['data']);
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
 }
 
-/// Get a specific chat session with its messages
+/// Get a specific chat session with its messages (v6)
 Future<Map<String, dynamic>> getChatSession(String sessionId) async {
   try {
-    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse2('/chat/sessions/$sessionId', method: networkUtils.HttpMethod.GET));
-
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/chat/sessions/$sessionId', method: networkUtils.HttpMethod.GET));
     final session = AiChatSessionModel.fromJson(response['data']['session']);
     final messages = (response['data']['messages'] as List).map((message) => AiChatMessageModel.fromJson(message)).toList();
-
     return {'session': session, 'messages': messages};
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
@@ -212,8 +217,7 @@ Future<Map<String, dynamic>> _sendTextOnlyMessage({
 
   // Create URL
   final Uri messageUrl = Uri.parse('$baseUrl/chat/messages');
-
-  try {
+    try {
     // Make the API call
     final stopwatch = Stopwatch()..start();
     final response = await http
@@ -380,83 +384,85 @@ Future<Map<String, dynamic>> _processApiResponse(http.Response response) async {
       // Get the message data
       final messageData = jsonResponse['data']['message'] as Map<String, dynamic>;
       final sources = jsonResponse['data']['sources'] as List?;
+      // v6: extract usage info for quota display
+      final usage = jsonResponse['data']['usage'] as Map<String, dynamic>?;
 
-      // Debug log message structure
       debugPrint("⚠️⚠️⚠️ API LAYER - message data structure: $messageData");
 
-      // Return the raw JSON data instead of a parsed model
-      return {'message': messageData, 'sources': sources ?? []};
+      return {'message': messageData, 'sources': sources ?? [], if (usage != null) 'usage': usage};
     } catch (e) {
       throw ApiException(message: "Invalid response format: $e", statusCode: response.statusCode);
     }
   } else {
-    // Handle error response
+    // Handle error response — including 429 quota exceeded
     String errorMessage;
+    bool isQuotaError = false;
+    Map<String, dynamic>? usageOnError;
     try {
       final errorJson = json.decode(response.body);
-      errorMessage = errorJson['error']?['message'] ?? 'Unknown error occurred';
+      errorMessage = errorJson['error']?['message'] ?? errorJson['message'] ?? 'Unknown error occurred';
+      if (response.statusCode == 429 && errorJson['upgrade'] == true) {
+        isQuotaError = true;
+        usageOnError = errorJson['usage'] as Map<String, dynamic>?;
+      }
     } catch (e) {
       errorMessage = 'Failed to parse error response: ${response.body}';
     }
 
+    if (isQuotaError) {
+      throw QuotaExceededException(message: errorMessage, usage: usageOnError);
+    }
     throw ApiException(message: errorMessage, statusCode: response.statusCode);
   }
 }
 
-/// Rename a chat session
+/// Rename a chat session (v6)
 Future<AiChatSessionModel> renameSession(String sessionId, String name) async {
   try {
     final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2(
+      await networkUtils.buildHttpResponseV6(
         '/chat/sessions/$sessionId/rename',
         method: networkUtils.HttpMethod.POST,
-        request: {
-          'session_id': sessionId, // Include session_id in the request body as well
-          'name': name,
-        },
+        request: {'name': name},
       ),
     );
-
     return AiChatSessionModel.fromJson(response['data']);
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
 }
 
-/// Delete a chat session
+/// Delete a chat session (v6)
 Future<Map<String, dynamic>> deleteSession(String sessionId) async {
   try {
-    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse2('/chat/sessions/$sessionId', method: networkUtils.HttpMethod.DELETE));
-
+    final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/chat/sessions/$sessionId', method: networkUtils.HttpMethod.DELETE));
     AiChatSessionModel? nextSession;
     if (response['data']['next_session'] != null) {
       nextSession = AiChatSessionModel.fromJson(response['data']['next_session']);
     }
-
     return {'success': true, 'nextSession': nextSession};
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
 }
 
-/// Submit feedback for a message
+/// Submit feedback for a message (v6 — use v4 endpoint as fallback since feedback not on v6 yet)
 Future<AiChatMessageModel> submitFeedback(String messageId, String feedback) async {
   try {
     final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2('/chat/feedback', method: networkUtils.HttpMethod.POST, request: {'message_id': messageId, 'feedback': feedback}),
+      await networkUtils.buildHttpResponseV6('/chat/messages/feedback', method: networkUtils.HttpMethod.POST, request: {'message_id': messageId, 'feedback': feedback}),
     );
-
     return AiChatMessageModel.fromJson(response['data']);
   } on ApiException catch (e) {
     throw ApiException(message: e.message, statusCode: e.statusCode);
   }
 }
 
-/// Suggest a title for a chat session
+/// Suggest a title for a chat session (v6)
 Future<String> suggestTitle(String sessionId, String userMessage, String aiResponse) async {
   try {
     final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse2('/chat/suggest-title', method: networkUtils.HttpMethod.POST, request: {'session_id': sessionId, 'user_message': userMessage, 'ai_response': aiResponse}),
+      await networkUtils.buildHttpResponseV6('/chat/suggest-title', method: networkUtils.HttpMethod.POST, request: {'session_id': sessionId, 'user_message': userMessage, 'ai_response': aiResponse}),
     );
 
     return response['data']['title'];

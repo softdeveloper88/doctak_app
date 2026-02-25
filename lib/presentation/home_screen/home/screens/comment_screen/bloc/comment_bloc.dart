@@ -168,7 +168,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           id: AppData.logInUserId, 
           firstName: AppData.name, 
           lastName: '',
-          profilePic: AppData.profile_pic.isNotEmpty ? '${AppData.imageUrl}${AppData.profile_pic}' : null,
+          profilePic: AppData.profile_pic.isNotEmpty ? AppData.profilePicUrl : null,
         ),
       ),
     );
@@ -257,7 +257,7 @@ class CommentBloc extends Bloc<CommentEvent, CommentState> {
           createdAt: formattedDateTime,
           commenter: ReplyCommenter(
             name: AppData.name, 
-            profilePic: AppData.profile_pic.isNotEmpty ? '${AppData.imageUrl}${AppData.profile_pic}' : null,
+            profilePic: AppData.profile_pic.isNotEmpty ? AppData.profilePicUrl : null,
           ),
         ),
       );

@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'debug_attachment_helper.dart';
 
@@ -473,31 +473,23 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                 try {
                   debugPrint('=== CAMERA CAPTURE START ===');
 
-                  debugPrint('Starting image picker...');
-                  final ImagePicker picker = ImagePicker();
-                  final XFile? photo = await picker.pickImage(source: ImageSource.camera, imageQuality: 85);
+                  final file = await UnifiedGalleryPicker.captureFromCamera(context);
 
-                  debugPrint('Image picker result: ${photo?.path ?? 'null'}');
+                  debugPrint('Camera result: ${file?.path ?? 'null'}');
 
-                  if (photo != null && photo.path.isNotEmpty) {
-                    debugPrint('Creating file from path: ${photo.path}');
-                    final file = File(photo.path);
-
-                    debugPrint('Checking if file exists...');
+                  if (file != null) {
                     final fileExists = await file.exists();
                     debugPrint('File exists: $fileExists');
 
                     if (fileExists) {
                       DebugAttachmentHelper.logFileInfo(file, 'Camera Captured Image');
-                      debugPrint('About to call onFileSelected...');
-
                       widget.onFileSelected(file, 'image');
                       debugPrint('onFileSelected called successfully');
                     } else {
-                      debugPrint('Camera file does not exist at path: ${photo.path}');
+                      debugPrint('Camera file does not exist at path: ${file.path}');
                     }
                   } else {
-                    debugPrint('Camera returned null photo or empty path (user may have cancelled)');
+                    debugPrint('Camera returned null (user may have cancelled)');
                   }
 
                   debugPrint('=== CAMERA CAPTURE END ===');
@@ -574,31 +566,26 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       try {
                         debugPrint('=== VIDEO CAPTURE START ===');
 
-                        debugPrint('Starting video picker...');
-                        final ImagePicker picker = ImagePicker();
-                        final XFile? video = await picker.pickVideo(source: ImageSource.camera, maxDuration: const Duration(minutes: 5));
+                        final file = await UnifiedGalleryPicker.captureVideoFromCamera(
+                          context,
+                          maxDuration: const Duration(minutes: 5),
+                        );
 
-                        debugPrint('Video picker result: ${video?.path ?? 'null'}');
+                        debugPrint('Video capture result: ${file?.path ?? 'null'}');
 
-                        if (video != null && video.path.isNotEmpty) {
-                          debugPrint('Creating file from path: ${video.path}');
-                          final file = File(video.path);
-
-                          debugPrint('Checking if file exists...');
+                        if (file != null) {
                           final fileExists = await file.exists();
                           debugPrint('File exists: $fileExists');
 
                           if (fileExists) {
                             DebugAttachmentHelper.logFileInfo(file, 'Camera Recorded Video');
-                            debugPrint('About to call onFileSelected...');
-
                             widget.onFileSelected(file, 'video');
                             debugPrint('onFileSelected called successfully');
                           } else {
-                            debugPrint('Video file does not exist at path: ${video.path}');
+                            debugPrint('Video file does not exist at path: ${file.path}');
                           }
                         } else {
-                          debugPrint('Video recording cancelled by user or returned empty path');
+                          debugPrint('Video recording cancelled by user');
                         }
 
                         debugPrint('=== VIDEO CAPTURE END ===');
@@ -651,31 +638,26 @@ class _AttachmentBottomSheetState extends State<AttachmentBottomSheet> with Sing
                       try {
                         debugPrint('=== VIDEO GALLERY PICK START ===');
 
-                        debugPrint('Starting video picker from gallery...');
-                        final ImagePicker picker = ImagePicker();
-                        final XFile? video = await picker.pickVideo(source: ImageSource.gallery);
+                        final file = await UnifiedGalleryPicker.pickSingleVideo(
+                          context,
+                          showCamera: false,
+                        );
 
-                        debugPrint('Video picker result: ${video?.path ?? 'null'}');
+                        debugPrint('Video gallery result: ${file?.path ?? 'null'}');
 
-                        if (video != null && video.path.isNotEmpty) {
-                          debugPrint('Creating file from path: ${video.path}');
-                          final file = File(video.path);
-
-                          debugPrint('Checking if file exists...');
+                        if (file != null) {
                           final fileExists = await file.exists();
                           debugPrint('File exists: $fileExists');
 
                           if (fileExists) {
                             DebugAttachmentHelper.logFileInfo(file, 'Gallery Selected Video');
-                            debugPrint('About to call onFileSelected...');
-
                             widget.onFileSelected(file, 'video');
                             debugPrint('onFileSelected called successfully');
                           } else {
-                            debugPrint('Video file does not exist at path: ${video.path}');
+                            debugPrint('Video file does not exist at path: ${file.path}');
                           }
                         } else {
-                          debugPrint('Video selection cancelled by user or returned empty path');
+                          debugPrint('Video selection cancelled by user');
                         }
 
                         debugPrint('=== VIDEO GALLERY PICK END ===');

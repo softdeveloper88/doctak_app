@@ -1,21 +1,66 @@
+import 'package:doctak_app/core/utils/app/app_environment.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
 import 'package:doctak_app/data/models/ads_model/ads_type_model.dart';
+import 'package:doctak_app/data/models/subscription/subscription_data_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_chat_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 class AppData {
-  // http://pharmadoc.net/
-  static var base = "https://doctak.net/";
-  static var base2 = "https://doctak.net";
-  static var basePath = "https://doctak.net/public/";
-  // FIXED: Changed to HTTPS for better compatibility with Android security restrictions
-  static var imageUrl = "https://doctak-file.s3.ap-south-1.amazonaws.com/";
-  static var remoteUrl = "https://doctak.net/api/v4";
-  static var remoteUrl2 = "https://doctak.net/api/v4";
-  static var remoteUrl3 = "https://doctak.net/api/v4";
-  static var userProfileUrl = "https://doctak.net/";
-  static const chatifyUrl = "https://doctak.net/chatify/api/";
+  // URLs are now driven by AppEnvironment (debug = local, release = production)
+  // Override with: flutter run --dart-define=ENV=production
+  //           or: flutter run --dart-define=LOCAL_IP=192.168.1.100
+  static var base = AppEnvironment.base;
+  static var base2 = AppEnvironment.base2;
+  static var basePath = AppEnvironment.basePath;
+  static var imageUrl = AppEnvironment.imageUrl;
+  static var remoteUrl = AppEnvironment.apiUrl;
+  static var remoteUrl2 = AppEnvironment.apiUrl;
+  static var remoteUrl3 = AppEnvironment.apiUrl;
+  static var remoteUrlV6 = AppEnvironment.apiUrlV6;
+  static var userProfileUrl = AppEnvironment.userProfileUrl;
+  static var chatifyUrl = AppEnvironment.chatifyUrl;
+
+  /// Returns a full image URL for a given path.
+  /// If the path is already an absolute URL (http/https), returns it as-is.
+  /// If it's a relative path, prepends the S3 base [imageUrl].
+  /// Returns empty string for null/empty paths.
+  static String fullImageUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    return '$imageUrl$path';
+  }
+
+  /// Notifier that fires whenever the user's profile picture changes.
+  /// Widgets can use [ValueListenableBuilder] to rebuild automatically.
+  static final profilePicNotifier = ValueNotifier<String>('');
+
+  /// Convenience getter for the current user's full profile pic URL.
+  static String get profilePicUrl => fullImageUrl(profile_pic);
+
+  /// Updates [profile_pic] everywhere: static var, [profilePicNotifier], and
+  /// persists to SecureStorageService so the value survives app restart.
+  static Future<void> updateProfilePic(String newPic) async {
+    profile_pic = newPic;
+    profilePicNotifier.value = fullImageUrl(newPic);
+    try {
+      final prefs = SecureStorageService.instance;
+      await prefs.initialize();
+      await prefs.setString('profile_pic', newPic);
+    } catch (_) {}
+  }
+
+  /// Updates [background] (cover photo) and persists to SecureStorageService.
+  static Future<void> updateBackground(String newBg) async {
+    background = newBg;
+    try {
+      final prefs = SecureStorageService.instance;
+      await prefs.initialize();
+      await prefs.setString('background', newBg);
+    } catch (_) {}
+  }
 
   static String? userToken;
   static var name = "";
@@ -40,6 +85,60 @@ class AppData {
   static String countryName = "";
   static List<AdsTypeModel> listAdsType = [];
   static AdsSettingModel adsSettingModel = AdsSettingModel();
+
+  // ===================== Subscription & Feature Data (v6) =====================
+  static bool isPremium = false;
+  static String accountType = 'free';
+  static String? planName;
+  static String? planSlug;
+  static String? planExpiresAt;
+  static int? daysRemaining;
+  static bool autoRenew = false;
+  static bool monetizationEnabled = false;
+  static SubscriptionData? subscriptionData;
+  static FeaturesMap? featuresMap;
+
+  /// Check if user has access to a specific feature
+  static bool hasFeatureAccess(String featureSlug) {
+    return featuresMap?.hasAccess(featureSlug) ?? false;
+  }
+
+  /// Get feature details
+  static FeatureAccess? getFeature(String featureSlug) {
+    return featuresMap?.getFeature(featureSlug);
+  }
+
+  /// Populate subscription fields from a PostLoginDeviceAuthResp
+  static void updateSubscriptionData(SubscriptionData? subscription, FeaturesMap? features) {
+    if (subscription != null) {
+      subscriptionData = subscription;
+      isPremium = subscription.isPremium;
+      accountType = subscription.accountType;
+      planName = subscription.planName;
+      planSlug = subscription.planSlug;
+      planExpiresAt = subscription.planExpiresAt;
+      daysRemaining = subscription.daysRemaining;
+      autoRenew = subscription.autoRenew;
+      monetizationEnabled = subscription.monetizationEnabled;
+    }
+    if (features != null) {
+      featuresMap = features;
+    }
+  }
+
+  /// Clear subscription data on logout
+  static void clearSubscriptionData() {
+    isPremium = false;
+    accountType = 'free';
+    planName = null;
+    planSlug = null;
+    planExpiresAt = null;
+    daysRemaining = null;
+    autoRenew = false;
+    monetizationEnabled = false;
+    subscriptionData = null;
+    featuresMap = null;
+  }
 
   /// Ads Setting
   static bool? isShowGoogleBannerAds;

@@ -136,7 +136,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
         searchController: _searchController,
         onSearchChanged: _onSearchChanged,
         startWithSearch: false,
-        showBackButton: false,
+        showBackButton: true,
       ),
       body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const SizedBox(height: 8), _buildTabWidget(theme)]),
     );

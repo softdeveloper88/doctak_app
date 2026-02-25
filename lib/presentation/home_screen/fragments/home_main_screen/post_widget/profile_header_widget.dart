@@ -13,7 +13,7 @@ class ProfileHeaderWidget extends StatelessWidget {
   final VoidCallback onDeleteTap;
   final bool isCurrentUser;
   final int? postId;
-  final int? userId;
+  final String? userId;
   final VoidCallback? onReportTap;
   final VoidCallback? onBlockTap;
 
@@ -37,7 +37,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     final theme = OneUITheme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -47,32 +47,24 @@ class ProfileHeaderWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Row(
                 children: [
-                  // One UI 8.5 Profile Picture
+                  // Clean circular avatar
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: theme.avatarBorder, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.primary.withValues(alpha: theme.isDark ? 0.2 : 0.1),
-                          spreadRadius: 1,
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      color: theme.avatarBackground,
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(21),
                       child: profilePicUrl.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: profilePicUrl,
-                              height: 48,
-                              width: 48,
+                              height: 42,
+                              width: 42,
                               fit: BoxFit.cover,
-                              memCacheWidth: 96, // 2x for retina
-                              memCacheHeight: 96,
+                              memCacheWidth: 84,
+                              memCacheHeight: 84,
                               fadeInDuration: const Duration(milliseconds: 150),
                               fadeOutDuration: const Duration(milliseconds: 100),
                               placeholder: (context, url) => Container(
@@ -80,7 +72,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                                    style: TextStyle(color: theme.avatarText, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                                    style: TextStyle(color: theme.avatarText, fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),
@@ -89,7 +81,7 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 child: Center(
                                   child: Text(
                                     userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                                    style: TextStyle(color: theme.avatarText, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                                    style: TextStyle(color: theme.avatarText, fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ),
@@ -99,14 +91,13 @@ class ProfileHeaderWidget extends StatelessWidget {
                               child: Center(
                                 child: Text(
                                   userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                                  style: TextStyle(color: theme.avatarText, fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Poppins'),
+                                  style: TextStyle(color: theme.avatarText, fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // User Info with One UI 8.5 styling
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,19 +111,15 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 userName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, fontFamily: 'Poppins', color: theme.textPrimary, letterSpacing: -0.2),
+                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: theme.textPrimary),
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            // One UI 8.5 Verification Badge
-                            Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(colors: [theme.verifiedBadge, theme.verifiedBadge.withValues(alpha: 0.8)]),
-                                shape: BoxShape.circle,
-                                boxShadow: [BoxShadow(color: theme.verifiedBadge.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 1))],
-                              ),
-                              child: const Icon(CupertinoIcons.checkmark_alt, size: 10, color: Colors.white),
+                            const SizedBox(width: 4),
+                            // Verified Badge
+                            Icon(
+                              CupertinoIcons.checkmark_seal_fill,
+                              size: 14,
+                              color: theme.verifiedBadge,
                             ),
                           ],
                         ),
@@ -156,20 +143,15 @@ class ProfileHeaderWidget extends StatelessWidget {
                         else
                           Row(
                             children: [
-                              Icon(CupertinoIcons.time, size: 12, color: theme.textSecondary),
-                              const SizedBox(width: 4),
                               Text(
                                 createdAt ?? '',
-                                style: TextStyle(fontSize: 12, color: theme.textSecondary, fontFamily: 'Poppins'),
+                                style: TextStyle(fontSize: 12, color: theme.textSecondary),
                               ),
                               if (createdAt != null && createdAt!.isNotEmpty) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  width: 3,
-                                  height: 3,
-                                  decoration: BoxDecoration(color: theme.textSecondary, shape: BoxShape.circle),
+                                Text(
+                                  ' • ',
+                                  style: TextStyle(fontSize: 12, color: theme.textSecondary),
                                 ),
-                                const SizedBox(width: 6),
                                 Icon(CupertinoIcons.globe, size: 12, color: theme.textSecondary),
                               ],
                             ],
@@ -181,11 +163,10 @@ class ProfileHeaderWidget extends StatelessWidget {
               ),
             ),
           ),
-          // One UI 8.5 More Options Button - Show for all posts
-          Container(
-            decoration: BoxDecoration(color: theme.moreButtonBg, shape: BoxShape.circle),
-            child: PopupMenuButton<String>(
-              icon: Icon(CupertinoIcons.ellipsis_vertical, color: theme.iconColor, size: 18),
+          // More Options Button
+          PopupMenuButton<String>(
+            icon: Icon(CupertinoIcons.ellipsis, color: theme.iconColor, size: 20),
+            padding: const EdgeInsets.all(8),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               color: theme.cardBackground,
               elevation: 8,
@@ -269,7 +250,6 @@ class ProfileHeaderWidget extends StatelessWidget {
                 }
               },
             ),
-          ),
         ],
       ),
     );

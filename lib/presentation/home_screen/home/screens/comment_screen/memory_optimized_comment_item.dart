@@ -228,14 +228,14 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
             // Show report bottom sheet
             ReportContentBottomSheet.show(
               context: context,
-              contentId: widget.comment.id ?? 0,
+              contentId: widget.comment.id?.toString() ?? '0',
               contentType: 'comment',
               contentOwnerName: '${widget.comment.commenter?.firstName ?? ''} ${widget.comment.commenter?.lastName ?? ''}'.trim(),
             );
           } else if (value == 'block') {
             // Show block dialog
-            final userId = int.tryParse(widget.comment.commenter?.id ?? '0') ?? 0;
-            if (userId > 0) {
+            final userId = widget.comment.commenter?.id ?? '';
+            if (userId.isNotEmpty) {
               BlockUserDialog.show(
                 context: context,
                 userId: userId,

@@ -10,7 +10,7 @@ import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/display_video.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 
 class SVPostOptionsComponent extends StatefulWidget {
   final AddPostBloc searchPeopleBloc;
@@ -22,7 +22,6 @@ class SVPostOptionsComponent extends StatefulWidget {
 }
 
 class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
-  final ImagePicker imgpicker = ImagePicker();
   List<XFile> imagefiles = [];
   bool _isPickingMedia = false;
   late StreamSubscription addPostSubscription;
@@ -162,10 +161,14 @@ class _SVPostOptionsComponentState extends State<SVPostOptionsComponent> {
         return;
       }
 
-      var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera, maxDuration: const Duration(minutes: 10));
-      if (pickedfiles != null) {
-        imagefiles.add(pickedfiles);
-        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+      var video = await UnifiedGalleryPicker.captureVideoFromCamera(
+        context,
+        maxDuration: const Duration(minutes: 10),
+      );
+      if (video != null) {
+        final xfile = XFile(video.path);
+        imagefiles.add(xfile);
+        widget.searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
         setState(() {});
       } else {
         debugPrint("No video is selected.");

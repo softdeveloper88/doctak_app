@@ -1,3 +1,5 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
+
 class PostModel {
   Posts? posts;
 
@@ -261,7 +263,7 @@ class Commenter {
   Commenter.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
 
   Map<String, dynamic> toJson() {

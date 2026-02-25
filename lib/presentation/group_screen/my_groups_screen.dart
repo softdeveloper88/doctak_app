@@ -94,7 +94,7 @@ class GroupListItem extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CachedNetworkImage(imageUrl: "${AppData.imageUrl}${group.logo}", height: 50, width: 50, fit: BoxFit.cover).cornerRadiusWithClipRRect(20),
+              CachedNetworkImage(imageUrl: AppData.fullImageUrl(group.logo), height: 50, width: 50, fit: BoxFit.cover).cornerRadiusWithClipRRect(20),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

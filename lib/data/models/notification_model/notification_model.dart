@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 NotificationModel notificationModelFromJson(String str) => NotificationModel.fromJson(json.decode(str));
 String notificationModelToJson(NotificationModel data) => json.encode(data.toJson());
@@ -177,11 +178,11 @@ class Data {
     senderFirstName = json['sender_first_name'];
     senderLastName = json['sender_last_name'];
     senderSpecialty = json['sender_specialty'];
-    senderProfilePic = json['sender_profile_pic'];
+    senderProfilePic = AppData.fullImageUrl(json['sender_profile_pic']);
     receiverFirstName = json['receiver_first_name'];
     receiverLastName = json['receiver_last_name'];
     receiverSpecialty = json['receiver_specialty'];
-    receiverProfilePic = json['receiver_profile_pic'];
+    receiverProfilePic = AppData.fullImageUrl(json['receiver_profile_pic']);
   }
   int? id;
   String? userId;

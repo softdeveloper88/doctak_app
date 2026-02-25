@@ -277,19 +277,25 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(24),
-                            child: CachedNetworkImage(
-                              imageUrl: "${AppData.imageUrl}${AppData.profile_pic.validate()}",
-                              height: 48,
-                              width: 48,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: theme.avatarBackground,
-                                child: Center(child: CupertinoActivityIndicator(color: theme.primary)),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: theme.avatarBackground,
-                                child: Center(child: Icon(CupertinoIcons.person_fill, color: theme.avatarText, size: 22)),
-                              ),
+                            child: ValueListenableBuilder<String>(
+                              valueListenable: AppData.profilePicNotifier,
+                              builder: (_, picUrl, __) {
+                                final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                                return CachedNetworkImage(
+                                  imageUrl: url,
+                                  height: 48,
+                                  width: 48,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(
+                                    color: theme.avatarBackground,
+                                    child: Center(child: CupertinoActivityIndicator(color: theme.primary)),
+                                  ),
+                                  errorWidget: (context, url, error) => Container(
+                                    color: theme.avatarBackground,
+                                    child: Center(child: Icon(CupertinoIcons.person_fill, color: theme.avatarText, size: 22)),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ),

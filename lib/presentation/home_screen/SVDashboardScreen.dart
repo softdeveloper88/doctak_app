@@ -1,6 +1,6 @@
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_tab_fragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -63,7 +63,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
 
     _fragments = [
       SVHomeFragment(homeBloc: homeBloc, openDrawer: () => scaffoldKey.currentState?.openDrawer()),
-      SearchScreen(backPress: () => setState(() => selectedIndex = 0)),
+      NetworkTabFragment(openDrawer: () => scaffoldKey.currentState?.openDrawer()),
       SVAddPostFragment(
         refresh: () {
           setState(() => selectedIndex = 0);
@@ -106,13 +106,16 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
     final theme = OneUITheme.of(context);
     final isRTL = Directionality.of(context) == TextDirection.rtl;
 
-    // One UI 8.5 styled bottom navigation
+    // Minimalist bottom navigation matching the clean design
     return Container(
-      decoration: theme.navBarDecoration,
+      decoration: BoxDecoration(
+        color: theme.navBarBackground,
+        border: Border(top: BorderSide(color: theme.divider, width: 1)),
+      ),
       child: SafeArea(
         top: false,
         child: Container(
-          height: 64,
+          height: 70,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, crossAxisAlignment: CrossAxisAlignment.center, children: isRTL ? _buildRTLNavigationItems() : _buildLTRNavigationItems()),
         ),
@@ -123,7 +126,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
   List<Widget> _buildLTRNavigationItems() {
     return [
       _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, translation(context).lbl_home),
-      _buildNavItem(1, CupertinoIcons.search_circle_fill, CupertinoIcons.search, translation(context).lbl_search),
+      _buildNavItem(1, CupertinoIcons.person_2_fill, CupertinoIcons.person_2, translation(context).lbl_my_network),
       _buildAddButton(),
       _buildProfileNavItem(),
       _buildAINavItem(),
@@ -135,7 +138,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
       _buildAINavItem(),
       _buildProfileNavItem(),
       _buildAddButton(),
-      _buildNavItem(1, CupertinoIcons.search_circle_fill, CupertinoIcons.search, translation(context).lbl_search),
+      _buildNavItem(1, CupertinoIcons.person_2_fill, CupertinoIcons.person_2, translation(context).lbl_my_network),
       _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, translation(context).lbl_home),
     ];
   }
@@ -158,19 +161,19 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // One UI 8.5 styled icon with pill indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              padding: EdgeInsets.symmetric(horizontal: isSelected ? 20 : 12, vertical: 6),
-              decoration: BoxDecoration(color: isSelected ? theme.primary.withValues(alpha: 0.15) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
-              child: Icon(isSelected ? activeIcon : inactiveIcon, size: 24, color: isSelected ? theme.primary : theme.iconInactive),
+            Icon(
+              isSelected ? activeIcon : inactiveIcon,
+              size: 22,
+              color: isSelected ? theme.primary : theme.iconInactive,
             ),
             const SizedBox(height: 4),
-            // One UI 8.5 label
             Text(
               label,
-              style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500, color: isSelected ? theme.primary : theme.iconInactive, letterSpacing: 0.1),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? theme.primary : theme.iconInactive,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -195,20 +198,18 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // One UI 8.5 styled add button
-            Container(
-              width: 48,
-              height: 32,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, spreadRadius: 0, offset: const Offset(0, 2))],
-              ),
-              child: const Icon(CupertinoIcons.plus, color: Colors.white, size: 22),
-            ),
+            Icon(CupertinoIcons.plus, size: 22, color: theme.iconInactive),
             const SizedBox(height: 4),
-            // Empty space to align with other items
-            const SizedBox(height: 13),
+            Text(
+              translation(context).lbl_post,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
+                color: theme.iconInactive,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
@@ -233,31 +234,36 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // One UI 8.5 styled profile with pill indicator
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              padding: EdgeInsets.symmetric(horizontal: isSelected ? 16 : 8, vertical: 4),
-              decoration: BoxDecoration(color: isSelected ? theme.primary.withValues(alpha: 0.15) : Colors.transparent, borderRadius: BorderRadius.circular(16)),
-              child: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: isSelected ? theme.primary : theme.iconInactive, width: 2),
+            Container(
+              width: 26,
+              height: 26,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? theme.primary : theme.iconInactive,
+                  width: 2,
                 ),
-                child: ClipOval(
-                  child: (AppData.profile_pic.trim().isNotEmpty && AppData.profile_pic.toLowerCase() != 'null')
-                      ? AppCachedNetworkImage(imageUrl: AppData.imageUrl + AppData.profile_pic, fit: BoxFit.cover)
-                      : Image.asset('assets/images/person.png', fit: BoxFit.cover),
+              ),
+              child: ClipOval(
+                child: ValueListenableBuilder<String>(
+                  valueListenable: AppData.profilePicNotifier,
+                  builder: (_, picUrl, __) {
+                    final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                    return (url.isNotEmpty && url.toLowerCase() != 'null')
+                        ? AppCachedNetworkImage(imageUrl: url, fit: BoxFit.cover)
+                        : Image.asset('assets/images/person.png', fit: BoxFit.cover);
+                  },
                 ),
               ),
             ),
             const SizedBox(height: 4),
-            // One UI 8.5 label
             Text(
               translation(context).lbl_profile,
-              style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500, color: isSelected ? theme.primary : theme.iconInactive, letterSpacing: 0.1),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? theme.primary : theme.iconInactive,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -282,16 +288,20 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // One UI 8.5 styled AI icon
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Image.asset(theme.isDark ? 'assets/images/docktak_ai_light.png' : 'assets/images/docktak_ai_light.png', width: 24, height: 24, fit: BoxFit.contain),
+            Image.asset(
+              theme.isDark ? 'assets/images/docktak_ai_light.png' : 'assets/images/docktak_ai_light.png',
+              width: 22,
+              height: 22,
+              fit: BoxFit.contain,
             ),
             const SizedBox(height: 4),
-            // One UI 8.5 label
             Text(
               translation(context).lbl_ai,
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: theme.iconInactive, letterSpacing: 0.1),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w400,
+                color: theme.iconInactive,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

@@ -139,7 +139,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       // Handle voice/audio messages
       if (attachmentType.contains('audio') || attachmentType.contains('voice') || attachmentType == 'audio' || attachmentType == 'voice') {
         debugPrint('Rendering voice/audio message');
-        final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
+        final audioUrl = AppData.fullImageUrl(widget.attachmentJson);
         return VoiceMessagePrecacher(
           audioUrl: audioUrl,
           child: CustomAudioPlayer(audioUrl: audioUrl, isMe: widget.isMe),
@@ -149,7 +149,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       // Handle video messages
       if (attachmentType.contains('video') || attachmentType == 'video') {
         debugPrint('Rendering video message');
-        return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
+        return VideoPlayerWidget(videoUrl: AppData.fullImageUrl(widget.attachmentJson));
       }
 
       // Fallback to extension-based detection if attachmentType is not available
@@ -169,14 +169,14 @@ class _ChatBubbleState extends State<ChatBubble> {
       if (audioExtensions.contains(fileExtension)) {
         // Use custom audio player with pre-caching for better performance
         debugPrint('Rendering audio by extension');
-        final audioUrl = "${AppData.imageUrl}${widget.attachmentJson}";
+        final audioUrl = AppData.fullImageUrl(widget.attachmentJson);
         return VoiceMessagePrecacher(
           audioUrl: audioUrl,
           child: CustomAudioPlayer(audioUrl: audioUrl, isMe: widget.isMe),
         );
       } else if (videoExtensions.contains(fileExtension)) {
         debugPrint('Rendering video by extension');
-        return VideoPlayerWidget(videoUrl: '${AppData.imageUrl}${widget.attachmentJson}');
+        return VideoPlayerWidget(videoUrl: AppData.fullImageUrl(widget.attachmentJson));
       } else {
         // Default to image
         debugPrint('Rendering as image (default)');
@@ -185,7 +185,7 @@ class _ChatBubbleState extends State<ChatBubble> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FullScreenImagePage(listCount: 1, imageUrl: "${AppData.imageUrl}${widget.attachmentJson}", post: null, mediaUrls: []),
+                builder: (context) => FullScreenImagePage(listCount: 1, imageUrl: AppData.fullImageUrl(widget.attachmentJson), post: null, mediaUrls: []),
               ),
             );
           },
@@ -199,7 +199,7 @@ class _ChatBubbleState extends State<ChatBubble> {
               ),
               child: Stack(
                 children: [
-                  CustomImageView(imagePath: "${AppData.imageUrl}${widget.attachmentJson}", fit: BoxFit.cover),
+                  CustomImageView(imagePath: AppData.fullImageUrl(widget.attachmentJson), fit: BoxFit.cover),
                   Positioned(
                     top: 8,
                     right: 8,

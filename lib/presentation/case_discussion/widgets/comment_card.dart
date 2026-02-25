@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import '../models/case_discussion_models.dart';
@@ -30,7 +31,7 @@ class CommentCard extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: theme.avatarBackground,
-                  backgroundImage: comment.author.profilePic != null ? NetworkImage(comment.author.profilePic!) : null,
+                  backgroundImage: comment.author.profilePic != null ? NetworkImage(AppData.fullImageUrl(comment.author.profilePic)) : null,
                   child: comment.author.profilePic == null
                       ? Text(
                           comment.author.name.isNotEmpty ? comment.author.name[0].toUpperCase() : '?',

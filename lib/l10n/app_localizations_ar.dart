@@ -1573,6 +1573,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get msg_privacy_settings_updated => 'تم تحديث إعدادات الخصوصية بنجاح';
 
   @override
+  String get msg_privacy_restricted => 'هذه المعلومات خاصة';
+
+  @override
+  String get msg_privacy_restricted_detail =>
+      'اختار المستخدم الحفاظ على خصوصية هذه المعلومات';
+
+  @override
   String get lbl_specialty_info => 'معلومات التخصص';
 
   @override
@@ -2491,6 +2498,71 @@ class AppLocalizationsAr extends AppLocalizations {
       'ما هو كود ICD-10 الذي يجب أن أستخدمه لداء السكري من النوع الثاني مع المضاعفات؟';
 
   @override
+  String get lbl_patient_education => 'Patient Education';
+
+  @override
+  String get lbl_patient_friendly_explanations =>
+      'Patient-friendly explanations';
+
+  @override
+  String get msg_patient_education_prompt =>
+      'Explain treatment options for type 2 diabetes in simple terms for a patient';
+
+  @override
+  String get lbl_guidelines_summary => 'Guidelines';
+
+  @override
+  String get lbl_latest_clinical_guidelines => 'Latest clinical guidelines';
+
+  @override
+  String get msg_guidelines_summary_prompt =>
+      'Summarize the latest treatment guidelines for hypertension';
+
+  @override
+  String get lbl_elaborate => 'Elaborate';
+
+  @override
+  String get lbl_summarize => 'Summarize';
+
+  @override
+  String get lbl_simpler_terms => 'Simpler terms';
+
+  @override
+  String get msg_simpler_terms_prompt => 'Explain this in simpler terms';
+
+  @override
+  String get lbl_risks_side_effects => 'Risks & side effects';
+
+  @override
+  String get msg_risks_prompt =>
+      'What are the potential risks or side effects?';
+
+  @override
+  String get lbl_treatment_options => 'Treatment options';
+
+  @override
+  String get msg_treatment_options_prompt =>
+      'What treatment options are available?';
+
+  @override
+  String get lbl_patient_education_chip => 'Patient education';
+
+  @override
+  String get msg_patient_education_chip_prompt =>
+      'Can you provide a patient-friendly explanation?';
+
+  @override
+  String lbl_messages_left_5h(Object limit, Object remaining) {
+    return '$remaining/$limit left (5h)';
+  }
+
+  @override
+  String get lbl_free_plan => 'Free Plan';
+
+  @override
+  String get lbl_upgrade_unlimited => 'Upgrade for unlimited →';
+
+  @override
   String get lbl_try_it => 'جربه';
 
   @override
@@ -3124,4 +3196,547 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get lbl_tap_to_retry => 'اضغط على إعادة المحاولة للتحديث';
+
+  @override
+  String get lbl_portfolio => 'الأعمال';
+
+  @override
+  String get lbl_research => 'الأبحاث';
+
+  @override
+  String get lbl_education => 'التعليم';
+
+  @override
+  String get lbl_contact_info => 'معلومات الاتصال';
+
+  @override
+  String get lbl_about_me => 'نبذة عني';
+
+  @override
+  String get lbl_professional_information => 'المعلومات المهنية';
+
+  @override
+  String get lbl_personal_details => 'التفاصيل الشخصية';
+
+  @override
+  String get lbl_medical_licenses => 'التراخيص الطبية';
+
+  @override
+  String get lbl_social_links => 'الروابط الاجتماعية';
+
+  @override
+  String get lbl_business_hours => 'ساعات العمل';
+
+  @override
+  String get lbl_awards_and_recognitions => 'الجوائز والتقديرات';
+
+  @override
+  String get lbl_publications => 'المنشورات العلمية';
+
+  @override
+  String get lbl_my_network => 'شبكتي';
+
+  @override
+  String get lbl_interests_hobbies => 'الاهتمامات والهوايات';
+
+  @override
+  String get lbl_privacy_settings => 'إعدادات الخصوصية';
+
+  @override
+  String get lbl_clinic_workplace => 'العيادة / مكان العمل';
+
+  @override
+  String get lbl_birthday => 'تاريخ الميلاد';
+
+  @override
+  String get lbl_from => 'من';
+
+  @override
+  String get lbl_lives_in => 'يعيش في';
+
+  @override
+  String get lbl_address => 'العنوان';
+
+  @override
+  String get lbl_languages => 'اللغات';
+
+  @override
+  String get lbl_country_of_origin => 'بلد المنشأ';
+
+  @override
+  String get lbl_joined => 'انضم';
+
+  @override
+  String get lbl_license => 'ترخيص';
+
+  @override
+  String get lbl_position => 'المنصب';
+
+  @override
+  String get lbl_closed => 'مغلق';
+
+  @override
+  String get lbl_profile_completion => 'اكتمال الملف الشخصي';
+
+  @override
+  String get lbl_share_profile => 'مشاركة الملف الشخصي';
+
+  @override
+  String get lbl_impact_factor_short => 'IF';
+
+  @override
+  String get lbl_citations => 'الاستشهادات';
+
+  @override
+  String get msg_no_contact_info => 'لا تتوفر معلومات اتصال';
+
+  @override
+  String get msg_tell_about_yourself => 'أخبر الآخرين عن نفسك...';
+
+  @override
+  String get msg_add_professional_info => 'أضف معلوماتك المهنية';
+
+  @override
+  String get msg_add_personal_details => 'أضف تفاصيلك الشخصية';
+
+  @override
+  String get msg_add_social_profiles =>
+      'أضف حساباتك الاجتماعية للتواصل مع الزملاء';
+
+  @override
+  String get msg_no_business_hours => 'لم تتم إضافة ساعات عمل بعد';
+
+  @override
+  String get msg_no_experience => 'لم تتم إضافة خبرات بعد';
+
+  @override
+  String get msg_no_education => 'لم تتم إضافة تعليم بعد';
+
+  @override
+  String get msg_no_awards => 'لم تتم إضافة جوائز بعد';
+
+  @override
+  String get msg_no_licenses => 'لم تتم إضافة تراخيص بعد';
+
+  @override
+  String get msg_no_publications => 'لم تتم إضافة منشورات بعد';
+
+  @override
+  String get msg_scan_profile_qr =>
+      'امسح لعرض ملفك الشخصي العام أو انسخ الرابط';
+
+  @override
+  String get msg_profile_link_copied => 'تم نسخ رابط الملف الشخصي!';
+
+  @override
+  String msg_share_profile_text(String url) {
+    return 'تحقق من ملفي الشخصي على DocTak: $url';
+  }
+
+  @override
+  String msg_remove_social_link(String platform) {
+    return 'إزالة رابط $platform؟';
+  }
+
+  @override
+  String get lbl_delete_social_link => 'حذف الرابط الاجتماعي';
+
+  @override
+  String get msg_select_start_date => 'يرجى تحديد تاريخ البدء';
+
+  @override
+  String get lbl_edit_contact_info => 'تعديل معلومات الاتصال';
+
+  @override
+  String get lbl_edit_about_me => 'تعديل نبذة عني';
+
+  @override
+  String get lbl_edit_professional_info => 'تعديل المعلومات المهنية';
+
+  @override
+  String get lbl_edit_personal_details => 'تعديل التفاصيل الشخصية';
+
+  @override
+  String get lbl_edit_experience => 'تعديل الخبرة';
+
+  @override
+  String get lbl_add_education => 'إضافة تعليم';
+
+  @override
+  String get lbl_edit_education => 'تعديل التعليم';
+
+  @override
+  String get lbl_add_publication => 'إضافة منشور';
+
+  @override
+  String get lbl_edit_publication => 'تعديل المنشور';
+
+  @override
+  String get lbl_add_social_link => 'إضافة رابط اجتماعي';
+
+  @override
+  String get lbl_edit_social_link => 'تعديل الرابط الاجتماعي';
+
+  @override
+  String get lbl_add_award => 'إضافة جائزة';
+
+  @override
+  String get lbl_edit_award => 'تعديل الجائزة';
+
+  @override
+  String get lbl_add_license => 'إضافة ترخيص';
+
+  @override
+  String get lbl_edit_license => 'تعديل الترخيص';
+
+  @override
+  String get lbl_add_business_hour => 'إضافة ساعة عمل';
+
+  @override
+  String get lbl_edit_business_hour => 'تعديل ساعة العمل';
+
+  @override
+  String get lbl_state_province => 'الولاية / المحافظة';
+
+  @override
+  String get lbl_license_number => 'رقم الترخيص';
+
+  @override
+  String get lbl_education_college => 'التعليم / الجامعة';
+
+  @override
+  String get lbl_first_name_required => 'الاسم الأول *';
+
+  @override
+  String get lbl_last_name_required => 'اسم العائلة *';
+
+  @override
+  String get lbl_birthplace => 'مكان الميلاد';
+
+  @override
+  String get lbl_position_required => 'المنصب *';
+
+  @override
+  String get lbl_company_required => 'الشركة / المؤسسة *';
+
+  @override
+  String get lbl_start_date_required => 'تاريخ البدء *';
+
+  @override
+  String get lbl_end_date_present => 'تاريخ الانتهاء (اتركه فارغاً للحاضر)';
+
+  @override
+  String get lbl_degree_required => 'الدرجة العلمية *';
+
+  @override
+  String get lbl_field_of_study => 'مجال الدراسة';
+
+  @override
+  String get lbl_institution_required => 'المؤسسة التعليمية *';
+
+  @override
+  String get lbl_grade_gpa => 'المعدل التراكمي';
+
+  @override
+  String get lbl_start_year_required => 'سنة البدء *';
+
+  @override
+  String get lbl_end_year => 'سنة الانتهاء';
+
+  @override
+  String get lbl_currently_studying => 'أدرس هنا حالياً';
+
+  @override
+  String get lbl_specialization => 'التخصص';
+
+  @override
+  String get lbl_activities_societies => 'الأنشطة والجمعيات';
+
+  @override
+  String get lbl_honors_awards => 'الأوسمة والجوائز';
+
+  @override
+  String get lbl_title_required => 'العنوان *';
+
+  @override
+  String get lbl_journal_name_required => 'اسم المجلة *';
+
+  @override
+  String get lbl_publication_date => 'تاريخ النشر';
+
+  @override
+  String get lbl_co_authors => 'المؤلفون المشاركون';
+
+  @override
+  String get lbl_abstract => 'الملخص';
+
+  @override
+  String get lbl_keywords_comma => 'الكلمات المفتاحية (مفصولة بفواصل)';
+
+  @override
+  String get lbl_impact_factor => 'معامل التأثير';
+
+  @override
+  String get lbl_doi_link => 'رابط DOI';
+
+  @override
+  String get lbl_platform_required => 'المنصة *';
+
+  @override
+  String get lbl_profile_url_required => 'رابط الملف الشخصي *';
+
+  @override
+  String get lbl_username_optional => 'اسم المستخدم (اختياري)';
+
+  @override
+  String get lbl_visible_to_others => 'مرئي للآخرين';
+
+  @override
+  String get lbl_award_name_required => 'اسم الجائزة *';
+
+  @override
+  String get lbl_awarding_body => 'الجهة المانحة';
+
+  @override
+  String get lbl_date_received => 'تاريخ الاستلام';
+
+  @override
+  String get lbl_level_hint => 'المستوى (وطني، دولي، إلخ)';
+
+  @override
+  String get lbl_license_type_required => 'نوع الترخيص *';
+
+  @override
+  String get lbl_license_number_required => 'رقم الترخيص *';
+
+  @override
+  String get lbl_issuing_authority_required => 'الجهة المصدرة *';
+
+  @override
+  String get lbl_issue_date => 'تاريخ الإصدار';
+
+  @override
+  String get lbl_expiry_date => 'تاريخ الانتهاء';
+
+  @override
+  String get lbl_location_name_required => 'اسم الموقع *';
+
+  @override
+  String get lbl_location_address => 'عنوان الموقع';
+
+  @override
+  String get lbl_day_of_week_required => 'يوم الأسبوع *';
+
+  @override
+  String get lbl_start_time_required => 'وقت البدء *';
+
+  @override
+  String get lbl_end_time_required => 'وقت الانتهاء *';
+
+  @override
+  String get lbl_available => 'متاح';
+
+  @override
+  String get lbl_notes => 'ملاحظات';
+
+  @override
+  String lbl_select_value(String label) {
+    return 'اختر $label';
+  }
+
+  @override
+  String get lbl_search_hint => 'بحث...';
+
+  @override
+  String lbl_use_custom_value(String value) {
+    return 'استخدم \"$value\"';
+  }
+
+  @override
+  String get msg_type_own_value => 'اكتب القيمة الخاصة بك';
+
+  @override
+  String get msg_type_custom_value => 'اكتب لإدخال قيمة مخصصة';
+
+  @override
+  String get msg_no_results_found => 'لم يتم العثور على نتائج';
+
+  @override
+  String get lbl_other_gender => 'آخر';
+
+  @override
+  String lbl_field_prefix(String value) {
+    return 'المجال: $value';
+  }
+
+  @override
+  String lbl_grade_gpa_prefix(String value) {
+    return 'المعدل: $value';
+  }
+
+  @override
+  String lbl_specialization_prefix(String value) {
+    return 'التخصص: $value';
+  }
+
+  @override
+  String lbl_honors_awards_prefix(String value) {
+    return 'الأوسمة والجوائز: $value';
+  }
+
+  @override
+  String lbl_activities_prefix(String value) {
+    return 'الأنشطة: $value';
+  }
+
+  @override
+  String lbl_issued_prefix(String value) {
+    return 'صدر: $value';
+  }
+
+  @override
+  String lbl_expires_prefix(String value) {
+    return 'ينتهي: $value';
+  }
+
+  @override
+  String lbl_published_prefix(String value) {
+    return 'نُشر: $value';
+  }
+
+  @override
+  String lbl_co_authors_prefix(String value) {
+    return 'المؤلفون المشاركون: $value';
+  }
+
+  @override
+  String get lbl_education_info => 'التعليم';
+
+  @override
+  String get lbl_connections_short => 'اتصالات';
+
+  @override
+  String get lbl_report_user => 'الإبلاغ عن المستخدم';
+
+  @override
+  String get lbl_block_user => 'حظر المستخدم';
+
+  @override
+  String lbl_points_format(String count) {
+    return '$count نقطة';
+  }
+
+  @override
+  String get lbl_section_about_me => 'نبذة عني';
+
+  @override
+  String get lbl_section_professional => 'المهنية';
+
+  @override
+  String get lbl_section_basic_info => 'المعلومات الأساسية';
+
+  @override
+  String get lbl_section_skills => 'المهارات';
+
+  @override
+  String get lbl_section_social_links => 'الروابط الاجتماعية';
+
+  @override
+  String get lbl_section_photo => 'الصورة';
+
+  @override
+  String get lbl_platform_website => 'موقع إلكتروني';
+
+  @override
+  String get lbl_platform_other => 'أخرى';
+
+  @override
+  String get lbl_connection_requests => 'طلبات الاتصال';
+
+  @override
+  String get lbl_people_you_may_know => 'أشخاص قد تعرفهم';
+
+  @override
+  String get lbl_your_connections => 'اتصالاتك';
+
+  @override
+  String get lbl_no_pending_requests => 'لا توجد طلبات معلقة';
+
+  @override
+  String get lbl_no_suggestions => 'لا توجد اقتراحات حالياً';
+
+  @override
+  String get lbl_no_connections => 'لا توجد اتصالات بعد';
+
+  @override
+  String get lbl_ignore => 'تجاهل';
+
+  @override
+  String get lbl_connect => 'اتصال';
+
+  @override
+  String get lbl_pending => 'قيد الانتظار';
+
+  @override
+  String get lbl_search_network => 'بحث في الشبكة...';
+
+  @override
+  String get lbl_search_network_hint => 'ابحث عن أشخاص في شبكتك';
+
+  @override
+  String get lbl_mutual_connections => 'اتصالات مشتركة';
+
+  @override
+  String get lbl_no_results_found => 'لم يتم العثور على نتائج';
+
+  @override
+  String get lbl_clear => 'Clear';
+
+  @override
+  String get lbl_results => 'results';
+
+  @override
+  String get msg_try_different_keywords_or_adjust_filters =>
+      'Try different keywords or adjust filters';
+
+  @override
+  String get msg_check_back_later_for_new_suggestions =>
+      'Check back later for new suggestions';
+
+  @override
+  String get lbl_create_story => 'إنشاء قصة';
+
+  @override
+  String get lbl_text => 'نص';
+
+  @override
+  String get lbl_photo => 'صورة';
+
+  @override
+  String get lbl_type_your_story => 'اكتب قصتك...';
+
+  @override
+  String get lbl_select_photo => 'اختر صورة';
+
+  @override
+  String get lbl_select_video => 'اختر فيديو';
+
+  @override
+  String get lbl_share_story => 'مشاركة القصة';
+
+  @override
+  String lbl_hours_format(String count) {
+    return '$count ساعات';
+  }
+
+  @override
+  String get msg_enter_story_text => 'الرجاء إدخال نص لقصتك';
+
+  @override
+  String msg_select_media(String type) {
+    return 'الرجاء اختيار $type لقصتك';
+  }
+
+  @override
+  String get msg_pick_media_failed => 'فشل في اختيار الوسائط';
 }

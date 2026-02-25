@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/subscription/subscription_data_model.dart';
 
 PostLoginDeviceAuthResp postLogingDeviceAuthReqsFromJson(String str) => PostLoginDeviceAuthResp.fromJson(json.decode(str));
 
 String postLogingDeviceAuthReqsToJson(PostLoginDeviceAuthResp data) => json.encode(data.toJson());
 
 class PostLoginDeviceAuthResp {
-  PostLoginDeviceAuthResp({this.success, this.user, this.token, this.recentCreated, this.university, this.country});
+  PostLoginDeviceAuthResp({this.success, this.user, this.token, this.recentCreated, this.university, this.country, this.subscription, this.features});
 
   PostLoginDeviceAuthResp.fromJson(dynamic json) {
     success = json['success'];
@@ -14,6 +16,12 @@ class PostLoginDeviceAuthResp {
     recentCreated = json['recent_created'];
     university = json['university'] != null ? University.fromJson(json['university']) : null;
     country = json['country'] != null ? Country.fromJson(json['country']) : null;
+    subscription = json['subscription'] != null
+        ? SubscriptionData.fromJson(json['subscription'])
+        : null;
+    features = json['features'] != null
+        ? FeaturesMap.fromJson(Map<String, dynamic>.from(json['features']))
+        : null;
   }
 
   bool? success;
@@ -22,6 +30,8 @@ class PostLoginDeviceAuthResp {
   bool? recentCreated;
   University? university;
   Country? country;
+  SubscriptionData? subscription;
+  FeaturesMap? features;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -36,6 +46,12 @@ class PostLoginDeviceAuthResp {
     }
     if (country != null) {
       map['country'] = country?.toJson();
+    }
+    if (subscription != null) {
+      map['subscription'] = subscription?.toJson();
+    }
+    if (features != null) {
+      map['features'] = features?.toJson();
     }
     return map;
   }
@@ -254,7 +270,7 @@ class User {
     clinicName = json['clinic_name'];
     college = json['college'];
     countryOrigin = json['country_origin'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     practicingCountry = json['practicing_country'];
     otpCode = json['otp_code'];
     balance = json['balance'];
@@ -270,7 +286,7 @@ class User {
     messengerColor = json['messenger_color'];
     name = json['name'];
     emailVerifiedAt = json['email_verified_at'];
-    background = json['background'];
+    background = AppData.fullImageUrl(json['background']);
     userType = json['user_type'];
     state = json['state'];
   }

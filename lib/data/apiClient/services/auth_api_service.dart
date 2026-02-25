@@ -15,7 +15,7 @@ class AuthApiService {
   Future<ApiResponse<PostLoginDeviceAuthResp>> login({required String email, required String password, required String deviceType, required String deviceId, required String deviceToken}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
+        await networkUtils.buildHttpResponseV6(
           '/login',
           method: networkUtils.HttpMethod.POST,
           request: {'email': email, 'password': password, 'device_type': deviceType, 'device_id': deviceId, 'device_token': deviceToken},
@@ -42,8 +42,8 @@ class AuthApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
-          '/login',
+        await networkUtils.buildHttpResponseV6(
+          '/social-login',
           method: networkUtils.HttpMethod.POST,
           request: {
             'email': email,
@@ -52,9 +52,8 @@ class AuthApiService {
             'device_type': deviceType,
             'device_id': deviceId,
             'device_token': deviceToken,
-            'isSocialLogin': true,
             'provider': provider,
-            'token': token,
+            'id_token': token,
           },
         ),
       );
@@ -79,7 +78,7 @@ class AuthApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
+        await networkUtils.buildHttpResponseV6(
           '/register',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -114,7 +113,7 @@ class AuthApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse1(
+        await networkUtils.buildHttpResponseV6(
           '/complete-profile',
           method: networkUtils.HttpMethod.POST,
           request: {'first_name': firstName, 'last_name': lastName, 'country': country, 'state': state, 'specialty': specialty, 'phone': phone, 'user_type': userType},

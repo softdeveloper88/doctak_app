@@ -307,6 +307,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       AppData.logInUserId = userId;
       AppData.name = await prefs.getString('name') ?? '';
       AppData.profile_pic = await prefs.getString('profile_pic') ?? '';
+      AppData.profilePicNotifier.value = AppData.profilePicUrl;
       AppData.background = await prefs.getString('background') ?? '';
       AppData.email = await prefs.getString('email') ?? '';
       AppData.specialty = await prefs.getString('specialty') ?? '';

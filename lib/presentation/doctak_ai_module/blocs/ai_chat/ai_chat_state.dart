@@ -75,11 +75,12 @@ class SessionSelected extends AiChatState {
   final List<AiChatSessionModel> sessions;
   final AiChatSessionModel selectedSession;
   final List<AiChatMessageModel> messages;
+  final AiUsageInfo? quotaInfo;
 
-  const SessionSelected({required this.sessions, required this.selectedSession, required this.messages});
+  const SessionSelected({required this.sessions, required this.selectedSession, required this.messages, this.quotaInfo});
 
   @override
-  List<Object> get props => [sessions, selectedSession, messages];
+  List<Object?> get props => [sessions, selectedSession, messages, quotaInfo];
 }
 
 class SessionLoadError extends AiChatState {
@@ -133,11 +134,12 @@ class MessageSent extends AiChatState {
   final AiChatMessageModel lastUserMessage;
   final AiChatMessageModel lastAiMessage;
   final List? sources;
+  final AiUsageInfo? quotaInfo;
 
-  const MessageSent({required this.sessions, required this.selectedSession, required this.messages, required this.lastUserMessage, required this.lastAiMessage, this.sources});
+  const MessageSent({required this.sessions, required this.selectedSession, required this.messages, required this.lastUserMessage, required this.lastAiMessage, this.sources, this.quotaInfo});
 
   @override
-  List<Object?> get props => [sessions, selectedSession, messages, lastUserMessage, lastAiMessage, sources];
+  List<Object?> get props => [sessions, selectedSession, messages, lastUserMessage, lastAiMessage, sources, quotaInfo];
 }
 
 class MessageSendError extends AiChatState {
@@ -145,11 +147,13 @@ class MessageSendError extends AiChatState {
   final AiChatSessionModel selectedSession;
   final List<AiChatMessageModel> messages;
   final String message;
+  final bool isQuotaError;
+  final AiUsageInfo? quotaInfo;
 
-  const MessageSendError({required this.sessions, required this.selectedSession, required this.messages, required this.message});
+  const MessageSendError({required this.sessions, required this.selectedSession, required this.messages, required this.message, this.isQuotaError = false, this.quotaInfo});
 
   @override
-  List<Object> get props => [sessions, selectedSession, messages, message];
+  List<Object?> get props => [sessions, selectedSession, messages, message, isQuotaError, quotaInfo];
 }
 
 // Session deletion states

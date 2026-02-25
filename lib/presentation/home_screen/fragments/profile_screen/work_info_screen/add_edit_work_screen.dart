@@ -129,7 +129,21 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> with SingleTicker
                   BlocBuilder<ProfileBloc, ProfileState>(
                     bloc: widget.profileBloc,
                     builder: (context, state) {
+                      List<String> specialties = [];
+                      String selectedSpecialty = '';
+                      bool isLoaded = false;
+
                       if (state is PaginationLoadedState) {
+                        specialties = state.specialtyDropdownValue;
+                        selectedSpecialty = state.selectedSpecialtyDropdownValue;
+                        isLoaded = true;
+                      } else if (state is FullProfileLoadedState) {
+                        specialties = state.specialtyDropdownValue;
+                        selectedSpecialty = state.selectedSpecialtyDropdownValue;
+                        isLoaded = true;
+                      }
+
+                      if (isLoaded) {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,8 +159,8 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> with SingleTicker
                                 ),
                                 child: CustomDropdownButtonFormField(
                                   itemBuilder: (item) => Text(item, style: const TextStyle(color: Colors.black)),
-                                  items: state.specialtyDropdownValue,
-                                  value: state.selectedSpecialtyDropdownValue,
+                                  items: specialties,
+                                  value: selectedSpecialty,
                                   width: double.infinity,
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                   onChanged: (String? newValue) {

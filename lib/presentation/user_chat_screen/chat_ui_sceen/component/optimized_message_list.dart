@@ -91,10 +91,8 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
           },
           child: ChatBubble(
             profile: message.userId == widget.userId
-                ? "${AppData.imageUrl}${AppData.profile_pic}"
-                : widget.profilePic.startsWith('http')
-                ? widget.profilePic
-                : "${AppData.imageUrl}${widget.profilePic}",
+                ? AppData.profilePicUrl
+                : AppData.fullImageUrl(widget.profilePic),
             message: message.body ?? '',
             isMe: message.userId == widget.userId ? true : false,
             attachmentJson: message.attachment,
@@ -174,7 +172,7 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
               child: ChatBubble(
-                profile: widget.profilePic.startsWith('http') ? widget.profilePic : "${AppData.imageUrl}${widget.profilePic}",
+                profile: AppData.fullImageUrl(widget.profilePic),
                 isMe: false,
                 attachmentJson: null,
                 attachmentType: null,

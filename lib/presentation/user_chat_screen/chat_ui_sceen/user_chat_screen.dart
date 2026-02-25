@@ -586,7 +586,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
           padding: const EdgeInsets.all(2),
           child: CustomImageView(
             placeHolder: 'images/socialv/faces/face_5.png',
-            imagePath: '${AppData.imageUrl}${contact.profilePic ?? ''}',
+            imagePath: AppData.fullImageUrl(contact.profilePic),
             height: 52,
             width: 52,
             fit: BoxFit.cover,

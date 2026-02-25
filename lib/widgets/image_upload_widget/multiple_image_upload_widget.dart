@@ -7,7 +7,7 @@ import 'package:doctak_app/widgets/display_video.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_bloc.dart';
 import 'package:doctak_app/widgets/image_upload_widget/bloc/image_upload_state.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart' show XFile;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 
@@ -30,7 +30,6 @@ class MultipleImageUploadWidget extends StatefulWidget {
 class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
   // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
   int selectTab = 0;
-  final ImagePicker imgpicker = ImagePicker();
 
   @override
   void initState() {
@@ -120,9 +119,9 @@ class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
         return;
       }
 
-      var pickedfiles = await imgpicker.pickVideo(source: ImageSource.camera);
-      if (pickedfiles != null) {
-        widget.imageUploadBloc.add(SelectedFiles(pickedfiles: pickedfiles, isRemove: false));
+      var video = await UnifiedGalleryPicker.captureVideoFromCamera(context);
+      if (video != null) {
+        widget.imageUploadBloc.add(SelectedFiles(pickedfiles: XFile(video.path), isRemove: false));
       } else {
         debugPrint("No video is selected.");
       }

@@ -40,33 +40,39 @@ class DrawerHeaderAlternative extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(40),
-                  child: AppCachedNetworkImage(
-                    imageUrl: AppData.imageUrl + AppData.profile_pic,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(colors: [Color(0xFF4285F4), Color(0xFF1A73E8)]),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _getInitials(AppData.name),
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins'),
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: AppData.profilePicNotifier,
+                    builder: (context, picUrl, __) {
+                      final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                      return AppCachedNetworkImage(
+                        imageUrl: url,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(colors: [Color(0xFF4285F4), Color(0xFF1A73E8)]),
+                          ),
+                          child: Center(
+                            child: Text(
+                              _getInitials(AppData.name),
+                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins'),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(colors: [Color(0xFF4285F4), Color(0xFF1A73E8)]),
-                      ),
-                      child: Center(
-                        child: Text(
-                          _getInitials(AppData.name),
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins'),
+                        errorWidget: (context, url, error) => Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(colors: [Color(0xFF4285F4), Color(0xFF1A73E8)]),
+                          ),
+                          child: Center(
+                            child: Text(
+                              _getInitials(AppData.name),
+                              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins'),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),

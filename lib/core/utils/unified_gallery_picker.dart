@@ -14,17 +14,26 @@ import 'package:doctak_app/utils/permission_utils.dart';
 /// - Single and multiple image selection modes
 /// - Consistent OneUI 8.5 styled bottom sheet design
 /// - Proper handling for both iOS and Android permissions
+/// The type of media the picker should show.
+enum GalleryMediaType {
+  /// Only images
+  image,
+  /// Only videos
+  video,
+  /// Both images and videos
+  common,
+}
+
 class UnifiedGalleryPicker {
   static final ImagePicker _imagePicker = ImagePicker();
 
   /// Show the unified gallery picker bottom sheet
   /// 
   /// [context] - BuildContext for showing the bottom sheet
-  /// [maxImages] - Maximum number of images that can be selected (null for unlimited, 1 for single selection)
+  /// [maxImages] - Maximum number of items that can be selected (null for unlimited, 1 for single selection)
   /// [showCamera] - Whether to show the camera option
   /// [title] - Title displayed in the bottom sheet header
-  /// [onImageSelected] - Callback when single image is selected (for single mode)
-  /// [onImagesSelected] - Callback when multiple images are selected (for multi mode)
+  /// [mediaType] - Type of media to show (image, video, or both)
   /// 
   /// Returns list of selected files, or null if cancelled
   static Future<List<File>?> show(
@@ -32,6 +41,7 @@ class UnifiedGalleryPicker {
     int? maxImages,
     bool showCamera = true,
     String title = 'Select Photo',
+    GalleryMediaType mediaType = GalleryMediaType.image,
   }) async {
     return await showModalBottomSheet<List<File>>(
       context: context,
@@ -42,6 +52,7 @@ class UnifiedGalleryPicker {
         maxImages: maxImages,
         showCamera: showCamera,
         title: title,
+        mediaType: mediaType,
       ),
     );
   }
@@ -57,6 +68,23 @@ class UnifiedGalleryPicker {
       maxImages: 1,
       showCamera: showCamera,
       title: title,
+      mediaType: GalleryMediaType.image,
+    );
+    return result?.isNotEmpty == true ? result!.first : null;
+  }
+
+  /// Convenience method for picking a single video
+  static Future<File?> pickSingleVideo(
+    BuildContext context, {
+    bool showCamera = true,
+    String title = 'Select Video',
+  }) async {
+    final result = await show(
+      context,
+      maxImages: 1,
+      showCamera: showCamera,
+      title: title,
+      mediaType: GalleryMediaType.video,
     );
     return result?.isNotEmpty == true ? result!.first : null;
   }
@@ -73,10 +101,27 @@ class UnifiedGalleryPicker {
       maxImages: maxImages,
       showCamera: showCamera,
       title: title,
+      mediaType: GalleryMediaType.image,
+    );
+  }
+
+  /// Convenience method for picking multiple media (images + videos)
+  static Future<List<File>?> pickMultipleMedia(
+    BuildContext context, {
+    int? maxImages,
+    bool showCamera = true,
+    String title = 'Select Media',
+  }) async {
+    return await show(
+      context,
+      maxImages: maxImages,
+      showCamera: showCamera,
+      title: title,
+      mediaType: GalleryMediaType.common,
     );
   }
   
-  /// Direct camera capture (useful when only camera is needed)
+  /// Direct camera capture for photo
   static Future<File?> captureFromCamera(BuildContext context) async {
     final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
     if (!cameraGranted) return null;
@@ -97,6 +142,29 @@ class UnifiedGalleryPicker {
     }
     return null;
   }
+
+  /// Direct camera capture for video
+  static Future<File?> captureVideoFromCamera(
+    BuildContext context, {
+    Duration maxDuration = const Duration(seconds: 60),
+  }) async {
+    final cameraGranted = await PermissionUtils.requestCameraPermissionWithUI(context);
+    if (!cameraGranted) return null;
+
+    try {
+      final XFile? video = await _imagePicker.pickVideo(
+        source: ImageSource.camera,
+        maxDuration: maxDuration,
+      );
+      
+      if (video != null) {
+        return File(video.path);
+      }
+    } catch (e) {
+      debugPrint('UnifiedGalleryPicker: Video capture failed: $e');
+    }
+    return null;
+  }
 }
 
 /// The main bottom sheet widget for unified gallery picking
@@ -104,11 +172,13 @@ class _UnifiedGalleryPickerSheet extends StatefulWidget {
   final int? maxImages;
   final bool showCamera;
   final String title;
+  final GalleryMediaType mediaType;
 
   const _UnifiedGalleryPickerSheet({
     required this.maxImages,
     required this.showCamera,
     required this.title,
+    this.mediaType = GalleryMediaType.image,
   });
 
   @override
@@ -162,8 +232,21 @@ class _UnifiedGalleryPickerSheetState extends State<_UnifiedGalleryPickerSheet>
 
       _hasPermission = true;
 
+      final RequestType requestType;
+      switch (widget.mediaType) {
+        case GalleryMediaType.image:
+          requestType = RequestType.image;
+          break;
+        case GalleryMediaType.video:
+          requestType = RequestType.video;
+          break;
+        case GalleryMediaType.common:
+          requestType = RequestType.common;
+          break;
+      }
+
       final List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
-        type: RequestType.image,
+        type: requestType,
         filterOption: FilterOptionGroup(
           imageOption: const FilterOption(
             sizeConstraint: SizeConstraint(minWidth: 0, minHeight: 0),
@@ -254,22 +337,33 @@ class _UnifiedGalleryPickerSheetState extends State<_UnifiedGalleryPickerSheet>
     if (!cameraGranted) return;
 
     try {
-      final XFile? photo = await ImagePicker().pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-        maxWidth: 1920,
-        maxHeight: 1080,
-      );
-
-      if (photo != null && mounted) {
-        Navigator.of(context).pop([File(photo.path)]);
+      if (widget.mediaType == GalleryMediaType.video) {
+        // Video capture
+        final XFile? video = await ImagePicker().pickVideo(
+          source: ImageSource.camera,
+          maxDuration: const Duration(seconds: 60),
+        );
+        if (video != null && mounted) {
+          Navigator.of(context).pop([File(video.path)]);
+        }
+      } else {
+        // Image capture (also for common mode — camera defaults to photo)
+        final XFile? photo = await ImagePicker().pickImage(
+          source: ImageSource.camera,
+          imageQuality: 85,
+          maxWidth: 1920,
+          maxHeight: 1080,
+        );
+        if (photo != null && mounted) {
+          Navigator.of(context).pop([File(photo.path)]);
+        }
       }
     } catch (e) {
       debugPrint('UnifiedGalleryPicker: Camera error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Error taking photo. Please try again.'),
+            content: const Text('Error capturing media. Please try again.'),
             backgroundColor: Colors.red[600],
             behavior: SnackBarBehavior.floating,
           ),
@@ -657,6 +751,34 @@ class _UnifiedGalleryPickerSheetState extends State<_UnifiedGalleryPickerSheet>
                   );
                 },
               ),
+              // Video duration badge
+              if (_assets[index].type == AssetType.video)
+                Positioned(
+                  bottom: 6,
+                  left: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.videocam, color: Colors.white, size: 12),
+                        const SizedBox(width: 3),
+                        Text(
+                          _formatDuration(_assets[index].duration),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               // Selection overlay
               if (isSelected)
                 ClipRRect(
@@ -725,6 +847,12 @@ class _UnifiedGalleryPickerSheetState extends State<_UnifiedGalleryPickerSheet>
         );
       },
     );
+  }
+
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
   Future<Widget> _buildThumbnail(AssetEntity asset, OneUITheme theme) async {

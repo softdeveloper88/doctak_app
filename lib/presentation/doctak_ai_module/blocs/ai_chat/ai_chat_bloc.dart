@@ -4,6 +4,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
+import 'package:doctak_app/data/apiClient/api_caller.dart';
+import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/presentation/doctak_ai_module/data/models/ai_chat_model/ai_chat_message_model.dart';
 import 'package:doctak_app/presentation/doctak_ai_module/data/api/ai_chat_api.dart' as aiChatApi;
 import '../../data/local/ai_chat_local_storage.dart';
@@ -107,6 +109,16 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
       );
       print("⚠️⚠️⚠️ AFTER SENDMESSAGE FUNCTION RETURNS");
       print("⚠️⚠️⚠️ sendMessage API call successful: ${response.keys}");
+    } on QuotaExceededException catch (e) {
+      print("⚠️⚠️⚠️ QUOTA EXCEEDED: ${e.message}");
+      AiUsageInfo? quotaInfo;
+      if (e.usage != null) {
+        try { quotaInfo = AiUsageInfo.fromJson(e.usage!); } catch (_) {}
+      }
+      if (!emit.isDone) {
+        emit(MessageSendError(sessions: sessions, selectedSession: selectedSession, messages: updatedMessages, message: e.message, isQuotaError: true, quotaInfo: quotaInfo));
+      }
+      return;
     } catch (e) {
       print("⚠️⚠️⚠️ CRITICAL ERROR in sendMessage API call: $e");
       print("⚠️⚠️⚠️ Stack trace: ${StackTrace.current}");
@@ -148,9 +160,23 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
       Map<String, dynamic> messageData = response['message'] as Map<String, dynamic>;
       aiMessage = AiChatMessageModel.fromJson(messageData);
       sources = response['sources'] as List?;
+
+      // Attach sources to aiMessage so SourceCitationWidget can render them.
+      // The message model reads sources from metadata, but the API also returns
+      // them as a top-level 'sources' key. Use the API list as fallback so
+      // citations are always shown regardless of metadata serialisation.
+      if ((sources?.isNotEmpty ?? false) && (aiMessage.sources?.isEmpty ?? true)) {
+        final parsedSources = sources!.map((s) {
+          final map = s as Map<String, dynamic>;
+          return Source(url: map['url']?.toString() ?? '', title: map['title']?.toString());
+        }).where((s) => s.url.isNotEmpty).toList();
+        if (parsedSources.isNotEmpty) {
+          aiMessage = aiMessage.withSources(parsedSources);
+        }
+      }
+
       print("⚠️⚠️⚠️ Successfully extracted message from response");
     } catch (e) {
-      print("⚠️⚠️⚠️ ERROR parsing response data: $e");
       print("⚠️⚠️⚠️ Response content: $response");
       print("⚠️⚠️⚠️ Response type: ${response.runtimeType}");
 
@@ -160,6 +186,12 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
       }
       return; // Exit early if parsing fails
     }
+
+    AiUsageInfo? quotaInfo;
+    try {
+      final usageData = response['usage'] as Map<String, dynamic>?;
+      if (usageData != null) quotaInfo = AiUsageInfo.fromJson(usageData);
+    } catch (_) {}
 
     // Add AI message to messages list
     final messagesWithResponse = [...updatedMessages, aiMessage];
@@ -196,7 +228,7 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
 
           // Emit only the final MessageSent state to avoid double emissions
           emit(
-            MessageSent(sessions: updatedSessions, selectedSession: updatedSelectedSession, messages: messagesWithResponse, lastUserMessage: userMessage, lastAiMessage: aiMessage, sources: sources),
+            MessageSent(sessions: updatedSessions, selectedSession: updatedSelectedSession, messages: messagesWithResponse, lastUserMessage: userMessage, lastAiMessage: aiMessage, sources: sources, quotaInfo: quotaInfo),
           );
           print("⚠️⚠️⚠️ EMITTED MessageSent state successfully (title case) - new state: ${state.runtimeType}");
         }
@@ -204,7 +236,7 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
         print('Failed to suggest title: ${e.toString()}');
         // Continue with original session name
         if (!emit.isDone) {
-          emit(MessageSent(sessions: sessions, selectedSession: selectedSession, messages: messagesWithResponse, lastUserMessage: userMessage, lastAiMessage: aiMessage, sources: sources));
+          emit(MessageSent(sessions: sessions, selectedSession: selectedSession, messages: messagesWithResponse, lastUserMessage: userMessage, lastAiMessage: aiMessage, sources: sources, quotaInfo: quotaInfo));
         }
       }
     } else {
@@ -215,7 +247,7 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
           print("⚠️⚠️⚠️ About to emit MessageSent state - current state: ${state.runtimeType}");
 
           // Emit only the final MessageSent state to avoid double emissions
-          emit(MessageSent(sessions: sessions, selectedSession: selectedSession, messages: messagesWithResponse, lastUserMessage: userMessage, lastAiMessage: aiMessage, sources: sources));
+          emit(MessageSent(sessions: sessions, selectedSession: selectedSession, messages: messagesWithResponse, lastUserMessage: userMessage, lastAiMessage: aiMessage, sources: sources, quotaInfo: quotaInfo));
           print("⚠️⚠️⚠️ EMITTED MessageSent state successfully - new state: ${state.runtimeType}");
         } catch (e) {
           print("⚠️⚠️⚠️ ERROR emitting MessageSent: $e");

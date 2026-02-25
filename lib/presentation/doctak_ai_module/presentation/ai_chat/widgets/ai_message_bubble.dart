@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,14 +9,17 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/models/ai_chat_model/ai_chat_message_model.dart';
+import 'source_citation_widget.dart';
 
 class AiMessageBubble extends StatefulWidget {
   final AiChatMessageModel message;
   final bool showAvatar;
   final Function(String feedback) onFeedbackSubmitted;
+  final Function(String prompt)? onSuggestionTap;
   final bool isNewMessage;
+  final bool isLastAiMessage;
 
-  const AiMessageBubble({super.key, required this.message, this.showAvatar = true, required this.onFeedbackSubmitted, this.isNewMessage = false});
+  const AiMessageBubble({super.key, required this.message, this.showAvatar = true, required this.onFeedbackSubmitted, this.onSuggestionTap, this.isNewMessage = false, this.isLastAiMessage = false});
 
   @override
   State<AiMessageBubble> createState() => _AiMessageBubbleState();
@@ -150,28 +154,46 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             padding: const EdgeInsets.only(left: 52, top: 8),
             child: Row(
               children: [
-                // Button 1: Expand/collapse
+                // Button 1: Elaborate (matches website)
                 Container(
                   margin: const EdgeInsets.only(right: 8),
                   child: _buildActionButton(
                     theme: theme,
-                    icon: _isExpanded ? Icons.compress : Icons.expand,
-                    label: _isExpanded ? 'Collapse' : 'Expand',
+                    icon: Icons.expand_circle_down_outlined,
+                    label: translation(context).lbl_elaborate,
                     onPressed: () {
-                      setState(() {
-                        _isExpanded = !_isExpanded;
-                      });
+                      final text = widget.message.content;
+                      final prompt = 'Please elaborate on the following:\n\n"$text"';
+                      if (widget.onSuggestionTap != null) {
+                        widget.onSuggestionTap!(prompt);
+                      }
                     },
                   ),
                 ),
 
-                // Button 2: Copy
+                // Button 2: Summarize (matches website)
+                Container(
+                  margin: const EdgeInsets.only(right: 8),
+                  child: _buildActionButton(
+                    theme: theme,
+                    icon: Icons.summarize_outlined,
+                    label: translation(context).lbl_summarize,
+                    onPressed: () {
+                      final text = widget.message.content;
+                      final prompt = 'Please summarize the following:\n\n"$text"';
+                      if (widget.onSuggestionTap != null) {
+                        widget.onSuggestionTap!(prompt);
+                      }
+                    },
+                  ),
+                ),
+
+                // Button 3: Copy
                 _buildActionButton(
                   theme: theme,
                   icon: Icons.copy_all,
                   label: 'Copy',
                   onPressed: () {
-                    // Copy to clipboard (always use full message text, even if still typing)
                     final text = widget.message.content;
                     Clipboard.setData(ClipboardData(text: text));
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -187,6 +209,29 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
               ],
             ),
           ),
+
+          // Source citations — shown immediately when sources are available (web search)
+          if (!_isTyping && (widget.message.sources?.isNotEmpty ?? false))
+            Padding(
+              padding: const EdgeInsets.only(left: 44, right: 8, top: 8),
+              child: SourceCitationWidget(sources: widget.message.sources!),
+            ),
+
+          // Suggestion chips — shown only after the last AI message (matches website)
+          if (!_isTyping && widget.isLastAiMessage && widget.onSuggestionTap != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 52, top: 8, right: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _buildSuggestionChip(theme, Icons.lightbulb_outline, translation(context).lbl_simpler_terms, translation(context).msg_simpler_terms_prompt),
+                  _buildSuggestionChip(theme, Icons.warning_amber_outlined, translation(context).lbl_risks_side_effects, translation(context).msg_risks_prompt),
+                  _buildSuggestionChip(theme, Icons.healing_outlined, translation(context).lbl_treatment_options, translation(context).msg_treatment_options_prompt),
+                  _buildSuggestionChip(theme, Icons.groups_outlined, translation(context).lbl_patient_education_chip, translation(context).msg_patient_education_chip_prompt),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -313,6 +358,31 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
           alignment: Alignment.center,
         ),
         onPressed: onPressed,
+      ),
+    );
+  }
+
+  Widget _buildSuggestionChip(OneUITheme theme, IconData icon, String label, String prompt) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        widget.onSuggestionTap?.call(prompt);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.primary.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.primary.withValues(alpha: 0.15), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: theme.primary),
+            const SizedBox(width: 6),
+            Text(label, style: TextStyle(fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: theme.primary)),
+          ],
+        ),
       ),
     );
   }

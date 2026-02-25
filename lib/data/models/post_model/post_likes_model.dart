@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 PostLikesModel postLikesModelFromJson(String str) => PostLikesModel.fromJson(json.decode(str));
 String postLikesModelToJson(PostLikesModel data) => json.encode(data.toJson());
@@ -8,7 +9,7 @@ class PostLikesModel {
 
   PostLikesModel.fromJson(dynamic json) {
     id = json['id'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     name = json['name'];
   }
 

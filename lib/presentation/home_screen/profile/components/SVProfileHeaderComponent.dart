@@ -1,78 +1,128 @@
 import 'dart:io';
+import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/network/custom_cache_manager.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
+import 'package:doctak_app/presentation/network_screen/network_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/profile_image_screen/profile_image_screen.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
+import 'package:doctak_app/widgets/communication/communication_gate.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/report_content_bottom_sheet.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:sizer/sizer.dart';
 
 import 'SVProfilePostsComponent.dart';
 
-// Stat item widget for posts/followers/following with improved design
+// ── Primary blue matching the design reference ──
+const Color _kPrimary = Color(0xFF1D4ED8);
+
+// ── Frosted glass circle button used on the cover area ──
+class _CoverButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _CoverButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.8),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, size: 20, color: isDark ? Colors.white70 : Colors.grey[700]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Stat item used inside the stats card ──
 class StatItem extends StatelessWidget {
   final String count;
   final String label;
   final Function() onTap;
   final IconData icon;
+  final bool showBorder;
 
   const StatItem({
     required this.count,
     required this.label,
     required this.onTap,
     required this.icon,
+    this.showBorder = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 16, color: theme.primary),
-                const SizedBox(width: 6),
-                Text(
-                  count,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: theme.primary,
-                    fontFamily: 'Poppins',
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          decoration: showBorder
+              ? BoxDecoration(
+                  border: BorderDirectional(
+                    end: BorderSide(
+                      color: theme.isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                      width: 1,
+                    ),
                   ),
+                )
+              : null,
+          child: Column(
+            children: [
+              Text(
+                count,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Inter',
+                  color: theme.textPrimary,
                 ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.textSecondary,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Poppins',
               ),
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                label.toUpperCase(),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  fontFamily: 'Inter',
+                  color: theme.isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -83,11 +133,13 @@ class SVProfileHeaderComponent extends StatefulWidget {
   UserProfile? userProfile;
   ProfileBloc? profileBoc;
   bool? isMe;
+  bool viewAsPublic;
 
   SVProfileHeaderComponent({
     this.userProfile,
     this.profileBoc,
     this.isMe,
+    this.viewAsPublic = false,
     super.key,
   });
 
@@ -96,168 +148,84 @@ class SVProfileHeaderComponent extends StatefulWidget {
       _SVProfileHeaderComponentState();
 }
 
-// Points card with improved design
-Widget _buildPointsCard(BuildContext context) {
-  final theme = OneUITheme.of(context);
-  return Card(
-    elevation: theme.isDark ? 0 : 2.0,
-    color: theme.cardBackground,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-      side: BorderSide(color: theme.primary.withValues(alpha: 0.2), width: 1),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
-              const SizedBox(width: 4),
-              Text(
-                translation(context).lbl_your_earned_points,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            '300',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: theme.primary,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
 class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  late AnimationController _headerController;
   late Animation<double> _profileImageAnimation;
-  late Animation<double> _headerOpacityAnimation;
-  late Animation<double> _headerScaleAnimation;
-
-  final ScrollController _scrollController = ScrollController();
-  double _scrollOffset = 0.0;
-  bool _isHeaderCollapsed = false;
 
   @override
   void initState() {
     super.initState();
-
-    // Profile image animation
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-
-    // Header collapse animation
-    _headerController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _profileImageAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
-
-    _headerOpacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _headerController, curve: Curves.easeInOut),
-    );
-
-    _headerScaleAnimation = Tween<double>(begin: 0.9, end: 1.0).animate(
-      CurvedAnimation(parent: _headerController, curve: Curves.easeOutBack),
-    );
-
-    // Add scroll listener for smooth header effects
-    _scrollController.addListener(_onScroll);
-
-    // Start animations
+    _profileImageAnimation = Tween<double>(begin: 0.8, end: 1.0)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _controller.forward();
-    _headerController.forward();
-  }
-
-  void _onScroll() {
-    setState(() {
-      _scrollOffset = _scrollController.offset;
-      _isHeaderCollapsed = _scrollOffset > 200;
-    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _headerController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+    final isDark = theme.isDark;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
+    final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
+    final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight + 80),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ═══════════════════════════════════════════
+          //  COVER IMAGE + OVERLAY BUTTONS
+          // ═══════════════════════════════════════════
           Stack(
             clipBehavior: Clip.none,
             children: [
-              // Background Image with gradient overlay
-              InkWell(
-                onTap: () {
-                  ProfileImageScreen(
-                    imageUrl: '${widget.userProfile?.coverPicture}',
-                  ).launch(context);
-                },
+              // Non-positioned child to define the Stack size including overflow area
+              // 200px cover + 60px space for avatar/buttons overflow
+              const SizedBox(height: 260, width: double.infinity),
+              // ── Cover image ──
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: GestureDetector(
+                onTap: () => ProfileImageScreen(
+                  imageUrl: '${widget.userProfile?.coverPicture}',
+                ).launch(context),
                 child: Container(
-                  height: 260,
-                  width: double.maxFinite,
-                  decoration: const BoxDecoration(),
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                          : [const Color(0xFFDBEAFE), const Color(0xFFEFF6FF)],
+                    ),
+                  ),
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Cover image - now fills entire space
-                      widget.userProfile?.coverPicture == null ||
-                              widget.userProfile?.coverPicture ==
-                                  'public/new_assets/assets/images/page-img/default-profile-bg.jpg'
-                          ? Image.asset(
-                              'assets/images/img_cover.png',
-                              width: double.maxFinite,
-                              height: 260,
-                              fit: BoxFit.cover,
-                            )
-                          : CustomImageView(
-                              imagePath: widget.userProfile?.coverPicture ?? '',
-                              height: 260,
-                              width: double.maxFinite,
-                              fit: BoxFit.cover,
-                              placeHolder: 'assets/images/img_cover.png',
-                            ),
-
-                      // Gradient overlay
+                      _buildCoverImage(),
+                      // Subtle gradient overlay like the reference
                       Container(
-                        width: double.maxFinite,
-                        height: 260,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withValues(alpha: 0.1),
-                              Colors.black.withValues(alpha: 0.5),
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.15),
                             ],
                           ),
                         ),
@@ -266,687 +234,593 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   ),
                 ),
               ),
+              ),
 
-              // Back button with improved styling
-              if (!(widget.isMe ?? false))
-                Positioned(
-                  top: 40,
-                  left: 16,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: theme.cardBackground,
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: theme.border, width: 1),
-                      boxShadow: theme.isDark
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 10,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                    ),
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        size: 18,
-                        color: theme.textPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Camera icon for cover photo with improved styling
-              if (widget.isMe ?? false)
-                Positioned(
-                  top: 40,
-                  right: 16,
-                  child: IconButton(
-                    onPressed: () async {
-                      // Use PermissionUtils for proper permission handling on both iOS and Android
-                      final hasPermission =
-                          await PermissionUtils.requestGalleryPermissionWithUI(
-                            context,
-                            showRationale: false,
-                          );
-
-                      if (hasPermission) {
-                        _showFileOptions(false);
-                      }
-                    },
-                    icon: Container(
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        color: theme.primary,
-                        border: Border.all(
-                          color: theme.scaffoldBackground,
-                          width: 2,
-                        ),
-                        borderRadius: BorderRadius.circular(25),
-                        boxShadow: theme.isDark
-                            ? null
-                            : [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 10,
-                                  spreadRadius: 0,
-                                ),
-                              ],
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt_outlined,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Curved top for profile content
+              // ── Overlay action buttons ──
               Positioned(
-                top: 230,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackground,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 16,
+                right: 16,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Back button (other users) or empty space (own profile)
+                    if (!(widget.isMe ?? false))
+                      _CoverButton(
+                        icon: Directionality.of(context) == TextDirection.rtl
+                            ? Icons.arrow_forward_ios
+                            : Icons.arrow_back_ios_new,
+                        onTap: () => Navigator.pop(context),
+                      )
+                    else
+                      const SizedBox(width: 40),
+                    // Right-side actions
+                    Row(
+                      children: [
+                        if (widget.isMe ?? false)
+                          _CoverButton(
+                            icon: Icons.camera_alt_outlined,
+                            onTap: () async {
+                              final hasPermission =
+                                  await PermissionUtils.requestGalleryPermissionWithUI(
+                                    context, showRationale: false);
+                              if (hasPermission) _showFileOptions(false);
+                            },
+                          ),
+                        if (!(widget.isMe ?? false)) ...[
+                          _CoverButton(
+                            icon: Icons.share,
+                            onTap: () {},
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        if (!(widget.isMe ?? false))
+                          _buildMoreOptionsButton(theme),
+                      ],
                     ),
-                    boxShadow: theme.isDark
-                        ? null
-                        : [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 10,
-                              spreadRadius: 0,
-                              offset: const Offset(0, -2),
-                            ),
-                          ],
-                  ),
+                  ],
                 ),
               ),
 
-              // Profile picture with animated scale effect
-              Positioned(
-                right: (100.w / 2) - 60,
-                top: 180,
+              // ── Avatar positioned to overlap the cover ──
+              PositionedDirectional(
+                top: 200 - 56, // half of avatar hangs over cover
+                start: 20,
                 child: ScaleTransition(
                   scale: _profileImageAnimation,
-                  child: Stack(
-                    children: [
-                      // Profile Picture with improved styling
-                      Container(
-                        margin: const EdgeInsets.all(10),
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: theme.scaffoldBackground,
-                            width: 4,
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                          color: theme.surfaceVariant,
-                          boxShadow: theme.isDark
-                              ? null
-                              : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 10,
-                                    spreadRadius: 0,
-                                  ),
-                                ],
-                        ),
-                        child: Hero(
-                          tag: 'profile-image',
-                          child: ClipOval(
-                            child: widget.userProfile?.profilePicture == null
-                                ? Image.asset(
-                                    'images/socialv/faces/face_5.png',
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  )
-                                : CustomImageView(
-                                    imagePath:
-                                        widget.userProfile?.profilePicture ??
-                                        '',
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                    placeHolder:
-                                        'images/socialv/faces/face_5.png',
-                                  ),
-                          ),
-                        ),
-                      ).onTap(() async {
-                        ProfileImageScreen(
-                          imageUrl: '${widget.userProfile?.profilePicture}',
-                        ).launch(context);
-                      }),
-
-                      // Camera icon for profile picture with improved styling
-                      if (widget.isMe ?? false)
-                        Positioned(
-                          top: 10,
-                          right: 5,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () async {
-                                // Use PermissionUtils for proper permission handling on both iOS and Android
-                                final hasPermission =
-                                    await PermissionUtils.requestGalleryPermissionWithUI(
-                                      context,
-                                      showRationale: false,
-                                    );
-
-                                if (hasPermission) {
-                                  _showFileOptions(true);
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(20),
-                              child: Container(
-                                height: 36,
-                                width: 36,
-                                decoration: BoxDecoration(
-                                  color: theme.primary,
-                                  border: Border.all(
-                                    color: theme.scaffoldBackground,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(18),
-                                  boxShadow: theme.isDark
-                                      ? null
-                                      : [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                            blurRadius: 5,
-                                            spreadRadius: 0,
-                                          ),
-                                        ],
-                                ),
-                                child: const Icon(
-                                  Icons.camera_alt_outlined,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
+                  child: _buildAvatar(theme),
                 ),
+              ),
+
+              // ── Follow + Message buttons (other users) / Camera (own) ──
+              PositionedDirectional(
+                top: 200 + 8,
+                end: 20,
+                child: _buildActionButtons(theme),
               ),
             ],
           ),
-          Column(
-            children: [
-              // Profile Image
-              const SizedBox(height: 30),
 
-              // User name with verification badge
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
+          // ── Name + Points badge ──
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
                     '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
                     style: TextStyle(
-                      color: svGetBodyColor(),
-                      fontSize: 20, // Increased font size
-                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Inter',
+                      color: textPrimary,
+                      letterSpacing: -0.3,
                     ),
-                  ), // Made font bolder
-                  8.width, // More spacing
-                  Image.asset(
-                    'images/socialv/icons/ic_TickSquare.png',
-                    height: 16,
-                    width: 16,
-                    fit: BoxFit.cover,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (widget.isMe ?? false) ...[                  
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star_rounded, size: 14, color: Colors.white),
+                        const SizedBox(width: 3),
+                        Text(
+                          translation(context).lbl_points_format('300'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Inter',
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          // ── Specialty + Location ──
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+            child: Row(
+              children: [
+                if (widget.userProfile?.user?.specialty != null &&
+                    widget.userProfile!.user!.specialty!.isNotEmpty) ...[
+                  Icon(Icons.medical_services, size: 14, color: _kPrimary),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      widget.userProfile!.user!.specialty!,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Inter',
+                        color: textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+                if (widget.userProfile?.user?.specialty != null &&
+                    widget.userProfile!.user!.specialty!.isNotEmpty &&
+                    _hasLocation()) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text('•', style: TextStyle(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1), fontSize: 14)),
+                  ),
+                ],
+                if (_hasLocation())
+                  Flexible(
+                    child: Text(
+                      _locationText(),
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Inter',
+                        color: textSecondary,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // ═══════════════════════════════════════════
+          //  STATS CARD
+          // ═══════════════════════════════════════════
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+              decoration: BoxDecoration(
+                color: cardBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderColor),
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              ),
+              child: Row(
+                children: [
+                  StatItem(
+                    count: '${widget.userProfile?.totalPosts ?? '0'}',
+                    label: translation(context).lbl_posts,
+                    onTap: () {},
+                    icon: Icons.article_rounded,
+                    showBorder: true,
+                  ),
+                  StatItem(
+                    count: '${widget.profileBoc?.fullProfile?.stats?.totalConnections ?? widget.userProfile?.totalFollows?.totalFollowings ?? '0'}',
+                    label: translation(context).lbl_connections_short,
+                    onTap: () {
+                      const NetworkScreen(initialTab: 3).launch(context);
+                    },
+                    icon: Icons.people_alt_rounded,
+                    showBorder: true,
+                  ),
+                  StatItem(
+                    count: widget.userProfile?.totalFollows?.totalFollowers ?? '0',
+                    label: translation(context).lbl_followers,
+                    onTap: () {
+                      final userId = (widget.isMe ?? false)
+                          ? AppData.logInUserId
+                          : (widget.userProfile?.user?.id ?? '');
+                      FollowerScreen(isFollowersScreen: true, userId: userId).launch(context);
+                    },
+                    icon: Icons.person_add_rounded,
+                    showBorder: true,
+                  ),
+                  StatItem(
+                    count: widget.userProfile?.totalFollows?.totalFollowings ?? '0',
+                    label: translation(context).lbl_following,
+                    onTap: () {
+                      final userId = (widget.isMe ?? false)
+                          ? AppData.logInUserId
+                          : (widget.userProfile?.user?.id ?? '');
+                      FollowerScreen(isFollowersScreen: false, userId: userId).launch(context);
+                    },
+                    icon: Icons.person_add_rounded,
                   ),
                 ],
               ),
-
-              // Location information
-              SizedBox(
-                width: 80.w,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.location_on, size: 14, color: theme.primary),
-                    4.width,
-                    Text(
-                      '${widget.userProfile?.user?.state ?? ''} ${widget.userProfile?.user?.state != null ? ',' : ''}${widget.userProfile?.user?.country ?? ''}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: theme.textSecondary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500, // Made font bolder
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Specialty
-              if (widget.userProfile?.user?.specialty != null &&
-                  widget.userProfile!.user!.specialty!.isNotEmpty)
-                SizedBox(
-                  width: 80.w,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.medical_services_outlined,
-                        size: 14,
-                        color: theme.primary,
-                      ),
-                      4.width,
-                      Flexible(
-                        child: Text(
-                          widget.userProfile?.user?.specialty ?? '',
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: svGetBodyColor(),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // About me text
-              if (widget.userProfile?.profile?.aboutMe != null &&
-                  widget.userProfile!.profile!.aboutMe!.isNotEmpty)
-                Container(
-                  width: 90.w,
-                  margin: const EdgeInsets.only(top: 8, bottom: 4),
-                  child: Text(
-                    widget.userProfile?.profile?.aboutMe ?? '',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: svGetBodyColor(),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-
-              // Points card for the user's own profile
-              if (widget.isMe ?? false)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  child: _buildPointsCard(context),
-                ),
-
-              // Message and Follow buttons for other users' profiles
-              if (widget.isMe != true)
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Message button with improved styling
-                      InkWell(
-                        onTap: () {
-                          ChatRoomScreen(
-                            username:
-                                '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}',
-                            profilePic:
-                                '${widget.userProfile?.profilePicture?.replaceAll('https://doctak-file.s3.ap-south-1.amazonaws.com/', '')}',
-                            id: '${widget.userProfile?.user?.id}',
-                            roomId: '',
-                          ).launch(context);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.cardBackground,
-                            border: Border.all(color: theme.primary),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: theme.isDark
-                                ? null
-                                : [
-                                    BoxShadow(
-                                      color: theme.primary.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      blurRadius: 5,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgPicture.asset(
-                                'assets/icon/ic_message.svg',
-                                color: theme.primary,
-                                width: 20,
-                                height: 20,
-                              ),
-                              8.width,
-                              Text(
-                                translation(context).lbl_message,
-                                style: TextStyle(
-                                  color: theme.primary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      // Follow button with improved styling
-                      MaterialButton(
-                        height: 40.0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        minWidth: 110,
-                        onPressed: () {
-                          if (widget.userProfile!.isFollowing ?? false) {
-                            widget.profileBoc?.add(
-                              SetUserFollow(
-                                widget.userProfile?.user?.id ?? '',
-                                'unfollow',
-                              ),
-                            );
-
-                            widget.userProfile!.isFollowing = false;
-                          } else {
-                            widget.profileBoc?.add(
-                              SetUserFollow(
-                                widget.userProfile?.user?.id ?? '',
-                                'follow',
-                              ),
-                            );
-
-                            widget.userProfile!.isFollowing = true;
-                          }
-                          setState(() {});
-                        },
-                        elevation: theme.isDark ? 0 : 2,
-                        color: widget.userProfile?.isFollowing ?? false
-                            ? theme.surfaceVariant
-                            : SVAppColorPrimary,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              widget.userProfile?.isFollowing ?? false
-                                  ? Icons.check
-                                  : Icons.person_add_alt_1_rounded,
-                              color: widget.userProfile?.isFollowing ?? false
-                                  ? theme.textSecondary
-                                  : Colors.white,
-                              size: 18,
-                            ),
-                            6.width,
-                            Text(
-                              widget.userProfile?.isFollowing ?? false
-                                  ? translation(context).lbl_following
-                                  : translation(context).lbl_follow,
-                              style: TextStyle(
-                                color: widget.userProfile?.isFollowing ?? false
-                                    ? theme.textSecondary
-                                    : Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 8),
-
-                      // More options (Report/Block) button
-                      Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: theme.surfaceVariant,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: theme.border),
-                        ),
-                        child: PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(
-                            CupertinoIcons.ellipsis,
-                            color: theme.textSecondary,
-                            size: 20,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          color: theme.cardBackground,
-                          elevation: 8,
-                          shadowColor: Colors.black.withValues(alpha: 0.2),
-                          itemBuilder: (context) => [
-                            // Report User option
-                            PopupMenuItem(
-                              value: 'Report',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.flag,
-                                    color: theme.warning,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Report User',
-                                    style: TextStyle(
-                                      color: theme.warning,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Block User option
-                            PopupMenuItem(
-                              value: 'Block',
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    CupertinoIcons.hand_raised,
-                                    color: theme.deleteRed,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Block User',
-                                    style: TextStyle(
-                                      color: theme.deleteRed,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                          onSelected: (value) {
-                            if (value == 'Report') {
-                              // Show report bottom sheet
-                              ReportContentBottomSheet.show(
-                                context: context,
-                                contentId:
-                                    int.tryParse(
-                                      widget.userProfile?.user?.id ?? '0',
-                                    ) ??
-                                    0,
-                                contentType: 'user',
-                                contentOwnerName:
-                                    '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
-                              );
-                            } else if (value == 'Block') {
-                              // Show block dialog
-                              BlockUserDialog.show(
-                                context: context,
-                                userId:
-                                    int.tryParse(
-                                      widget.userProfile?.user?.id ?? '0',
-                                    ) ??
-                                    0,
-                                userName:
-                                    '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
-                                onUserBlocked: () {
-                                  // Navigate back after blocking
-                                  Navigator.of(context).pop();
-                                },
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              // Stats row (posts, followers, following)
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: theme.border, width: 1),
-                    bottom: BorderSide(color: theme.border, width: 1),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // Posts stat
-                    GestureDetector(
-                      onTap: () {},
-                      child: StatItem(
-                        count: '${widget.userProfile?.totalPosts ?? ''}',
-                        label: translation(context).lbl_posts,
-                        onTap: () {},
-                        icon: Icons.article_rounded,
-                      ),
-                    ),
-
-                    // Followers stat
-                    GestureDetector(
-                      onTap: () {
-                        if (!(widget.isMe ?? false)) {
-                          FollowerScreen(
-                            isFollowersScreen: true,
-                            userId: widget.userProfile?.user?.id ?? '',
-                          ).launch(context);
-                        } else {
-                          FollowerScreen(
-                            isFollowersScreen: true,
-                            userId: AppData.logInUserId,
-                          ).launch(context);
-                        }
-                      },
-                      child: StatItem(
-                        count:
-                            widget.userProfile?.totalFollows?.totalFollowings ??
-                            '',
-                        label: translation(context).lbl_followers,
-                        onTap: () {
-                          if (!(widget.isMe ?? false)) {
-                            FollowerScreen(
-                              isFollowersScreen: true,
-                              userId: widget.userProfile?.user?.id ?? '',
-                            ).launch(context);
-                          } else {
-                            FollowerScreen(
-                              isFollowersScreen: true,
-                              userId: AppData.logInUserId,
-                            ).launch(context);
-                          }
-                        },
-                        icon: Icons.people_alt_rounded,
-                      ),
-                    ),
-
-                    // Following stat
-                    GestureDetector(
-                      onTap: () {
-                        if (!(widget.isMe ?? false)) {
-                          FollowerScreen(
-                            isFollowersScreen: false,
-                            userId: widget.userProfile?.user?.id ?? '',
-                          ).launch(context);
-                        } else {
-                          FollowerScreen(
-                            isFollowersScreen: false,
-                            userId: AppData.logInUserId,
-                          ).launch(context);
-                        }
-                      },
-                      child: StatItem(
-                        count:
-                            widget.userProfile?.totalFollows?.totalFollowers ??
-                            '',
-                        label: translation(context).lbl_followings,
-                        onTap: () {
-                          if (!(widget.isMe ?? false)) {
-                            FollowerScreen(
-                              isFollowersScreen: false,
-                              userId: widget.userProfile?.user?.id ?? '',
-                            ).launch(context);
-                          } else {
-                            FollowerScreen(
-                              isFollowersScreen: false,
-                              userId: AppData.logInUserId,
-                            ).launch(context);
-                          }
-                        },
-                        icon: Icons.person_add_rounded,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Container(color: svGetBgColor(), height: 10),
-
-              // Profile posts component
-              SVProfilePostsComponent(widget.profileBoc!),
-            ],
+            ),
           ),
+
+          // ═══════════════════════════════════════════
+          //  TAB SECTION
+          // ═══════════════════════════════════════════
+          SVProfilePostsComponent(widget.profileBoc!, viewAsPublic: widget.viewAsPublic),
         ],
       ),
     );
   }
 
-  var _selectedFile;
+  // ── Cover image widget ──
+  Widget _buildCoverImage() {
+    final coverPic = widget.userProfile?.coverPicture;
+    final isDefault = coverPic == null ||
+        coverPic.isEmpty ||
+        coverPic.contains('default-profile-bg.jpg');
 
-  // Use unified gallery picker for consistent experience
+    if (isDefault) {
+      return Image.asset(
+        'assets/images/img_cover.png',
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+      );
+    }
+    return CachedNetworkImage(
+      key: ValueKey('cover_${coverPic}_${widget.profileBoc?.imageVersion ?? 0}'),
+      imageUrl: coverPic!,
+      height: 200,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      cacheManager: CustomCacheManager(),
+      placeholder: (context, url) => Container(
+        height: 200,
+        width: double.infinity,
+        color: Colors.grey[200],
+        child: const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
+      ),
+      errorWidget: (context, url, error) => Image.asset(
+        'assets/images/img_cover.png',
+        height: 200,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  // ── Avatar with verified badge ──
+  Widget _buildAvatar(OneUITheme theme) {
+    return Stack(
+      children: [
+        Container(
+          width: 112,
+          height: 112,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
+              width: 4,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: GestureDetector(
+            onTap: () => ProfileImageScreen(
+              imageUrl: '${widget.userProfile?.profilePicture}',
+            ).launch(context),
+            child: Hero(
+              tag: 'profile-image',
+              child: ClipOval(
+                child: Container(
+                  color: theme.isDark ? const Color(0xFF1E293B) : Colors.white,
+                  child: (widget.userProfile?.profilePicture == null || widget.userProfile!.profilePicture!.isEmpty)
+                      ? Image.asset(
+                          'images/socialv/faces/face_5.png',
+                          width: 104,
+                          height: 104,
+                          fit: BoxFit.cover,
+                        )
+                      : CachedNetworkImage(
+                          key: ValueKey(
+                              'profile_${widget.userProfile?.profilePicture}_${widget.profileBoc?.imageVersion ?? 0}'),
+                          imageUrl: widget.userProfile!.profilePicture!,
+                          width: 104,
+                          height: 104,
+                          fit: BoxFit.cover,
+                          cacheManager: CustomCacheManager(),
+                          placeholder: (context, url) => Container(
+                            width: 104,
+                            height: 104,
+                            color: theme.isDark ? const Color(0xFF1E293B) : Colors.grey[200],
+                            child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: theme.primary))),
+                          ),
+                          errorWidget: (context, url, error) => Image.asset(
+                            'images/socialv/faces/face_5.png',
+                            width: 104,
+                            height: 104,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Verified badge (bottom-end)
+        PositionedDirectional(
+          bottom: 4,
+          end: 4,
+          child: Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: _kPrimary,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
+                width: 2,
+              ),
+            ),
+            child: const Icon(Icons.verified, size: 14, color: Colors.white),
+          ),
+        ),
+        // Camera button for own profile
+        if (widget.isMe ?? false)
+          PositionedDirectional(
+            top: 0,
+            end: 0,
+            child: GestureDetector(
+              onTap: () async {
+                final hasPermission =
+                    await PermissionUtils.requestGalleryPermissionWithUI(
+                        context, showRationale: false);
+                if (hasPermission) _showFileOptions(true);
+              },
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: _kPrimary,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(Icons.camera_alt_outlined, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ── Action buttons (Follow/Message for other users) ──
+  Widget _buildActionButtons(OneUITheme theme) {
+    if (widget.isMe ?? false) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Follow button — pill shaped, filled
+        GestureDetector(
+          onTap: () {
+            if (widget.userProfile!.isFollowing ?? false) {
+              widget.profileBoc?.add(
+                  SetUserFollow(widget.userProfile?.user?.id ?? '', 'unfollow'));
+              widget.userProfile!.isFollowing = false;
+            } else {
+              widget.profileBoc?.add(
+                  SetUserFollow(widget.userProfile?.user?.id ?? '', 'follow'));
+              widget.userProfile!.isFollowing = true;
+            }
+            setState(() {});
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            decoration: BoxDecoration(
+              color: (widget.userProfile?.isFollowing ?? false)
+                  ? (theme.isDark ? Colors.white12 : const Color(0xFFF1F5F9))
+                  : _kPrimary,
+              borderRadius: BorderRadius.circular(999),
+              boxShadow: (widget.userProfile?.isFollowing ?? false)
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: _kPrimary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+            ),
+            child: Text(
+              (widget.userProfile?.isFollowing ?? false)
+                  ? translation(context).lbl_following
+                  : translation(context).lbl_follow,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter',
+                color: (widget.userProfile?.isFollowing ?? false)
+                    ? theme.textSecondary
+                    : Colors.white,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Message icon button — outlined circle
+        GestureDetector(
+          onTap: () {
+            final userId = '${widget.userProfile?.user?.id}';
+            final userName = '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}';
+            CommunicationGate.guardMessage(
+              context: context,
+              targetUserId: userId,
+              targetUserName: userName,
+              onAllowed: () {
+                ChatRoomScreen(
+                  username: userName,
+                  profilePic: '${widget.userProfile?.profilePicture ?? ''}',
+                  id: userId,
+                  roomId: '',
+                ).launch(context);
+              },
+            );
+          },
+          child: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: theme.isDark ? const Color(0xFF1E293B) : Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: theme.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+              boxShadow: theme.isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+            ),
+            child: Icon(
+              Icons.mail_outline_rounded,
+              size: 20,
+              color: theme.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── More options button (report / block) ──
+  Widget _buildMoreOptionsButton(OneUITheme theme) {
+    return PopupMenuButton<String>(
+      padding: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: theme.cardBackground,
+      elevation: 8,
+      shadowColor: Colors.black.withValues(alpha: 0.2),
+      child: ClipOval(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: theme.isDark
+                  ? Colors.black.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.8),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.more_vert, size: 20,
+                color: theme.isDark ? Colors.white70 : Colors.grey[700]),
+          ),
+        ),
+      ),
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'Report',
+          child: Row(
+            children: [
+              Icon(CupertinoIcons.flag, color: theme.warning, size: 20),
+              const SizedBox(width: 12),
+              Text(translation(context).lbl_report_user,
+                  style: TextStyle(
+                      color: theme.warning,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'Block',
+          child: Row(
+            children: [
+              Icon(CupertinoIcons.hand_raised, color: theme.deleteRed, size: 20),
+              const SizedBox(width: 12),
+              Text(translation(context).lbl_block_user,
+                  style: TextStyle(
+                      color: theme.deleteRed,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+      ],
+      onSelected: (value) {
+        if (value == 'Report') {
+          ReportContentBottomSheet.show(
+            context: context,
+            contentId: widget.userProfile?.user?.id ?? '',
+            contentType: 'user',
+            contentOwnerName:
+                '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
+          );
+        } else if (value == 'Block') {
+          BlockUserDialog.show(
+            context: context,
+            userId: widget.userProfile?.user?.id ?? '',
+            userName:
+                '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
+            onUserBlocked: () => Navigator.of(context).pop(),
+          );
+        }
+      },
+    );
+  }
+
+  // ── Helpers ──
+  bool _hasLocation() {
+    final user = widget.userProfile?.user;
+    return (user?.state != null && user!.state!.isNotEmpty) ||
+        (user?.country != null && user!.country!.isNotEmpty);
+  }
+
+  String _locationText() {
+    final user = widget.userProfile?.user;
+    final parts = <String>[];
+    if (user?.state != null && user!.state!.isNotEmpty) parts.add(user.state!);
+    if (user?.country != null && user!.country!.isNotEmpty) parts.add(user.country!);
+    return parts.join(', ');
+  }
+
+  // ignore: unused_field
+  File? _selectedFile;
+
   void _showFileOptions(bool isProfilePic) {
     _pickFromUnifiedGallery(isProfilePic);
   }
@@ -958,7 +832,6 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
           ? translation(context).lbl_update_profile_picture
           : translation(context).lbl_update_cover_photo,
     );
-
     if (file != null) {
       setState(() {
         _selectedFile = file;

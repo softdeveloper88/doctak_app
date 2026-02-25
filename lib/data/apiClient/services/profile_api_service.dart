@@ -1,5 +1,7 @@
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_caller.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:doctak_app/data/models/profile_model/family_relationship_model.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
@@ -64,6 +66,7 @@ class ProfileApiService {
             'gender': gender,
             'country': country,
             'city': city,
+            'state': city,
             'country_origin': countryOrigin,
             'dob_privacy': dobPrivacy,
             'email_privacy': emailPrivacy,
@@ -85,27 +88,59 @@ class ProfileApiService {
     }
   }
 
-  /// Upload profile picture
+  /// Upload profile picture using multipart file upload
   Future<ApiResponse<Map<String, dynamic>>> uploadProfilePicture({required String filePath}) async {
     try {
-      // Note: This needs proper file upload handling in networkUtils
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/upload-profile-pic', method: networkUtils.HttpMethod.POST, request: {'profile_pic': filePath}));
-      return ApiResponse.success(Map<String, dynamic>.from(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
+      final dioClient = dio.Dio();
+      final formData = dio.FormData.fromMap({
+        'profile_pic': await dio.MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+      final response = await dioClient.post(
+        '${AppData.remoteUrl2}/upload-profile-pic',
+        data: formData,
+        options: dio.Options(headers: {
+          'Authorization': 'Bearer ${AppData.userToken}',
+          'Accept': 'application/json',
+        }),
+      );
+      final data = response.data is Map ? Map<String, dynamic>.from(response.data) : <String, dynamic>{};
+      if (data['success'] == true) {
+        return ApiResponse.success(data);
+      } else {
+        return ApiResponse.error(data['message'] ?? 'Upload failed');
+      }
     } catch (e) {
       return ApiResponse.error('Failed to upload profile picture: $e');
     }
   }
 
-  /// Upload cover picture
+  /// Upload cover picture using multipart file upload
   Future<ApiResponse<Map<String, dynamic>>> uploadCoverPicture({required String filePath}) async {
     try {
-      // Note: This needs proper file upload handling in networkUtils
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/upload-cover-pic', method: networkUtils.HttpMethod.POST, request: {'background': filePath}));
-      return ApiResponse.success(Map<String, dynamic>.from(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
+      final dioClient = dio.Dio();
+      final formData = dio.FormData.fromMap({
+        'background': await dio.MultipartFile.fromFile(
+          filePath,
+          filename: filePath.split('/').last,
+        ),
+      });
+      final response = await dioClient.post(
+        '${AppData.remoteUrl2}/upload-cover-pic',
+        data: formData,
+        options: dio.Options(headers: {
+          'Authorization': 'Bearer ${AppData.userToken}',
+          'Accept': 'application/json',
+        }),
+      );
+      final data = response.data is Map ? Map<String, dynamic>.from(response.data) : <String, dynamic>{};
+      if (data['success'] == true) {
+        return ApiResponse.success(data);
+      } else {
+        return ApiResponse.error(data['message'] ?? 'Upload failed');
+      }
     } catch (e) {
       return ApiResponse.error('Failed to upload cover picture: $e');
     }
@@ -277,6 +312,7 @@ class ProfileApiService {
             'address_privacy': addressPrivacy,
             'birthplace_privacy': birthplacePrivacy,
             'language_privacy': languagesPrivacy,
+            'languages_privacy': languagesPrivacy,
             'lives_in_privacy': livesInPrivacy,
             'phone_privacy': phonePrivacy,
           },

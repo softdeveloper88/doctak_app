@@ -10,6 +10,7 @@ import 'package:doctak_app/data/models/chat_model/message_model.dart';
 import 'package:doctak_app/data/models/chat_model/search_contacts_model.dart';
 import 'package:doctak_app/data/models/chat_model/send_message_model.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
+import 'package:doctak_app/data/apiClient/services/moderation_api_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -304,6 +305,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     print(event.attachmentType);
 
     try {
+      // Check if the receiver is blocked before sending
+      if (event.receiverId != null && event.receiverId!.isNotEmpty) {
+        final canComm = await ModerationApiService().canCommunicate(
+          targetUserId: event.receiverId!,
+        );
+        if (canComm.success && canComm.data == false) {
+          emit(DataError('Cannot send message. This user is blocked.'));
+          return;
+        }
+      }
+
       print("Processing file: ${event.file}");
       SendMessageModel response;
 

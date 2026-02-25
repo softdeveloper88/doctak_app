@@ -633,7 +633,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
                   ),
                   child: ClipOval(
                     child: user.profilePic != null && user.profilePic!.isNotEmpty
-                        ? CustomImageView(imagePath: '${AppData.imageUrl}${user.profilePic!}', fit: BoxFit.cover)
+                        ? CustomImageView(imagePath: AppData.fullImageUrl(user.profilePic!), fit: BoxFit.cover)
                         : Container(
                             color: accentColor.withValues(alpha: 0.1),
                             child: Icon(Icons.person, color: accentColor, size: 30),

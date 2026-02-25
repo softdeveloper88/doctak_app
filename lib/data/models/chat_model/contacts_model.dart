@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 import 'package:equatable/equatable.dart';
 
@@ -85,7 +86,7 @@ class Contacts extends Equatable {
       createdAt = json['created_at'],
       firstName = json['first_name'],
       lastName = json['last_name'],
-      profilePic = json['profile_pic'],
+      profilePic = AppData.fullImageUrl(json['profile_pic']),
       latestMessage = json['latest_message'],
       latestMessageTime = json['latest_message_time'],
       unreadCount = json['unread_count'];

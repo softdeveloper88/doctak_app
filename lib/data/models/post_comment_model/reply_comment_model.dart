@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 ReplyCommentModel replyCommentModelFromJson(String str) => ReplyCommentModel.fromJson(json.decode(str));
 String replyCommentModelToJson(ReplyCommentModel data) => json.encode(data.toJson());
@@ -82,7 +83,7 @@ class ReplyCommenter {
 
   ReplyCommenter.fromJson(dynamic json) {
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
   }
   String? name;
   String? profilePic;

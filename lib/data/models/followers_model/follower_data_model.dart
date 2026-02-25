@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 FollowerDataModel followerDataModelFromJson(String str) => FollowerDataModel.fromJson(json.decode(str));
 String followerDataModelToJson(FollowerDataModel data) => json.encode(data.toJson());
@@ -8,8 +9,8 @@ class FollowerDataModel {
 
   FollowerDataModel.fromJson(dynamic json) {
     totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
-    profilePicture = json['profile_picture'];
-    coverPicture = json['cover_picture'];
+    profilePicture = AppData.fullImageUrl(json['profile_picture']);
+    coverPicture = AppData.fullImageUrl(json['cover_picture']);
     totalPosts = json['total_posts'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     if (json['followers'] != null) {
@@ -65,7 +66,7 @@ class Following {
     isCurrentlyFollow = json['isCurrentlyFollow'];
     profileUrl = json['profile_url'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     specialty = json['specialty'];
   }
   String? id;
@@ -98,7 +99,7 @@ class Followers {
     isCurrentlyFollow = json['isCurrentlyFollow'];
     profileUrl = json['profile_url'];
     name = json['name'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     specialty = json['specialty'];
   }
   String? id;
@@ -180,7 +181,7 @@ class User {
     clinicName = json['clinic_name'];
     college = json['college'];
     countryOrigin = json['country_origin'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     practicingCountry = json['practicing_country'];
     otpCode = json['otp_code'];
     balance = json['balance'];
@@ -195,7 +196,7 @@ class User {
     darkMode = json['dark_mode'];
     messengerColor = json['messenger_color'];
     isPremium = json['is_premium'];
-    background = json['background'];
+    background = AppData.fullImageUrl(json['background']);
   }
   String? id;
   String? firstName;

@@ -137,3 +137,14 @@ class ApiException implements Exception {
   @override
   String toString() => 'ApiException: $statusCode - $message\nResponse: $response';
 }
+
+/// Thrown when the user's AI chat quota is exhausted (HTTP 429).
+class QuotaExceededException implements Exception {
+  final String message;
+  final Map<String, dynamic>? usage;
+
+  const QuotaExceededException({required this.message, this.usage});
+
+  @override
+  String toString() => 'QuotaExceededException: $message';
+}

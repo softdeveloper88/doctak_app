@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/widgets/medical_citation_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +10,6 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../../core/utils/app/AppData.dart';
-import '../../../widgets/custom_image_view.dart';
 
 class ChatBubble extends StatelessWidget {
   final String text;
@@ -21,6 +21,8 @@ class ChatBubble extends StatelessWidget {
   final String responseImageUrl2;
   final List<int>? imageBytes1;
   final List<int>? imageBytes2;
+  /// Citation sources (Apple Guideline 1.4.1). Each map has 'url' and optional 'title'.
+  final List<Map<String, dynamic>>? sources;
 
   const ChatBubble({
     super.key,
@@ -33,7 +35,41 @@ class ChatBubble extends StatelessWidget {
     this.responseImageUrl2 = '',
     this.imageBytes1,
     this.imageBytes2,
+    this.sources,
   });
+
+  /// Safely load a network image with error handling to prevent crashes
+  /// from expired/invalid URLs (fixes MultiFrameImageStreamCompleter errors).
+  Widget _safeNetworkImage(String url) {
+    return CachedNetworkImage(
+      imageUrl: url,
+      fit: BoxFit.cover,
+      fadeInDuration: const Duration(milliseconds: 150),
+      httpHeaders: const {
+        'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+      },
+      placeholder: (context, _) => Container(
+        color: Colors.grey[200],
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+          ),
+        ),
+      ),
+      errorWidget: (context, _, __) => Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Center(
+          child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 28),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +184,21 @@ class ChatBubble extends StatelessWidget {
                                 ),
                         ),
                       ),
+                      // Citation sources shown for AI responses (Apple Guideline 1.4.1)
+                      if (!isUserMessage &&
+                          sources != null &&
+                          sources!.isNotEmpty &&
+                          text != translation(context).lbl_generating_response)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                          child: MedicalCitationWidget(
+                            sources: sources!.map((s) => {
+                              'url': s['url']?.toString() ?? '',
+                              'title': s['title']?.toString(),
+                            }).toList(),
+                          ),
+                        ),
+
                       Divider(color: theme.isDark ? Colors.grey[700] : Colors.grey[200]),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -203,7 +254,7 @@ class ChatBubble extends StatelessWidget {
                                   Row(
                                     children: [
                                       if (responseImageUrl1 != '')
-                                        SizedBox(height: 100, width: 100, child: CustomImageView(imagePath: responseImageUrl1))
+                                        SizedBox(height: 100, width: 100, child: _safeNetworkImage(responseImageUrl1))
                                       else if (imageBytes1 != null && imageBytes1!.isNotEmpty)
                                         SizedBox(
                                           height: 100,
@@ -228,7 +279,7 @@ class ChatBubble extends StatelessWidget {
                                         ),
                                       const SizedBox(width: 4),
                                       if (responseImageUrl2 != '')
-                                        SizedBox(height: 100, width: 100, child: CustomImageView(imagePath: responseImageUrl2))
+                                        SizedBox(height: 100, width: 100, child: _safeNetworkImage(responseImageUrl2))
                                       else if (imageBytes2 != null && imageBytes2!.isNotEmpty)
                                         SizedBox(
                                           height: 100,
@@ -254,7 +305,7 @@ class ChatBubble extends StatelessWidget {
                                     ],
                                   )
                                 else if (responseImageUrl1 != '')
-                                  CustomImageView(imagePath: responseImageUrl1)
+                                  _safeNetworkImage(responseImageUrl1)
                                 else if (imageBytes1 != null && imageBytes1!.isNotEmpty)
                                   Image.memory(
                                     Uint8List.fromList(imageBytes1!),
@@ -295,7 +346,7 @@ class ChatBubble extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
                         child: CachedNetworkImage(
-                          imageUrl: AppData.imageUrl + AppData.profile_pic,
+                          imageUrl: AppData.profilePicUrl,
                           width: 32,
                           height: 32,
                           fit: BoxFit.cover,

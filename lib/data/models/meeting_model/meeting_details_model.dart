@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 MeetingDetailsModel meetingDetailsModelFromJson(String str) => MeetingDetailsModel.fromJson(json.decode(str));
 String meetingDetailsModelToJson(MeetingDetailsModel data) => json.encode(data.toJson());
@@ -72,7 +73,7 @@ class Users {
     firstName = json['first_name'];
     lastName = json['last_name'];
     specialty = json['specialty'];
-    profilePic = json['profile_pic'];
+    profilePic = AppData.fullImageUrl(json['profile_pic']);
     if (json['meeting_details'] != null) {
       meetingDetails = [];
       json['meeting_details'].forEach((v) {
