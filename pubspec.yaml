@@ -125,7 +125,7 @@ dependencies:
   audio_session: ^0.1.16
   mobx: ^2.3.0+1
   flutter_mobx: ^2.0.6+5
-  flutter_callkit_incoming: 2.0.4+2
+  flutter_callkit_incoming: ^3.0.0
   flutter_webrtc: ^1.2.1
   uuid: ^4.0.0
   wakelock_plus: ^1.2.11

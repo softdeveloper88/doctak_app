@@ -13,6 +13,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/guidelines_screen.dart';
+import 'package:doctak_app/presentation/guideline_module/presentation/guideline_agent_screen.dart';
+import 'package:doctak_app/presentation/guideline_module/blocs/guideline_agent/guideline_agent_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/suggestion_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
@@ -2174,7 +2176,15 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           ).launch(context);
           break;
         case 4:
-          const GuidelinesScreen().launch(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) => GuidelineAgentBloc(),
+                child: const GuidelineAgentScreen(),
+              ),
+            ),
+          );
           break;
         case 5:
           const ConferencesScreen().launch(context);
