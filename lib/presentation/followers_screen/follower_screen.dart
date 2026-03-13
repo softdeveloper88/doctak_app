@@ -66,11 +66,7 @@ class _FollowerScreenState extends State<FollowerScreen> {
               IconButton(
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                  child: Icon(isSearchShow ? Icons.close : Icons.search, color: theme.primary, size: 16),
-                ),
+                icon: Icon(isSearchShow ? Icons.close : Icons.search, color: theme.primary, size: 22),
                 onPressed: () {
                   setState(() {
                     isSearchShow = !isSearchShow;

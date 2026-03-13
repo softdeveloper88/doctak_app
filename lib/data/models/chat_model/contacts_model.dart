@@ -91,6 +91,30 @@ class Contacts extends Equatable {
       latestMessageTime = json['latest_message_time'],
       unreadCount = json['unread_count'];
 
+  Contacts copyWith({
+    dynamic id,
+    dynamic roomId,
+    String? createdAt,
+    String? firstName,
+    String? lastName,
+    String? profilePic,
+    String? latestMessage,
+    String? latestMessageTime,
+    int? unreadCount,
+  }) {
+    return Contacts(
+      id: id ?? this.id,
+      roomId: roomId ?? this.roomId,
+      createdAt: createdAt ?? this.createdAt,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      profilePic: profilePic ?? this.profilePic,
+      latestMessage: latestMessage ?? this.latestMessage,
+      latestMessageTime: latestMessageTime ?? this.latestMessageTime,
+      unreadCount: unreadCount ?? this.unreadCount,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['id'] = id;

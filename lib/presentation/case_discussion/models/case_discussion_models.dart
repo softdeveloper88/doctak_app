@@ -1,283 +1,468 @@
-// Models for the Case Discussion module
+// ============================================================================
+// Case Discussion Models - v6 API
+// Clean, type-safe models matching the v6 API response structure.
+// ============================================================================
+
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 
-// Separate model for discussion list items (simplified data)
+/// Safely parse a dynamic value to int (handles String, int, double, null).
+int _parseInt(dynamic value, [int fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LIST ITEM MODEL (for paginated list)
+// ─────────────────────────────────────────────────────────────────────────────
+
 class CaseDiscussionListItem {
   final int id;
   final String title;
+  final String? description;
   final String? tags;
   final int likes;
   final int views;
   final String? attachedFile;
-  final int promoted;
+  final bool promoted;
   final DateTime createdAt;
   final String name;
   final String? profilePic;
   final String? specialty;
-  final int comments;
+  final int commentsCount;
+  final bool isLiked;
+  final bool isBookmarked;
+  final bool isOwner;
 
   CaseDiscussionListItem({
     required this.id,
     required this.title,
+    this.description,
     this.tags,
     required this.likes,
     required this.views,
     this.attachedFile,
-    required this.promoted,
+    this.promoted = false,
     required this.createdAt,
     required this.name,
     this.profilePic,
     this.specialty,
-    required this.comments,
+    required this.commentsCount,
+    this.isLiked = false,
+    this.isBookmarked = false,
+    this.isOwner = false,
   });
 
   factory CaseDiscussionListItem.fromJson(Map<String, dynamic> json) {
+    // attached_file may be a List (Eloquent array cast) or String
+    String? attachedFile;
+    final rawFile = json['attached_file'];
+    if (rawFile is String) {
+      attachedFile = rawFile;
+    } else if (rawFile is List) {
+      attachedFile = jsonEncode(rawFile);
+    }
+
     return CaseDiscussionListItem(
-      id: json['id'] ?? 0,
+      id: _parseInt(json['id']),
       title: json['title'] ?? '',
-      tags: json['tags'],
-      likes: json['likes'] ?? 0,
-      views: json['views'] ?? 0,
-      attachedFile: json['attached_file'],
-      promoted: json['promoted'] ?? 0,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
+      description: json['description']?.toString(),
+      tags: json['tags']?.toString(),
+      likes: _parseInt(json['likes']),
+      views: _parseInt(json['views']),
+      attachedFile: attachedFile,
+      promoted: json['promoted'] == 1 || json['promoted'] == true,
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
       name: json['name'] ?? 'Unknown User',
       profilePic: AppData.fullImageUrl(json['profile_pic']),
-      specialty: json['specialty'],
-      comments: json['comments'] ?? 0,
+      specialty: json['specialty']?.toString(),
+      commentsCount: _parseInt(json['comments_count'] ?? json['comments']),
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1,
+      isBookmarked: json['is_bookmarked'] == true || json['is_bookmarked'] == 1,
+      isOwner: json['is_owner'] == true || json['is_owner'] == 1,
     );
   }
 
-  // Parse tags to extract clean values - now expects simple comma-separated format
+  /// Parse comma-separated tags into a clean list.
   List<String> get parsedTags {
     if (tags == null || tags!.isEmpty || tags == 'null') return [];
-
     try {
-      // Handle comma-separated format: "tag1,tag2,tag3" or "tag1, tag2, tag3"
-      if (tags!.contains(',')) {
-        return tags!.split(',').map((tag) => tag.trim()).where((tag) => tag.isNotEmpty).toList();
-      } else {
-        // Handle single tag
-        return [tags!.trim()];
-      }
-    } catch (e) {
-      print('Error parsing tags: $e');
-      return [tags!];
+      return tags!
+          .split(',')
+          .map((tag) => tag.trim())
+          .where((tag) => tag.isNotEmpty)
+          .toList();
+    } catch (_) {
+      return [tags!.trim()];
     }
   }
 
-  // Get author info in consistent format
-  CaseAuthor get author {
-    return CaseAuthor(
-      id: id, // Use case id since user_id not available in list
-      name: name,
-      specialty: specialty ?? 'Medical Professional',
-      profilePic: profilePic,
-    );
+  /// Get parsed image URLs from attachedFile field.
+  List<String> get imageUrls {
+    if (attachedFile == null || attachedFile!.isEmpty) return [];
+    try {
+      final str = attachedFile!;
+      if (str.startsWith('[')) {
+        final parsed = jsonDecode(str) as List;
+        return parsed.map((e) => AppData.fullImageUrl(e.toString())).toList();
+      }
+      return [AppData.fullImageUrl(str)];
+    } catch (_) {
+      return [];
+    }
   }
 
-  // Get stats in consistent format
-  CaseStats get stats {
-    return CaseStats(
-      commentsCount: comments,
-      followersCount: 0, // Not available in list
-      updatesCount: 0, // Not available in list
-      likes: likes,
+  CaseAuthor get author => CaseAuthor(
+        id: 0,
+        name: name,
+        specialty: specialty ?? '',
+        profilePic: profilePic,
+      );
+
+  CaseDiscussionListItem copyWith({
+    int? likes,
+    bool? isLiked,
+    bool? isBookmarked,
+    int? commentsCount,
+  }) {
+    return CaseDiscussionListItem(
+      id: id,
+      title: title,
+      description: description,
+      tags: tags,
+      likes: likes ?? this.likes,
       views: views,
+      attachedFile: attachedFile,
+      promoted: promoted,
+      createdAt: createdAt,
+      name: name,
+      profilePic: profilePic,
+      specialty: specialty,
+      commentsCount: commentsCount ?? this.commentsCount,
+      isLiked: isLiked ?? this.isLiked,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
+      isOwner: isOwner,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'tags': tags,
-      'likes': likes,
-      'views': views,
-      'attached_file': attachedFile,
-      'promoted': promoted,
-      'created_at': createdAt.toIso8601String(),
-      'name': name,
-      'profile_pic': profilePic,
-      'specialty': specialty,
-      'comments': comments,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'tags': tags,
+        'likes': likes,
+        'views': views,
+        'attached_file': attachedFile,
+        'promoted': promoted ? 1 : 0,
+        'created_at': createdAt.toIso8601String(),
+        'name': name,
+        'profile_pic': profilePic,
+        'specialty': specialty,
+        'comments_count': commentsCount,
+        'is_liked': isLiked,
+        'is_bookmarked': isBookmarked,
+        'is_owner': isOwner,
+      };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DETAIL MODEL (full case data)
+// ─────────────────────────────────────────────────────────────────────────────
 
 class CaseDiscussion {
   final int id;
   final String title;
   final String description;
-  final String status;
-  final String specialty;
-  final int? specialtyId;
-  final String? countryName;
-  final String? countryFlag;
+  final String? tags;
+  final int likes;
+  final int views;
   final DateTime createdAt;
   final DateTime updatedAt;
   final CaseAuthor author;
-  final CaseStats stats;
-  final PatientInfo? patientInfo;
-  final List<String>? symptoms;
-  final String? diagnosis;
-  final String? treatmentPlan;
-  final List<CaseAttachment>? attachments;
+  final String? specialty;
+  final int? specialtyId;
+  final String? countryName;
+  final String? countryFlag;
+  final List<CaseAttachment> attachments;
   final AISummary? aiSummary;
-
-  // Additional fields from new API
-  final Map<String, dynamic>? metadata;
-  final bool? isFollowing;
-  final bool? isLiked;
-  final List<RelatedCase>? relatedCases;
-  final CaseMetadata? caseMetadata;
-  final List<DecisionSupport>? decisionSupports;
-  final List<CaseUpdate>? updates;
-  final int? followersCount;
+  final CaseMetadata? metadata;
+  final List<CaseUpdate> updates;
+  final List<DecisionSupport> decisionSupports;
+  final List<RelatedCase> relatedCases;
+  final int commentsCount;
+  final int followersCount;
+  final bool isLiked;
+  final bool isBookmarked;
+  final bool isFollowing;
+  final bool isOwner;
+  final bool isPaid;
+  final int? aiSummaryRemaining;
+  final int aiSummaryDailyLimit;
 
   CaseDiscussion({
     required this.id,
     required this.title,
     required this.description,
-    required this.status,
-    required this.specialty,
-    this.specialtyId,
-    this.countryName,
-    this.countryFlag,
+    this.tags,
+    required this.likes,
+    required this.views,
     required this.createdAt,
     required this.updatedAt,
     required this.author,
-    required this.stats,
-    this.patientInfo,
-    this.symptoms,
-    this.diagnosis,
-    this.treatmentPlan,
-    this.attachments,
+    this.specialty,
+    this.specialtyId,
+    this.countryName,
+    this.countryFlag,
+    this.attachments = const [],
     this.aiSummary,
     this.metadata,
-    this.isFollowing,
-    this.isLiked,
-    this.relatedCases,
-    this.caseMetadata,
-    this.decisionSupports,
-    this.updates,
-    this.followersCount,
+    this.updates = const [],
+    this.decisionSupports = const [],
+    this.relatedCases = const [],
+    this.commentsCount = 0,
+    this.followersCount = 0,
+    this.isLiked = false,
+    this.isBookmarked = false,
+    this.isFollowing = false,
+    this.isOwner = false,
+    this.isPaid = false,
+    this.aiSummaryRemaining,
+    this.aiSummaryDailyLimit = 5,
   });
 
   factory CaseDiscussion.fromJson(Map<String, dynamic> json) {
-    // Handle new detailed API structure where case data is nested under 'case' key
-    Map<String, dynamic> caseData;
-    if (json.containsKey('case') && json['case'] is Map<String, dynamic>) {
-      // New detailed API structure
-      caseData = json['case'] as Map<String, dynamic>;
+    // The v6 API nests case under 'case' key in detail response
+    final data = json.containsKey('case') ? json : {'case': json};
+    final caseData = data['case'] as Map<String, dynamic>? ?? json;
+
+    // Parse user/author
+    CaseAuthor author;
+    if (caseData['user'] is Map<String, dynamic>) {
+      final u = caseData['user'] as Map<String, dynamic>;
+      author = CaseAuthor(
+        id: u['id'] ?? 0,
+        name: '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'.trim(),
+        specialty: u['specialty'] ?? caseData['specialty'] ?? '',
+        profilePic: AppData.fullImageUrl(u['profile_pic']),
+      );
     } else {
-      // Legacy structure or direct case data
-      caseData = json;
+      author = CaseAuthor(
+        id: caseData['user_id'] ?? 0,
+        name: caseData['name'] ?? 'Unknown User',
+        specialty: caseData['specialty'] ?? '',
+        profilePic: AppData.fullImageUrl(caseData['profile_pic']),
+      );
     }
 
-    // Handle tags parsing - now expects simple comma-separated format from API
-    List<String>? parsedTags;
-    if (caseData['tags'] != null && caseData['tags'].toString().isNotEmpty && caseData['tags'] != "\"[]\"") {
-      try {
-        final tagsString = caseData['tags'].toString();
-        // Handle comma-separated format: "tag1,tag2,tag3" or "tag1, tag2, tag3"
-        if (tagsString.contains(',')) {
-          parsedTags = tagsString.split(',').map((e) => e.trim()).where((tag) => tag.isNotEmpty).toList();
-        } else if (tagsString.isNotEmpty) {
-          // Single tag
-          parsedTags = [tagsString.trim()];
-        }
-      } catch (e) {
-        print('Error parsing tags: $e');
-      }
+    // Parse attachments
+    List<CaseAttachment> attachments = [];
+    if (caseData['attached_file'] != null) {
+      attachments = _parseAttachments(caseData['attached_file']);
     }
 
-    // Handle attachments parsing
-    List<CaseAttachment>? attachments;
-    if (caseData['attached_file'] != null && caseData['attached_file'].toString() != "\"[]\"") {
-      try {
-        final attachedFileString = caseData['attached_file'].toString();
-        if (attachedFileString.startsWith('[') && attachedFileString.endsWith(']')) {
-          final parsed = jsonDecode(attachedFileString) as List;
-          attachments = parsed.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            if (item is String) {
-              return CaseAttachment(id: index, type: 'image', url: item, description: 'Attachment ${index + 1}');
-            }
-            return CaseAttachment.fromJson(item);
-          }).toList();
-        }
-      } catch (e) {
-        print('Error parsing attached files: $e');
-      }
+    // Parse AI summary
+    AISummary? aiSummary;
+    if (data['ai_summary'] != null) {
+      aiSummary = AISummary.fromJson(data['ai_summary']);
+    }
+
+    // Parse metadata
+    CaseMetadata? metadata;
+    if (data['metadata'] != null && data['metadata'] is Map<String, dynamic>) {
+      metadata = CaseMetadata.fromJson(data['metadata']);
+    }
+
+    // Parse updates
+    List<CaseUpdate> updates = [];
+    if (data['updates'] is List) {
+      updates = (data['updates'] as List)
+          .map((item) => CaseUpdate.fromJson(item))
+          .toList();
+    }
+
+    // Parse decision supports
+    List<DecisionSupport> decisionSupports = [];
+    if (data['decision_supports'] is List) {
+      decisionSupports = (data['decision_supports'] as List)
+          .map((item) => DecisionSupport.fromJson(item))
+          .toList();
+    }
+
+    // Parse related cases
+    List<RelatedCase> relatedCases = [];
+    if (data['related_cases'] is List) {
+      relatedCases = (data['related_cases'] as List)
+          .map((item) => RelatedCase.fromJson(item))
+          .toList();
     }
 
     return CaseDiscussion(
-      id: caseData['id'] ?? 0,
+      id: _parseInt(caseData['id']),
       title: caseData['title'] ?? '',
       description: caseData['description'] ?? '',
-      status: caseData['status'] ?? 'active',
-      specialty: caseData['specialty'] ?? 'General',
-      specialtyId: caseData['specialty_id'],
-      countryName: caseData['country_name'],
-      countryFlag: caseData['country_flag'],
-      createdAt: DateTime.parse(caseData['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(caseData['updated_at'] ?? DateTime.now().toIso8601String()),
-      author: CaseAuthor.fromJson({
-        'id': caseData['user_id'] ?? caseData['id'] ?? 0,
-        'name': caseData['name'] ?? 'Unknown User',
-        'specialty': caseData['specialty'] ?? '',
-        'profile_pic': caseData['profile_pic'],
-      }),
-      stats: CaseStats.fromJson({
-        'comments_count': caseData['comments'] ?? 0,
-        'followers_count': json['followers_count'] ?? 0, // From top level
-        'updates_count': 0,
-        'likes': caseData['likes'] ?? 0,
-        'views': caseData['views'] ?? 0,
-      }),
-      patientInfo: caseData['patient_info'] != null ? PatientInfo.fromJson(caseData['patient_info']) : null,
-      symptoms: parsedTags,
-      diagnosis: caseData['diagnosis'],
-      treatmentPlan: caseData['treatment_plan'],
+      tags: caseData['tags']?.toString(),
+      likes: _parseInt(caseData['likes']),
+      views: _parseInt(caseData['views']),
+      createdAt: DateTime.parse(
+          caseData['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: DateTime.parse(
+          caseData['updated_at'] ?? DateTime.now().toIso8601String()),
+      author: author,
+      specialty: caseData['specialty']?.toString(),
+      specialtyId: caseData['specialty_id'] != null
+          ? _parseInt(caseData['specialty_id'])
+          : null,
+      countryName: caseData['country_name']?.toString(),
+      countryFlag: caseData['country_flag']?.toString(),
       attachments: attachments,
-      aiSummary: json['ai_summary'] != null ? AISummary.fromJson(json['ai_summary']) : null,
-      metadata: json['metadata'], // Top-level metadata map
-      isFollowing: json['is_following'],
-      isLiked: json['is_like'],
-      followersCount: json['followers_count'],
-      caseMetadata: json['metadata'] != null ? CaseMetadata.fromJson(json['metadata']) : null,
-      decisionSupports: json['decision_supports'] != null ? (json['decision_supports'] as List).map((item) => DecisionSupport.fromJson(item)).toList() : [],
-      updates: json['updates'] != null ? (json['updates'] as List).map((item) => CaseUpdate.fromJson(item)).toList() : [],
-      relatedCases: json['related_cases'] != null ? (json['related_cases'] as List).map((item) => RelatedCase.fromJson(item)).toList() : null,
+      aiSummary: aiSummary,
+      metadata: metadata,
+      updates: updates,
+      decisionSupports: decisionSupports,
+      relatedCases: relatedCases,
+      commentsCount: _parseInt(caseData['comments_count'] ?? caseData['comments']),
+      followersCount: _parseInt(data['followers_count']),
+      isLiked: data['is_liked'] == true || data['is_liked'] == 1,
+      isBookmarked:
+          data['is_bookmarked'] == true || data['is_bookmarked'] == 1,
+      isFollowing:
+          data['is_following'] == true || data['is_following'] == 1,
+      isOwner: data['is_owner'] == true || data['is_owner'] == 1,
+      isPaid: data['is_paid'] == true || data['is_paid'] == 1,
+      aiSummaryRemaining: data['ai_summary_remaining'] != null
+          ? _parseInt(data['ai_summary_remaining'])
+          : null,
+      aiSummaryDailyLimit: data['ai_summary_daily_limit'] != null
+          ? _parseInt(data['ai_summary_daily_limit'])
+          : 5,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'status': status,
-      'specialty': specialty,
-      'specialty_id': specialtyId,
-      'country_name': countryName,
-      'country_flag': countryFlag,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-      'author': author.toJson(),
-      'stats': stats.toJson(),
-      if (patientInfo != null) 'patient_info': patientInfo!.toJson(),
-      if (symptoms != null) 'symptoms': symptoms,
-      if (diagnosis != null) 'diagnosis': diagnosis,
-      if (treatmentPlan != null) 'treatment_plan': treatmentPlan,
-      if (attachments != null) 'attachments': attachments!.map((a) => a.toJson()).toList(),
-      if (aiSummary != null) 'ai_summary': aiSummary!.toJson(),
-    };
+  /// Parse comma-separated tags
+  List<String> get parsedTags {
+    if (tags == null || tags!.isEmpty || tags == 'null') return [];
+    try {
+      return tags!
+          .split(',')
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  CaseDiscussion copyWith({
+    int? likes,
+    int? commentsCount,
+    int? followersCount,
+    bool? isLiked,
+    bool? isBookmarked,
+    bool? isFollowing,
+    AISummary? aiSummary,
+    List<CaseUpdate>? updates,
+    bool? isPaid,
+    int? aiSummaryRemaining,
+    int? aiSummaryDailyLimit,
+  }) {
+    return CaseDiscussion(
+      id: id,
+      title: title,
+      description: description,
+      tags: tags,
+      likes: likes ?? this.likes,
+      views: views,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      author: author,
+      specialty: specialty,
+      specialtyId: specialtyId,
+      countryName: countryName,
+      countryFlag: countryFlag,
+      attachments: attachments,
+      aiSummary: aiSummary ?? this.aiSummary,
+      metadata: metadata,
+      updates: updates ?? this.updates,
+      decisionSupports: decisionSupports,
+      relatedCases: relatedCases,
+      commentsCount: commentsCount ?? this.commentsCount,
+      followersCount: followersCount ?? this.followersCount,
+      isLiked: isLiked ?? this.isLiked,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
+      isFollowing: isFollowing ?? this.isFollowing,
+      isOwner: isOwner,
+      isPaid: isPaid ?? this.isPaid,
+      aiSummaryRemaining: aiSummaryRemaining ?? this.aiSummaryRemaining,
+      aiSummaryDailyLimit: aiSummaryDailyLimit ?? this.aiSummaryDailyLimit,
+    );
+  }
+
+  static List<CaseAttachment> _parseAttachments(dynamic attachedFile) {
+    if (attachedFile == null) return [];
+    try {
+      final str = attachedFile.toString();
+      if (str.isEmpty || str == 'null' || str == '[]' || str == '"[]"') {
+        return [];
+      }
+
+      // Clean up escaped JSON strings
+      String cleanStr = str;
+      if (cleanStr.startsWith('"') && cleanStr.endsWith('"')) {
+        cleanStr = cleanStr.substring(1, cleanStr.length - 1);
+        cleanStr =
+            cleanStr.replaceAll('\\"', '"').replaceAll('\\\\', '\\');
+      }
+
+      if (cleanStr.startsWith('[') && cleanStr.endsWith(']')) {
+        final parsed = jsonDecode(cleanStr) as List;
+        return parsed.asMap().entries.map((entry) {
+          final url = entry.value.toString();
+          return CaseAttachment(
+            id: entry.key,
+            type: _fileTypeFromUrl(url),
+            url: AppData.fullImageUrl(url),
+            description: 'Attachment ${entry.key + 1}',
+          );
+        }).toList();
+      }
+      // Single file
+      return [
+        CaseAttachment(
+          id: 0,
+          type: _fileTypeFromUrl(cleanStr),
+          url: AppData.fullImageUrl(cleanStr),
+          description: 'Attachment',
+        ),
+      ];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static String _fileTypeFromUrl(String url) {
+    final lower = url.toLowerCase();
+    if (lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.gif') ||
+        lower.endsWith('.webp')) {
+      return 'image';
+    } else if (lower.endsWith('.pdf')) {
+      return 'pdf';
+    } else if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
+      return 'document';
+    }
+    return 'image';
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTHOR
+// ─────────────────────────────────────────────────────────────────────────────
 
 class CaseAuthor {
   final dynamic id;
@@ -285,56 +470,38 @@ class CaseAuthor {
   final String specialty;
   final String? profilePic;
 
-  CaseAuthor({required this.id, required this.name, required this.specialty, this.profilePic});
+  CaseAuthor({
+    required this.id,
+    required this.name,
+    required this.specialty,
+    this.profilePic,
+  });
 
   factory CaseAuthor.fromJson(Map<String, dynamic> json) {
-    return CaseAuthor(id: json['id'] ?? 0, name: json['name'] ?? '', specialty: json['specialty'] ?? '', profilePic: AppData.fullImageUrl(json['profile_pic']));
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'specialty': specialty, 'profile_pic': profilePic};
-  }
-}
-
-class CaseStats {
-  final int commentsCount;
-  final int followersCount;
-  final int updatesCount;
-  final int likes;
-  final int views;
-
-  CaseStats({required this.commentsCount, required this.followersCount, required this.updatesCount, required this.likes, required this.views});
-
-  factory CaseStats.fromJson(Map<String, dynamic> json) {
-    return CaseStats(
-      commentsCount: json['comments_count'] ?? 0,
-      followersCount: json['followers_count'] ?? 0,
-      updatesCount: json['updates_count'] ?? 0,
-      likes: json['likes'] ?? 0,
-      views: json['views'] ?? 0,
+    String name = json['name'] ?? '';
+    if (name.isEmpty) {
+      name =
+          '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    }
+    return CaseAuthor(
+      id: json['id'] ?? 0,
+      name: name.isEmpty ? 'Unknown User' : name,
+      specialty: json['specialty'] ?? '',
+      profilePic: AppData.fullImageUrl(json['profile_pic']),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {'comments_count': commentsCount, 'followers_count': followersCount, 'updates_count': updatesCount, 'likes': likes, 'views': views};
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'specialty': specialty,
+        'profile_pic': profilePic,
+      };
 }
 
-class PatientInfo {
-  final int age;
-  final String gender;
-  final String medicalHistory;
-
-  PatientInfo({required this.age, required this.gender, required this.medicalHistory});
-
-  factory PatientInfo.fromJson(Map<String, dynamic> json) {
-    return PatientInfo(age: json['age'] ?? 0, gender: json['gender'] ?? '', medicalHistory: json['medical_history'] ?? '');
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'age': age, 'gender': gender, 'medical_history': medicalHistory};
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// ATTACHMENT
+// ─────────────────────────────────────────────────────────────────────────────
 
 class CaseAttachment {
   final int id;
@@ -342,64 +509,99 @@ class CaseAttachment {
   final String url;
   final String description;
 
-  CaseAttachment({required this.id, required this.type, required this.url, required this.description});
+  CaseAttachment({
+    required this.id,
+    required this.type,
+    required this.url,
+    required this.description,
+  });
 
   factory CaseAttachment.fromJson(Map<String, dynamic> json) {
-    return CaseAttachment(id: json['id'] ?? 0, type: json['type'] ?? '', url: json['url'] ?? '', description: json['description'] ?? '');
+    return CaseAttachment(
+      id: json['id'] ?? 0,
+      type: json['type'] ?? 'image',
+      url: json['url'] ?? '',
+      description: json['description'] ?? '',
+    );
   }
 
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'type': type, 'url': url, 'description': description};
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'type': type,
+        'url': url,
+        'description': description,
+      };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI SUMMARY
+// ─────────────────────────────────────────────────────────────────────────────
 
 class AISummary {
   final int? id;
   final int? discussCaseId;
-  final DateTime generatedAt;
   final String summary;
   final double confidenceScore;
-  final List<String>? keyPoints;
+  final List<String> keyPoints;
   final int? version;
-  final DateTime? lastGeneratedAt;
+  final DateTime? generatedAt;
 
-  AISummary({this.id, this.discussCaseId, required this.generatedAt, required this.summary, required this.confidenceScore, this.keyPoints, this.version, this.lastGeneratedAt});
+  AISummary({
+    this.id,
+    this.discussCaseId,
+    required this.summary,
+    this.confidenceScore = 0.0,
+    this.keyPoints = const [],
+    this.version,
+    this.generatedAt,
+  });
 
   factory AISummary.fromJson(Map<String, dynamic> json) {
-    // Parse key points
-    List<String>? parsedKeyPoints;
+    // Parse key points from string or list
+    List<String> keyPoints = [];
     if (json['key_points'] != null) {
       try {
         if (json['key_points'] is String) {
-          final keyPointsString = json['key_points'] as String;
-          if (keyPointsString.startsWith('[') && keyPointsString.endsWith(']')) {
-            final parsed = jsonDecode(keyPointsString) as List;
-            parsedKeyPoints = parsed.map((item) => item.toString()).toList();
+          final str = json['key_points'] as String;
+          if (str.startsWith('[')) {
+            keyPoints = (jsonDecode(str) as List)
+                .map((e) => e.toString())
+                .toList();
           }
         } else if (json['key_points'] is List) {
-          parsedKeyPoints = List<String>.from(json['key_points']);
+          keyPoints = List<String>.from(json['key_points']);
         }
-      } catch (e) {
-        print('Error parsing AI summary key points: $e');
-      }
+      } catch (_) {}
     }
 
     return AISummary(
-      id: json['id'],
-      discussCaseId: json['discuss_case_id'],
-      generatedAt: DateTime.parse(json['last_generated_at'] ?? json['generated_at'] ?? DateTime.now().toIso8601String()),
+      id: json['id'] != null ? _parseInt(json['id']) : null,
+      discussCaseId: json['discuss_case_id'] != null
+          ? _parseInt(json['discuss_case_id'])
+          : null,
       summary: json['summary_text'] ?? json['summary'] ?? '',
       confidenceScore: (json['confidence_score'] ?? 0.0).toDouble(),
-      keyPoints: parsedKeyPoints,
+      keyPoints: keyPoints,
       version: json['version'],
-      lastGeneratedAt: json['last_generated_at'] != null ? DateTime.parse(json['last_generated_at']) : null,
+      generatedAt: json['last_generated_at'] != null
+          ? DateTime.tryParse(json['last_generated_at'])
+          : (json['generated_at'] != null
+              ? DateTime.tryParse(json['generated_at'])
+              : null),
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {'generated_at': generatedAt.toIso8601String(), 'summary': summary, 'confidence_score': confidenceScore, if (keyPoints != null) 'key_points': keyPoints};
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'summary': summary,
+        'confidence_score': confidenceScore,
+        'key_points': keyPoints,
+      };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMMENT
+// ─────────────────────────────────────────────────────────────────────────────
 
 class CaseComment {
   final int id;
@@ -413,8 +615,10 @@ class CaseComment {
   final DateTime? updatedAt;
   final CaseAuthor author;
   final int repliesCount;
-  final bool? isLiked;
-  final bool? isDisliked;
+  final bool isLiked;
+  final bool isDisliked;
+  final bool isOwner;
+  final List<CaseReply> replies;
 
   CaseComment({
     required this.id,
@@ -423,132 +627,424 @@ class CaseComment {
     required this.comment,
     this.clinicalTags,
     required this.likes,
-    required this.dislikes,
+    this.dislikes = 0,
     required this.createdAt,
     this.updatedAt,
     required this.author,
-    required this.repliesCount,
-    this.isLiked,
-    this.isDisliked,
+    this.repliesCount = 0,
+    this.isLiked = false,
+    this.isDisliked = false,
+    this.isOwner = false,
+    this.replies = const [],
   });
 
   factory CaseComment.fromJson(Map<String, dynamic> json) {
-    // Handle user data - could be nested under 'user' or directly in json
-    Map<String, dynamic> userData = {};
-    if (json['user'] != null && json['user'] is Map) {
-      userData = json['user'] as Map<String, dynamic>;
+    // Build author from nested user or flat fields
+    CaseAuthor author;
+    if (json['user'] is Map<String, dynamic>) {
+      author = CaseAuthor.fromJson(json['user']);
     } else {
-      // Use fields directly from comment if no nested user object
-      userData = {
-        'id': json['user_id'] ?? 0,
-        'name': json['user_name'] ?? 'Unknown User',
-        'first_name': json['user_name']?.split(' ').first ?? 'Unknown',
-        'last_name': json['user_name']?.split(' ').skip(1).join(' ') ?? '',
-        'specialty': json['specialty'] ?? '',
-        'profile_pic': json['profile_pic'],
-      };
+      author = CaseAuthor(
+        id: json['user_id'] ?? 0,
+        name: json['user_name'] ?? 'Unknown User',
+        specialty: json['specialty'] ?? '',
+        profilePic: AppData.fullImageUrl(json['profile_pic']),
+      );
+    }
+
+    // Parse replies if present
+    List<CaseReply> replies = [];
+    if (json['replies'] is List) {
+      replies = (json['replies'] as List)
+          .map((r) => CaseReply.fromJson(r))
+          .toList();
     }
 
     return CaseComment(
-      id: json['id'] ?? 0,
-      caseId: json['discuss_case_id'] ?? json['case_id'] ?? 0,
+      id: _parseInt(json['id']),
+      caseId: _parseInt(json['discuss_case_id'] ?? json['case_id']),
       userId: json['user_id'] ?? 0,
       comment: json['comment'] ?? '',
-      clinicalTags: json['clinical_tags'] ?? json['specialty'],
-      likes: json['likes'] ?? 0,
-      dislikes: json['dislikes'] ?? 0,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      author: CaseAuthor.fromJson(userData),
-      repliesCount: json['replies_count'] ?? 0,
-      isLiked: json['is_liked'],
-      isDisliked: json['is_disliked'],
+      clinicalTags: json['clinical_tags'],
+      likes: _parseInt(json['likes']),
+      dislikes: _parseInt(json['dislikes']),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'])
+          : null,
+      author: author,
+      repliesCount: _parseInt(json['replies_count'],
+          replies.isNotEmpty ? replies.length : 0),
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1,
+      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1,
+      isOwner: json['is_owner'] == true || json['is_owner'] == 1,
+      replies: replies,
+    );
+  }
+
+  CaseComment copyWith({
+    int? likes,
+    bool? isLiked,
+    int? repliesCount,
+    List<CaseReply>? replies,
+  }) {
+    return CaseComment(
+      id: id,
+      caseId: caseId,
+      userId: userId,
+      comment: comment,
+      clinicalTags: clinicalTags,
+      likes: likes ?? this.likes,
+      dislikes: dislikes,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      author: author,
+      repliesCount: repliesCount ?? this.repliesCount,
+      isLiked: isLiked ?? this.isLiked,
+      isDisliked: isDisliked,
+      isOwner: isOwner,
+      replies: replies ?? this.replies,
+    );
+  }
+
+  /// Parse clinical tags into a list
+  List<String> get parsedClinicalTags {
+    if (clinicalTags == null || clinicalTags!.isEmpty) return [];
+    return clinicalTags!
+        .split(',')
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REPLY
+// ─────────────────────────────────────────────────────────────────────────────
+
+class CaseReply {
+  final int id;
+  final int commentId;
+  final dynamic userId;
+  final String reply;
+  final DateTime createdAt;
+  final CaseAuthor author;
+
+  CaseReply({
+    required this.id,
+    required this.commentId,
+    required this.userId,
+    required this.reply,
+    required this.createdAt,
+    required this.author,
+  });
+
+  factory CaseReply.fromJson(Map<String, dynamic> json) {
+    CaseAuthor author;
+    if (json['user'] is Map<String, dynamic>) {
+      author = CaseAuthor.fromJson(json['user']);
+    } else {
+      author = CaseAuthor(
+        id: json['user_id'] ?? 0,
+        name: json['user_name'] ?? 'Unknown User',
+        specialty: '',
+        profilePic: null,
+      );
+    }
+
+    return CaseReply(
+      id: _parseInt(json['id']),
+      commentId: _parseInt(json['comment_id'] ?? json['discuss_case_comment_id']),
+      userId: json['user_id'] ?? 0,
+      reply: json['comment'] ?? json['reply'] ?? '',
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      author: author,
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RELATED CASE
+// ─────────────────────────────────────────────────────────────────────────────
+
+class RelatedCase {
+  final int id;
+  final String title;
+  final String description;
+  final String? tags;
+  final int likes;
+  final int views;
+  final DateTime createdAt;
+  final String? attachedFile;
+
+  RelatedCase({
+    required this.id,
+    required this.title,
+    required this.description,
+    this.tags,
+    required this.likes,
+    required this.views,
+    required this.createdAt,
+    this.attachedFile,
+  });
+
+  factory RelatedCase.fromJson(Map<String, dynamic> json) {
+    // attached_file may be a List (Eloquent array cast) or String
+    String? attachedFile;
+    final rawFile = json['attached_file'];
+    if (rawFile is String) {
+      attachedFile = rawFile;
+    } else if (rawFile is List) {
+      attachedFile = jsonEncode(rawFile);
+    }
+
+    return RelatedCase(
+      id: _parseInt(json['id']),
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      tags: json['tags']?.toString(),
+      likes: _parseInt(json['likes']),
+      views: _parseInt(json['views']),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      attachedFile: attachedFile,
+    );
+  }
+
+  List<String> get parsedTags {
+    if (tags == null || tags!.isEmpty) return [];
+    return tags!
+        .split(',')
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty)
+        .toList();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// METADATA
+// ─────────────────────────────────────────────────────────────────────────────
+
+class CaseMetadata {
+  final int id;
+  final int discussCaseId;
+  final String? patientDemographics;
+  final String? clinicalComplexity;
+  final String? teachingValue;
+  final String? evidenceLevel;
+  final bool isAnonymized;
+  final String? clinicalKeywords;
+
+  CaseMetadata({
+    required this.id,
+    required this.discussCaseId,
+    this.patientDemographics,
+    this.clinicalComplexity,
+    this.teachingValue,
+    this.evidenceLevel,
+    this.isAnonymized = false,
+    this.clinicalKeywords,
+  });
+
+  factory CaseMetadata.fromJson(Map<String, dynamic> json) {
+    // patient_demographics and clinical_keywords may come as Map/List (Eloquent array cast)
+    // or as a JSON string (raw DB query). Normalize to String? for storage.
+    String? demographics;
+    final rawDem = json['patient_demographics'];
+    if (rawDem is String) {
+      demographics = rawDem;
+    } else if (rawDem is Map || rawDem is List) {
+      demographics = jsonEncode(rawDem);
+    }
+
+    String? keywords;
+    final rawKw = json['clinical_keywords'];
+    if (rawKw is String) {
+      keywords = rawKw;
+    } else if (rawKw is Map || rawKw is List) {
+      keywords = jsonEncode(rawKw);
+    }
+
+    return CaseMetadata(
+      id: _parseInt(json['id']),
+      discussCaseId: _parseInt(json['discuss_case_id']),
+      patientDemographics: demographics,
+      clinicalComplexity: json['clinical_complexity']?.toString(),
+      teachingValue: json['teaching_value']?.toString(),
+      evidenceLevel: json['evidence_level']?.toString(),
+      isAnonymized:
+          json['is_anonymized'] == true || json['is_anonymized'] == 1,
+      clinicalKeywords: keywords,
+    );
+  }
+
+  /// Parse patient demographics JSON string
+  Map<String, dynamic>? get parsedDemographics {
+    if (patientDemographics == null || patientDemographics!.isEmpty) {
+      return null;
+    }
+    try {
+      final decoded = jsonDecode(patientDemographics!);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+        return decoded.first as Map<String, dynamic>;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Parse clinical keywords
+  List<String> get parsedKeywords {
+    if (clinicalKeywords == null || clinicalKeywords!.isEmpty) return [];
+    try {
+      if (clinicalKeywords!.startsWith('[')) {
+        return (jsonDecode(clinicalKeywords!) as List)
+            .map((e) => e.toString())
+            .toList();
+      }
+      return clinicalKeywords!
+          .split(',')
+          .map((k) => k.trim())
+          .where((k) => k.isNotEmpty)
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DECISION SUPPORT
+// ─────────────────────────────────────────────────────────────────────────────
+
+class DecisionSupport {
+  final int id;
+  final int discussCaseId;
+  final String type;
+  final String content;
+  final String? source;
+  final DateTime createdAt;
+
+  DecisionSupport({
+    required this.id,
+    required this.discussCaseId,
+    required this.type,
+    required this.content,
+    this.source,
+    required this.createdAt,
+  });
+
+  factory DecisionSupport.fromJson(Map<String, dynamic> json) {
+    return DecisionSupport(
+      id: _parseInt(json['id']),
+      discussCaseId: _parseInt(json['discuss_case_id']),
+      type: json['type']?.toString() ?? '',
+      content: json['content']?.toString() ?? '',
+      source: json['source']?.toString(),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CASE UPDATE (Timeline)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class CaseUpdate {
+  final int id;
+  final int discussCaseId;
+  final String updateType;
+  final String content;
+  final String? authorId;
+  final DateTime createdAt;
+  final List<String> attachedFiles;
+
+  CaseUpdate({
+    required this.id,
+    required this.discussCaseId,
+    required this.updateType,
+    required this.content,
+    this.authorId,
+    required this.createdAt,
+    this.attachedFiles = const [],
+  });
+
+  factory CaseUpdate.fromJson(Map<String, dynamic> json) {
+    // Handle attached_files: can be List, JSON string, or double-encoded string
+    var rawFiles = json['attached_files'];
+    if (rawFiles is String) {
+      try {
+        rawFiles = jsonDecode(rawFiles);
+      } catch (_) {}
+    }
+    // After one decode it might still be a string (double-encoded)
+    if (rawFiles is String) {
+      try {
+        rawFiles = jsonDecode(rawFiles);
+      } catch (_) {}
+    }
+    final files = rawFiles is List
+        ? rawFiles.map((e) => e.toString()).toList()
+        : <String>[];
+    return CaseUpdate(
+      id: _parseInt(json['id']),
+      discussCaseId: _parseInt(json['discuss_case_id']),
+      updateType: json['update_title']?.toString() ?? json['update_type']?.toString() ?? '',
+      content: json['update_content']?.toString() ?? json['content']?.toString() ?? '',
+      authorId: json['user_id']?.toString() ?? json['author_id']?.toString(),
+      createdAt: DateTime.parse(
+          json['created_at'] ?? DateTime.now().toIso8601String()),
+      attachedFiles: files,
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CREATE / UPDATE REQUEST
+// ─────────────────────────────────────────────────────────────────────────────
 
 class CreateCaseRequest {
   final String title;
   final String description;
   final String? tags;
-  // final String? specialtyId;
   final Map<String, dynamic>? patientDemographics;
   final String? clinicalComplexity;
   final String? teachingValue;
   final bool? isAnonymized;
   final List<String>? attachedFiles;
+  final List<String>? existingFileUrls;
 
   CreateCaseRequest({
     required this.title,
     required this.description,
     this.tags,
-    // this.specialtyId,
     this.patientDemographics,
     this.clinicalComplexity,
     this.teachingValue,
     this.isAnonymized,
     this.attachedFiles,
+    this.existingFileUrls,
   });
 
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'description': description,
-      if (tags != null) 'tags': tags,
-      // if (specialtyId != null) 'specialty_id': specialtyId,
-      if (patientDemographics != null) 'patient_demographics': patientDemographics,
-      if (clinicalComplexity != null) 'clinical_complexity': clinicalComplexity,
-      if (teachingValue != null) 'teaching_value': teachingValue,
-      if (isAnonymized != null) 'is_anonymized': isAnonymized,
-      if (attachedFiles != null) 'attached_files': attachedFiles,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'description': description,
+        if (tags != null) 'tags': tags,
+        if (patientDemographics != null)
+          'patient_demographics': patientDemographics,
+        if (clinicalComplexity != null)
+          'clinical_complexity': clinicalComplexity,
+        if (teachingValue != null) 'teaching_value': teachingValue,
+        if (isAnonymized != null) 'is_anonymized': isAnonymized,
+      };
 }
 
-class AttachmentData {
-  final String type;
-  final String file; // base64 encoded
-  final String description;
-
-  AttachmentData({required this.type, required this.file, required this.description});
-
-  Map<String, dynamic> toJson() {
-    return {'type': type, 'file': file, 'description': description};
-  }
-}
-
-class ApiResponse<T> {
-  final String status;
-  final String message;
-  final T? data;
-  final Map<String, dynamic>? errors;
-  final ApiMeta meta;
-
-  ApiResponse({required this.status, required this.message, this.data, this.errors, required this.meta});
-
-  bool get isSuccess => status == 'success';
-
-  factory ApiResponse.fromJson(Map<String, dynamic> json, T Function(dynamic)? fromJsonT) {
-    return ApiResponse<T>(
-      status: json['status'] ?? '',
-      message: json['message'] ?? '',
-      data: json['data'] != null && fromJsonT != null ? fromJsonT(json['data']) : json['data'],
-      errors: json['errors'],
-      meta: ApiMeta.fromJson(json['meta'] ?? {}),
-    );
-  }
-}
-
-class ApiMeta {
-  final DateTime timestamp;
-  final String version;
-
-  ApiMeta({required this.timestamp, required this.version});
-
-  factory ApiMeta.fromJson(Map<String, dynamic> json) {
-    return ApiMeta(timestamp: DateTime.parse(json['timestamp'] ?? DateTime.now().toIso8601String()), version: json['version'] ?? 'v3');
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGINATION
+// ─────────────────────────────────────────────────────────────────────────────
 
 class PaginatedResponse<T> {
   final List<T> items;
@@ -563,37 +1059,47 @@ class PaginationMeta {
   final int perPage;
   final int total;
 
-  PaginationMeta({required this.currentPage, required this.lastPage, required this.perPage, required this.total});
+  PaginationMeta({
+    required this.currentPage,
+    required this.lastPage,
+    required this.perPage,
+    required this.total,
+  });
 
   factory PaginationMeta.fromJson(Map<String, dynamic> json) {
-    return PaginationMeta(currentPage: json['current_page'] ?? 1, lastPage: json['last_page'] ?? 1, perPage: json['per_page'] ?? 15, total: json['total'] ?? 0);
+    return PaginationMeta(
+      currentPage: json['current_page'] ?? 1,
+      lastPage: json['last_page'] ?? 1,
+      perPage: int.tryParse(json['per_page']?.toString() ?? '12') ?? 12,
+      total: json['total'] ?? 0,
+    );
   }
 
   bool get hasNextPage => currentPage < lastPage;
 }
 
-// Filter models for case discussions
+// ─────────────────────────────────────────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────────────────────────────────────────
+
 class SpecialtyFilter {
   final int id;
   final String name;
-  final String slug;
-  final bool isActive;
+  final String? slug;
 
-  SpecialtyFilter({required this.id, required this.name, required this.slug, this.isActive = true});
+  SpecialtyFilter({required this.id, required this.name, this.slug});
 
   factory SpecialtyFilter.fromJson(Map<String, dynamic> json) {
-    return SpecialtyFilter(id: json['id'] ?? 0, name: json['name'] ?? '', slug: json['slug'] ?? '', isActive: json['is_active'] ?? true);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'slug': slug, 'is_active': isActive};
+    return SpecialtyFilter(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? json['specialty_name'] ?? '',
+      slug: json['slug'],
+    );
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is SpecialtyFilter && other.id == id;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) || other is SpecialtyFilter && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
@@ -608,21 +1114,25 @@ class CountryFilter {
   final String code;
   final String flag;
 
-  CountryFilter({required this.id, required this.name, required this.code, required this.flag});
+  CountryFilter({
+    required this.id,
+    required this.name,
+    required this.code,
+    this.flag = '',
+  });
 
   factory CountryFilter.fromJson(Map<String, dynamic> json) {
-    return CountryFilter(id: json['id'] ?? 0, name: json['countryName'] ?? json['name'] ?? '', code: json['countryCode'] ?? json['code'] ?? '', flag: json['flag'] ?? '');
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'code': code, 'flag': flag};
+    return CountryFilter(
+      id: json['id'] ?? 0,
+      name: json['countryName'] ?? json['name'] ?? '',
+      code: json['countryCode'] ?? json['code'] ?? '',
+      flag: json['flag'] ?? '',
+    );
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is CountryFilter && other.id == id;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) || other is CountryFilter && other.id == id;
 
   @override
   int get hashCode => id.hashCode;
@@ -631,41 +1141,50 @@ class CountryFilter {
   String toString() => 'CountryFilter(id: $id, name: $name)';
 }
 
+/// Filter state for case discussions
 class CaseDiscussionFilters {
   final String? searchQuery;
   final SpecialtyFilter? selectedSpecialty;
   final CountryFilter? selectedCountry;
-  final String? sortBy;
-  final String? sortOrder;
-  final CaseStatus? status;
+  final String? sortBy; // newest, most_viewed, most_discussed
+  final String? tab; // null=all, my, saved, following
 
-  const CaseDiscussionFilters({this.searchQuery, this.selectedSpecialty, this.selectedCountry, this.sortBy, this.sortOrder, this.status});
+  const CaseDiscussionFilters({
+    this.searchQuery,
+    this.selectedSpecialty,
+    this.selectedCountry,
+    this.sortBy,
+    this.tab,
+  });
 
   CaseDiscussionFilters copyWith({
     String? searchQuery,
     SpecialtyFilter? selectedSpecialty,
     CountryFilter? selectedCountry,
     String? sortBy,
-    String? sortOrder,
-    CaseStatus? status,
+    String? tab,
     bool clearSpecialty = false,
     bool clearCountry = false,
     bool clearSort = false,
-    bool clearStatus = false,
+    bool clearTab = false,
+    bool clearSearch = false,
   }) {
     return CaseDiscussionFilters(
-      searchQuery: searchQuery ?? this.searchQuery,
-      selectedSpecialty: clearSpecialty ? null : (selectedSpecialty ?? this.selectedSpecialty),
-      selectedCountry: clearCountry ? null : (selectedCountry ?? this.selectedCountry),
+      searchQuery:
+          clearSearch ? null : (searchQuery ?? this.searchQuery),
+      selectedSpecialty: clearSpecialty
+          ? null
+          : (selectedSpecialty ?? this.selectedSpecialty),
+      selectedCountry: clearCountry
+          ? null
+          : (selectedCountry ?? this.selectedCountry),
       sortBy: clearSort ? null : (sortBy ?? this.sortBy),
-      sortOrder: clearSort ? null : (sortOrder ?? this.sortOrder),
-      status: clearStatus ? null : (status ?? this.status),
+      tab: clearTab ? null : (tab ?? this.tab),
     );
   }
 
   Map<String, dynamic> toQueryParameters() {
     final params = <String, dynamic>{};
-
     if (searchQuery != null && searchQuery!.isNotEmpty) {
       params['keyword'] = searchQuery;
     }
@@ -675,257 +1194,40 @@ class CaseDiscussionFilters {
     if (selectedCountry != null) {
       params['country'] = selectedCountry!.id.toString();
     }
-    if (sortBy != null) {
-      params['sort'] = sortBy;
-    }
-    if (status != null) {
-      params['status'] = status!.value;
-    }
-
+    if (sortBy != null) params['sort'] = sortBy;
+    if (tab != null) params['tab'] = tab;
     return params;
   }
+
+  bool get hasActiveFilters =>
+      (searchQuery != null && searchQuery!.isNotEmpty) ||
+      selectedSpecialty != null ||
+      selectedCountry != null ||
+      sortBy != null;
 }
 
-enum CaseStatus {
-  active('active'),
-  closed('closed'),
-  pending('pending'),
-  resolved('resolved');
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOM EXCEPTIONS
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const CaseStatus(this.value);
-  final String value;
-
-  static CaseStatus? fromString(String? value) {
-    try {
-      return CaseStatus.values.firstWhere((status) => status.value == value);
-    } catch (e) {
-      return null;
-    }
-  }
+class ValidationException implements Exception {
+  final String message;
+  final Map<String, dynamic>? errors;
+  ValidationException(this.message, [this.errors]);
+  @override
+  String toString() => 'ValidationException: $message';
 }
 
-// Related Case model for displaying related cases
-class RelatedCase {
-  final int id;
-  final String title;
-  final String description;
-  final String? tags;
-  final int likes;
-  final int views;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final String? attachedFile;
-
-  RelatedCase({
-    required this.id,
-    required this.title,
-    required this.description,
-    this.tags,
-    required this.likes,
-    required this.views,
-    required this.createdAt,
-    required this.updatedAt,
-    this.attachedFile,
-  });
-
-  factory RelatedCase.fromJson(Map<String, dynamic> json) {
-    return RelatedCase(
-      id: json['id'] ?? 0,
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      tags: json['tags'],
-      likes: json['likes'] ?? 0,
-      views: json['views'] ?? 0,
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
-      attachedFile: json['attached_file'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'tags': tags,
-      'likes': likes,
-      'views': views,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-      'attached_file': attachedFile,
-    };
-  }
-
-  // Parse tags if they are in JSON format
-  List<String>? get parsedTags {
-    if (tags == null || tags!.isEmpty) return null;
-    try {
-      if (tags!.startsWith('[') && tags!.endsWith(']')) {
-        final parsed = json.decode(tags!) as List;
-        return parsed.map((tag) => tag['value'].toString()).toList();
-      }
-    } catch (e) {
-      print('Error parsing related case tags: $e');
-    }
-    return null;
-  }
+class UnauthorizedException implements Exception {
+  final String message;
+  UnauthorizedException(this.message);
+  @override
+  String toString() => 'UnauthorizedException: $message';
 }
 
-// New models for the updated API response structure
-class CaseMetadata {
-  final int id;
-  final int discussCaseId;
-  final String? patientDemographics;
-  final String? clinicalComplexity;
-  final String? teachingValue;
-  final String? evidenceLevel;
-  final bool? isAnonymized;
-  final String? clinicalKeywords;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  CaseMetadata({
-    required this.id,
-    required this.discussCaseId,
-    this.patientDemographics,
-    this.clinicalComplexity,
-    this.teachingValue,
-    this.evidenceLevel,
-    this.isAnonymized,
-    this.clinicalKeywords,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-
-  factory CaseMetadata.fromJson(Map<String, dynamic> json) {
-    return CaseMetadata(
-      id: json['id'] ?? 0,
-      discussCaseId: json['discuss_case_id'] ?? 0,
-      patientDemographics: json['patient_demographics'],
-      clinicalComplexity: json['clinical_complexity'],
-      teachingValue: json['teaching_value'],
-      evidenceLevel: json['evidence_level'],
-      isAnonymized: json['is_anonymized'],
-      clinicalKeywords: json['clinical_keywords'],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'discuss_case_id': discussCaseId,
-      'patient_demographics': patientDemographics,
-      'clinical_complexity': clinicalComplexity,
-      'teaching_value': teachingValue,
-      'evidence_level': evidenceLevel,
-      'is_anonymized': isAnonymized,
-      'clinical_keywords': clinicalKeywords,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-    };
-  }
-
-  // Helper method to parse patient demographics
-  Map<String, dynamic>? get parsedPatientDemographics {
-    if (patientDemographics == null || patientDemographics!.isEmpty) return null;
-    try {
-      final decoded = json.decode(patientDemographics!);
-      if (decoded is Map<String, dynamic>) {
-        return decoded;
-      } else if (decoded is List && decoded.isNotEmpty) {
-        // If it's a list, try to use the first item as a map
-        final firstItem = decoded.first;
-        if (firstItem is Map<String, dynamic>) {
-          return firstItem;
-        }
-      }
-      // If neither Map nor usable List, return null
-      return null;
-    } catch (e) {
-      print('Error parsing patient demographics: $e');
-      return null;
-    }
-  }
-
-  // Helper method to parse clinical keywords
-  List<String>? get parsedClinicalKeywords {
-    if (clinicalKeywords == null || clinicalKeywords!.isEmpty) return null;
-    try {
-      if (clinicalKeywords!.startsWith('[') && clinicalKeywords!.endsWith(']')) {
-        final parsed = json.decode(clinicalKeywords!);
-        if (parsed is List) {
-          return parsed.map((item) => item.toString()).toList();
-        }
-      }
-    } catch (e) {
-      print('Error parsing clinical keywords: $e');
-    }
-    return null;
-  }
-}
-
-class DecisionSupport {
-  final int id;
-  final int discussCaseId;
-  final String type;
-  final String content;
-  final String? source;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  DecisionSupport({required this.id, required this.discussCaseId, required this.type, required this.content, this.source, required this.createdAt, required this.updatedAt});
-
-  factory DecisionSupport.fromJson(Map<String, dynamic> json) {
-    return DecisionSupport(
-      id: json['id'] ?? 0,
-      discussCaseId: json['discuss_case_id'] ?? 0,
-      type: json['type'] ?? '',
-      content: json['content'] ?? '',
-      source: json['source'],
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {'id': id, 'discuss_case_id': discussCaseId, 'type': type, 'content': content, 'source': source, 'created_at': createdAt.toIso8601String(), 'updated_at': updatedAt.toIso8601String()};
-  }
-}
-
-class CaseUpdate {
-  final int id;
-  final int discussCaseId;
-  final String updateType;
-  final String content;
-  final String? authorId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-
-  CaseUpdate({required this.id, required this.discussCaseId, required this.updateType, required this.content, this.authorId, required this.createdAt, required this.updatedAt});
-
-  factory CaseUpdate.fromJson(Map<String, dynamic> json) {
-    return CaseUpdate(
-      id: json['id'] ?? 0,
-      discussCaseId: json['discuss_case_id'] ?? 0,
-      updateType: json['update_type'] ?? '',
-      content: json['content'] ?? '',
-      authorId: json['author_id']?.toString(),
-      createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updated_at'] ?? DateTime.now().toIso8601String()),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'discuss_case_id': discussCaseId,
-      'update_type': updateType,
-      'content': content,
-      'author_id': authorId,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-    };
-  }
+class ForbiddenException implements Exception {
+  final String message;
+  ForbiddenException(this.message);
+  @override
+  String toString() => 'ForbiddenException: $message';
 }

@@ -1,311 +1,162 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
+import 'package:doctak_app/data/apiClient/services/conversation_api_service.dart';
+import 'package:doctak_app/data/models/chat_model/conversation_model.dart';
+import 'package:doctak_app/data/models/chat_model/conversation_message_model.dart';
 import 'package:doctak_app/data/models/chat_model/contacts_model.dart';
 import 'package:doctak_app/data/models/chat_model/message_model.dart';
 import 'package:doctak_app/data/models/chat_model/search_contacts_model.dart';
-import 'package:doctak_app/data/models/chat_model/send_message_model.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:doctak_app/data/apiClient/services/moderation_api_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 part 'chat_event.dart';
 part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
+  final ConversationApiService _chatApi = ConversationApiService();
   final ApiServiceManager apiManager = ApiServiceManager();
   List<XFile> imagefiles = [];
-  int pageNumber = 1;
-  int numberOfPage = 1;
-  List<Contacts> contactsList = [];
-  List<Groups> groupList = [];
-  final int nextPageTrigger = 1;
 
-  // search contacts
+  // Conversation list
+  List<Conversation> conversationsList = [];
+
+  // Search contacts (kept for backward compatibility with search screen)
   int contactPageNumber = 1;
   int contactNumberOfPage = 1;
   List<Data> searchContactsList = [];
   final int contactNextPageTrigger = 1;
 
-  // room message
+  // Conversation messages
+  List<ConversationMessage> conversationMessages = [];
+  bool hasMoreMessages = true;
+  bool isLoadingMore = false;
+
+  // Current conversation
+  int? currentConversationId;
+
+  // Legacy compatibility fields
+  int pageNumber = 1;
+  int numberOfPage = 1;
+  List<Contacts> contactsList = [];
+  List<Groups> groupList = [];
+  final int nextPageTrigger = 1;
   int messagePageNumber = 1;
   int messageNumberOfPage = 1;
   List<Messages> messagesList = [];
   final int messageNextPageTrigger = 1;
-
   String? roomId;
 
   ChatBloc() : super(DataInitial()) {
-    on<LoadPageEvent>(_onGetChat);
+    on<LoadPageEvent>(_onLoadConversations);
     on<LoadContactsEvent>(_onGetSearchContacts);
+    on<LoadConversationMessagesEvent>(_onLoadConversationMessages);
+    on<SendConversationMessageEvent>(_onSendConversationMessage);
+    on<DeleteConversationMessageEvent>(_onDeleteConversationMessage);
+    on<MarkConversationReadEvent>(_onMarkConversationRead);
+    on<LoadMoreMessagesEvent>(_onLoadMoreMessages);
+    on<NewMessageReceivedEvent>(_onNewMessageReceived);
+    // Legacy events (kept for backward compat with search screen)
     on<LoadRoomMessageEvent>(_onGetMessages);
     on<SendMessageEvent>(_onSendMessages);
     on<DeleteMessageEvent>(_onDeleteMessages);
     on<ChatReadStatusEvent>(_updateChatReadStatus);
     on<SelectedFiles>(_selectedFile);
-    on<CheckIfNeedMoreDataEvent>((event, emit) async {
-      if (event.index == contactsList.length - nextPageTrigger) {
-        add(LoadPageEvent(page: pageNumber));
-      }
-    });
+    on<CheckIfNeedMoreDataEvent>((event, emit) async {});
     on<CheckIfNeedMoreContactDataEvent>((event, emit) async {
       if (event.index == searchContactsList.length - contactNextPageTrigger) {
         add(LoadContactsEvent(page: contactPageNumber));
       }
     });
-    on<CheckIfNeedMoreMessageDataEvent>((event, emit) async {
-      if (event.index == messagesList.length - messageNextPageTrigger) {
-        add(LoadRoomMessageEvent(page: messagePageNumber, userId: event.userId, roomId: event.roomId));
-      }
-    });
+    on<CheckIfNeedMoreMessageDataEvent>((event, emit) async {});
   }
 
-  Future<void> _onGetChat(LoadPageEvent event, Emitter<ChatState> emit) async {
+  // ======================== NEW CONVERSATION API ========================
+
+  Future<void> _onLoadConversations(LoadPageEvent event, Emitter<ChatState> emit) async {
     if (event.page == 1) {
-      contactsList.clear();
-      pageNumber = 1;
+      conversationsList.clear();
       emit(PaginationLoadingState());
     }
     try {
-      ContactsModel response = await apiManager.getContacts('Bearer ${AppData.userToken}', '$pageNumber');
-      numberOfPage = response.lastPage ?? 0;
-      if (pageNumber < numberOfPage + 1) {
-        pageNumber = pageNumber + 1;
-        contactsList.addAll(response.contacts ?? []);
-        contactsList.removeWhere((element) => element.id == null);
-        groupList.addAll(response.groups ?? []);
-      }
-      log(response.contacts!.length);
+      final response = await _chatApi.getConversations();
+      conversationsList = response.conversations ?? [];
       emit(PaginationLoadedState());
     } catch (e) {
-      print(e);
-
+      debugPrint('Error loading conversations: $e');
       emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
     }
   }
 
-  Future<void> _onGetSearchContacts(LoadContactsEvent event, Emitter<ChatState> emit) async {
-    if (event.page == 1) {
-      searchContactsList.clear();
-      contactPageNumber = 1;
+  Future<void> _onLoadConversationMessages(
+    LoadConversationMessagesEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    currentConversationId = event.conversationId;
+    if (event.isFirstLoading) {
+      conversationMessages.clear();
+      hasMoreMessages = true;
       emit(PaginationLoadingState());
     }
     try {
-      print('🔍 Searching contacts with keyword: "${event.keyword ?? ''}", page: $contactPageNumber');
-
-      SearchContactsModel response = await apiManager.searchContacts('Bearer ${AppData.userToken}', '$contactPageNumber', event.keyword ?? '');
-
-      print('✅ Search response received - Success: ${response.success}, Records: ${response.records?.data?.length ?? 0}');
-
-      contactNumberOfPage = response.lastPage ?? 0;
-      if (contactPageNumber < contactNumberOfPage + 1) {
-        contactPageNumber = contactPageNumber + 1;
-        searchContactsList.addAll(response.records?.data ?? []);
-      }
-
-      emit(PaginationLoadedState());
-
-      // emit(DataLoaded(contactsList));
-    } catch (e) {
-      print('❌ Search contacts error: $e');
-      emit(DataError('Failed to search contacts: $e'));
-    }
-  }
-
-  Future<void> _updateChatReadStatus(ChatReadStatusEvent event, Emitter<ChatState> emit) async {
-    try {
-      if (event.roomId != '') {
-        await apiManager.updateReadStatus('Bearer ${AppData.userToken}', event.userId ?? "", event.roomId ?? '');
-      }
-      emit(PaginationLoadedState());
-
-      // emit(DataLoaded(contactsList));
-    } catch (e) {
-      print(e);
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
-    }
-  }
-
-  void addUserIfNotExists(List<Messages> oldMessages, List<Messages> newMessages) {
-    for (var message in newMessages) {
-      if (!oldMessages.contains(message)) {
-        oldMessages.add(message);
-      }
-    }
-    messagesList = oldMessages;
-  }
-
-  Future<void> _onGetMessages(LoadRoomMessageEvent event, Emitter<ChatState> emit) async {
-    print('page ${event.page}');
-    if (event.page == 1) {
-      messagesList.clear();
-      messagePageNumber = 1;
-      if (event.isFirstLoading ?? false) {
-        emit(PaginationLoadingState());
-      }
-      print('page ${event.page}');
-    } else if (event.page == 0) {
-      // messagesList.clear();
-      messagePageNumber = 0;
-    }
-    try {
-      print(event.page);
-
-      MessageModel response = await apiManager.getRoomMessenger('Bearer ${AppData.userToken}', '$messagePageNumber', event.userId ?? "", event.roomId ?? "");
-
-      roomId = response.roomId.toString();
-      await apiManager.updateReadStatus('Bearer ${AppData.userToken}', event.userId ?? "", roomId ?? event.roomId ?? '');
-      print(roomId);
-      messageNumberOfPage = response.lastPage ?? 0;
-      if (messagePageNumber < messageNumberOfPage + 1) {
-        messagePageNumber = messagePageNumber + 1;
-        if (event.page == 0) {
-          // messagesList.addAll(response.messages ?? []);
-          messagesList = response.messages ?? [];
-          // addUserIfNotExists(messagesList, response.messages ?? []);
-          // messagesList.addAll(response.messages ?? []);
-          // messagesList=messagesList.reversed.toList();
-        } else {
-          messagesList.addAll(response.messages ?? []);
-        }
-      }
-      log("response ${response.toJson()}");
-      emit(PaginationLoadedState());
-    } catch (e) {
-      print('eee$e');
-
-      emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
-    }
-  }
-
-  Future<SendMessageModel> _sendMessageWithFile({
-    required String token,
-    required String userId,
-    required String roomId,
-    required String receiverId,
-    required String attachmentType,
-    required String message,
-    required String filePath,
-  }) async {
-    try {
-      // Check if file exists before uploading
-      final file = File(filePath);
-      if (!await file.exists()) {
-        throw Exception('File does not exist: $filePath');
-      }
-
-      final fileSize = await file.length();
-      print("=== FILE VALIDATION ===");
-      print("File exists: true");
-      print("File size: $fileSize bytes");
-      print("File can read: ${file.existsSync()}");
-      print("====================");
-
-      final Dio dio = Dio();
-
-      // Add interceptor for debugging
-      dio.interceptors.add(
-        LogInterceptor(
-          request: true,
-          requestBody: false, // Don't log body to avoid huge logs
-          responseBody: true,
-          requestHeader: true,
-          responseHeader: true,
-        ),
+      final response = await _chatApi.getMessages(
+        conversationId: event.conversationId,
+        limit: 50,
       );
+      // Reverse so newest message is at index 0 (for reverse:true ListView)
+      conversationMessages = (response.messages ?? []).reversed.toList();
+      hasMoreMessages = response.hasMore ?? false;
 
-      // Create FormData for file upload
-      final String fileName = filePath.split('/').last;
+      // Auto-mark as read
+      await _chatApi.markConversationAsRead(conversationId: event.conversationId);
 
-      // Determine simple mime type from extension for better server compatibility
-      String mimeTypeFor(String path, String attachmentType) {
-        final ext = path.split('.').last.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].contains(ext)) return 'image/$ext';
-        if (['mp4', 'mov', 'm4v'].contains(ext)) return 'video/${ext == 'mov' ? 'quicktime' : ext}';
-        if (['pdf'].contains(ext)) return 'application/pdf';
-        if (['mp3', 'wav', 'm4a', 'aac', 'ogg'].contains(ext)) return 'audio/$ext';
-        // fallback based on attachmentType
-        if (attachmentType == 'voice' || attachmentType == 'audio') return 'audio/mpeg';
-        return 'application/octet-stream';
-      }
-
-      final mime = mimeTypeFor(filePath, attachmentType).split('/');
-      final contentType = MediaType(mime[0], mime[1]);
-
-      final formData = FormData.fromMap({
-        'user_id': userId,
-        'room_id': roomId,
-        'receiver_id': receiverId,
-        'attachment_type': attachmentType,
-        'message': message,
-        'file': await MultipartFile.fromFile(filePath, filename: fileName, contentType: contentType),
-      });
-
-      print("=== SENDING FILE UPLOAD REQUEST ===");
-      print("URL: ${AppData.remoteUrl}/send-message");
-      print("File path: $filePath");
-      print("File name: $fileName");
-      print("Attachment type: $attachmentType");
-      print("Message: $message");
-
-      // Log FormData fields
-      print("FormData fields:");
-      for (var field in formData.fields) {
-        print("  ${field.key}: ${field.value}");
-      }
-      print("FormData files: ${formData.files.length}");
-      if (formData.files.isNotEmpty) {
-        for (var file in formData.files) {
-          print("  File field: ${file.key}");
-          print("  File name: ${file.value.filename}");
-          print("  File length: ${file.value.length}");
-          print("  Content type: ${file.value.contentType}");
-        }
-      }
-
-      final response = await dio.post(
-        '${AppData.remoteUrl}/send-message',
-        data: formData,
-        options: Options(headers: {'Authorization': token, 'Accept': 'application/json'}),
-      );
-
-      print("=== RAW API RESPONSE ===");
-      print("Status code: ${response.statusCode}");
-      print("Response data: ${response.data}");
-      print("=======================");
-
-      return SendMessageModel.fromJson(response.data);
+      emit(PaginationLoadedState());
     } catch (e) {
-      print('Error in custom file upload: $e');
-      rethrow;
+      debugPrint('Error loading messages: $e');
+      emit(PaginationLoadedState());
     }
   }
 
-  Future<void> _onSendMessages(SendMessageEvent event, Emitter<ChatState> emit) async {
-    print(event.roomId);
-    print(event.userId);
-    print(event.receiverId);
-    print(event.message);
-    print(event.file);
-    print(event.attachmentType);
-
+  Future<void> _onLoadMoreMessages(
+    LoadMoreMessagesEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    if (!hasMoreMessages || conversationMessages.isEmpty || isLoadingMore) return;
+    isLoadingMore = true;
+    emit(PaginationLoadedState()); // refresh UI to show spinner
     try {
-      // Check if the receiver is blocked before sending
+      final oldestId = conversationMessages.last.id;
+      final response = await _chatApi.getMessages(
+        conversationId: event.conversationId,
+        beforeId: oldestId,
+        limit: 50,
+      );
+      // Reverse so oldest is at the end (consistent with newest-first ordering)
+      final newMessages = (response.messages ?? []).reversed.toList();
+      hasMoreMessages = response.hasMore ?? false;
+
+      // Append older messages
+      conversationMessages.addAll(newMessages);
+    } catch (e) {
+      debugPrint('Error loading more messages: $e');
+    } finally {
+      isLoadingMore = false;
+      emit(PaginationLoadedState());
+    }
+  }
+
+  Future<void> _onSendConversationMessage(
+    SendConversationMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    try {
+      // Check moderation
       if (event.receiverId != null && event.receiverId!.isNotEmpty) {
         final canComm = await ModerationApiService().canCommunicate(
           targetUserId: event.receiverId!,
@@ -316,130 +167,253 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         }
       }
 
-      print("Processing file: ${event.file}");
-      SendMessageModel response;
+      ConversationMessage sentMessage;
 
-      if (event.file != null && event.file!.isNotEmpty) {
-        // Check if file exists
-        final File file = File(event.file!);
+      if (event.attachmentType == 'voice' && event.filePath != null && event.filePath!.isNotEmpty) {
+        // Voice message
+        emit(FileUploadingState());
+        sentMessage = await _chatApi.sendVoiceMessage(
+          conversationId: event.conversationId,
+          audioPath: event.filePath!,
+        );
+        emit(FileUploadedState());
+      } else if (event.filePath != null && event.filePath!.isNotEmpty) {
+        // File attachment
+        final file = File(event.filePath!);
         if (await file.exists()) {
-          final fileSize = await file.length();
-          print("=== FILE DETAILS ===");
-          print("File path: ${file.path}");
-          print("File size: $fileSize bytes");
-          print("Attachment type: ${event.attachmentType}");
-          print("===================");
-
-          // Emit uploading state
           emit(FileUploadingState());
-
-          // Use the robust file upload helper to always send multipart/form-data
-          response = await _sendMessageWithFile(
-            token: 'Bearer ${AppData.userToken}',
-            userId: event.userId ?? '',
-            roomId: event.roomId ?? '',
-            receiverId: event.receiverId ?? '',
-            attachmentType: event.attachmentType ?? '',
-            message: event.message ?? '',
-            filePath: file.path,
+          sentMessage = await _chatApi.sendFileMessage(
+            conversationId: event.conversationId,
+            filePath: event.filePath!,
+            message: event.message,
+            type: event.attachmentType,
           );
-
-          print("=== FILE UPLOAD RESPONSE ===");
-          print("Response body: ${response.body}");
-          print("Response attachment: ${response.attachment}");
-          print("Response attachmentType: ${response.attachmentType}");
-          print("Response userId: ${response.userId}");
-          print("==========================");
-
-          // Emit uploaded state
           emit(FileUploadedState());
         } else {
-          print("File does not exist: ${event.file}");
-          // Send without file if file doesn't exist
-          response = await apiManager.sendMessageWithoutFile(
-            'Bearer ${AppData.userToken}',
-            event.userId!,
-            event.roomId!,
-            event.receiverId!,
-            event.attachmentType!,
-            'File upload failed - file not found',
+          // File doesn't exist, send as text
+          sentMessage = await _chatApi.sendTextMessage(
+            conversationId: event.conversationId,
+            message: event.message ?? 'File not found',
           );
         }
       } else {
-        // For text messages, show a brief loading state
-        if (event.attachmentType == 'text') {
-          emit(FileUploadingState());
-        }
-
-        response = await apiManager.sendMessageWithoutFile('Bearer ${AppData.userToken}', event.userId!, event.roomId!, event.receiverId!, event.attachmentType!, event.message!);
-
-        if (event.attachmentType == 'text') {
-          emit(FileUploadedState());
-        }
+        // Text message
+        emit(FileUploadingState());
+        sentMessage = await _chatApi.sendTextMessage(
+          conversationId: event.conversationId,
+          message: event.message ?? '',
+        );
+        emit(FileUploadedState());
       }
 
-      messagesList.insert(
-        0,
-        Messages(
-          id: DateTime.now().millisecondsSinceEpoch.toString(), // Generate temporary ID
-          userId: response.userId!,
-          profile: response.profile,
-          body: response.body,
-          attachment: response.attachment,
-          attachmentType: response.attachmentType,
-          createdAt: response.createdAt,
-          seen: 0,
-        ),
-      );
-      // Force rebuild by emitting a different state first
-      emit(PaginationLoadingState());
-      // Then emit the loaded state to trigger UI update
+      // Insert at the beginning (newest first)
+      conversationMessages.insert(0, sentMessage);
       emit(PaginationLoadedState());
     } catch (e) {
-      print('Error sending message: $e');
-
-      // Emit upload finished state on error
+      debugPrint('Error sending message: $e');
       emit(FileUploadedState());
+      emit(PaginationLoadedState());
+    }
+  }
 
-      // Don't show error message for file uploads - just log it
-      if (event.file == null || event.file!.isEmpty) {
-        // Only show error for text messages
-        messagesList.insert(
-          0,
-          Messages(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            userId: AppData.logInUserId,
-            profile: '',
-            body: 'Failed to send message: ${e.toString()}',
-            attachment: '',
-            attachmentType: 'text',
-            createdAt: DateTime.now().toIso8601String(),
-            seen: 0,
-          ),
-        );
+  Future<void> _onDeleteConversationMessage(
+    DeleteConversationMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    try {
+      await _chatApi.deleteMessage(messageId: event.messageId);
+      conversationMessages.removeWhere((m) => m.id == event.messageId);
+      showToast('Message deleted');
+      emit(PaginationLoadedState());
+    } catch (e) {
+      debugPrint('Error deleting message: $e');
+      showToast('Failed to delete message');
+      emit(PaginationLoadedState());
+    }
+  }
+
+  Future<void> _onMarkConversationRead(
+    MarkConversationReadEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    try {
+      await _chatApi.markConversationAsRead(conversationId: event.conversationId);
+      // Update local unread count
+      final idx = conversationsList.indexWhere((c) => c.id == event.conversationId);
+      if (idx != -1) {
+        conversationsList[idx] = conversationsList[idx].copyWith(unreadCount: 0);
+      }
+      emit(PaginationLoadedState());
+    } catch (e) {
+      debugPrint('Error marking read: $e');
+    }
+  }
+
+  /// Handle real-time message from Pusher
+  Future<void> _onNewMessageReceived(
+    NewMessageReceivedEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    // Add to messages list if we're in the same conversation
+    if (currentConversationId == event.message.conversationId) {
+      // Avoid duplicates
+      if (!conversationMessages.any((m) => m.id == event.message.id)) {
+        conversationMessages.insert(0, event.message);
+      }
+    }
+    emit(PaginationLoadedState());
+  }
+
+  /// Create or find a conversation with a user and return the conversation ID
+  Future<int?> getOrCreateConversation(String userId) async {
+    try {
+      final response = await _chatApi.createConversation(userId: userId);
+      return response.conversationId;
+    } catch (e) {
+      debugPrint('Error creating conversation: $e');
+      return null;
+    }
+  }
+
+  /// Send typing indicator for a conversation
+  Future<void> sendTypingIndicator(int conversationId) async {
+    try {
+      await _chatApi.sendTypingIndicator(conversationId: conversationId);
+    } catch (e) {
+      debugPrint('Error sending typing: $e');
+    }
+  }
+
+  // ======================== LEGACY METHODS (backward compat) ========================
+
+  Future<void> _onGetSearchContacts(LoadContactsEvent event, Emitter<ChatState> emit) async {
+    if (event.page == 1) {
+      searchContactsList.clear();
+      contactPageNumber = 1;
+      emit(PaginationLoadingState());
+    }
+    try {
+      SearchContactsModel response = await apiManager.searchContacts('Bearer ${AppData.userToken}', '$contactPageNumber', event.keyword ?? '');
+      contactNumberOfPage = response.lastPage ?? 0;
+      if (contactPageNumber < contactNumberOfPage + 1) {
+        contactPageNumber = contactPageNumber + 1;
+        searchContactsList.addAll(response.records?.data ?? []);
+      }
+      emit(PaginationLoadedState());
+    } catch (e) {
+      debugPrint('Search contacts error: $e');
+      emit(DataError('Failed to search contacts: $e'));
+    }
+  }
+
+  Future<void> _updateChatReadStatus(ChatReadStatusEvent event, Emitter<ChatState> emit) async {
+    try {
+      // Try to find conversation and mark read via new API
+      if (event.userId != null && event.userId!.isNotEmpty) {
+        final findResp = await _chatApi.findConversation(userId: event.userId!);
+        if (findResp.exists == true && findResp.conversationId != null) {
+          await _chatApi.markConversationAsRead(conversationId: findResp.conversationId!);
+          final idx = conversationsList.indexWhere((c) => c.id == findResp.conversationId);
+          if (idx != -1) {
+            conversationsList[idx] = conversationsList[idx].copyWith(unreadCount: 0);
+          }
+        }
+      }
+      emit(PaginationLoadedState());
+    } catch (e) {
+      debugPrint('Error updating read status: $e');
+      emit(PaginationLoadedState());
+    }
+  }
+
+  Future<void> _onGetMessages(LoadRoomMessageEvent event, Emitter<ChatState> emit) async {
+    // Legacy - no-op, use LoadConversationMessagesEvent instead
+    emit(PaginationLoadedState());
+  }
+
+  Future<void> _onSendMessages(SendMessageEvent event, Emitter<ChatState> emit) async {
+    // Legacy wrapper: find/create conversation, then send via new API
+    try {
+      if (event.receiverId == null || event.receiverId!.isEmpty) return;
+
+      // Check moderation
+      final canComm = await ModerationApiService().canCommunicate(
+        targetUserId: event.receiverId!,
+      );
+      if (canComm.success && canComm.data == false) {
+        emit(DataError('Cannot send message. This user is blocked.'));
+        return;
       }
 
+      // Get or create conversation
+      final convId = await getOrCreateConversation(event.receiverId!);
+      if (convId == null) {
+        emit(DataError('Failed to create conversation'));
+        return;
+      }
+
+      ConversationMessage sentMessage;
+
+      if (event.file != null && event.file!.isNotEmpty) {
+        final file = File(event.file!);
+        if (await file.exists()) {
+          emit(FileUploadingState());
+          if (event.attachmentType == 'voice') {
+            sentMessage = await _chatApi.sendVoiceMessage(
+              conversationId: convId,
+              audioPath: event.file!,
+            );
+          } else {
+            sentMessage = await _chatApi.sendFileMessage(
+              conversationId: convId,
+              filePath: event.file!,
+              message: event.message,
+              type: event.attachmentType,
+            );
+          }
+          emit(FileUploadedState());
+        } else {
+          sentMessage = await _chatApi.sendTextMessage(
+            conversationId: convId,
+            message: event.message ?? 'File not found',
+          );
+        }
+      } else {
+        emit(FileUploadingState());
+        sentMessage = await _chatApi.sendTextMessage(
+          conversationId: convId,
+          message: event.message ?? '',
+        );
+        emit(FileUploadedState());
+      }
+
+      // Update currentConversationId if not set
+      currentConversationId ??= convId;
+
+      // Insert into conversation messages
+      conversationMessages.insert(0, sentMessage);
+      emit(PaginationLoadedState());
+    } catch (e) {
+      debugPrint('Error sending message: $e');
+      emit(FileUploadedState());
       emit(PaginationLoadedState());
     }
   }
 
   Future<void> _onDeleteMessages(DeleteMessageEvent event, Emitter<ChatState> emit) async {
     try {
-      final messageId = (event.id ?? '').toString();
-      if (messageId.isEmpty) {
+      final messageId = int.tryParse(event.id ?? '');
+      if (messageId == null) {
         showToast('Invalid message id');
         emit(PaginationLoadedState());
         return;
       }
-
-      await apiManager.deleteMessage('Bearer ${AppData.userToken}', messageId);
-
-      // Remove locally (handle int/string ids)
-      messagesList.removeWhere((m) => m.id?.toString() == messageId);
+      await _chatApi.deleteMessage(messageId: messageId);
+      conversationMessages.removeWhere((m) => m.id == messageId);
       showToast('Message deleted');
       emit(PaginationLoadedState());
     } catch (e) {
-      debugPrint('❌ Delete message failed: $e');
+      debugPrint('Delete message failed: $e');
       showToast('Failed to delete message');
       emit(PaginationLoadedState());
     }
@@ -448,12 +422,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Future<void> _selectedFile(SelectedFiles event, Emitter<ChatState> emit) async {
     if (event.isRemove) {
       imagefiles.remove(event.pickedfiles);
-      emit(PaginationLoadedState());
     } else {
       imagefiles.add(event.pickedfiles);
-      // print(imagefiles);
-      emit(PaginationLoadedState());
     }
-    // emit(DataLoaded(searchPeopleData));
+    emit(PaginationLoadedState());
   }
 }

@@ -730,38 +730,72 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> signInWithApple() async {
-    //   print('token$token');
-    final rawNonce = generateNonce();
-    final nonce = sha256ofString(rawNonce);
+    try {
+      final rawNonce = generateNonce();
+      final nonce = sha256ofString(rawNonce);
 
-    // Request credential for the currently signed in Apple account.
-    final appleCredential = await SignInWithApple.getAppleIDCredential(scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName], nonce: nonce);
+      // Request credential from Apple
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
+        nonce: nonce,
+      );
 
-    // The actual Apple identity token (JWT) for server-side verification
-    final appleIdToken = appleCredential.identityToken;
+      // The identity token is the JWT we send to our backend
+      final appleIdToken = appleCredential.identityToken;
+      if (appleIdToken == null) {
+        toast(translation(context).msg_something_wrong);
+        return;
+      }
 
-    // Create an `OAuthCredential` from the credential returned by Apple.
-    final oauthCredential = OAuthProvider('apple.com').credential(idToken: appleIdToken, rawNonce: rawNonce);
-    String token = await _getSafeFcmToken();
-    var response = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
-    if (token.isNotEmpty && appleIdToken != null) {
+      // Try to get extra user info via Firebase (optional — only works when
+      // Firebase Apple Sign-In is configured). If it fails we continue with
+      // whatever Apple gave us directly.
+      String? firebaseEmail;
+      String? firebaseDisplayName;
+      try {
+        final oauthCredential = OAuthProvider('apple.com').credential(idToken: appleIdToken, rawNonce: rawNonce);
+        final firebaseResponse = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+        firebaseEmail = firebaseResponse.user?.email;
+        firebaseDisplayName = firebaseResponse.user?.displayName;
+      } catch (firebaseError) {
+        // Firebase sign-in failed (misconfiguration, network, etc.)
+        // Non-fatal: we still have the Apple identity token for our own backend.
+        debugPrint('Apple Firebase sign-in skipped: $firebaseError');
+      }
+
+      final String deviceToken = await _getSafeFcmToken();
+
+      // Resolve email: Apple credential → Firebase → empty string (backend handles missing email)
+      final String email = appleCredential.authorizationCode.isNotEmpty
+          ? (firebaseEmail ?? '')
+          : (firebaseEmail ?? '');
+
+      // Resolve name parts
+      final nameParts = (firebaseDisplayName ?? '').split(' ');
+      final String firstName = appleCredential.givenName ?? (nameParts.isNotEmpty ? nameParts.first : '');
+      final String lastName  = appleCredential.familyName ?? (nameParts.length > 1 ? nameParts.last : '');
+
       loginBloc.add(
         SocialLoginButtonPressed(
-          email: response.user?.email ?? ' ',
-          firstName: appleCredential.givenName ?? response.user?.displayName?.split(' ').first ?? ' ',
-          lastName: appleCredential.familyName ?? response.user?.displayName?.split(' ').last ?? ' ',
+          email: email,
+          firstName: firstName,
+          lastName: lastName,
           isSocialLogin: true,
           provider: 'apple',
           token: appleIdToken,
-          deviceToken: token,
+          deviceToken: deviceToken,
         ),
       );
-    } else {
-      toast(translation(context).msg_something_wrong);
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // User cancelled or Apple auth failed — don't show an error for cancellation
+      if (e.code != AuthorizationErrorCode.canceled) {
+        debugPrint('Apple Sign-In error: ${e.message}');
+        if (mounted) toast(translation(context).msg_something_wrong);
+      }
+    } catch (e) {
+      debugPrint('Apple Sign-In unexpected error: $e');
+      if (mounted) toast(translation(context).msg_something_wrong);
     }
-    print("${appleCredential.givenName} ${appleCredential.familyName}");
-
-    // No need to disconnect GoogleSignIn here since we're using Apple Sign-In
   }
 
   Future<void> loginApp(BuildContext context) async {

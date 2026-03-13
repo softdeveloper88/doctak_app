@@ -382,7 +382,10 @@ class DrugAIUsage {
   }
 
   double get usagePercent => dailyLimit > 0 ? dailyUsed / dailyLimit : 0.0;
-  bool get isLimitReached => !canUse || dailyRemaining <= 0;
+  /// The admin can set daily_limit to 0 or a very high number (e.g. 9999)
+  /// to indicate unlimited usage. Also treat negative values as unlimited.
+  bool get isUnlimited => dailyLimit <= 0 || dailyLimit >= 9999;
+  bool get isLimitReached => !isUnlimited && (!canUse || dailyRemaining <= 0);
   bool get isPremium => planSlug != 'free';
 }
 

@@ -47,6 +47,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   bool isAlreadyAsk = true;
   bool isEmpty = false;
   FocusNode focusNode = FocusNode();
+  int _lastTypingResponseLength = -1;
 
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
@@ -61,7 +62,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
       id: -1,
       gptSessionId: selectedSessionId.toString(),
       question: question,
-      response: 'Generating response...',
+      response: translation(context).lbl_generating_response,
       createdAt: DateTime.now().toString(),
       updatedAt: DateTime.now().toString(),
     );
@@ -76,13 +77,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
     );
     textController.clear();
     scrollToBottom();
-    // });
-    try {
-      isWriting = false;
-      // });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-    }
   }
 
   @override
@@ -124,6 +118,8 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
           } else if (state1 is DataLoaded) {
             print('response ${state1.response.toString()}');
 
+            _autoScrollWhileTyping(state1.response1.messages);
+
             // Handle drugs list prompts first
             if (!widget.isFromMainScreen && (widget.question?.isNotEmpty ?? false)) {
               // Always show chat UI for drug questions
@@ -150,11 +146,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                      child: Icon(Icons.history_rounded, color: theme.primary, size: 16),
-                    ),
+                    icon: Icon(Icons.history_rounded, color: theme.primary, size: 22),
                     onPressed: () {
                       ChatHistoryScreen(
                         onNewSessionTap: () {
@@ -184,11 +176,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                     child: IconButton(
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.green.withValues(alpha: 0.1), shape: BoxShape.circle),
-                        child: Icon(Icons.add, color: Colors.green[600], size: 16),
-                      ),
+                      icon: Icon(Icons.add, color: theme.primary, size: 22),
                       onPressed: () {
                         try {
                           BlocProvider.of<ChatGPTBloc>(context).add(GetNewChat());
@@ -330,7 +318,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                       gptSessionId: selectedSessionId.toString(),
                                       question: question,
                                       imageUrl1: message.imageUrl1,
-                                      response: 'Generating response...',
+                                      response: translation(context).lbl_generating_response,
                                       createdAt: DateTime.now().toString(),
                                       updatedAt: DateTime.now().toString(),
                                     );
@@ -554,7 +542,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                     id: -1,
                                     gptSessionId: selectedSessionId.toString(),
                                     question: question,
-                                    response: 'Generating response...',
+                                    response: translation(context).lbl_generating_response,
                                     createdAt: DateTime.now().toString(),
                                     updatedAt: DateTime.now().toString(),
                                     imageUrl1: '',
@@ -659,9 +647,6 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
                                   //   // });
                                   //   scrollToBottom();
                                   // }
-                                  // setState(() {
-                                  isWriting = false;
-                                  // });
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                                 }
@@ -751,6 +736,44 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   }
 
   void onSubscriptionCount(String channelName, int subscriptionCount) {}
+
+  void _autoScrollWhileTyping(List<Messages>? messages) {
+    if (messages == null || messages.isEmpty) {
+      _lastTypingResponseLength = -1;
+      return;
+    }
+
+    Messages? typingMessage;
+    for (int i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].id == -1) {
+        typingMessage = messages[i];
+        break;
+      }
+    }
+
+    if (typingMessage == null) {
+      _lastTypingResponseLength = -1;
+      return;
+    }
+
+    final int currentLength = (typingMessage.response ?? '').length;
+    final bool shouldScroll =
+        _lastTypingResponseLength == -1 ||
+        currentLength <= 8 ||
+        (currentLength - _lastTypingResponseLength) >= 20;
+
+    if (shouldScroll) {
+      _lastTypingResponseLength = currentLength;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+  }
 
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 100), () {

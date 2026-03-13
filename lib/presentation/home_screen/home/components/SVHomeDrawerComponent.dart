@@ -32,6 +32,7 @@ import '../../../doctak_ai_module/presentation/ai_chat_screen.dart';
 import '../screens/meeting_screen/manage_meeting_screen.dart';
 import '../screens/moderation_screen/moderation_privacy_screen.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
+import 'package:doctak_app/presentation/cme_module/cme_main_screen.dart';
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 
 class SVHomeDrawerComponent extends StatefulWidget {
@@ -142,6 +143,12 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             Icons.description_outlined,
             l10n.lbl_guidelines,
             l10n.desc_guidelines,
+          ),
+          MenuItemData(
+            14,
+            Icons.school_outlined,
+            l10n.lbl_CME,
+            l10n.lbl_cme_full,
           ),
         ],
       ),
@@ -2221,6 +2228,9 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           break;
         case 13:
           const SubscriptionScreen().launch(context);
+          break;
+        case 14:
+          const CmeMainScreen().launch(context);
           break;
       }
     });

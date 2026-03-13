@@ -7,6 +7,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/manage_meeting_screen.dart';
 import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:share_plus/share_plus.dart';
@@ -284,9 +285,7 @@ class DeepLinkService {
           return await _handleCallDeepLink(context, deepLink);
 
         case DeepLinkType.profile:
-          // Profile deep link - can be implemented later
-          debugPrint('🔗 DeepLinkService: Profile deep links not yet implemented');
-          return false;
+          return await _handleProfileDeepLink(context, deepLink);
 
         case DeepLinkType.unknown:
           debugPrint('🔗 DeepLinkService: Unknown deep link type, navigating to dashboard');
@@ -393,6 +392,25 @@ class DeepLinkService {
       MaterialPageRoute(
         builder: (context) => CallScreen(callId: callId, contactId: contactId, contactName: contactName, contactAvatar: contactAvatar, isIncoming: true, isVideoCall: isVideo),
       ),
+      (route) => false,
+    );
+
+    return true;
+  }
+
+  /// Handle profile deep link
+  Future<bool> _handleProfileDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final userId = deepLink.id;
+    if (userId == null || userId.isEmpty) {
+      debugPrint('🔗 DeepLinkService: User ID is missing');
+      const SVDashboardScreen().launch(context, isNewTask: true);
+      return false;
+    }
+
+    debugPrint('🔗 DeepLinkService: Navigating to profile: $userId');
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => SVProfileFragment(userId: userId)),
       (route) => false,
     );
 

@@ -1824,6 +1824,44 @@ class AppLocalizationsFa extends AppLocalizations {
       'کنترل‌هایی برای مدیریت حریم خصوصی و امنیت جلسه، شامل محدود کردن دسترسی، فعال کردن اتاق انتظار، درخواست رمز عبور و غیره.';
 
   @override
+  String get lbl_all => 'همه';
+
+  @override
+  String get lbl_this_week => 'این هفته';
+
+  @override
+  String get lbl_this_month => 'این ماه';
+
+  @override
+  String get lbl_participants => 'شرکت‌کنندگان';
+
+  @override
+  String get lbl_host => 'میزبان';
+
+  @override
+  String get lbl_you_hosted => 'شما میزبان بودید';
+
+  @override
+  String get lbl_hosted_by => 'میزبانی شده توسط';
+
+  @override
+  String get msg_no_meeting_history => 'سابقه جلسه‌ای وجود ندارد';
+
+  @override
+  String get msg_meetings_will_appear_here =>
+      'جلسات قبلی شما اینجا نمایش داده می‌شوند';
+
+  @override
+  String get lbl_cancel_meeting => 'لغو جلسه';
+
+  @override
+  String get msg_cancel_meeting_confirm =>
+      'آیا مطمئن هستید که می‌خواهید این جلسه را لغو کنید؟';
+
+  @override
+  String get msg_meeting_cancelled => 'جلسه با موفقیت لغو شد';
+
+  @override
   String get lbl_add_case => 'افزودن مورد';
 
   @override

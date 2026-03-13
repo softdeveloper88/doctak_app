@@ -2,6 +2,7 @@ import 'package:doctak_app/data/apiClient/drugs_v6_api_service.dart';
 import 'package:doctak_app/data/models/drugs_model/drug_v6_models.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drug_ai_sheet.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -156,43 +157,10 @@ class _DrugDetailScreenState extends State<DrugDetailScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(OneUITheme theme) {
-    return AppBar(
-      backgroundColor: theme.appBarBackground,
-      elevation: 0,
-      scrolledUnderElevation: 1,
-      centerTitle: true,
-      title: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            _drug.displayName,
-            style: TextStyle(
-              color: theme.textPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              fontFamily: 'Poppins',
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (_drug.subtitle.isNotEmpty)
-            Text(
-              _drug.subtitle,
-              style: TextStyle(
-                color: theme.primary,
-                fontSize: 11,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-        ],
-      ),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.textPrimary, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
+    return DoctakAppBar(
+      title: _drug.displayName,
+      subtitle: _drug.subtitle.isNotEmpty ? _drug.subtitle : null,
+      titleFontSize: 16,
       actions: [
         if (_loadingDetail)
           Padding(
@@ -209,19 +177,19 @@ class _DrugDetailScreenState extends State<DrugDetailScreen> {
         IconButton(
           icon: Icon(
             _isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-            color: _isBookmarked ? theme.primary : theme.textSecondary,
+            color: _isBookmarked ? theme.primary : theme.iconColor,
             size: 22,
           ),
           tooltip: _isBookmarked ? 'Remove bookmark' : 'Save drug',
           onPressed: _toggleBookmark,
         ),
         IconButton(
-          icon: Icon(Icons.copy_rounded, color: theme.textSecondary, size: 20),
+          icon: Icon(Icons.copy_rounded, color: theme.iconColor, size: 22),
           tooltip: 'Copy info',
           onPressed: _copyInfo,
         ),
         IconButton(
-          icon: Icon(Icons.share_rounded, color: theme.textSecondary, size: 20),
+          icon: Icon(Icons.share_rounded, color: theme.iconColor, size: 22),
           tooltip: 'Share',
           onPressed: _shareInfo,
         ),

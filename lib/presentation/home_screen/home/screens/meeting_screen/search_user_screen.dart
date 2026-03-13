@@ -8,6 +8,8 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,26 +19,21 @@ import '../../../utils/shimmer_widget.dart';
 
 /// One UI 8.5 Theme Helper for Search User Screen
 class _OneUITheme {
-  final bool isDark;
+  final OneUITheme shared;
 
-  _OneUITheme(BuildContext context) : isDark = Theme.of(context).brightness == Brightness.dark;
+  _OneUITheme(BuildContext context) : shared = OneUITheme.of(context);
 
-  // Background colors
-  Color get background => isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF7F7F7);
-  Color get surface => isDark ? const Color(0xFF1B2838) : Colors.white;
-  Color get surfaceVariant => isDark ? const Color(0xFF2D3E50) : const Color(0xFFF0F0F0);
+  bool get isDark => shared.isDark;
+  Color get background => shared.scaffoldBackground;
+  Color get surface => shared.cardBackground;
+  Color get surfaceVariant => shared.surfaceVariant;
+  Color get textPrimary => shared.textPrimary;
+  Color get textSecondary => shared.textSecondary;
+  Color get textTertiary => shared.textTertiary;
+  Color get accent => shared.primary;
+  Color get divider => shared.divider;
+  Color get border => shared.border;
 
-  // Text colors
-  Color get textPrimary => isDark ? Colors.white : const Color(0xFF1C1C1E);
-  Color get textSecondary => isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF8E8E93);
-  Color get textTertiary => isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFFC7C7CC);
-
-  // Accent & semantic colors
-  Color get accent => const Color(0xFF0A84FF);
-  Color get divider => isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1);
-  Color get border => isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08);
-
-  // Shadows
   List<BoxShadow> get cardShadow => [
     BoxShadow(
       color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
@@ -77,6 +74,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
+    meetingBloc.close();
     super.dispose();
   }
 
@@ -96,50 +94,16 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
 
     return Scaffold(
       backgroundColor: theme.background,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        surfaceTintColor: theme.surface,
-        backgroundColor: theme.surface,
-        elevation: 0,
-        centerTitle: false,
-        title: Text(
-          translation(context).lbl_search_friends,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
-        ),
+      appBar: DoctakSearchableAppBar(
+        title: translation(context).lbl_search_friends,
+        searchHint: translation(context).lbl_search_by_name_or_email,
+        searchController: _searchController,
+        onSearchChanged: _onSearchChanged,
+        startWithSearch: true,
+        showBackButton: true,
       ),
       body: Column(
         children: [
-          // One UI styled search bar
-          Container(
-            color: theme.surface,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Container(
-              decoration: BoxDecoration(
-                color: theme.surfaceVariant,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: theme.border, width: 1),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                style: TextStyle(color: theme.textPrimary, fontSize: 15, fontFamily: 'Poppins'),
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: translation(context).lbl_search_by_name_or_email,
-                  hintStyle: TextStyle(color: theme.textTertiary, fontFamily: 'Poppins', fontSize: 15),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  suffixIcon: Container(
-                    padding: const EdgeInsets.all(12),
-                    child: Icon(Icons.search, color: theme.textSecondary, size: 22),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           // User list
           BlocBuilder<MeetingBloc, MeetingState>(
             bloc: meetingBloc,

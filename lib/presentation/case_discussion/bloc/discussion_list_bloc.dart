@@ -1,68 +1,72 @@
+// ============================================================================
+// Discussion List BLoC - v6 API
+// Handles list loading, pagination, filtering (tabs + search + specialty/country/sort),
+// and optimistic like/bookmark actions.
+// ============================================================================
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../repository/case_discussion_repository.dart';
 import '../models/case_discussion_models.dart';
 
-// Events
+// ─────────────────────────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────────────────────────
+
 abstract class DiscussionListEvent extends Equatable {
   const DiscussionListEvent();
-
   @override
   List<Object?> get props => [];
 }
 
 class LoadDiscussionList extends DiscussionListEvent {
   final bool refresh;
-  final String? search;
-  final String? specialty;
-  final String? countryId;
-  final String? sortBy;
-  final String? sortOrder;
   final CaseDiscussionFilters? filters;
-
-  const LoadDiscussionList({this.refresh = false, this.search, this.specialty, this.countryId, this.sortBy, this.sortOrder, this.filters});
-
+  const LoadDiscussionList({this.refresh = false, this.filters});
   @override
-  List<Object?> get props => [refresh, search, specialty, countryId, sortBy, sortOrder, filters];
+  List<Object?> get props => [refresh, filters];
 }
 
 class LoadMoreDiscussions extends DiscussionListEvent {}
 
 class RefreshDiscussionList extends DiscussionListEvent {}
 
-class LikeDiscussion extends DiscussionListEvent {
-  final int caseId;
-
-  const LikeDiscussion(this.caseId);
-
+class UpdateFilters extends DiscussionListEvent {
+  final CaseDiscussionFilters filters;
+  const UpdateFilters(this.filters);
   @override
-  List<Object> get props => [caseId];
+  List<Object?> get props => [filters];
 }
 
 class LoadFilterData extends DiscussionListEvent {}
 
-class DeleteDiscussion extends DiscussionListEvent {
+class ToggleLikeDiscussion extends DiscussionListEvent {
   final int caseId;
-
-  const DeleteDiscussion(this.caseId);
-
+  const ToggleLikeDiscussion(this.caseId);
   @override
   List<Object> get props => [caseId];
 }
 
-class UpdateFilters extends DiscussionListEvent {
-  final CaseDiscussionFilters filters;
-
-  const UpdateFilters(this.filters);
-
+class ToggleBookmarkDiscussion extends DiscussionListEvent {
+  final int caseId;
+  const ToggleBookmarkDiscussion(this.caseId);
   @override
-  List<Object> get props => [filters];
+  List<Object> get props => [caseId];
 }
 
-// States
+class DeleteDiscussion extends DiscussionListEvent {
+  final int caseId;
+  const DeleteDiscussion(this.caseId);
+  @override
+  List<Object> get props => [caseId];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATES
+// ─────────────────────────────────────────────────────────────────────────────
+
 abstract class DiscussionListState extends Equatable {
   const DiscussionListState();
-
   @override
   List<Object?> get props => [];
 }
@@ -89,7 +93,14 @@ class DiscussionListLoaded extends DiscussionListState {
   });
 
   @override
-  List<Object> get props => [discussions, hasReachedMax, isLoadingMore, specialties, countries, currentFilters];
+  List<Object> get props => [
+        discussions,
+        hasReachedMax,
+        isLoadingMore,
+        specialties,
+        countries,
+        currentFilters,
+      ];
 
   DiscussionListLoaded copyWith({
     List<CaseDiscussionListItem>? discussions,
@@ -112,15 +123,17 @@ class DiscussionListLoaded extends DiscussionListState {
 
 class DiscussionListError extends DiscussionListState {
   final String message;
-
   const DiscussionListError(this.message);
-
   @override
   List<Object> get props => [message];
 }
 
-// BLoC
-class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> {
+// ─────────────────────────────────────────────────────────────────────────────
+// BLOC
+// ─────────────────────────────────────────────────────────────────────────────
+
+class DiscussionListBloc
+    extends Bloc<DiscussionListEvent, DiscussionListState> {
   final CaseDiscussionRepository repository;
 
   int _currentPage = 1;
@@ -129,23 +142,25 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
   List<SpecialtyFilter> _specialties = [];
   List<CountryFilter> _countries = [];
 
-  DiscussionListBloc({required this.repository}) : super(DiscussionListInitial()) {
+  DiscussionListBloc({required this.repository})
+      : super(DiscussionListInitial()) {
     on<LoadDiscussionList>(_onLoadDiscussionList);
     on<LoadMoreDiscussions>(_onLoadMoreDiscussions);
     on<RefreshDiscussionList>(_onRefreshDiscussionList);
-    on<LikeDiscussion>(_onLikeDiscussion);
-    on<LoadFilterData>(_onLoadFilterData);
     on<UpdateFilters>(_onUpdateFilters);
+    on<LoadFilterData>(_onLoadFilterData);
+    on<ToggleLikeDiscussion>(_onToggleLike);
+    on<ToggleBookmarkDiscussion>(_onToggleBookmark);
     on<DeleteDiscussion>(_onDeleteDiscussion);
   }
 
-  Future<void> _onLoadDiscussionList(LoadDiscussionList event, Emitter<DiscussionListState> emit) async {
+  Future<void> _onLoadDiscussionList(
+      LoadDiscussionList event, Emitter<DiscussionListState> emit) async {
     if (event.refresh) {
       _currentPage = 1;
       _discussions.clear();
     }
 
-    // Update current filters
     if (event.filters != null) {
       _currentFilters = event.filters!;
     }
@@ -157,12 +172,7 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
     try {
       final result = await repository.getCaseDiscussions(
         page: _currentPage,
-        search: event.search,
-        specialty: event.specialty,
-        countryId: event.countryId,
-        sortBy: event.sortBy,
-        sortOrder: event.sortOrder,
-        filters: event.filters ?? _currentFilters,
+        filters: _currentFilters,
       );
 
       if (event.refresh) {
@@ -170,167 +180,179 @@ class DiscussionListBloc extends Bloc<DiscussionListEvent, DiscussionListState> 
       } else {
         _discussions.addAll(result.items);
       }
-
       _currentPage++;
 
-      emit(
-        DiscussionListLoaded(discussions: List.from(_discussions), hasReachedMax: !result.pagination.hasNextPage, specialties: _specialties, countries: _countries, currentFilters: _currentFilters),
-      );
+      emit(DiscussionListLoaded(
+        discussions: List.from(_discussions),
+        hasReachedMax: !result.pagination.hasNextPage,
+        specialties: _specialties,
+        countries: _countries,
+        currentFilters: _currentFilters,
+      ));
     } catch (e) {
       emit(DiscussionListError(e.toString()));
     }
   }
 
-  Future<void> _onLoadMoreDiscussions(LoadMoreDiscussions event, Emitter<DiscussionListState> emit) async {
+  Future<void> _onLoadMoreDiscussions(
+      LoadMoreDiscussions event, Emitter<DiscussionListState> emit) async {
     final currentState = state;
-    if (currentState is DiscussionListLoaded && !currentState.hasReachedMax) {
+    if (currentState is DiscussionListLoaded &&
+        !currentState.hasReachedMax &&
+        !currentState.isLoadingMore) {
       emit(currentState.copyWith(isLoadingMore: true));
 
       try {
-        final result = await repository.getCaseDiscussions(page: _currentPage, filters: _currentFilters);
+        final result = await repository.getCaseDiscussions(
+          page: _currentPage,
+          filters: _currentFilters,
+        );
 
         _discussions.addAll(result.items);
         _currentPage++;
 
-        emit(
-          DiscussionListLoaded(
-            discussions: List.from(_discussions),
-            hasReachedMax: !result.pagination.hasNextPage,
-            isLoadingMore: false,
-            specialties: _specialties,
-            countries: _countries,
-            currentFilters: _currentFilters,
-          ),
-        );
+        emit(DiscussionListLoaded(
+          discussions: List.from(_discussions),
+          hasReachedMax: !result.pagination.hasNextPage,
+          isLoadingMore: false,
+          specialties: _specialties,
+          countries: _countries,
+          currentFilters: _currentFilters,
+        ));
       } catch (e) {
         emit(currentState.copyWith(isLoadingMore: false));
       }
     }
   }
 
-  Future<void> _onRefreshDiscussionList(RefreshDiscussionList event, Emitter<DiscussionListState> emit) async {
+  Future<void> _onRefreshDiscussionList(
+      RefreshDiscussionList event, Emitter<DiscussionListState> emit) async {
     add(LoadDiscussionList(refresh: true, filters: _currentFilters));
   }
 
-  Future<void> _onLikeDiscussion(LikeDiscussion event, Emitter<DiscussionListState> emit) async {
-    try {
-      // TODO: Add like state tracking to properly toggle like/unlike
-      await repository.performCaseAction(caseId: event.caseId, action: 'like');
-
-      // Update the like count in the local list
-      final currentState = state;
-      if (currentState is DiscussionListLoaded) {
-        final updatedDiscussions = currentState.discussions.map((discussion) {
-          if (discussion.id == event.caseId) {
-            // Create updated list item with incremented likes
-            return CaseDiscussionListItem(
-              id: discussion.id,
-              title: discussion.title,
-              tags: discussion.tags,
-              likes: discussion.likes + 1,
-              views: discussion.views,
-              attachedFile: discussion.attachedFile,
-              promoted: discussion.promoted,
-              createdAt: discussion.createdAt,
-              name: discussion.name,
-              profilePic: discussion.profilePic,
-              specialty: discussion.specialty,
-              comments: discussion.comments,
-            );
-          }
-          return discussion;
-        }).toList();
-
-        emit(currentState.copyWith(discussions: updatedDiscussions));
-      }
-    } catch (e) {
-      // Handle error silently or show a snackbar
-      print('Error liking discussion: $e');
-    }
-  }
-
-  Future<void> _onLoadFilterData(LoadFilterData event, Emitter<DiscussionListState> emit) async {
-    try {
-      print('Loading filter data...');
-
-      // Use the new getFilterData method
-      final filterData = await repository.getFilterData();
-      final specialties = filterData['specialties'] as List<SpecialtyFilter>;
-      final countries = filterData['countries'] as List<CountryFilter>;
-
-      _specialties = specialties;
-      _countries = countries;
-
-      print('Loaded ${specialties.length} specialties and ${countries.length} countries');
-
-      final currentState = state;
-      if (currentState is DiscussionListLoaded) {
-        emit(currentState.copyWith(specialties: specialties, countries: countries));
-      } else {
-        // If no discussions loaded yet, emit a loaded state with empty discussions
-        // This ensures the filter UI can be displayed
-        emit(DiscussionListLoaded(discussions: [], hasReachedMax: false, specialties: specialties, countries: countries, currentFilters: _currentFilters));
-      }
-    } catch (e) {
-      print('Error loading filter data: $e');
-      // Continue with fallback data
-      final currentState = state;
-      if (currentState is DiscussionListLoaded) {
-        // Keep current state but ensure we have fallback data
-        if (_specialties.isEmpty || _countries.isEmpty) {
-          try {
-            _specialties = await repository.getSpecialties();
-            _countries = await repository.getCountries();
-          } catch (_) {
-            // Use empty lists if all else fails
-            _specialties = [];
-            _countries = [];
-          }
-        }
-        emit(currentState.copyWith(specialties: _specialties, countries: _countries));
-      }
-    }
-  }
-
-  Future<void> _onUpdateFilters(UpdateFilters event, Emitter<DiscussionListState> emit) async {
-    print('Updating filters: ${event.filters.toQueryParameters()}');
-
+  Future<void> _onUpdateFilters(
+      UpdateFilters event, Emitter<DiscussionListState> emit) async {
     _currentFilters = event.filters;
-
-    // Reset pagination and reload discussions with new filters
     _currentPage = 1;
     _discussions.clear();
+    emit(DiscussionListLoading());
 
-    // Reload discussions with new filters
-    add(LoadDiscussionList(refresh: true, filters: _currentFilters));
+    try {
+      final result = await repository.getCaseDiscussions(
+        page: 1,
+        filters: _currentFilters,
+      );
+
+      _discussions = result.items;
+      _currentPage = 2;
+
+      emit(DiscussionListLoaded(
+        discussions: List.from(_discussions),
+        hasReachedMax: !result.pagination.hasNextPage,
+        specialties: _specialties,
+        countries: _countries,
+        currentFilters: _currentFilters,
+      ));
+    } catch (e) {
+      emit(DiscussionListError(e.toString()));
+    }
   }
 
-  Future<void> _onDeleteDiscussion(DeleteDiscussion event, Emitter<DiscussionListState> emit) async {
+  Future<void> _onLoadFilterData(
+      LoadFilterData event, Emitter<DiscussionListState> emit) async {
     try {
-      print('🗑️ Starting delete process for case ID: ${event.caseId}');
-      print('📋 Current discussions count: ${_discussions.length}');
+      final filterData = await repository.getFilterData();
+      _specialties = filterData['specialties'] as List<SpecialtyFilter>;
+      _countries = filterData['countries'] as List<CountryFilter>;
 
-      // Call API to delete case
-      await repository.deleteCase(event.caseId);
-      print('✅ API delete call successful');
-
-      // Remove case from local list for real-time update
-      final initialCount = _discussions.length;
-      _discussions.removeWhere((discussion) => discussion.id == event.caseId);
-      print('📋 Discussions count after removal: ${_discussions.length} (removed: ${initialCount - _discussions.length})');
-
-      // Emit updated state
       final currentState = state;
       if (currentState is DiscussionListLoaded) {
-        print('🔄 Emitting updated state with ${_discussions.length} discussions');
-        emit(currentState.copyWith(discussions: List.from(_discussions)));
+        emit(currentState.copyWith(
+          specialties: _specialties,
+          countries: _countries,
+        ));
       }
-
-      print('✅ Case deleted successfully and list updated');
     } catch (e) {
-      print('❌ Error deleting case: $e');
-      // Optionally emit an error state or show a snackbar
-      // emit(DiscussionListError('Failed to delete discussion: $e'));
+      // Filter load failure is non-critical
+    }
+  }
+
+  Future<void> _onToggleLike(
+      ToggleLikeDiscussion event, Emitter<DiscussionListState> emit) async {
+    final currentState = state;
+    if (currentState is DiscussionListLoaded) {
+      // Find the item
+      final idx =
+          currentState.discussions.indexWhere((d) => d.id == event.caseId);
+      if (idx == -1) return;
+      final item = currentState.discussions[idx];
+      final wasLiked = item.isLiked;
+
+      // Optimistic update
+      final updated = item.copyWith(
+        isLiked: !wasLiked,
+        likes: wasLiked ? item.likes - 1 : item.likes + 1,
+      );
+      final updatedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+      updatedList[idx] = updated;
+      emit(currentState.copyWith(discussions: updatedList));
+
+      try {
+        await repository.performCaseAction(
+          caseId: event.caseId,
+          action: wasLiked ? 'unlike' : 'like',
+        );
+      } catch (_) {
+        // Revert on failure
+        final revertedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+        revertedList[idx] = item;
+        emit(currentState.copyWith(discussions: revertedList));
+      }
+    }
+  }
+
+  Future<void> _onToggleBookmark(
+      ToggleBookmarkDiscussion event, Emitter<DiscussionListState> emit) async {
+    final currentState = state;
+    if (currentState is DiscussionListLoaded) {
+      final idx =
+          currentState.discussions.indexWhere((d) => d.id == event.caseId);
+      if (idx == -1) return;
+      final item = currentState.discussions[idx];
+      final wasBookmarked = item.isBookmarked;
+
+      // Optimistic update
+      final updated = item.copyWith(isBookmarked: !wasBookmarked);
+      final updatedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+      updatedList[idx] = updated;
+      emit(currentState.copyWith(discussions: updatedList));
+
+      try {
+        await repository.performCaseAction(
+          caseId: event.caseId,
+          action: wasBookmarked ? 'unbookmark' : 'bookmark',
+        );
+      } catch (_) {
+        final revertedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+        revertedList[idx] = item;
+        emit(currentState.copyWith(discussions: revertedList));
+      }
+    }
+  }
+
+  Future<void> _onDeleteDiscussion(
+      DeleteDiscussion event, Emitter<DiscussionListState> emit) async {
+    final currentState = state;
+    if (currentState is DiscussionListLoaded) {
+      try {
+        await repository.deleteCase(event.caseId);
+        _discussions.removeWhere((d) => d.id == event.caseId);
+        emit(currentState.copyWith(
+          discussions: List.from(_discussions),
+        ));
+      } catch (_) {
+        // Silently handle
+      }
     }
   }
 }

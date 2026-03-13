@@ -121,7 +121,6 @@ class _OfflineRetryBannerState extends State<OfflineRetryBanner>
                     Text(
                       widget.message,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: isDark ? Colors.white : Colors.orange.shade900,
@@ -131,7 +130,6 @@ class _OfflineRetryBannerState extends State<OfflineRetryBanner>
                     Text(
                       translation(context).lbl_showing_cached_data,
                       style: TextStyle(
-                        fontFamily: 'Poppins',
                         fontSize: 11,
                         color: isDark
                             ? Colors.grey.shade400
@@ -176,7 +174,6 @@ class _OfflineRetryBannerState extends State<OfflineRetryBanner>
                       label: Text(
                         translation(context).lbl_retry,
                         style: TextStyle(
-                          fontFamily: 'Poppins',
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: isDark
@@ -232,7 +229,6 @@ class OfflineRetryCard extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Poppins',
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: isDark ? Colors.white : Colors.orange.shade800,
@@ -243,7 +239,6 @@ class OfflineRetryCard extends StatelessWidget {
             translation(context).lbl_tap_to_retry,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontFamily: 'Poppins',
               fontSize: 12,
               color: isDark ? Colors.grey.shade400 : Colors.orange.shade600,
             ),
@@ -263,7 +258,6 @@ class OfflineRetryCard extends StatelessWidget {
             label: Text(
               translation(context).lbl_retry,
               style: const TextStyle(
-                fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
               ),
             ),

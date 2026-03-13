@@ -1813,6 +1813,43 @@ class AppLocalizationsAr extends AppLocalizations {
       'ضوابط لإدارة خصوصية وأمان الاجتماع، بما في ذلك تقييد الوصول، وتمكين غرفة الانتظار، وطلب كلمات المرور، إلخ.';
 
   @override
+  String get lbl_all => 'الكل';
+
+  @override
+  String get lbl_this_week => 'هذا الأسبوع';
+
+  @override
+  String get lbl_this_month => 'هذا الشهر';
+
+  @override
+  String get lbl_participants => 'المشاركون';
+
+  @override
+  String get lbl_host => 'المضيف';
+
+  @override
+  String get lbl_you_hosted => 'أنت استضفت';
+
+  @override
+  String get lbl_hosted_by => 'استضافها';
+
+  @override
+  String get msg_no_meeting_history => 'لا يوجد سجل اجتماعات';
+
+  @override
+  String get msg_meetings_will_appear_here => 'ستظهر اجتماعاتك السابقة هنا';
+
+  @override
+  String get lbl_cancel_meeting => 'إلغاء الاجتماع';
+
+  @override
+  String get msg_cancel_meeting_confirm =>
+      'هل أنت متأكد أنك تريد إلغاء هذا الاجتماع؟';
+
+  @override
+  String get msg_meeting_cancelled => 'تم إلغاء الاجتماع بنجاح';
+
+  @override
   String get lbl_add_case => 'إضافة حالة';
 
   @override

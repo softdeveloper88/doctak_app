@@ -1,11 +1,17 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 
-JobDetailModel jobDetailModelFromJson(String str) => JobDetailModel.fromJson(json.decode(str));
+JobDetailModel jobDetailModelFromJson(String str) =>
+    JobDetailModel.fromJson(json.decode(str));
 String jobDetailModelToJson(JobDetailModel data) => json.encode(data.toJson());
 
 class JobDetailModel {
-  JobDetailModel({this.job, this.hasApplied, this.totalApplicants, this.isViewedByAdmin});
+  JobDetailModel({
+    this.job,
+    this.hasApplied,
+    this.totalApplicants,
+    this.isViewedByAdmin,
+  });
 
   JobDetailModel.fromJson(dynamic json) {
     job = json['job'] != null ? Job.fromJson(json['job']) : null;
@@ -37,6 +43,7 @@ class Job {
   Job({
     this.id,
     this.jobTitle,
+    this.jobType,
     this.companyName,
     this.experience,
     this.location,
@@ -64,6 +71,7 @@ class Job {
   Job.fromJson(dynamic json) {
     id = json['id'];
     jobTitle = json['job_title'];
+    jobType = json['job_type']?.toString();
     companyName = json['company_name'];
     experience = json['experience'];
     location = json['location'];
@@ -81,7 +89,9 @@ class Job {
     postedAt = json['posted_at'];
     preferredLanguage = json['preferred_language'];
     salaryRange = json['salary_range'];
-    promoted = json['promoted'] is bool ? (json['promoted'] ? 1 : 0) : json['promoted'];
+    promoted = json['promoted'] is bool
+        ? (json['promoted'] ? 1 : 0)
+        : json['promoted'];
     views = json['views'];
     clicks = json['clicks'];
     if (json['specialties'] != null) {
@@ -102,6 +112,7 @@ class Job {
   }
   int? id;
   String? jobTitle;
+  String? jobType;
   String? companyName;
   String? experience;
   String? location;
@@ -129,6 +140,7 @@ class Job {
     final map = <String, dynamic>{};
     map['id'] = id;
     map['job_title'] = jobTitle;
+    map['job_type'] = jobType;
     map['company_name'] = companyName;
     map['experience'] = experience;
     map['location'] = location;
@@ -183,7 +195,8 @@ class User {
   }
 }
 
-Specialties specialtiesFromJson(String str) => Specialties.fromJson(json.decode(str));
+Specialties specialtiesFromJson(String str) =>
+    Specialties.fromJson(json.decode(str));
 String specialtiesToJson(Specialties data) => json.encode(data.toJson());
 
 class Specialties {

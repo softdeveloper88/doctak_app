@@ -4,28 +4,25 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'chat_bubble.dart';
 
 class OptimizedMessageList extends StatefulWidget {
   final ChatBloc chatBloc;
   final String userId;
-  final String roomId;
+  final int conversationId;
   final String profilePic;
   final ScrollController scrollController;
   final bool isSomeoneTyping;
-  final String? fromId;
 
   const OptimizedMessageList({
     super.key,
     required this.chatBloc,
     required this.userId,
-    required this.roomId,
+    required this.conversationId,
     required this.profilePic,
     required this.scrollController,
     required this.isSomeoneTyping,
-    this.fromId,
   });
 
   @override
@@ -44,6 +41,21 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
     super.dispose();
   }
 
+  Widget _buildLoadMoreIndicator(bool isLoading) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const SizedBox.shrink(),
+      ),
+    );
+  }
+
   Widget _buildMessage(int index) {
     // Don't use cache for the first few messages to ensure real-time updates
     if (index > 5 && _cachedMessages.containsKey(index)) {
@@ -51,20 +63,37 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
     }
 
     final bloc = widget.chatBloc;
-    final message = bloc.messagesList[index];
-    final isLastOfOwnMessage = index == bloc.messagesList.length - 1 || bloc.messagesList[index].userId != bloc.messagesList[index + 1].userId;
+    final msg = bloc.conversationMessages[index];
+    final isMe = msg.senderId?.toString() == widget.userId;
+    final isLastOfOwnMessage = index == bloc.conversationMessages.length - 1 ||
+        bloc.conversationMessages[index].senderId != bloc.conversationMessages[index + 1].senderId;
+
+    // Build attachment info
+    String? attachmentJson;
+    String? attachmentType;
+    if (msg.hasAttachment) {
+      attachmentType = msg.type;
+      // Use fileUrl if available, otherwise use first file from files list
+      if (msg.fileUrl != null && msg.fileUrl!.isNotEmpty) {
+        attachmentJson = msg.fileUrl;
+      } else if (msg.files != null && msg.files!.isNotEmpty) {
+        attachmentJson = msg.files!.first.fileUrl;
+      }
+    }
+
+    // Map status to seen value (0 = sent, 1 = read)
+    final int seen = (msg.status == 'read') ? 1 : 0;
 
     final messageWidget = InkWell(
       onLongPress: () {
-        // Only allow deletion of messages sent by the current user
-        if (message.userId == widget.userId) {
+        if (isMe) {
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return CustomAlertDialog(
                 title: translation(context).msg_confirm_delete_message,
                 callback: () {
-                  bloc.add(DeleteMessageEvent(id: message.id.toString()));
+                  bloc.add(DeleteConversationMessageEvent(messageId: msg.id!));
                 },
               );
             },
@@ -76,13 +105,11 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
         child: VisibilityDetector(
           key: Key('message_$index'),
           onVisibilityChanged: (info) {
-            // Validate bounds before accessing visibleFraction
             if (info.size.width > 0 && info.size.height > 0) {
               if (info.visibleFraction > 0.1) {
                 _visibleIndices.add(index);
               } else {
                 _visibleIndices.remove(index);
-                // Clean up cache for non-visible items
                 if (_cachedMessages.length > 50 && !_visibleIndices.contains(index)) {
                   _cachedMessages.remove(index);
                 }
@@ -90,21 +117,20 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
             }
           },
           child: ChatBubble(
-            profile: message.userId == widget.userId
+            profile: isMe
                 ? AppData.profilePicUrl
-                : AppData.fullImageUrl(widget.profilePic),
-            message: message.body ?? '',
-            isMe: message.userId == widget.userId ? true : false,
-            attachmentJson: message.attachment,
-            attachmentType: message.attachmentType?.toString(),
-            createAt: message.createdAt,
-            seen: message.seen,
+                : AppData.fullImageUrl(msg.sender?.profilePic ?? widget.profilePic),
+            message: msg.displayText,
+            isMe: isMe,
+            attachmentJson: attachmentJson,
+            attachmentType: attachmentType,
+            createAt: msg.createdAt,
+            seen: seen,
           ),
         ),
       ),
     );
 
-    // Cache the widget
     _cachedMessages[index] = messageWidget;
     return messageWidget;
   }
@@ -112,8 +138,7 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
   @override
   void didUpdateWidget(OptimizedMessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Clear cache when messages change to ensure real-time updates
-    if (oldWidget.chatBloc.messagesList.length != widget.chatBloc.messagesList.length) {
+    if (oldWidget.chatBloc.conversationMessages.length != widget.chatBloc.conversationMessages.length) {
       _cachedMessages.clear();
     }
   }
@@ -122,12 +147,10 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
   Widget build(BuildContext context) {
     final bloc = widget.chatBloc;
 
-    // Important: widget.chatBloc is the same instance across rebuilds.
-    // didUpdateWidget can't reliably detect length changes, so track it here.
-    if (_lastMessageCount != bloc.messagesList.length) {
+    if (_lastMessageCount != bloc.conversationMessages.length) {
       _cachedMessages.clear();
       _visibleIndices.clear();
-      _lastMessageCount = bloc.messagesList.length;
+      _lastMessageCount = bloc.conversationMessages.length;
     }
 
     return CustomScrollView(
@@ -135,39 +158,8 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
       reverse: true,
       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       slivers: [
-        // Messages
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                // Trigger pagination
-                if (bloc.messagePageNumber <= bloc.messageNumberOfPage) {
-                  if (index == bloc.messagesList.length - bloc.messageNextPageTrigger) {
-                    // Schedule pagination after build
-                    SchedulerBinding.instance.addPostFrameCallback((_) {
-                      bloc.add(CheckIfNeedMoreMessageDataEvent(index: index, userId: AppData.logInUserId, roomId: widget.roomId.isEmpty ? widget.chatBloc.roomId! : widget.roomId));
-                    });
-                  }
-                }
-
-                // Show loader at the end
-                if (bloc.messageNumberOfPage != bloc.messagePageNumber - 1 && index >= bloc.messagesList.length - 1) {
-                  return SizedBox(height: 100, child: ChatShimmerLoader());
-                }
-
-                return _buildMessage(index);
-              },
-              childCount: bloc.messagesList.length,
-              addAutomaticKeepAlives: false,
-              addRepaintBoundaries: true,
-              addSemanticIndexes: false,
-            ),
-          ),
-        ),
-
-        // Typing indicator
-        if (widget.isSomeoneTyping && widget.fromId != widget.userId)
+        // Typing indicator (first sliver = bottom-most with reverse:true)
+        if (widget.isSomeoneTyping)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
@@ -182,6 +174,34 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
               ),
             ),
           ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                // Show loading spinner at the top (oldest end) when loading more
+                if (index >= bloc.conversationMessages.length) {
+                  // Trigger load only once via guard
+                  if (bloc.hasMoreMessages && !bloc.isLoadingMore) {
+                    SchedulerBinding.instance.addPostFrameCallback((_) {
+                      if (widget.conversationId > 0) {
+                        bloc.add(LoadMoreMessagesEvent(conversationId: widget.conversationId));
+                      }
+                    });
+                  }
+                  return _buildLoadMoreIndicator(bloc.isLoadingMore);
+                }
+
+                return _buildMessage(index);
+              },
+              childCount: bloc.conversationMessages.length + ((bloc.hasMoreMessages || bloc.isLoadingMore) ? 1 : 0),
+              addAutomaticKeepAlives: false,
+              addRepaintBoundaries: true,
+              addSemanticIndexes: false,
+            ),
+          ),
+        ),
+
       ],
     );
   }

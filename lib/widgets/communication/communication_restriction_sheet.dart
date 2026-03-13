@@ -214,8 +214,41 @@ class CommunicationRestrictionSheet extends StatelessWidget {
         label: 'Accept Connection Request',
         color: Colors.green,
         onTap: () async {
-          Navigator.of(context).pop();
-          onActionDone?.call();
+          try {
+            String? requestId = permission.pendingRequestId;
+
+            // Fallback: resolve request id from pending received list when API
+            // check-permission response does not include it.
+            requestId ??= await NetworkApiService()
+                .findPendingReceivedRequestIdByUserId(targetUserId);
+
+            if (requestId == null || requestId.isEmpty) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Unable to locate this connection request. Please open Network > Requests and accept from there.'),
+                  ),
+                );
+              }
+              return;
+            }
+
+            await NetworkApiService().acceptFriendRequest(requestId);
+
+            if (context.mounted) {
+              Navigator.of(context).pop();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Connection request accepted!')),
+              );
+            }
+            onActionDone?.call();
+          } catch (e) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to accept request: $e')),
+              );
+            }
+          }
         },
       );
     }

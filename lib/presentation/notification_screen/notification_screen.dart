@@ -61,11 +61,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            icon: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(Icons.filter_list_rounded, color: theme.primary, size: 14),
-            ),
+            icon: Icon(Icons.filter_list_rounded, color: theme.primary, size: 22),
             onPressed: () {
               setState(() {
                 isFilterShow = !isFilterShow;
@@ -319,14 +315,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         username: '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''}',
                         profilePic: '${notification.senderProfilePic ?? ''}',
                         id: '${notification.userId}',
-                        roomId: '',
+                        conversationId: 0,
                       ).launch(context);
                     } else if (typeNotification == 'message_received') {
                       ChatRoomScreen(
                         username: '${notification.senderFirstName ?? ''} ${notification.senderLastName ?? ''}',
                         profilePic: '${notification.senderProfilePic ?? ''}',
                         id: '${notification.fromUserId}',
-                        roomId: '',
+                        conversationId: 0,
                       ).launch(context);
                     } else if (typeNotification == 'discuss_case_comment_like') {
                       // CaseDiscussion().launch(context,pageRouteAnimation: PageRouteAnimation.Slide);

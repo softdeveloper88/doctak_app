@@ -89,7 +89,8 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       } else {
         // Only apply typing animation for new messages
         emit(DataLoaded(currentState.response, currentState.response1, response));
-        for (int i = 0; i <= response.content!.length; i++) {
+        final int startIndex = response.content!.isNotEmpty ? 1 : 0;
+        for (int i = startIndex; i <= response.content!.length; i++) {
           await Future.delayed(const Duration(milliseconds: 1)); // Delay to simulate typing speed
 
           // Check if state is still DataLoaded during animation

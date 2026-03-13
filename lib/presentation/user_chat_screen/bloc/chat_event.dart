@@ -117,3 +117,58 @@ class SelectedFiles extends ChatEvent {
   @override
   List<Object?> get props => [pickedfiles, isRemove];
 }
+
+// ======================== NEW CONVERSATION EVENTS ========================
+
+class LoadConversationMessagesEvent extends ChatEvent {
+  final int conversationId;
+  final bool isFirstLoading;
+  LoadConversationMessagesEvent({required this.conversationId, this.isFirstLoading = true});
+  @override
+  List<Object?> get props => [conversationId, isFirstLoading];
+}
+
+class SendConversationMessageEvent extends ChatEvent {
+  final int conversationId;
+  final String? message;
+  final String? filePath;
+  final String? attachmentType;
+  final String? receiverId;
+  SendConversationMessageEvent({
+    required this.conversationId,
+    this.message,
+    this.filePath,
+    this.attachmentType,
+    this.receiverId,
+  });
+  @override
+  List<Object?> get props => [conversationId, message, filePath, attachmentType];
+}
+
+class DeleteConversationMessageEvent extends ChatEvent {
+  final int messageId;
+  DeleteConversationMessageEvent({required this.messageId});
+  @override
+  List<Object?> get props => [messageId];
+}
+
+class MarkConversationReadEvent extends ChatEvent {
+  final int conversationId;
+  MarkConversationReadEvent({required this.conversationId});
+  @override
+  List<Object?> get props => [conversationId];
+}
+
+class LoadMoreMessagesEvent extends ChatEvent {
+  final int conversationId;
+  LoadMoreMessagesEvent({required this.conversationId});
+  @override
+  List<Object?> get props => [conversationId];
+}
+
+class NewMessageReceivedEvent extends ChatEvent {
+  final ConversationMessage message;
+  NewMessageReceivedEvent({required this.message});
+  @override
+  List<Object?> get props => [message.id];
+}

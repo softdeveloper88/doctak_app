@@ -25,7 +25,21 @@ Jobs jobsFromJson(String str) => Jobs.fromJson(json.decode(str));
 String jobsToJson(Jobs data) => json.encode(data.toJson());
 
 class Jobs {
-  Jobs({this.currentPage, this.data, this.firstPageUrl, this.from, this.lastPage, this.lastPageUrl, this.links, this.nextPageUrl, this.path, this.perPage, this.prevPageUrl, this.to, this.total});
+  Jobs({
+    this.currentPage,
+    this.data,
+    this.firstPageUrl,
+    this.from,
+    this.lastPage,
+    this.lastPageUrl,
+    this.links,
+    this.nextPageUrl,
+    this.path,
+    this.perPage,
+    this.prevPageUrl,
+    this.to,
+    this.total,
+  });
 
   Jobs.fromJson(dynamic json) {
     currentPage = json['current_page'];
@@ -120,6 +134,7 @@ class Data {
   Data({
     this.id,
     this.jobTitle,
+    this.jobType,
     this.companyName,
     this.experience,
     this.location,
@@ -148,6 +163,7 @@ class Data {
   Data.fromJson(dynamic json) {
     id = json['id'];
     jobTitle = json['job_title'];
+    jobType = json['job_type']?.toString();
     companyName = json['company_name'];
     experience = json['experience'];
     location = json['location'];
@@ -184,6 +200,7 @@ class Data {
   }
   dynamic id;
   String? jobTitle;
+  String? jobType;
   String? companyName;
   String? experience;
   String? location;
@@ -212,6 +229,7 @@ class Data {
     final map = <String, dynamic>{};
     map['id'] = id;
     map['job_title'] = jobTitle;
+    map['job_type'] = jobType;
     map['company_name'] = companyName;
     map['experience'] = experience;
     map['location'] = location;
@@ -269,7 +287,8 @@ class User {
   }
 }
 
-Applicants applicantsFromJson(String str) => Applicants.fromJson(json.decode(str));
+Applicants applicantsFromJson(String str) =>
+    Applicants.fromJson(json.decode(str));
 String applicantsToJson(Applicants data) => json.encode(data.toJson());
 
 class Applicants {
@@ -455,7 +474,8 @@ class Pivot {
   }
 }
 
-Specialties specialtiesFromJson(String str) => Specialties.fromJson(json.decode(str));
+Specialties specialtiesFromJson(String str) =>
+    Specialties.fromJson(json.decode(str));
 String specialtiesToJson(Specialties data) => json.encode(data.toJson());
 
 class Specialties {

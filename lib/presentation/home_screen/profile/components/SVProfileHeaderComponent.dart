@@ -623,9 +623,12 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
     );
   }
 
-  // ── Action buttons (Follow/Message for other users) ──
+  // ── Action buttons (Follow/Connect/Message for other users) ──
   Widget _buildActionButtons(OneUITheme theme) {
     if (widget.isMe ?? false) return const SizedBox.shrink();
+
+    final connectionStatus = widget.profileBoc?.fullProfile?.connectionStatus ?? 'none';
+    final friendRequestId = widget.profileBoc?.fullProfile?.friendRequestId;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -645,7 +648,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             setState(() {});
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             decoration: BoxDecoration(
               color: (widget.userProfile?.isFollowing ?? false)
                   ? (theme.isDark ? Colors.white12 : const Color(0xFFF1F5F9))
@@ -666,7 +669,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   ? translation(context).lbl_following
                   : translation(context).lbl_follow,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Inter',
                 color: (widget.userProfile?.isFollowing ?? false)
@@ -676,6 +679,9 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             ),
           ),
         ),
+        const SizedBox(width: 8),
+        // Connect button — pill shaped, outlined or filled based on status
+        _buildConnectButton(theme, connectionStatus, friendRequestId),
         const SizedBox(width: 8),
         // Message icon button — outlined circle
         GestureDetector(
@@ -691,7 +697,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   username: userName,
                   profilePic: '${widget.userProfile?.profilePicture ?? ''}',
                   id: userId,
-                  roomId: '',
+                  conversationId: 0,
                 ).launch(context);
               },
             );
@@ -723,6 +729,106 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildConnectButton(OneUITheme theme, String connectionStatus, String? friendRequestId) {
+    final userId = widget.userProfile?.user?.id ?? '';
+
+    // Already connected — show checkmark pill
+    if (connectionStatus == 'connected') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: theme.isDark ? const Color(0xFF1E3A2F) : const Color(0xFFECFDF5),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle, size: 16, color: const Color(0xFF059669)),
+            const SizedBox(width: 4),
+            Text(
+              translation(context).lbl_connections_short,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter',
+                color: Color(0xFF059669),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Pending sent — show "Pending" with cancel on tap
+    if (connectionStatus == 'pending_sent') {
+      return GestureDetector(
+        onTap: () {
+          if (friendRequestId != null && friendRequestId.isNotEmpty) {
+            widget.profileBoc?.add(CancelConnectionRequestEvent(friendRequestId));
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: theme.isDark ? Colors.white12 : const Color(0xFFF1F5F9),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: theme.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.hourglass_top_rounded, size: 15,
+                  color: theme.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B)),
+              const SizedBox(width: 4),
+              Text(
+                translation(context).lbl_pending,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Inter',
+                  color: theme.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // No connection / rejected / cancelled — show "Connect" button
+    return GestureDetector(
+      onTap: () {
+        widget.profileBoc?.add(SendConnectionRequestEvent(userId));
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(color: _kPrimary, width: 1.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.person_add_alt_1_rounded, size: 16, color: _kPrimary),
+            const SizedBox(width: 4),
+            Text(
+              translation(context).lbl_connect,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Inter',
+                color: _kPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

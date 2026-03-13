@@ -25,6 +25,7 @@ import '../../widgets/image_upload_widget/bloc/image_upload_event.dart';
 import '../../widgets/image_upload_widget/bloc/image_upload_state.dart';
 import '../../widgets/shimmer_widget/chat_shimmer_loader.dart';
 import 'widgets/medical_citation_widget.dart';
+import '../../widgets/ai_data_consent_dialog.dart';
 
 @immutable
 class ChatGptWithImageScreen extends StatefulWidget {
@@ -66,15 +67,28 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
   late StreamSubscription imageUploadSubscription;
   List<int>? imageBytes1;
   List<int>? imageBytes2;
+  int _lastTypingResponseLength = -1;
+  int _lastTypingAutoScrollAtMs = 0;
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    // Initialize the ChatGPT bloc with LoadDataValues event
-    try {
-      BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
-    } catch (_) {}
+    // Show AI data-sharing consent on first use (Apple/Google compliance).
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final agreed = await showAiConsentIfNeeded(context);
+      if (!mounted) return;
+      if (!agreed) {
+        // User declined — leave the screen
+        Navigator.of(context).maybePop();
+        return;
+      }
+      // Consent granted — initialise the bloc
+      try {
+        BlocProvider.of<ChatGPTBloc>(context).add(LoadDataValues());
+      } catch (_) {}
+    });
 
     // Listen for image upload bloc updates
     imageUploadSubscription = imageUploadBloc.stream.listen((state) {
@@ -123,9 +137,25 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
     }
   }
 
+  /// Wraps [question] with an image-relevance guard when an image is present.
+  /// This instructs the AI to reject non-medical / off-topic images.
+  String _buildQuestion(String question, {bool hasImage = false, String imageTypeName = ''}) {
+    if (!hasImage) return question;
+    final type = imageTypeName.isEmpty ? 'medical' : imageTypeName;
+    return 'SYSTEM INSTRUCTION: You are a specialized medical AI. '
+        'First verify that the attached image is a genuine $type medical image. '
+        'If the image is clearly NOT a medical image (e.g. a selfie, food photo, '
+        'landscape, cartoon, screenshot, or any non-clinical content), '
+        'politely refuse to analyze it and explain that you only process '
+        'relevant medical images. Do NOT attempt any analysis on non-medical images.\n\n'
+        'User question: $question';
+  }
+
   void drugsAskQuestion(state1, context) {
     String question = widget.question ?? "";
     if (question.isEmpty) return;
+
+    isWriting = true;
 
     var myMessage = Messages(
       id: -1,
@@ -143,14 +173,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
     ).add(GetPost(sessionId: selectedSessionId.toString(), question: question));
     textController.clear();
     scrollToBottom();
-
-    try {
-      isWriting = false;
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-    }
   }
 
   @override
@@ -199,21 +221,14 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
         title: translation(context).lbl_ai_image_analysis,
         titleIcon: Icons.image_search_rounded,
         actions: [
-          // History button - OneUI 8.5 style
+          // History button
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.history_rounded,
-                color: theme.primary,
-                size: 16,
-              ),
+            icon: Icon(
+              Icons.history_rounded,
+              color: theme.primary,
+              size: 22,
             ),
             onPressed: () {
               ChatHistoryScreen(
@@ -246,23 +261,16 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
               ).launch(context);
             },
           ),
-          // New Analysis button - OneUI 8.5 style
+          // New Analysis button
           Container(
             margin: const EdgeInsets.only(right: 16),
             child: IconButton(
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.primary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.add_photo_alternate_rounded,
-                  color: theme.primary,
-                  size: 16,
-                ),
+              icon: Icon(
+                Icons.add_photo_alternate_rounded,
+                color: theme.primary,
+                size: 22,
               ),
               onPressed: () {
                 isOneTimeImageUploaded = false;
@@ -331,6 +339,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                 if (mounted) setState(() => isWriting = false);
               });
             }
+
+            _autoScrollWhileTyping(state1.response1.messages);
 
             if (!widget.isFromMainScreen) {
               if (isAlreadyAsk) {
@@ -410,7 +420,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                 padding: const EdgeInsets.only(bottom: 8),
                                 children: [
                                   _buildAnalysisCard(theme, Icons.medical_services, 'X-Ray Analysis', 'Analyze chest, bone & joint X-rays', 'X-ray'),
-                                  _buildAnalysisCard(theme, Icons.monitor_heart_outlined, 'ECG Interpretation', 'Interpret ECG / EKG tracings', 'ECG'),
                                   _buildAnalysisCard(theme, Icons.scanner, 'CT Scan Review', 'Review CT scan images & cross-sections', 'CT Scan'),
                                   _buildAnalysisCard(theme, Icons.psychology_rounded, 'MRI Analysis', 'Analyze MRI images for abnormalities', 'MRI Scan'),
                                   _buildAnalysisCard(theme, Icons.favorite_border_rounded, 'Mammogram Review', 'Evaluate mammogram findings', 'Mammography'),
@@ -468,10 +477,10 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                     : (message.imageBytes2 ?? imageBytes2),
                                 responseImageUrl1: index != 0
                                     ? ''
-                                    : message.imageUrl1 ?? '',
+                                    : (message.imageUrl1?.startsWith('http') == true ? message.imageUrl1! : ''),
                                 responseImageUrl2: index != 0
                                     ? ''
-                                    : message.imageUrl2 ?? '',
+                                    : (message.imageUrl2?.startsWith('http') == true ? message.imageUrl2! : ''),
                               ),
                               ChatBubble(
                                 text: message.response ?? "",
@@ -516,14 +525,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                     textController.clear();
                                     scrollToBottom();
                                   });
-
-                                  try {
-                                    isWriting = false;
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Error: $e')),
-                                    );
-                                  }
                                 },
                               ),
                               // Apple Guideline 1.4.1: show medical citation sources
@@ -719,13 +720,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                         textController.clear();
                                         scrollToBottom();
                                       });
-                                      try {
-                                        isWriting = false;
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Error: $e')),
-                                        );
-                                      }
                                     } else if (selectedImageFiles.isEmpty &&
                                         imageUploadBloc.imagefiles.isEmpty &&
                                         isOneTimeImageUploaded) {
@@ -773,18 +767,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                           textController.clear();
                                           scrollToBottom();
                                         });
-
-                                        try {
-                                          isWriting = false;
-                                        } catch (e) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Error: $e'),
-                                            ),
-                                          );
-                                        }
                                       } else {
                                         toasty(
                                           context,
@@ -902,11 +884,15 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                         GetPost(
                                           sessionId: selectedSessionId
                                               .toString(),
-                                          question: question == ""
-                                              ? translation(
-                                                  context,
-                                                ).lbl_analyse_image
-                                              : question,
+                                          question: _buildQuestion(
+                                            question == ""
+                                                ? translation(
+                                                    context,
+                                                  ).lbl_analyse_image
+                                                : question,
+                                            hasImage: true,
+                                            imageTypeName: imageType,
+                                          ),
                                           imageUrl1: imageUploadBloc
                                               .imagefiles
                                               .first
@@ -923,15 +909,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                                       selectedImageFiles.clear();
                                       textController.clear();
                                       scrollToBottom();
-                                      try {
-                                        isWriting = false;
-                                      } catch (e) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(content: Text('Error: $e')),
-                                        );
-                                      }
                                     }
                                   },
                                   child: Padding(
@@ -1057,6 +1034,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
 
   // ── Usage / Plan Banner (like website) ────────────────────────────────
   Widget _buildUsageBanner(dynamic theme, AiUsageInfo usage) {
+    // Premium users don't need to see the quota banner
+    if (usage.isPaid) return const SizedBox.shrink();
     final isFreePlan = !usage.isPaid;
     final percent = usage.dailyLimit > 0
         ? (usage.dailyUsed / usage.dailyLimit).clamp(0.0, 1.0)
@@ -1572,6 +1551,76 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
         );
       }
     }
+  }
+
+  void _autoScrollWhileTyping(List<Messages>? messages) {
+    if (messages == null || messages.isEmpty) {
+      _lastTypingResponseLength = -1;
+      _lastTypingAutoScrollAtMs = 0;
+      return;
+    }
+
+    Messages? typingMessage;
+    for (int i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].id == -1) {
+        typingMessage = messages[i];
+        break;
+      }
+    }
+
+    if (typingMessage == null) {
+      _lastTypingResponseLength = -1;
+      _lastTypingAutoScrollAtMs = 0;
+      return;
+    }
+
+    final String responseText = typingMessage.response ?? '';
+    final String placeholder = translation(context).lbl_generating_response;
+
+    // While the placeholder is shown (typing indicator dots), scroll once to
+    // make it visible but don't track its length — real content will start at
+    // length 1 and we need to detect that as growth.
+    if (responseText == placeholder) {
+      if (_lastTypingResponseLength < 0) {
+        _lastTypingAutoScrollAtMs = DateTime.now().millisecondsSinceEpoch;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_scrollController.hasClients) return;
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOut,
+          );
+        });
+        // Mark as "seen placeholder" with length 0 so the first real char
+        // (length 1) is detected as growth.
+        _lastTypingResponseLength = 0;
+      }
+      return;
+    }
+
+    // --- Real content from the server ---
+    final int currentLength = responseText.length;
+    final int previousLength = _lastTypingResponseLength;
+    final int nowMs = DateTime.now().millisecondsSinceEpoch;
+    final bool hasGrowth = currentLength > previousLength;
+    final bool firstRealFrame = previousLength <= 0;
+    final bool throttlePassed = (nowMs - _lastTypingAutoScrollAtMs) > 140;
+    final bool shouldScroll =
+        firstRealFrame || (hasGrowth && (currentLength <= 12 || throttlePassed));
+
+    if (shouldScroll) {
+      _lastTypingAutoScrollAtMs = nowMs;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+
+    _lastTypingResponseLength = currentLength;
   }
 
   void scrollToBottom() {

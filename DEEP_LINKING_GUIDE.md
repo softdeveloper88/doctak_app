@@ -157,40 +157,318 @@ Associated domains are configured:
 </array>
 ```
 
-## Server-Side Requirements
+## Server-Side Configuration (CRITICAL)
 
-For deep links to work properly on iOS, you need to host an `apple-app-site-association` file at:
-`https://doctak.net/.well-known/apple-app-site-association`
+For app links to work (open the app when a link is clicked), your web server must host verification files. Without these, links will always open in the browser instead of the app.
 
-Example content:
+---
+
+### ANDROID — `assetlinks.json`
+
+**File**: `https://doctak.net/.well-known/assetlinks.json`
+
+```json
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.kt.doctak",
+      "sha256_cert_fingerprints": [
+        "E4:DE:91:CA:5B:A8:8B:48:32:3C:10:A7:0D:F8:89:0E:F5:DE:8B:20:59:D9:56:B1:2E:DD:5A:97:21:D5:A0:66"
+      ]
+    }
+  }
+]
+```
+
+**Server requirements for Android:**
+1. Serve the file at **exactly** `https://doctak.net/.well-known/assetlinks.json`
+2. Content-Type: `application/json`
+3. Must be accessible over **HTTPS** (not HTTP)
+4. **No redirects** — the URL must respond directly with a 200 status code (no 301/302 redirects)
+5. File must be accessible without authentication
+6. The `sha256_cert_fingerprints` must include ALL signing certificates:
+   - **Release/Play Store signing key** (the one used by Google Play App Signing)
+   - **Upload key** (the one you sign with locally)
+   - **Debug key** (optional, for testing only)
+
+**How to get your SHA256 fingerprints:**
+```bash
+# Debug key
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android | grep SHA256
+
+# Upload/Release key  
+keytool -list -v -keystore your-upload-key.jks -alias your-alias | grep SHA256
+
+# Play Store App Signing key (from Google Play Console):
+# Go to: Setup → App signing → App signing key certificate → SHA-256 fingerprint
+```
+
+> **IMPORTANT**: If you use Google Play App Signing (most apps do), the SHA256 from Play Console is the one that matters most for production. Add BOTH the Play Console SHA256 AND your upload key SHA256.
+
+**Verify Android setup:**
+```bash
+# Google's verification tool (most reliable)
+https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://doctak.net&relation=delegate_permission/common.handle_all_urls
+
+# Force re-verify on device
+adb shell pm set-app-links-allowed --package com.kt.doctak true
+
+# Check verification status
+adb shell pm get-app-links com.kt.doctak
+```
+
+---
+
+### iOS — `apple-app-site-association` (AASA)
+
+**File**: `https://doctak.net/.well-known/apple-app-site-association`
+
 ```json
 {
   "applinks": {
-    "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.com.doctak.ios",
-        "paths": ["/post/*", "/job/*", "/conference/*", "/meeting/*", "/call/*", "/profile/*"]
+        "appIDs": ["588K7KH3K6.com.doctak.ios"],
+        "components": [
+          { "/": "/post/*" },
+          { "/": "/job/*" },
+          { "/": "/conference/*" },
+          { "/": "/meeting/*" },
+          { "/": "/call/*" },
+          { "/": "/profile/*" }
+        ]
       }
     ]
+  },
+  "webcredentials": {
+    "apps": ["588K7KH3K6.com.doctak.ios"]
   }
 }
 ```
 
-For Android, you need an `assetlinks.json` file at:
-`https://doctak.net/.well-known/assetlinks.json`
+**Server requirements for iOS:**
+1. Serve at **exactly** `https://doctak.net/.well-known/apple-app-site-association`
+2. Content-Type: `application/json` (do **NOT** use `application/pkcs7-mime`)
+3. Must be accessible over **HTTPS** with a valid TLS certificate
+4. **No redirects** — Apple's CDN will reject files served with redirects
+5. File must be **publicly accessible** (no auth, no captcha, no geo-blocking)
+6. File size must be under 128 KB
+7. The `appIDs` format is: `<TeamID>.<BundleID>` → `588K7KH3K6.com.doctak.ios`
 
-Example content:
-```json
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.kt.doctak",
-    "sha256_cert_fingerprints": ["YOUR_APP_SHA256_FINGERPRINT"]
-  }
-}]
+**Verify iOS setup:**
+```bash
+# Apple's CDN validation (checks what Apple has cached)
+curl -v "https://app-site-association.cdn-apple.com/a/v1/doctak.net"
+
+# Direct check on your server
+curl -v "https://doctak.net/.well-known/apple-app-site-association"
+
+# Test on simulator
+xcrun simctl openurl booted "https://doctak.net/post/123"
 ```
+
+> **NOTE**: Apple caches the AASA file via their CDN. After updating, it can take **24-48 hours** to propagate. To force refresh during development, go to **Settings → Developer → Associated Domains Development** on the test device.
+
+---
+
+### Nginx Server Configuration Example
+
+If you use Nginx, add this to your server block:
+
+```nginx
+# Serve .well-known files with correct headers
+location /.well-known/assetlinks.json {
+    default_type application/json;
+    add_header Cache-Control "max-age=86400";
+}
+
+location /.well-known/apple-app-site-association {
+    default_type application/json;
+    add_header Cache-Control "max-age=86400";
+}
+```
+
+### Apache Server Configuration Example
+
+```apache
+<Location "/.well-known/assetlinks.json">
+    Header set Content-Type "application/json"
+</Location>
+
+<Location "/.well-known/apple-app-site-association">
+    Header set Content-Type "application/json"
+</Location>
+```
+
+### Laravel (if doctak.net backend is Laravel)
+
+Add a route in `routes/web.php`:
+
+```php
+Route::get('/.well-known/assetlinks.json', function () {
+    return response()->json([
+        [
+            'relation' => ['delegate_permission/common.handle_all_urls'],
+            'target' => [
+                'namespace' => 'android_app',
+                'package_name' => 'com.kt.doctak',
+                'sha256_cert_fingerprints' => [
+                    'E4:DE:91:CA:5B:A8:8B:48:32:3C:10:A7:0D:F8:89:0E:F5:DE:8B:20:59:D9:56:B1:2E:DD:5A:97:21:D5:A0:66'
+                ]
+            ]
+        ]
+    ]);
+});
+
+Route::get('/.well-known/apple-app-site-association', function () {
+    return response()->json([
+        'applinks' => [
+            'details' => [
+                [
+                    'appIDs' => ['588K7KH3K6.com.doctak.ios'],
+                    'components' => [
+                        ['/' => '/post/*'],
+                        ['/' => '/job/*'],
+                        ['/' => '/conference/*'],
+                        ['/' => '/meeting/*'],
+                        ['/' => '/call/*'],
+                        ['/' => '/profile/*'],
+                    ]
+                ]
+            ]
+        ],
+        'webcredentials' => [
+            'apps' => ['588K7KH3K6.com.doctak.ios']
+        ]
+    ]);
+});
+```
+
+---
+
+### Fallback: Redirect to Play Store / App Store When App Not Installed
+
+App Links / Universal Links only work when the app is installed. When the app is **not** installed, the link opens in the browser. Your server needs **fallback HTML pages** that detect the platform and redirect accordingly.
+
+**Option A: Server-side route for each deep link path**
+
+In your Laravel backend, add fallback routes:
+
+```php
+// routes/web.php — Fallback for all deep link paths
+Route::get('/post/{id}', 'DeepLinkController@handleLink');
+Route::get('/job/{id}', 'DeepLinkController@handleLink');
+Route::get('/conference/{id}', 'DeepLinkController@handleLink');
+Route::get('/meeting/{id}', 'DeepLinkController@handleLink');
+Route::get('/call/{id}', 'DeepLinkController@handleLink');
+Route::get('/profile/{id}', 'DeepLinkController@handleLink');
+```
+
+```php
+// app/Http/Controllers/DeepLinkController.php
+class DeepLinkController extends Controller
+{
+    public function handleLink(Request $request, $id = null)
+    {
+        $userAgent = $request->header('User-Agent', '');
+        $currentUrl = $request->fullUrl();
+        
+        // If the app handled the link via App Links/Universal Links,
+        // this page won't even load. This only fires when app is NOT installed.
+        
+        return view('deep-link-redirect', [
+            'currentUrl' => $currentUrl,
+            'playStoreUrl' => 'https://play.google.com/store/apps/details?id=com.kt.doctak',
+            'appStoreUrl' => 'https://apps.apple.com/app/doctak/id YOUR_APP_STORE_ID',
+            'webFallbackUrl' => 'https://doctak.net',
+        ]);
+    }
+}
+```
+
+```html
+<!-- resources/views/deep-link-redirect.blade.php -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Opening DocTak...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: -apple-system, sans-serif; text-align: center; padding: 60px 20px; }
+        .btn { display: inline-block; padding: 14px 32px; margin: 10px; border-radius: 8px; 
+               text-decoration: none; color: white; font-size: 16px; }
+        .android { background: #34A853; }
+        .ios { background: #007AFF; }
+        .web { background: #666; margin-top: 20px; }
+    </style>
+    <script>
+        (function() {
+            var ua = navigator.userAgent || '';
+            var isAndroid = /android/i.test(ua);
+            var isIOS = /iPad|iPhone|iPod/.test(ua);
+            
+            // Try custom scheme first (works if app is installed)
+            var customSchemeUrl = 'doctak://open' + window.location.pathname + window.location.search;
+            
+            if (isAndroid) {
+                // Android intent:// fallback — opens app or Play Store
+                var intentUrl = 'intent://' + window.location.host + window.location.pathname + window.location.search
+                    + '#Intent;scheme=https;package=com.kt.doctak;end';
+                window.location = intentUrl;
+            } else if (isIOS) {
+                // Try universal link, then App Store
+                setTimeout(function() {
+                    window.location = '{{ $appStoreUrl }}';
+                }, 2000);
+                window.location = customSchemeUrl;
+            }
+        })();
+    </script>
+</head>
+<body>
+    <h2>Opening in DocTak App...</h2>
+    <p>If the app doesn't open automatically:</p>
+    <a href="{{ $playStoreUrl }}" class="btn android">Get it on Google Play</a>
+    <a href="{{ $appStoreUrl }}" class="btn ios">Download on App Store</a>
+    <br>
+    <a href="{{ $webFallbackUrl }}" class="btn web">Continue on Web</a>
+</body>
+</html>
+```
+
+**Option B: Simple meta-redirect (static HTML)**
+
+If you prefer static files, create an `index.html` inside each deep link folder:
+
+```
+doctak.net/post/index.html
+doctak.net/job/index.html
+...
+```
+
+**The Android `intent://` URI** is the most reliable fallback for Android — it will open the app if installed, or redirect to Play Store if not, all in one step.
+
+---
+
+### Checklist
+
+| Step | Platform | Status |
+|------|----------|--------|
+| Host `/.well-known/assetlinks.json` on `doctak.net` | Android | ⬜ |
+| Include BOTH Play Store signing key + upload key SHA256 | Android | ⬜ |
+| Verify with Google Digital Asset Links API | Android | ⬜ |
+| Host `/.well-known/apple-app-site-association` on `doctak.net` | iOS | ⬜ |
+| `Content-Type: application/json` (no redirects) | Both | ⬜ |
+| HTTPS with valid certificate | Both | ⬜ |
+| Fallback HTML pages for store redirect | Both | ⬜ |
+| Test `adb shell am start -d "https://doctak.net/post/123"` | Android | ⬜ |
+| Test from iMessage/Notes with `https://doctak.net/post/123` | iOS | ⬜ |
+| Wait 24-48h for Apple CDN to refresh AASA | iOS | ⬜ |
 
 ## Handling Authentication
 

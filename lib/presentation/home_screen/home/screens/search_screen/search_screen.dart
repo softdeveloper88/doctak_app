@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
@@ -32,7 +30,6 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderStateMixin {
   int selectIndex = 0;
   String searchQuery = '';
-  Timer? _debounce;
   TabController? _tabController;
 
   SearchBloc drugsBloc = SearchBloc();
@@ -60,59 +57,12 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
   void dispose() {
     _tabController?.removeListener(_handleTabChange);
     _tabController?.dispose();
-    _debounce?.cancel();
+    drugsBloc.close();
+    searchPeopleBloc.close();
+    homeBloc.close();
     super.dispose();
   }
 
-  //
-  // @override
-  // void initState() {
-  //   getBannerAds();
-  //   super.initState();
-  // }
-  // bool isLoaded = false;
-  // bool isActive = true;
-  // BannerAd? _bannerAd;
-  //
-  // getBannerAds() {
-  //   _bannerAd = BannerAd(
-  //       size: AdSize.banner,
-  //       adUnitId: AdmobSetting.bannerUnit,
-  //       listener: BannerAdListener(onAdClosed: (Ad ad) {
-  //         debugPrint("Ad Closed");
-  //       }, onAdFailedToLoad: (Ad ad, LoadAdError error) {
-  //         setState(() {
-  //           isLoaded = false;
-  //         });
-  //       }, onAdLoaded: (Ad ad) {
-  //         setState(() {
-  //           isLoaded = true;
-  //         });
-  //         debugPrint('Ad Loaded');
-  //       }, onAdOpened: (Ad ad) {
-  //         debugPrint('Ad opened');
-  //       }),
-  //       request: const AdRequest());
-  //
-  //   _bannerAd!.load();
-  // }
-  // Widget bannerAdLoaded() {
-  //   if (isLoaded == true) {
-  //     return Padding(
-  //       padding: const EdgeInsets.all(8.0),
-  //       child: SizedBox(
-  //         height: _bannerAd!.size.height.toDouble(),
-  //         child: AdWidget(
-  //           ad: _bannerAd!,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     return const SizedBox(
-  //       height: 8,
-  //     );
-  //   }
-  // }
   var selectedValue;
   final TextEditingController _searchController = TextEditingController();
 

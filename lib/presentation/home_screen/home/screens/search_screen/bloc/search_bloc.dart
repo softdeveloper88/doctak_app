@@ -13,34 +13,37 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   List<Data> drugsData = [];
   final int nextPageTrigger = 1;
 
+  // Track current filter context so pagination uses the same country/search as the initial load
+  String _currentCountryId = '';
+  String _currentSearchTerm = '';
+
   SearchBloc() : super(PaginationInitialState()) {
     on<LoadPageEvent>(_onGetJobs);
     on<GetPost>(_onGetJobs1);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
-      // emit(PaginationLoadingState());
       if (event.index == drugsData.length - nextPageTrigger) {
-        add(LoadPageEvent(page: pageNumber));
+        add(LoadPageEvent(page: pageNumber, countryId: _currentCountryId, searchTerm: _currentSearchTerm));
       }
     });
   }
   Future<void> _onGetJobs(LoadPageEvent event, Emitter<SearchState> emit) async {
-    print('33 ${event.page}');
     if (event.page == 1) {
       drugsData.clear();
       pageNumber = 1;
+      // Store filter context for subsequent pagination requests
+      _currentCountryId = event.countryId ?? '';
+      _currentSearchTerm = event.searchTerm ?? '';
       emit(PaginationLoadingState());
-      print(event.countryId);
-      print(event.searchTerm);
-      print(event.type);
     }
     
     try {
       JobsModel response = await apiManager.getSearchJobsList(
         'Bearer ${AppData.userToken}',
         '$pageNumber',
-        event.countryId ?? "1",
-        event.searchTerm ?? '',
+        _currentCountryId,
+        _currentSearchTerm,
       );
+      if (isClosed) return;
       numberOfPage = response.jobs?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
@@ -48,8 +51,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       }
       emit(PaginationLoadedState());
     } catch (e) {
-      print('Error loading jobs: $e');
-      // Show user-friendly error message
+      if (isClosed) return;
       String errorMessage = e.toString();
       if (errorMessage.contains('Too many requests')) {
         emit(DataError('Please wait a moment before searching again'));
@@ -62,7 +64,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Future<void> _onGetJobs1(GetPost event, Emitter<SearchState> emit) async {
-    print('33${event.type}');
     try {
       final response = await apiManager.getJobsList(
         'Bearer ${AppData.userToken}',
@@ -71,13 +72,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         event.searchTerm,
         '',
       );
-      print("ddd${response.jobs?.data!.length}");
+      if (isClosed) return;
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);
       emit(PaginationLoadedState());
     } catch (e) {
-      print('Error loading jobs: $e');
-      // Show user-friendly error message
+      if (isClosed) return;
       String errorMessage = e.toString();
       if (errorMessage.contains('Too many requests')) {
         emit(DataError('Please wait a moment before searching again'));

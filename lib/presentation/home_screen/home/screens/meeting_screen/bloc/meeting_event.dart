@@ -27,3 +27,24 @@ class LoadSearchUserEvent extends MeetingEvent {
 }
 
 class FetchMeetings extends MeetingEvent {}
+
+class FetchMeetingHistory extends MeetingEvent {
+  final String filter;
+  final String search;
+
+  const FetchMeetingHistory({this.filter = 'all', this.search = ''});
+
+  @override
+  List<Object> get props => [filter, search];
+}
+
+class LoadMoreMeetingHistory extends MeetingEvent {}
+
+class CancelScheduledMeetingEvent extends MeetingEvent {
+  final int meetingId;
+
+  const CancelScheduledMeetingEvent({required this.meetingId});
+
+  @override
+  List<Object> get props => [meetingId];
+}

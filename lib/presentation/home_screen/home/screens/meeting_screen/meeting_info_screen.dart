@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 class MeetingInfoScreen extends StatelessWidget {
   const MeetingInfoScreen({super.key});
@@ -26,20 +27,7 @@ class MeetingInfoScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: theme.appBarBackground,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: theme.textPrimary, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          translation(context).lbl_meeting_information,
-          style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontWeight: FontWeight.w600, fontSize: 18),
-        ),
-        centerTitle: true,
-      ),
+      appBar: DoctakAppBar(title: translation(context).lbl_meeting_information),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(

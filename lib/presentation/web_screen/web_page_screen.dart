@@ -1,8 +1,11 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
+import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 class WebPageScreen extends StatefulWidget {
   final String url;
@@ -29,41 +32,82 @@ class _WebPageScreenState extends State<WebPageScreen> {
   }
 
   void _initWebView() {
-    _webViewController = WebViewController()
+    // ── Platform-specific params for best CSS/mixed-content support ──
+    late final PlatformWebViewControllerCreationParams params;
+    if (WebViewPlatform.instance is WebKitWebViewPlatform) {
+      params = WebKitWebViewControllerCreationParams(
+        allowsInlineMediaPlayback: true,
+        mediaTypesRequiringUserAction: const <PlaybackMediaTypes>{},
+      );
+    } else {
+      params = const PlatformWebViewControllerCreationParams();
+    }
+
+    late WebViewController controller;
+    controller = WebViewController.fromPlatformCreationParams(params)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.transparent)
+      ..setBackgroundColor(Colors.white)
+      ..setUserAgent(
+        defaultTargetPlatform == TargetPlatform.iOS
+            ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
+              'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+            : 'Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 '
+              '(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
             setState(() {
               _loadingProgress = progress / 100;
-              if (progress == 100) {
-                _isLoading = false;
-              }
+              if (progress == 100) _isLoading = false;
             });
           },
-          onPageStarted: (String url) {
-            setState(() {
-              _isLoading = true;
-            });
-          },
+          onPageStarted: (String url) => setState(() => _isLoading = true),
           onPageFinished: (String url) {
-            setState(() {
-              _isLoading = false;
-            });
+            setState(() => _isLoading = false);
+            // Inject viewport meta if missing, for proper mobile CSS rendering
+            controller.runJavaScript(
+              "if (!document.querySelector('meta[name=viewport]')) {"
+              "  var m = document.createElement('meta');"
+              "  m.name = 'viewport';"
+              "  m.content = 'width=device-width, initial-scale=1.0';"
+              "  document.head.appendChild(m);"
+              "}",
+            );
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('WebView error: ${error.description}');
           },
-          onNavigationRequest: (NavigationRequest request) {
-            if (request.url.startsWith('https://www.youtube.com/')) {
-              return NavigationDecision.prevent;
-            }
-            return NavigationDecision.navigate;
-          },
+          onNavigationRequest: (NavigationRequest request) =>
+              NavigationDecision.navigate,
         ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
+      );
+
+    // ── Android-specific: DOM storage + mixed content ──
+    if (controller.platform is AndroidWebViewController) {
+      AndroidWebViewController.enableDebugging(false);
+      final androidController =
+          controller.platform as AndroidWebViewController;
+      androidController.setMediaPlaybackRequiresUserGesture(false);
+    }
+
+    // Clear any stale cached resources before loading
+    controller.clearCache();
+    controller.clearLocalStorage();
+
+    if (widget.isHtml && widget.htmlString.isNotEmpty) {
+      controller.loadHtmlString(widget.htmlString);
+    } else if (widget.url.isNotEmpty) {
+      controller.loadRequest(
+        Uri.parse(widget.url),
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
+    }
+
+    _webViewController = controller;
   }
 
   @override
@@ -85,10 +129,7 @@ class _WebPageScreenState extends State<WebPageScreen> {
       return Stack(
         children: [
           // WebView
-          Container(
-            color: theme.cardBackground,
-            child: WebViewWidget(controller: _webViewController!),
-          ),
+          WebViewWidget(controller: _webViewController!),
 
           // Loading indicator
           if (_isLoading)

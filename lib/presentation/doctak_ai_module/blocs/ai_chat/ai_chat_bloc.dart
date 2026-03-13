@@ -464,6 +464,10 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
         }
       } else {
         debugPrint("⚠️⚠️⚠️ No cached messages found for session ${event.sessionId}");
+        // For new/empty sessions, emit immediately so UI can proceed
+        if (!emit.isDone) {
+          emit(SessionSelected(sessions: currentSessions, selectedSession: selectedSession, messages: const []));
+        }
       }
 
       // Then fetch from network
@@ -475,32 +479,54 @@ class AiChatBloc extends Bloc<AiChatEvent, AiChatState> {
         // Cache the latest data
         await AiChatLocalStorage.saveMessages(event.sessionId, messages);
 
-        // Only emit if we got new data and emitter is still valid
-        if (!emit.isDone) {
+        // IMPORTANT: Don't overwrite active message-sending states.
+        // Because _onSendMessage runs concurrently, it may have already
+        // emitted MessageSending/MessageStreaming/MessageSent. A late
+        // SessionSelected emission from this network fetch would destroy
+        // that state and cause the typing indicator to vanish mid-send.
+        final currentState = state;
+        final bool messageFlowActive = currentState is MessageSending ||
+            currentState is MessageStreaming ||
+            currentState is MessageSent ||
+            currentState is MessageSendError;
+
+        if (!emit.isDone && !messageFlowActive) {
           emit(SessionSelected(sessions: currentSessions, selectedSession: session, messages: messages));
+        } else {
+          debugPrint("⚠️⚠️⚠️ Skipping late SessionSelected emit — message flow active ($currentState)");
         }
       } catch (networkError) {
         debugPrint("⚠️⚠️⚠️ Network error loading session messages: $networkError");
 
-        // If we already emitted cached data, only emit an error if we have no messages
-        if (cachedMessages == null || cachedMessages.isEmpty) {
+        // Same guard: don't overwrite message-sending states with error states
+        final currentState = state;
+        final bool messageFlowActive = currentState is MessageSending ||
+            currentState is MessageStreaming ||
+            currentState is MessageSent ||
+            currentState is MessageSendError;
+
+        if (messageFlowActive) {
+          debugPrint("⚠️⚠️⚠️ Skipping SessionLoadError emit — message flow active");
+        } else if (cachedMessages == null || cachedMessages.isEmpty) {
           if (!emit.isDone) {
             emit(
               SessionLoadError(message: 'Failed to load messages. Check your connection and try again.', sessions: currentSessions, selectedSession: selectedSession, messages: cachedMessages ?? []),
             );
           }
-        } else {
-          // We have cached messages, so maintain the selected state but show a warning
-          if (!emit.isDone && cachedMessages.isNotEmpty) {
-            // First make sure we're in the correct state
-            emit(SessionSelected(sessions: currentSessions, selectedSession: selectedSession, messages: cachedMessages));
-          }
         }
+        // If we have cached messages and no message flow, the previously-emitted
+        // SessionSelected (from cache) is already correct — nothing to do.
       }
     } catch (e) {
       debugPrint("⚠️⚠️⚠️ Error in _onSelectSession: $e");
-      // Handle any other errors
-      if (!emit.isDone) {
+      // Don't overwrite message-sending states with errors
+      final currentState = state;
+      final bool messageFlowActive = currentState is MessageSending ||
+          currentState is MessageStreaming ||
+          currentState is MessageSent ||
+          currentState is MessageSendError;
+
+      if (!emit.isDone && !messageFlowActive) {
         emit(SessionLoadError(message: 'Failed to load session: ${e.toString()}', sessions: currentSessions));
       }
     }

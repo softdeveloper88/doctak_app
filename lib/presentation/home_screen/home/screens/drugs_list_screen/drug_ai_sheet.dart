@@ -4,6 +4,7 @@ import 'package:doctak_app/data/apiClient/drugs_v6_api_service.dart';
 import 'package:doctak_app/data/models/drugs_model/drug_v6_models.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/ai_data_consent_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown_widget/markdown_widget.dart';
@@ -26,7 +27,10 @@ class DrugAISheet extends StatefulWidget {
     BuildContext context, {
     required DrugV6Item drug,
     String? initialQuestion,
-  }) {
+  }) async {
+    final agreed = await showAiConsentIfNeeded(context);
+    if (!agreed || !context.mounted) return;
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -92,9 +96,10 @@ class _DrugAISheetState extends State<DrugAISheet> {
       setState(() {
         _session = results[0] as DrugAISession;
         _usage = results[1] as DrugAIUsage;
-        _messages
-          ..clear()
-          ..addAll(_session!.messages);
+        // When the backend returns an existing session with old messages,
+        // always start fresh. The user expects a new conversation each time
+        // they open the bottom sheet—not the previous answers.
+        _messages.clear();
         _loading = false;
       });
       // Auto-send initialQuestion from quick-question chips
@@ -166,7 +171,8 @@ class _DrugAISheetState extends State<DrugAISheet> {
             dailyLimit: _usage!.dailyLimit,
             dailyUsed: _usage!.dailyLimit - remaining,
             dailyRemaining: remaining,
-            canUse: remaining > 0,
+            // For unlimited plans, always allow. For limited plans, check remaining.
+            canUse: _usage!.isUnlimited || remaining > 0,
           );
         }
         setState(() {
@@ -251,8 +257,8 @@ class _DrugAISheetState extends State<DrugAISheet> {
           // Header
           _buildHeader(theme),
 
-          // Usage bar
-          if (_usage != null) _buildUsageBar(theme),
+          // Usage bar — hide for unlimited plans (admin-set unlimited quota)
+          if (_usage != null && !_usage!.isUnlimited) _buildUsageBar(theme),
 
           const Divider(height: 1),
 
@@ -333,11 +339,10 @@ class _DrugAISheetState extends State<DrugAISheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Dr. AI — Drug Assistant',
+                  'Doctak AI — Drug Assistant',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
                   ),
                 ),
                 const SizedBox(height: 1),
@@ -350,7 +355,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                         text: drugTitle,
                         style: TextStyle(
                           fontSize: 12,
-                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
                           color: theme.primary,
                         ),
@@ -360,7 +364,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                           text: '  •  $genericSub',
                           style: TextStyle(
                             fontSize: 11,
-                            fontFamily: 'Poppins',
                             color: theme.textSecondary,
                           ),
                         ),
@@ -402,12 +405,12 @@ class _DrugAISheetState extends State<DrugAISheet> {
               const SizedBox(width: 6),
               Text(
                 '${usage.planName} Plan',
-                style: TextStyle(fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: theme.textPrimary),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: theme.textPrimary),
               ),
               const Spacer(),
               Text(
                 '${usage.dailyUsed}/${usage.dailyLimit} queries today',
-                style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: theme.textSecondary),
+                style: TextStyle(fontSize: 11, color: theme.textSecondary),
               ),
             ],
           ),
@@ -430,7 +433,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
                 Expanded(
                   child: Text(
                     'Daily limit reached. Upgrade for unlimited AI queries.',
-                    style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: theme.error),
+                    style: TextStyle(fontSize: 11, color: theme.error),
                   ),
                 ),
                 GestureDetector(
@@ -443,7 +446,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
                     ),
                     child: const Text(
                       'Upgrade',
-                      style: TextStyle(fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w700, color: Colors.white),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
                     ),
                   ),
                 ),
@@ -460,7 +463,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
                   const SizedBox(width: 4),
                   Text(
                     'Upgrade for unlimited AI queries →',
-                    style: TextStyle(fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: theme.primary),
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: theme.primary),
                   ),
                 ],
               ),
@@ -480,7 +483,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
           const SizedBox(height: 16),
           Text(
             'Connecting to AI...',
-            style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary, fontSize: 14),
+            style: TextStyle(color: theme.textSecondary, fontSize: 14),
           ),
         ],
       ),
@@ -496,7 +499,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
           children: [
             Icon(Icons.wifi_off_rounded, size: 48, color: theme.textTertiary),
             const SizedBox(height: 12),
-            Text(_error ?? 'Something went wrong', style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary)),
+            Text(_error ?? 'Something went wrong', style: TextStyle(color: theme.textSecondary)),
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: () {
@@ -553,14 +556,13 @@ class _DrugAISheetState extends State<DrugAISheet> {
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
                 color: theme.textPrimary,
-                fontFamily: 'Poppins',
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               'Get evidence-based pharmaceutical information from Dr. AI.',
-              style: TextStyle(fontSize: 13, color: theme.textSecondary, fontFamily: 'Poppins'),
+              style: TextStyle(fontSize: 13, color: theme.textSecondary),
               textAlign: TextAlign.center,
             ),
           ],
@@ -644,7 +646,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                           displayText,
                           style: const TextStyle(
                             fontSize: 14,
-                            fontFamily: 'Poppins',
                             color: Colors.white,
                             height: 1.5,
                           ),
@@ -663,7 +664,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                                   PConfig(
                                     textStyle: TextStyle(
                                       fontSize: 14,
-                                      fontFamily: 'Poppins',
                                       height: 1.6,
                                       color: theme.textPrimary,
                                     ),
@@ -672,7 +672,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
-                                      fontFamily: 'Poppins',
                                       color: theme.textPrimary,
                                     ),
                                   ),
@@ -680,7 +679,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
-                                      fontFamily: 'Poppins',
                                       color: theme.textPrimary,
                                     ),
                                   ),
@@ -688,7 +686,6 @@ class _DrugAISheetState extends State<DrugAISheet> {
                                     style: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w600,
-                                      fontFamily: 'Poppins',
                                       color: theme.primary,
                                     ),
                                   ),
@@ -734,7 +731,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
                       children: [
                         Icon(Icons.copy_rounded, size: 12, color: theme.textTertiary),
                         const SizedBox(width: 4),
-                        Text('Copy', style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: theme.textTertiary)),
+                        Text('Copy', style: TextStyle(fontSize: 11, color: theme.textTertiary)),
                       ],
                     ),
                   ),
@@ -759,7 +756,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
             const SizedBox(width: 4),
             Text(
               'Sources',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: Colors.blue[700]),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue[700]),
             ),
           ],
         ),
@@ -794,7 +791,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
                       width: 16, height: 16,
                       decoration: BoxDecoration(color: Colors.blue[700], borderRadius: BorderRadius.circular(4)),
                       alignment: Alignment.center,
-                      child: Text('$i', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white, fontFamily: 'Poppins')),
+                      child: Text('$i', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: Colors.white)),
                     ),
                     const SizedBox(width: 5),
                     Flexible(
@@ -802,8 +799,8 @@ class _DrugAISheetState extends State<DrugAISheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary)),
-                          Text(_domain(url), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 8, fontFamily: 'Poppins', color: Colors.blue[600])),
+                          Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: theme.textPrimary)),
+                          Text(_domain(url), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 8, color: Colors.blue[600])),
                         ],
                       ),
                     ),
@@ -891,7 +888,7 @@ class _DrugAISheetState extends State<DrugAISheet> {
               ),
               child: Text(
                 _quickQuestions[i],
-                style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.primary, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 12, color: theme.primary, fontWeight: FontWeight.w500),
               ),
             ),
           );
@@ -926,10 +923,10 @@ class _DrugAISheetState extends State<DrugAISheet> {
                 minLines: 1,
                 textInputAction: TextInputAction.send,
                 onSubmitted: _ask,
-                style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
+                style: TextStyle(fontSize: 14, color: theme.textPrimary),
                 decoration: InputDecoration(
                   hintText: isLimited ? 'Upgrade to send more queries' : 'Ask about ${widget.drug.genericName ?? 'this drug'}…',
-                  hintStyle: TextStyle(fontSize: 13, fontFamily: 'Poppins', color: theme.textTertiary),
+                  hintStyle: TextStyle(fontSize: 13, color: theme.textTertiary),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),

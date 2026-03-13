@@ -1857,6 +1857,44 @@ class AppLocalizationsFr extends AppLocalizations {
       'Contrôles pour gérer la confidentialité et la sécurité de la réunion, y compris la restriction d\'accès, l\'activation de la salle d\'attente, l\'exigence de mots de passe, etc.';
 
   @override
+  String get lbl_all => 'Tous';
+
+  @override
+  String get lbl_this_week => 'Cette semaine';
+
+  @override
+  String get lbl_this_month => 'Ce mois';
+
+  @override
+  String get lbl_participants => 'Participants';
+
+  @override
+  String get lbl_host => 'Hôte';
+
+  @override
+  String get lbl_you_hosted => 'Vous avez hébergé';
+
+  @override
+  String get lbl_hosted_by => 'Hébergé par';
+
+  @override
+  String get msg_no_meeting_history => 'Aucun historique de réunion';
+
+  @override
+  String get msg_meetings_will_appear_here =>
+      'Vos réunions passées apparaîtront ici';
+
+  @override
+  String get lbl_cancel_meeting => 'Annuler la réunion';
+
+  @override
+  String get msg_cancel_meeting_confirm =>
+      'Êtes-vous sûr de vouloir annuler cette réunion ?';
+
+  @override
+  String get msg_meeting_cancelled => 'Réunion annulée avec succès';
+
+  @override
   String get lbl_add_case => 'Ajouter un cas';
 
   @override

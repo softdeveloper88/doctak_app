@@ -367,7 +367,7 @@ class _NetworkTabFragmentState extends State<NetworkTabFragment> {
                       username: '${person['first_name'] ?? ''} ${person['last_name'] ?? ''}',
                       profilePic: person['profile_pic'] ?? '',
                       id: person['id']?.toString() ?? '',
-                      roomId: '',
+                      conversationId: 0,
                     ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
                   },
                 ),

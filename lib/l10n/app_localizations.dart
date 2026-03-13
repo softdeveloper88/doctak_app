@@ -3550,6 +3550,78 @@ abstract class AppLocalizations {
   /// **'Controls for managing meeting privacy and security, including restricting access, enabling waiting room, requiring passwords, etc.'**
   String get desc_meeting_privacy_settings;
 
+  /// No description provided for @lbl_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get lbl_all;
+
+  /// No description provided for @lbl_this_week.
+  ///
+  /// In en, this message translates to:
+  /// **'This Week'**
+  String get lbl_this_week;
+
+  /// No description provided for @lbl_this_month.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get lbl_this_month;
+
+  /// No description provided for @lbl_participants.
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get lbl_participants;
+
+  /// No description provided for @lbl_host.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get lbl_host;
+
+  /// No description provided for @lbl_you_hosted.
+  ///
+  /// In en, this message translates to:
+  /// **'You hosted'**
+  String get lbl_you_hosted;
+
+  /// No description provided for @lbl_hosted_by.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosted by'**
+  String get lbl_hosted_by;
+
+  /// No description provided for @msg_no_meeting_history.
+  ///
+  /// In en, this message translates to:
+  /// **'No meeting history'**
+  String get msg_no_meeting_history;
+
+  /// No description provided for @msg_meetings_will_appear_here.
+  ///
+  /// In en, this message translates to:
+  /// **'Your past meetings will appear here'**
+  String get msg_meetings_will_appear_here;
+
+  /// No description provided for @lbl_cancel_meeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Meeting'**
+  String get lbl_cancel_meeting;
+
+  /// No description provided for @msg_cancel_meeting_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this meeting?'**
+  String get msg_cancel_meeting_confirm;
+
+  /// No description provided for @msg_meeting_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting cancelled successfully'**
+  String get msg_meeting_cancelled;
+
   /// No description provided for @lbl_add_case.
   ///
   /// In en, this message translates to:

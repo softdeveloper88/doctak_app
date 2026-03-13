@@ -1,9 +1,8 @@
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-
-import '../home_screen/utils/SVCommon.dart';
 
 class ManageNotificationScreen extends StatefulWidget {
   ManageNotificationScreen(this.groupBloc, {super.key});
@@ -22,22 +21,11 @@ class _ManageNotificationScreenState extends State<ManageNotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        surfaceTintColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Manage Notification', style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      backgroundColor: theme.scaffoldBackground,
+      appBar: const DoctakAppBar(title: 'Manage Notification'),
       body: Padding(
         padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16),
         child: Column(

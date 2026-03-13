@@ -1,336 +1,459 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '../models/case_discussion_models.dart';
 
+/// Card widget for each case in the discussion list.
+/// Shows author, title, tags, description preview, images, stats, and actions.
 class DiscussionCard extends StatelessWidget {
-  final CaseDiscussionListItem discussion;
+  final CaseDiscussionListItem item;
   final VoidCallback onTap;
   final VoidCallback onLike;
+  final VoidCallback onBookmark;
   final VoidCallback? onDelete;
-  final VoidCallback? onEdit;
 
-  const DiscussionCard({super.key, required this.discussion, required this.onTap, required this.onLike, this.onDelete, this.onEdit});
+  const DiscussionCard({
+    super.key,
+    required this.item,
+    required this.onTap,
+    required this.onLike,
+    required this.onBookmark,
+    this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(20), boxShadow: theme.cardShadow),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(20),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header with author info - One UI style
-                Row(
-                  children: [
-                    // Avatar with gradient border
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.5)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(shape: BoxShape.circle, color: theme.cardBackground),
-                        padding: const EdgeInsets.all(2),
-                        child: CircleAvatar(
-                          radius: 22,
-                          backgroundColor: theme.avatarBackground,
-                          backgroundImage: discussion.author.profilePic != null ? CachedNetworkImageProvider(AppData.fullImageUrl(discussion.author.profilePic)) : null,
-                          child: discussion.author.profilePic == null
-                              ? Text(
-                                  discussion.author.name.isNotEmpty ? discussion.author.name[0].toUpperCase() : '?',
-                                  style: TextStyle(color: theme.primary, fontWeight: FontWeight.w700, fontSize: 16, fontFamily: 'Poppins'),
-                                )
-                              : null,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            discussion.author.name,
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, fontFamily: 'Poppins', color: theme.textPrimary),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            discussion.author.specialty.isNotEmpty ? discussion.author.specialty : 'Medical Professional',
-                            style: TextStyle(color: theme.textSecondary, fontSize: 12, fontFamily: 'Poppins'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Specialty badge - One UI pill style
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [_getSpecialtyColor(discussion.author.specialty, theme), _getSpecialtyColor(discussion.author.specialty, theme).withValues(alpha: 0.7)]),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        discussion.author.specialty.isNotEmpty ? discussion.author.specialty.toUpperCase() : 'GENERAL',
-                        style: TextStyle(color: theme.cardBackground, fontSize: 9, fontWeight: FontWeight.w700, fontFamily: 'Poppins', letterSpacing: 0.5),
-                      ),
-                    ),
-                    // More menu for author
-                    if (_isCurrentUserAuthor() && onDelete != null) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(12)),
-                        child: PopupMenuButton<String>(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.more_horiz_rounded, color: theme.textSecondary, size: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          color: theme.cardBackground,
-                          elevation: 8,
-                          onSelected: (value) {
-                            if (value == 'edit' && onEdit != null) {
-                              onEdit!();
-                            } else if (value == 'delete') {
-                              _showDeleteConfirmation(context, theme);
-                            }
-                          },
-                          itemBuilder: (BuildContext context) => [
-                            if (onEdit != null)
-                              PopupMenuItem<String>(
-                                value: 'edit',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.edit_rounded, color: theme.primary, size: 18),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      'Edit',
-                                      style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-                                    ),
-                                  ],
+    final tags = item.parsedTags;
+    final images = item.imageUrls;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: theme.cardDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Author Row ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
+              child: Row(
+                children: [
+                  _AuthorAvatar(
+                    name: item.name,
+                    imageUrl: item.profilePic,
+                    theme: theme,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                item.name,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: theme.textPrimary,
                                 ),
-                              ),
-                            PopupMenuItem<String>(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.delete_outline_rounded, color: theme.error, size: 18),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    'Delete',
-                                    style: TextStyle(color: theme.error, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-                                  ),
-                                ],
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            if (item.promoted) ...[
+                              const SizedBox(width: 6),
+                              Icon(Icons.verified,
+                                  size: 14, color: theme.primary),
+                            ],
                           ],
                         ),
-                      ),
-                    ],
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Title - prominent and clean
-                Text(
-                  discussion.title,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: theme.textPrimary, height: 1.3),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-
-                // Description preview
-                Text(
-                  discussion.title.length > 100 ? '${discussion.title.substring(0, 100)}...' : discussion.title,
-                  style: TextStyle(color: theme.textSecondary, fontSize: 13, fontFamily: 'Poppins', height: 1.4),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                // Tags/Symptoms - One UI chip style
-                if (discussion.parsedTags.isNotEmpty) ...[
-                  const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: discussion.parsedTags.take(3).map((tag) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(color: theme.warning.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-                        child: Text(
-                          tag,
-                          style: TextStyle(color: theme.warning, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                        const SizedBox(height: 2),
+                        Text(
+                          _buildSubtitle(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontFamily: 'Poppins',
+                            color: theme.textTertiary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    }).toList(),
+                      ],
+                    ),
                   ),
-                  if (discussion.parsedTags.length > 3)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        '+${discussion.parsedTags.length - 3} more',
-                        style: TextStyle(color: theme.textTertiary, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-                      ),
+                  if (item.isOwner && onDelete != null)
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert,
+                          size: 20, color: theme.iconColor),
+                      onSelected: (value) {
+                        if (value == 'delete') onDelete!();
+                      },
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline,
+                                  size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                 ],
-
-                const SizedBox(height: 16),
-
-                // Divider
-                Container(height: 1, color: theme.divider),
-
-                const SizedBox(height: 12),
-
-                // Footer with stats - One UI style
-                Row(
-                  children: [
-                    _buildStatChip(Icons.thumb_up_rounded, discussion.stats.likes, theme, iconColor: theme.primary),
-                    const SizedBox(width: 10),
-                    _buildStatChip(Icons.chat_bubble_rounded, discussion.stats.commentsCount, theme, iconColor: theme.success),
-                    const SizedBox(width: 10),
-                    _buildStatChip(Icons.visibility_rounded, discussion.stats.views, theme, iconColor: theme.secondary),
-                    const Spacer(),
-                    // Time with icon - One UI style container
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(20)),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.schedule_rounded, size: 14, color: theme.textTertiary),
-                          const SizedBox(width: 4),
-                          Text(
-                            _formatTime(discussion.createdAt),
-                            style: TextStyle(color: theme.textTertiary, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+
+            // ── Title ──
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+              child: Text(
+                item.title,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  color: theme.textPrimary,
+                  height: 1.3,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // ── Tags ──
+            if (tags.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: tags.take(4).map((tag) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: theme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '#$tag',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: theme.primary,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+
+            // ── Description Preview ──
+            if (item.description != null && item.description!.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Text(
+                  item.description!,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontFamily: 'Poppins',
+                    color: theme.textSecondary,
+                    height: 1.5,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+            // ── Image Grid ──
+            if (images.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                child: _ImageGrid(images: images, theme: theme),
+              ),
+
+            const SizedBox(height: 10),
+
+            // ── Divider ──
+            Divider(height: 1, color: theme.divider),
+
+            // ── Action Row ──
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  // Like
+                  _ActionButton(
+                    icon: item.isLiked
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                    label: item.likes > 0 ? '${item.likes}' : 'Like',
+                    color: item.isLiked
+                        ? theme.likeColor
+                        : theme.textSecondary,
+                    onTap: onLike,
+                  ),
+                  // Comments
+                  _ActionButton(
+                    icon: Icons.chat_bubble_outline,
+                    label: item.commentsCount > 0
+                        ? '${item.commentsCount}'
+                        : 'Comment',
+                    color: theme.textSecondary,
+                    onTap: onTap,
+                  ),
+                  // Views
+                  _ActionButton(
+                    icon: Icons.visibility_outlined,
+                    label: '${item.views}',
+                    color: theme.textSecondary,
+                    onTap: null,
+                  ),
+                  // Bookmark
+                  _ActionButton(
+                    icon: item.isBookmarked
+                        ? Icons.bookmark
+                        : Icons.bookmark_border,
+                    label: 'Save',
+                    color: item.isBookmarked
+                        ? theme.primary
+                        : theme.textSecondary,
+                    onTap: onBookmark,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStatChip(IconData icon, int count, OneUITheme theme, {Color? iconColor}) {
-    final color = iconColor ?? theme.textSecondary;
+  String _buildSubtitle() {
+    final parts = <String>[];
+    if (item.specialty != null && item.specialty!.isNotEmpty) {
+      parts.add(item.specialty!);
+    }
+    parts.add(timeago.format(item.createdAt));
+    return parts.join(' · ');
+  }
+}
+
+// ── Private Widgets ──
+
+class _AuthorAvatar extends StatelessWidget {
+  final String name;
+  final String? imageUrl;
+  final OneUITheme theme;
+
+  const _AuthorAvatar({
+    required this.name,
+    required this.imageUrl,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
+    final initials = name.isNotEmpty
+        ? name
+            .split(' ')
+            .take(2)
+            .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
+            .join()
+        : '?';
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      width: 40,
+      height: 40,
       decoration: BoxDecoration(
-        color: theme.surfaceVariant,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.border, width: 0.5),
+        shape: BoxShape.circle,
+        color: theme.avatarBackground,
+        border: Border.all(color: theme.avatarBorder, width: 1),
       ),
+      child: hasImage
+          ? ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: imageUrl!,
+                width: 40,
+                height: 40,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) => Center(
+                  child: Text(
+                    initials,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: theme.avatarText,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : Center(
+              child: Text(
+                initials,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: theme.avatarText,
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+class _ImageGrid extends StatelessWidget {
+  final List<String> images;
+  final OneUITheme theme;
+
+  const _ImageGrid({required this.images, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    if (images.isEmpty) return const SizedBox.shrink();
+
+    if (images.length == 1) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CachedNetworkImage(
+          imageUrl: images.first,
+          height: 180,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => Container(
+            height: 180,
+            color: theme.surfaceVariant,
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: theme.primary,
+              ),
+            ),
+          ),
+          errorWidget: (_, __, ___) => Container(
+            height: 180,
+            color: theme.surfaceVariant,
+            child: Icon(Icons.image_not_supported,
+                color: theme.textTertiary),
+          ),
+        ),
+      );
+    }
+
+    // Multiple images: show up to 3 in a row
+    final displayImages = images.take(3).toList();
+    final remaining = images.length - 3;
+
+    return SizedBox(
+      height: 120,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(2),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
-            child: Icon(icon, size: 12, color: color),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            _formatCount(count),
-            style: TextStyle(color: theme.textSecondary, fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-          ),
-        ],
+        children: displayImages.asMap().entries.map((entry) {
+          final isLast = entry.key == displayImages.length - 1;
+          return Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  right: isLast ? 0 : 4),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: CachedNetworkImage(
+                      imageUrl: entry.value,
+                      fit: BoxFit.cover,
+                      placeholder: (_, __) => Container(
+                          color: theme.surfaceVariant),
+                      errorWidget: (_, __, ___) => Container(
+                        color: theme.surfaceVariant,
+                        child: Icon(Icons.broken_image,
+                            color: theme.textTertiary, size: 20),
+                      ),
+                    ),
+                  ),
+                  if (isLast && remaining > 0)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        color: Colors.black54,
+                        child: Center(
+                          child: Text(
+                            '+$remaining',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
+}
 
-  String _formatCount(int count) {
-    if (count >= 1000) {
-      return '${(count / 1000).toStringAsFixed(1)}k';
-    }
-    return count.toString();
-  }
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
 
-  Color _getSpecialtyColor(String specialty, OneUITheme theme) {
-    switch (specialty.toLowerCase()) {
-      case 'cardiology':
-        return theme.error;
-      case 'neurology':
-        return const Color(0xFF9C27B0);
-      case 'orthopedics':
-        return theme.primary;
-      case 'pediatrics':
-        return theme.success;
-      default:
-        return theme.warning;
-    }
-  }
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
 
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
-
-  bool _isCurrentUserAuthor() {
-    return discussion.author.name.toString() == AppData.name.toString();
-  }
-
-  void _showDeleteConfirmation(BuildContext context, OneUITheme theme) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: theme.cardBackground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(
-            'Delete Discussion',
-            style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-          ),
-          content: Text(
-            'Are you sure you want to delete this case discussion? This action cannot be undone.',
-            style: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins'),
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    color: color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                onDelete?.call();
-              },
-              style: TextButton.styleFrom(foregroundColor: theme.error),
-              child: Text(
-                'Delete',
-                style: TextStyle(color: theme.error, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-              ),
-            ),
-          ],
-        );
-      },
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

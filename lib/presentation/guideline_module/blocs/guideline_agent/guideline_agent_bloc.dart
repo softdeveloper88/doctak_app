@@ -34,6 +34,7 @@ class GuidelineAgentBloc
 
   String get currentSessionId => _currentSessionId;
   List<String> get selectedSources => _selectedSources;
+  List<GuidelineSourceModel> get sources => _sources;
 
   Future<void> _onLoadData(
     LoadGuidelineData event,

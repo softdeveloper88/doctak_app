@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/chat_model/conversation_model.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -35,7 +36,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     setStatusBarColor(svGetScaffoldColor());
-    ConnectPusher();
+    _connectPusher();
     chatBloc.add(LoadPageEvent(page: 1));
     super.initState();
   }
@@ -51,230 +52,126 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    print('state life');
     if (state == AppLifecycleState.resumed) {
-      print("state life $state");
-      ConnectPusher();
+      _connectPusher();
+      chatBloc.add(LoadPageEvent(page: 1));
     }
   }
 
-  void onEvent(PusherEvent event) {
-    print("onEvent data: $event");
-    Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
-    // var data=json.encode(event);
-    // print(jsonDecode(event.eventName));
-    // print('onEventName ${jsonDecode(event.eventName)}');
-    // if(event.eventName=='client-typing'){
-    //   onTypingStarted();
-    // }
-    print('data click ${jsonMap['from_id']}');
-    FromId = jsonMap['from_id'];
-    setState(() {});
-  }
-
-  void onSubscriptionSucceeded(String channelName, dynamic data) {
-    print("onSubscriptionSucceeded: $channelName data: $data");
-  }
-
-  void onSubscriptionError(String message, dynamic e) {
-    print("onSubscriptionError: $message Exception: $e");
-  }
-
-  void onDecryptionFailure(String event, String reason) {
-    print("onDecryptionFailure: $event reason: $reason");
-  }
-
-  void onMemberAdded(String channelName, PusherMember member) {
-    print("onMemberAdded: $channelName member: $member");
-  }
-
-  void onMemberRemoved(String channelName, PusherMember member) {
-    print("onMemberRemoved: $channelName member: $member");
-  }
-
-  void onError(String message, int? code, dynamic e) {
-    print("onError: $message code: $code exception: $e");
-  }
-
   PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
-  late PusherChannel clientListenChannel;
-  late PusherChannel clientSendChannel;
   bool isSomeoneTyping = false;
-  String? FromId;
+  String? typingUserId;
+  int? typingConversationId;
+  Timer? typingTimer;
+  final Set<String> _subscribedChannels = {};
 
   Future<dynamic> onAuthorizer(String channelName, String socketId, dynamic options) async {
-    final Uri uri = Uri.parse("${AppData.chatifyUrl}chat/auth");
-
-    // Build query parameters
+    // Use the new API auth endpoint for conversation channels
+    final String authUrl = channelName.startsWith('private-conversation')
+        ? '${AppData.chatApiUrl}/pusher/auth'
+        : '${AppData.chatifyUrl}chat/auth';
+    final Uri uri = Uri.parse(authUrl);
     final Map<String, String> queryParams = {'socket_id': socketId, 'channel_name': channelName};
-
     final response = await http.post(uri.replace(queryParameters: queryParams), headers: {'Authorization': 'Bearer ${AppData.userToken!}'});
-
     if (response.statusCode == 200) {
-      final String data = response.body;
-
-      return jsonDecode(data);
+      return jsonDecode(response.body);
     } else {
       throw Exception(translation(context).msg_pusher_auth_failed);
     }
   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.addObserver(this);
-    _timer?.cancel();
-    _ampTimer?.cancel();
-    _timerChat?.cancel();
-    super.dispose();
-  }
-
-  void onTypingStarted() {
-    setState(() {
-      print('FromId $FromId');
-      isSomeoneTyping = true;
-    });
-  }
-
-  Future<void> _refresh() async {
-    // Simulate network request
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      chatBloc.add(LoadPageEvent(page: 1));
-    });
-  }
-
-  void onTypingStopped() {
-    print('FromId $FromId');
-    setState(() {
-      isSomeoneTyping = false;
-    });
-  }
-
-  void onSubscriptionCount(String channelName, int subscriptionCount) {}
-  Timer? _timer;
-  Timer? _timerChat;
-  Timer? _ampTimer;
-  Timer? typingTimer;
-
-  void ConnectPusher() async {
-    // Create the Pusher client
+  void _connectPusher() async {
     try {
       await pusher.init(
         apiKey: PusherConfig.key,
         cluster: PusherConfig.cluster,
         useTLS: false,
-        onSubscriptionSucceeded: onSubscriptionSucceeded,
-        onSubscriptionError: onSubscriptionError,
-        onMemberAdded: onMemberAdded,
-        onMemberRemoved: onMemberRemoved,
-        onEvent: onEvent,
-        onDecryptionFailure: onDecryptionFailure,
-        onError: onError,
-        onSubscriptionCount: onSubscriptionCount,
         onAuthorizer: onAuthorizer,
+        onSubscriptionSucceeded: (channelName, data) {},
+        onSubscriptionError: (message, e) {
+          debugPrint("Pusher subscription error: $message");
+        },
+        onError: (message, code, e) {
+          debugPrint("Pusher error: $message");
+        },
+        onEvent: (event) {},
+        onSubscriptionCount: (channelName, count) {},
+        onMemberAdded: (channelName, member) {},
+        onMemberRemoved: (channelName, member) {},
+        onDecryptionFailure: (event, reason) {},
       );
-
-      pusher.connect();
-
-      // Successfully created and connected to Pusher
-      clientListenChannel = await pusher.subscribe(
-        channelName: 'private-chatify.${AppData.logInUserId}',
-        onMemberAdded: (member) {
-          print("Member added: $member");
-        },
-        onMemberRemoved: (member) {
-          // print("Member removed: $member");
-        },
-        onEvent: (event) {
-          String eventName = event.eventName;
-          print(eventName);
-
-          switch (eventName) {
-            case 'client-typing':
-              onTypingStarted();
-              // If the timer is already running, cancel it
-              if (typingTimer != null && typingTimer!.isActive) {
-                typingTimer!.cancel();
-              }
-              // Set a timer to stop typing indicator after 2 seconds
-              typingTimer = Timer(const Duration(seconds: 2), () {
-                onTypingStopped();
-                // chatBloc.add(LoadRoomMessageEvent(
-                //     page: 0, userId: widget.id, roomId: widget.roomId));
-              });
-              break;
-            // case 'client-seen':
-            // var textMessage = "";
-            // var messageData = event.data;
-            //                 messageData = json.decode(messageData);
-            //                 var status = messageData['status'];
-            //                 if (status == "web") {
-            //                   final htmlMessage = event.data;
-            //                   var message = json.decode(htmlMessage);
-            //
-            //                   // Use the html package to parse the HTML and extract text content
-            //                   final document = htmlParser.parse(message['message']);
-            //
-            //                   final messageDiv = document.querySelector('.message');
-            //                   final textMessageWithTime = messageDiv?.text.trim() ?? "";
-            //
-            // // Split the textMessageWithTime by the "time ago" portion
-            //                   final parts = textMessageWithTime.split('1 second ago');
-            //                   textMessage =
-            //                       parts.first.trim(); // Take the first part (the message)
-            //
-            //                 }
-            //                 if (status == "api") {
-            //                   var message = messageData['message'];
-            //
-            //                   textMessage = message['message'];
-            //                   print(textMessage);
-            //
-            //                 }
-            //                 print(textMessage);
-            //                 // setState(() {
-            //                 typingTimer = Timer(const Duration(seconds: 2), () {
-            //                   chatBloc.add(ChatReadStatusEvent(
-            //                       userId: widget.id,
-            //                       roomId: widget.roomId,));
-            // chatBloc.add(LoadRoomMessageEvent(
-            //     page: 0, userId: widget.id, roomId: widget.roomId));
-            // });
-            // messagesList.insert(
-            //   0,
-            //   Message(
-            //     body: textMessage, // Use the extracted text content
-            //     toId: AppData.logInUserId,
-            //     fromId: widget.id,
-            //   ),
-            // );
-            // isLoading = false;
-            // });
-            // break;
-            // Add more cases for other event types as needed
-            default:
-              // Handle unknown event types or ignore them
-              break;
-          }
-        },
-      );
-      // clientSendChannel = await pusher.subscribe(
-      //   channelName: "private-chatify.${widget.id}",
-      //   onMemberAdded: (member) {
-      //     // print("Member added: $member");
-      //   },
-      //   onMemberRemoved: (member) {
-      //     // print("Member removed: $member");
-      //   },
-      //   onEvent: (event) {
-      //     // print("Received Event (Listen Channel): $event");
-      //   },
-      // );
-
-      // Attach an event listener to the channel
+      await pusher.connect();
     } catch (e) {
-      print(e);
+      debugPrint('Pusher connection error: $e');
     }
+  }
+
+  /// Subscribe to Pusher channels for all conversations
+  void _subscribeToConversations() {
+    for (final conv in chatBloc.conversationsList) {
+      final channelName = 'private-conversation.${conv.id}';
+      if (_subscribedChannels.contains(channelName)) continue;
+      _subscribedChannels.add(channelName);
+
+      pusher.subscribe(
+        channelName: channelName,
+        onEvent: (event) {
+          _handleConversationEvent(conv.id!, event);
+        },
+        onMemberAdded: (member) {},
+        onMemberRemoved: (member) {},
+      );
+    }
+  }
+
+  void _handleConversationEvent(int conversationId, PusherEvent event) {
+    final eventName = event.eventName;
+    switch (eventName) {
+      case 'message.sent':
+        // New message - reload conversations to update preview and unread count
+        chatBloc.add(LoadPageEvent(page: 1));
+        break;
+      case 'user.typing':
+        final data = jsonDecode(event.data ?? '{}');
+        final userId = (data['user']?['id'] ?? data['user_id'])?.toString();
+        if (userId != AppData.logInUserId) {
+          setState(() {
+            isSomeoneTyping = true;
+            typingUserId = userId;
+            typingConversationId = conversationId;
+          });
+          typingTimer?.cancel();
+          typingTimer = Timer(const Duration(seconds: 3), () {
+            if (mounted) {
+              setState(() {
+                isSomeoneTyping = false;
+                typingUserId = null;
+                typingConversationId = null;
+              });
+            }
+          });
+        }
+        break;
+      case 'user.stopped.typing':
+        setState(() {
+          isSomeoneTyping = false;
+          typingUserId = null;
+          typingConversationId = null;
+        });
+        break;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    typingTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    chatBloc.add(LoadPageEvent(page: 1));
+    await Future.delayed(const Duration(seconds: 1));
   }
 
   @override
@@ -290,11 +187,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(Icons.search_rounded, color: theme.primary, size: 18),
-            ),
+            icon: Icon(Icons.search_rounded, color: theme.primary, size: 22),
             onPressed: () {
               SearchContactScreen().launch(context);
             },
@@ -316,6 +209,10 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
                 builder: (context) => AlertDialog(content: Text(state.errorMessage)),
               );
             }
+            if (state is PaginationLoadedState) {
+              // Subscribe to Pusher channels after conversations are loaded
+              _subscribeToConversations();
+            }
           },
           builder: (context, state) {
             if (state is PaginationLoadingState) {
@@ -326,11 +223,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
               return RetryWidget(
                 errorMessage: translation(context).msg_chat_error,
                 onRetry: () {
-                  try {
-                    chatBloc.add(LoadPageEvent(page: 1));
-                  } catch (e) {
-                    debugPrint(e.toString());
-                  }
+                  chatBloc.add(LoadPageEvent(page: 1));
                 },
               );
             } else {
@@ -346,7 +239,6 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // No Internet Banner
         if (isCurrentlyOnNoInternet)
           Container(
             padding: const EdgeInsets.all(10),
@@ -357,11 +249,8 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
             ),
           ),
 
-        // Groups Section
-        if (chatBloc.groupList.isNotEmpty) ...[_buildSectionHeader(theme, translation(context).lbl_groups, chatBloc.groupList.length), _buildGroupsList(theme)],
-
-        // Messages Section
-        if (chatBloc.contactsList.isNotEmpty) ...[
+        // Conversations List
+        if (chatBloc.conversationsList.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
             child: Text(
@@ -369,7 +258,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: theme.textPrimary),
             ),
           ),
-          _buildContactsList(theme),
+          _buildConversationsList(theme),
         ] else
           Expanded(
             child: Center(
@@ -385,141 +274,24 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
     );
   }
 
-  Widget _buildSectionHeader(OneUITheme theme, String title, int count) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: theme.textPrimary),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-            child: Text(
-              '$count',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: theme.primary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGroupsList(OneUITheme theme) {
-    return Container(
-      height: 120,
-      padding: const EdgeInsets.only(left: 12),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        itemCount: chatBloc.groupList.length,
-        itemBuilder: (context, index) {
-          final bloc = chatBloc;
-
-          if (bloc.pageNumber <= bloc.numberOfPage) {
-            if (index == bloc.groupList.length - bloc.nextPageTrigger) {
-              bloc.add(CheckIfNeedMoreDataEvent(index: index));
-            }
-          }
-          if (bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.groupList.length - 1) {
-            return const UserShimmer();
-          } else {
-            return _buildGroupCard(theme, bloc, index);
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildGroupCard(OneUITheme theme, ChatBloc bloc, int index) {
-    return GestureDetector(
-      onTap: () {
-        ChatRoomScreen(username: bloc.groupList[index].groupName ?? '', profilePic: '', id: '', roomId: '${bloc.groupList[index].roomId}').launch(context);
-      },
-      child: Container(
-        width: 220,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [theme.primary.withValues(alpha: 0.85), theme.primary]),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                    child: const Icon(Icons.group_rounded, color: Colors.white, size: 20),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
-                    child: const Text(
-                      'Group',
-                      style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    bloc.groupList[index].groupName ?? translation(context).lbl_unknown,
-                    style: const TextStyle(fontFamily: 'Poppins', color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    bloc.groupList[index].latestMessage ?? 'No messages yet',
-                    style: TextStyle(fontFamily: 'Poppins', color: Colors.white.withValues(alpha: 0.8), fontSize: 12),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContactsList(OneUITheme theme) {
+  Widget _buildConversationsList(OneUITheme theme) {
     return Expanded(
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16, right: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
-        itemCount: chatBloc.contactsList.length,
+        itemCount: chatBloc.conversationsList.length,
         itemBuilder: (context, index) {
-          var bloc = chatBloc;
-          if (bloc.pageNumber <= bloc.numberOfPage) {
-            if (index == bloc.contactsList.length - bloc.nextPageTrigger) {
-              bloc.add(CheckIfNeedMoreDataEvent(index: index));
-            }
-          }
-          if (bloc.numberOfPage != bloc.pageNumber - 1 && index >= bloc.contactsList.length - 1) {
-            return const UserShimmer();
-          } else {
-            return _buildContactCard(theme, bloc, index);
-          }
+          return _buildConversationCard(theme, chatBloc.conversationsList[index]);
         },
       ),
     );
   }
 
-  Widget _buildContactCard(OneUITheme theme, ChatBloc bloc, int index) {
-    final contact = bloc.contactsList[index];
+  Widget _buildConversationCard(OneUITheme theme, Conversation conversation) {
+    // Get the other participant for direct conversations
+    final otherParticipant = conversation.getOtherParticipant(AppData.logInUserId);
+    final displayName = conversation.name ?? otherParticipant?.user?.fullName ?? 'Unknown';
+    final profilePic = conversation.avatar ?? otherParticipant?.user?.profilePic ?? '';
+    final userId = otherParticipant?.userId?.toString() ?? '';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -527,9 +299,19 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // contact.unreadCount = 0; // Field is now final
-            setState(() {});
-            ChatRoomScreen(username: '${contact.firstName ?? ''} ${contact.lastName ?? ''}', profilePic: '${contact.profilePic}', id: '${contact.id}', roomId: '${contact.roomId}').launch(context);
+            // Mark as read
+            if (conversation.id != null) {
+              chatBloc.add(MarkConversationReadEvent(conversationId: conversation.id!));
+            }
+            ChatRoomScreen(
+              username: displayName,
+              profilePic: profilePic,
+              id: userId,
+              conversationId: conversation.id ?? 0,
+            ).launch(context).then((_) {
+              // Reload conversations when returning
+              chatBloc.add(LoadPageEvent(page: 1));
+            });
           },
           borderRadius: BorderRadius.circular(16),
           child: Container(
@@ -542,26 +324,23 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
             ),
             child: Row(
               children: [
-                // Profile Picture
-                _buildContactAvatar(theme, contact),
+                _buildContactAvatar(theme, profilePic, userId),
                 const SizedBox(width: 12),
-                // Message Content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        sanitizeString("${contact.firstName ?? ""} ${contact.lastName ?? ''}"),
+                        sanitizeString(displayName),
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                       const SizedBox(height: 4),
-                      _buildMessagePreview(theme, contact),
+                      _buildMessagePreview(theme, conversation),
                     ],
                   ),
                 ),
-                // Time and Unread Count
-                _buildTimeAndBadge(theme, contact),
+                _buildTimeAndBadge(theme, conversation),
               ],
             ),
           ),
@@ -570,10 +349,12 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
     );
   }
 
-  Widget _buildContactAvatar(OneUITheme theme, dynamic contact) {
+  Widget _buildContactAvatar(OneUITheme theme, String profilePic, String userId) {
     return InkWell(
       onTap: () {
-        SVProfileFragment(userId: contact.id).launch(context);
+        if (userId.isNotEmpty) {
+          SVProfileFragment(userId: userId).launch(context);
+        }
       },
       child: Container(
         width: 56,
@@ -586,7 +367,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
           padding: const EdgeInsets.all(2),
           child: CustomImageView(
             placeHolder: 'images/socialv/faces/face_5.png',
-            imagePath: AppData.fullImageUrl(contact.profilePic),
+            imagePath: AppData.fullImageUrl(profilePic),
             height: 52,
             width: 52,
             fit: BoxFit.cover,
@@ -596,8 +377,9 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
     );
   }
 
-  Widget _buildMessagePreview(OneUITheme theme, dynamic contact) {
-    if (isSomeoneTyping && FromId == contact.id) {
+  Widget _buildMessagePreview(OneUITheme theme, Conversation conversation) {
+    // Check typing indicator
+    if (isSomeoneTyping && typingConversationId == conversation.id) {
       return Row(
         children: [
           Container(
@@ -614,24 +396,39 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
       );
     }
 
+    final lastMsg = conversation.lastMessage;
+    String preview = lastMsg?.body ?? lastMsg?.content ?? 'Start a conversation';
+
+    // Show type indicator for non-text messages
+    if (lastMsg?.type == 'image') preview = '📷 Photo';
+    if (lastMsg?.type == 'video') preview = '📹 Video';
+    if (lastMsg?.type == 'audio') preview = '🎵 Voice message';
+    if (lastMsg?.type == 'file') preview = '📎 File';
+
+    if (preview.length > 30) preview = '${preview.substring(0, 30)}...';
+
     return Text(
-      (contact.latestMessage?.length ?? 0) > 30 ? '${contact.latestMessage?.substring(0, 30)}...' : contact.latestMessage ?? "Start a conversation",
+      preview,
       style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary, fontSize: 14, height: 1.5),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 
-  Widget _buildTimeAndBadge(OneUITheme theme, dynamic contact) {
+  Widget _buildTimeAndBadge(OneUITheme theme, Conversation conversation) {
+    final lastMsg = conversation.lastMessage;
+    final timeStr = lastMsg?.createdAt ?? conversation.updatedAt ?? conversation.createdAt;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          timeAgo.format(DateTime.parse(contact.latestMessageTime ?? '2024-01-01 00:00:00')),
-          style: TextStyle(fontFamily: 'Poppins', color: theme.textTertiary, fontSize: 12),
-        ),
+        if (timeStr != null)
+          Text(
+            timeAgo.format(DateTime.parse(timeStr)),
+            style: TextStyle(fontFamily: 'Poppins', color: theme.textTertiary, fontSize: 12),
+          ),
         const SizedBox(height: 8),
-        if ((contact.unreadCount ?? 0) > 0)
+        if ((conversation.unreadCount ?? 0) > 0)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -640,7 +437,7 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
               boxShadow: [BoxShadow(color: theme.error.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 2))],
             ),
             child: Text(
-              '${contact.unreadCount ?? 0}',
+              '${conversation.unreadCount}',
               style: const TextStyle(fontFamily: 'Poppins', color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
             ),
           ),

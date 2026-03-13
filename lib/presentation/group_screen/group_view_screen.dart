@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/group_screen/about_group_screen.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_state.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
@@ -45,31 +46,21 @@ class _GroupViewScreenState extends State<GroupViewScreen> {
       backgroundColor: svGetBgColor(),
       endDrawer: CustomDrawer(groupBloc),
       endDrawerEnableOpenDragGesture: true,
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        surfaceTintColor: svGetScaffoldColor(),
-        title: const Text('Groups'),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      appBar: DoctakAppBar(
+        title: 'Groups',
+        toolbarHeight: 56,
         actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Image.asset('assets/images/search.png', height: 20, width: 20, color: svGetBodyColor()),
+          IconButton(
+            icon: const Icon(Icons.search_rounded),
+            onPressed: () {},
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Icon(Icons.notifications_sharp, color: svGetBodyColor()),
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
           ),
-          GestureDetector(
-            onTap: () {
-              _scaffoldKey.currentState?.openEndDrawer();
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset('assets/images/img_menu.png', height: 25, width: 25, color: svGetBodyColor()),
-            ),
+          IconButton(
+            icon: const Icon(Icons.menu_rounded),
+            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart'
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class SettingsHostControlsScreen extends StatefulWidget {
@@ -68,19 +69,9 @@ class _SettingsHostControlsScreenState extends State<SettingsHostControlsScreen>
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: theme.appBarBackground,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: theme.textPrimary, size: 20),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-        title: Text(
-          translation(context).lbl_settings_host_controls,
-          style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontWeight: FontWeight.w600, fontSize: 18),
-        ),
-        centerTitle: true,
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_settings_host_controls,
+        onBackPressed: () => Navigator.pop(context, true),
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),

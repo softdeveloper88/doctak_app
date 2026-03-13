@@ -528,3 +528,19 @@ class UpdateSpecialtyDropdownValue1 extends ProfileEvent {
 //   // TODO: implement props
 //   List<Object?> get props => [selectedStateDropdownValue];
 // }
+
+/// Send a connection (friend) request from the profile page
+class SendConnectionRequestEvent extends ProfileEvent {
+  final String userId;
+  SendConnectionRequestEvent(this.userId);
+  @override
+  List<Object?> get props => [userId];
+}
+
+/// Cancel a pending sent connection request from the profile page
+class CancelConnectionRequestEvent extends ProfileEvent {
+  final String requestId;
+  CancelConnectionRequestEvent(this.requestId);
+  @override
+  List<Object?> get props => [requestId];
+}

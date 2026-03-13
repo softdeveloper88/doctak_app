@@ -15,6 +15,8 @@ class FullProfileModel {
   bool? isOwnProfile;
   bool? isFollowing;
   bool? isFriend;
+  String? connectionStatus;
+  String? friendRequestId;
   FullProfileUser? user;
   FullProfileInfo? profile;
   Map<String, dynamic>? contactInfo;
@@ -36,6 +38,8 @@ class FullProfileModel {
     this.isOwnProfile,
     this.isFollowing,
     this.isFriend,
+    this.connectionStatus,
+    this.friendRequestId,
     this.user,
     this.profile,
     this.contactInfo,
@@ -59,6 +63,8 @@ class FullProfileModel {
       isOwnProfile: json['is_own_profile'] as bool?,
       isFollowing: json['is_following'] as bool?,
       isFriend: json['is_friend'] as bool?,
+      connectionStatus: json['connection_status'] as String?,
+      friendRequestId: json['friend_request_id']?.toString(),
       user: json['user'] != null
           ? FullProfileUser.fromJson(json['user'] as Map<String, dynamic>)
           : null,
@@ -124,6 +130,8 @@ class FullProfileModel {
       'is_own_profile': isOwnProfile,
       'is_following': isFollowing,
       'is_friend': isFriend,
+      'connection_status': connectionStatus,
+      'friend_request_id': friendRequestId,
       'user': user?.toJson(),
       'profile': profile?.toJson(),
       'contact_info': contactInfo,

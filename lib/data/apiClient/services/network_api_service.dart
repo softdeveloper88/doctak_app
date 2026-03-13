@@ -102,6 +102,51 @@ class NetworkApiService {
     }
   }
 
+  /// Resolve a pending received request id for [targetUserId].
+  ///
+  /// This is used by profile/chat/call flows where we only know the user id,
+  /// but the accept endpoint requires the friend request id.
+  Future<String?> findPendingReceivedRequestIdByUserId(
+    String targetUserId, {
+    int maxPages = 3,
+  }) async {
+    for (int page = 1; page <= maxPages; page++) {
+      final result = await getFriendRequests(type: 'received', status: 'pending', page: page);
+      final requestsObj = result['requests'];
+      final List<dynamic> data = requestsObj is Map
+          ? (requestsObj['data'] as List<dynamic>? ?? [])
+          : (result['data'] as List<dynamic>? ?? []);
+
+      for (final item in data) {
+        if (item is! Map) continue;
+        final request = Map<String, dynamic>.from(item);
+
+        final senderId =
+            request['sender_id']?.toString() ??
+            request['senderId']?.toString() ??
+            (request['sender'] is Map
+                ? (request['sender']['id']?.toString() ?? request['sender']['user_id']?.toString())
+                : null) ??
+            request['user_id']?.toString() ??
+            request['userId']?.toString();
+
+        if (senderId == targetUserId) {
+          return request['id']?.toString() ??
+              request['friend_request_id']?.toString() ??
+              request['friendRequestId']?.toString() ??
+              request['request_id']?.toString() ??
+              request['requestId']?.toString();
+        }
+      }
+
+      final currentPage = int.tryParse(result['current_page']?.toString() ?? '') ?? page;
+      final lastPage = int.tryParse(result['last_page']?.toString() ?? '') ?? page;
+      if (currentPage >= lastPage) break;
+    }
+
+    return null;
+  }
+
   // ── Reject Friend Request ──
   Future<Map<String, dynamic>> rejectFriendRequest(String requestId) async {
     try {

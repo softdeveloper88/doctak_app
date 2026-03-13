@@ -503,19 +503,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         '$pageNumber',
         event.search ?? '',
       );
-      print(response.toJson());
+      if (isClosed) return;
       numberOfPage = response.posts?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         postList.addAll(response.posts?.data ?? []);
       }
       emit(PostPaginationLoadedState());
-
-      // emit(DataLoaded(postList));
     } catch (e) {
-      print(e);
-      // emit(PostPaginationLoadedState());
-
+      if (isClosed) return;
       emit(PostDataError('An error occurred $e'));
     }
   }

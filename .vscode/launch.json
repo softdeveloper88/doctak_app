@@ -10,6 +10,14 @@
             "type": "dart"
         },
         {
+            "name": "doctak_app (debug no DDS)",
+            "request": "launch",
+            "type": "dart",
+            "toolArgs": [
+                "--no-dds"
+            ]
+        },
+        {
             "name": "doctak_app (profile mode)",
             "request": "launch",
             "type": "dart",

@@ -5,6 +5,7 @@ import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/ai_quota_banner.dart';
+import 'package:doctak_app/widgets/ai_data_consent_dialog.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,17 +39,27 @@ class _AiChatScreenState extends State<AiChatScreen> {
   int _maxTokens = 1024;
   bool _isWaitingForResponse = false; // Track if we're waiting for a response
   AiUsageInfo? _quotaInfo; // Current quota state for AI chat
+  int _lastStreamingLength = -1;
+  int _lastRenderedMessageCount = -1;
+  int _lastLiveAutoScrollAtMs = 0;
 
   @override
   void initState() {
     super.initState();
 
-    // Always load sessions first for consistent state
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Load all sessions first to ensure the drawer has data
+    // Show AI data-sharing consent on first use, then load sessions.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final agreed = await showAiConsentIfNeeded(context);
+      if (!mounted) return;
+      if (!agreed) {
+        Navigator.of(context).maybePop();
+        return;
+      }
+
+      // Consent granted — load sessions
       context.read<AiChatBloc>().add(LoadSessions());
 
-      // If we have an initial session ID, select it immediately after sessions load
       if (widget.initialSessionId != null) {
         setState(() {
           _showWelcomeScreen = false;
@@ -70,6 +81,46 @@ class _AiChatScreenState extends State<AiChatScreen> {
         _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     });
+  }
+
+  List<AiChatMessageModel> _messagesForState(AiChatState state) {
+    if (state is SessionSelected) return state.messages;
+    if (state is MessageSending) return state.messages;
+    if (state is MessageStreaming) return state.messages;
+    if (state is MessageSent) return state.messages;
+    if (state is MessageSendError) return state.messages;
+    if (state is SessionUpdating) return state.messages;
+    if (state is FeedbackError) return state.messages;
+    if (state is SessionLoadError) return state.messages ?? [];
+    return const [];
+  }
+
+  void _autoScrollForLiveResponse({
+    required List<AiChatMessageModel> messages,
+    required bool isLoading,
+    required bool isStreaming,
+    required String streamingContent,
+  }) {
+    final int nowMs = DateTime.now().millisecondsSinceEpoch;
+    final bool messageCountIncreased = messages.length > _lastRenderedMessageCount;
+    final bool loadingStarted = isLoading && _lastRenderedMessageCount >= 0;
+    final bool streamingGrew = isStreaming && streamingContent.length > _lastStreamingLength;
+    final bool throttlePassed = (nowMs - _lastLiveAutoScrollAtMs) > 140;
+
+    if (messageCountIncreased || (loadingStarted && throttlePassed) || (streamingGrew && throttlePassed)) {
+      _lastLiveAutoScrollAtMs = nowMs;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+
+    _lastRenderedMessageCount = messages.length;
+    _lastStreamingLength = isStreaming ? streamingContent.length : -1;
   }
 
   Future<void> _pickImage() async {
@@ -452,10 +503,20 @@ class _AiChatScreenState extends State<AiChatScreen> {
             if (state is MessageSendError && state.isQuotaError) _quotaInfo = state.quotaInfo;
           });
 
-          // Only scroll if message was sent successfully
+          // Scroll after response arrives — use a second delayed scroll
+          // to handle late layout changes (e.g. long markdown rendering)
           if (state is MessageSent) {
             _scrollToBottom();
+            Future.delayed(const Duration(milliseconds: 350), () {
+              if (mounted) _scrollToBottom();
+            });
           }
+        }
+        else if (state is MessageStreaming) {
+          setState(() {
+            _showWelcomeScreen = false;
+            _isWaitingForResponse = true;
+          });
         }
         // CASE 3: Session update states
         else if (state is SessionUpdating) {
@@ -472,14 +533,11 @@ class _AiChatScreenState extends State<AiChatScreen> {
         }
         // When a new session is created
         else if (state is SessionCreated) {
-          debugPrint("SessionCreated received - selecting session: ${state.newSession.id}");
-
-          // Use a microtask to avoid race conditions with state transitions
-          Future.microtask(() {
-            if (mounted) {
-              context.read<AiChatBloc>().add(SelectSession(sessionId: state.newSession.id.toString()));
-            }
-          });
+          // _onCreateSession in the BLoC already calls _onSelectSession
+          // internally. Do NOT add a duplicate SelectSession here — that
+          // would cause an extra SessionLoading→SessionSelected cycle that
+          // resets _isWaitingForResponse and hides the typing indicator.
+          debugPrint("SessionCreated received (handled by BLoC): ${state.newSession.id}");
         }
         // CASE 4: Session selection - handle this only once
         else if (state is SessionSelected) {
@@ -515,11 +573,26 @@ class _AiChatScreenState extends State<AiChatScreen> {
               _clearImage();
             }
 
+            // Keep waiting-for-response state visible — SendMessage was just
+            // dispatched and will be processed after the current event.
+            setState(() {
+              _isWaitingForResponse = true;
+              _showWelcomeScreen = false;
+            });
             return; // Return early to avoid the setState below
           }
 
+          // If a message send is in progress (between dispatching SendMessage
+          // and MessageSending/MessageSent arriving), don't reset the flag.
+          // This prevents a duplicate SessionSelected emission from the BLoC's
+          // network-refresh from hiding the typing indicator mid-send.
+          if (_isWaitingForResponse) {
+            if (hasMessages) _scrollToBottom();
+            return;
+          }
+
           setState(() {
-            // Only show welcome screen if session is empty - once we have messages, never show welcome again
+            // Only show welcome screen if session is empty
             _showWelcomeScreen = !hasMessages;
             _isWaitingForResponse = false;
           });
@@ -552,18 +625,19 @@ class _AiChatScreenState extends State<AiChatScreen> {
         }
 
         // Second case: Show chat messages for all other situations
-        List<AiChatMessageModel> messages = [];
-        if (state is SessionSelected) {
-          messages = state.messages;
-        } else if (state is MessageSending) {
-          messages = state.messages;
-        } else if (state is MessageSent) {
-          messages = state.messages;
-        }
+        final List<AiChatMessageModel> messages = _messagesForState(state);
 
         // Use improved virtualized message list with streaming support
         final isStreaming = state is MessageStreaming;
         final streamingContent = isStreaming ? state.partialResponse : '';
+        final bool isLoading = state is MessageSending && state is! MessageStreaming;
+
+        _autoScrollForLiveResponse(
+          messages: messages,
+          isLoading: isLoading,
+          isStreaming: isStreaming,
+          streamingContent: streamingContent,
+        );
 
         if (state is SessionLoading) {
           // When session is loading and we have a pending message, show it immediately
@@ -731,7 +805,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
         // Return the virtualized message list for normal chat display
         return VirtualizedMessageList(
           messages: messages,
-          isLoading: state is MessageSending && state is! MessageStreaming,
+          isLoading: isLoading,
           isStreaming: isStreaming,
           streamingContent: streamingContent,
           webSearch: _webSearchEnabled,
@@ -813,11 +887,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
             builder: (context) => IconButton(
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: Icon(Icons.history, color: theme.primary, size: 14),
-              ),
+              icon: Icon(Icons.history, color: theme.primary, size: 22),
               tooltip: 'Chat History',
               onPressed: () {
                 HapticFeedback.lightImpact();
@@ -830,11 +900,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            icon: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(Icons.add_circle, color: theme.primary, size: 14),
-            ),
+            icon: Icon(Icons.add_circle, color: theme.primary, size: 22),
             tooltip: 'New Chat',
             onPressed: () {
               HapticFeedback.mediumImpact();
@@ -861,11 +927,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                 return IconButton(
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                  icon: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-                    child: Icon(Icons.settings_outlined, color: theme.primary, size: 14),
-                  ),
+                  icon: Icon(Icons.settings_outlined, color: theme.primary, size: 22),
                   onPressed: () {
                     HapticFeedback.lightImpact();
                     _showSessionSettingsSheet(context);

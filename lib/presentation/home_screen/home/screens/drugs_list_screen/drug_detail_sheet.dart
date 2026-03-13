@@ -125,7 +125,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: theme.textSecondary,
-                                fontFamily: 'Poppins',
                                 letterSpacing: 0.5,
                               ),
                             ),
@@ -141,7 +140,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: theme.textPrimary,
-                                  fontFamily: 'Poppins',
                                   height: 1.6,
                                 ),
                               ),
@@ -157,7 +155,7 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                               icon: const Icon(Icons.auto_awesome_rounded, size: 20),
                               label: const Text(
                                 'Ask AI about this drug',
-                                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 15),
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: theme.primary,
@@ -182,7 +180,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                               label: Text(
                                 'Copy Drug Info',
                                 style: TextStyle(
-                                  fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
                                   fontSize: 14,
                                   color: theme.textSecondary,
@@ -230,7 +227,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: theme.textPrimary,
-                    fontFamily: 'Poppins',
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -241,7 +237,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                     style: TextStyle(
                       fontSize: 13,
                       color: theme.primary,
-                      fontFamily: 'Poppins',
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -284,7 +279,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                   style: TextStyle(
                     fontSize: 11,
                     color: theme.textTertiary,
-                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.3,
                   ),
@@ -295,7 +289,6 @@ class _DrugDetailSheetState extends State<DrugDetailSheet> {
                   style: TextStyle(
                     fontSize: 14,
                     color: highlight ? theme.success : theme.textPrimary,
-                    fontFamily: 'Poppins',
                     fontWeight: highlight ? FontWeight.w600 : FontWeight.w400,
                   ),
                 ),

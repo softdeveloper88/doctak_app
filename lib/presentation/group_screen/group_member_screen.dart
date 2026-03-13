@@ -1,10 +1,11 @@
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
-
-import '../home_screen/utils/SVCommon.dart';
 
 class GroupMemberScreen extends StatefulWidget {
   GroupMemberScreen(this.groupBloc, {super.key});
@@ -29,34 +30,20 @@ class _GroupMemberScreenState extends State<GroupMemberScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        surfaceTintColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('Member', style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+      backgroundColor: theme.scaffoldBackground,
+      appBar: DoctakAppBar(
+        title: 'Members',
         actions: [
           IconButton(
-            icon: Image.asset('assets/images/add_member.png', height: 20, width: 20),
-            onPressed: () {
-              // Handle add member button press
-            },
-          ),
-          IconButton(
-            icon: Image.asset('assets/images/search.png', height: 20, width: 20),
+            icon: Icon(CupertinoIcons.search, size: 22, color: theme.iconColor),
             onPressed: () {
               // Handle search button press
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(

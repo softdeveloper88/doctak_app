@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:flutter/material.dart';
@@ -191,15 +192,9 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
   Widget build(BuildContext context) {
     List<Message> messageList = AppData.chatMessages.reversed.toList();
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(translation(context).lbl_chat),
+      appBar: DoctakAppBar(
+        title: translation(context).lbl_chat,
+        toolbarHeight: 56,
       ),
       body: Column(
         children: [

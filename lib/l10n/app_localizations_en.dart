@@ -1818,6 +1818,44 @@ class AppLocalizationsEn extends AppLocalizations {
       'Controls for managing meeting privacy and security, including restricting access, enabling waiting room, requiring passwords, etc.';
 
   @override
+  String get lbl_all => 'All';
+
+  @override
+  String get lbl_this_week => 'This Week';
+
+  @override
+  String get lbl_this_month => 'This Month';
+
+  @override
+  String get lbl_participants => 'Participants';
+
+  @override
+  String get lbl_host => 'Host';
+
+  @override
+  String get lbl_you_hosted => 'You hosted';
+
+  @override
+  String get lbl_hosted_by => 'Hosted by';
+
+  @override
+  String get msg_no_meeting_history => 'No meeting history';
+
+  @override
+  String get msg_meetings_will_appear_here =>
+      'Your past meetings will appear here';
+
+  @override
+  String get lbl_cancel_meeting => 'Cancel Meeting';
+
+  @override
+  String get msg_cancel_meeting_confirm =>
+      'Are you sure you want to cancel this meeting?';
+
+  @override
+  String get msg_meeting_cancelled => 'Meeting cancelled successfully';
+
+  @override
   String get lbl_add_case => 'Add Case';
 
   @override

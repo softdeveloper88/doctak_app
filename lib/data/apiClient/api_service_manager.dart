@@ -695,8 +695,13 @@ class ApiServiceManager {
   /// Read all selected notifications (backward compatibility)
   Future<dynamic> readAllSelectedNotifications(String token) async {
     try {
-      // Note: This endpoint doesn't exist in SharedApiService, providing mock response
-      return MockHttpResponse(response: MockResponse(data: {'success': true, 'message': 'All notifications marked as read'}, statusCode: 200));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/notifications/mark-read',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return MockHttpResponse(response: MockResponse(data: Map<String, dynamic>.from(response), statusCode: 200));
     } catch (e) {
       rethrow;
     }

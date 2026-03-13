@@ -8,6 +8,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/news_screen/blo
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_card_list.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
@@ -69,21 +70,10 @@ class _NewsScreenState extends State<NewsScreen> {
       create: (context) => NewsBloc()..add(GetPost(newsChannel: 'bbc-news')),
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        appBar: AppBar(
-          leading: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: const Icon(Icons.arrow_back_ios),
-          ),
-          backgroundColor: svGetScaffoldColor(),
-          iconTheme: IconThemeData(color: context.iconColor),
-          title: Text(translation(context).lbl_world_news, style: boldTextStyle(size: 18)),
-          elevation: 0,
+        appBar: DoctakAppBar(
+          title: translation(context).lbl_world_news,
           centerTitle: true,
-          actions: const [
-            // IconButton(onPressed: () {}, icon: const Icon(Icons.more_horiz)),
-          ],
+          toolbarHeight: 56,
         ),
         body: DefaultTabController(
           length: 2,

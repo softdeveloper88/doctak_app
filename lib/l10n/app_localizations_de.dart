@@ -1849,6 +1849,44 @@ class AppLocalizationsDe extends AppLocalizations {
       'Kontrollen zur Verwaltung von Besprechungs-Datenschutz und -Sicherheit, einschließlich Zugriffsbeschränkung, Aktivierung des Warteraums, Passwort-Anforderung usw.';
 
   @override
+  String get lbl_all => 'Alle';
+
+  @override
+  String get lbl_this_week => 'Diese Woche';
+
+  @override
+  String get lbl_this_month => 'Dieser Monat';
+
+  @override
+  String get lbl_participants => 'Teilnehmer';
+
+  @override
+  String get lbl_host => 'Gastgeber';
+
+  @override
+  String get lbl_you_hosted => 'Sie haben gehostet';
+
+  @override
+  String get lbl_hosted_by => 'Gehostet von';
+
+  @override
+  String get msg_no_meeting_history => 'Kein Besprechungsverlauf';
+
+  @override
+  String get msg_meetings_will_appear_here =>
+      'Ihre vergangenen Besprechungen werden hier angezeigt';
+
+  @override
+  String get lbl_cancel_meeting => 'Besprechung absagen';
+
+  @override
+  String get msg_cancel_meeting_confirm =>
+      'Möchten Sie diese Besprechung wirklich absagen?';
+
+  @override
+  String get msg_meeting_cancelled => 'Besprechung erfolgreich abgesagt';
+
+  @override
   String get lbl_add_case => 'Fall hinzufügen';
 
   @override

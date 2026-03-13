@@ -4,6 +4,8 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_state.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
@@ -26,22 +28,11 @@ class _GroupCreateScreenState extends State<GroupCreateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetBgColor(),
-      appBar: AppBar(
-        backgroundColor: context.cardColor,
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text(translation(context).lbl_create_group_wizard, style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [IconButton(onPressed: () {}, icon: Image.asset('assets/images/search.png', height: 20, width: 20))],
-      ),
+      backgroundColor: theme.scaffoldBackground,
+      appBar: DoctakAppBar(title: translation(context).lbl_create_group_wizard),
       body: SingleChildScrollView(
         child: Column(
           children: [

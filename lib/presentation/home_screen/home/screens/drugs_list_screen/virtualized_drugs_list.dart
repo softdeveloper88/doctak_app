@@ -53,12 +53,12 @@ class _VirtualizedDrugsListState extends State<VirtualizedDrugsList> {
           const SizedBox(height: 16),
           Text(
             translation(context).msg_no_drugs_found,
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w500, color: theme.textSecondary),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: theme.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
             translation(context).msg_try_adjusting_filters,
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
+            style: TextStyle(fontSize: 14, color: theme.textTertiary),
           ),
         ],
       ),

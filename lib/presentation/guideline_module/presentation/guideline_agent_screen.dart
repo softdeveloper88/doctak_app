@@ -10,6 +10,7 @@ import 'package:doctak_app/presentation/guideline_module/presentation/widgets/gu
 import 'package:doctak_app/presentation/guideline_module/presentation/widgets/guideline_quota_banner.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -70,18 +71,9 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         final bloc = context.read<GuidelineAgentBloc>();
-        final state = bloc.state;
-        List<GuidelineSourceModel> sources = [];
-        List<String> selected = bloc.selectedSources;
-
-        if (state is GuidelineAgentReady) {
-          sources = state.sources;
-          selected = state.selectedSources;
-        }
-
         return GuidelineSourceSelector(
-          sources: sources,
-          selectedSources: selected,
+          sources: bloc.sources,
+          selectedSources: bloc.selectedSources,
           onApply: (newSources) {
             bloc.add(SelectSources(sources: newSources));
           },
@@ -124,7 +116,29 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: _buildAppBar(theme),
+      appBar: DoctakAppBar(
+        title: 'Medical Guideline Agent',
+        subtitle: 'ONLINE • POWERED BY AI',
+        showOnlineIndicator: true,
+        centerTitle: false,
+        toolbarHeight: 60,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add, color: theme.iconColor, size: 22),
+            tooltip: 'New Chat',
+            onPressed: () {
+              setState(() => _showWelcome = true);
+              context.read<GuidelineAgentBloc>().add(StartNewChat());
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.history_rounded, color: theme.iconColor, size: 22),
+            tooltip: 'Chat History',
+            onPressed: _showHistory,
+          ),
+          const SizedBox(width: 4),
+        ],
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -222,88 +236,6 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(OneUITheme theme) {
-    return AppBar(
-      backgroundColor: theme.cardBackground,
-      surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: theme.textPrimary),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Row(
-        children: [
-          Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A84FF).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.local_hospital_rounded,
-              color: Color(0xFF0A84FF),
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Medical Guideline Agent',
-                  style: TextStyle(
-                    color: theme.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF34C759),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'ONLINE • POWERED BY AI',
-                      style: TextStyle(
-                        color: theme.textSecondary,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.add, color: theme.textPrimary),
-          tooltip: 'New Chat',
-          onPressed: () {
-            setState(() => _showWelcome = true);
-            context.read<GuidelineAgentBloc>().add(StartNewChat());
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.history, color: theme.textPrimary),
-          tooltip: 'Chat History',
-          onPressed: _showHistory,
-        ),
-      ],
     );
   }
 

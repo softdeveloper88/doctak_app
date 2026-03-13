@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/app_export.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import '../home_screen/utils/SVColors.dart';
 
 class EventsScreen extends StatefulWidget {
   EventsScreen(this.id, {super.key});
@@ -26,13 +26,13 @@ class _EventsScreenState extends State<EventsScreen> with SingleTickerProviderSt
   }
 
   int selectIndex = 0;
-  Widget _individualTab(String tabName) {
+  Widget _individualTab(String tabName, OneUITheme theme) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Expanded(
           child: Tab(
-            child: Text(tabName, style: TextStyle(color: svGetBodyColor())),
+            child: Text(tabName, style: TextStyle(color: theme.textPrimary, fontFamily: 'Poppins', fontSize: 14)),
           ),
         ),
         if (tabName == 'Upcoming Event')
@@ -41,7 +41,7 @@ class _EventsScreenState extends State<EventsScreen> with SingleTickerProviderSt
             width: 1,
             decoration: BoxDecoration(
               border: Border(
-                right: BorderSide(color: svGetBodyColor(), width: 1, style: BorderStyle.solid),
+                right: BorderSide(color: theme.textSecondary, width: 1, style: BorderStyle.solid),
               ),
             ),
           ),
@@ -51,37 +51,31 @@ class _EventsScreenState extends State<EventsScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      appBar: AppBar(
-        surfaceTintColor: svGetScaffoldColor(),
-        backgroundColor: svGetScaffoldColor(),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        centerTitle: false,
-        title: Text('Events', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-      ),
+      backgroundColor: theme.scaffoldBackground,
+      appBar: const DoctakAppBar(title: 'Events'),
       body: Column(
         children: [
           Container(
-            color: svGetScaffoldColor(),
+            color: theme.scaffoldBackground,
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
             child: TabBar(
               controller: _tabController,
               dividerHeight: 1,
-              dividerColor: Colors.grey,
+              dividerColor: theme.divider,
               onTap: (index) {
                 setState(() {
                   selectIndex = index;
                 });
               },
               indicatorWeight: 4,
-              unselectedLabelColor: Colors.grey,
+              unselectedLabelColor: theme.textSecondary,
               indicatorSize: TabBarIndicatorSize.tab,
               labelPadding: const EdgeInsets.all(4),
-              indicatorColor: SVAppColorPrimary,
-              tabs: [_individualTab('Upcoming Event'), _individualTab('Past Event')],
+              indicatorColor: theme.primary,
+              tabs: [_individualTab('Upcoming Event', theme), _individualTab('Past Event', theme)],
             ),
           ),
           Expanded(

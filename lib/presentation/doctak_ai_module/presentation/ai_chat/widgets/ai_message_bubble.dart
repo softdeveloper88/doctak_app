@@ -149,43 +149,39 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
             ],
           ),
 
-          // Action buttons in a row below the message
+          // Action buttons below the message — Wrap to avoid overflow on narrow screens
           Padding(
-            padding: const EdgeInsets.only(left: 52, top: 8),
-            child: Row(
+            padding: const EdgeInsets.only(left: 52, top: 8, right: 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 6,
               children: [
                 // Button 1: Elaborate (matches website)
-                Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: _buildActionButton(
-                    theme: theme,
-                    icon: Icons.expand_circle_down_outlined,
-                    label: translation(context).lbl_elaborate,
-                    onPressed: () {
-                      final text = widget.message.content;
-                      final prompt = 'Please elaborate on the following:\n\n"$text"';
-                      if (widget.onSuggestionTap != null) {
-                        widget.onSuggestionTap!(prompt);
-                      }
-                    },
-                  ),
+                _buildActionButton(
+                  theme: theme,
+                  icon: Icons.expand_circle_down_outlined,
+                  label: translation(context).lbl_elaborate,
+                  onPressed: () {
+                    final text = widget.message.content;
+                    final prompt = 'Please elaborate on the following:\n\n"$text"';
+                    if (widget.onSuggestionTap != null) {
+                      widget.onSuggestionTap!(prompt);
+                    }
+                  },
                 ),
 
                 // Button 2: Summarize (matches website)
-                Container(
-                  margin: const EdgeInsets.only(right: 8),
-                  child: _buildActionButton(
-                    theme: theme,
-                    icon: Icons.summarize_outlined,
-                    label: translation(context).lbl_summarize,
-                    onPressed: () {
-                      final text = widget.message.content;
-                      final prompt = 'Please summarize the following:\n\n"$text"';
-                      if (widget.onSuggestionTap != null) {
-                        widget.onSuggestionTap!(prompt);
-                      }
-                    },
-                  ),
+                _buildActionButton(
+                  theme: theme,
+                  icon: Icons.summarize_outlined,
+                  label: translation(context).lbl_summarize,
+                  onPressed: () {
+                    final text = widget.message.content;
+                    final prompt = 'Please summarize the following:\n\n"$text"';
+                    if (widget.onSuggestionTap != null) {
+                      widget.onSuggestionTap!(prompt);
+                    }
+                  },
                 ),
 
                 // Button 3: Copy

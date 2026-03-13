@@ -11,6 +11,7 @@ class CommunicationPermission {
   final String connectionStatus; // 'connected', 'pending_sent', 'pending_received', 'none'
   final bool isBlocked;
   final String? blockedDirection; // 'you_blocked', 'blocked_you', 'mutual', null
+  final String? pendingRequestId; // request id when status is pending_received/pending_sent
 
   const CommunicationPermission({
     required this.canMessage,
@@ -20,6 +21,7 @@ class CommunicationPermission {
     required this.connectionStatus,
     required this.isBlocked,
     this.blockedDirection,
+    this.pendingRequestId,
   });
 
   /// Fully allowed
@@ -47,6 +49,11 @@ class CommunicationPermission {
       connectionStatus: json['connection_status'] ?? 'unknown',
       isBlocked: json['is_blocked'] ?? false,
       blockedDirection: json['blocked_direction'],
+      pendingRequestId:
+          json['friend_request_id']?.toString() ??
+          json['friendRequestId']?.toString() ??
+          json['request_id']?.toString() ??
+          json['requestId']?.toString(),
     );
   }
 

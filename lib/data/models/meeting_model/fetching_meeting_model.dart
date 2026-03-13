@@ -15,7 +15,10 @@ class FetchingMeetingModel {
   FetchingMeetingModel({required this.date, required this.sessions});
 
   factory FetchingMeetingModel.fromJson(Map<String, dynamic> json) {
-    return FetchingMeetingModel(date: json['date'], sessions: (json['sessions'] as List).map((session) => Session.fromJson(session)).toList());
+    return FetchingMeetingModel(
+      date: json['date'] ?? '',
+      sessions: (json['sessions'] as List?)?.map((session) => Session.fromJson(session)).toList() ?? [],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -33,7 +36,13 @@ class Session {
   Session({required this.time, required this.title, required this.id, required this.channel, required this.image});
 
   factory Session.fromJson(Map<String, dynamic> json) {
-    return Session(time: json['time'], title: json['title'], id: json['id'], channel: json['channel'], image: json['image']);
+    return Session(
+      time: json['time'] ?? '',
+      title: json['title'] ?? json['name'] ?? 'Untitled',
+      id: json['id'] ?? 0,
+      channel: json['channel'] ?? '',
+      image: json['image'] ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {

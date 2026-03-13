@@ -145,7 +145,7 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
           // Back button
           IconButton(
             onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(Icons.arrow_back_ios_new_rounded, color: theme.iconColor, size: 20),
+            icon: Icon(CupertinoIcons.back, color: theme.iconColor, size: 22),
             splashRadius: 20,
           ),
           // Search text field

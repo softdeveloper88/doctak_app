@@ -129,54 +129,8 @@ class GuidelineChatInput extends StatelessWidget {
               ),
             ],
           ),
-          // Bottom hints
-          Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildKeyHint(theme, 'Enter'),
-                Text(
-                  ' to send  ',
-                  style: TextStyle(
-                    color: theme.textSecondary.withOpacity(0.5),
-                    fontSize: 10,
-                  ),
-                ),
-                _buildKeyHint(theme, 'Shift+Enter'),
-                Text(
-                  ' new line',
-                  style: TextStyle(
-                    color: theme.textSecondary.withOpacity(0.5),
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Keyboard hints removed — matches chat_gpt_with_image_screen style
         ],
-      ),
-    );
-  }
-
-  Widget _buildKeyHint(OneUITheme theme, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: theme.scaffoldBackground,
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: theme.border,
-          width: 0.5,
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: theme.textSecondary.withOpacity(0.6),
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }

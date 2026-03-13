@@ -1,10 +1,10 @@
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
-import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -19,23 +19,11 @@ class GroupMemberRequestScreen extends StatefulWidget {
 class _GroupMemberRequestScreenState extends State<GroupMemberRequestScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     return Scaffold(
-      backgroundColor: svGetScaffoldColor(),
-      appBar: AppBar(
-        backgroundColor: svGetScaffoldColor(),
-        surfaceTintColor: svGetScaffoldColor(),
-        iconTheme: IconThemeData(color: context.iconColor),
-        title: Text('View Member Request', style: boldTextStyle(size: 20)),
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: svGetBodyColor()),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [IconButton(onPressed: () {}, icon: Image.asset('assets/images/search.png', height: 20, width: 20))],
-      ),
+      backgroundColor: theme.scaffoldBackground,
+      appBar: const DoctakAppBar(title: 'View Member Request'),
       body: ListView.builder(
         shrinkWrap: true,
         itemCount: widget.groupBloc?.groupMemberRequestModel?.groupMembers?.length ?? 0, // Replace with the actual number of items

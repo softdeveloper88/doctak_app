@@ -253,23 +253,14 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
                 ),
                 const SizedBox(width: 12),
 
-                // Country flag placeholder
-                Container(
+                // Country flag emoji
+                SizedBox(
                   width: 28,
                   height: 20,
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackground,
-                    borderRadius: BorderRadius.circular(3),
-                    border: Border.all(
-                      color: theme.border,
-                      width: 0.5,
-                    ),
-                  ),
                   child: Center(
-                    child: Icon(
-                      Icons.flag,
-                      size: 14,
-                      color: theme.textSecondary,
+                    child: Text(
+                      _countryFlag(source.country?.name),
+                      style: const TextStyle(fontSize: 18),
                     ),
                   ),
                 ),
@@ -305,5 +296,30 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
         ),
       ),
     );
+  }
+
+  /// Returns a Unicode flag emoji for a given country name.
+  String _countryFlag(String? countryName) {
+    if (countryName == null) return '🌐';
+    const map = {
+      'united states': '🇺🇸',
+      'united states virgin islands': '🇺🇸',
+      'united kingdom': '🇬🇧',
+      'united arab emirates': '🇦🇪',
+      'australia': '🇦🇺',
+      'canada': '🇨🇦',
+      'germany': '🇩🇪',
+      'france': '🇫🇷',
+      'india': '🇮🇳',
+      'saudi arabia': '🇸🇦',
+      'china': '🇨🇳',
+      'japan': '🇯🇵',
+      'europe': '🇪🇺',
+      'european union': '🇪🇺',
+      'scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+      'international': '🌐',
+      'global': '🌐',
+    };
+    return map[countryName.toLowerCase()] ?? '🌐';
   }
 }

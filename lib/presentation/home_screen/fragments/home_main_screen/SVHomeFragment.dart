@@ -9,6 +9,7 @@ import 'package:doctak_app/presentation/notification_screen/bloc/notification_bl
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
 import 'package:flutter/cupertino.dart';
@@ -264,54 +265,44 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   PreferredSizeWidget _buildModernAppBar(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(60),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.appBarBackground,
-          border: Border(bottom: BorderSide(color: theme.divider, width: 1)),
-        ),
-        child: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          toolbarHeight: 60,
-          leading: IconButton(
-            icon: Icon(Icons.menu, size: 22, color: theme.iconColor),
-            onPressed: () {
-              widget.openDrawer();
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
-          ),
-          title: Text(translation(context).lbl_home, style: theme.appBarTitle),
-          actions: [
-            IconButton(
-              icon: Icon(CupertinoIcons.search, size: 20, color: theme.iconColor),
-              onPressed: () {
-                FocusManager.instance.primaryFocus?.unfocus();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => SearchScreen(backPress: () => Navigator.of(context).pop()),
-                  ),
-                );
-              },
-            ),
-            _buildNotificationButton(context, theme),
-            IconButton(
-              icon: SvgPicture.asset(
-                height: 22,
-                width: 22,
-                icChat,
-                color: theme.iconColor,
-              ),
-              onPressed: () async {
-                FocusManager.instance.primaryFocus?.unfocus();
-                UserChatScreen().launch(context);
-              },
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
+    return DoctakAppBar(
+      title: translation(context).lbl_home,
+      showBackButton: false,
+      automaticallyImplyLeading: true,
+      customLeading: IconButton(
+        icon: Icon(Icons.menu, size: 22, color: theme.iconColor),
+        onPressed: () {
+          widget.openDrawer();
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
       ),
+      actions: [
+        IconButton(
+          icon: Icon(CupertinoIcons.search, size: 22, color: theme.iconColor),
+          onPressed: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => SearchScreen(backPress: () => Navigator.of(context).pop()),
+              ),
+            );
+          },
+        ),
+        _buildNotificationButton(context, theme),
+        IconButton(
+          icon: SvgPicture.asset(
+            height: 22,
+            width: 22,
+            icChat,
+            color: theme.iconColor,
+          ),
+          onPressed: () async {
+            FocusManager.instance.primaryFocus?.unfocus();
+            UserChatScreen().launch(context);
+          },
+        ),
+        const SizedBox(width: 8),
+      ],
     );
   }
 

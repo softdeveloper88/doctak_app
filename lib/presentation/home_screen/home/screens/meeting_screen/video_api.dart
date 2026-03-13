@@ -1,3 +1,4 @@
+import 'package:doctak_app/data/models/meeting_model/meeting_history_model.dart';
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_caller.dart';
@@ -204,12 +205,12 @@ Future<ApiResponse> updateMeetingSetting({
   }
 }
 
-Future<ApiResponse> setScheduleMeeting({title, date, time}) async {
+Future<ApiResponse> setScheduleMeeting({title, date, time, int duration = 60}) async {
   try {
     ProgressDialogUtils.showProgressDialog();
 
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/save-schedule-meeting?title=$title&date=$date&time=$time', method: networkUtils.HttpMethod.GET),
+      await networkUtils.buildHttpResponse('/save-schedule-meeting?title=$title&date=$date&time=$time&duration=$duration', method: networkUtils.HttpMethod.GET),
     );
     ProgressDialogUtils.hideProgressDialog();
 
@@ -217,6 +218,42 @@ Future<ApiResponse> setScheduleMeeting({title, date, time}) async {
   } on ApiException catch (e) {
     ProgressDialogUtils.hideProgressDialog();
 
+    print('Error: ${e.statusCode} - ${e.message}');
+    return ApiResponse.error("Something went wrong");
+  }
+}
+
+Future<MeetingHistoryResponse> getMeetingHistory({
+  String filter = 'all',
+  String search = '',
+  int page = 1,
+}) async {
+  final response = await networkUtils.handleResponse(
+    await networkUtils.buildHttpResponse(
+      '/meeting-history?filter=$filter&search=${Uri.encodeComponent(search)}&page=$page',
+      method: networkUtils.HttpMethod.GET,
+    ),
+  );
+  if (response is Map<String, dynamic>) {
+    return MeetingHistoryResponse.fromJson(response);
+  }
+  return MeetingHistoryResponse(
+    success: false,
+    data: [],
+    pagination: MeetingHistoryPagination(currentPage: 1, lastPage: 1, perPage: 10, total: 0),
+  );
+}
+
+Future<ApiResponse> cancelScheduledMeeting(int meetingId) async {
+  try {
+    Map<String, dynamic> response = await networkUtils.handleResponse(
+      await networkUtils.buildHttpResponse(
+        '/cancel-scheduled-meeting/$meetingId',
+        method: networkUtils.HttpMethod.POST,
+      ),
+    );
+    return ApiResponse.success(response);
+  } on ApiException catch (e) {
     print('Error: ${e.statusCode} - ${e.message}');
     return ApiResponse.error("Something went wrong");
   }

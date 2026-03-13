@@ -3,6 +3,7 @@ import 'package:doctak_app/core/network/custom_cache_manager.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
+import 'package:doctak_app/data/apiClient/services/network_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/v5_profile_api_service.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
@@ -75,6 +76,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<LoadPageEvent1>(_onGetPosts);
     on<DeleteWorkEducationEvent>(_deleteAddWorkEduction);
     on<SetUserFollow>(_setUserFollow);
+    on<SendConnectionRequestEvent>(_onSendConnectionRequest);
+    on<CancelConnectionRequestEvent>(_onCancelConnectionRequest);
 
     // ── V5 Full Profile Handlers ──
     on<LoadFullProfileEvent>(_onLoadFullProfile);
@@ -798,6 +801,39 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     } catch (e) {
       print(e);
       emit(DataError('No Data Found'));
+    }
+  }
+
+  // ── Connection (Friend Request) handlers ──
+
+  final NetworkApiService _networkApi = NetworkApiService();
+
+  Future<void> _onSendConnectionRequest(
+      SendConnectionRequestEvent event, Emitter<ProfileState> emit) async {
+    try {
+      final result = await _networkApi.sendFriendRequest(event.userId);
+      if (result['success'] == true) {
+        // Update local model
+        fullProfile?.connectionStatus = 'pending_sent';
+        fullProfile?.friendRequestId = result['friend_request_id']?.toString();
+        _reemitFullProfileState(emit);
+      }
+    } catch (e) {
+      print('Error sending connection request: $e');
+    }
+  }
+
+  Future<void> _onCancelConnectionRequest(
+      CancelConnectionRequestEvent event, Emitter<ProfileState> emit) async {
+    try {
+      final result = await _networkApi.cancelFriendRequest(event.requestId);
+      if (result['success'] == true) {
+        fullProfile?.connectionStatus = 'none';
+        fullProfile?.friendRequestId = null;
+        _reemitFullProfileState(emit);
+      }
+    } catch (e) {
+      print('Error cancelling connection request: $e');
     }
   }
 

@@ -1,22 +1,22 @@
-import 'dart:async';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:shimmer/shimmer.dart';
-import '../../../core/utils/app/AppData.dart';
-import '../../../localization/app_localization.dart';
-import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import '../bloc/create_discussion_bloc.dart';
+
 import '../bloc/discussion_list_bloc.dart';
+import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
 import '../widgets/discussion_card.dart';
-import '../widgets/discussion_stats_bar.dart';
-import '../widgets/case_discussion_list_shimmer.dart';
-import 'discussion_detail_screen.dart';
+import '../widgets/shimmer_widgets.dart';
 import 'create_discussion_screen.dart';
+import 'discussion_detail_screen.dart';
 
+/// The main case discussion listing screen.
+/// Features tab bar (All / My Cases / Saved / Following),
+/// search, specialty/country/sort filters, active filter chips,
+/// paginated list with pull-to-refresh, and a FAB to create new cases.
 class DiscussionListScreen extends StatefulWidget {
   const DiscussionListScreen({super.key});
 
@@ -24,68 +24,60 @@ class DiscussionListScreen extends StatefulWidget {
   State<DiscussionListScreen> createState() => _DiscussionListScreenState();
 }
 
-class _DiscussionListScreenState extends State<DiscussionListScreen> {
-  Timer? _debounce;
+class _DiscussionListScreenState extends State<DiscussionListScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
-  bool isSearchShow = false;
+  bool _isSearching = false;
+
+  static const _tabs = [
+    _TabItem('All Cases', null),
+    _TabItem('My Cases', 'my'),
+    _TabItem('Saved', 'saved'),
+    _TabItem('Following', 'following'),
+  ];
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController.addListener(() { if (mounted) setState(() {}); });
     _scrollController.addListener(_onScroll);
 
-    print('DiscussionListScreen: Initializing...');
-
-    // Load filter data first to populate specialties and countries
-    context.read<DiscussionListBloc>().add(LoadFilterData());
-
-    // Then load discussions after a short delay
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        print('DiscussionListScreen: Loading discussions...');
-        context.read<DiscussionListBloc>().add(const LoadDiscussionList());
-      }
-    });
+    // Initial load
+    final bloc = context.read<DiscussionListBloc>();
+    bloc.add(LoadFilterData());
+    bloc.add(const LoadDiscussionList());
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _scrollController.dispose();
     _searchController.dispose();
-    _debounce?.cancel();
     super.dispose();
   }
 
   void _onScroll() {
-    if (_isBottom) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       context.read<DiscussionListBloc>().add(LoadMoreDiscussions());
     }
   }
 
-  bool get _isBottom {
-    if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
-  }
-
   void _onSearch(String query) {
     final bloc = context.read<DiscussionListBloc>();
-    final currentState = bloc.state;
-
-    if (currentState is DiscussionListLoaded) {
-      final updatedFilters = currentState.currentFilters.copyWith(searchQuery: query.isEmpty ? null : query);
-      bloc.add(UpdateFilters(updatedFilters));
-    }
-  }
-
-  void _onFiltersChanged(CaseDiscussionFilters filters) {
-    context.read<DiscussionListBloc>().add(UpdateFilters(filters));
-  }
-
-  void _onRefresh() {
-    context.read<DiscussionListBloc>().add(RefreshDiscussionList());
+    final state = bloc.state;
+    final currentFilters = state is DiscussionListLoaded
+        ? state.currentFilters
+        : const CaseDiscussionFilters();
+    bloc.add(UpdateFilters(
+      currentFilters.copyWith(
+        searchQuery: query.isEmpty ? null : query,
+        clearSearch: query.isEmpty,
+      ),
+    ));
   }
 
   @override
@@ -93,538 +85,198 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
     final theme = OneUITheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackground,
-      appBar: DoctakAppBar(
-        title: translation(context).lbl_case_discussions,
-        titleIcon: Icons.medical_information_rounded,
-        actions: [
-          // Search icon button
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-              child: Icon(isSearchShow ? Icons.close : Icons.search, color: theme.primary, size: 16),
-            ),
-            onPressed: () {
-              setState(() {
-                isSearchShow = !isSearchShow;
-                if (!isSearchShow) {
-                  _searchController.clear();
-                  _onSearch('');
-                }
-              });
-            },
-          ),
-          // Add new discussion button
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: theme.success.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: Icon(Icons.add_rounded, color: theme.success, size: 16),
-              ),
-              onPressed: _navigateToCreateDiscussion,
-            ),
-          ),
-        ],
-      ),
+      backgroundColor: theme.isDark
+          ? theme.scaffoldBackground
+          : const Color(0xFFF6F6F8),
       body: Column(
         children: [
+          // ── Unified header: AppBar + search + tab strip ──
           Container(
-            color: theme.cardBackground,
-            child: Column(
-              children: [
-                // Search field with animated visibility
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  height: isSearchShow ? 80 : 0,
-                  child: SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: isSearchShow
-                        ? Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                            decoration: BoxDecoration(
-                              color: theme.inputBackground,
-                              borderRadius: BorderRadius.circular(24.0),
-                              border: Border.all(color: theme.inputBorder, width: 1.5),
-                              boxShadow: theme.cardShadow,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(24.0),
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                                    child: Icon(Icons.search_rounded, color: theme.primary.withValues(alpha: 0.6), size: 24),
-                                  ),
-                                  Expanded(
-                                    child: AppTextField(
-                                      controller: _searchController,
-                                      textFieldType: TextFieldType.NAME,
-                                      textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
-                                      onChanged: (searchTxt) async {
-                                        if (_debounce?.isActive ?? false) _debounce?.cancel();
-                                        _debounce = Timer(const Duration(milliseconds: 500), () {
-                                          _onSearch(searchTxt);
-                                        });
-                                      },
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        hintText: translation(context).lbl_search_case_discussions,
-                                        hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
-                                        contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                                      ),
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      _searchController.clear();
-                                      _onSearch('');
-                                    },
-                                    borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(
-                                        color: theme.primary.withValues(alpha: 0.1),
-                                        borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
-                                      ),
-                                      child: Icon(Icons.clear, color: theme.primary.withValues(alpha: 0.6), size: 24),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : const SizedBox(),
-                  ),
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.isDark ? theme.border : Colors.grey.shade200,
+                  width: 0.8,
                 ),
-                // Filter options section
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: BlocBuilder<DiscussionListBloc, DiscussionListState>(
-                    builder: (context, state) {
-                      if (state is DiscussionListLoaded) {
-                        return Row(
-                          children: [
-                            // Specialty Filter
-                            Expanded(
-                              child: Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: theme.surfaceVariant,
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: theme.border),
-                                ),
-                                child: PopupMenuButton<SpecialtyFilter>(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                  color: theme.cardBackground,
-                                  offset: const Offset(0, 45),
-                                  tooltip: translation(context).lbl_filter_by_specialty,
-                                  elevation: 8,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.medical_services_outlined, size: 16, color: theme.primary),
-                                        const SizedBox(width: 6),
-                                        Expanded(
-                                          child: Text(
-                                            state.currentFilters.selectedSpecialty?.name ?? translation(context).lbl_all_specialties,
-                                            style: TextStyle(fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: theme.textPrimary),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        Icon(Icons.arrow_drop_down, size: 16, color: theme.primary),
-                                      ],
-                                    ),
-                                  ),
-                                  itemBuilder: (BuildContext context) {
-                                    final items = <PopupMenuEntry<SpecialtyFilter>>[];
-
-                                    // Add "All" option
-                                    items.add(
-                                      PopupMenuItem<SpecialtyFilter>(
-                                        value: SpecialtyFilter(id: 0, name: translation(context).lbl_all_specialties, slug: 'all'),
-                                        height: 35,
-                                        child: Text(
-                                          translation(context).lbl_all_specialties,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontFamily: 'Poppins',
-                                            color: state.currentFilters.selectedSpecialty == null ? theme.primary : theme.textPrimary,
-                                            fontWeight: state.currentFilters.selectedSpecialty == null ? FontWeight.w600 : FontWeight.w400,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-
-                                    // Add specialty options
-                                    items.addAll(
-                                      state.specialties.map((specialty) {
-                                        return PopupMenuItem<SpecialtyFilter>(
-                                          value: specialty,
-                                          height: 35,
-                                          child: Text(
-                                            specialty.name,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              color: state.currentFilters.selectedSpecialty?.id == specialty.id ? theme.primary : theme.textPrimary,
-                                              fontWeight: state.currentFilters.selectedSpecialty?.id == specialty.id ? FontWeight.w600 : FontWeight.w400,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        );
-                                      }).toList(),
-                                    );
-
-                                    return items;
-                                  },
-                                  onSelected: (SpecialtyFilter? selectedSpecialty) {
-                                    final updatedFilters = state.currentFilters.copyWith(
-                                      selectedSpecialty: selectedSpecialty?.id == 0 ? null : selectedSpecialty,
-                                      clearSpecialty: selectedSpecialty?.id == 0,
-                                    );
-                                    _onFiltersChanged(updatedFilters);
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Country Filter
-                            // Expanded(
-                            //   child: Container(
-                            //     height: 40,
-                            //     decoration: BoxDecoration(
-                            //       color: theme.surfaceVariant,
-                            //       borderRadius: BorderRadius.circular(20),
-                            //       border: Border.all(
-                            //         color: theme.border,
-                            //       ),
-                            //     ),
-                            //     child: PopupMenuButton<CountryFilter>(
-                            //       shape: RoundedRectangleBorder(
-                            //         borderRadius: BorderRadius.circular(16),
-                            //       ),
-                            //       offset: const Offset(0, 45),
-                            //       tooltip: 'Filter by Country',
-                            //       elevation: 8,
-                            //       child: Container(
-                            //         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            //         child: Row(
-                            //           mainAxisAlignment: MainAxisAlignment.center,
-                            //           children: [
-                            //             Icon(
-                            //               Icons.location_on_outlined,
-                            //               size: 16,
-                            //               color: Colors.blue[600],
-                            //             ),
-                            //             const SizedBox(width: 6),
-                            //             Expanded(
-                            //               child: Text(
-                            //                 state.currentFilters.selectedCountry?.name ?? 'All Countries',
-                            //                 style: const TextStyle(
-                            //                   fontSize: 12,
-                            //                   fontFamily: 'Poppins',
-                            //                   fontWeight: FontWeight.w500,
-                            //                 ),
-                            //                 overflow: TextOverflow.ellipsis,
-                            //               ),
-                            //             ),
-                            //             Icon(
-                            //               Icons.arrow_drop_down,
-                            //               size: 16,
-                            //               color: Colors.blue[600],
-                            //             ),
-                            //           ],
-                            //         ),
-                            //       ),
-                            //       itemBuilder: (BuildContext context) {
-                            //         final items = <PopupMenuEntry<CountryFilter>>[];
-                            //
-                            //         // Add "All" option
-                            //         items.add(
-                            //           PopupMenuItem<CountryFilter>(
-                            //             value: CountryFilter(id: 0, name: 'All Countries', code: 'all', flag: ''),
-                            //             height: 35,
-                            //             child: Text(
-                            //               'All Countries',
-                            //               style: TextStyle(
-                            //                 fontSize: 12,
-                            //                 fontFamily: 'Poppins',
-                            //                 color: state.currentFilters.selectedCountry == null
-                            //                     ? Colors.blue[800]
-                            //                     : Colors.black87,
-                            //                 fontWeight: state.currentFilters.selectedCountry == null
-                            //                     ? FontWeight.w600
-                            //                     : FontWeight.w400,
-                            //               ),
-                            //             ),
-                            //           ),
-                            //         );
-                            //
-                            //         // Add country options
-                            //         items.addAll(
-                            //           state.countries.map((country) {
-                            //             return PopupMenuItem<CountryFilter>(
-                            //               value: country,
-                            //               height: 35,
-                            //               child: Row(
-                            //                 children: [
-                            //                   if (country.flag.isNotEmpty) ...[
-                            //                     Text(
-                            //                       country.flag,
-                            //                       style: const TextStyle(fontSize: 14),
-                            //                     ),
-                            //                     const SizedBox(width: 8),
-                            //                   ],
-                            //                   Expanded(
-                            //                     child: Text(
-                            //                       country.name,
-                            //                       style: TextStyle(
-                            //                         fontSize: 12,
-                            //                         fontFamily: 'Poppins',
-                            //                         color: state.currentFilters.selectedCountry?.id == country.id
-                            //                             ? Colors.blue[800]
-                            //                             : Colors.black87,
-                            //                         fontWeight: state.currentFilters.selectedCountry?.id == country.id
-                            //                             ? FontWeight.w600
-                            //                             : FontWeight.w400,
-                            //                       ),
-                            //                       overflow: TextOverflow.ellipsis,
-                            //                     ),
-                            //                   ),
-                            //                 ],
-                            //               ),
-                            //             );
-                            //           }).toList(),
-                            //         );
-                            //
-                            //         return items;
-                            //       },
-                            //       onSelected: (CountryFilter? selectedCountry) {
-                            //         final updatedFilters = state.currentFilters.copyWith(
-                            //           selectedCountry: selectedCountry?.id == 0 ? null : selectedCountry,
-                            //           clearCountry: selectedCountry?.id == 0,
-                            //         );
-                            //         _onFiltersChanged(updatedFilters);
-                            //       },
-                            //     ),
-                            //   ),
-                            // ),
-                            const SizedBox(width: 8),
-                            // Sort Options
-                            Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: theme.surfaceVariant,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
-                              ),
-                              child: PopupMenuButton<String>(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                offset: const Offset(0, 45),
-                                tooltip: translation(context).lbl_sort_options,
-                                elevation: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.sort_rounded, size: 16, color: theme.primary),
-                                      const SizedBox(width: 4),
-                                      Icon(Icons.arrow_drop_down, size: 16, color: theme.primary),
-                                    ],
-                                  ),
-                                ),
-                                itemBuilder: (BuildContext context) {
-                                  return [
-                                    PopupMenuItem<String>(
-                                      value: 'newest',
-                                      height: 35,
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.schedule, size: 16, color: theme.primary),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            translation(context).lbl_newest_first,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              color: state.currentFilters.sortBy == 'newest' ? theme.primary : theme.textPrimary,
-                                              fontWeight: state.currentFilters.sortBy == 'newest' ? FontWeight.w600 : FontWeight.w400,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem<String>(
-                                      value: 'popular',
-                                      height: 35,
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.trending_up, size: 16, color: theme.primary),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            translation(context).lbl_most_popular,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              color: state.currentFilters.sortBy == 'popular' ? theme.primary : theme.textPrimary,
-                                              fontWeight: state.currentFilters.sortBy == 'popular' ? FontWeight.w600 : FontWeight.w400,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem<String>(
-                                      value: 'comments',
-                                      height: 35,
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.comment_outlined, size: 16, color: theme.primary),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            translation(context).lbl_most_discussed,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontFamily: 'Poppins',
-                                              color: state.currentFilters.sortBy == 'comments' ? theme.primary : theme.textPrimary,
-                                              fontWeight: state.currentFilters.sortBy == 'comments' ? FontWeight.w600 : FontWeight.w400,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ];
-                                },
-                                onSelected: (String? sortBy) {
-                                  final updatedFilters = state.currentFilters.copyWith(sortBy: sortBy);
-                                  _onFiltersChanged(updatedFilters);
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
-                  ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DoctakAppBar(
+                  title: 'Case Discussions',
+                  backgroundColor: Colors.transparent,
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        _isSearching ? Icons.close : Icons.search,
+                        color: theme.textPrimary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isSearching = !_isSearching;
+                          if (!_isSearching) {
+                            _searchController.clear();
+                            _onSearch('');
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                if (_isSearching)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: theme.inputBackground,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: theme.border),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        autofocus: true,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                          color: theme.textPrimary,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'Search cases...',
+                          hintStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: theme.textTertiary,
+                          ),
+                          prefixIcon: Icon(Icons.search,
+                              size: 20, color: theme.textTertiary),
+                          border: InputBorder.none,
+                          contentPadding:
+                              const EdgeInsets.symmetric(vertical: 10),
+                          isDense: true,
+                        ),
+                        onSubmitted: _onSearch,
+                        onChanged: (value) {
+                          Future.delayed(
+                              const Duration(milliseconds: 500), () {
+                            if (_searchController.text == value) {
+                              _onSearch(value);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                // ── Tab strip ──
+                _buildTabStrip(theme),
+              ],
+            ),
           ),
+
+          // ── Filter Chips ──
+          BlocBuilder<DiscussionListBloc, DiscussionListState>(
+            buildWhen: (prev, curr) {
+              if (prev is DiscussionListLoaded && curr is DiscussionListLoaded) {
+                return prev.currentFilters != curr.currentFilters ||
+                    prev.specialties != curr.specialties;
+              }
+              return true;
+            },
+            builder: (context, state) {
+              if (state is DiscussionListLoaded) {
+                return _FilterBar(
+                  specialties: state.specialties,
+                  countries: state.countries,
+                  currentFilters: state.currentFilters,
+                  theme: theme,
+                  onFilterChanged: (filters) {
+                    context.read<DiscussionListBloc>().add(
+                          UpdateFilters(filters),
+                        );
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+
+          // ── Content ──
           Expanded(
-            child: BlocBuilder<DiscussionListBloc, DiscussionListState>(
+            child:
+                BlocBuilder<DiscussionListBloc, DiscussionListState>(
               builder: (context, state) {
                 if (state is DiscussionListLoading) {
                   return const CaseDiscussionListShimmer();
                 }
 
                 if (state is DiscussionListError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
-                        const SizedBox(height: 16),
-                        Text(translation(context).msg_error_loading_discussions, style: Theme.of(context).textTheme.headlineSmall),
-                        const SizedBox(height: 8),
-                        Text(state.message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
-                        const SizedBox(height: 16),
-                        ElevatedButton(onPressed: _onRefresh, child: Text(translation(context).lbl_retry)),
-                      ],
-                    ),
+                  return _ErrorView(
+                    message: state.message,
+                    onRetry: () {
+                      context
+                          .read<DiscussionListBloc>()
+                          .add(const LoadDiscussionList());
+                    },
+                    theme: theme,
                   );
                 }
 
                 if (state is DiscussionListLoaded) {
-                  // Show shimmer if specialties/countries are still loading
-                  if (state.specialties.isEmpty && state.countries.isEmpty && state.discussions.isEmpty) {
-                    return const CaseDiscussionListShimmer();
+                  if (state.discussions.isEmpty) {
+                    return _EmptyView(theme: theme);
                   }
 
-                  return Column(
-                    children: [
-                      // Stats bar
-                      DiscussionStatsBar(discussions: state.discussions, currentFilters: state.currentFilters, isLoading: state.isLoadingMore),
+                  return RefreshIndicator(
+                    color: theme.primary,
+                    onRefresh: () async {
+                      context
+                          .read<DiscussionListBloc>()
+                          .add(RefreshDiscussionList());
+                    },
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 80),
+                      itemCount: state.discussions.length +
+                          (state.isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index >= state.discussions.length) {
+                          return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Center(
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2)),
+                          );
+                        }
 
-                      // Content
-                      Expanded(
-                        child: state.discussions.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.chat_bubble_outline, size: 48, color: theme.textTertiary),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      translation(context).msg_no_discussions_found,
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: theme.textSecondary),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      _hasActiveFilters(state.currentFilters) ? translation(context).msg_try_adjusting_filters : translation(context).msg_be_first_to_start_discussion,
-                                      style: TextStyle(color: theme.textTertiary, fontSize: 14),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    if (_hasActiveFilters(state.currentFilters)) ...[
-                                      const SizedBox(height: 16),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          context.read<DiscussionListBloc>().add(UpdateFilters(const CaseDiscussionFilters()));
-                                        },
-                                        style: ElevatedButton.styleFrom(backgroundColor: theme.primary, foregroundColor: theme.buttonPrimaryText),
-                                        child: Text(translation(context).lbl_clear_filters),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              )
-                            : RefreshIndicator(
-                                onRefresh: () async => _onRefresh(),
-                                color: theme.primary,
-                                backgroundColor: theme.surfaceVariant,
-                                strokeWidth: 2.5,
-                                child: ListView.builder(
-                                  controller: _scrollController,
-                                  padding: EdgeInsets.only(left: 0, right: 0, top: 8, bottom: MediaQuery.of(context).padding.bottom + 16),
-                                  itemCount: state.discussions.length + (state.hasReachedMax ? 0 : 1),
-                                  itemBuilder: (context, index) {
-                                    if (index >= state.discussions.length) {
-                                      // Simple shimmer for load more
-                                      return Container(
-                                        margin: const EdgeInsets.all(16),
-                                        height: 80,
-                                        child: Shimmer.fromColors(
-                                          baseColor: theme.divider,
-                                          highlightColor: theme.cardBackground,
-                                          child: Container(
-                                            decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(12)),
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    final discussion = state.discussions[index];
-                                    return DiscussionCard(
-                                      discussion: discussion,
-                                      onTap: () => _navigateToDiscussionDetail(discussion.id),
-                                      onLike: () => _likeDiscussion(discussion.id),
-                                      onDelete: () => _deleteDiscussion(discussion.id),
-                                      onEdit: () => _editDiscussion(discussion),
-                                    );
-                                  },
-                                ),
-                              ),
-                      ),
-                    ],
+                        final item = state.discussions[index];
+                        return DiscussionCard(
+                          item: item,
+                          onTap: () => _openDetail(item.id),
+                          onLike: () {
+                            context.read<DiscussionListBloc>().add(
+                                  ToggleLikeDiscussion(item.id),
+                                );
+                          },
+                          onBookmark: () {
+                            context.read<DiscussionListBloc>().add(
+                                  ToggleBookmarkDiscussion(item.id),
+                                );
+                          },
+                          onDelete: item.isOwner
+                              ? () => _confirmDelete(item.id)
+                              : null,
+                        );
+                      },
+                    ),
                   );
                 }
 
@@ -634,76 +286,592 @@ class _DiscussionListScreenState extends State<DiscussionListScreen> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openCreateScreen,
+        backgroundColor: theme.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text(
+          'New Case',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
     );
   }
 
-  void _navigateToDiscussionDetail(int caseId) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => DiscussionDetailScreen(caseId: caseId)));
+  // ── Drugs-style tab strip ──────────────────────────────────────────────────
+
+  Widget _buildTabStrip(OneUITheme theme) {
+    return Row(
+      children: _tabs.asMap().entries.map((entry) {
+        return _caseTab(theme, entry.value.label, entry.key);
+      }).toList(),
+    );
   }
 
-  void _navigateToCreateDiscussion() {
-    BlocProvider(
-      create: (context) => CreateDiscussionBloc(
-        repository: CaseDiscussionRepository(
-          baseUrl: AppData.base2,
-          getAuthToken: () {
-            return AppData.userToken ?? "";
-          },
+  Widget _caseTab(OneUITheme theme, String label, int index) {
+    final selected = _tabController.index == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          if (_tabController.index == index) return;
+          setState(() {});
+          _tabController.animateTo(index);
+          final tab = _tabs[index].filterValue;
+          final bloc = context.read<DiscussionListBloc>();
+          final state = bloc.state;
+          final currentFilters = state is DiscussionListLoaded
+              ? state.currentFilters
+              : const CaseDiscussionFilters();
+          bloc.add(UpdateFilters(
+              currentFilters.copyWith(tab: tab, clearTab: tab == null)));
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border(
+              bottom: BorderSide(
+                color: selected ? theme.primary : Colors.transparent,
+                width: 2.5,
+              ),
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: selected ? theme.primary : theme.textTertiary,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              fontFamily: 'Poppins',
+            ),
+          ),
         ),
       ),
-      child: const CreateDiscussionScreen(),
-    ).launch(context).then((created) {
-      if (created == true) {
-        _onRefresh();
+    );
+  }
+
+  // ── Navigation ─────────────────────────────────────────────────────────────
+
+  void _openDetail(int caseId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DiscussionDetailScreen(caseId: caseId),
+      ),
+    );
+  }
+
+  void _openCreateScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => CreateDiscussionBloc(
+            repository: CaseDiscussionRepository(
+              baseUrl: AppData.base2,
+              getAuthToken: () => AppData.userToken ?? '',
+            ),
+          ),
+          child: const CreateDiscussionScreen(),
+        ),
+      ),
+    ).then((result) {
+      if (result == true) {
+        context.read<DiscussionListBloc>().add(RefreshDiscussionList());
       }
     });
   }
 
-  void _likeDiscussion(int caseId) {
-    context.read<DiscussionListBloc>().add(LikeDiscussion(caseId));
-  }
-
-  void _deleteDiscussion(int caseId) {
-    context.read<DiscussionListBloc>().add(DeleteDiscussion(caseId));
-  }
-
-  void _editDiscussion(CaseDiscussionListItem discussion) async {
-    print('🔄 Navigating to edit mode for case: ${discussion.id}');
-
-    // For editing, we need to convert list item to full case discussion
-    // For now, create a basic CaseDiscussion from the list item data
-    final caseDiscussion = CaseDiscussion(
-      id: discussion.id,
-      title: discussion.title,
-      description: discussion.title, // Use title as description for list items
-      status: 'active',
-      specialty: discussion.author.specialty,
-      createdAt: discussion.createdAt,
-      updatedAt: discussion.createdAt,
-      author: discussion.author,
-      stats: discussion.stats,
-      symptoms: discussion.parsedTags,
-    );
-
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BlocProvider(
-          create: (context) => CreateDiscussionBloc(
-            repository: CaseDiscussionRepository(baseUrl: AppData.base2, getAuthToken: () => AppData.userToken ?? ""),
+  void _confirmDelete(int caseId) {
+    final theme = OneUITheme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Case'),
+        content: const Text(
+            'Are you sure you want to delete this case discussion?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child:
+                Text('Cancel', style: TextStyle(color: theme.textSecondary)),
           ),
-          child: CreateDiscussionScreen(existingCase: caseDiscussion),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              context
+                  .read<DiscussionListBloc>()
+                  .add(DeleteDiscussion(caseId));
+            },
+            child:
+                const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Tab Item ──
+
+class _TabItem {
+  final String label;
+  final String? filterValue;
+  const _TabItem(this.label, this.filterValue);
+}
+
+// ── Filter Bar ──
+
+class _FilterBar extends StatelessWidget {
+  final List<SpecialtyFilter> specialties;
+  final List<CountryFilter> countries;
+  final CaseDiscussionFilters currentFilters;
+  final OneUITheme theme;
+  final Function(CaseDiscussionFilters) onFilterChanged;
+
+  const _FilterBar({
+    required this.specialties,
+    required this.countries,
+    required this.currentFilters,
+    required this.theme,
+    required this.onFilterChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasActiveFilter = currentFilters.selectedSpecialty != null ||
+        currentFilters.selectedCountry != null ||
+        (currentFilters.sortBy != null && currentFilters.sortBy != 'latest');
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        border: Border(
+          bottom: BorderSide(color: theme.divider, width: 0.5),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            // Specialty dropdown
+            _FilterDropdown(
+              label: _getSpecialtyLabel(),
+              icon: Icons.medical_services_outlined,
+              isActive: currentFilters.selectedSpecialty != null,
+              theme: theme,
+              onTap: () => _showSpecialtyPicker(context),
+            ),
+            const SizedBox(width: 8),
+
+            // Country dropdown
+            _FilterDropdown(
+              label: _getCountryLabel(),
+              icon: Icons.public,
+              isActive: currentFilters.selectedCountry != null,
+              theme: theme,
+              onTap: () => _showCountryPicker(context),
+            ),
+            const SizedBox(width: 8),
+
+            // Sort dropdown
+            _FilterDropdown(
+              label: _getSortLabel(),
+              icon: Icons.sort,
+              isActive: currentFilters.sortBy != null &&
+                  currentFilters.sortBy != 'latest',
+              theme: theme,
+              onTap: () => _showSortPicker(context),
+            ),
+
+            // Clear filters button
+            if (hasActiveFilter) ...[
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () {
+                  onFilterChanged(CaseDiscussionFilters(
+                    tab: currentFilters.tab,
+                  ));
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.clear, size: 14, color: theme.error),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Clear',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: theme.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
+  }
 
-    // Refresh the list if the case was updated
-    if (result == true) {
-      print('✅ Case updated successfully, refreshing list');
-      context.read<DiscussionListBloc>().add(LoadDiscussionList(refresh: true));
+  String _getSpecialtyLabel() {
+    if (currentFilters.selectedSpecialty == null) return 'Specialty';
+    return currentFilters.selectedSpecialty!.name;
+  }
+
+  String _getCountryLabel() {
+    if (currentFilters.selectedCountry == null) return 'Country';
+    return currentFilters.selectedCountry!.name;
+  }
+
+  String _getSortLabel() {
+    switch (currentFilters.sortBy) {
+      case 'most_liked':
+        return 'Most Liked';
+      case 'most_commented':
+        return 'Most Commented';
+      case 'most_viewed':
+        return 'Most Viewed';
+      case 'oldest':
+        return 'Oldest';
+      default:
+        return 'Sort';
     }
   }
 
-  bool _hasActiveFilters(CaseDiscussionFilters filters) {
-    return filters.selectedSpecialty != null || filters.selectedCountry != null || filters.status != null || filters.sortBy != null || (filters.searchQuery != null && filters.searchQuery!.isNotEmpty);
+  void _showSpecialtyPicker(BuildContext context) {
+    _showFilterBottomSheet(
+      context: context,
+      title: 'Select Specialty',
+      items: [
+        _FilterItem(null, 'All Specialties'),
+        ...specialties.map((s) => _FilterItem(s.id, s.name)),
+      ],
+      selectedId: currentFilters.selectedSpecialty?.id,
+      onSelect: (id) {
+        final specialty = id == null
+            ? null
+            : specialties.firstWhere((s) => s.id == id);
+        onFilterChanged(currentFilters.copyWith(
+          selectedSpecialty: specialty,
+          clearSpecialty: id == null,
+        ));
+      },
+    );
+  }
+
+  void _showCountryPicker(BuildContext context) {
+    _showFilterBottomSheet(
+      context: context,
+      title: 'Select Country',
+      items: [
+        _FilterItem(null, 'All Countries'),
+        ...countries.map((c) => _FilterItem(c.id, c.name)),
+      ],
+      selectedId: currentFilters.selectedCountry?.id,
+      onSelect: (id) {
+        final country = id == null
+            ? null
+            : countries.firstWhere((c) => c.id == id);
+        onFilterChanged(currentFilters.copyWith(
+          selectedCountry: country,
+          clearCountry: id == null,
+        ));
+      },
+    );
+  }
+
+  void _showSortPicker(BuildContext context) {
+    _showFilterBottomSheet(
+      context: context,
+      title: 'Sort By',
+      items: [
+        _FilterItem(null, 'Latest'),
+        _FilterItem('most_liked', 'Most Liked'),
+        _FilterItem('most_commented', 'Most Commented'),
+        _FilterItem('most_viewed', 'Most Viewed'),
+        _FilterItem('oldest', 'Oldest First'),
+      ],
+      selectedId: currentFilters.sortBy,
+      onSelect: (id) {
+        onFilterChanged(currentFilters.copyWith(
+          sortBy: id?.toString(),
+          clearSort: id == null,
+        ));
+      },
+    );
+  }
+
+  void _showFilterBottomSheet({
+    required BuildContext context,
+    required String title,
+    required List<_FilterItem> items,
+    dynamic selectedId,
+    required Function(dynamic) onSelect,
+  }) {
+    final theme = OneUITheme.of(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: theme.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.8,
+          expand: false,
+          builder: (_, controller) {
+            return Column(
+              children: [
+                // Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 10, bottom: 6),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.textTertiary.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: theme.textPrimary,
+                    ),
+                  ),
+                ),
+                Divider(color: theme.divider),
+                Expanded(
+                  child: ListView.builder(
+                    controller: controller,
+                    itemCount: items.length,
+                    itemBuilder: (_, i) {
+                      final item = items[i];
+                      final isSelected =
+                          item.id?.toString() == selectedId?.toString();
+                      return ListTile(
+                        title: Text(
+                          item.label,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            color: isSelected
+                                ? theme.primary
+                                : theme.textPrimary,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check, color: theme.primary, size: 20)
+                            : null,
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          onSelect(item.id);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _FilterItem {
+  final dynamic id;
+  final String label;
+  const _FilterItem(this.id, this.label);
+}
+
+class _FilterDropdown extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isActive;
+  final OneUITheme theme;
+  final VoidCallback onTap;
+
+  const _FilterDropdown({
+    required this.label,
+    required this.icon,
+    required this.isActive,
+    required this.theme,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isActive
+              ? theme.primary.withValues(alpha: 0.1)
+              : theme.surfaceVariant,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive
+                ? theme.primary.withValues(alpha: 0.3)
+                : theme.border,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isActive ? theme.primary : theme.textTertiary,
+            ),
+            const SizedBox(width: 5),
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 100),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  color: isActive ? theme.primary : theme.textSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 3),
+            Icon(
+              Icons.arrow_drop_down,
+              size: 16,
+              color: isActive ? theme.primary : theme.textTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Error View ──
+
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+  final OneUITheme theme;
+
+  const _ErrorView({
+    required this.message,
+    required this.onRetry,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: theme.textTertiary),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Empty View ──
+
+class _EmptyView extends StatelessWidget {
+  final OneUITheme theme;
+  const _EmptyView({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.forum_outlined, size: 64, color: theme.textTertiary),
+            const SizedBox(height: 16),
+            Text(
+              'No case discussions found',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Start a new case discussion to share your clinical experience with the community.',
+              style: TextStyle(
+                fontSize: 13,
+                fontFamily: 'Poppins',
+                color: theme.textTertiary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

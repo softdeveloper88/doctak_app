@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/widgets/medical_citation_widget.dart';
+import 'package:doctak_app/presentation/chat_gpt_screen/widgets/typing_indicators.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +24,8 @@ class ChatBubble extends StatelessWidget {
   final List<int>? imageBytes2;
   /// Citation sources (Apple Guideline 1.4.1). Each map has 'url' and optional 'title'.
   final List<Map<String, dynamic>>? sources;
+  /// Called when user taps Elaborate/Summarize suggestions below the AI bubble.
+  final Function(String prompt)? onSuggestionTap;
 
   const ChatBubble({
     super.key,
@@ -36,6 +39,7 @@ class ChatBubble extends StatelessWidget {
     this.imageBytes1,
     this.imageBytes2,
     this.sources,
+    this.onSuggestionTap,
   });
 
   /// Safely load a network image with error handling to prevent crashes
@@ -71,6 +75,30 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
+  Widget _buildActionButton(BuildContext context, {required OneUITheme theme, required IconData icon, required String label, required VoidCallback? onPressed}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: theme.primary.withValues(alpha: 0.1), width: 1),
+      ),
+      child: TextButton.icon(
+        icon: Icon(icon, size: 16, color: theme.primary),
+        label: Text(
+          label,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: theme.primary),
+        ),
+        style: TextButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          alignment: Alignment.center,
+        ),
+        onPressed: onPressed,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
@@ -100,7 +128,33 @@ class ChatBubble extends StatelessWidget {
                 ),
               ),
               Flexible(
-                child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // DocTak AI sender label
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 4),
+                      child: Text(
+                        'DocTak AI',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          color: theme.primary,
+                        ),
+                      ),
+                    ),
+                    if (text == translation(context).lbl_generating_response)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: TypingIndicators(
+                          color: theme.primary,
+                          size: 5.0,
+                        ),
+                      )
+                    else
+                    Container(
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomRight: Radius.circular(16), bottomLeft: Radius.circular(4)),
                     color: theme.cardBackground,
@@ -111,78 +165,44 @@ class ChatBubble extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Flexible(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                          child: text == translation(context).lbl_generating_response
-                              ? Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    MarkdownBlock(
-                                      data: text,
-                                      config: MarkdownConfig(
-                                        configs: [
-                                          PreConfig(
-                                            decoration: BoxDecoration(color: theme.isDark ? theme.inputBackground : Colors.grey[100], borderRadius: BorderRadius.circular(8)),
-                                            padding: const EdgeInsets.all(12),
-                                            textStyle: TextStyle(
-                                              fontSize: 16.sp, // Responsive font size
-                                              fontFamily: 'Poppins',
-                                              color: theme.textPrimary,
-                                            ),
-                                          ),
-                                          PConfig(
-                                            textStyle: TextStyle(
-                                              fontSize: 15.sp, // Responsive font size
-                                              fontFamily: 'Poppins',
-                                              height: 1.5,
-                                              color: theme.textPrimary,
-                                            ),
-                                          ),
-                                        ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                        child: MarkdownBlock(
+                                data: text,
+                                config: MarkdownConfig(
+                                  configs: [
+                                    PreConfig(
+                                      decoration: BoxDecoration(color: theme.isDark ? theme.inputBackground : Colors.grey[100], borderRadius: BorderRadius.circular(8)),
+                                      padding: const EdgeInsets.all(12),
+                                      textStyle: TextStyle(
+                                        fontSize: 16.sp, // Responsive font size
+                                        fontFamily: 'Poppins',
+                                        color: theme.textPrimary,
                                       ),
                                     ),
-                                    const SizedBox(height: 10),
-                                    CircularProgressIndicator(color: theme.primary),
+                                    PConfig(
+                                      textStyle: TextStyle(
+                                        fontSize: 15.sp, // Responsive font size
+                                        fontFamily: 'Poppins',
+                                        height: 1.5,
+                                        color: theme.textPrimary,
+                                      ),
+                                    ),
+                                    H1Config(
+                                      style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
+                                    ),
+                                    H2Config(
+                                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
+                                    ),
+                                    H3Config(
+                                      style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
+                                    ),
+                                    CodeConfig(
+                                      style: TextStyle(fontSize: 14.sp, fontFamily: 'monospace', color: theme.textPrimary),
+                                    ),
                                   ],
-                                )
-                              : MarkdownBlock(
-                                  data: text,
-                                  config: MarkdownConfig(
-                                    configs: [
-                                      PreConfig(
-                                        decoration: BoxDecoration(color: theme.isDark ? theme.inputBackground : Colors.grey[100], borderRadius: BorderRadius.circular(8)),
-                                        padding: const EdgeInsets.all(12),
-                                        textStyle: TextStyle(
-                                          fontSize: 16.sp, // Responsive font size
-                                          fontFamily: 'Poppins',
-                                          color: theme.textPrimary,
-                                        ),
-                                      ),
-                                      PConfig(
-                                        textStyle: TextStyle(
-                                          fontSize: 15.sp, // Responsive font size
-                                          fontFamily: 'Poppins',
-                                          height: 1.5,
-                                          color: theme.textPrimary,
-                                        ),
-                                      ),
-                                      H1Config(
-                                        style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
-                                      ),
-                                      H2Config(
-                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
-                                      ),
-                                      H3Config(
-                                        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, fontFamily: 'Poppins', color: theme.textPrimary),
-                                      ),
-                                      CodeConfig(
-                                        style: TextStyle(fontSize: 14.sp, fontFamily: 'monospace', color: theme.textPrimary),
-                                      ),
-                                    ],
-                                  ),
                                 ),
-                        ),
+                              ),
                       ),
                       // Citation sources shown for AI responses (Apple Guideline 1.4.1)
                       if (!isUserMessage &&
@@ -199,35 +219,58 @@ class ChatBubble extends StatelessWidget {
                           ),
                         ),
 
-                      Divider(color: theme.isDark ? Colors.grey[700] : Colors.grey[200]),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                    ],
+                  ),
+                ),
+                    // Action buttons below the bubble
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
                         children: [
-                          // InkWell(
-                          //   onTap: () => onTapReginarate!(),
-                          //   child: const Padding(
-                          //     padding: EdgeInsets.all(8.0),
-                          //     child: Row(
-                          //       children: [
-                          //         Icon(Icons.change_circle_outlined),
-                          //         Text(' Regenerate')
-                          //       ],
-                          //     ),
-                          //   ),
-                          // ),
-                          IconButton(
-                            icon: const Icon(Icons.copy),
+                          // Elaborate & Summarize only if suggestions are enabled
+                          if (onSuggestionTap != null) ...[  
+                            _buildActionButton(context,
+                              theme: theme,
+                              icon: Icons.expand_circle_down_outlined,
+                              label: translation(context).lbl_elaborate,
+                              onPressed: () {
+                                final prompt = 'Please elaborate on the following:\n\n"$text"';
+                                onSuggestionTap!.call(prompt);
+                              },
+                            ),
+                            _buildActionButton(context,
+                              theme: theme,
+                              icon: Icons.summarize_outlined,
+                              label: translation(context).lbl_summarize,
+                              onPressed: () {
+                                final prompt = 'Please summarize the following:\n\n"$text"';
+                                onSuggestionTap!.call(prompt);
+                              },
+                            ),
+                          ],
+                          // Copy is always available
+                          _buildActionButton(context,
+                            theme: theme,
+                            icon: Icons.copy_all,
+                            label: 'Copy',
                             onPressed: () {
-                              // Copy text to clipboard
                               Clipboard.setData(ClipboardData(text: text));
-                              // You can show a snackbar or any other feedback here
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).lbl_text_copied_clipboard)));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(translation(context).lbl_text_copied_clipboard, style: const TextStyle(fontFamily: 'Poppins')),
+                                  behavior: SnackBarBehavior.floating,
+                                  duration: const Duration(seconds: 2),
+                                  backgroundColor: theme.primary,
+                                ),
+                              );
                             },
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ] else ...[

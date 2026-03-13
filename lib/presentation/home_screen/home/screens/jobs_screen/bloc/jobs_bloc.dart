@@ -18,6 +18,10 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   JobApplicantsModel? jobApplicantsModel = JobApplicantsModel();
   final int nextPageTrigger = 1;
 
+  // Track current filter context so pagination uses the same country/search as the initial load
+  String _currentCountryId = '';
+  String _currentSearchTerm = '';
+
   JobsBloc() : super(PaginationInitialState()) {
     on<JobLoadPageEvent>(_onGetJobs);
     on<GetPost>(_onGetJobs1);
@@ -25,50 +29,42 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     on<WithDrawApplicant>(_withDrawApplicant);
     on<ShowApplicantEvent>(_showApplicant);
     on<JobCheckIfNeedMoreDataEvent>((event, emit) async {
-      // emit(PaginationLoadingState());
       if (event.index == drugsData.length - nextPageTrigger) {
-        add(JobLoadPageEvent(page: pageNumber));
+        add(JobLoadPageEvent(page: pageNumber, countryId: _currentCountryId, searchTerm: _currentSearchTerm));
       }
     });
   }
 
   Future<void> _onGetJobs(JobLoadPageEvent event, Emitter<JobsState> emit) async {
-    // emit(DrugsDataInitial());
-    print('search text ${event.searchTerm}');
-    print('country id ${event.countryId}');
     if (event.page == 1) {
-      print('object clear');
       drugsData.clear();
       pageNumber = 1;
+      // Store filter context for subsequent pagination requests
+      _currentCountryId = event.countryId ?? '';
+      _currentSearchTerm = event.searchTerm ?? '';
       emit(PaginationLoadingState());
-      print(event.countryId);
-      print(event.searchTerm);
     }
-    // ProgressDialogUtils.showProgressDialog();
     try {
-      JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', '$pageNumber', event.countryId ?? "1", event.searchTerm ?? '', ""); // Empty string to get all jobs
+      JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', '$pageNumber', _currentCountryId, _currentSearchTerm, "");
+      if (isClosed) return;
       numberOfPage = response.jobs?.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         drugsData.addAll(response.jobs?.data ?? []);
       }
       emit(PaginationLoadedState());
-      // emit(DataLoaded(drugsData));
     } catch (e) {
-      print(e);
-
-      // emit(PaginationLoadedState());
-
+      if (isClosed) return;
       emit(DataError('No Data Found'));
     }
   }
 
   Future<void> _onGetJobDetail(JobDetailPageEvent event, Emitter<JobsState> emit) async {
     emit(PaginationLoadingState());
-    print('jobId ${event.jobId}');
     try {
       // Use the SharedApiService directly for job details
       final response = await apiManager.sharedApi.getJobDetails(jobId: event.jobId.toString());
+      if (isClosed) return;
       if (response.success) {
         jobDetailModel = response.data!; // response.data is already a JobDetailModel
         emit(PaginationLoadedState());
@@ -76,28 +72,20 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
         emit(DataError(response.message ?? 'Failed to get job details'));
       }
     } catch (e) {
-      print('Error getting job details: $e');
+      if (isClosed) return;
       emit(DataError('No Data Found'));
     }
   }
 
   Future<void> _onGetJobs1(GetPost event, Emitter<JobsState> emit) async {
-    // emit(PaginationInitialState());
-    // ProgressDialogUtils.showProgressDialog();
-
-    // emit(PaginationLoadingState());
     try {
       JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', "1", event.countryId, event.searchTerm, ""); // Empty string to get all jobs
-      print("ddd${response.jobs?.data!.length}");
+      if (isClosed) return;
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);
       emit(PaginationLoadedState());
-
-      // emit(DataLoaded(drugsData));
     } catch (e) {
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
-
+      if (isClosed) return;
       emit(DataError('No Data Found'));
     }
   }
@@ -107,9 +95,9 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     try {
       // Use the SharedApiService for withdrawing application
       final response = await apiManager.sharedApi.withdrawJobApplication(jobId: event.jobId.toString());
+      if (isClosed) return;
       if (response.success) {
         toast(response.data?['message'] ?? 'Application withdrawn successfully');
-        print("response ${response.data}");
 
         // Reload job details after successful withdrawal
         add(JobDetailPageEvent(jobId: event.jobId));
@@ -119,7 +107,7 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
         toast(response.message ?? 'Failed to withdraw application');
       }
     } catch (e) {
-      print('Error withdrawing application: $e');
+      if (isClosed) return;
       emit(PaginationLoadedState());
       toast('Failed to withdraw application');
     }
@@ -130,16 +118,15 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     try {
       // Use the SharedApiService for getting job applicants
       final response = await apiManager.sharedApi.getJobApplicants(jobId: event.jobId.toString());
+      if (isClosed) return;
       if (response.success) {
         jobApplicantsModel = response.data!; // response.data is already a JobApplicantsModel
-        print("Applicants data: ${response.data}");
         emit(PaginationLoadedState());
       } else {
-        print('Error getting applicants: ${response.message}');
         emit(DataError(response.message ?? 'Failed to get job applicants'));
       }
     } catch (e) {
-      print('Error getting applicants: $e');
+      if (isClosed) return;
       emit(DataError('Failed to get job applicants'));
     }
   }

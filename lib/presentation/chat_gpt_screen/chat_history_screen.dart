@@ -74,11 +74,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
             child: IconButton(
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: Icon(Icons.add, color: Colors.blue[600], size: 14),
-              ),
+              icon: Icon(Icons.add, color: Colors.blue[600], size: 22),
               onPressed: () {
                 widget.onNewSessionTap();
               },

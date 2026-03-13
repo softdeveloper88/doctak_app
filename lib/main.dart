@@ -2440,7 +2440,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           settings: settings,
                           builder: (context) => ChatRoomScreen(
                             id: widget.id.toString(),
-                            roomId: '',
+                            conversationId: 0,
                             username: widget.message?.notification?.title ?? "",
                             profilePic: widget.message?.data['image'] ?? '',
                           ),
@@ -2461,7 +2461,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       '/friend_request': (context) => SVProfileFragment(userId: widget.id ?? ''),
                       '/message_received': (context) => ChatRoomScreen(
                         id: widget.id.toString(),
-                        roomId: '',
+                        conversationId: 0,
                         username: widget.message?.notification?.title ?? "",
                         profilePic: widget.message?.data['image'] ?? '',
                       ),

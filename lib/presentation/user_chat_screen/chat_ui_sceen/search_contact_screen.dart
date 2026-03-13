@@ -182,7 +182,7 @@ class _SearchContactScreenState extends State<SearchContactScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            ChatRoomScreen(username: '${contact.firstName ?? ''} ${contact.lastName ?? ""}', profilePic: '${contact.profilePic}', id: '${contact.id}', roomId: '').launch(context);
+            ChatRoomScreen(username: '${contact.firstName ?? ''} ${contact.lastName ?? ""}', profilePic: '${contact.profilePic}', id: '${contact.id}', conversationId: 0).launch(context);
           },
           borderRadius: BorderRadius.circular(16),
           child: Container(

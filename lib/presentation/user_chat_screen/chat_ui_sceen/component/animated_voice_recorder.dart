@@ -40,6 +40,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
   bool _isRecording = false;
   bool _isLocked = false;
   bool _isCancelling = false;
+  bool _isSending = false;
   int _recordDuration = 0;
   String? _recordPath;
   Timer? _durationTimer;
@@ -305,7 +306,8 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
   }
 
   Future<void> _sendRecording() async {
-    if (_isCancelling || !_isRecording) return;
+    if (_isCancelling || !_isRecording || _isSending) return;
+    _isSending = true;
 
     _durationTimer?.cancel();
 

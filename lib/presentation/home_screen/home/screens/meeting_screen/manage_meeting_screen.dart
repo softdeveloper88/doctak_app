@@ -5,14 +5,17 @@ import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
+import 'package:doctak_app/data/models/meeting_model/meeting_history_model.dart';
 import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
 
 import 'bloc/meeting_bloc.dart';
 import 'upcoming_meeting_screen.dart';
@@ -37,11 +40,16 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   late TabController _tabController;
   bool _showNewMeeting = false;
   bool _isScheduling = false;
   int _durationMinutes = 60;
+  String _selectedHistoryFilter = 'all';
+  bool _isSearchVisible = false;
+  String _searchQuery = '';
+  Timer? _searchDebounce;
 
   // Pusher related properties
   late PusherChannel clientListenChannel;
@@ -57,6 +65,10 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() {});
+      // Load history when switching to History tab
+      if (_tabController.index == 2 && meetingBloc.historyList.isEmpty) {
+        meetingBloc.add(FetchMeetingHistory(filter: _selectedHistoryFilter, search: _searchQuery));
+      }
     });
     meetingBloc.add(FetchMeetings());
     // Initialize date field with tomorrow's date
@@ -89,6 +101,8 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
     _dateController.dispose();
     _startTimeController.dispose();
     _endTimeController.dispose();
+    _searchController.dispose();
+    _searchDebounce?.cancel();
     _tabController.dispose();
     super.dispose();
   }
@@ -155,67 +169,124 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
     final theme = OneUITheme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackground,
+      backgroundColor: theme.isDark
+          ? theme.scaffoldBackground
+          : const Color(0xFFF6F6F8),
       body: Column(
         children: [
-          // Custom App Bar using DoctakAppBar
-          DoctakAppBar(title: translation(context).lbl_meeting_management, titleIcon: Icons.video_call_rounded),
-
-          // Compact Tab Container with One UI 8.5 style
+          // Unified header card: AppBar + underline tabs (same as Drugs List)
           Container(
-            color: theme.cardBackground,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              height: 48,
-              decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(25)),
-              child: Row(
-                children: [
-                  _buildTabItem(context: context, theme: theme, index: 0, icon: Icons.videocam_rounded, label: translation(context).lbl_join_create),
-                  _buildTabItem(context: context, theme: theme, index: 1, icon: Icons.calendar_today_rounded, label: translation(context).lbl_scheduled),
-                  _buildTabItem(context: context, theme: theme, index: 2, icon: Icons.history_rounded, label: translation(context).lbl_history),
-                ],
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              border: Border(
+                bottom: BorderSide(
+                  color: theme.isDark ? theme.border : Colors.grey.shade200,
+                  width: 0.8,
+                ),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DoctakAppBar(
+                  title: translation(context).lbl_meeting_management,
+                  titleIcon: Icons.video_call_rounded,
+                  backgroundColor: Colors.transparent,
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        _isSearchVisible ? Icons.close_rounded : Icons.search_rounded,
+                        color: theme.iconColor,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isSearchVisible = !_isSearchVisible;
+                          if (!_isSearchVisible) {
+                            _searchController.clear();
+                            _searchQuery = '';
+                            if (_tabController.index == 2) {
+                              meetingBloc.add(FetchMeetingHistory(filter: _selectedHistoryFilter));
+                            }
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                  searchField: _isSearchVisible
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: theme.surfaceVariant.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: theme.surfaceVariant),
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              style: TextStyle(color: theme.textPrimary, fontSize: 14),
+                              decoration: InputDecoration(
+                                hintText: translation(context).lbl_search,
+                                hintStyle: TextStyle(color: theme.textTertiary),
+                                prefixIcon: Icon(Icons.search_rounded, color: theme.textSecondary, size: 20),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              ),
+                              onChanged: (value) {
+                                _searchDebounce?.cancel();
+                                _searchDebounce = Timer(const Duration(milliseconds: 500), () {
+                                  setState(() {
+                                    _searchQuery = value;
+                                  });
+                                  if (_tabController.index == 2) {
+                                    meetingBloc.add(FetchMeetingHistory(
+                                      filter: _selectedHistoryFilter,
+                                      search: value,
+                                    ));
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+                OneUITabBar(
+                  controller: _tabController,
+                  tabs: [
+                    translation(context).lbl_join_create,
+                    translation(context).lbl_scheduled,
+                    translation(context).lbl_history,
+                  ],
+                  icons: const [
+                    Icons.videocam_rounded,
+                    Icons.calendar_today_rounded,
+                    Icons.history_rounded,
+                  ],
+                ),
+              ],
             ),
           ),
 
           // Tab Content
           Expanded(
-            child: TabBarView(controller: _tabController, children: [_buildJoinCreateTab(theme), const UpcomingMeetingScreen(), _buildHistoryTab(theme)]),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabItem({required BuildContext context, required OneUITheme theme, required int index, required IconData icon, required String label}) {
-    final isSelected = _tabController.index == index;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          _tabController.animateTo(index);
-        },
-        child: Container(
-          decoration: BoxDecoration(color: isSelected ? theme.primary : Colors.transparent, borderRadius: BorderRadius.circular(25)),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                if (isSelected)
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    margin: const EdgeInsets.only(right: 6),
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                    child: Icon(icon, size: 12, color: theme.primary),
-                  ),
-                Text(
-                  label,
-                  style: TextStyle(color: isSelected ? Colors.white : theme.textSecondary, fontSize: 12, fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-                ),
+                _buildJoinCreateTab(theme),
+                UpcomingMeetingScreen(searchQuery: _searchQuery),
+                _buildHistoryTab(theme),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -652,7 +723,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
 
                         try {
                           ProgressDialogUtils.showProgressDialog();
-                          final response = await setScheduleMeeting(title: _meetingTitleController.text, date: _dateController.text, time: _startTimeController.text);
+                          final response = await setScheduleMeeting(title: _meetingTitleController.text, date: _dateController.text, time: _startTimeController.text, duration: _durationMinutes);
 
                           Map<String, dynamic> responseData = json.decode(jsonEncode(response.data));
                           ProgressDialogUtils.hideProgressDialog();
@@ -706,18 +777,20 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
             borderRadius: BorderRadius.circular(12),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(icon, size: 16, color: Colors.white),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -738,18 +811,20 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
             borderRadius: BorderRadius.circular(12),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(icon, size: 16, color: theme.textSecondary),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: theme.textSecondary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: TextStyle(fontFamily: 'Poppins', fontSize: 12, fontWeight: FontWeight.w600, color: theme.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -844,90 +919,132 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
   }
 
   Widget _buildHistoryTab(OneUITheme theme) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      physics: const BouncingScrollPhysics(),
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
-            boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                translation(context).lbl_history,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
+    return BlocBuilder<MeetingBloc, MeetingState>(
+      bloc: meetingBloc,
+      builder: (context, state) {
+        return Column(
+          children: [
+            const SizedBox(height: 12),
+
+            // Filter chips
+            SizedBox(
+              height: 40,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _buildFilterChip(theme, translation(context).lbl_all, 'all'),
+                  _buildFilterChip(theme, translation(context).lbl_this_week, 'this_week'),
+                  _buildFilterChip(theme, translation(context).lbl_this_month, 'this_month'),
+                ],
               ),
-              Container(
-                decoration: BoxDecoration(color: theme.surfaceVariant.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(10)),
-                child: IconButton(
-                  icon: Icon(Icons.search_rounded, color: theme.primary),
-                  onPressed: () {
-                    // Open search
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
+            ),
+            const SizedBox(height: 12),
 
-        // Filter options
-        SizedBox(
-          height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            children: [_buildFilterChip(theme, 'All', true), _buildFilterChip(theme, 'This Week', false), _buildFilterChip(theme, 'This Month', false), _buildFilterChip(theme, 'Custom Range', false)],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Past meetings
-        _buildHistoryCard(
-          theme: theme,
-          title: 'Medical Review Meeting',
-          date: DateTime.now().subtract(const Duration(days: 15)),
-          duration: const Duration(hours: 1, minutes: 30),
-          participants: 8,
-          hasRecording: true,
-        ),
-        _buildHistoryCard(
-          theme: theme,
-          title: 'Patient Consultation Workshop',
-          date: DateTime.now().subtract(const Duration(days: 30)),
-          duration: const Duration(hours: 2, minutes: 15),
-          participants: 12,
-          hasRecording: false,
-        ),
-        _buildHistoryCard(
-          theme: theme,
-          title: 'Team Weekly Standup',
-          date: DateTime.now().subtract(const Duration(days: 7)),
-          duration: const Duration(hours: 1, minutes: 0),
-          participants: 6,
-          hasRecording: true,
-        ),
-      ],
+            // History list
+            Expanded(
+              child: _buildHistoryContent(theme, state),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildFilterChip(OneUITheme theme, String label, bool isSelected) {
+  Widget _buildHistoryContent(OneUITheme theme, MeetingState state) {
+    if (state is MeetingHistoryLoading) {
+      return Center(child: CircularProgressIndicator(color: theme.primary));
+    }
+
+    if (state is MeetingHistoryError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline_rounded, size: 48, color: theme.textTertiary),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Text(
+                state.message,
+                style: TextStyle(color: theme.textSecondary, fontSize: 14),
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: () => meetingBloc.add(FetchMeetingHistory(filter: _selectedHistoryFilter, search: _searchQuery)),
+              child: Text(translation(context).lbl_retry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (meetingBloc.historyList.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.history_rounded, size: 64, color: theme.textTertiary.withValues(alpha: 0.5)),
+            const SizedBox(height: 16),
+            Text(
+              translation(context).msg_no_meeting_history,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: theme.textSecondary),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              translation(context).msg_meetings_will_appear_here,
+              style: TextStyle(fontSize: 13, color: theme.textTertiary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+          if (!meetingBloc.isHistoryLoading && meetingBloc.historyPage < meetingBloc.historyLastPage) {
+            meetingBloc.add(LoadMoreMeetingHistory());
+          }
+        }
+        return false;
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        physics: const BouncingScrollPhysics(),
+        itemCount: meetingBloc.historyList.length + (state is MeetingHistoryLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == meetingBloc.historyList.length) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator(color: theme.primary)),
+            );
+          }
+          return _buildHistoryCard(theme: theme, item: meetingBloc.historyList[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(OneUITheme theme, String label, String filterValue) {
+    final isSelected = _selectedHistoryFilter == filterValue;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       child: FilterChip(
         label: Text(label),
         selected: isSelected,
         onSelected: (selected) {
-          // Update filter
+          setState(() {
+            _selectedHistoryFilter = filterValue;
+          });
+          meetingBloc.add(FetchMeetingHistory(filter: filterValue, search: _searchQuery));
         },
         backgroundColor: theme.surfaceVariant.withValues(alpha: 0.5),
         selectedColor: theme.primary.withValues(alpha: 0.15),
@@ -942,7 +1059,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
     );
   }
 
-  Widget _buildHistoryCard({required OneUITheme theme, required String title, required DateTime date, required Duration duration, required int participants, required bool hasRecording}) {
+  Widget _buildHistoryCard({required OneUITheme theme, required MeetingHistoryItem item}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -954,9 +1071,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () {
-            // Show meeting details
-          },
+          onTap: () {},
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -977,7 +1092,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            title,
+                            item.title,
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary),
                           ),
                           const SizedBox(height: 8),
@@ -990,7 +1105,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
                                 children: [
                                   Icon(Icons.calendar_today_rounded, size: 14, color: theme.textSecondary),
                                   const SizedBox(width: 4),
-                                  Text('${date.day}/${date.month}/${date.year}', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
+                                  Text(item.date, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                                 ],
                               ),
                               Row(
@@ -998,7 +1113,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
                                 children: [
                                   Icon(Icons.access_time_rounded, size: 14, color: theme.textSecondary),
                                   const SizedBox(width: 4),
-                                  Text('${duration.inHours}h ${duration.inMinutes.remainder(60)}m', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
+                                  Text(item.formattedDuration, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                                 ],
                               ),
                             ],
@@ -1008,29 +1123,92 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
                             children: [
                               Icon(Icons.people_rounded, size: 14, color: theme.textSecondary),
                               const SizedBox(width: 4),
-                              Text('$participants Participants', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
+                              Text('${item.participantsCount} ${translation(context).lbl_participants}', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                             ],
                           ),
+                          if (item.host != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(item.isHost ? Icons.star_rounded : Icons.person_rounded, size: 14, color: item.isHost ? theme.warning : theme.textSecondary),
+                                const SizedBox(width: 4),
+                                Text(
+                                  item.isHost ? translation(context).lbl_you_hosted : '${translation(context).lbl_hosted_by} ${item.host!.name}',
+                                  style: TextStyle(color: item.isHost ? theme.warning : theme.textSecondary, fontSize: 12, fontWeight: item.isHost ? FontWeight.w600 : FontWeight.normal),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Divider(height: 1, thickness: 1, color: theme.surfaceVariant),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    _buildThemedButton(theme: theme, label: translation(context).lbl_details, icon: Icons.info_outline_rounded, isPrimary: false, onTap: () {}),
-                    if (hasRecording) _buildThemedButton(theme: theme, label: translation(context).lbl_see_more, icon: Icons.play_circle_outline_rounded, isPrimary: true, onTap: () {}),
+                    _buildThemedButton(
+                      theme: theme,
+                      label: translation(context).lbl_details,
+                      icon: Icons.info_outline_rounded,
+                      isPrimary: false,
+                      onTap: () {
+                        _showHistoryDetailDialog(theme, item);
+                      },
+                    ),
                   ],
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showHistoryDetailDialog(OneUITheme theme, MeetingHistoryItem item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
+              child: Icon(Icons.history_rounded, color: theme.primary, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                item.title,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDialogDetailRow(theme, translation(context).lbl_date, item.date),
+            _buildDialogDetailRow(theme, translation(context).lbl_time, item.time),
+            _buildDialogDetailRow(theme, translation(context).lbl_duration, item.formattedDuration),
+            _buildDialogDetailRow(theme, translation(context).lbl_participants, '${item.participantsCount}'),
+            _buildDialogDetailRow(theme, translation(context).lbl_meeting_code, item.meetingChannel),
+            if (item.host != null) _buildDialogDetailRow(theme, translation(context).lbl_host, item.host!.name),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(translation(context).lbl_close, style: TextStyle(color: theme.textSecondary)),
+          ),
+        ],
       ),
     );
   }

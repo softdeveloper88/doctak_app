@@ -79,8 +79,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
         var response = await apiManager.readAllSelectedNotifications(
           'Bearer ${AppData.userToken}',
         );
-        // notificationsModel.notifications?.data. where((e)=>e.isRead==1)=0;
         print(response.data);
+        // Mark all local notifications as read
+        for (var n in notificationsList) {
+          n.isRead = 1;
+        }
+        totalNotifications = 0;
       }
 
       emit(PaginationLoadedState());

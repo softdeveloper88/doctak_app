@@ -14,15 +14,17 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
   List<Data> searchPeopleData = [];
   final int nextPageTrigger = 1;
 
+  // Track current search context so pagination uses the same term as the initial load
+  String _currentSearchTerm = '';
+
   SearchPeopleBloc() : super(SearchPeoplePaginationInitialState()) {
     on<SearchPeopleLoadPageEvent>(_onGetUserInfo);
     on<GetPost>(_onGetUserInfo1);
     on<SetUserFollow>(_setUserFollow);
 
     on<SearchPeopleCheckIfNeedMoreDataEvent>((event, emit) async {
-      // emit(PaginationLoadingState());
       if (event.index == searchPeopleData.length - nextPageTrigger) {
-        add(SearchPeopleLoadPageEvent(page: pageNumber));
+        add(SearchPeopleLoadPageEvent(page: pageNumber, searchTerm: _currentSearchTerm));
       }
     });
   }
@@ -39,69 +41,56 @@ class SearchPeopleBloc extends Bloc<SearchPeopleEvent, SearchPeopleState> {
   }
 
   // Dispose method to close stream controller
-  void dispose() {
+  @override
+  Future<void> close() {
     _loadingController.close();
+    return super.close();
   }
 
   Future<void> _onGetUserInfo(SearchPeopleLoadPageEvent event, Emitter<SearchPeopleState> emit) async {
-    // emit(DrugsDataInitial());
-    print('33 ${event.page}');
     if (event.page == 1) {
       searchPeopleData.clear();
       pageNumber = 1;
+      // Store search context for subsequent pagination requests
+      _currentSearchTerm = event.searchTerm ?? '';
       emit(SearchPeoplePaginationLoadingState());
-      print(event.searchTerm);
     }
-    // ProgressDialogUtils.showProgressDialog();
     try {
-      SearchPeopleModel response = await apiManager.getSearchPeople('Bearer ${AppData.userToken}', '$pageNumber', event.searchTerm ?? '');
+      SearchPeopleModel response = await apiManager.getSearchPeople('Bearer ${AppData.userToken}', '$pageNumber', _currentSearchTerm);
+      if (isClosed) return;
       numberOfPage = response.lastPage ?? 0;
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         searchPeopleData.addAll(response.data ?? []);
       }
       emit(SearchPeoplePaginationLoadedState());
-
-      // emit(DataLoaded(searchPeopleData));
     } catch (e) {
-      print(e);
-
-      // emit(PaginationLoadedState());
-
+      if (isClosed) return;
       emit(SearchPeopleDataError(e.toString()));
     }
   }
 
   Future<void> _setUserFollow(SetUserFollow event, Emitter<SearchPeopleState> emit) async {
-    // emit(DrugsDataInitial());
-    // ProgressDialogUtils.showProgressDialog();
-
     try {
       var response = await apiManager.setUserFollow('Bearer ${AppData.userToken}', event.userId, event.follow ?? '');
+      if (isClosed) return;
       setLoading(false);
       emit(SearchPeoplePaginationLoadedState());
     } catch (e) {
-      print(e);
-
+      if (isClosed) return;
       emit(SearchPeopleDataError('No Data Found'));
     }
   }
 
   Future<void> _onGetUserInfo1(GetPost event, Emitter<SearchPeopleState> emit) async {
-    // emit(PaginationInitialState());
-    // ProgressDialogUtils.showProgressDialog();
-
-    // emit(PaginationLoadingState());
     try {
       SearchPeopleModel response = await apiManager.getSearchPeople('Bearer ${AppData.userToken}', "1", '');
-      print("ddd${response.data!.length}");
+      if (isClosed) return;
       searchPeopleData.clear();
       searchPeopleData.addAll(response.data ?? []);
       emit(SearchPeoplePaginationLoadedState());
-      // emit(DataLoaded(searchPeopleData));
     } catch (e) {
-      // ProgressDialogUtils.hideProgressDialog();
-      print(e);
+      if (isClosed) return;
       emit(SearchPeopleDataError('No Data Found'));
     }
   }

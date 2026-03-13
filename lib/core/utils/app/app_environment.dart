@@ -37,6 +37,7 @@ class AppEnvironment {
   static const String _prodApiUrlV6 = 'https://doctak.net/api/v6';
   static const String _prodUserProfileUrl = 'https://doctak.net/';
   static const String _prodChatifyUrl = 'https://doctak.net/chatify/api/';
+  static const String _prodChatApiUrl = 'https://doctak.net/api/v6/chat';
   static const String _prodImageUrl = 'https://doctak-file.s3.ap-south-1.amazonaws.com/';
 
   // ===================== Development URLs =====================
@@ -53,6 +54,7 @@ class AppEnvironment {
   static String get _devApiUrlV6 => 'http://$_localIp:$_localPort/api/v6';
   static String get _devUserProfileUrl => 'http://$_localIp:$_localPort/';
   static String get _devChatifyUrl => 'http://$_localIp:$_localPort/chatify/api/';
+  static String get _devChatApiUrl => 'http://$_localIp:$_localPort/api/v6/chat';
   // In dev, still use S3 for images (they are stored on S3 regardless)
   static const String _devImageUrl = 'https://doctak-file.s3.ap-south-1.amazonaws.com/';
 
@@ -64,6 +66,7 @@ class AppEnvironment {
   static String get apiUrlV6 => isProduction ? _prodApiUrlV6 : _devApiUrlV6;
   static String get userProfileUrl => isProduction ? _prodUserProfileUrl : _devUserProfileUrl;
   static String get chatifyUrl => isProduction ? _prodChatifyUrl : _devChatifyUrl;
+  static String get chatApiUrl => isProduction ? _prodChatApiUrl : _devChatApiUrl;
   static String get imageUrl => isProduction ? _prodImageUrl : _devImageUrl;
 
   /// Get current environment name for logging

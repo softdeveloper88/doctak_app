@@ -22,6 +22,7 @@ class AppData {
   static var remoteUrlV6 = AppEnvironment.apiUrlV6;
   static var userProfileUrl = AppEnvironment.userProfileUrl;
   static var chatifyUrl = AppEnvironment.chatifyUrl;
+  static var chatApiUrl = AppEnvironment.chatApiUrl;
 
   /// Returns a full image URL for a given path.
   /// If the path is already an absolute URL (http/https), returns it as-is.
@@ -30,6 +31,10 @@ class AppData {
   static String fullImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    // Avoid double-slash when imageUrl ends with / and path starts with /
+    if (imageUrl.endsWith('/') && path.startsWith('/')) {
+      return '$imageUrl${path.substring(1)}';
+    }
     return '$imageUrl$path';
   }
 

@@ -49,10 +49,16 @@ class _VirtualizedMessageListState extends State<VirtualizedMessageList> {
   void didUpdateWidget(VirtualizedMessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Check for new messages - only mark new ones as seen after animation completes
-    if (widget.messages.length > oldWidget.messages.length) {
-      _scrollToBottom();
+    final bool hasNewMessages = widget.messages.length > oldWidget.messages.length;
+    final bool streamingLengthGrew = widget.isStreaming && widget.streamingContent.length > oldWidget.streamingContent.length;
+    final bool typingStateStarted = widget.isLoading && !oldWidget.isLoading;
 
+    if (hasNewMessages || streamingLengthGrew || typingStateStarted) {
+      _scrollToBottom();
+    }
+
+    // Check for new messages - only mark new ones as seen after animation completes
+    if (hasNewMessages) {
       // Mark only the new messages as seen after a delay to allow typing animation
       Future.delayed(const Duration(milliseconds: 500), () {
         _markCurrentMessagesAsSeen();

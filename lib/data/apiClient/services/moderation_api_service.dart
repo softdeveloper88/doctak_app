@@ -30,7 +30,7 @@ class ModerationApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/report/post',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -59,7 +59,7 @@ class ModerationApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/report/comment',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -88,7 +88,7 @@ class ModerationApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/report/user',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -119,7 +119,7 @@ class ModerationApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/user/block',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -142,7 +142,7 @@ class ModerationApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/user/unblock',
           method: networkUtils.HttpMethod.POST,
           request: {
@@ -162,7 +162,7 @@ class ModerationApiService {
   Future<ApiResponse<List<BlockedUser>>> getBlockedUsers() async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/user/blocked-list',
           method: networkUtils.HttpMethod.GET,
         ),
@@ -183,7 +183,7 @@ class ModerationApiService {
   Future<ApiResponse<bool>> isUserBlocked({required String userId}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/user/is-blocked/$userId',
           method: networkUtils.HttpMethod.GET,
         ),
@@ -202,7 +202,7 @@ class ModerationApiService {
   Future<ApiResponse<ReportHistoryResponse>> getMyReports({int page = 1}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/report/my-reports?page=$page',
           method: networkUtils.HttpMethod.GET,
         ),
@@ -222,7 +222,7 @@ class ModerationApiService {
   Future<ApiResponse<bool>> canCommunicate({required String targetUserId}) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/user/can-communicate/$targetUserId',
           method: networkUtils.HttpMethod.GET,
         ),
@@ -239,7 +239,7 @@ class ModerationApiService {
   Future<ApiResponse<BlockedIdsResponse>> getBlockedUserIds() async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
+        await networkUtils.buildHttpResponseV6(
           '/user/blocked-ids',
           method: networkUtils.HttpMethod.GET,
         ),

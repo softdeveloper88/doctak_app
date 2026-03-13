@@ -25,7 +25,7 @@ class RetryWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               errorMessage,
-              style: TextStyle(fontFamily: 'Poppins', color: theme.error, fontSize: 18, fontWeight: FontWeight.w500),
+              style: TextStyle(color: theme.error, fontSize: 18, fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
@@ -40,7 +40,7 @@ class RetryWidget extends StatelessWidget {
               ),
               child: Text(
                 translation(context).lbl_retry,
-                style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ],
