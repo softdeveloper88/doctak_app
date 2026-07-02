@@ -17,6 +17,8 @@ import 'package:doctak_app/data/models/chat_model/send_message_model.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
+import 'package:doctak_app/data/models/feed_model/feed_models.dart';
+import 'package:doctak_app/data/models/survey_model/survey_detail_model.dart';
 import 'package:doctak_app/data/models/followers_model/follower_data_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/data/models/jobs_model/job_applicants_model.dart';
@@ -30,9 +32,11 @@ import 'package:doctak_app/data/models/meeting_model/search_user_model.dart';
 import 'package:doctak_app/data/models/notification_model/notification_model.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/data/models/post_model/post_reactions_model.dart';
 import 'package:doctak_app/data/models/post_model/post_detail_model.dart';
 import 'package:doctak_app/data/models/post_model/post_details_data_model.dart';
 import 'package:doctak_app/data/models/profile_model/interest_model.dart';
+import 'package:doctak_app/data/models/profile_model/profile_completed_survey_model.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/data/models/search_people_model/search_people_model.dart';
@@ -205,16 +209,22 @@ class SharedApiService {
     }
   }
 
-  /// Logout
+  /// Logout via doctak-node (`POST /api/v1/logout`).
+  /// Removes this device's FCM token server-side and clears the session.
   Future<ApiResponse<Map<String, dynamic>>> logout({
     required String deviceId,
+    String? deviceToken,
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/logout',
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/logout',
           method: networkUtils.HttpMethod.POST,
-          request: {'device_id': deviceId},
+          body: {
+            'device_id': deviceId,
+            if (deviceToken != null && deviceToken.isNotEmpty)
+              'device_token': deviceToken,
+          },
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -339,6 +349,808 @@ class SharedApiService {
     }
   }
 
+  // ================================== FEED ENDPOINTS ==================================
+
+  /// Get the typed home feed from doctak-node (`GET /api/feed`).
+  ///
+  /// Returns typed entries (post/poll/blog/case/job/cme/survey) plus
+  /// horizontal strips, with cursor-based pagination.
+  Future<ApiResponse<FeedResponse>> getHomeFeed({
+    String? cursor,
+    int limit = 20,
+    bool initial = false,
+  }) async {
+    try {
+      final params = <String, String>{'limit': '$limit'};
+      if (initial) {
+        params['initial'] = '1';
+      }
+      if (cursor != null && cursor.isNotEmpty) {
+        params['cursor'] = cursor;
+      }
+      final query = params.entries
+          .map((e) => '${e.key}=${Uri.encodeQueryComponent(e.value)}')
+          .join('&');
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/feed?$query',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(
+        FeedResponse.fromJson(Map<String, dynamic>.from(response)),
+      );
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load feed: $e');
+    }
+  }
+
+  /// Fallback: load discuss cases for home feed when `/api/feed` omits them.
+  Future<List<FeedItem>> fetchCasesForFeed({int limit = 3}) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/cases?page=1&per_page=$limit',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      final data = response['data'];
+      if (data is! Map) return const [];
+      final cases = data['cases'];
+      if (cases is! Map) return const [];
+      final list = cases['data'];
+      if (list is! List) return const [];
+
+      return list.whereType<Map>().map((raw) {
+        final row = Map<String, dynamic>.from(raw);
+        final id = '${row['id'] ?? ''}';
+        return FeedItem(
+          type: 'case',
+          id: id,
+          createdAt: row['created_at']?.toString(),
+          authorId: row['user_id']?.toString(),
+          engagement: FeedEngagement(
+            views: _parseInt(row['views']),
+            likes: _parseInt(row['likes']),
+            comments: _parseInt(row['comments_count']),
+          ),
+          payload: {
+            'title': row['title']?.toString(),
+            'description': row['description']?.toString(),
+            'tags': row['tags']?.toString(),
+            'authorName': row['name']?.toString(),
+            'authorAvatar': row['profile_pic']?.toString(),
+            'authorSpecialty': row['specialty']?.toString(),
+            'is_liked': row['is_liked'] == true || row['is_liked'] == 1,
+          },
+        );
+      }).where((item) => item.id.isNotEmpty).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Load a single survey with questions (`GET /api/v1/surveys/{id}`).
+  Future<ApiResponse<SurveyDetail>> getSurveyDetail(String surveyId) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/surveys/$surveyId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      if (response is Map && response['success'] == false) {
+        return ApiResponse.error(
+          response['message']?.toString() ?? 'Failed to load survey',
+        );
+      }
+      final survey = response['survey'];
+      if (survey is! Map) {
+        return ApiResponse.error('Survey not found');
+      }
+      return ApiResponse.success(
+        SurveyDetail.fromJson(Map<String, dynamic>.from(survey)),
+      );
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load survey: $e');
+    }
+  }
+
+  /// Submit survey answers (`POST /api/v1/surveys/{id}/respond`).
+  Future<ApiResponse<void>> submitSurveyResponse({
+    required String surveyId,
+    required List<Map<String, String>> answers,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/surveys/$surveyId/respond',
+          method: networkUtils.HttpMethod.POST,
+          body: {'answers': answers},
+        ),
+      );
+      if (response is Map && response['success'] == false) {
+        return ApiResponse.error(
+          response['message']?.toString() ?? 'Failed to submit survey',
+        );
+      }
+      return ApiResponse.success(null);
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to submit survey: $e');
+    }
+  }
+
+  /// Fallback: extract survey items from a larger feed page when strips are missing.
+  Future<List<FeedItem>> fetchSurveysForFeed({int limit = 3}) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/surveys/browse?limit=$limit',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      final raw = response['surveys'];
+      if (raw is! List) return const [];
+      final out = <FeedItem>[];
+      for (final entry in raw) {
+        if (entry is! Map) continue;
+        out.add(FeedItem.fromJson(Map<String, dynamic>.from(entry)));
+        if (out.length >= limit) break;
+      }
+      return out;
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  static int _parseInt(dynamic v) {
+    if (v is num) return v.toInt();
+    return int.tryParse('${v ?? 0}') ?? 0;
+  }
+
+  // ================================== CREATE (doctak-node) ==================================
+
+  /// Create a poll (`POST /api/polls`).
+  Future<ApiResponse<Map<String, dynamic>>> createPoll({
+    required String title,
+    String? description,
+    required List<String> options,
+    int durationValue = 1,
+    String durationUnit = 'days',
+    bool isMultipleChoice = false,
+    bool showVoters = true,
+    bool isAnonymous = false,
+    bool allowAddOptions = false,
+    bool allowChangeVote = false,
+    String privacy = 'public',
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/polls',
+          method: networkUtils.HttpMethod.POST,
+          body: {
+            'title': title,
+            'description': description,
+            'options': options,
+            'durationValue': durationValue,
+            'durationUnit': durationUnit,
+            'isMultipleChoice': isMultipleChoice,
+            'showVoters': showVoters,
+            'isAnonymous': isAnonymous,
+            'allowAddOptions': allowAddOptions,
+            'allowChangeVote': allowChangeVote,
+            'privacy': privacy,
+          },
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to create poll: $e');
+    }
+  }
+
+  /// List blog categories (`GET /api/blogs/categories`).
+  Future<ApiResponse<List<Map<String, dynamic>>>> getBlogCategories() async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/categories',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      final raw = response['categories'];
+      final list = <Map<String, dynamic>>[];
+      if (raw is List) {
+        for (final item in raw) {
+          if (item is Map) {
+            list.add(Map<String, dynamic>.from(item));
+          }
+        }
+      }
+      return ApiResponse.success(list);
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load blog categories: $e');
+    }
+  }
+
+  /// Upload media for posts/blogs (`POST /api/posts/media`).
+  Future<ApiResponse<Map<String, dynamic>>> uploadPostMedia(File file) async {
+    try {
+      final base = AppData.nodeApiUrl.endsWith('/')
+          ? AppData.nodeApiUrl.substring(0, AppData.nodeApiUrl.length - 1)
+          : AppData.nodeApiUrl;
+      final uri = Uri.parse('$base/api/posts/media');
+      final request = http.MultipartRequest('POST', uri);
+
+      final token = AppData.userToken?.trim();
+      if (token != null && token.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      request.headers['Accept'] = 'application/json';
+
+      final name = file.path.split('/').last.toLowerCase();
+      var mime = 'image/jpeg';
+      if (name.endsWith('.png')) mime = 'image/png';
+      if (name.endsWith('.webp')) mime = 'image/webp';
+      if (name.endsWith('.gif')) mime = 'image/gif';
+
+      request.files.add(await http.MultipartFile.fromPath(
+        'file',
+        file.path,
+        contentType: MediaType.parse(mime),
+      ));
+
+      final streamed = await request.send().timeout(
+        const Duration(seconds: 90),
+        onTimeout: () => throw ApiException(message: 'Upload timed out', statusCode: 408),
+      );
+      final response = await http.Response.fromStream(streamed);
+      final decoded = jsonDecode(response.body);
+      if (response.statusCode >= 200 &&
+          response.statusCode < 300 &&
+          decoded is Map &&
+          decoded['success'] == true) {
+        return ApiResponse.success(Map<String, dynamic>.from(decoded));
+      }
+      final message = decoded is Map
+          ? (decoded['message']?.toString() ?? 'Upload failed')
+          : 'Upload failed';
+      return ApiResponse.error(message, statusCode: response.statusCode);
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to upload media: $e');
+    }
+  }
+
+  /// Create a blog/article (`POST /api/blogs`).
+  Future<ApiResponse<Map<String, dynamic>>> createBlog({
+    required String title,
+    required String content,
+    String? slug,
+    String? excerpt,
+    String? coverImage,
+    dynamic categoryId,
+    String? metaTitle,
+    String? metaDescription,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs',
+          method: networkUtils.HttpMethod.POST,
+          body: {
+            'title': title,
+            'content': content,
+            'slug': slug,
+            'excerpt': excerpt,
+            'coverImage': coverImage,
+            'categoryId': categoryId,
+            'metaTitle': metaTitle,
+            'metaDescription': metaDescription,
+          },
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to create blog: $e');
+    }
+  }
+
+  /// Update a poll question/description (`PATCH /api/polls/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> updatePoll({
+    required String pollId,
+    required String title,
+    String? description,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/polls/$pollId',
+          method: networkUtils.HttpMethod.PATCH,
+          body: {
+            'title': title,
+            'description': description,
+          },
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to update poll: $e');
+    }
+  }
+
+  /// Update a blog/article (`PATCH /api/blogs/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> updateBlog({
+    required String blogId,
+    required String title,
+    String? excerpt,
+    String? content,
+    String? slug,
+    String? coverImage,
+  }) async {
+    try {
+      final body = <String, dynamic>{'title': title};
+      if (excerpt != null) body['excerpt'] = excerpt;
+      if (content != null) body['content'] = content;
+      if (slug != null) body['slug'] = slug;
+      if (coverImage != null) body['coverImage'] = coverImage;
+
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId',
+          method: networkUtils.HttpMethod.PATCH,
+          body: body,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to update blog: $e');
+    }
+  }
+
+  /// Delete a blog/article (`DELETE /api/blogs/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> deleteBlog({
+    required String blogId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId',
+          method: networkUtils.HttpMethod.DELETE,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to delete blog: $e');
+    }
+  }
+
+  /// Fetch a single post for edit (`GET /api/v1/posts/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> getPostV1({
+    required String postId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseV6(
+          '/posts/$postId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load post: $e');
+    }
+  }
+
+  /// Edit a post body/title/media (`PATCH /api/v1/posts/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> updatePost({
+    required String postId,
+    required String body,
+    String? title,
+    List<Map<String, dynamic>>? newMedia,
+    List<String>? removeMediaIds,
+  }) async {
+    try {
+      final payload = <String, dynamic>{'body': body};
+      if (title != null) payload['title'] = title;
+      if (newMedia != null && newMedia.isNotEmpty) {
+        payload['newMedia'] = newMedia;
+      }
+      if (removeMediaIds != null && removeMediaIds.isNotEmpty) {
+        payload['removeMediaIds'] = removeMediaIds;
+      }
+
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseV6(
+          '/posts/$postId',
+          method: networkUtils.HttpMethod.PATCH,
+          request: payload,
+          jsonBody: true,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to update post: $e');
+    }
+  }
+
+  /// Delete a post/poll via doctak-node (`DELETE /api/v1/posts/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> deletePostV1({
+    required String postId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseV6(
+          '/posts/$postId',
+          method: networkUtils.HttpMethod.DELETE,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to delete post: $e');
+    }
+  }
+
+  // ================================== REACTIONS / SHARE / REPOST ==================================
+
+  /// React to a post with a specific reaction type (`POST /api/v1/like?post_id=&reaction=`).
+  ///
+  /// Sending the same reaction again removes it (toggle). [reaction] is one of
+  /// like/love/insightful/care/haha/wow/sad/angry.
+  Future<ApiResponse<Map<String, dynamic>>> reactToPost({
+    required String postId,
+    String reaction = 'like',
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/like?post_id=${Uri.encodeQueryComponent(postId)}&reaction=${Uri.encodeQueryComponent(reaction)}',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to react: $e');
+    }
+  }
+
+  /// Paginated users who reacted to a post or blog
+  /// (`GET /api/v1/getPostLikes?type=&id=&reaction_type=&page=`).
+  Future<ApiResponse<PostReactionsPage>> getPostReactions({
+    required String contentId,
+    String contentType = 'post',
+    String? reactionType,
+    int page = 1,
+  }) async {
+    try {
+      final params = <String, String>{
+        'type': contentType,
+        'id': contentId,
+        'page': '$page',
+        'per_page': '20',
+      };
+      if (reactionType != null && reactionType.isNotEmpty && reactionType != 'all') {
+        params['reaction_type'] = reactionType;
+      }
+      final query = params.entries
+          .map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}')
+          .join('&');
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/getPostLikes?$query',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(
+        PostReactionsPage.fromJson(Map<String, dynamic>.from(response)),
+      );
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load reactions: $e');
+    }
+  }
+
+  /// Top reaction types for a post (`GET /api/v1/getPostReactionSummary?postId=`).
+  Future<ApiResponse<Map<String, dynamic>>> getPostReactionSummary({
+    required String postId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/getPostReactionSummary?postId=${Uri.encodeQueryComponent(postId)}',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load reaction summary: $e');
+    }
+  }
+
+  /// Fetch the current viewer's blog reaction state + counts
+  /// (`GET /api/blogs/{id}/like`).
+  Future<ApiResponse<Map<String, dynamic>>> getBlogReaction({
+    required String blogId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/like',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load reaction: $e');
+    }
+  }
+
+  /// React to a blog (`POST /api/blogs/{id}/like?reaction=`).
+  Future<ApiResponse<Map<String, dynamic>>> reactToBlog({
+    required String blogId,
+    String reaction = 'like',
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/like?reaction=${Uri.encodeQueryComponent(reaction)}',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to react to blog: $e');
+    }
+  }
+
+  /// Toggle a Doctak repost of a post (`POST /api/v1/repost?post_id=`).
+  Future<ApiResponse<Map<String, dynamic>>> repostPost({
+    required String postId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/repost?post_id=${Uri.encodeQueryComponent(postId)}',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to repost: $e');
+    }
+  }
+
+  /// Toggle a Doctak repost of a blog (`POST /api/blogs/{id}/repost`).
+  Future<ApiResponse<Map<String, dynamic>>> repostBlog({
+    required String blogId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/repost',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to repost blog: $e');
+    }
+  }
+
+  /// Record an external share of a post (`POST /api/v1/post-share?post_id=`).
+  Future<ApiResponse<Map<String, dynamic>>> recordShare({
+    required String postId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/post-share?post_id=${Uri.encodeQueryComponent(postId)}',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to record share: $e');
+    }
+  }
+
+  /// Record a feed interaction (share, click, etc.) via the node batch API
+  /// (`POST /api/feed/interactions/batch`).
+  Future<ApiResponse<Map<String, dynamic>>> recordFeedInteraction({
+    required String contentType,
+    required String contentId,
+    required String type,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/feed/interactions/batch',
+          method: networkUtils.HttpMethod.POST,
+          body: {
+            'events': [
+              {
+                'contentType': contentType,
+                'contentId': contentId,
+                'type': type,
+              },
+            ],
+          },
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to record interaction: $e');
+    }
+  }
+
+  /// Fetch blog repost state (`GET /api/blogs/{id}/repost`).
+  Future<ApiResponse<Map<String, dynamic>>> getBlogRepost({
+    required String blogId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/repost',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load repost state: $e');
+    }
+  }
+
+  // ================================== BLOG READ (doctak-node) ==================================
+
+  /// Fetch a single blog detail (`GET /api/blogs/{id}`).
+  Future<ApiResponse<Map<String, dynamic>>> getBlogDetail({
+    required String blogId,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load blog: $e');
+    }
+  }
+
+  /// Fetch blog comments (`GET /api/blogs/{id}/comments`).
+  Future<ApiResponse<Map<String, dynamic>>> getBlogComments({
+    required String blogId,
+    int page = 1,
+    int perPage = 15,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/comments?page=$page&per_page=$perPage',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load blog comments: $e');
+    }
+  }
+
+  /// Add a comment to a blog (`POST /api/blogs/{id}/comments`).
+  Future<ApiResponse<Map<String, dynamic>>> addBlogComment({
+    required String blogId,
+    required String body,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/comments',
+          method: networkUtils.HttpMethod.POST,
+          body: {'body': body, 'comment': body},
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to add blog comment: $e');
+    }
+  }
+
+  /// Add blog comment replies (`GET /api/blogs/{blogId}/comments/{commentId}/replies`).
+  Future<ApiResponse<Map<String, dynamic>>> getBlogCommentReplies({
+    required String blogId,
+    required String commentId,
+    int page = 1,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/comments/$commentId/replies?page=$page',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load blog replies: $e');
+    }
+  }
+
+  /// Post a reply to a blog comment (`POST /api/blogs/{blogId}/comments/{commentId}/replies`).
+  Future<ApiResponse<Map<String, dynamic>>> addBlogCommentReply({
+    required String blogId,
+    required String commentId,
+    required String body,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/blogs/$blogId/comments/$commentId/replies',
+          method: networkUtils.HttpMethod.POST,
+          body: {'body': body, 'comment_text': body},
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to post blog reply: $e');
+    }
+  }
+
   // ================================== POSTS ENDPOINTS ==================================
 
   /// Get posts feed
@@ -398,6 +1210,37 @@ class SharedApiService {
     }
   }
 
+  /// Completed surveys for the signed-in user's profile (`GET /api/profile/tab?tab=surveys`).
+  Future<ApiResponse<List<ProfileCompletedSurvey>>> getProfileCompletedSurveys() async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/profile/tab?tab=surveys',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      if (response is Map && response['success'] == false) {
+        return ApiResponse.error(
+          response['message']?.toString() ?? 'Failed to load profile surveys',
+        );
+      }
+      final raw = response['surveys'];
+      final surveys = raw is List
+          ? raw
+              .whereType<Map>()
+              .map((e) => ProfileCompletedSurvey.fromJson(
+                    Map<String, dynamic>.from(e),
+                  ))
+              .toList()
+          : <ProfileCompletedSurvey>[];
+      return ApiResponse.success(surveys);
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load profile surveys: $e');
+    }
+  }
+
   /// Get user posts
   Future<ApiResponse<PostDataModel>> getMyPosts({
     required String page,
@@ -437,6 +1280,37 @@ class SharedApiService {
     }
   }
 
+  /// Vote on a poll option or add a new option via [optionText].
+  Future<ApiResponse<Map<String, dynamic>>> votePoll({
+    required String pollId,
+    String? optionId,
+    String? optionText,
+  }) async {
+    try {
+      final params = <String, String>{'poll_id': pollId};
+      if (optionText != null && optionText.trim().isNotEmpty) {
+        params['option_text'] = optionText.trim();
+      } else if (optionId != null) {
+        params['option_id'] = optionId;
+      }
+      final query = params.entries
+          .map((e) =>
+              '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}')
+          .join('&');
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/poll-vote?$query',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to vote: $e');
+    }
+  }
+
   /// Delete post
   Future<ApiResponse<Map<String, dynamic>>> deletePost({
     required String postId,
@@ -461,11 +1335,12 @@ class SharedApiService {
   /// Get post comments
   Future<ApiResponse<PostCommentModel>> getPostComments({
     required String postId,
+    int page = 1,
   }) async {
     try {
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
-          '/get-post-comments?post_id=$postId',
+          '/get-post-comments?post_id=${Uri.encodeComponent(postId)}&page=$page',
           method: networkUtils.HttpMethod.GET,
         ),
       );
@@ -485,7 +1360,7 @@ class SharedApiService {
     try {
       final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
-          '/post-comment?post_id=$postId&comment=$comment',
+          '/post-comment?post_id=${Uri.encodeComponent(postId)}&comment=${Uri.encodeComponent(comment)}',
           method: networkUtils.HttpMethod.POST,
         ),
       );
@@ -514,6 +1389,53 @@ class SharedApiService {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
       return ApiResponse.error('Failed to delete comment: $e');
+    }
+  }
+
+  /// Toggle like on a comment or reply (post, blog, or unified feed comment).
+  Future<ApiResponse<Map<String, dynamic>>> toggleCommentLike({
+    required String commentId,
+    String? targetType,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseV6(
+          '/comments/$commentId/like',
+          method: networkUtils.HttpMethod.POST,
+          request: targetType != null && targetType.isNotEmpty
+              ? {'target_type': targetType}
+              : null,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response as Map));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to update comment like: $e');
+    }
+  }
+
+  /// Legacy alias — some callers still post to /like-comment.
+  Future<ApiResponse<Map<String, dynamic>>> likeCommentLegacy({
+    required String commentId,
+    String? targetType,
+  }) async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/like-comment',
+          method: networkUtils.HttpMethod.POST,
+          request: {
+            'comment_id': commentId,
+            if (targetType != null && targetType.isNotEmpty) 'target_type': targetType,
+          },
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response as Map));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to update comment like: $e');
     }
   }
 
@@ -831,19 +1753,19 @@ class SharedApiService {
     required String searchTerm,
     required String expiredJob,
   }) async {
-    // try {
-    final response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse(
-        '/jobs?page=$page&country_id=$countryId&searchTerm=$searchTerm&expired_job=$expiredJob',
-        method: networkUtils.HttpMethod.GET,
-      ),
-    );
-    return ApiResponse.success(JobsModel.fromJson(response));
-    // } on ApiException catch (e) {
-    //   return ApiResponse.error(e.message, statusCode: e.statusCode);
-    // } catch (e) {
-    //   return ApiResponse.error('Failed to get jobs: $e');
-    // }
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/jobs?page=$page&country_id=$countryId&searchTerm=$searchTerm&expired_job=$expiredJob',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(JobsModel.fromJson(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to get jobs: $e');
+    }
   }
 
   /// Get job details
@@ -851,12 +1773,27 @@ class SharedApiService {
     required String jobId,
   }) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/job_detail?job_id=$jobId',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
+      // Try V6 first, fall back to V4 if route not found
+      dynamic response;
+      try {
+        response = await networkUtils.handleResponse(
+          await networkUtils.buildHttpResponseV6(
+            '/job_detail',
+            method: networkUtils.HttpMethod.POST,
+            request: {'job_id': jobId},
+          ),
+        );
+      } catch (e) {
+        // If V6 fails (e.g. 404 route not deployed), fall back to V4
+        print('📋 [JobDetails] V6 failed: $e, trying V4 fallback');
+        response = await networkUtils.handleResponse(
+          await networkUtils.buildHttpResponse(
+            '/job_detail',
+            method: networkUtils.HttpMethod.POST,
+            request: {'job_id': jobId},
+          ),
+        );
+      }
 
       // If the server returned a structured error (success: false) or an explicit message,
       // convert that into an ApiResponse.error so UI can display a friendly message.
@@ -949,22 +1886,74 @@ class SharedApiService {
 
   // ================================== NOTIFICATIONS ENDPOINTS ==================================
 
-  /// Get notifications
+  /// Get notifications (Node API with Laravel fallback)
   Future<ApiResponse<NotificationModel>> getNotifications({
     required String page,
+    String? filter,
   }) async {
+    final filterQuery =
+        filter != null && filter.isNotEmpty ? '&filter=$filter' : '';
+
+    NotificationModel? nodeModel;
     try {
       final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications?page=$page$filterQuery',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      nodeModel = NotificationModel.fromJson(response);
+      // Trust the Node API whenever the request succeeds — do not fall through
+      // to Laravel when the list is empty but unread_count is non-zero.
+      return ApiResponse.success(nodeModel);
+    } on ApiException catch (e) {
+      if (e.statusCode != null && e.statusCode! >= 500) {
+        // fall through to Laravel
+      } else if (e.statusCode == 401) {
+        return ApiResponse.error(e.message, statusCode: e.statusCode);
+      }
+    } catch (_) {
+      // fall through to Laravel fallback
+    }
+
+    try {
+      final legacyPath = filter == 'unread'
+          ? '/notifications/unread?page=$page'
+          : '/notifications?page=$page';
+      final response = await networkUtils.handleResponse(
         await networkUtils.buildHttpResponse(
-          '/notifications?page=$page',
+          legacyPath,
           method: networkUtils.HttpMethod.GET,
         ),
       );
       return ApiResponse.success(NotificationModel.fromJson(response));
     } on ApiException catch (e) {
+      if (nodeModel != null) {
+        return ApiResponse.success(nodeModel);
+      }
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
+      if (nodeModel != null) {
+        return ApiResponse.success(nodeModel);
+      }
       return ApiResponse.error('Failed to get notifications: $e');
+    }
+  }
+
+  /// Mark all notifications as read
+  Future<ApiResponse<Map<String, dynamic>>> markAllNotificationsAsRead() async {
+    try {
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications/mark-read',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to mark all notifications as read: $e');
     }
   }
 
@@ -974,8 +1963,8 @@ class SharedApiService {
   }) async {
     try {
       final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/$notificationId/mark-read',
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications/$notificationId/mark-read',
           method: networkUtils.HttpMethod.POST,
         ),
       );
@@ -1340,16 +2329,24 @@ class SharedApiService {
 
   // ================================== SEARCH ENDPOINTS ==================================
 
+  Future<ApiResponse<Map<String, dynamic>>> getConferenceDetail({
+    required String id,
+  }) async {
+    return _searchService.getConferenceDetail(id: id);
+  }
+
   /// Search conferences
   Future<ApiResponse<SearchConferenceModel>> searchConferences({
     required String page,
     String? keyword,
     String? country,
+    String? month,
   }) async {
     return await _searchService.searchConferences(
       page: page,
       keyword: keyword,
       country: country,
+      month: month,
     );
   }
 

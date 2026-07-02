@@ -17,7 +17,9 @@ class LoginState extends Equatable {
 
 class LoginInitial extends LoginState {}
 
-class LoginLoading extends LoginState {}
+class LoginLoading extends LoginState {
+  LoginLoading({super.isShowPassword});
+}
 
 class LoginSuccess extends LoginState {
   final String isEmailVerified;

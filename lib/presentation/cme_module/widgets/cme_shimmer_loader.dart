@@ -24,12 +24,7 @@ class CmeShimmerLoader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Banner shimmer
-              _ShimmerBox(
-                width: double.infinity,
-                height: 140,
-                isDark: isDark,
-              ),
+              CmeShimmerBox(width: double.infinity, height: 140, isDark: isDark),
               Padding(
                 padding: const EdgeInsets.all(14),
                 child: Column(
@@ -37,21 +32,21 @@ class CmeShimmerLoader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _ShimmerBox(width: 60, height: 20, isDark: isDark),
+                        CmeShimmerBox(width: 60, height: 20, isDark: isDark),
                         const SizedBox(width: 8),
-                        _ShimmerBox(width: 80, height: 20, isDark: isDark),
+                        CmeShimmerBox(width: 80, height: 20, isDark: isDark),
                       ],
                     ),
                     const SizedBox(height: 10),
-                    _ShimmerBox(width: double.infinity, height: 18, isDark: isDark),
+                    CmeShimmerBox(width: double.infinity, height: 18, isDark: isDark),
                     const SizedBox(height: 6),
-                    _ShimmerBox(width: 200, height: 14, isDark: isDark),
+                    CmeShimmerBox(width: 200, height: 14, isDark: isDark),
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        _ShimmerBox(width: 120, height: 14, isDark: isDark),
+                        CmeShimmerBox(width: 120, height: 14, isDark: isDark),
                         const SizedBox(width: 12),
-                        _ShimmerBox(width: 100, height: 14, isDark: isDark),
+                        CmeShimmerBox(width: 100, height: 14, isDark: isDark),
                       ],
                     ),
                   ],
@@ -65,22 +60,195 @@ class CmeShimmerLoader extends StatelessWidget {
   }
 }
 
-class _ShimmerBox extends StatefulWidget {
-  final double width;
-  final double height;
-  final bool isDark;
+/// Full-screen shimmer for CME event detail loading.
+class CmeEventDetailShimmer extends StatelessWidget {
+  const CmeEventDetailShimmer({super.key});
 
-  const _ShimmerBox({
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: CmeShimmerBox(width: double.infinity, height: 220, isDark: isDark),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CmeShimmerBox(width: 72, height: 22, isDark: isDark, radius: 12),
+                    const SizedBox(width: 8),
+                    CmeShimmerBox(width: 56, height: 22, isDark: isDark, radius: 12),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                CmeShimmerBox(width: double.infinity, height: 24, isDark: isDark),
+                const SizedBox(height: 8),
+                CmeShimmerBox(width: 160, height: 16, isDark: isDark),
+                const SizedBox(height: 16),
+                CmeShimmerBox(width: double.infinity, height: 48, isDark: isDark, radius: 10),
+                const SizedBox(height: 16),
+                _progressCardShimmer(isDark),
+                const SizedBox(height: 16),
+                _detailsCardShimmer(theme, isDark),
+                const SizedBox(height: 16),
+                CmeShimmerBox(width: double.infinity, height: 40, isDark: isDark, radius: 8),
+                const SizedBox(height: 12),
+                _tabPanelShimmer(theme, isDark),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _progressCardShimmer(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2A36) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? const Color(0xFF2D3E50) : const Color(0xFFE8E8E8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CmeShimmerBox(width: 100, height: 14, isDark: isDark),
+              const Spacer(),
+              CmeShimmerBox(width: 36, height: 14, isDark: isDark),
+            ],
+          ),
+          const SizedBox(height: 12),
+          CmeShimmerBox(width: double.infinity, height: 6, isDark: isDark, radius: 4),
+          const SizedBox(height: 18),
+          Row(
+            children: List.generate(
+              4,
+              (i) => Expanded(
+                child: Column(
+                  children: [
+                    CmeShimmerBox(width: 24, height: 24, isDark: isDark, radius: 12),
+                    const SizedBox(height: 8),
+                    CmeShimmerBox(width: 48, height: 10, isDark: isDark),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailsCardShimmer(OneUITheme theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: theme.cardDecoration,
+      child: Column(
+        children: List.generate(
+          3,
+          (i) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                CmeShimmerBox(width: 18, height: 18, isDark: isDark, radius: 4),
+                const SizedBox(width: 12),
+                CmeShimmerBox(width: 70, height: 12, isDark: isDark),
+                const SizedBox(width: 12),
+                Expanded(child: CmeShimmerBox(width: double.infinity, height: 12, isDark: isDark)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _tabPanelShimmer(OneUITheme theme, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: theme.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CmeShimmerBox(width: 120, height: 14, isDark: isDark),
+          const SizedBox(height: 10),
+          CmeShimmerBox(width: double.infinity, height: 12, isDark: isDark),
+          const SizedBox(height: 6),
+          CmeShimmerBox(width: double.infinity, height: 12, isDark: isDark),
+          const SizedBox(height: 6),
+          CmeShimmerBox(width: 220, height: 12, isDark: isDark),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shimmer placeholder for tab panel content (agenda / speakers).
+class CmeTabPanelShimmer extends StatelessWidget {
+  const CmeTabPanelShimmer({super.key, this.rows = 3});
+
+  final int rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Column(
+      children: List.generate(
+        rows,
+        (i) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CmeShimmerBox(width: 28, height: 28, isDark: isDark, radius: 8),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CmeShimmerBox(width: double.infinity, height: 14, isDark: isDark),
+                    const SizedBox(height: 6),
+                    CmeShimmerBox(width: 180, height: 11, isDark: isDark),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CmeShimmerBox extends StatefulWidget {
+  const CmeShimmerBox({
+    super.key,
     required this.width,
     required this.height,
     required this.isDark,
+    this.radius = 6,
   });
 
+  final double width;
+  final double height;
+  final bool isDark;
+  final double radius;
+
   @override
-  State<_ShimmerBox> createState() => _ShimmerBoxState();
+  State<CmeShimmerBox> createState() => _CmeShimmerBoxState();
 }
 
-class _ShimmerBoxState extends State<_ShimmerBox>
+class _CmeShimmerBoxState extends State<CmeShimmerBox>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -112,20 +280,20 @@ class _ShimmerBoxState extends State<_ShimmerBox>
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(widget.radius),
             gradient: LinearGradient(
               begin: Alignment(_animation.value - 1, 0),
               end: Alignment(_animation.value, 0),
               colors: widget.isDark
-                  ? [
-                      const Color(0xFF2D3E50),
-                      const Color(0xFF374F65),
-                      const Color(0xFF2D3E50),
+                  ? const [
+                      Color(0xFF2D3E50),
+                      Color(0xFF374F65),
+                      Color(0xFF2D3E50),
                     ]
-                  : [
-                      const Color(0xFFE8E8E8),
-                      const Color(0xFFF5F5F5),
-                      const Color(0xFFE8E8E8),
+                  : const [
+                      Color(0xFFE8E8E8),
+                      Color(0xFFF5F5F5),
+                      Color(0xFFE8E8E8),
                     ],
             ),
           ),

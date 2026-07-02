@@ -1,10 +1,13 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
+import 'package:doctak_app/presentation/fcm_debug_screen/fcm_debug_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:http/http.dart' as http;
@@ -275,6 +278,52 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                 ),
               ),
             ),
+            // FCM Debug Card (debug builds only)
+            if (kDebugMode)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: theme.cardBackground,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
+                  boxShadow: theme.isDark ? [] : theme.cardShadow,
+                ),
+                child: InkWell(
+                  onTap: () => AppNavigator.push(context, const FcmDebugScreen()),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
+                          child: const Icon(Icons.notifications_active_outlined, color: Colors.blue, size: 24),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'FCM Debug',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Push token & server registration',
+                                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded, color: theme.textSecondary),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             // Delete Account Card
             Container(
               decoration: BoxDecoration(
@@ -379,7 +428,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                       var result = await _deleteUserAccount();
                       if (result) {
                         AppSharedPreferences().clearSharedPreferencesData(context);
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+                        AppNavigator.pushReplacement(context, const LoginScreen());
                       }
                     },
                     style: ElevatedButton.styleFrom(

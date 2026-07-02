@@ -33,6 +33,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
   String? feeling = '';
   String backgroundColor = '';
   String title = '';
+  String privacy = 'public';
 
   AddPostBloc() : super(PaginationInitialState()) {
     on<LoadPageEvent>(_onGetUserInfo);
@@ -296,13 +297,14 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
   Future<void> _uploadPost(String title, String locationName, String lat, String lng, String backgroundColor, String tagging, String feeling, Emitter<AddPostState> emit) async {
     var uri = Uri.parse("${AppData.remoteUrl}/new_post");
     var request = http.MultipartRequest('POST', uri)
-      ..fields['title'] = title
+      ..fields['body'] = title
       ..fields['location_name'] = locationName
       ..fields['lat'] = latitude
       ..fields['lng'] = longitude
       ..fields['background_color'] = backgroundColor
       ..fields['tagging'] = tagging
       ..fields['feeling'] = feeling
+      ..fields['privacy'] = privacy
       ..headers['Authorization'] = 'Bearer ${AppData.userToken}'; // Add token bearer header
 
     print('$title,$locationName,$latitude,$longitude,$backgroundColor,$tagging,$feeling');

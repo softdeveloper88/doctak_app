@@ -497,9 +497,14 @@ class _JobsScreenState extends State<JobsScreen> {
                   ],
                 );
               } else if (state is CountriesDataError) {
-                BlocProvider.of<SplashBloc>(
-                  context,
-                ).add(LoadDropdownData('', '', '', ''));
+                // Schedule reload after frame to avoid dispatching during build
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    BlocProvider.of<SplashBloc>(
+                      context,
+                    ).add(LoadDropdownData('', '', '', ''));
+                  }
+                });
 
                 return Center(
                   child: Text(
@@ -508,9 +513,14 @@ class _JobsScreenState extends State<JobsScreen> {
                   ),
                 );
               } else {
-                BlocProvider.of<SplashBloc>(
-                  context,
-                ).add(LoadDropdownData('', '', '', ''));
+                // Schedule reload after frame to avoid dispatching during build
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) {
+                    BlocProvider.of<SplashBloc>(
+                      context,
+                    ).add(LoadDropdownData('', '', '', ''));
+                  }
+                });
 
                 return Center(
                   child: Text(
@@ -536,7 +546,43 @@ class _JobsScreenState extends State<JobsScreen> {
               } else if (state is DataError) {
                 return Expanded(
                   child: Center(
-                    child: Text(state.errorMessage, style: theme.bodyMedium),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.work_off_rounded, size: 56, color: theme.textSecondary),
+                          const SizedBox(height: 16),
+                          Text(
+                            translation(context).msg_something_went_wrong,
+                            style: theme.titleSmall.copyWith(color: theme.textPrimary),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            state.errorMessage,
+                            style: theme.bodySecondary.copyWith(color: theme.textSecondary, fontSize: 13),
+                            textAlign: TextAlign.center,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton.icon(
+                            onPressed: () {
+                              jobsBloc.add(JobLoadPageEvent(page: 1, countryId: '', searchTerm: ''));
+                            },
+                            icon: const Icon(Icons.refresh, size: 18),
+                            label: Text(translation(context).lbl_retry),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: theme.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               } else {

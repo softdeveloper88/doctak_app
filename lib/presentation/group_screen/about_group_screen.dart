@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -10,16 +11,27 @@ import 'package:flutter/material.dart';
 class AboutGroupScreen extends StatelessWidget {
   AboutGroupScreen(this.groupBloc, {super.key});
   GroupBloc? groupBloc;
-  String decodeDataFromJson(data) {
-    List<dynamic> decodedJson = jsonDecode(data);
-
-    var values = decodedJson.map((item) => item['value'] as String).toList();
-    return values.join(',');
+  String decodeDataFromJson(dynamic data) {
+    if (data == null) return '';
+    if (data is! String || data.trim().isEmpty) return data.toString();
+    try {
+      final decodedJson = jsonDecode(data);
+      if (decodedJson is! List) return data.toString();
+      return decodedJson
+          .map((item) => item is Map ? item['value']?.toString() ?? '' : item.toString())
+          .where((value) => value.isNotEmpty)
+          .join(', ');
+    } catch (_) {
+      return data.toString();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+
+    final logoUrl = AppData.fullImageUrl(groupBloc?.groupDetailsModel?.group?.logo);
+    final logoProvider = logoUrl.isEmpty ? null : CachedNetworkImageProvider(logoUrl);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
@@ -32,7 +44,8 @@ class AboutGroupScreen extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: CachedNetworkImageProvider(groupBloc?.groupDetailsModel?.group?.logo ?? ''), // Add your image asset
+                  backgroundImage: logoProvider,
+                  child: logoUrl.isEmpty ? const Icon(Icons.groups) : null,
                 ),
                 const SizedBox(width: 16),
                 Column(

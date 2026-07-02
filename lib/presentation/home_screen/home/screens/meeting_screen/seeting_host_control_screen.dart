@@ -6,10 +6,10 @@ import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 
 class SettingsHostControlsScreen extends StatefulWidget {
-  const SettingsHostControlsScreen(this.settings, this.meetingId, {super.key});
+  const SettingsHostControlsScreen(this.settings, this.meetingChannel, {super.key});
 
   final Settings? settings;
-  final String? meetingId;
+  final String? meetingChannel;
 
   @override
   State<SettingsHostControlsScreen> createState() => _SettingsHostControlsScreenState();
@@ -49,17 +49,26 @@ class _SettingsHostControlsScreenState extends State<SettingsHostControlsScreen>
   }
 
   Future<void> _updateSettings() async {
+    // Keep widget.settings in sync so re-opening this screen shows current values.
+    widget.settings?.startStopMeeting = startStopMeeting ? '1' : '0';
+    widget.settings?.addRemoveHost = addRemoveHost ? '1' : '0';
+    widget.settings?.muteAll = muteAll ? '1' : '0';
+    widget.settings?.shareScreen = shareScreen ? '1' : '0';
+    widget.settings?.raisedHand = raiseHand ? '1' : '0';
+    widget.settings?.sendReactions = sendReactions ? 1 : 0;
+    widget.settings?.toggleMicrophone = turnOnOffMicrophone ? 1 : 0;
+    widget.settings?.toggleVideo = turnOnOffVideo ? 1 : 0;
+    widget.settings?.enableWaitingRoom = enableWaitingRoom ? 1 : 0;
+
     await updateMeetingSetting(
-      meetingId: widget.meetingId,
-      startStopMeeting: startStopMeeting ? '1' : '0',
-      addRemoveHost: addRemoveHost ? '1' : '0',
-      shareScreen: shareScreen ? '1' : '0',
-      raisedHand: raiseHand ? '1' : '0',
-      sendReactions: sendReactions ? '1' : '0',
-      toggleMicrophone: turnOnOffMicrophone ? '1' : '0',
-      toggleVideo: turnOnOffVideo ? '1' : '0',
-      enableWaitingRoom: enableWaitingRoom ? '1' : '0',
-      requirePassword: '0',
+      meetingChannel: widget.meetingChannel,
+      muteAll: muteAll,
+      shareScreen: shareScreen,
+      raisedHand: raiseHand,
+      sendReactions: sendReactions,
+      toggleMicrophone: turnOnOffMicrophone,
+      toggleVideo: turnOnOffVideo,
+      enableWaitingRoom: enableWaitingRoom,
     );
   }
 
@@ -119,6 +128,17 @@ class _SettingsHostControlsScreenState extends State<SettingsHostControlsScreen>
                 title: translation(context).lbl_participant_controls,
                 description: translation(context).desc_participant_controls,
                 children: [
+                  _buildSwitchTile(
+                    theme: theme,
+                    icon: Icons.mic_off_rounded,
+                    title: translation(context).lbl_mute_all_participants,
+                    value: muteAll,
+                    onChanged: (val) async {
+                      setState(() => muteAll = val);
+                      await _updateSettings();
+                    },
+                  ),
+                  Divider(height: 1, indent: 56, color: theme.divider),
                   _buildSwitchTile(
                     theme: theme,
                     icon: Icons.screen_share_rounded,

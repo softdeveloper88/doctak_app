@@ -33,15 +33,15 @@ class Comment {
   Comment({this.id, this.commentableId, this.commenterId, this.childId, this.comment, this.createdAt});
 
   Comment.fromJson(dynamic json) {
-    id = json['id'];
-    commentableId = json['commentable_id'];
-    commenterId = json['commenter_id'];
-    childId = json['child_id'];
+    id = json['id'] != null ? int.tryParse(json['id'].toString()) : null;
+    commentableId = json['commentable_id']?.toString();
+    commenterId = json['commenter_id']?.toString();
+    childId = json['child_id']?.toString();
     comment = json['comment'];
     createdAt = json['created_at'];
   }
   int? id;
-  int? commentableId;
+  String? commentableId;
   String? commenterId;
   String? childId;
   String? comment;

@@ -44,6 +44,25 @@ class GuidelineAgentReady extends GuidelineAgentState {
       [sources, selectedSources, topics, sessions, usage, messages, suggestions];
 }
 
+/// Streaming response in progress — partialResponse grows with each chunk.
+class GuidelineMessageStreaming extends GuidelineAgentReady {
+  final String partialResponse;
+
+  const GuidelineMessageStreaming({
+    required super.sources,
+    required super.selectedSources,
+    required super.topics,
+    required super.sessions,
+    super.usage,
+    required super.messages,
+    required super.suggestions,
+    required this.partialResponse,
+  });
+
+  @override
+  List<Object?> get props => [...super.props, partialResponse];
+}
+
 /// Sending a message — shows loading indicator.
 class GuidelineMessageSending extends GuidelineAgentReady {
   const GuidelineMessageSending({

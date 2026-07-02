@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/apiClient/cme/cme_api_service.dart';
+import 'package:doctak_app/data/apiClient/cme/cme_node_api_service.dart';
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,28 +18,41 @@ class CmeEventDetailBloc
     on<CmeJoinWaitlistEvent>(_onJoinWaitlist);
   }
 
+  Future<CmeEventData> _loadEvent(String eventId) async {
+    try {
+      return await CmeNodeApiService.getEventDetail(eventId);
+    } catch (_) {
+      return CmeApiService.getEventDetail(eventId);
+    }
+  }
+
   Future<void> _onLoadDetail(
       CmeLoadEventDetailEvent event, Emitter<CmeEventDetailState> emit) async {
-    emit(CmeEventDetailLoadingState());
+    if (!event.silent || eventData == null) {
+      emit(CmeEventDetailLoadingState());
+    }
     try {
-      eventData = await CmeApiService.getEventDetail(event.eventId);
+      eventData = await _loadEvent(event.eventId);
       emit(CmeEventDetailLoadedState());
     } catch (e) {
-      emit(CmeEventDetailErrorState('$e'));
+      if (eventData != null && event.silent) {
+        emit(CmeEventDetailLoadedState());
+      } else {
+        emit(CmeEventDetailErrorState('$e'));
+      }
     }
   }
 
   Future<void> _onRegister(
       CmeRegisterEvent event, Emitter<CmeEventDetailState> emit) async {
     try {
-      final result = await CmeApiService.registerForEvent(event.eventId);
-      eventData?.isRegistered = true;
-      eventData?.registrationStatus = 'registered';
-      if (eventData?.currentParticipants != null) {
-        eventData!.currentParticipants = eventData!.currentParticipants! + 1;
+      try {
+        await CmeNodeApiService.registerEvent(event.eventId);
+      } catch (_) {
+        await CmeApiService.registerForEvent(event.eventId);
       }
-      emit(CmeRegistrationSuccessState(
-          result['message'] ?? 'Successfully registered'));
+      eventData = await _loadEvent(event.eventId);
+      emit(CmeRegistrationSuccessState('Successfully registered'));
       emit(CmeEventDetailLoadedState());
     } catch (e) {
       emit(CmeRegistrationErrorState('$e'));
@@ -49,13 +63,12 @@ class CmeEventDetailBloc
   Future<void> _onUnregister(
       CmeUnregisterEvent event, Emitter<CmeEventDetailState> emit) async {
     try {
-      await CmeApiService.unregisterFromEvent(event.eventId);
-      eventData?.isRegistered = false;
-      eventData?.registrationStatus = null;
-      if (eventData?.currentParticipants != null &&
-          eventData!.currentParticipants! > 0) {
-        eventData!.currentParticipants = eventData!.currentParticipants! - 1;
+      try {
+        await CmeNodeApiService.cancelRegistration(event.eventId);
+      } catch (_) {
+        await CmeApiService.unregisterFromEvent(event.eventId);
       }
+      eventData = await _loadEvent(event.eventId);
       emit(CmeRegistrationSuccessState('Successfully unregistered'));
       emit(CmeEventDetailLoadedState());
     } catch (e) {
@@ -67,8 +80,12 @@ class CmeEventDetailBloc
   Future<void> _onJoinEvent(
       CmeJoinEventEvent event, Emitter<CmeEventDetailState> emit) async {
     try {
-      await CmeApiService.joinEvent(event.eventId);
-      eventData?.isAttending = true;
+      try {
+        await CmeNodeApiService.joinLiveEvent(event.eventId);
+      } catch (_) {
+        await CmeApiService.joinEvent(event.eventId);
+      }
+      eventData = await _loadEvent(event.eventId);
       emit(CmeJoinedEventState());
       emit(CmeEventDetailLoadedState());
     } catch (e) {

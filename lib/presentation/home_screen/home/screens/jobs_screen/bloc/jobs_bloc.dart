@@ -45,17 +45,21 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
       emit(PaginationLoadingState());
     }
     try {
+      print('📋 [JobsBloc] Loading jobs page=$pageNumber country=$_currentCountryId search=$_currentSearchTerm');
       JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', '$pageNumber', _currentCountryId, _currentSearchTerm, "");
       if (isClosed) return;
       numberOfPage = response.jobs?.lastPage ?? 0;
+      print('📋 [JobsBloc] Jobs loaded: ${response.jobs?.data?.length ?? 0} items, lastPage=$numberOfPage');
       if (pageNumber < numberOfPage + 1) {
         pageNumber = pageNumber + 1;
         drugsData.addAll(response.jobs?.data ?? []);
       }
       emit(PaginationLoadedState());
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('📋 [JobsBloc] Error loading jobs: $e');
+      print('📋 [JobsBloc] StackTrace: $stackTrace');
       if (isClosed) return;
-      emit(DataError('No Data Found'));
+      emit(DataError('$e'));
     }
   }
 
@@ -79,14 +83,18 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
 
   Future<void> _onGetJobs1(GetPost event, Emitter<JobsState> emit) async {
     try {
+      print('📋 [JobsBloc] GetPost: loading jobs country=${event.countryId} search=${event.searchTerm}');
       JobsModel response = await apiManager.getJobsList('Bearer ${AppData.userToken}', "1", event.countryId, event.searchTerm, ""); // Empty string to get all jobs
       if (isClosed) return;
       drugsData.clear();
       drugsData.addAll(response.jobs?.data ?? []);
+      print('📋 [JobsBloc] GetPost: loaded ${drugsData.length} jobs');
       emit(PaginationLoadedState());
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('📋 [JobsBloc] GetPost error: $e');
+      print('📋 [JobsBloc] StackTrace: $stackTrace');
       if (isClosed) return;
-      emit(DataError('No Data Found'));
+      emit(DataError('$e'));
     }
   }
 

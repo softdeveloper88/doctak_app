@@ -50,8 +50,10 @@ class VideoUtils {
       return 'Video codec not supported on this device.';
     } else if (errorStr.contains('network') || errorStr.contains('connection') || errorStr.contains('timeout')) {
       return 'Network error. Please check your internet connection.';
-    } else if (errorStr.contains('format') || errorStr.contains('unsupported')) {
-      return 'Video format not supported.';
+    } else if (errorStr.contains('format') ||
+        errorStr.contains('unsupported') ||
+        errorStr.contains('not supported on ios')) {
+      return 'Video format not supported on this device.';
     } else if (errorStr.contains('source') || errorStr.contains('not found') || errorStr.contains('404')) {
       return 'Video not found or unavailable.';
     } else if (errorStr.contains('permission') || errorStr.contains('access')) {

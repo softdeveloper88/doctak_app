@@ -37,11 +37,27 @@ class GroupApiService {
     }
   }
 
-  /// Get group details by ID
+  /// Get group details by ID (doctak-node mobile API).
   Future<ApiResponse<GroupDetailsModel>> getGroupDetails({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/group-details/$groupId', method: networkUtils.HttpMethod.GET));
-      return ApiResponse.success(GroupDetailsModel.fromJson(response));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/group-details/$groupId',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      if (response is Map && response['success'] == false) {
+        return ApiResponse.error(
+          response['message']?.toString() ?? 'Failed to load group',
+        );
+      }
+      final payload = response is Map ? Map<String, dynamic>.from(response) : <String, dynamic>{};
+      payload.remove('success');
+      try {
+        return ApiResponse.success(GroupDetailsModel.fromJson(payload));
+      } catch (e) {
+        return ApiResponse.error('Invalid group details response: $e');
+      }
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
@@ -61,10 +77,15 @@ class GroupApiService {
     }
   }
 
-  /// Join a group
+  /// Join a group (doctak-node mobile API).
   Future<ApiResponse<Map<String, dynamic>>> joinGroup({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/join', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/groups/$groupId/join',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -73,10 +94,15 @@ class GroupApiService {
     }
   }
 
-  /// Leave a group
+  /// Leave a group (doctak-node mobile API).
   Future<ApiResponse<Map<String, dynamic>>> leaveGroup({required String groupId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/groups/$groupId/leave', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/groups/$groupId/leave',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);

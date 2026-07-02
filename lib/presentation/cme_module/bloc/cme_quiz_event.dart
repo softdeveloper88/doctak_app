@@ -7,18 +7,20 @@ abstract class CmeQuizEvent extends Equatable {
 
 class CmeLoadQuizEvent extends CmeQuizEvent {
   final String eventId;
-  final String moduleId;
-  final String quizId;
+  final String? moduleId;
+  final bool reveal;
 
   CmeLoadQuizEvent({
     required this.eventId,
-    required this.moduleId,
-    required this.quizId,
+    this.moduleId,
+    this.reveal = false,
   });
 
   @override
-  List<Object?> get props => [eventId, moduleId, quizId];
+  List<Object?> get props => [eventId, moduleId, reveal];
 }
+
+class CmeBeginQuizEvent extends CmeQuizEvent {}
 
 class CmeSelectAnswerEvent extends CmeQuizEvent {
   final String questionId;
@@ -30,52 +32,38 @@ class CmeSelectAnswerEvent extends CmeQuizEvent {
   List<Object?> get props => [questionId, answer];
 }
 
+class CmeToggleMultiAnswerEvent extends CmeQuizEvent {
+  final String questionId;
+  final String value;
+
+  CmeToggleMultiAnswerEvent({required this.questionId, required this.value});
+
+  @override
+  List<Object?> get props => [questionId, value];
+}
+
+class CmeSetEssayAnswerEvent extends CmeQuizEvent {
+  final String questionId;
+  final String text;
+
+  CmeSetEssayAnswerEvent({required this.questionId, required this.text});
+
+  @override
+  List<Object?> get props => [questionId, text];
+}
+
 class CmeSubmitQuizEvent extends CmeQuizEvent {
   final String eventId;
-  final String moduleId;
-  final String quizId;
 
-  CmeSubmitQuizEvent({
-    required this.eventId,
-    required this.moduleId,
-    required this.quizId,
-  });
+  CmeSubmitQuizEvent({required this.eventId});
 
   @override
-  List<Object?> get props => [eventId, moduleId, quizId];
+  List<Object?> get props => [eventId];
 }
 
-class CmeAutoSaveQuizEvent extends CmeQuizEvent {
-  final String eventId;
-  final String moduleId;
-  final String quizId;
+class CmeGoToReviewEvent extends CmeQuizEvent {}
 
-  CmeAutoSaveQuizEvent({
-    required this.eventId,
-    required this.moduleId,
-    required this.quizId,
-  });
-
-  @override
-  List<Object?> get props => [eventId, moduleId, quizId];
-}
-
-class CmeLoadQuizResultsEvent extends CmeQuizEvent {
-  final String eventId;
-  final String moduleId;
-  final String quizId;
-  final String resultId;
-
-  CmeLoadQuizResultsEvent({
-    required this.eventId,
-    required this.moduleId,
-    required this.quizId,
-    required this.resultId,
-  });
-
-  @override
-  List<Object?> get props => [eventId, moduleId, quizId, resultId];
-}
+class CmeResetQuizEvent extends CmeQuizEvent {}
 
 class CmeTimerTickEvent extends CmeQuizEvent {
   final int remainingSeconds;

@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
+import '../models/clinical_snapshot.dart';
+import '../repository/case_discussion_repository.dart';
 
 /// Screen for creating or editing a case discussion.
 /// Features:
@@ -31,6 +34,21 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   final _descriptionController = TextEditingController();
   final _tagsController = TextEditingController();
   final _ageController = TextEditingController();
+  final _chiefComplaintController = TextEditingController();
+  final _pastMedicalHxController = TextEditingController();
+  final _medicationsController = TextEditingController();
+  final _clinicalQuestionController = TextEditingController();
+  final _vitalBpController = TextEditingController();
+  final _vitalHrController = TextEditingController();
+  final _vitalSpo2Controller = TextEditingController();
+  final _vitalTempController = TextEditingController();
+  final _vitalRrController = TextEditingController();
+  bool _vitalBpAbnormal = false;
+  bool _vitalHrAbnormal = false;
+  bool _vitalSpo2Abnormal = false;
+  bool _vitalTempAbnormal = false;
+  bool _vitalRrAbnormal = false;
+  List<LabResult> _labResults = [];
 
   String? _selectedSpecialty;
   String? _selectedCountry;
@@ -40,42 +58,177 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
   String? _selectedEthnicity;
   bool _isAnonymized = true;
 
+  // API-loaded filter data
+  List<SpecialtyFilter> _loadedSpecialties = [];
+  List<CountryFilter> _loadedCountries = [];
+  bool _loadingFilters = true;
+
   List<PlatformFile> _selectedFiles = [];
   List<String> _existingFileUrls = [];
+  CaseDiscussion? _editCase;
 
   bool get _isEditMode => widget.existingCase != null;
+
+  static const _genderOptions = ['male', 'female', 'other'];
+  static const _ethnicityOptions = [
+    'Asian',
+    'Black',
+    'Caucasian',
+    'Hispanic',
+    'Middle Eastern',
+    'Other',
+  ];
 
   @override
   void initState() {
     super.initState();
     if (_isEditMode) {
-      _populateFromExisting();
+      _editCase = widget.existingCase;
+      _applyCaseToForm(_editCase!);
+      _refreshEditCase();
+    }
+    _loadFilterData();
+  }
+
+  Future<void> _refreshEditCase() async {
+    final caseId = widget.existingCase?.id;
+    if (caseId == null) return;
+
+    try {
+      final repo = CaseDiscussionRepository(
+        baseUrl: AppData.base2,
+        getAuthToken: () => AppData.userToken ?? '',
+      );
+      final fresh = await repo.getCaseDiscussion(caseId);
+      if (!mounted) return;
+      setState(() {
+        _editCase = fresh;
+        _applyCaseToForm(fresh);
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _loadFilterData() async {
+    try {
+      final repo = CaseDiscussionRepository(
+        baseUrl: AppData.base2,
+        getAuthToken: () => AppData.userToken ?? '',
+      );
+      final data = await repo.getFilterData();
+      if (mounted) {
+        setState(() {
+          _loadedSpecialties = data['specialties'] as List<SpecialtyFilter>;
+          _loadedCountries = data['countries'] as List<CountryFilter>;
+          _loadingFilters = false;
+          if (_isEditMode && _editCase != null) {
+            _selectedSpecialty = _resolveSpecialtyName(_editCase!);
+            _selectedCountry = _resolveCountryName(_editCase!);
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _loadingFilters = false);
     }
   }
 
-  void _populateFromExisting() {
-    final c = widget.existingCase!;
+  void _applyCaseToForm(CaseDiscussion c) {
     _titleController.text = c.title;
     _descriptionController.text = c.description;
     _tagsController.text = c.parsedTags.join(', ');
-    _selectedSpecialty = c.specialty;
-    _selectedCountry = c.countryName;
+    _selectedSpecialty = _resolveSpecialtyName(c);
+    _selectedCountry = _resolveCountryName(c);
 
     if (c.metadata != null) {
-      _selectedComplexity = c.metadata!.clinicalComplexity;
-      _selectedTeachingValue = c.metadata!.teachingValue;
+      _selectedComplexity = _normalizeLevel(c.metadata!.clinicalComplexity);
+      _selectedTeachingValue = _normalizeLevel(c.metadata!.teachingValue);
       _isAnonymized = c.metadata!.isAnonymized;
 
-      final demo = c.metadata!.parsedDemographics;
-      if (demo != null) {
-        _ageController.text = demo['age']?.toString() ?? '';
-        _selectedGender = demo['gender'];
-        _selectedEthnicity = demo['ethnicity'];
-      }
+      final snapshot = c.metadata!.clinicalSnapshot;
+      _ageController.text = snapshot.age ?? '';
+      _selectedGender = _normalizeGender(snapshot.gender);
+      _selectedEthnicity = _normalizeEthnicity(snapshot.ethnicity);
+      _chiefComplaintController.text = snapshot.chiefComplaint ?? '';
+      _pastMedicalHxController.text = snapshot.pastMedicalHistory ?? '';
+      _medicationsController.text = snapshot.medications ?? '';
+      _clinicalQuestionController.text = snapshot.clinicalQuestion ?? '';
+      _vitalBpController.text = snapshot.vitalSigns.bp?.value ?? '';
+      _vitalBpAbnormal = snapshot.vitalSigns.bp?.abnormal ?? false;
+      _vitalHrController.text = snapshot.vitalSigns.hr?.value ?? '';
+      _vitalHrAbnormal = snapshot.vitalSigns.hr?.abnormal ?? false;
+      _vitalSpo2Controller.text = snapshot.vitalSigns.spo2?.value ?? '';
+      _vitalSpo2Abnormal = snapshot.vitalSigns.spo2?.abnormal ?? false;
+      _vitalTempController.text = snapshot.vitalSigns.temp?.value ?? '';
+      _vitalTempAbnormal = snapshot.vitalSigns.temp?.abnormal ?? false;
+      _vitalRrController.text = snapshot.vitalSigns.rr?.value ?? '';
+      _vitalRrAbnormal = snapshot.vitalSigns.rr?.abnormal ?? false;
+      _labResults = List<LabResult>.from(snapshot.labResults);
     }
 
-    // Keep existing file URLs
     _existingFileUrls = c.attachments.map((a) => a.url).toList();
+  }
+
+  String? _normalizeLevel(String? value) {
+    if (value == null || value.isEmpty) return null;
+    final v = value.toLowerCase();
+    if (v == 'low' || v == 'medium' || v == 'high') return v;
+    return value;
+  }
+
+  String? _normalizeGender(String? value) {
+    if (value == null || value.isEmpty) return null;
+    final v = value.toLowerCase();
+    return _genderOptions.contains(v) ? v : null;
+  }
+
+  String? _normalizeEthnicity(String? value) {
+    if (value == null || value.isEmpty) return null;
+    final normalized = value.toLowerCase().replaceAll(' ', '_');
+    for (final item in _ethnicityOptions) {
+      if (item.toLowerCase() == value.toLowerCase()) return item;
+      if (item.toLowerCase().replaceAll(' ', '_') == normalized) return item;
+    }
+    const aliases = {
+      'white': 'Caucasian',
+      'middle_eastern': 'Middle Eastern',
+      'mixed': 'Other',
+    };
+    return aliases[normalized];
+  }
+
+  String? _resolveSpecialtyName(CaseDiscussion c) {
+    if (_loadedSpecialties.isNotEmpty && c.specialtyId != null) {
+      for (final specialty in _loadedSpecialties) {
+        if (specialty.id == c.specialtyId) return specialty.name;
+      }
+    }
+    if (c.specialty != null && c.specialty!.isNotEmpty) {
+      if (_loadedSpecialties.isEmpty) return c.specialty;
+      for (final specialty in _loadedSpecialties) {
+        if (specialty.name.toLowerCase() == c.specialty!.toLowerCase()) {
+          return specialty.name;
+        }
+      }
+      return c.specialty;
+    }
+    return null;
+  }
+
+  String? _resolveCountryName(CaseDiscussion c) {
+    if (_loadedCountries.isNotEmpty && c.countryId != null) {
+      for (final country in _loadedCountries) {
+        if (country.id == c.countryId) return country.name;
+      }
+    }
+    if (c.countryName != null && c.countryName!.isNotEmpty) {
+      if (_loadedCountries.isEmpty) return c.countryName;
+      for (final country in _loadedCountries) {
+        if (country.name.toLowerCase() == c.countryName!.toLowerCase()) {
+          return country.name;
+        }
+      }
+      return c.countryName;
+    }
+    return null;
   }
 
   @override
@@ -84,6 +237,15 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
     _descriptionController.dispose();
     _tagsController.dispose();
     _ageController.dispose();
+    _chiefComplaintController.dispose();
+    _pastMedicalHxController.dispose();
+    _medicationsController.dispose();
+    _clinicalQuestionController.dispose();
+    _vitalBpController.dispose();
+    _vitalHrController.dispose();
+    _vitalSpo2Controller.dispose();
+    _vitalTempController.dispose();
+    _vitalRrController.dispose();
     super.dispose();
   }
 
@@ -215,14 +377,18 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         children: [
                           _SectionLabel(label: 'Specialty', theme: theme),
                           const SizedBox(height: 6),
-                          _DropdownField(
-                            value: _selectedSpecialty,
-                            hint: 'Select specialty',
-                            items: _specialties,
-                            theme: theme,
-                            onChanged: (v) =>
-                                setState(() => _selectedSpecialty = v),
-                          ),
+                          _loadingFilters
+                              ? _LoadingDropdownPlaceholder(theme: theme)
+                              : _DropdownField(
+                                  value: _selectedSpecialty,
+                                  hint: 'Select specialty',
+                                  items: _loadedSpecialties
+                                      .map((s) => s.name)
+                                      .toList(),
+                                  theme: theme,
+                                  onChanged: (v) =>
+                                      setState(() => _selectedSpecialty = v),
+                                ),
                         ],
                       ),
                     ),
@@ -233,14 +399,18 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                         children: [
                           _SectionLabel(label: 'Country', theme: theme),
                           const SizedBox(height: 6),
-                          _DropdownField(
-                            value: _selectedCountry,
-                            hint: 'Select country',
-                            items: _countries,
-                            theme: theme,
-                            onChanged: (v) =>
-                                setState(() => _selectedCountry = v),
-                          ),
+                          _loadingFilters
+                              ? _LoadingDropdownPlaceholder(theme: theme)
+                              : _DropdownField(
+                                  value: _selectedCountry,
+                                  hint: 'Select country',
+                                  items: _loadedCountries
+                                      .map((c) => c.name)
+                                      .toList(),
+                                  theme: theme,
+                                  onChanged: (v) =>
+                                      setState(() => _selectedCountry = v),
+                                ),
                         ],
                       ),
                     ),
@@ -281,7 +451,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           _DropdownField(
                             value: _selectedGender,
                             hint: 'Select',
-                            items: const ['male', 'female', 'other'],
+                            items: _genderOptions,
                             theme: theme,
                             onChanged: (v) =>
                                 setState(() => _selectedGender = v),
@@ -299,14 +469,7 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                           _DropdownField(
                             value: _selectedEthnicity,
                             hint: 'Select',
-                            items: const [
-                              'Asian',
-                              'Black',
-                              'Caucasian',
-                              'Hispanic',
-                              'Middle Eastern',
-                              'Other',
-                            ],
+                            items: _ethnicityOptions,
                             theme: theme,
                             onChanged: (v) =>
                                 setState(() => _selectedEthnicity = v),
@@ -340,6 +503,125 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
                       ),
                     ),
                   ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // ── Clinical Presentation ──
+                _SectionDivider(
+                    label: 'Clinical Presentation', theme: theme),
+                const SizedBox(height: 12),
+                _SectionLabel(label: 'Chief Complaint', theme: theme),
+                const SizedBox(height: 6),
+                _StyledTextField(
+                  controller: _chiefComplaintController,
+                  hint: 'e.g. Crushing chest pain radiating to left arm with SOB',
+                  theme: theme,
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 16),
+                _SectionLabel(label: 'Past Medical History', theme: theme),
+                const SizedBox(height: 6),
+                _StyledTextField(
+                  controller: _pastMedicalHxController,
+                  hint: 'e.g. DM Type 2, MI (2019), HTN',
+                  theme: theme,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 16),
+                _SectionLabel(label: 'Medications', theme: theme),
+                const SizedBox(height: 6),
+                _StyledTextField(
+                  controller: _medicationsController,
+                  hint: 'e.g. Metformin, Aspirin, Ramipril',
+                  theme: theme,
+                ),
+                const SizedBox(height: 20),
+                _SectionDivider(label: 'Vital Signs', theme: theme),
+                const SizedBox(height: 12),
+                _VitalSignField(
+                  label: 'BP',
+                  controller: _vitalBpController,
+                  abnormal: _vitalBpAbnormal,
+                  theme: theme,
+                  onAbnormalChanged: (v) => setState(() => _vitalBpAbnormal = v),
+                ),
+                const SizedBox(height: 10),
+                _VitalSignField(
+                  label: 'HR',
+                  controller: _vitalHrController,
+                  abnormal: _vitalHrAbnormal,
+                  theme: theme,
+                  onAbnormalChanged: (v) => setState(() => _vitalHrAbnormal = v),
+                ),
+                const SizedBox(height: 10),
+                _VitalSignField(
+                  label: 'SPO2',
+                  controller: _vitalSpo2Controller,
+                  abnormal: _vitalSpo2Abnormal,
+                  theme: theme,
+                  onAbnormalChanged: (v) => setState(() => _vitalSpo2Abnormal = v),
+                ),
+                const SizedBox(height: 10),
+                _VitalSignField(
+                  label: 'TEMP',
+                  controller: _vitalTempController,
+                  abnormal: _vitalTempAbnormal,
+                  theme: theme,
+                  onAbnormalChanged: (v) => setState(() => _vitalTempAbnormal = v),
+                ),
+                const SizedBox(height: 10),
+                _VitalSignField(
+                  label: 'RR',
+                  controller: _vitalRrController,
+                  abnormal: _vitalRrAbnormal,
+                  theme: theme,
+                  onAbnormalChanged: (v) => setState(() => _vitalRrAbnormal = v),
+                ),
+                const SizedBox(height: 20),
+                _SectionDivider(label: 'Lab Results', theme: theme),
+                const SizedBox(height: 12),
+                ..._labResults.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final lab = entry.value;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _LabResultRow(
+                      lab: lab,
+                      theme: theme,
+                      onChanged: (updated) {
+                        setState(() => _labResults[index] = updated);
+                      },
+                      onRemove: () {
+                        setState(() => _labResults.removeAt(index));
+                      },
+                    ),
+                  );
+                }),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _labResults.add(const LabResult(name: '', value: ''));
+                    });
+                  },
+                  icon: Icon(Icons.add, size: 18, color: theme.primary),
+                  label: Text(
+                    'Add lab result',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: theme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _SectionDivider(label: 'Clinical Question', theme: theme),
+                const SizedBox(height: 12),
+                _StyledTextField(
+                  controller: _clinicalQuestionController,
+                  hint: 'What is the optimal management strategy given...',
+                  theme: theme,
+                  maxLines: 4,
                 ),
 
                 const SizedBox(height: 20),
@@ -510,22 +792,83 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
         .where((t) => t.isNotEmpty)
         .toList();
 
-    final demographics = <String, dynamic>{};
-    if (_ageController.text.isNotEmpty) {
-      demographics['age'] = int.tryParse(_ageController.text);
-    }
-    if (_selectedGender != null) {
-      demographics['gender'] = _selectedGender;
-    }
-    if (_selectedEthnicity != null) {
-      demographics['ethnicity'] = _selectedEthnicity;
-    }
+    final snapshot = ClinicalSnapshot(
+      age: _ageController.text.trim().isNotEmpty
+          ? _ageController.text.trim()
+          : null,
+      gender: _selectedGender,
+      ethnicity: _selectedEthnicity,
+      chiefComplaint: _chiefComplaintController.text.trim().isNotEmpty
+          ? _chiefComplaintController.text.trim()
+          : null,
+      pastMedicalHistory: _pastMedicalHxController.text.trim().isNotEmpty
+          ? _pastMedicalHxController.text.trim()
+          : null,
+      medications: _medicationsController.text.trim().isNotEmpty
+          ? _medicationsController.text.trim()
+          : null,
+      vitalSigns: VitalSignsMap(
+        bp: _vitalBpController.text.trim().isNotEmpty
+            ? VitalSign(
+                value: _vitalBpController.text.trim(),
+                abnormal: _vitalBpAbnormal,
+              )
+            : null,
+        hr: _vitalHrController.text.trim().isNotEmpty
+            ? VitalSign(
+                value: _vitalHrController.text.trim(),
+                abnormal: _vitalHrAbnormal,
+              )
+            : null,
+        spo2: _vitalSpo2Controller.text.trim().isNotEmpty
+            ? VitalSign(
+                value: _vitalSpo2Controller.text.trim(),
+                abnormal: _vitalSpo2Abnormal,
+              )
+            : null,
+        temp: _vitalTempController.text.trim().isNotEmpty
+            ? VitalSign(
+                value: _vitalTempController.text.trim(),
+                abnormal: _vitalTempAbnormal,
+              )
+            : null,
+        rr: _vitalRrController.text.trim().isNotEmpty
+            ? VitalSign(
+                value: _vitalRrController.text.trim(),
+                abnormal: _vitalRrAbnormal,
+              )
+            : null,
+      ),
+      labResults: _labResults
+          .where((l) => l.name.trim().isNotEmpty && l.value.trim().isNotEmpty)
+          .toList(),
+      clinicalQuestion: _clinicalQuestionController.text.trim().isNotEmpty
+          ? _clinicalQuestionController.text.trim()
+          : null,
+    );
+    final demographics = snapshot.toDemographicsJson();
 
     // Collect file paths from selected files
     final filePaths = _selectedFiles
         .where((f) => f.path != null)
         .map((f) => f.path!)
         .toList();
+
+    int? specialtyId;
+    for (final s in _loadedSpecialties) {
+      if (s.name == _selectedSpecialty) {
+        specialtyId = s.id;
+        break;
+      }
+    }
+
+    int? countryId;
+    for (final ct in _loadedCountries) {
+      if (ct.name == _selectedCountry) {
+        countryId = ct.id;
+        break;
+      }
+    }
 
     final request = CreateCaseRequest(
       title: _titleController.text.trim(),
@@ -537,60 +880,49 @@ class _CreateDiscussionScreenState extends State<CreateDiscussionScreen> {
       patientDemographics: demographics.isNotEmpty ? demographics : null,
       attachedFiles: filePaths.isNotEmpty ? filePaths : null,
       existingFileUrls: _existingFileUrls.isNotEmpty ? _existingFileUrls : null,
+      specialtyId: specialtyId,
+      countryId: countryId,
     );
 
     final bloc = context.read<CreateDiscussionBloc>();
 
     if (_isEditMode) {
-      bloc.add(UpdateDiscussion(widget.existingCase!.id, request));
+      bloc.add(UpdateDiscussion((_editCase ?? widget.existingCase)!.id, request));
     } else {
       bloc.add(CreateDiscussion(request));
     }
   }
 
-  static const _specialties = [
-    'Cardiology',
-    'Dermatology',
-    'Emergency Medicine',
-    'Endocrinology',
-    'Gastroenterology',
-    'General Surgery',
-    'Internal Medicine',
-    'Nephrology',
-    'Neurology',
-    'Obstetrics & Gynecology',
-    'Oncology',
-    'Ophthalmology',
-    'Orthopedics',
-    'Pediatrics',
-    'Psychiatry',
-    'Pulmonology',
-    'Radiology',
-    'Rheumatology',
-    'Urology',
-  ];
-
-  static const _countries = [
-    'United States',
-    'United Kingdom',
-    'Canada',
-    'Australia',
-    'India',
-    'Germany',
-    'France',
-    'Saudi Arabia',
-    'UAE',
-    'Pakistan',
-    'Egypt',
-    'Brazil',
-    'South Africa',
-    'Japan',
-    'South Korea',
-    'China',
-  ];
 }
 
 // ── Helper Widgets ──
+
+class _LoadingDropdownPlaceholder extends StatelessWidget {
+  final OneUITheme theme;
+  const _LoadingDropdownPlaceholder({required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.divider),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: theme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _SectionLabel extends StatelessWidget {
   final String label;
@@ -682,14 +1014,14 @@ class _StyledTextField extends StatelessWidget {
         filled: true,
         fillColor: theme.inputBackground,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.border),
+          borderSide: BorderSide(color: theme.inputBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.border),
+          borderSide: BorderSide(color: theme.inputBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -726,7 +1058,7 @@ class _DropdownField extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.inputBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: theme.border),
+        border: Border.all(color: theme.inputBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -740,10 +1072,11 @@ class _DropdownField extends StatelessWidget {
             ),
           ),
           isExpanded: true,
-          icon: Icon(Icons.arrow_drop_down, color: theme.textTertiary),
+          icon: Icon(Icons.arrow_drop_down, color: theme.textSecondary),
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 14,
             fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500,
             color: theme.textPrimary,
           ),
           dropdownColor: theme.cardBackground,
@@ -755,7 +1088,7 @@ class _DropdownField extends StatelessWidget {
                     ? '${item[0].toUpperCase()}${item.substring(1)}'
                     : item,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontFamily: 'Poppins',
                   color: theme.textPrimary,
                 ),
@@ -903,6 +1236,145 @@ class _NewFileTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _VitalSignField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final bool abnormal;
+  final OneUITheme theme;
+  final ValueChanged<bool> onAbnormalChanged;
+
+  const _VitalSignField({
+    required this.label,
+    required this.controller,
+    required this.abnormal,
+    required this.theme,
+    required this.onAbnormalChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 52,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Poppins',
+              color: theme.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: _StyledTextField(
+            controller: controller,
+            hint: 'Value',
+            theme: theme,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Checkbox(
+              value: abnormal,
+              activeColor: theme.error,
+              onChanged: (v) => onAbnormalChanged(v ?? false),
+            ),
+            Text(
+              'Abnormal',
+              style: TextStyle(
+                fontSize: 11,
+                fontFamily: 'Poppins',
+                color: theme.textTertiary,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _LabResultRow extends StatelessWidget {
+  final LabResult lab;
+  final OneUITheme theme;
+  final ValueChanged<LabResult> onChanged;
+  final VoidCallback onRemove;
+
+  const _LabResultRow({
+    required this.lab,
+    required this.theme,
+    required this.onChanged,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: TextFormField(
+            initialValue: lab.name,
+            onChanged: (v) => onChanged(lab.copyWith(name: v)),
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'Poppins',
+              color: theme.textPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Test name',
+              filled: true,
+              fillColor: theme.inputBackground,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: theme.inputBorder),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: TextFormField(
+            initialValue: lab.value,
+            onChanged: (v) => onChanged(lab.copyWith(value: v)),
+            style: TextStyle(
+              fontSize: 14,
+              fontFamily: 'Poppins',
+              color: theme.textPrimary,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Value',
+              filled: true,
+              fillColor: theme.inputBackground,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: theme.inputBorder),
+              ),
+            ),
+          ),
+        ),
+        Checkbox(
+          value: lab.abnormal,
+          activeColor: theme.error,
+          onChanged: (v) => onChanged(lab.copyWith(abnormal: v ?? false)),
+        ),
+        IconButton(
+          icon: Icon(Icons.close, size: 18, color: theme.textTertiary),
+          onPressed: onRemove,
+        ),
+      ],
     );
   }
 }

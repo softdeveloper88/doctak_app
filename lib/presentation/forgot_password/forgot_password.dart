@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/forgot_password/bloc/forgot_event.dart';
 import 'package:doctak_app/presentation/forgot_password/bloc/forgot_state.dart';
@@ -41,7 +42,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               var data = jsonDecode(state.response);
               if (data['success']) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent), backgroundColor: theme.success));
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const LoginScreen()), (route) => false);
+                AppNavigator.pushAndRemoveAll(context, const LoginScreen());
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), backgroundColor: theme.error));
               }
@@ -190,7 +191,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                   actionText: translation(context).lbl_sign_up,
                                   onTap: () {
                                     FocusScope.of(context).unfocus();
-                                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => SignUpScreen()), (route) => false);
+                                    AppNavigator.pushAndRemoveAll(context, SignUpScreen());
                                   },
                                 ),
                               ],

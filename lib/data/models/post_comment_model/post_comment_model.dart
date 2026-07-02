@@ -124,12 +124,18 @@ class PostComments {
 
   PostComments.fromJson(dynamic json) {
     id = json['id'];
-    comment = json['comment'];
+    comment = json['comment'] ?? json['body'];
     createdAt = json['created_at'];
-    userHasLiked = json['user_has_liked'];
-    reactionCount = json['reaction_count'];
-    replyCount = json['reply_count'];
+    userHasLiked = _parseCommentUserHasLiked(json['user_has_liked']);
+    reactionCount = json['reaction_count'] != null
+        ? int.tryParse(json['reaction_count'].toString())
+        : (json['like_count'] != null ? int.tryParse(json['like_count'].toString()) : null);
+    replyCount = json['reply_count'] != null ? int.tryParse(json['reply_count'].toString()) : null;
     commenter = json['commenter'] != null ? Commenter.fromJson(json['commenter']) : null;
+    if (commenter != null &&
+        (json['commenterIsVerified'] != null || json['commenter_is_verified'] != null)) {
+      commenter!.isVerified = Commenter.parseCommenterVerified(json);
+    }
   }
   int? id;
   String? comment;
@@ -158,18 +164,35 @@ Commenter commenterFromJson(String str) => Commenter.fromJson(json.decode(str));
 String commenterToJson(Commenter data) => json.encode(data.toJson());
 
 class Commenter {
-  Commenter({this.id, this.firstName, this.lastName, this.profilePic});
+  Commenter({this.id, this.firstName, this.lastName, this.profilePic, this.specialty, this.isVerified});
 
   Commenter.fromJson(dynamic json) {
     id = json['id'];
     firstName = json['first_name'];
     lastName = json['last_name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
+    if ((firstName == null || '$firstName'.trim().isEmpty) && json['name'] != null) {
+      final parts = json['name'].toString().trim().split(' ');
+      firstName = parts.isNotEmpty ? parts.first : '';
+      lastName = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+    }
+    profilePic = resolveCommentProfilePic(json);
+    specialty = json['specialty']?.toString() ?? json['specialization']?.toString();
+    isVerified = parseCommenterVerified(json);
+  }
+
+  static bool parseCommenterVerified(dynamic json) {
+    if (json is! Map) return false;
+    final raw = json['is_verified'] ??
+        json['commenterIsVerified'] ??
+        json['commenter_is_verified'];
+    return raw == true || raw == 1 || raw == '1';
   }
   dynamic id;
   String? firstName;
   String? lastName;
   String? profilePic;
+  String? specialty;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -177,6 +200,30 @@ class Commenter {
     map['first_name'] = firstName;
     map['last_name'] = lastName;
     map['profile_pic'] = profilePic;
+    map['specialty'] = specialty;
+    map['is_verified'] = isVerified;
     return map;
   }
+}
+
+bool? _parseCommentUserHasLiked(dynamic raw) {
+  if (raw == null) return false;
+  if (raw is bool) return raw;
+  if (raw is num) return raw != 0;
+  final s = raw.toString().toLowerCase();
+  return s == 'true' || s == '1';
+}
+
+String? resolveCommentProfilePic(dynamic json) {
+  if (json is! Map) return null;
+  final user = json['user'];
+  final raw = json['profile_pic'] ??
+      json['profilePic'] ??
+      json['avatar'] ??
+      json['avatar_url'] ??
+      json['author_avatar'] ??
+      json['display_pic'] ??
+      (user is Map ? user['profile_pic'] ?? user['profilePic'] : null);
+  final resolved = AppData.fullImageUrl(raw?.toString());
+  return resolved.isEmpty ? null : resolved;
 }

@@ -80,30 +80,22 @@ class CaseDiscussionRepository {
     List<CountryFilter> countries = [];
 
     try {
-      final response = await _dio.get('$baseUrl/api/v1/specialty');
+      final response = await _dio.get('$baseUrl/api/v1/cases/filters');
       final data = response.data;
-      List items = [];
-      if (data is List) {
-        items = data;
-      } else if (data is Map && data['data'] is List) {
-        items = data['data'];
-      }
-      specialties = items
-          .map((item) => SpecialtyFilter.fromJson({
-                'id': item['id'] ?? 0,
-                'name': item['name'] ?? item['specialty_name'] ?? 'Unknown',
-              }))
-          .toList();
-    } catch (e) {
-      debugPrint('Error fetching specialties: $e');
-    }
+      if (data is Map && data['success'] == true && data['data'] is Map) {
+        final payload = data['data'] as Map<String, dynamic>;
 
-    try {
-      final response = await _dio.get('$baseUrl/api/v1/country-list');
-      if (response.data is Map) {
-        final data = response.data as Map<String, dynamic>;
-        if (data['countries'] is List) {
-          countries = (data['countries'] as List)
+        if (payload['specialties'] is List) {
+          specialties = (payload['specialties'] as List)
+              .map((item) => SpecialtyFilter.fromJson({
+                    'id': item['id'] ?? 0,
+                    'name': item['name'] ?? '',
+                  }))
+              .toList();
+        }
+
+        if (payload['countries'] is List) {
+          countries = (payload['countries'] as List)
               .map((item) => CountryFilter.fromJson({
                     'id': item['id'] ?? 0,
                     'name': item['countryName'] ?? item['name'] ?? '',
@@ -114,7 +106,7 @@ class CaseDiscussionRepository {
         }
       }
     } catch (e) {
-      debugPrint('Error fetching countries: $e');
+      debugPrint('Error fetching filter data: $e');
     }
 
     _cachedSpecialties = specialties;
@@ -144,7 +136,7 @@ class CaseDiscussionRepository {
       }
 
       final response = await _dio.get(
-        '$baseUrl/api/v6/cases',
+        '$baseUrl/api/v1/cases',
         queryParameters: queryParams,
       );
 
@@ -188,7 +180,7 @@ class CaseDiscussionRepository {
 
   Future<CaseDiscussion> getCaseDiscussion(int caseId) async {
     try {
-      final response = await _dio.get('$baseUrl/api/v6/cases/$caseId');
+      final response = await _dio.get('$baseUrl/api/v1/cases/$caseId');
 
       if (response.data == null || response.data is! Map<String, dynamic>) {
         throw Exception('Invalid response format');
@@ -220,7 +212,7 @@ class CaseDiscussionRepository {
       await attachFiles(formData, request);
 
       final response = await _dio.post(
-        '$baseUrl/api/v6/cases',
+        '$baseUrl/api/v1/cases',
         data: formData,
         options: Options(
           headers: {
@@ -246,7 +238,7 @@ class CaseDiscussionRepository {
       await attachFiles(formData, request);
 
       final response = await _dio.post(
-        '$baseUrl/api/v6/cases/$caseId',
+        '$baseUrl/api/v1/cases/$caseId',
         data: formData,
         options: Options(
           headers: {
@@ -267,7 +259,7 @@ class CaseDiscussionRepository {
 
   Future<void> deleteCase(int caseId) async {
     try {
-      await _dio.delete('$baseUrl/api/v6/cases/$caseId');
+      await _dio.delete('$baseUrl/api/v1/cases/$caseId');
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -293,7 +285,7 @@ class CaseDiscussionRepository {
       if (verified != null) queryParams['verified'] = verified ? '1' : '0';
 
       final response = await _dio.get(
-        '$baseUrl/api/v6/cases/$caseId/comments',
+        '$baseUrl/api/v1/cases/$caseId/comments',
         queryParameters: queryParams,
       );
 
@@ -345,7 +337,7 @@ class CaseDiscussionRepository {
   }) async {
     try {
       final response = await _dio.post(
-        '$baseUrl/api/v6/cases/comments',
+        '$baseUrl/api/v1/cases/comments',
         data: {
           'case_id': caseId,
           'comment': comment,
@@ -382,7 +374,7 @@ class CaseDiscussionRepository {
   Future<void> updateComment(int commentId, String comment) async {
     try {
       await _dio.put(
-        '$baseUrl/api/v6/cases/comments/$commentId',
+        '$baseUrl/api/v1/cases/comments/$commentId',
         data: {'comment': comment},
       );
     } on DioException catch (e) {
@@ -392,7 +384,7 @@ class CaseDiscussionRepository {
 
   Future<void> deleteComment(int commentId) async {
     try {
-      await _dio.delete('$baseUrl/api/v6/cases/comments/$commentId');
+      await _dio.delete('$baseUrl/api/v1/cases/comments/$commentId');
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -405,7 +397,7 @@ class CaseDiscussionRepository {
   Future<List<CaseReply>> getReplies(int commentId) async {
     try {
       final response =
-          await _dio.get('$baseUrl/api/v6/cases/comments/$commentId/replies');
+          await _dio.get('$baseUrl/api/v1/cases/comments/$commentId/replies');
       final responseData = response.data as Map<String, dynamic>;
 
       if (responseData['success'] == true && responseData['data'] != null) {
@@ -428,7 +420,7 @@ class CaseDiscussionRepository {
   }) async {
     try {
       final response = await _dio.post(
-        '$baseUrl/api/v6/cases/replies',
+        '$baseUrl/api/v1/cases/replies',
         data: {
           'comment_id': commentId,
           'reply': reply,
@@ -448,6 +440,18 @@ class CaseDiscussionRepository {
         reply: reply,
         createdAt: DateTime.now(),
         author: CaseAuthor(id: 0, name: 'You', specialty: ''),
+        isOwner: true,
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<void> updateReply(int replyId, String reply) async {
+    try {
+      await _dio.put(
+        '$baseUrl/api/v1/cases/replies/$replyId',
+        data: {'reply': reply},
       );
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -456,7 +460,7 @@ class CaseDiscussionRepository {
 
   Future<void> deleteReply(int replyId) async {
     try {
-      await _dio.delete('$baseUrl/api/v6/cases/replies/$replyId');
+      await _dio.delete('$baseUrl/api/v1/cases/replies/$replyId');
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -473,7 +477,7 @@ class CaseDiscussionRepository {
   }) async {
     try {
       final response = await _dio.post(
-        '$baseUrl/api/v6/cases/action',
+        '$baseUrl/api/v1/cases/action',
         data: {
           'case_id': caseId,
           'action': action,
@@ -486,18 +490,67 @@ class CaseDiscussionRepository {
     }
   }
 
-  Future<void> performCommentAction({
-    required int commentId,
-    required String action, // comment_like, comment_unlike
+  Future<Map<String, dynamic>> voteCase({
+    required int caseId,
+    required String direction,
   }) async {
     try {
-      await _dio.post(
-        '$baseUrl/api/v6/cases/comment-action',
+      final response = await _dio.post(
+        '$baseUrl/api/discuss-case/$caseId/like',
+        data: {
+          'direction': direction,
+        },
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic>) return data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+      return {'success': true};
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> voteComment({
+    required int commentId,
+    required String direction,
+    String targetType = 'comment',
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v1/cases/comment-action',
+        data: {
+          'comment_id': commentId,
+          'direction': direction,
+          'target_type': targetType,
+        },
+      );
+      final data = response.data;
+      if (data is Map<String, dynamic>) return data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+      return {'success': true};
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<Map<String, dynamic>> performCommentAction({
+    required int commentId,
+    required String action, // like, unlike
+    String targetType = 'comment', // comment | reply (case discussion)
+  }) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/api/v1/cases/comment-action',
         data: {
           'comment_id': commentId,
           'action': action,
+          'target_type': targetType,
         },
       );
+      final data = response.data;
+      if (data is Map<String, dynamic>) return data;
+      if (data is Map) return Map<String, dynamic>.from(data);
+      return {'success': true};
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -509,7 +562,7 @@ class CaseDiscussionRepository {
 
   Future<void> followCase(int caseId) async {
     try {
-      await _dio.post('$baseUrl/api/v6/cases/$caseId/follow');
+      await _dio.post('$baseUrl/api/v1/cases/$caseId/follow');
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -517,7 +570,7 @@ class CaseDiscussionRepository {
 
   Future<void> unfollowCase(int caseId) async {
     try {
-      await _dio.delete('$baseUrl/api/v6/cases/$caseId/follow');
+      await _dio.delete('$baseUrl/api/v1/cases/$caseId/follow');
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -532,7 +585,7 @@ class CaseDiscussionRepository {
       int caseId) async {
     try {
       final response =
-          await _dio.post('$baseUrl/api/v6/cases/$caseId/ai-summary');
+          await _dio.post('$baseUrl/api/v1/cases/$caseId/ai-summary');
       final responseData = response.data as Map<String, dynamic>;
 
       if (responseData['success'] == true &&
@@ -563,7 +616,7 @@ class CaseDiscussionRepository {
   Future<List<CaseUpdate>> getCaseUpdates(int caseId) async {
     try {
       final response =
-          await _dio.get('$baseUrl/api/v6/cases/$caseId/updates');
+          await _dio.get('$baseUrl/api/v1/cases/$caseId/updates');
       final responseData = response.data as Map<String, dynamic>;
 
       if (responseData['success'] == true &&
@@ -604,7 +657,7 @@ class CaseDiscussionRepository {
         formData.files.add(MapEntry('attached_files[]', file));
       }
       final response = await _dio.post(
-        '$baseUrl/api/v6/cases/$caseId/updates',
+        '$baseUrl/api/v1/cases/$caseId/updates',
         data: formData,
       );
 
@@ -639,7 +692,7 @@ class CaseDiscussionRepository {
         formData.files.add(MapEntry('attached_files[]', file));
       }
       final response = await _dio.put(
-        '$baseUrl/api/v6/cases/updates/$updateId',
+        '$baseUrl/api/v1/cases/updates/$updateId',
         data: formData,
       );
 
@@ -657,7 +710,7 @@ class CaseDiscussionRepository {
   Future<void> deleteCaseUpdate(int updateId) async {
     try {
       final response = await _dio.delete(
-        '$baseUrl/api/v6/cases/updates/$updateId',
+        '$baseUrl/api/v1/cases/updates/$updateId',
       );
 
       final responseData = response.data as Map<String, dynamic>;
@@ -695,10 +748,22 @@ class CaseDiscussionRepository {
       }
     }
 
-    formData.fields.add(const MapEntry('specialty_id', '1'));
+    if (request.specialtyId != null) {
+      formData.fields
+          .add(MapEntry('specialty_id', request.specialtyId.toString()));
+    }
+    if (request.countryId != null) {
+      formData.fields
+          .add(MapEntry('country_id', request.countryId.toString()));
+    }
 
-    if (request.patientDemographics != null) {
+    if (request.patientDemographics != null &&
+        request.patientDemographics!.isNotEmpty) {
       final demographics = request.patientDemographics!;
+      formData.fields.add(MapEntry(
+        'patient_demographics',
+        jsonEncode(demographics),
+      ));
       if (demographics['age'] != null) {
         formData.fields
             .add(MapEntry('patient_age', demographics['age'].toString()));
@@ -710,6 +775,30 @@ class CaseDiscussionRepository {
       if (demographics['ethnicity'] != null) {
         formData.fields.add(MapEntry(
             'patient_ethnicity', demographics['ethnicity'].toString()));
+      }
+      if (demographics['chief_complaint'] != null) {
+        formData.fields.add(MapEntry('chief_complaint',
+            demographics['chief_complaint'].toString()));
+      }
+      if (demographics['past_medical_history'] != null) {
+        formData.fields.add(MapEntry('past_medical_history',
+            demographics['past_medical_history'].toString()));
+      }
+      if (demographics['medications'] != null) {
+        formData.fields.add(
+            MapEntry('medications', demographics['medications'].toString()));
+      }
+      if (demographics['clinical_question'] != null) {
+        formData.fields.add(MapEntry('clinical_question',
+            demographics['clinical_question'].toString()));
+      }
+      if (demographics['vital_signs'] != null) {
+        formData.fields.add(MapEntry(
+            'vital_signs', jsonEncode(demographics['vital_signs'])));
+      }
+      if (demographics['lab_results'] != null) {
+        formData.fields.add(MapEntry(
+            'lab_results', jsonEncode(demographics['lab_results'])));
       }
     }
 

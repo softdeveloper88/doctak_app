@@ -59,10 +59,30 @@ class ExperienceModel {
 
   bool get isCurrentlyWorking => currentStatus == 1;
 
+  static String formatExperienceDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    final trimmed = raw.trim();
+    if (trimmed.toLowerCase() == 'present') return 'Present';
+    final parsed = DateTime.tryParse(trimmed);
+    if (parsed != null) {
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      ];
+      final month = parsed.month;
+      if (month >= 1 && month <= 12) {
+        return '${months[month - 1]} ${parsed.year}';
+      }
+    }
+    return trimmed;
+  }
+
   String get displayDateRange {
-    final start = startDate ?? '';
-    final end = isCurrentlyWorking ? 'Present' : (endDate ?? '');
+    final start = formatExperienceDate(startDate);
+    final end = isCurrentlyWorking ? 'Present' : formatExperienceDate(endDate);
     if (start.isEmpty && end.isEmpty) return '';
+    if (start.isEmpty) return end;
+    if (end.isEmpty) return start;
     return '$start - $end';
   }
 }

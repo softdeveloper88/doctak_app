@@ -1502,7 +1502,7 @@
 "lbl_co_authors_prefix": "Co-authors: {value}",
 "@lbl_co_authors_prefix": {"placeholders": {"value": {"type": "String"}}},
 "lbl_education_info": "Education",
-"lbl_connections_short": "Conns",
+"lbl_connections_short": "Connections",
 "lbl_report_user": "Report User",
 "lbl_block_user": "Block User",
 "lbl_points_format": "{count} pts",

@@ -4,7 +4,7 @@ import 'package:doctak_app/data/models/profile_model/work_education_model.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:doctak_app/widgets/one_ui_form_dropdown.dart';
 import 'package:flutter/material.dart';
 
 import '../../../utils/SVCommon.dart';
@@ -149,27 +149,18 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> with SingleTicker
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (AppData.userType == "doctor") const SizedBox(height: 10),
-                            if (AppData.userType == "doctor") Text(translation(context).lbl_specialty, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                            if (AppData.userType == "doctor") const SizedBox(height: 8),
                             if (AppData.userType == "doctor")
-                              Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey.shade300),
-                                ),
-                                child: CustomDropdownButtonFormField(
-                                  itemBuilder: (item) => Text(item, style: const TextStyle(color: Colors.black)),
-                                  items: specialties,
-                                  value: selectedSpecialty,
-                                  width: double.infinity,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                  onChanged: (String? newValue) {
-                                    print(newValue);
-                                    print("Specialty $newValue");
-                                    updateWork?.name = newValue;
-                                    widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue ?? ''));
-                                  },
-                                ),
+                              OneUIFormDropdown<String>(
+                                label: translation(context).lbl_specialty,
+                                items: specialties,
+                                value: selectedSpecialty,
+                                itemLabel: (item) => item,
+                                onChanged: (String? newValue) {
+                                  print(newValue);
+                                  print("Specialty $newValue");
+                                  updateWork?.name = newValue;
+                                  widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue ?? ''));
+                                },
                               ),
                           ],
                         );
@@ -181,25 +172,16 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> with SingleTicker
 
                 // Position/Role dropdown
                 const SizedBox(height: 20),
-                Text(translation(context).lbl_position_role, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: CustomDropdownButtonFormField(
-                    itemBuilder: (item) => Text(item, style: const TextStyle(color: Colors.black)),
-                    items: positionList,
-                    value: updateWork?.position ?? positionList.first,
-                    width: double.infinity,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        updateWork?.position = newValue;
-                      });
-                    },
-                  ),
+                OneUIFormDropdown<String>(
+                  label: translation(context).lbl_position_role,
+                  items: positionList,
+                  value: updateWork?.position ?? positionList.first,
+                  itemLabel: (item) => item,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      updateWork?.position = newValue;
+                    });
+                  },
                 ),
 
                 // Hospital/Clinic name field
@@ -264,50 +246,33 @@ class _AddEditWorkScreenState extends State<AddEditWorkScreen> with SingleTicker
 
                 // Privacy dropdown
                 const SizedBox(height: 20),
-                Text(translation(context).lbl_privacy, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
+                OneUIFormDropdown<String>(
+                  label: translation(context).lbl_privacy,
+                  items: privacyList,
+                  value: privacy,
+                  itemLabel: (item) => item == 'only me'
+                      ? translation(context).lbl_only_me
+                      : item == 'private'
+                      ? translation(context).lbl_friends
+                      : translation(context).lbl_public,
+                  itemLeading: (item) => Icon(
+                    item == 'only me'
+                        ? Icons.lock_outline
+                        : item == 'private'
+                        ? Icons.people_outline
+                        : Icons.public,
+                    size: 16,
+                    color: item == 'only me'
+                        ? Colors.red
+                        : item == 'private'
+                        ? Colors.orange
+                        : Colors.green,
                   ),
-                  child: CustomDropdownButtonFormField(
-                    itemBuilder: (item) => Row(
-                      children: [
-                        Icon(
-                          item == 'only me'
-                              ? Icons.lock_outline
-                              : item == 'private'
-                              ? Icons.people_outline
-                              : Icons.public,
-                          size: 16,
-                          color: item == 'only me'
-                              ? Colors.red
-                              : item == 'private'
-                              ? Colors.orange
-                              : Colors.green,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          item == 'only me'
-                              ? translation(context).lbl_only_me
-                              : item == 'private'
-                              ? translation(context).lbl_friends
-                              : translation(context).lbl_public,
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                      ],
-                    ),
-                    items: privacyList,
-                    value: privacy,
-                    width: double.infinity,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        privacy = newValue!;
-                      });
-                    },
-                  ),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      privacy = newValue!;
+                    });
+                  },
                 ),
               ],
             ),

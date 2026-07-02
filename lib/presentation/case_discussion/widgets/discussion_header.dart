@@ -1,17 +1,20 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import '../models/case_discussion_models.dart';
+import 'case_clinical_detail.dart';
+import 'case_display_utils.dart';
+import 'case_discussion_layout.dart';
+import 'vote_controls.dart';
 
 /// Full case header for the detail screen.
-/// Displays author info, full title, description, attachments gallery,
-/// metadata (specialty, country, complexity, teaching value, patient demographics),
-/// and action buttons (like/bookmark/follow/share).
 class DiscussionHeader extends StatelessWidget {
   final CaseDiscussion discussion;
-  final VoidCallback onLike;
+  final VoidCallback onUpvote;
+  final VoidCallback onDownvote;
   final VoidCallback onBookmark;
   final VoidCallback onFollow;
   final VoidCallback onShare;
@@ -20,7 +23,8 @@ class DiscussionHeader extends StatelessWidget {
   const DiscussionHeader({
     super.key,
     required this.discussion,
-    required this.onLike,
+    required this.onUpvote,
+    required this.onDownvote,
     required this.onBookmark,
     required this.onFollow,
     required this.onShare,
@@ -39,13 +43,46 @@ class DiscussionHeader extends StatelessWidget {
         .toList();
 
     return Container(
+      margin: const EdgeInsets.fromLTRB(
+        CaseDiscussionLayout.screenHorizontal,
+        CaseDiscussionLayout.screenTop,
+        CaseDiscussionLayout.screenHorizontal,
+        0,
+      ),
+      clipBehavior: Clip.antiAlias,
       decoration: theme.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Tags ──
+          if (tags.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: tags.map((tag) => _CaseTagChip(tag: tag)).toList(),
+              ),
+            ),
+
+          // ── Title ──
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, tags.isNotEmpty ? 12 : 16, 16, 0),
+            child: Text(
+              discussion.title,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Poppins',
+                color: theme.textPrimary,
+                height: 1.3,
+              ),
+            ),
+          ),
+
           // ── Author Info ──
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 12, 0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 12, 0),
             child: Row(
               children: [
                 _AuthorAvatar(
@@ -58,14 +95,25 @@ class DiscussionHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        discussion.author.name,
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins',
-                          color: theme.textPrimary,
-                        ),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              discussion.author.name,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Poppins',
+                                color: theme.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          if (discussion.author.isVerified)
+                            theme.buildVerifiedBadge(size: 15),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -81,7 +129,24 @@ class DiscussionHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (discussion.isOwner && onEdit != null)
+                if (!discussion.isOwner)
+                  TextButton(
+                    onPressed: onFollow,
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      minimumSize: const Size(0, 34),
+                    ),
+                    child: Text(
+                      discussion.isFollowing ? 'Following' : '+ Follow',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                        color: theme.primary,
+                      ),
+                    ),
+                  )
+                else if (onEdit != null)
                   IconButton(
                     icon: Icon(Icons.edit_outlined,
                         size: 20, color: theme.textSecondary),
@@ -92,48 +157,11 @@ class DiscussionHeader extends StatelessWidget {
             ),
           ),
 
-          // ── Title ──
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
-            child: Text(
-              discussion.title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                fontFamily: 'Poppins',
-                color: theme.textPrimary,
-                height: 1.35,
-              ),
-            ),
-          ),
-
-          // ── Tags ──
-          if (tags.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: tags.map((tag) {
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '#$tag',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        color: theme.primary,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
+          // ── Clinical snapshot (patient, vitals, labs, question) ──
+          if (discussion.metadata != null &&
+              !discussion.metadata!.clinicalSnapshot.isEmpty)
+            CaseClinicalDetail(
+              snapshot: discussion.metadata!.clinicalSnapshot,
             ),
 
           // ── Description ──
@@ -182,7 +210,7 @@ class DiscussionHeader extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           // ── Stats Row ──
           Padding(
@@ -193,21 +221,24 @@ class DiscussionHeader extends StatelessWidget {
           const SizedBox(height: 8),
           Divider(height: 1, color: theme.divider),
 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: VoteControls(
+              layout: VoteLayout.row,
+              likes: discussion.likes,
+              dislikes: discussion.dislikes,
+              isUpvoted: discussion.isLiked,
+              isDownvoted: discussion.isDisliked,
+              onUpvote: onUpvote,
+              onDownvote: onDownvote,
+            ),
+          ),
+
           // ── Action Buttons Row ──
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
             child: Row(
               children: [
-                _ActionButton(
-                  icon: discussion.isLiked
-                      ? Icons.favorite
-                      : Icons.favorite_border,
-                  label: 'Like',
-                  color: discussion.isLiked
-                      ? theme.likeColor
-                      : theme.textSecondary,
-                  onTap: onLike,
-                ),
                 _ActionButton(
                   icon: discussion.isBookmarked
                       ? Icons.bookmark
@@ -239,6 +270,7 @@ class DiscussionHeader extends StatelessWidget {
           ),
 
           Divider(height: 1, color: theme.divider),
+          const SizedBox(height: 4),
         ],
       ),
     );
@@ -248,6 +280,9 @@ class DiscussionHeader extends StatelessWidget {
     final parts = <String>[];
     if (discussion.author.specialty.isNotEmpty) {
       parts.add(discussion.author.specialty);
+    }
+    if (discussion.countryName != null && discussion.countryName!.isNotEmpty) {
+      parts.add(discussion.countryName!);
     }
     parts.add(timeago.format(discussion.createdAt));
     return parts.join(' · ');
@@ -277,19 +312,15 @@ class _AuthorAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage =
         author.profilePic != null && author.profilePic!.isNotEmpty;
-    final initials = author.name
-        .split(' ')
-        .take(2)
-        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
-        .join();
+    final initials = authorInitials(author.name);
+    final color = avatarColorFromName(author.name);
 
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: theme.avatarBackground,
-        border: Border.all(color: theme.avatarBorder, width: 1),
+        color: color.withValues(alpha: 0.14),
       ),
       child: hasImage
           ? ClipOval(
@@ -303,8 +334,8 @@ class _AuthorAvatar extends StatelessWidget {
                     initials,
                     style: TextStyle(
                       fontSize: size * 0.35,
-                      fontWeight: FontWeight.w600,
-                      color: theme.avatarText,
+                      fontWeight: FontWeight.w700,
+                      color: color,
                     ),
                   ),
                 ),
@@ -315,8 +346,8 @@ class _AuthorAvatar extends StatelessWidget {
                 initials,
                 style: TextStyle(
                   fontSize: size * 0.35,
-                  fontWeight: FontWeight.w600,
-                  color: theme.avatarText,
+                  fontWeight: FontWeight.w700,
+                  color: color,
                 ),
               ),
             ),
@@ -417,9 +448,7 @@ class _ImageGallery extends StatelessWidget {
   }
 
   void _showFullImage(BuildContext context, String url) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => _FullImageViewer(url: url),
-    ));
+    AppNavigator.push(context, _FullImageViewer(url: url));
   }
 }
 
@@ -715,6 +744,38 @@ class _ActionButton extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CaseTagChip extends StatelessWidget {
+  final String tag;
+
+  const _CaseTagChip({required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    final style = caseTagStyle(tag);
+    final label = style.uppercase ? tag.toUpperCase() : tag;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: style.background,
+        borderRadius: BorderRadius.circular(999),
+        border: tag.toLowerCase().contains('cme')
+            ? Border.all(color: const Color(0xFFFDE68A))
+            : null,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10,
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+          color: style.foreground,
         ),
       ),
     );

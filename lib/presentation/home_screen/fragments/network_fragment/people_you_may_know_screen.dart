@@ -1,19 +1,21 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_widgets.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/network_screen/bloc/network_bloc.dart';
+import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:shimmer/shimmer.dart';
+import 'package:doctak_app/widgets/one_ui_shimmer.dart';
 
 import '../../../../localization/app_localization.dart';
 
@@ -24,7 +26,12 @@ import '../../../../localization/app_localization.dart';
 /// ═══════════════════════════════════════════════════════
 class PeopleYouMayKnowScreen extends StatefulWidget {
   final String? initialSearch;
-  const PeopleYouMayKnowScreen({super.key, this.initialSearch});
+  final String initialEntityScope;
+  const PeopleYouMayKnowScreen({
+    super.key,
+    this.initialSearch,
+    this.initialEntityScope = 'all',
+  });
 
   @override
   State<PeopleYouMayKnowScreen> createState() =>
@@ -39,6 +46,7 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
   Timer? _debounce;
 
   String _currentQuery = '';
+  String _entityScope = 'all';
   String _selectedSpecialty = '';
   String _selectedCountry = '';
   List<dynamic> _specialties = [];
@@ -53,11 +61,18 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
     if (widget.initialSearch != null && widget.initialSearch!.isNotEmpty) {
       _currentQuery = widget.initialSearch!;
       _searchCtrl.text = widget.initialSearch!;
-      _bloc.add(NetworkSearchEvent(query: _currentQuery));
+      _entityScope = widget.initialEntityScope;
+      _bloc.add(NetworkSearchEvent(
+        query: _currentQuery,
+        scope: _entityScope,
+      ));
     } else {
       _bloc.add(const LoadSuggestionsEvent());
     }
     _scrollCtrl.addListener(_onScroll);
+    preloadSpecialties().then((_) {
+      if (mounted) setState(() {});
+    });
     _loadFilters();
   }
 
@@ -65,6 +80,12 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
       _selectedSpecialty.isNotEmpty || _selectedCountry.isNotEmpty;
   bool get _isSearchMode => _currentQuery.isNotEmpty || _hasFilters;
 
+  /// Header height: search bar (44) + 10 gap + optional scope bar (36+10) + filter row (36) + 12 bottom
+  double get _headerContentHeight {
+    double h = 44 + 10 + 36 + 12; // search + gap + filter row + bottom pad
+    if (_isSearchMode) h += 36 + 10; // scope bar + gap
+    return h;
+  }
   Future<void> _loadFilters() async {
     try {
       final sharedApi = SharedApiService();
@@ -96,6 +117,7 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
             page: _bloc.searchPage + 1,
             specialty: _selectedSpecialty,
             country: _selectedCountry,
+            scope: _entityScope,
           ));
         }
       } else {
@@ -123,6 +145,7 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
       query: _currentQuery,
       specialty: _selectedSpecialty,
       country: _selectedCountry,
+      scope: _entityScope,
     ));
   }
 
@@ -141,8 +164,23 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
   }
 
   void _navigateToProfile(Map<String, dynamic> person) {
-    SVProfileFragment(userId: person['id']?.toString() ?? '')
-        .launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+    ProfileNavigation.openFromMap(context, person);
+  }
+
+  void _openOrganization(Map<String, dynamic> org) {
+    ProfileNavigation.openFromMap(context, org);
+  }
+
+  void _openSearchResultItem(Map<String, dynamic> item) {
+    ProfileNavigation.openFromMap(context, item);
+  }
+
+  void _onEntityScopeChanged(String scope) {
+    if (_entityScope == scope) return;
+    setState(() => _entityScope = scope);
+    if (_isSearchMode) {
+      _triggerSearch();
+    }
   }
 
   @override
@@ -172,13 +210,34 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
             const SizedBox(width: 12),
           ],
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(100),
+            preferredSize: Size.fromHeight(_headerContentHeight),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildSearchBar(theme),
                   const SizedBox(height: 10),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topLeft,
+                    child: _isSearchMode
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              NetworkEntityScopeBar(
+                                selectedScope: _entityScope,
+                                peopleCount: _bloc.searchPeopleCount,
+                                organizationCount: _bloc.searchOrganizationCount,
+                                onChanged: _onEntityScopeChanged,
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                   _buildFilterRow(theme),
                 ],
               ),
@@ -292,6 +351,7 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
   // ═══════════════════════════════════════════
   Widget _buildFilterRow(OneUITheme theme) {
     if (!_filtersLoaded) return const SizedBox.shrink();
+    final showPeopleFilters = _entityScope != 'organizations';
     return Row(
       children: [
         Expanded(
@@ -299,34 +359,36 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                NetworkFilterChip(
-                  icon: CupertinoIcons.briefcase,
-                  label: _selectedSpecialty.isEmpty
-                      ? translation(context).lbl_specialty
-                      : _selectedSpecialty,
-                  isActive: _selectedSpecialty.isNotEmpty,
-                  onTap: () => showNetworkFilterSheet(
-                    context: context,
-                    title: translation(context).lbl_filter_by_specialty,
-                    allLabel: translation(context).lbl_all_specialties,
-                    items: _specialties,
-                    selectedValue: _selectedSpecialty,
-                    nameExtractor: (item) => item is Map
-                        ? (item['name'] ?? '').toString()
-                        : item.toString(),
-                    onSelected: (value) {
-                      setState(() => _selectedSpecialty = value);
-                      _triggerSearch();
-                    },
+                if (showPeopleFilters) ...[
+                  NetworkFilterChip(
+                    icon: CupertinoIcons.briefcase,
+                    label: _selectedSpecialty.isEmpty
+                        ? translation(context).lbl_specialty
+                        : _selectedSpecialty,
+                    isActive: _selectedSpecialty.isNotEmpty,
+                    onTap: () => showNetworkFilterSheet(
+                      context: context,
+                      title: translation(context).lbl_filter_by_specialty,
+                      allLabel: translation(context).lbl_all_specialties,
+                      items: _specialties,
+                      selectedValue: _selectedSpecialty,
+                      nameExtractor: (item) => item is Map
+                          ? (item['name'] ?? '').toString()
+                          : item.toString(),
+                      onSelected: (value) {
+                        setState(() => _selectedSpecialty = value);
+                        _triggerSearch();
+                      },
+                    ),
+                    onClear: _selectedSpecialty.isNotEmpty
+                        ? () {
+                            setState(() => _selectedSpecialty = '');
+                            _triggerSearch();
+                          }
+                        : null,
                   ),
-                  onClear: _selectedSpecialty.isNotEmpty
-                      ? () {
-                          setState(() => _selectedSpecialty = '');
-                          _triggerSearch();
-                        }
-                      : null,
-                ),
-                const SizedBox(width: 8),
+                  const SizedBox(width: 8),
+                ],
                 NetworkFilterChip(
                   icon: CupertinoIcons.globe,
                   label: _selectedCountry.isEmpty
@@ -492,22 +554,33 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
     const loadMoreCount = 2;
     return GridView.builder(
       controller: _scrollCtrl,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 100),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 100),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.95,
+        childAspectRatio: 0.82,
       ),
       itemCount: items.length + (showLoadMoreShimmer ? loadMoreCount : 0),
       itemBuilder: (ctx, i) {
         if (i >= items.length) {
           return _buildGridLoadMoreShimmerCard(theme);
         }
+        if (networkSearchItemIsOrganization(items[i])) {
+          return NetworkOrganizationGridCard(
+            organization: items[i],
+            onFollowToggle: () => _bloc.add(
+              ToggleOrganizationFollowEvent(
+                organizationId: items[i]['id']?.toString() ?? '',
+              ),
+            ),
+            onOpen: () => _openOrganization(items[i]),
+          );
+        }
         return NetworkUserGridCard(
           person: items[i],
           bloc: _bloc,
-          onTap: () => _navigateToProfile(items[i]),
+          onTap: () => _openSearchResultItem(items[i]),
         );
       },
     );
@@ -539,6 +612,17 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
         if (i >= items.length) {
           return _buildListLoadMoreShimmerTile(theme);
         }
+        if (networkSearchItemIsOrganization(items[i])) {
+          return NetworkOrganizationListTile(
+            organization: items[i],
+            onFollowToggle: () => _bloc.add(
+              ToggleOrganizationFollowEvent(
+                organizationId: items[i]['id']?.toString() ?? '',
+              ),
+            ),
+            onOpen: () => _openOrganization(items[i]),
+          );
+        }
         return NetworkUserListTile(
           person: items[i],
           bloc: _bloc,
@@ -555,35 +639,19 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.95,
+        childAspectRatio: 0.72,
       ),
       itemCount: 6,
       itemBuilder: (_, __) => _buildGridLoadMoreShimmerCard(theme),
     );
   }
 
-  Color _shimmerBaseColor(OneUITheme theme) {
-    return theme.isDark
-        ? theme.surfaceVariant.withValues(alpha: 0.9)
-        : theme.surfaceVariant.withValues(alpha: 0.7);
-  }
-
-  Color _shimmerHighlightColor(OneUITheme theme) {
-    return theme.isDark
-        ? theme.cardBackground.withValues(alpha: 0.9)
-        : theme.cardBackground.withValues(alpha: 0.95);
-  }
-
   Widget _buildGridLoadMoreShimmerCard(OneUITheme theme) {
-    final base = _shimmerBaseColor(theme);
-    final highlight = _shimmerHighlightColor(theme);
+    final base = theme.shimmerBase;
     return Container(
       decoration: theme.cardDecoration,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-      child: Shimmer.fromColors(
-        baseColor: base,
-        highlightColor: highlight,
-        period: const Duration(milliseconds: 1300),
+      child: OneUIShimmer(
         child: Column(
           children: [
             Container(
@@ -628,14 +696,10 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
   }
 
   Widget _buildListLoadMoreShimmerTile(OneUITheme theme) {
-    final base = _shimmerBaseColor(theme);
-    final highlight = _shimmerHighlightColor(theme);
+    final base = theme.shimmerBase;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Shimmer.fromColors(
-        baseColor: base,
-        highlightColor: highlight,
-        period: const Duration(milliseconds: 1300),
+      child: OneUIShimmer(
         child: Row(
           children: [
             Container(
@@ -1025,79 +1089,19 @@ class NetworkFilterChip extends StatelessWidget {
   }
 }
 
-/// Shared user avatar — one implementation for all network screens
-class NetworkUserAvatar extends StatelessWidget {
-  final String? imageUrl;
-  final String name;
-  final double size;
-
-  const NetworkUserAvatar({
-    super.key,
-    required this.imageUrl,
-    required this.name,
-    required this.size,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: theme.avatarBorder, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primary
-                .withValues(alpha: theme.isDark ? 0.2 : 0.08),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size / 2),
-        child: (imageUrl == null || imageUrl!.isEmpty)
-            ? Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      theme.primary.withValues(alpha: 0.15),
-                      theme.secondary.withValues(alpha: 0.1),
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                    style: TextStyle(
-                      color: theme.avatarText,
-                      fontSize: size * 0.38,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: imageUrl!,
-                width: size,
-                height: size,
-                fit: BoxFit.cover,
-                placeholder: (_, __) =>
-                    Container(color: theme.avatarBackground),
-                errorWidget: (_, __, ___) => Container(
-                  color: theme.avatarBackground,
-                  child: Icon(Icons.person,
-                      color: theme.primary, size: size * 0.45),
-                ),
-              ),
-      ),
-    );
+String _resolvePersonName(Map<String, dynamic> person) {
+  final fullName =
+      (person['fullName'] ?? person['name'] ?? '').toString().trim();
+  if (fullName.isNotEmpty && fullName.toLowerCase() != 'unknown') {
+    return fullName;
   }
+  final firstLast =
+      '${person['first_name'] ?? person['firstName'] ?? ''} ${person['last_name'] ?? person['lastName'] ?? ''}'
+          .trim();
+  if (firstLast.isNotEmpty) return firstLast;
+  final username = (person['username'] ?? '').toString().trim();
+  if (username.isNotEmpty) return username;
+  return '';
 }
 
 /// Extracts common user data from person map
@@ -1109,6 +1113,7 @@ class NetworkUserData {
   final String status;
   final String requestId;
   final String userId;
+  final bool isVerified;
 
   const NetworkUserData._({
     required this.name,
@@ -1118,12 +1123,13 @@ class NetworkUserData {
     required this.status,
     required this.requestId,
     required this.userId,
+    this.isVerified = false,
   });
 
   factory NetworkUserData.fromMap(Map<String, dynamic> person) {
-    final name = person['fullName'] as String? ??
-        '${person['first_name'] ?? ''} ${person['last_name'] ?? ''}'.trim();
-    final specialty = person['specialty'] as String? ?? '';
+    final name = _resolvePersonName(person);
+    final specialty =
+        specialtyLabelOrNull(person['specialty']?.toString()) ?? '';
     final mutualRaw = person['mutualCount'] ?? person['mutual_count'] ?? 0;
     final mutualCount =
         mutualRaw is int ? mutualRaw : int.tryParse(mutualRaw.toString()) ?? 0;
@@ -1135,6 +1141,7 @@ class NetworkUserData {
         person['friendRequestId']?.toString() ??
         '';
     final userId = person['id']?.toString() ?? '';
+    final isVerified = person['is_verified'] == true || person['is_verified'] == 1;
 
     return NetworkUserData._(
       name: name,
@@ -1144,6 +1151,7 @@ class NetworkUserData {
       status: status,
       requestId: requestId,
       userId: userId,
+      isVerified: isVerified,
     );
   }
 }
@@ -1163,74 +1171,19 @@ class NetworkUserGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
     final data = NetworkUserData.fromMap(person);
 
-    return GestureDetector(
+    return NetworkPersonSuggestionCard(
+      person: person,
       onTap: onTap,
-      child: Container(
-        decoration: theme.cardDecoration,
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 12, 10, 10),
-          child: Column(
-            children: [
-              NetworkUserAvatar(
-                imageUrl: data.avatarUrl,
-                name: data.name,
-                size: 48,
-              ),
-              const SizedBox(height: 6),
-              Text(
-                data.name.isNotEmpty ? data.name : translation(context).lbl_unknown,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: theme.titleSmall.copyWith(fontSize: 13.5),
-              ),
-              if (data.specialty.isNotEmpty) ...[
-                const SizedBox(height: 1),
-                Text(
-                  capitalizeWords(data.specialty),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: theme.caption.copyWith(fontSize: 11),
-                ),
-              ],
-              if (data.mutualCount > 0) ...[
-                const SizedBox(height: 3),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.people_outline_rounded,
-                        size: 11, color: theme.textTertiary),
-                    const SizedBox(width: 3),
-                    Flexible(
-                      child: Text(
-                        '${data.mutualCount} ${translation(context).lbl_mutual_connections}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.caption.copyWith(fontSize: 10),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: NetworkConnectionAction(
-                  person: person,
-                  bloc: bloc,
-                  status: data.status,
-                  requestId: data.requestId,
-                  isCompact: true,
-                ),
-              ),
-            ],
-          ),
-        ),
+      fillWidth: true,
+      includeTrailingMargin: false,
+      action: NetworkConnectionAction(
+        person: person,
+        bloc: bloc,
+        status: data.status,
+        requestId: data.requestId,
+        isCompact: true,
       ),
     );
   }
@@ -1270,11 +1223,21 @@ class NetworkUserListTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    data.name.isNotEmpty ? data.name : translation(context).lbl_unknown,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.titleSmall,
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          data.name.isNotEmpty ? data.name : translation(context).lbl_unknown,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.titleSmall,
+                        ),
+                      ),
+                      if (data.isVerified) ...[
+                        const SizedBox(width: 4),
+                        theme.buildVerifiedBadge(size: 16),
+                      ],
+                    ],
                   ),
                   if (data.specialty.isNotEmpty) ...[
                     const SizedBox(height: 2),
@@ -1342,10 +1305,18 @@ class NetworkConnectionAction extends StatelessWidget {
       case 'connected':
         return NetworkActionButton(
           label: translation(context).lbl_message,
-          filled: false,
+          fullWidth: false,
           onTap: () {
-            SVProfileFragment(userId: userId).launch(context,
-                pageRouteAnimation: PageRouteAnimation.Slide);
+            final name = _resolvePersonName(person);
+            final profilePic = person['profilePicUrl'] as String? ??
+                person['profile_pic'] as String? ??
+                '';
+            ChatRoomScreen(
+              username: name,
+              profilePic: profilePic,
+              id: userId,
+              conversationId: 0,
+            ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
           },
         );
 
@@ -1356,7 +1327,7 @@ class NetworkConnectionAction extends StatelessWidget {
               Expanded(
                 child: NetworkActionButton(
                   label: translation(context).lbl_accept,
-                  filled: true,
+                  fullWidth: false,
                   onTap: () {
                     if (requestId.isNotEmpty) {
                       bloc.add(AcceptFriendRequestEvent(requestId: requestId));
@@ -1368,7 +1339,8 @@ class NetworkConnectionAction extends StatelessWidget {
               Expanded(
                 child: NetworkActionButton(
                   label: translation(context).lbl_ignore,
-                  filled: false,
+                  muted: true,
+                  fullWidth: false,
                   onTap: () {
                     if (requestId.isNotEmpty) {
                       bloc.add(RejectFriendRequestEvent(requestId: requestId));
@@ -1384,7 +1356,7 @@ class NetworkConnectionAction extends StatelessWidget {
           children: [
             NetworkActionButton(
               label: translation(context).lbl_accept,
-              filled: true,
+              fullWidth: false,
               onTap: () {
                 if (requestId.isNotEmpty) {
                   bloc.add(AcceptFriendRequestEvent(requestId: requestId));
@@ -1394,7 +1366,8 @@ class NetworkConnectionAction extends StatelessWidget {
             const SizedBox(width: 6),
             NetworkActionButton(
               label: translation(context).lbl_ignore,
-              filled: false,
+              muted: true,
+              fullWidth: false,
               onTap: () {
                 if (requestId.isNotEmpty) {
                   bloc.add(RejectFriendRequestEvent(requestId: requestId));
@@ -1407,7 +1380,8 @@ class NetworkConnectionAction extends StatelessWidget {
       case 'pending_sent':
         return NetworkActionButton(
           label: translation(context).lbl_pending,
-          filled: false,
+          muted: true,
+          fullWidth: false,
           onTap: () {
             if (requestId.isNotEmpty) {
               bloc.add(CancelFriendRequestEvent(
@@ -1419,7 +1393,6 @@ class NetworkConnectionAction extends StatelessWidget {
       default:
         return NetworkActionButton(
           label: translation(context).lbl_connect,
-          filled: true,
           onTap: () {
             if (userId.isNotEmpty) {
               bloc.add(SendFriendRequestEvent(userId: userId));
@@ -1427,66 +1400,5 @@ class NetworkConnectionAction extends StatelessWidget {
           },
         );
     }
-  }
-}
-
-/// One UI 8.5 styled pill action button
-class NetworkActionButton extends StatelessWidget {
-  final String label;
-  final bool filled;
-  final VoidCallback onTap;
-
-  const NetworkActionButton({
-    super.key,
-    required this.label,
-    required this.filled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: theme.radiusFull,
-        splashColor: filled
-            ? Colors.white.withValues(alpha: 0.15)
-            : theme.primary.withValues(alpha: 0.08),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            gradient: filled
-                ? LinearGradient(
-                    colors: [
-                      theme.primary,
-                      theme.primary.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
-            color: filled ? null : Colors.transparent,
-            borderRadius: theme.radiusFull,
-            border: Border.all(
-              color: filled ? Colors.transparent : theme.border,
-              width: 1.5,
-            ),
-          ),
-          child: Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.caption.copyWith(
-              color: filled ? Colors.white : theme.textSecondary,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

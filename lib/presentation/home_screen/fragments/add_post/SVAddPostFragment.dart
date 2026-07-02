@@ -31,7 +31,8 @@ class SVAddPostFragment extends StatefulWidget {
   State<SVAddPostFragment> createState() => _SVAddPostFragmentState();
 }
 
-class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindingObserver {
+class _SVAddPostFragmentState extends State<SVAddPostFragment>
+    with WidgetsBindingObserver {
   String image = '';
 
   // Professional background colors matching the design
@@ -96,7 +97,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    setStatusBarColor(appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground);
+    setStatusBarColor(
+      appStore.isDarkMode ? appBackgroundColorDark : SVAppLayoutBackground,
+    );
     _postTextController.dispose();
     // Close the bloc if this widget created it
     if (_createdBloc) {
@@ -120,7 +123,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       if (mounted) {
         setState(() {
           // This will trigger a rebuild with updated images
-          print('SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files');
+          print(
+            'SVAddPost: Force refresh - BLoC has ${searchPeopleBloc.imagefiles.length} files',
+          );
         });
       }
     }
@@ -157,9 +162,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+      backgroundColor: theme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+        backgroundColor: theme.appBarBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 100,
@@ -175,7 +180,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.close, color: isDark ? Colors.grey[400] : const Color(0xFF64748B), size: 20),
+                Icon(
+                  Icons.close,
+                  color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                  size: 20,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   translation(context).lbl_cancel,
@@ -207,7 +216,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
               if (state is ResponseLoadedState) {
                 try {
                   Map<String, dynamic> jsonMap = json.decode(state.message);
-                  String extractMessage(dynamic messageData, String defaultMsg) {
+                  String extractMessage(
+                    dynamic messageData,
+                    String defaultMsg,
+                  ) {
                     if (messageData == null) return defaultMsg;
                     if (messageData is String) return messageData;
                     if (messageData is List && messageData.isNotEmpty) {
@@ -217,7 +229,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   }
 
                   if (jsonMap['success'] == true) {
-                    final message = extractMessage(jsonMap['message'], 'Post created successfully!');
+                    final message = extractMessage(
+                      jsonMap['message'],
+                      'Post created successfully!',
+                    );
                     showToast(message);
                     searchPeopleBloc.selectedSearchPeopleData.clear();
                     searchPeopleBloc.imagefiles.clear();
@@ -236,7 +251,10 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                       if (mounted) widget.refresh();
                     });
                   } else {
-                    final errorMsg = extractMessage(jsonMap['message'], 'Failed to create post');
+                    final errorMsg = extractMessage(
+                      jsonMap['message'],
+                      'Failed to create post',
+                    );
                     showToast(errorMsg);
                   }
                 } catch (e) {
@@ -268,10 +286,17 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   }
                 },
                 style: TextButton.styleFrom(
-                  backgroundColor: _validatePost() ? const Color(0xFF007AFF) : const Color(0xFF007AFF).withValues(alpha: 0.4),
+                  backgroundColor: _validatePost()
+                      ? const Color(0xFF007AFF)
+                      : const Color(0xFF007AFF).withValues(alpha: 0.4),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 6,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   elevation: 0,
                 ),
                 child: Text(
@@ -288,10 +313,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(0.5),
-          child: Container(
-            height: 0.5,
-            color: isDark ? Colors.grey[800] : const Color(0xFFE2E8F0),
-          ),
+          child: Container(height: 0.5, color: theme.border),
         ),
       ),
       body: Column(
@@ -322,7 +344,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   BlocBuilder<AddPostBloc, AddPostState>(
                     bloc: searchPeopleBloc,
                     builder: (context, state) {
-                      if (searchPeopleBloc.selectedSearchPeopleData.isNotEmpty) {
+                      if (searchPeopleBloc
+                          .selectedSearchPeopleData
+                          .isNotEmpty) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: _buildTaggedFriendsPreview(theme),
@@ -369,19 +393,27 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   child: ValueListenableBuilder<String>(
                     valueListenable: AppData.profilePicNotifier,
                     builder: (_, picUrl, __) {
-                      final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                      final url = picUrl.isNotEmpty
+                          ? picUrl
+                          : AppData.profilePicUrl;
                       return CachedNetworkImage(
                         imageUrl: url,
                         height: 56,
                         width: 56,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          color: isDark ? Colors.grey[800] : const Color(0xFFF2F2F7),
-                          child: const Center(child: CupertinoActivityIndicator()),
+                          color: theme.surfaceVariant,
+                          child: const Center(
+                            child: CupertinoActivityIndicator(),
+                          ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          color: isDark ? Colors.grey[800] : const Color(0xFFF2F2F7),
-                          child: Icon(CupertinoIcons.person_fill, color: isDark ? Colors.grey[500] : Colors.grey[400], size: 28),
+                          color: theme.surfaceVariant,
+                          child: Icon(
+                            CupertinoIcons.person_fill,
+                            color: isDark ? Colors.grey[500] : Colors.grey[400],
+                            size: 28,
+                          ),
                         ),
                       );
                     },
@@ -399,7 +431,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                     color: const Color(0xFF22C55E),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+                      color: isDark ? theme.scaffoldBackground : Colors.white,
                       width: 2,
                     ),
                   ),
@@ -434,7 +466,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Poppins',
-                            color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+                            color: isDark
+                                ? Colors.grey[400]
+                                : const Color(0xFF64748B),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -448,7 +482,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                         fontSize: 12,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Poppins',
-                        color: isDark ? Colors.grey[500] : const Color(0xFF94A3B8),
+                        color: isDark
+                            ? Colors.grey[500]
+                            : const Color(0xFF94A3B8),
                       ),
                     ),
                   ],
@@ -467,12 +503,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900]!.withValues(alpha: 0.5) : const Color(0xFFF8F9FA),
+          color: isDark
+              ? theme.surfaceVariant.withValues(alpha: 0.5)
+              : theme.inputBackground,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? Colors.grey[700]!.withValues(alpha: 0.6) : const Color(0xFFE2E8F0).withValues(alpha: 0.6),
-            width: 1,
-          ),
+          border: Border.all(color: theme.border, width: 1),
         ),
         padding: const EdgeInsets.all(16),
         child: TextFormField(
@@ -538,24 +573,26 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                 return GestureDetector(
                   onTap: () => _selectBackgroundColor(index),
                   child: Container(
-                    margin: EdgeInsets.only(right: index < backgroundColors.length - 1 ? 12 : 0),
+                    margin: EdgeInsets.only(
+                      right: index < backgroundColors.length - 1 ? 12 : 0,
+                    ),
                     width: isSelected ? 36 : 32,
                     height: isSelected ? 36 : 32,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: isNone
-                          ? (isDark ? Colors.grey[800] : Colors.white)
+                          ? (isDark ? theme.surfaceVariant : Colors.white)
                           : _hexToColor(colorHex),
                       border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF007AFF)
-                            : (isDark ? Colors.grey[700]! : const Color(0xFFE2E8F0)),
+                        color: isSelected ? theme.primary : theme.border,
                         width: isSelected ? 2 : 1,
                       ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: const Color(0xFF007AFF).withValues(alpha: 0.2),
+                                color: const Color(
+                                  0xFF007AFF,
+                                ).withValues(alpha: 0.2),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),
@@ -566,7 +603,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                         ? Icon(
                             Icons.block,
                             size: isSelected ? 18 : 16,
-                            color: isSelected ? const Color(0xFF007AFF) : (isDark ? Colors.grey[500] : Colors.grey[400]),
+                            color: isSelected
+                                ? const Color(0xFF007AFF)
+                                : (isDark
+                                      ? Colors.grey[500]
+                                      : Colors.grey[400]),
                           )
                         : null,
                   ),
@@ -583,12 +624,15 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
   Widget _buildBottomActions(OneUITheme theme, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
-        border: Border(
-          top: BorderSide(color: isDark ? Colors.grey[800]! : const Color(0xFFE2E8F0), width: 0.5),
-        ),
+        color: theme.cardBackground,
+        border: Border(top: BorderSide(color: theme.border, width: 0.5)),
       ),
-      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).padding.bottom + 24),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        MediaQuery.of(context).padding.bottom + 24,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -601,7 +645,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   isDark: isDark,
                   icon: Icons.collections_outlined,
                   iconColor: const Color(0xFF2563EB),
-                  iconBgColor: isDark ? const Color(0xFF1E3A5F) : const Color(0xFFEFF6FF),
+                  iconBgColor: isDark
+                      ? const Color(0xFF1E3A5F)
+                      : const Color(0xFFEFF6FF),
                   title: translation(context).lbl_gallery,
                   subtitle: 'Photos/Video',
                   onTap: _isPickingMedia ? null : _openGallery,
@@ -614,10 +660,13 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                   isDark: isDark,
                   icon: Icons.group_add_outlined,
                   iconColor: const Color(0xFF9333EA),
-                  iconBgColor: isDark ? const Color(0xFF3B1F5B) : const Color(0xFFFAF5FF),
+                  iconBgColor: isDark
+                      ? const Color(0xFF3B1F5B)
+                      : const Color(0xFFFAF5FF),
                   title: 'Tag',
                   subtitle: 'Colleagues',
-                  onTap: () => svShowShareBottomSheet(context, searchPeopleBloc),
+                  onTap: () =>
+                      svShowShareBottomSheet(context, searchPeopleBloc),
                 ),
               ),
             ],
@@ -636,7 +685,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                     context: context,
                     isScrollControlled: true,
                     shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
                     ),
                     builder: (context) => SizedBox(
                       height: MediaQuery.of(context).size.height * 0.7,
@@ -688,8 +739,8 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: LinearProgressIndicator(
-                backgroundColor: isDark ? Colors.grey[800] : const Color(0xFFE2E8F0),
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF007AFF)),
+                backgroundColor: theme.surfaceVariant,
+                valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                 minHeight: 2,
               ),
             ),
@@ -708,8 +759,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     required String subtitle,
     VoidCallback? onTap,
   }) {
+    final oneUiTheme = OneUITheme.of(context);
     return Material(
-      color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
+      color: oneUiTheme.surfaceVariant,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -718,10 +770,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.grey[700]! : const Color(0xFFE2E8F0),
-              width: 1,
-            ),
+            border: Border.all(color: oneUiTheme.border, width: 1),
           ),
           child: Row(
             children: [
@@ -735,30 +784,38 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                 child: Icon(icon, color: iconColor, size: 24),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      height: 1.2,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                        color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        height: 1.2,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Poppins',
-                      color: isDark ? Colors.grey[500] : const Color(0xFF64748B),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Poppins',
+                        color: isDark
+                            ? Colors.grey[500]
+                            : const Color(0xFF64748B),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
@@ -780,7 +837,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 22, color: isDark ? Colors.grey[400] : const Color(0xFF64748B)),
+          Icon(
+            icon,
+            size: 22,
+            color: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+          ),
           const SizedBox(width: 6),
           Text(
             label,
@@ -824,14 +885,13 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
 
   Widget _buildMediaPreview(OneUITheme theme) {
     final files = searchPeopleBloc.imagefiles;
-    final isDark = theme.isDark;
     if (files.length == 1) {
       return Container(
         margin: const EdgeInsets.only(top: 12, bottom: 8),
         constraints: const BoxConstraints(maxHeight: 260),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE2E8F0), width: 0.5),
+          border: Border.all(color: theme.border, width: 0.5),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
@@ -839,7 +899,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
             children: [
               SizedBox(
                 width: double.infinity,
-                child: _buildMediaItem(File(files[0].path), theme, fit: BoxFit.cover),
+                child: _buildMediaItem(
+                  File(files[0].path),
+                  theme,
+                  fit: BoxFit.cover,
+                ),
               ),
               Positioned(
                 top: 8,
@@ -864,7 +928,7 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
             margin: EdgeInsets.only(right: index < files.length - 1 ? 8 : 0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: isDark ? Colors.grey[700]! : const Color(0xFFE2E8F0), width: 0.5),
+              border: Border.all(color: theme.border, width: 0.5),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
@@ -903,10 +967,18 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     );
   }
 
-  Widget _buildMediaItem(File file, OneUITheme theme, {BoxFit fit = BoxFit.cover}) {
+  Widget _buildMediaItem(
+    File file,
+    OneUITheme theme, {
+    BoxFit fit = BoxFit.cover,
+  }) {
     final path = file.path;
     final lower = path.toLowerCase();
-    if (lower.endsWith('.mp4') || lower.endsWith('.mov') || lower.endsWith('.avi') || lower.endsWith('.mkv') || lower.endsWith('.webm')) {
+    if (lower.endsWith('.mp4') ||
+        lower.endsWith('.mov') ||
+        lower.endsWith('.avi') ||
+        lower.endsWith('.mkv') ||
+        lower.endsWith('.webm')) {
       return Stack(
         fit: StackFit.expand,
         children: [
@@ -916,8 +988,15 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
             child: Center(
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), shape: BoxShape.circle),
-                child: Icon(CupertinoIcons.play_fill, color: theme.primary, size: 18),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  CupertinoIcons.play_fill,
+                  color: theme.primary,
+                  size: 18,
+                ),
               ),
             ),
           ),
@@ -930,13 +1009,21 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
             color: theme.surfaceVariant,
-            child: Center(child: CupertinoActivityIndicator(color: theme.primary)),
+            child: Center(
+              child: CupertinoActivityIndicator(color: theme.primary),
+            ),
           );
         }
-        if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+        if (snapshot.hasError ||
+            snapshot.data == null ||
+            snapshot.data!.isEmpty) {
           return Container(
             color: theme.surfaceVariant,
-            child: Icon(CupertinoIcons.doc, color: theme.textTertiary, size: 28),
+            child: Icon(
+              CupertinoIcons.doc,
+              color: theme.textTertiary,
+              size: 28,
+            ),
           );
         }
         return Image.memory(
@@ -944,7 +1031,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
           fit: fit,
           errorBuilder: (_, __, ___) => Container(
             color: theme.surfaceVariant,
-            child: Icon(CupertinoIcons.doc, color: theme.textTertiary, size: 28),
+            child: Icon(
+              CupertinoIcons.doc,
+              color: theme.textTertiary,
+              size: 28,
+            ),
           ),
         );
       },
@@ -962,14 +1053,23 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: const Color(0xFF007AFF).withValues(alpha: isDark ? 0.15 : 0.08),
+              color: const Color(
+                0xFF007AFF,
+              ).withValues(alpha: isDark ? 0.15 : 0.08),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF007AFF).withValues(alpha: 0.2), width: 1),
+              border: Border.all(
+                color: const Color(0xFF007AFF).withValues(alpha: 0.2),
+                width: 1,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(CupertinoIcons.person_fill, size: 12, color: const Color(0xFF007AFF)),
+                Icon(
+                  CupertinoIcons.person_fill,
+                  size: 12,
+                  color: const Color(0xFF007AFF),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${element.firstName ?? ''} ${element.lastName ?? ''}'.trim(),
@@ -983,9 +1083,15 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
                 const SizedBox(width: 4),
                 GestureDetector(
                   onTap: () {
-                    searchPeopleBloc.add(SelectFriendEvent(userData: element, isAdd: false));
+                    searchPeopleBloc.add(
+                      SelectFriendEvent(userData: element, isAdd: false),
+                    );
                   },
-                  child: const Icon(Icons.close, size: 14, color: Color(0xFF007AFF)),
+                  child: const Icon(
+                    Icons.close,
+                    size: 14,
+                    color: Color(0xFF007AFF),
+                  ),
                 ),
               ],
             ),
@@ -1001,15 +1107,18 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
     if (_isPickingMedia) return;
     setState(() => _isPickingMedia = true);
     try {
-      final List<File>? pickedFiles = await UnifiedGalleryPicker.pickMultipleImages(
-        context,
-        title: translation(context).lbl_choose_from_gallery,
-      );
+      final List<File>? pickedFiles =
+          await UnifiedGalleryPicker.pickMultipleImages(
+            context,
+            title: translation(context).lbl_choose_from_gallery,
+          );
       if (pickedFiles != null && pickedFiles.isNotEmpty) {
         for (var element in pickedFiles) {
           if (_isValidMediaFile(element.path)) {
             final xfile = XFile(element.path);
-            searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
+            searchPeopleBloc.add(
+              SelectedFiles(pickedfiles: xfile, isRemove: false),
+            );
           }
         }
         setState(() {});
@@ -1028,7 +1137,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       final File? photo = await UnifiedGalleryPicker.captureFromCamera(context);
       if (photo != null) {
         final xfile = XFile(photo.path);
-        searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
+        searchPeopleBloc.add(
+          SelectedFiles(pickedfiles: xfile, isRemove: false),
+        );
         setState(() {});
       }
     } catch (e) {
@@ -1048,7 +1159,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment> with WidgetsBindi
       );
       if (video != null) {
         final xfile = XFile(video.path);
-        searchPeopleBloc.add(SelectedFiles(pickedfiles: xfile, isRemove: false));
+        searchPeopleBloc.add(
+          SelectedFiles(pickedfiles: xfile, isRemove: false),
+        );
         setState(() {});
       }
     } catch (e) {

@@ -20,7 +20,7 @@ class CallControls extends StatelessWidget {
     final theme = OneUITheme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -40,8 +40,11 @@ class CallControls extends StatelessWidget {
             Container(
               height: 4,
               width: 40,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
 
             Wrap(
@@ -52,17 +55,25 @@ class CallControls extends StatelessWidget {
                 // Mute button
                 _CallControlButton(
                   onTap: callProvider.toggleMute,
-                  icon: callState.isMuted ? CupertinoIcons.mic_off : CupertinoIcons.mic,
+                  icon: callState.isMuted
+                      ? CupertinoIcons.mic_off
+                      : CupertinoIcons.mic,
                   label: translation(context).lbl_mute,
-                  bgColor: callState.isMuted ? theme.error : Colors.white.withValues(alpha: 0.2),
+                  bgColor: callState.isMuted
+                      ? theme.error
+                      : Colors.white.withValues(alpha: 0.2),
                   isActive: callState.isMuted,
                 ),
 
                 // Switch call type button
                 _CallControlButton(
                   onTap: callProvider.switchCallType,
-                  icon: isVideoCall ? Icons.phone_rounded : Icons.videocam_rounded,
-                  label: isVideoCall ? translation(context).lbl_audio : translation(context).lbl_video,
+                  icon: isVideoCall
+                      ? Icons.phone_rounded
+                      : Icons.videocam_rounded,
+                  label: isVideoCall
+                      ? translation(context).lbl_audio
+                      : translation(context).lbl_video,
                   bgColor: Colors.white.withValues(alpha: 0.2),
                   isActive: false,
                 ),
@@ -70,9 +81,13 @@ class CallControls extends StatelessWidget {
                 // Speaker button
                 _CallControlButton(
                   onTap: callProvider.toggleSpeaker,
-                  icon: callState.isSpeakerOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                  icon: callState.isSpeakerOn
+                      ? Icons.volume_up_rounded
+                      : Icons.volume_off_rounded,
                   label: translation(context).lbl_speaker,
-                  bgColor: callState.isSpeakerOn ? theme.primary : Colors.white.withValues(alpha: 0.2),
+                  bgColor: callState.isSpeakerOn
+                      ? theme.primary
+                      : Colors.white.withValues(alpha: 0.2),
                   isActive: callState.isSpeakerOn,
                 ),
 
@@ -87,7 +102,14 @@ class CallControls extends StatelessWidget {
                   ),
 
                 // End call button
-                _CallControlButton(onTap: onEndCallConfirm, icon: Icons.call_end_rounded, label: translation(context).lbl_end, bgColor: theme.error, isActive: true, isEndCall: true),
+                _CallControlButton(
+                  onTap: onEndCallConfirm,
+                  icon: Icons.call_end_rounded,
+                  label: translation(context).lbl_end,
+                  bgColor: theme.error,
+                  isActive: true,
+                  isEndCall: true,
+                ),
               ],
             ),
           ],
@@ -106,7 +128,14 @@ class _CallControlButton extends StatelessWidget {
   final bool isActive;
   final bool isEndCall;
 
-  const _CallControlButton({required this.onTap, required this.icon, required this.label, required this.bgColor, this.isActive = false, this.isEndCall = false});
+  const _CallControlButton({
+    required this.onTap,
+    required this.icon,
+    required this.label,
+    required this.bgColor,
+    this.isActive = false,
+    this.isEndCall = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +151,24 @@ class _CallControlButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: bgColor,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: bgColor.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 2)],
+              boxShadow: [
+                BoxShadow(
+                  color: bgColor.withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
             child: Icon(icon, color: Colors.white, size: isEndCall ? 28 : 24),
           ),
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Poppins',
+            ),
           ),
         ],
       ),

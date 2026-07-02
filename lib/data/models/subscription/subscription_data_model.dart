@@ -83,17 +83,23 @@ class FeatureAccess {
     return FeatureAccess(
       slug: slug,
       name: json['name']?.toString() ?? slug,
-      hasAccess: json['has_access'] == true,
+      hasAccess: json['can_access'] == true || json['has_access'] == true,
       accessLevel: json['access_level']?.toString() ?? 'none',
-      usageLimit: json['usage_limit'] != null
-          ? int.tryParse(json['usage_limit'].toString())
-          : null,
-      usageCount: json['usage_count'] != null
-          ? int.tryParse(json['usage_count'].toString())
-          : null,
-      remaining: json['remaining'] != null
-          ? int.tryParse(json['remaining'].toString())
-          : null,
+      usageLimit: json['daily_limit'] != null
+          ? int.tryParse(json['daily_limit'].toString())
+          : (json['usage_limit'] != null
+              ? int.tryParse(json['usage_limit'].toString())
+              : null),
+      usageCount: json['daily_used'] != null
+          ? int.tryParse(json['daily_used'].toString())
+          : (json['usage_count'] != null
+              ? int.tryParse(json['usage_count'].toString())
+              : null),
+      remaining: json['daily_remaining'] != null
+          ? int.tryParse(json['daily_remaining'].toString())
+          : (json['remaining'] != null
+              ? int.tryParse(json['remaining'].toString())
+              : null),
     );
   }
 

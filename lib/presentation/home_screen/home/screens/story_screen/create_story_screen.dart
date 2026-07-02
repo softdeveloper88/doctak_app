@@ -21,6 +21,9 @@ class _CreateStoryScreenState extends State<CreateStoryScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // Own bloc so creation is not affected by the parent feed bloc's lifecycle
+  late final StoryBloc _localBloc;
+
   // Text story fields
   final TextEditingController _textController = TextEditingController();
   int _selectedColorIndex = 0;
@@ -50,10 +53,12 @@ class _CreateStoryScreenState extends State<CreateStoryScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _localBloc = StoryBloc();
   }
 
   @override
   void dispose() {
+    _localBloc.close();
     _tabController.dispose();
     _textController.dispose();
     super.dispose();
@@ -602,7 +607,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen>
     final bgHex =
         '#${_backgroundColors[_selectedColorIndex].toARGB32().toRadixString(16).substring(2)}';
 
-    widget.storyBloc.add(CreateStoryEvent(
+    _localBloc.add(CreateStoryEvent(
       type: type,
       mediaPath: _selectedMedia?.path,
       content: type == 'text' ? _textController.text.trim() : null,
@@ -612,7 +617,7 @@ class _CreateStoryScreenState extends State<CreateStoryScreen>
     ));
 
     // Listen for result then pop
-    late final subscription = widget.storyBloc.stream.listen((state) {});
+    late final subscription = _localBloc.stream.listen((state) {});
     subscription.onData((state) {
       if (!mounted) {
         subscription.cancel();

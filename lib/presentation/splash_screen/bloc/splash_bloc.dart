@@ -1,15 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:bloc/bloc.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:dio/dio.dart';
+import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_state.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import '../../../data/models/countries_model/countries_model.dart';
 import 'splash_event.dart';
 
@@ -39,95 +35,19 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // add(LoadDropdownData(event.newValue,event.typeValue));
   }
 
-  /// Safely get FCM token with retry logic for FIS_AUTH_ERROR
-  Future<String?> _getSafeFcmToken() async {
-    const maxRetries = 3;
-    const retryDelay = Duration(seconds: 2);
-
-    for (int attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        final token = await FirebaseMessaging.instance.getToken();
-        if (token != null && token.isNotEmpty) {
-          return token;
-        }
-      } catch (e) {
-        debugPrint("FCM token attempt $attempt failed: $e");
-
-        if (e.toString().contains('FIS_AUTH_ERROR')) {
-          try {
-            await FirebaseMessaging.instance.deleteToken();
-            await Future.delayed(const Duration(milliseconds: 500));
-          } catch (_) {}
-        }
-
-        if (attempt < maxRetries) {
-          await Future.delayed(retryDelay);
-        }
-      }
-    }
-    return null;
-  }
-
   Future<void> getNewDeviceToken() async {
     try {
-      // Ensure Firebase is initialized before getting token
       if (Firebase.apps.isEmpty) {
         debugPrint('Firebase not initialized, skipping device token update');
         return;
       }
 
-      final token = await _getSafeFcmToken();
-      if (token == null) {
-        debugPrint('FCM token is null after all retries');
-        return;
-      }
+      final auth = AppData.userToken?.trim() ?? '';
+      if (auth.isEmpty) return;
 
-      DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-      String deviceId = '';
-      String deviceType = '';
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
-        print('Running on ${androidInfo.model}');
-        deviceType = "android";
-        deviceId = androidInfo.id;
-      } else {
-        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-        print('Running on ${iosInfo.utsname.machine}'); // e.g. "iPod7,1"
-        deviceType = "ios";
-        deviceId = iosInfo.identifierForVendor.toString();
-      }
-      final prefs = SecureStorageService.instance;
-      await prefs.initialize();
-      String deviceToken = await prefs.getString('device_token') ?? '';
-
-      if (deviceToken.isNotEmpty && deviceToken != token) {
-        try {
-          print("new Token $token");
-          Dio dio = Dio();
-          try {
-            Response response = await dio.post(
-              '${AppData.remoteUrl}/update-token', // Add query parameters
-              data: FormData.fromMap({'device_id': deviceId, 'device_type': deviceType, 'user_id': AppData.logInUserId, 'device_token': token}),
-              options: Options(
-                headers: {
-                  'Authorization': 'Bearer ${AppData.userToken}', // Set headers
-                },
-              ),
-            );
-
-            print("response ${response.data}");
-          } catch (e) {
-            print('Error: $e');
-          }
-          // emit(DataLoaded(drugsData));
-        } catch (e) {
-          // ProgressDialogUtils.hideProgressDialog();
-          print(e);
-        }
-      }
+      await NotificationService.syncDeviceToken();
     } catch (e) {
-      debugPrint('Error getting device token: $e');
-      // Continue without token - app should still work
+      debugPrint('Error syncing device token: $e');
     }
   }
 

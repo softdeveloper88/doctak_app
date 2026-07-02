@@ -1,7 +1,9 @@
-import 'package:doctak_app/data/models/cme/cme_gamification_model.dart';
+import 'package:doctak_app/data/models/cme/cme_on_demand_model.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_on_demand_bloc.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_on_demand_event.dart';
-import 'package:doctak_app/presentation/cme_module/bloc/cme_on_demand_state.dart';import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/presentation/cme_module/bloc/cme_on_demand_state.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -30,12 +32,7 @@ class _OnDemandView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: theme.cardBackground,
-        foregroundColor: theme.textPrimary,
-        title: const Text('On-Demand Content',
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 18)),
-      ),
+      appBar: const DoctakAppBar(title: 'On-Demand Content'),
       body: BlocBuilder<CmeOnDemandBloc, CmeOnDemandState>(
         builder: (context, state) {
           if (state is CmeOnDemandLoadingState) {
@@ -135,11 +132,11 @@ class _OnDemandView extends StatelessWidget {
                         module.thumbnailUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          color: theme.primary.withOpacity(0.1),
+                          color: theme.primary.withValues(alpha: 0.1),
                           child: Icon(
                             _getTypeIcon(module.type),
                             size: 48,
-                            color: theme.primary.withOpacity(0.5),
+                            color: theme.primary.withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -151,7 +148,7 @@ class _OnDemandView extends StatelessWidget {
                             height: 56,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.black.withOpacity(0.6),
+                              color: Colors.black.withValues(alpha: 0.6),
                             ),
                             child: const Icon(
                               Icons.play_arrow,
@@ -169,7 +166,7 @@ class _OnDemandView extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF34C759),
+                              color: theme.success,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Row(
@@ -205,7 +202,7 @@ class _OnDemandView extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
                         decoration: BoxDecoration(
-                          color: theme.primary.withOpacity(0.1),
+                          color: theme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
@@ -233,8 +230,8 @@ class _OnDemandView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: _getDifficultyColor(module.difficulty)
-                                .withOpacity(0.1),
+                            color: _getDifficultyColor(module.difficulty, theme)
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -244,7 +241,7 @@ class _OnDemandView extends StatelessWidget {
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
                               color:
-                                  _getDifficultyColor(module.difficulty),
+                                  _getDifficultyColor(module.difficulty, theme),
                             ),
                           ),
                         ),
@@ -382,7 +379,7 @@ class _OnDemandView extends StatelessWidget {
                         const SizedBox(width: 8),
                         _buildMetaChip(
                             theme, Icons.signal_cellular_alt, module.difficulty!,
-                            color: _getDifficultyColor(module.difficulty)),
+                            color: _getDifficultyColor(module.difficulty, theme)),
                       ],
                     ],
                   ),
@@ -488,16 +485,16 @@ class _OnDemandView extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isCompleted
-                ? const Color(0xFF34C759).withOpacity(0.1)
+                ? theme.success.withValues(alpha: 0.1)
                 : theme.scaffoldBackground,
             border: Border.all(
-              color: isCompleted ? const Color(0xFF34C759) : theme.divider,
+              color: isCompleted ? theme.success : theme.divider,
             ),
           ),
           child: Center(
             child: isCompleted
-                ? const Icon(Icons.check,
-                    color: Color(0xFF34C759), size: 18)
+              ? Icon(Icons.check,
+                    color: theme.success, size: 18)
                 : Text(
                     '${index + 1}',
                     style: TextStyle(
@@ -540,7 +537,7 @@ class _OnDemandView extends StatelessWidget {
                 },
               )
             : Icon(Icons.check_circle,
-                color: const Color(0xFF34C759), size: 24),
+                color: theme.success, size: 24),
         onTap: () {
           _openSectionContent(context, theme, section, module);
         },
@@ -633,7 +630,7 @@ class _OnDemandView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: (color ?? theme.textTertiary).withOpacity(0.1),
+        color: (color ?? theme.textTertiary).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Row(
@@ -683,10 +680,10 @@ class _OnDemandView extends StatelessWidget {
     }
   }
 
-  Color _getDifficultyColor(String? difficulty) {
+  Color _getDifficultyColor(String? difficulty, OneUITheme theme) {
     switch (difficulty?.toLowerCase()) {
       case 'beginner':
-        return const Color(0xFF34C759);
+        return theme.success;
       case 'intermediate':
         return Colors.orange;
       case 'advanced':

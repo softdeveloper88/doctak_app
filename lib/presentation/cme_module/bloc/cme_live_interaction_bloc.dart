@@ -182,18 +182,23 @@ class CmeLiveInteractionBloc
   void _startChatPolling(String eventId) {
     _chatRefreshTimer?.cancel();
     _chatRefreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      add(CmeRefreshChatEvent(eventId: eventId));
+      if (!isClosed) {
+        add(CmeRefreshChatEvent(eventId: eventId));
+      }
     });
   }
 
   void stopChatPolling() {
     _chatRefreshTimer?.cancel();
+    _chatRefreshTimer = null;
   }
 
   @override
   Future<void> close() {
     _chatRefreshTimer?.cancel();
+    _chatRefreshTimer = null;
     _participationTimer?.cancel();
+    _participationTimer = null;
     return super.close();
   }
 }

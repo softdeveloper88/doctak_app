@@ -17,19 +17,19 @@ Route<T> buildPageRoute<T>(Widget? child, PageRouteAnimation? pageRouteAnimation
       return PageRouteBuilder(
         pageBuilder: (c, a1, a2) => child!,
         transitionsBuilder: (c, anim, a2, child) => FadeTransition(opacity: anim, child: child),
-        transitionDuration: Duration(milliseconds: 1000),
+        transitionDuration: duration ?? const Duration(milliseconds: 1000),
       );
     } else if (pageRouteAnimation == PageRouteAnimation.Rotate) {
       return PageRouteBuilder(
         pageBuilder: (c, a1, a2) => child!,
         transitionsBuilder: (c, anim, a2, child) => RotationTransition(turns: ReverseAnimation(anim), child: child),
-        transitionDuration: Duration(milliseconds: 700),
+        transitionDuration: duration ?? const Duration(milliseconds: 700),
       );
     } else if (pageRouteAnimation == PageRouteAnimation.Scale) {
       return PageRouteBuilder(
         pageBuilder: (c, a1, a2) => child!,
         transitionsBuilder: (c, anim, a2, child) => ScaleTransition(scale: anim, child: child),
-        transitionDuration: Duration(milliseconds: 700),
+        transitionDuration: duration ?? const Duration(milliseconds: 700),
       );
     } else if (pageRouteAnimation == PageRouteAnimation.Slide) {
       return PageRouteBuilder(
@@ -38,7 +38,7 @@ Route<T> buildPageRoute<T>(Widget? child, PageRouteAnimation? pageRouteAnimation
           position: Tween(begin: Offset(1.0, 0.0), end: Offset(0.0, 0.0)).animate(anim),
           child: child,
         ),
-        transitionDuration: Duration(milliseconds: 500),
+        transitionDuration: duration ?? const Duration(milliseconds: 500),
       );
     } else if (pageRouteAnimation == PageRouteAnimation.SlideBottomTop) {
       return PageRouteBuilder(
@@ -47,7 +47,7 @@ Route<T> buildPageRoute<T>(Widget? child, PageRouteAnimation? pageRouteAnimation
           position: Tween(begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0)).animate(anim),
           child: child,
         ),
-        transitionDuration: Duration(milliseconds: 500),
+        transitionDuration: duration ?? const Duration(milliseconds: 500),
       );
     }
   }

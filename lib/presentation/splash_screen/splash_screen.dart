@@ -1,18 +1,23 @@
 import 'dart:async';
+import 'dart:convert';
 
 // TODO: app_links temporarily disabled due to SDK compatibility
 // import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/core/utils/session_manager.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
+import 'package:doctak_app/data/models/subscription/subscription_data_model.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
+import 'package:doctak_app/presentation/splash_screen/splash_branding.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:sizer/sizer.dart';
 import '../home_screen/SVDashboardScreen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -98,17 +103,43 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  /// Restore subscription & features data from SecureStorage after cold restart.
+  void _restoreSubscriptionData(SecureStorageService prefs) async {
+    try {
+      final subscriptionJson = await prefs.getString('subscription_json');
+      final featuresJson = await prefs.getString('features_json');
+
+      SubscriptionData? subscription;
+      FeaturesMap? features;
+
+      if (subscriptionJson != null && subscriptionJson.isNotEmpty) {
+        subscription = SubscriptionData.fromJson(
+          Map<String, dynamic>.from(jsonDecode(subscriptionJson)),
+        );
+      }
+      if (featuresJson != null && featuresJson.isNotEmpty) {
+        features = FeaturesMap.fromJson(
+          Map<String, dynamic>.from(jsonDecode(featuresJson)),
+        );
+      }
+
+      AppData.updateSubscriptionData(subscription, features);
+    } catch (e) {
+      debugPrint('Failed to restore subscription data: $e');
+    }
+  }
+
   Future<void> init() async {
     setStatusBarColor(Colors.transparent);
-    // Removed artificial delay for faster startup
-    finish(context);
     BlocProvider.of<SplashBloc>(context).add(LoadDropdownData('', '', '', ''));
     BlocProvider.of<SplashBloc>(context).add(LoadDropdownData1('', ''));
-
     initializeAsync();
   }
 
   void initializeAsync() async {
+    final splashStart = DateTime.now();
+    const minSplashDuration = SplashBranding.minDuration;
+
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
 
@@ -117,6 +148,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
     String? userToken = await prefs.getString('token');
     String? userId = await prefs.getString('userId');
+
+    // iOS keeps Keychain data after an uninstall, so a reinstall can still hold a
+    // stale/revoked token. Validate it with the server once per install — a
+    // normal app update keeps a valid token (no logout); only an invalid session
+    // routes to login (see SessionManager).
+    if (rememberMe && userToken != null && userToken.isNotEmpty) {
+      final check = await SessionManager.verifyStoredSessionOncePerInstall(
+        token: userToken,
+        userId: userId,
+      );
+      if (check == SessionCheck.invalid) {
+        userToken = null;
+      }
+    }
 
     String? name = await prefs.getString('name');
     String? profilePic = await prefs.getString('profile_pic');
@@ -139,38 +184,44 @@ class _SplashScreenState extends State<SplashScreen> {
       // AppData.background= background!;
       AppData.background = background ?? '';
       AppData.email = email ?? '';
-      AppData.specialty = specialty ?? '';
+      final rawSpecialty = specialty ?? '';
+      await SpecialtyDisplay.instance.ensureLoaded();
+      final resolvedSpecialty =
+          SpecialtyDisplay.instance.resolve(rawSpecialty).isNotEmpty
+              ? SpecialtyDisplay.instance.resolve(rawSpecialty)
+              : rawSpecialty;
+      AppData.specialty = resolvedSpecialty;
+      if (resolvedSpecialty != rawSpecialty && resolvedSpecialty.isNotEmpty) {
+        await prefs.setString('specialty', resolvedSpecialty);
+      }
+      final isVerified = await prefs.getString('is_verified') ?? 'false';
+      AppData.isVerified = isVerified == 'true';
       AppData.university = university;
       AppData.userType = userType;
       AppData.city = city;
       AppData.countryName = countryName;
       AppData.currency = currency;
+
+      // ── Restore subscription & features data (v6) ──
+      _restoreSubscriptionData(prefs);
+
+      // Re-register FCM after restoring a remembered session (non-blocking).
+      unawaited(NotificationService.syncDeviceToken());
     }
+    // Ensure splash shows for at least minSplashDuration regardless of how fast init completes
+    final elapsed = DateTime.now().difference(splashStart);
+    if (elapsed < minSplashDuration) {
+      await Future.delayed(minSplashDuration - elapsed);
+    }
+
     if (rememberMe) {
       if (userToken != null) {
-        //Future.delayed(const Duration(seconds: 1), () {
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) =>  HomeScreen()), // Navigate to OnboardingScreen
-        // );
-
         initDeepLinks(context);
-        // const SVDashboardScreen().launch(context,isNewTask: true);
-        // });
       } else {
-        // Future.delayed(const Duration(seconds: 1), () {
         LoginScreen().launch(context, isNewTask: true);
-
-        // Navigator.pushReplacement(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const SignInScreen()), // Navigate to OnboardingScreen
-        // );
-        // });
       }
     } else {
       LoginScreen().launch(context, isNewTask: true);
-
-      // TermsAndConditionScreen().launch(context, isNewTask: true);
     }
   }
 
@@ -239,22 +290,9 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo with scale and fade animations
-                  Padding(
-                    padding: const EdgeInsets.all(15),
-                    child:
-                        Image.asset(
-                              'assets/logo/logo.png',
-                              width: 50.w,
-                              fit: BoxFit.contain,
-                            )
-                            .animate()
-                            .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
-                            .scale(
-                              begin: const Offset(0.8, 0.8),
-                              end: const Offset(1.0, 1.0),
-                              duration: 600.ms,
-                            ),
+                  const Padding(
+                    padding: EdgeInsets.all(15),
+                    child: SplashLogoLottie(),
                   ),
                   const SizedBox(height: 35),
 

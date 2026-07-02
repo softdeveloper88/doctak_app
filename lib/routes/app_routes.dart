@@ -55,6 +55,8 @@ class AppRoutes {
 
   static const String profilePage = '/profile_page';
 
+  static const String diagnosisScreen = '/diagnosis_screen';
+
   static const String appNavigationScreen = '/app_navigation_screen';
 
   static const String initialRoute = '/initialRoute';

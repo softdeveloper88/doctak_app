@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 
-SearchPeopleModel searchPeopleModelFromJson(String str) => SearchPeopleModel.fromJson(json.decode(str));
-String searchPeopleModelToJson(SearchPeopleModel data) => json.encode(data.toJson());
+SearchPeopleModel searchPeopleModelFromJson(String str) =>
+    SearchPeopleModel.fromJson(json.decode(str));
+String searchPeopleModelToJson(SearchPeopleModel data) =>
+    json.encode(data.toJson());
 
 class SearchPeopleModel {
   SearchPeopleModel({
@@ -111,7 +113,18 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 
 class Data {
-  Data({this.id, this.firstName, this.lastName, this.profilePic, this.userType, this.specialty, this.followersCount, this.isFollowedByCurrentUser, this.isCurrentUser});
+  Data({
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.profilePic,
+    this.userType,
+    this.specialty,
+    this.followersCount,
+    this.isFollowedByCurrentUser,
+    this.isCurrentUser,
+    this.isVerified,
+  });
 
   Data.fromJson(dynamic json) {
     id = json['id'];
@@ -123,6 +136,7 @@ class Data {
     followersCount = json['followers_count'];
     isFollowedByCurrentUser = json['is_followed_by_current_user'];
     isCurrentUser = json['is_current_user'];
+    isVerified = json['is_verified'] == true || json['is_verified'] == 1;
   }
   String? id;
   String? firstName;
@@ -133,6 +147,7 @@ class Data {
   int? followersCount;
   bool? isFollowedByCurrentUser;
   bool? isCurrentUser;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -145,6 +160,7 @@ class Data {
     map['followers_count'] = followersCount;
     map['is_followed_by_current_user'] = isFollowedByCurrentUser;
     map['is_current_user'] = isCurrentUser;
+    map['is_verified'] = isVerified;
     return map;
   }
 }

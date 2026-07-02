@@ -1,205 +1,244 @@
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/comment_sheet_widgets.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// Ultra-detailed shimmer loader for comments that precisely mirrors the comment card layout
-class EnhancedCommentShimmer extends StatelessWidget {
-  const EnhancedCommentShimmer({super.key});
+/// Shimmer placeholder matching [CommentSheetBubble] + action row layout.
+class CommentSheetShimmerItem extends StatelessWidget {
+  final int index;
+
+  const CommentSheetShimmerItem({super.key, this.index = 0});
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = theme.isDark;
 
-    final baseColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.3) : Colors.grey[300]!;
-    final highlightColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.5) : Colors.grey[100]!;
-    final shimmerColor = isDark ? theme.surfaceVariant.withValues(alpha: 0.4) : Colors.grey[400]!;
+    final baseColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : CommentSheetTokens.bubbleBackground;
+    final highlightColor = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : Colors.white;
+    final boneColor = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : CommentSheetTokens.threadLine;
 
-    return ListView.builder(
-      itemCount: 6, // Number of shimmer cards to show
-      padding: const EdgeInsets.all(8.0),
-      itemBuilder: (context, index) {
-        // Create variations for each card to make it look more realistic
-        final bool hasLongName = index % 2 == 0;
-        final bool hasLongComment = index % 3 == 0;
-        final bool hasReplies = index % 2 == 1;
+    final bubbleBg = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : CommentSheetTokens.bubbleBackground;
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12.0),
-          child: Shimmer.fromColors(
-            baseColor: baseColor,
-            highlightColor: highlightColor,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: theme.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, spreadRadius: 0, offset: const Offset(0, 2))],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // User and comment header
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // User avatar
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(color: shimmerColor, shape: BoxShape.circle),
-                        ),
-                        const SizedBox(width: 12),
+    final hasLongBody = index % 3 == 0;
+    final showSpecialty = index % 2 == 0;
+    final showViewReplies = index == 1;
 
-                        // Comment content
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // User info row
-                              Row(
-                                children: [
-                                  // Username
-                                  Container(
-                                    width: hasLongName ? 120 : 90,
-                                    height: 16,
-                                    decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  // Verification badge
-                                  Container(
-                                    width: 14,
-                                    height: 14,
-                                    decoration: BoxDecoration(color: shimmerColor, shape: BoxShape.circle),
-                                  ),
-                                  const Spacer(),
-                                  // Menu icon (only on some items)
-                                  if (index % 3 == 0)
-                                    Container(
-                                      width: 20,
-                                      height: 20,
-                                      decoration: BoxDecoration(color: shimmerColor, shape: BoxShape.circle),
-                                    ),
-                                ],
-                              ),
+    BoxDecoration bone({double radius = 4}) => BoxDecoration(
+          color: boneColor,
+          borderRadius: BorderRadius.circular(radius),
+        );
 
-                              const SizedBox(height: 8),
+    Widget boneBox({double? width, required double height, double radius = 4}) {
+      return Container(
+        width: width,
+        height: height,
+        decoration: bone(radius: radius),
+      );
+    }
 
-                              // Comment text lines with varying width
-                              Container(
-                                width: double.infinity,
-                                height: 14,
-                                decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                              ),
-                              const SizedBox(height: 6),
-                              Container(
-                                width: hasLongComment ? MediaQuery.of(context).size.width * 0.7 : MediaQuery.of(context).size.width * 0.5,
-                                height: 14,
-                                decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                              ),
-                              if (hasLongComment) ...[
-                                const SizedBox(height: 6),
-                                Container(
-                                  width: MediaQuery.of(context).size.width * 0.6,
-                                  height: 14,
-                                  decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                                ),
-                              ],
-
-                              const SizedBox(height: 8),
-
-                              // Timestamp
-                              Container(
-                                width: 80,
-                                height: 12,
-                                decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Action buttons
-                              Row(
-                                children: [
-                                  // Reply button
-                                  Container(
-                                    width: 70,
-                                    height: 24,
-                                    decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(12)),
-                                  ),
-                                  const SizedBox(width: 16),
-
-                                  // Like button
-                                  Container(
-                                    width: 60,
-                                    height: 24,
-                                    decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(12)),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Reply section (only for some items)
-                    if (hasReplies) ...[
-                      const SizedBox(height: 16),
-                      Container(
-                        margin: const EdgeInsets.only(left: 30),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Reply avatar
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(color: shimmerColor, shape: BoxShape.circle),
-                            ),
-                            const SizedBox(width: 8),
-
-                            // Reply content
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Reply username
-                                  Container(
-                                    width: 80,
-                                    height: 14,
-                                    decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                                  ),
-
-                                  const SizedBox(height: 6),
-
-                                  // Reply text
-                                  Container(
-                                    width: double.infinity,
-                                    height: 12,
-                                    decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Container(
-                                    width: MediaQuery.of(context).size.width * 0.4,
-                                    height: 12,
-                                    decoration: BoxDecoration(color: shimmerColor, borderRadius: BorderRadius.circular(4)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CommentSheetTokens.horizontalPadding,
+        10,
+        CommentSheetTokens.horizontalPadding,
+        0,
+      ),
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: CommentSheetTokens.avatarMain,
+              height: CommentSheetTokens.avatarMain,
+              decoration: const BoxDecoration(
+                color: CommentSheetTokens.threadLine,
+                shape: BoxShape.circle,
               ),
             ),
-          ),
-        );
-      },
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+                    decoration: isDark
+                        ? BoxDecoration(
+                            color: bubbleBg,
+                            borderRadius: BorderRadius.circular(
+                              CommentSheetTokens.bubbleRadius,
+                            ),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
+                          )
+                        : CommentSheetTokens.bubbleDecoration(isDark: false)
+                            .copyWith(color: bubbleBg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            boneBox(width: showSpecialty ? 72 : 96, height: 12),
+                            if (showSpecialty) ...[
+                              const Spacer(),
+                              boneBox(width: 56, height: 10),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        boneBox(width: double.infinity, height: 12),
+                        if (hasLongBody) ...[
+                          const SizedBox(height: 5),
+                          boneBox(
+                            width: MediaQuery.sizeOf(context).width * 0.46,
+                            height: 12,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2, top: 6),
+                    child: Row(
+                      children: [
+                        boneBox(width: 28, height: 10),
+                        const SizedBox(width: 12),
+                        boneBox(width: 14, height: 14, radius: 7),
+                        const SizedBox(width: 4),
+                        boneBox(width: 12, height: 10),
+                        const SizedBox(width: 12),
+                        boneBox(width: 14, height: 14, radius: 7),
+                        const SizedBox(width: 4),
+                        boneBox(width: 32, height: 10),
+                        const Spacer(),
+                        boneBox(width: 18, height: 18, radius: 9),
+                      ],
+                    ),
+                  ),
+                  if (showViewReplies)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10, bottom: 2),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 1,
+                            color: CommentSheetTokens.threadLine,
+                          ),
+                          const SizedBox(width: 10),
+                          boneBox(width: 108, height: 11, radius: 5),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Header shimmer while comments are loading in the bottom sheet.
+class CommentSheetHeaderShimmer extends StatelessWidget {
+  const CommentSheetHeaderShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final isDark = theme.isDark;
+    final baseColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : CommentSheetTokens.bubbleBackground;
+    final highlightColor = isDark
+        ? Colors.white.withValues(alpha: 0.14)
+        : Colors.white;
+    final boneColor = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : CommentSheetTokens.threadLine;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        CommentSheetTokens.horizontalPadding,
+        4,
+        CommentSheetTokens.horizontalPadding,
+        0,
+      ),
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 96,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: boneColor,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: CommentSheetTokens.threadLine,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: CommentSheetTokens.threadLine,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Divider(
+              height: 1,
+              thickness: 1,
+              color: CommentSheetTokens.threadLine,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Pre-loader for the comment bottom sheet — mirrors real comment list UX.
+class EnhancedCommentShimmer extends StatelessWidget {
+  final int itemCount;
+
+  const EnhancedCommentShimmer({super.key, this.itemCount = 5});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.only(top: 4, bottom: 12),
+      itemCount: itemCount,
+      itemBuilder: (context, index) => CommentSheetShimmerItem(index: index),
     );
   }
 }

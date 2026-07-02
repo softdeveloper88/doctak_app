@@ -1,23 +1,22 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificates_bloc.dart';
-import 'package:doctak_app/presentation/cme_module/bloc/cme_dashboard_bloc.dart';
-import 'package:doctak_app/presentation/cme_module/bloc/cme_events_bloc.dart';
-import 'package:doctak_app/presentation/cme_module/bloc/cme_notifications_bloc.dart';
-import 'package:doctak_app/presentation/cme_module/bloc/cme_notifications_event.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_analytics_screen.dart';
+import 'package:doctak_app/presentation/cme_module/cme_hub_controller.dart';
 import 'package:doctak_app/presentation/cme_module/screens/cme_certificates_screen.dart';
+import 'package:doctak_app/presentation/cme_module/screens/cme_credits_screen.dart';
 import 'package:doctak_app/presentation/cme_module/screens/cme_event_creation_screen.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_events_screen.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_gamification_screen.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_learning_paths_screen.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_my_events_screen.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_notifications_screen.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_profile_screen.dart';
-import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
+import 'package:doctak_app/presentation/cme_module/screens/cme_provider_events_screen.dart';
+import 'package:doctak_app/presentation/cme_module/screens/cme_speaking_screen.dart';
+import 'package:doctak_app/presentation/cme_module/widgets/cme_credit_summary_card.dart';
+import 'package:doctak_app/presentation/cme_module/widgets/cme_workspace_sheet.dart';
+import 'package:doctak_app/presentation/cme_module/widgets/cme_workspace_switcher.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
+import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// CME hub — swipeable tabs + workspace switcher (web `CmeSidebar` parity).
 class CmeMainScreen extends StatefulWidget {
   const CmeMainScreen({super.key});
 
@@ -25,312 +24,368 @@ class CmeMainScreen extends StatefulWidget {
   State<CmeMainScreen> createState() => _CmeMainScreenState();
 }
 
-class _CmeMainScreenState extends State<CmeMainScreen> {
-  int _currentIndex = 0;
-
-  // Create BLoCs once
-  late final CmeEventsBloc _eventsBloc;
-  late final CmeDashboardBloc _dashboardBloc;
+class _CmeMainScreenState extends State<CmeMainScreen>
+    with TickerProviderStateMixin {
+  final _hub = CmeHubController();
+  final _searchController = TextEditingController();
   late final CmeCertificatesBloc _certificatesBloc;
-  late final CmeNotificationsBloc _notificationsBloc;
+  TabController? _tabController;
+  bool? _tabProviderMode;
+  bool _isSearchVisible = false;
+  String _searchKeyword = '';
+
+  static const _learnerTabs = [
+    'Browse',
+    'Registered',
+    'In progress',
+    'Completed',
+    'Certificates',
+    'Speaking',
+    'Invites',
+  ];
+
+  static const _providerTabs = ['All', 'Open', 'Closed'];
 
   @override
   void initState() {
     super.initState();
-    _eventsBloc = CmeEventsBloc();
-    _dashboardBloc = CmeDashboardBloc();
     _certificatesBloc = CmeCertificatesBloc();
-    _notificationsBloc = CmeNotificationsBloc();
+    _hub.addListener(_onHubChanged);
+    _hub.initialize();
   }
 
   @override
   void dispose() {
-    _eventsBloc.close();
-    _dashboardBloc.close();
+    _hub.removeListener(_onHubChanged);
+    _tabController?.removeListener(_onTabIndexChanged);
+    _tabController?.dispose();
+    _searchController.dispose();
+    _hub.dispose();
     _certificatesBloc.close();
-    _notificationsBloc.close();
     super.dispose();
   }
 
-  void _onCreateEvent(BuildContext context) {
-    if (AppData.hasFeatureAccess('cme_credits')) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const CmeEventCreationScreen()),
-      );
-    } else {
-      _showUpgradeDialog(context);
+  void _onHubChanged() {
+    _syncTabController(forceReset: _tabProviderMode != _hub.isProviderMode);
+    if (mounted) setState(() {});
+  }
+
+  void _syncTabController({bool forceReset = false}) {
+    final providerMode = _hub.isProviderMode;
+    if (!forceReset &&
+        _tabController != null &&
+        _tabProviderMode == providerMode) {
+      return;
+    }
+
+    _tabController?.removeListener(_onTabIndexChanged);
+    _tabController?.dispose();
+
+    _tabProviderMode = providerMode;
+    final length = providerMode ? _providerTabs.length : _learnerTabs.length;
+    _tabController = TabController(length: length, vsync: this);
+    _tabController!.addListener(_onTabIndexChanged);
+  }
+
+  void _onTabIndexChanged() {
+    if (_tabController == null || _tabController!.indexIsChanging) return;
+    final index = _tabController!.index;
+    final dest = _hub.isProviderMode
+        ? _providerDestinations[index]
+        : _learnerDestinations[index];
+    if (_hub.destination != dest) {
+      _hub.selectDestination(dest);
+      if (!_supportsSearchFor(dest)) _clearSearch();
+    }
+    setState(() {});
+  }
+
+  static const _learnerDestinations = [
+    CmeHubDestination.browse,
+    CmeHubDestination.myRegistrations,
+    CmeHubDestination.inProgress,
+    CmeHubDestination.completed,
+    CmeHubDestination.certificates,
+    CmeHubDestination.speaking,
+    CmeHubDestination.invitations,
+  ];
+
+  static const _providerDestinations = [
+    CmeHubDestination.providerAll,
+    CmeHubDestination.providerOpen,
+    CmeHubDestination.providerClosed,
+  ];
+
+  bool get _supportsSearch {
+    if (_tabController == null) return false;
+    final dest = _hub.isProviderMode
+        ? _providerDestinations[_tabController!.index]
+        : _learnerDestinations[_tabController!.index];
+    return _supportsSearchFor(dest);
+  }
+
+  bool _supportsSearchFor(CmeHubDestination dest) {
+    switch (dest) {
+      case CmeHubDestination.certificates:
+      case CmeHubDestination.credits:
+      case CmeHubDestination.speaking:
+      case CmeHubDestination.invitations:
+        return false;
+      default:
+        return true;
     }
   }
 
-  void _showUpgradeDialog(BuildContext context) {
+  void _onCreateEvent(BuildContext context) {
+    if (_hub.capabilities?.canCreate == true || _hub.isProviderMode) {
+      AppNavigator.push(context, const CmeEventCreationScreen());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Switch to a CME provider workspace to create activities.',
+          ),
+        ),
+      );
+    }
+  }
+
+  void _openCredits(BuildContext context) {
     final theme = OneUITheme.of(context);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: theme.radiusL),
-        title: Row(
-          children: [
-            Icon(Icons.workspace_premium_rounded,
-                color: const Color(0xFFFFB800), size: 28),
-            const SizedBox(width: 10),
-            Text('Premium Feature',
-                style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: theme.textPrimary)),
-          ],
-        ),
-        content: Text(
-          'Creating CME events requires a premium subscription. '
-          'Upgrade your plan to unlock this feature.',
-          style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              color: theme.textSecondary,
-              height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Cancel',
-                style: TextStyle(
-                    fontFamily: 'Poppins', color: theme.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => const SubscriptionScreen()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Upgrade',
-                style: TextStyle(fontFamily: 'Poppins')),
-          ),
-        ],
+    AppNavigator.push(
+      context,
+      Scaffold(
+        backgroundColor: theme.scaffoldBackground,
+        appBar: const DoctakAppBar(title: 'Credit history'),
+        body: const CmeCreditsScreen(),
       ),
     );
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    if (_searchKeyword.isNotEmpty || _isSearchVisible) {
+      setState(() {
+        _searchKeyword = '';
+        _isSearchVisible = false;
+      });
+    }
+  }
+
+  void _onSearchChanged(String value) {
+    final next = value.trim();
+    if (next != _searchKeyword) {
+      setState(() => _searchKeyword = next);
+    }
+  }
+
+  List<int?> _learnerBadgeCounts() {
+    final n = _hub.navCounts;
+    return [
+      null,
+      n.registrations,
+      n.inProgress,
+      n.completed,
+      n.certificates,
+      n.speaking,
+      n.invitations,
+    ];
+  }
+
+  List<int?> _providerBadgeCounts() {
+    final p = _hub.providerCounts;
+    return [p.all, p.open, p.closed];
+  }
+
+  List<Widget> _learnerTabViews() {
+    final keyword = _searchKeyword;
+    return [
+      CmeLearnerBrowseScreen(
+        scope: 'all',
+        segment: 'browse',
+        searchKeyword: keyword,
+        description: 'Live and on-demand CME activities you can register for.',
+      ),
+      CmeLearnerBrowseScreen(
+        scope: 'registered',
+        segment: 'registered',
+        searchKeyword: keyword,
+        description: 'CME activities you have registered for.',
+      ),
+      CmeLearnerBrowseScreen(
+        scope: 'registered',
+        segment: 'progress',
+        searchKeyword: keyword,
+        description: 'Finish these activities to earn CME credit.',
+      ),
+      CmeLearnerBrowseScreen(
+        scope: 'registered',
+        segment: 'completed',
+        searchKeyword: keyword,
+        description: 'Activities you completed and earned credit for.',
+      ),
+      const CmeCertificatesScreen(),
+      const CmeSpeakingScreen(),
+      const CmeSpeakingScreen(invitationsOnly: true),
+    ];
+  }
+
+  List<Widget> _providerTabViews() {
+    final keyword = _searchKeyword;
+    return [
+      CmeProviderEventsScreen(
+        mode: CmeProviderEventsMode.all,
+        searchKeyword: keyword,
+        description: 'Every CME activity your provider organization created.',
+      ),
+      CmeProviderEventsScreen(
+        mode: CmeProviderEventsMode.open,
+        searchKeyword: keyword,
+        description: 'Draft and live activities that are not closed yet.',
+      ),
+      CmeProviderEventsScreen(
+        mode: CmeProviderEventsMode.closed,
+        searchKeyword: keyword,
+        description: 'Ended or closed CME activities.',
+      ),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+    _syncTabController();
 
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider.value(value: _eventsBloc),
-        BlocProvider.value(value: _dashboardBloc),
-        BlocProvider.value(value: _certificatesBloc),
-        BlocProvider.value(value: _notificationsBloc),
-      ],
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackground,
-        appBar: _buildAppBar(theme),
-        body: IndexedStack(
-          index: _currentIndex,
-          children: const [
-            CmeEventsScreen(),
-            CmeMyEventsScreen(),
-            CmeLearningPathsScreen(),
-            CmeCertificatesScreen(),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () => _onCreateEvent(context),
-          backgroundColor: theme.primary,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-        bottomNavigationBar: _buildBottomNav(theme),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(OneUITheme theme) {
-    return AppBar(
-      backgroundColor: theme.cardBackground,
-      foregroundColor: theme.textPrimary,
-      elevation: 0,
-      title: const Text(
-        'CME',
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.emoji_events_outlined, color: theme.textSecondary),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const CmeGamificationScreen(),
-              ),
-            );
-          },
-          tooltip: 'Achievements',
-        ),
-        IconButton(
-          icon: Icon(Icons.analytics_outlined, color: theme.textSecondary),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const CmeAnalyticsScreen(),
-              ),
-            );
-          },
-          tooltip: 'Analytics',
-        ),
-        IconButton(
-          icon: Icon(Icons.person_outline, color: theme.textSecondary),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const CmeProfileScreen(),
-              ),
-            );
-          },
-          tooltip: 'CME Profile',
-        ),
-        // Notifications bell
-        Stack(
-          children: [
-            IconButton(
-              icon: Icon(Icons.notifications_outlined,
-                  color: theme.textSecondary),
-              onPressed: () {
-                _notificationsBloc.add(CmeLoadNotificationsEvent());
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: _notificationsBloc,
-                      child: const CmeNotificationsScreen(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            // Unread badge
-            if (_notificationsBloc.unreadCount > 0)
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFFF3B30),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${_notificationsBloc.unreadCount}',
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomNav(OneUITheme theme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        border: Border(
-          top: BorderSide(
-            color: theme.textTertiary.withValues(alpha: 0.15),
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(theme, 0, Icons.explore_outlined,
-                  Icons.explore, 'Events'),
-              _buildNavItem(theme, 1, Icons.school_outlined,
-                  Icons.school, 'My CME'),
-              _buildNavItem(theme, 2, Icons.route_outlined,
-                  Icons.route, 'Paths'),
-              _buildNavItem(theme, 3, Icons.workspace_premium_outlined,
-                  Icons.workspace_premium, 'Certs'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(
-    OneUITheme theme,
-    int index,
-    IconData icon,
-    IconData activeIcon,
-    String label,
-  ) {
-    final isActive = _currentIndex == index;
-
-    return GestureDetector(
-      onTap: () {
-        if (_currentIndex != index) {
-          setState(() => _currentIndex = index);
+    return ListenableBuilder(
+      listenable: _hub,
+      builder: (context, _) {
+        final tabController = _tabController;
+        if (tabController == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
-      },
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive
-              ? theme.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: theme.radiusL,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              size: 22,
-              color: isActive ? theme.primary : theme.textTertiary,
-            ),
-            if (isActive) ...[
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: theme.primary,
+
+        final providerMode = _hub.isProviderMode;
+        final tabs = providerMode ? _providerTabs : _learnerTabs;
+        final badgeCounts =
+            providerMode ? _providerBadgeCounts() : _learnerBadgeCounts();
+
+        return BlocProvider.value(
+          value: _certificatesBloc,
+          child: Scaffold(
+            backgroundColor: theme.scaffoldBackground,
+            floatingActionButton: _hub.capabilities?.canCreate == true
+                ? FloatingActionButton.extended(
+                    onPressed: () => _onCreateEvent(context),
+                    backgroundColor: theme.primary,
+                    icon: Icon(Icons.add, color: theme.buttonPrimaryText),
+                    label: Text(
+                      'Create',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: theme.buttonPrimaryText,
+                      ),
+                    ),
+                  )
+                : null,
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.cardBackground,
+                    border: Border(
+                      bottom: BorderSide(color: theme.border, width: 0.8),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DoctakAppBar(
+                        title: 'CME',
+                        subtitle: providerMode
+                            ? (_hub.activeOrg?.name ?? 'Provider workspace')
+                            : 'Personal learning',
+                        showBackButton: true,
+                        showShadow: false,
+                        backgroundColor: theme.cardBackground,
+                        onBackPressed: () => Navigator.pop(context),
+                        searchField: _supportsSearch
+                            ? DoctakCollapsibleSearchField(
+                                isVisible: _isSearchVisible,
+                                hintText: 'Search CME activities...',
+                                controller: _searchController,
+                                onChanged: _onSearchChanged,
+                                onClear: _clearSearch,
+                              )
+                            : null,
+                        actions: [
+                          if (_supportsSearch)
+                            DoctakSearchToggleButton(
+                              isSearching: _isSearchVisible,
+                              onTap: () {
+                                setState(() {
+                                  _isSearchVisible = !_isSearchVisible;
+                                  if (!_isSearchVisible) _clearSearch();
+                                });
+                              },
+                            ),
+                          CmeWorkspaceSwitcher(
+                            hub: _hub,
+                            onTap: () => showCmeWorkspaceSheet(context, hub: _hub),
+                          ),
+                        ],
+                      ),
+                      OneUIProfileTabBar(
+                        tabs: tabs,
+                        badgeCounts: badgeCounts,
+                        selectedIndex: tabController.index,
+                        onSelected: tabController.animateTo,
+                        expandTabs: providerMode,
+                        showBottomBorder: false,
+                        backgroundColor: theme.cardBackground,
+                        matchAppBar: false,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ],
-        ),
-      ),
+                if (_hub.error != null)
+                  MaterialBanner(
+                    content: Text(
+                      _hub.error!,
+                      style: TextStyle(color: theme.error, fontSize: 13),
+                    ),
+                    leading: Icon(Icons.warning_amber_rounded, color: theme.error),
+                    actions: [
+                      TextButton(
+                        onPressed: _hub.refresh,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                if (_hub.loading)
+                  const LinearProgressIndicator(minHeight: 2),
+                if (!providerMode && !_hub.loading && _hub.error == null)
+                  CmeCreditSummaryCard(
+                    hub: _hub,
+                    onTap: () => _openCredits(context),
+                  ),
+                Expanded(
+                  child: TabBarView(
+                    controller: tabController,
+                    physics: const BouncingScrollPhysics(),
+                    children: providerMode
+                        ? _providerTabViews()
+                        : _learnerTabViews(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

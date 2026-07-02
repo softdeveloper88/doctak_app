@@ -2,14 +2,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import '../widgets/case_discussion_layout.dart';
 import '../models/case_discussion_models.dart';
+import 'vote_controls.dart';
 
 /// Card widget for each case in the discussion list.
-/// Shows author, title, tags, description preview, images, stats, and actions.
 class DiscussionCard extends StatelessWidget {
   final CaseDiscussionListItem item;
   final VoidCallback onTap;
-  final VoidCallback onLike;
+  final VoidCallback onUpvote;
+  final VoidCallback onDownvote;
   final VoidCallback onBookmark;
   final VoidCallback? onDelete;
 
@@ -17,7 +19,8 @@ class DiscussionCard extends StatelessWidget {
     super.key,
     required this.item,
     required this.onTap,
-    required this.onLike,
+    required this.onUpvote,
+    required this.onDownvote,
     required this.onBookmark,
     this.onDelete,
   });
@@ -31,11 +34,35 @@ class DiscussionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: CaseDiscussionLayout.sectionGap),
         decoration: theme.cardDecoration,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              VoteControls(
+                likes: item.likes,
+                dislikes: item.dislikes,
+                isUpvoted: item.isLiked,
+                isDownvoted: item.isDisliked,
+                onUpvote: onUpvote,
+                onDownvote: onDownvote,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _cardBody(theme, tags, images),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _cardBody(OneUITheme theme, List<String> tags, List<String> images) {
+    return [
             // ── Author Row ──
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 14, 12, 0),
@@ -66,10 +93,9 @@ class DiscussionCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (item.promoted) ...[
+                            if (item.isVerified) ...[
                               const SizedBox(width: 6),
-                              Icon(Icons.verified,
-                                  size: 14, color: theme.primary),
+                              theme.buildVerifiedBadge(size: 14),
                             ],
                           ],
                         ),
@@ -193,18 +219,6 @@ class DiscussionCard extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
-                  // Like
-                  _ActionButton(
-                    icon: item.isLiked
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                    label: item.likes > 0 ? '${item.likes}' : 'Like',
-                    color: item.isLiked
-                        ? theme.likeColor
-                        : theme.textSecondary,
-                    onTap: onLike,
-                  ),
-                  // Comments
                   _ActionButton(
                     icon: Icons.chat_bubble_outline,
                     label: item.commentsCount > 0
@@ -213,14 +227,12 @@ class DiscussionCard extends StatelessWidget {
                     color: theme.textSecondary,
                     onTap: onTap,
                   ),
-                  // Views
                   _ActionButton(
                     icon: Icons.visibility_outlined,
                     label: '${item.views}',
                     color: theme.textSecondary,
                     onTap: null,
                   ),
-                  // Bookmark
                   _ActionButton(
                     icon: item.isBookmarked
                         ? Icons.bookmark
@@ -234,10 +246,7 @@ class DiscussionCard extends StatelessWidget {
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+    ];
   }
 
   String _buildSubtitle() {

@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -201,7 +201,7 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            SVProfileFragment(userId: contact.id).launch(context);
+            ProfileNavigation.openUser(context, contact.id);
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(

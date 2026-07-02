@@ -49,3 +49,6 @@ app.*.map.json
 # Local artifacts
 run_log.txt
 ios/Runner/AppDelegate.swift.backup
+
+# fdb session state
+.fdb/

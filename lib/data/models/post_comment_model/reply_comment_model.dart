@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart'
+    show Commenter, resolveCommentProfilePic;
 
 ReplyCommentModel replyCommentModelFromJson(String str) => ReplyCommentModel.fromJson(json.decode(str));
 String replyCommentModelToJson(ReplyCommentModel data) => json.encode(data.toJson());
@@ -41,13 +42,13 @@ class CommentsModel {
   CommentsModel({this.id, this.commentableId, this.commenterId, this.comment, this.createdAt, this.likeCount, this.userHasLiked, this.commenter});
 
   CommentsModel.fromJson(dynamic json) {
-    id = json['id'];
-    commentableId = json['commentable_id'];
-    commenterId = json['commenter_id'];
-    comment = json['comment'];
+    id = json['id'] != null ? int.tryParse(json['id'].toString()) : null;
+    commentableId = json['commentable_id']?.toString();
+    commenterId = json['commenter_id']?.toString();
+    comment = json['comment'] ?? json['body'] ?? json['reply'];
     createdAt = json['created_at'];
-    likeCount = json['like_count'];
-    userHasLiked = json['user_has_liked'];
+    likeCount = _parseReplyLikeCount(json);
+    userHasLiked = _parseReplyUserHasLiked(json['user_has_liked']);
     commenter = json['commenter'] != null ? ReplyCommenter.fromJson(json['commenter']) : null;
   }
   int? id;
@@ -79,21 +80,47 @@ ReplyCommenter commenterFromJson(String str) => ReplyCommenter.fromJson(json.dec
 String commenterToJson(ReplyCommenter data) => json.encode(data.toJson());
 
 class ReplyCommenter {
-  ReplyCommenter({this.name, this.profilePic});
+  ReplyCommenter({this.name, this.profilePic, this.specialty, this.isVerified});
 
   ReplyCommenter.fromJson(dynamic json) {
-    name = json['name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
+    name = json['name']?.toString();
+    if (name == null || name!.trim().isEmpty) {
+      final fn = json['first_name']?.toString() ?? '';
+      final ln = json['last_name']?.toString() ?? '';
+      name = '$fn $ln'.trim();
+    }
+    profilePic = resolveCommentProfilePic(json);
+    specialty = json['specialty']?.toString() ?? json['specialization']?.toString();
+    isVerified = Commenter.parseCommenterVerified(json);
   }
   String? name;
   String? profilePic;
+  String? specialty;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['name'] = name;
     map['profile_pic'] = profilePic;
+    map['specialty'] = specialty;
+    map['is_verified'] = isVerified;
     return map;
   }
+}
+
+int? _parseReplyLikeCount(dynamic json) {
+  if (json is! Map) return null;
+  final raw = json['like_count'] ?? json['reaction_count'] ?? json['likes'];
+  if (raw == null) return null;
+  return int.tryParse(raw.toString());
+}
+
+bool? _parseReplyUserHasLiked(dynamic raw) {
+  if (raw == null) return false;
+  if (raw is bool) return raw;
+  if (raw is num) return raw != 0;
+  final s = raw.toString().toLowerCase();
+  return s == 'true' || s == '1';
 }
 
 Pagination paginationFromJson(String str) => Pagination.fromJson(json.decode(str));

@@ -172,3 +172,133 @@ class NewMessageReceivedEvent extends ChatEvent {
   @override
   List<Object?> get props => [message.id];
 }
+
+// ======================== WEBSOCKET EVENTS ========================
+
+class ConnectWebSocketEvent extends ChatEvent {
+  final int conversationId;
+  ConnectWebSocketEvent({required this.conversationId});
+  @override
+  List<Object?> get props => [conversationId];
+}
+
+class DisconnectWebSocketEvent extends ChatEvent {
+  @override
+  List<Object?> get props => [];
+}
+
+class SendTypingEvent extends ChatEvent {
+  final bool isTyping;
+  SendTypingEvent({required this.isTyping});
+  @override
+  List<Object?> get props => [isTyping];
+}
+
+class EditMessageEvent extends ChatEvent {
+  final int messageId;
+  final String body;
+  EditMessageEvent({required this.messageId, required this.body});
+  @override
+  List<Object?> get props => [messageId, body];
+}
+
+class ToggleReactionEvent extends ChatEvent {
+  final int messageId;
+  final String emoji;
+  ToggleReactionEvent({required this.messageId, required this.emoji});
+  @override
+  List<Object?> get props => [messageId, emoji];
+}
+
+// ─── Internal WS dispatch events (dispatched by the WS listener) ─────
+
+class WsMessageCreatedEvent extends ChatEvent {
+  final ConversationMessage message;
+  WsMessageCreatedEvent({required this.message});
+  @override
+  List<Object?> get props => [message.id];
+}
+
+class WsMessageUpdatedEvent extends ChatEvent {
+  final ConversationMessage message;
+  WsMessageUpdatedEvent({required this.message});
+  @override
+  List<Object?> get props => [message.id];
+}
+
+class WsMessageDeletedEvent extends ChatEvent {
+  final int messageId;
+  final int conversationId;
+  WsMessageDeletedEvent({required this.messageId, required this.conversationId});
+  @override
+  List<Object?> get props => [messageId, conversationId];
+}
+
+class WsReactionsUpdatedEvent extends ChatEvent {
+  final int messageId;
+  final List<MessageReaction> reactions;
+  WsReactionsUpdatedEvent({required this.messageId, required this.reactions});
+  @override
+  List<Object?> get props => [messageId];
+}
+
+class WsTypingEvent extends ChatEvent {
+  final String userId;
+  final bool isTyping;
+  final int conversationId;
+  WsTypingEvent({required this.userId, required this.isTyping, required this.conversationId});
+  @override
+  List<Object?> get props => [userId, isTyping, conversationId];
+}
+
+class WsPresenceEvent extends ChatEvent {
+  final String userId;
+  final bool isOnline;
+  WsPresenceEvent({required this.userId, required this.isOnline});
+  @override
+  List<Object?> get props => [userId, isOnline];
+}
+
+class WsDeliveredEvent extends ChatEvent {
+  final int messageId;
+  final String userId;
+  WsDeliveredEvent({required this.messageId, required this.userId});
+  @override
+  List<Object?> get props => [messageId, userId];
+}
+
+class WsReadEvent extends ChatEvent {
+  final int messageId;
+  final String userId;
+  WsReadEvent({required this.messageId, required this.userId});
+  @override
+  List<Object?> get props => [messageId, userId];
+}
+
+class ChatListMessageEvent extends ChatEvent {
+  final int conversationId;
+  final Map<String, dynamic> message;
+  ChatListMessageEvent({required this.conversationId, required this.message});
+  @override
+  List<Object?> get props => [conversationId, message];
+}
+
+class ChatListTypingEvent extends ChatEvent {
+  final int conversationId;
+  final String userId;
+  final bool isTyping;
+  ChatListTypingEvent({
+    required this.conversationId,
+    required this.userId,
+    required this.isTyping,
+  });
+  @override
+  List<Object?> get props => [conversationId, userId, isTyping];
+}
+
+class ChatListTypingRefreshEvent extends ChatEvent {
+  ChatListTypingRefreshEvent();
+  @override
+  List<Object?> get props => [];
+}
+

@@ -1,6 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -38,28 +39,10 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
       child: GestureDetector(
         onTap: widget.onJobTap,
         child: Container(
-          margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+          margin: AppCardLayout.listItemMargin,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xFF1E293B)
-                : Colors.white, // slate-800 / white
-            borderRadius: BorderRadius.circular(16), // rounded-2xl
-            border: Border.all(
-              color: isDark
-                  ? const Color(0xFF334155)
-                  : const Color(0xFFF1F5F9), // slate-700 / slate-100
-            ),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04), // shadow-sm
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-          ),
+          clipBehavior: Clip.antiAlias,
+          decoration: theme.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

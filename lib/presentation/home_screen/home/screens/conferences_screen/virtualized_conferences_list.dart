@@ -64,7 +64,7 @@ class _VirtualizedConferencesListState extends State<VirtualizedConferencesList>
 
     return ListView.builder(
       controller: widget.scrollController,
-      padding: EdgeInsets.only(top: 10, bottom: MediaQuery.of(context).padding.bottom + 16),
+      padding: EdgeInsets.only(top: 8, bottom: MediaQuery.of(context).padding.bottom + 16),
       itemCount: bloc.conferenceList.length,
       // Using cacheExtent to preload items beyond the visible area
       cacheExtent: 1000,

@@ -5,20 +5,32 @@ MeetingDetailsModel meetingDetailsModelFromJson(String str) => MeetingDetailsMod
 String meetingDetailsModelToJson(MeetingDetailsModel data) => json.encode(data.toJson());
 
 class MeetingDetailsModel {
-  MeetingDetailsModel({this.success, this.data, this.message});
+  MeetingDetailsModel({this.success, this.data, this.message, this.waiting, this.isHost});
 
+  /// Parses doctak-node flat shape: {success, meeting, settings, participant, waiting, isHost}
+  /// and old Laravel shape: {success, data: {meeting, settings, users: [...]}}
   MeetingDetailsModel.fromJson(dynamic json) {
     success = json['success'];
-    data = json['data'] != null ? Data.fromJson(json['data']) : null;
     message = json['message'];
+    waiting = json['waiting'];
+    isHost = json['isHost'];
+    if (json['data'] != null) {
+      data = Data.fromJson(json['data']);
+    } else if (json['meeting'] != null) {
+      data = Data.fromJson(json);
+    }
   }
   bool? success;
   Data? data;
   String? message;
+  bool? waiting;
+  bool? isHost;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['success'] = success;
+    map['waiting'] = waiting;
+    map['isHost'] = isHost;
     if (data != null) {
       map['data'] = data?.toJson();
     }
@@ -31,21 +43,35 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 
 class Data {
-  Data({this.meeting, this.settings, this.users});
+  Data({this.meeting, this.settings, this.users, this.participant});
 
+  /// Accepts both doctak-node flat join response and old Laravel nested shape.
   Data.fromJson(dynamic json) {
     meeting = json['meeting'] != null ? Meeting.fromJson(json['meeting']) : null;
     settings = json['settings'] != null ? Settings.fromJson(json['settings']) : null;
-    if (json['users'] != null) {
+    // doctak-node returns a single `participant` object for the current user
+    if (json['participant'] != null) {
+      participant = Users.fromParticipant(json['participant']);
+    }
+    // Prefer 'participants' array (all meeting members) when available
+    if (json['participants'] != null) {
+      users = [];
+      json['participants'].forEach((v) {
+        users?.add(Users.fromParticipant(v));
+      });
+    } else if (json['users'] != null) {
       users = [];
       json['users'].forEach((v) {
         users?.add(Users.fromJson(v));
       });
+    } else if (participant != null) {
+      users = [participant!];
     }
   }
   Meeting? meeting;
   Settings? settings;
   List<Users>? users;
+  Users? participant;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -66,10 +92,10 @@ Users usersFromJson(String str) => Users.fromJson(json.decode(str));
 String usersToJson(Users data) => json.encode(data.toJson());
 
 class Users {
-  Users({this.id, this.firstName, this.lastName, this.specialty, this.profilePic, this.meetingDetails});
+  Users({this.id, this.firstName, this.lastName, this.specialty, this.profilePic, this.meetingDetails, this.participantDetail});
 
   Users.fromJson(dynamic json) {
-    id = json['id'];
+    id = json['id']?.toString();
     firstName = json['first_name'];
     lastName = json['last_name'];
     specialty = json['specialty'];
@@ -81,12 +107,34 @@ class Users {
       });
     }
   }
+
+  /// Construct from doctak-node LiveMeetingParticipant shape.
+  Users.fromParticipant(dynamic json) {
+    id = json['userId']?.toString();
+    firstName = json['userName']?.toString();
+    profilePic = AppData.fullImageUrl(json['userAvatar']);
+    final detail = MeetingDetails();
+    detail.id = json['id']?.toString();
+    detail.meetingId = json['meetingId']?.toString();
+    detail.userId = json['userId']?.toString();
+    detail.joinedAt = json['joinedAt']?.toString();
+    detail.isAllowed = json['isAllowed'] == true || json['isAllowed'] == 1 ? '1' : '0';
+    detail.isMicOn = (json['isMicOn'] == true || json['isMicOn'] == 1) ? 1 : 0;
+    detail.isVideoOn = (json['isVideoOn'] == true || json['isVideoOn'] == 1) ? 1 : 0;
+    detail.isScreenShared = (json['isScreenShared'] == true || json['isScreenShared'] == 1) ? 1 : 0;
+    detail.isHandUp = (json['isHandUp'] == true || json['isHandUp'] == 1) ? 1 : 0;
+    detail.isMeetingLeaved = (json['isMeetingLeaved'] == true || json['isMeetingLeaved'] == 1) ? 1 : 0;
+    meetingDetails = [detail];
+    participantDetail = detail;
+  }
+
   String? id;
   String? firstName;
   String? lastName;
   String? specialty;
   String? profilePic;
   List<MeetingDetails>? meetingDetails;
+  MeetingDetails? participantDetail;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -187,21 +235,38 @@ class Settings {
     this.updatedAt,
   });
 
+  // Normalize backend payloads: legacy Laravel sends "1"/"0" strings while
+  // doctak-node sends real booleans. We canonicalize to "1"/"0" so all the
+  // downstream `== '1'` checks keep working without touching every call site.
+  static String? _flagToString(dynamic raw) {
+    if (raw == null) return null;
+    if (raw is bool) return raw ? '1' : '0';
+    if (raw is num) return raw != 0 ? '1' : '0';
+    final s = raw.toString().toLowerCase();
+    if (s == 'true' || s == '1') return '1';
+    if (s == 'false' || s == '0') return '0';
+    return raw.toString();
+  }
+
   Settings.fromJson(dynamic json) {
     id = json['id'];
-    meetingId = json['meeting_id'];
-    startStopMeeting = json['start_stop_meeting'];
-    muteAll = json['mute_all'];
-    unmuteAll = json['unmute_all'];
-    addRemoveHost = json['add_remove_host'];
-    shareScreen = json['share_screen'];
-    raisedHand = json['raised_hand'];
-    sendReactions = json['send_reactions'];
-    toggleMicrophone = json['toggle_microphone'];
-    toggleVideo = json['toggle_video'];
-    enableWaitingRoom = json['enable_waiting_room'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    meetingId = (json['meetingId'] ?? json['meeting_id'])?.toString();
+    startStopMeeting = _flagToString(json['startStopMeeting'] ?? json['start_stop_meeting']);
+    muteAll = _flagToString(json['muteAll'] ?? json['mute_all']);
+    unmuteAll = _flagToString(json['unmuteAll'] ?? json['unmute_all']);
+    addRemoveHost = _flagToString(json['addRemoveHost'] ?? json['add_remove_host']);
+    shareScreen = _flagToString(json['shareScreen'] ?? json['share_screen']);
+    raisedHand = _flagToString(json['raisedHand'] ?? json['raised_hand']);
+    final sr = json['sendReactions'] ?? json['send_reactions'];
+    sendReactions = sr == true ? 1 : sr == false ? 0 : sr as int?;
+    final tm = json['toggleMicrophone'] ?? json['toggle_microphone'];
+    toggleMicrophone = tm == true ? 1 : tm == false ? 0 : tm as int?;
+    final tv = json['toggleVideo'] ?? json['toggle_video'];
+    toggleVideo = tv == true ? 1 : tv == false ? 0 : tv as int?;
+    final ew = json['enableWaitingRoom'] ?? json['enable_waiting_room'];
+    enableWaitingRoom = ew == true ? 1 : ew == false ? 0 : ew as int?;
+    createdAt = (json['createdAt'] ?? json['created_at'])?.toString();
+    updatedAt = (json['updatedAt'] ?? json['updated_at'])?.toString();
   }
   int? id;
   String? meetingId;
@@ -246,8 +311,9 @@ class Meeting {
 
   Meeting.fromJson(dynamic json) {
     id = json['id'];
-    meetingToken = json['meetingToken'];
-    meetingChannel = json['meetingChannel'];
+    // doctak-node returns 'token'/'channel'; old Laravel returns 'meetingToken'/'meetingChannel'
+    meetingToken = (json['token'] ?? json['meetingToken'])?.toString();
+    meetingChannel = (json['channel'] ?? json['meetingChannel'])?.toString();
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     meetingId = json['meetingId'];

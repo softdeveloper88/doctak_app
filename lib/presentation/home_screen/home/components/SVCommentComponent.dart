@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/post_comment_model/post_comment_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +35,10 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
             children: [
               InkWell(
                 onTap: () {
-                  SVProfileFragment(userId: widget.comment.commenter?.id ?? '').launch(context);
+                  ProfileNavigation.openUser(
+                    context,
+                    widget.comment.commenter?.id,
+                  );
                 },
                 child: CircleAvatar(backgroundImage: NetworkImage(AppData.fullImageUrl(widget.comment.commenter?.profilePic ?? '')), radius: 24.0),
               ),
@@ -50,7 +53,10 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                           flex: 5,
                           child: InkWell(
                             onTap: () {
-                              SVProfileFragment(userId: widget.comment.commenter?.id ?? "").launch(context);
+                              ProfileNavigation.openUser(
+                                context,
+                                widget.comment.commenter?.id,
+                              );
                             },
                             child: Wrap(
                               crossAxisAlignment: WrapCrossAlignment.center,
@@ -107,12 +113,12 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                                 if (value == translation(context).lbl_delete) {
                                   showDialog(
                                     context: context,
+                                    useRootNavigator: false,
                                     builder: (BuildContext context) {
                                       return CustomAlertDialog(
                                         title: translation(context).msg_confirm_delete_comment,
                                         callback: () {
                                           widget.commentBloc.add(DeleteCommentEvent(commentId: widget.comment.id.toString()));
-                                          Navigator.of(context).pop();
                                         },
                                       );
                                     },

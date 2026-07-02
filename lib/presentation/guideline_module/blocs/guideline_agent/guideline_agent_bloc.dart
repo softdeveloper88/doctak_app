@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +12,15 @@ import '../../data/models/guideline_source_model.dart';
 part 'guideline_agent_event.dart';
 part 'guideline_agent_state.dart';
 
+/// Safe parser for the sources array returned by the API.
+List<Map<String, dynamic>> _parseSources(dynamic value) {
+  if (value is! List) return const <Map<String, dynamic>>[];
+  return value
+      .whereType<Map>()
+      .map((e) => Map<String, dynamic>.from(e))
+      .toList();
+}
+
 class GuidelineAgentBloc
     extends Bloc<GuidelineAgentEvent, GuidelineAgentState> {
   GuidelineAgentBloc() : super(GuidelineAgentInitial()) {
@@ -21,6 +32,7 @@ class GuidelineAgentBloc
     on<ClearCurrentChat>(_onClearCurrentChat);
     on<SubmitMessageFeedback>(_onSubmitFeedback);
     on<StartNewChat>(_onStartNewChat);
+    on<CancelGuidelineStream>(_onCancelStream);
   }
 
   List<GuidelineSourceModel> _sources = [];
@@ -42,7 +54,6 @@ class GuidelineAgentBloc
   ) async {
     emit(GuidelineAgentLoading());
     try {
-      // Load sources, topics, sessions, and usage in parallel
       final results = await Future.wait([
         api.getGuidelineSources(),
         api.getSuggestedTopics(),
@@ -55,7 +66,6 @@ class GuidelineAgentBloc
       _sessions = results[2] as List<GuidelineChatSession>;
       _usage = results[3] as GuidelineUsageInfo?;
 
-      // Generate a new session ID
       _currentSessionId =
           '${AppData.logInUserId}-${DateTime.now().millisecondsSinceEpoch}';
 
@@ -90,11 +100,13 @@ class GuidelineAgentBloc
     ));
   }
 
+  /// Send message using the reliable non-streaming API endpoint —
+  /// identical to what the website uses, so the formatted response
+  /// (with "📚 Based on:" header and disclaimer) is always returned.
   Future<void> _onSendMessage(
     SendGuidelineMessage event,
     Emitter<GuidelineAgentState> emit,
   ) async {
-    // Add user message to local list immediately
     final userMessage = GuidelineChatMessage(
       role: 'user',
       content: event.message,
@@ -113,81 +125,68 @@ class GuidelineAgentBloc
     ));
 
     try {
-      final result = await api.sendGuidelineMessage(
+      final responseData = await api.sendGuidelineMessage(
         query: event.message,
         sessionId: _currentSessionId,
         sources: _selectedSources,
       );
 
-      if (result['success'] == true) {
-        final data = result['data'] ?? {};
-        final agentResponse = GuidelineAgentResponse.fromJson(data);
+      // The non-streaming API returns the payload at the top level
+      // ({"success": true, "response": "...", ...}). Some deployments nest it
+      // under a 'data' key, so fall back to that for compatibility.
+      final Map<String, dynamic> data = responseData['data'] is Map
+          ? Map<String, dynamic>.from(responseData['data'] as Map)
+          : responseData;
 
-        // Add assistant message
-        final assistantMessage = GuidelineChatMessage(
-          role: 'assistant',
-          content: agentResponse.response,
-          createdAt: DateTime.now(),
-        );
-        _messages = [..._messages, assistantMessage];
-        _suggestions = agentResponse.suggestions;
+      final responseText = data['response']?.toString() ?? '';
+      final agentSources = _parseSources(data['sources']);
+      final suggestions = (data['suggestions'] as List?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const <String>[];
+      final sessionId = data['session_id'] as String?;
 
-        // Update session ID from response
-        if (agentResponse.sessionId.isNotEmpty) {
-          _currentSessionId = agentResponse.sessionId;
-        }
-
-        // Update usage from response
-        if (result['usage'] != null) {
-          _usage = GuidelineUsageInfo.fromJson(result['usage']);
-        }
-
-        // Refresh sessions list
-        try {
-          _sessions = await api.getGuidelineSessions();
-        } catch (_) {}
-
-        emit(GuidelineMessageReceived(
-          sources: _sources,
-          selectedSources: _selectedSources,
-          topics: _topics,
-          sessions: _sessions,
-          usage: _usage,
-          messages: _messages,
-          suggestions: _suggestions,
-          agentSources: agentResponse.sources,
-        ));
-      } else if (result['limit_reached'] == true) {
-        if (result['usage'] != null) {
-          _usage = GuidelineUsageInfo.fromJson(result['usage']);
-        }
-        emit(GuidelineQuotaExceeded(
-          sources: _sources,
-          selectedSources: _selectedSources,
-          topics: _topics,
-          sessions: _sessions,
-          usage: _usage,
-          messages: _messages,
-          suggestions: _suggestions,
-        ));
-      } else {
-        emit(GuidelineMessageError(
-          sources: _sources,
-          selectedSources: _selectedSources,
-          topics: _topics,
-          sessions: _sessions,
-          usage: _usage,
-          messages: _messages,
-          suggestions: _suggestions,
-          errorMessage: result['message'] ?? 'Unknown error',
-        ));
+      if (sessionId != null && sessionId.isNotEmpty) {
+        _currentSessionId = sessionId;
       }
+      _suggestions = suggestions;
+
+      // Refresh usage quota from response
+      if (responseData['usage'] is Map) {
+        _usage = GuidelineUsageInfo.fromJson(
+          Map<String, dynamic>.from(responseData['usage'] as Map),
+        );
+      }
+
+      final assistantMessage = GuidelineChatMessage(
+        role: 'assistant',
+        content: responseText,
+        createdAt: DateTime.now(),
+        sources: agentSources,
+      );
+      _messages = [..._messages, assistantMessage];
+
+      try {
+        _sessions = await api.getGuidelineSessions();
+      } catch (_) {}
+
+      emit(GuidelineMessageReceived(
+        sources: _sources,
+        selectedSources: _selectedSources,
+        topics: _topics,
+        sessions: _sessions,
+        usage: _usage,
+        messages: _messages,
+        suggestions: _suggestions,
+        agentSources: agentSources,
+      ));
     } catch (e) {
       debugPrint('SendGuidelineMessage error: $e');
+      final errorStr = e.toString();
 
-      // Check for 429 quota error
-      final isQuotaError = e.toString().contains('429');
-      if (isQuotaError) {
+      if (errorStr.contains('429') ||
+          errorStr.contains('Too many requests') ||
+          errorStr.contains('limit')) {
         emit(GuidelineQuotaExceeded(
           sources: _sources,
           selectedSources: _selectedSources,
@@ -210,6 +209,22 @@ class GuidelineAgentBloc
         ));
       }
     }
+  }
+
+  /// Cancel is a no-op for non-streaming requests.
+  void _onCancelStream(
+    CancelGuidelineStream event,
+    Emitter<GuidelineAgentState> emit,
+  ) {
+    emit(GuidelineAgentReady(
+      sources: _sources,
+      selectedSources: _selectedSources,
+      topics: _topics,
+      sessions: _sessions,
+      usage: _usage,
+      messages: _messages,
+      suggestions: _suggestions,
+    ));
   }
 
   Future<void> _onLoadSessionMessages(
@@ -244,7 +259,6 @@ class GuidelineAgentBloc
       _sessions =
           _sessions.where((s) => s.sessionId != event.sessionId).toList();
 
-      // If deleting current session, reset chat
       if (event.sessionId == _currentSessionId) {
         _messages = [];
         _suggestions = [];

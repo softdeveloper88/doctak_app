@@ -23,59 +23,18 @@ class GuidelineWelcomeView extends StatelessWidget {
         children: [
           const SizedBox(height: 20),
 
-          // Agent Avatar
-          Container(
+          Image.asset(
+            'assets/logo/logo.png',
             width: 80,
             height: 80,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  const Color(0xFF0A84FF).withOpacity(0.1),
-                  const Color(0xFF5AC8FA).withOpacity(0.1),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const Icon(
-                  Icons.local_hospital_rounded,
-                  size: 40,
-                  color: Color(0xFF0A84FF),
-                ),
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF9500),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.cardBackground,
-                        width: 2,
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.star,
-                      size: 10,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            fit: BoxFit.contain,
           ),
 
           const SizedBox(height: 20),
 
           // Title
           Text(
-            'Medical Guideline Assistant',
+            'Medical guidelines assistant',
             style: TextStyle(
               color: theme.textPrimary,
               fontSize: 22,
@@ -187,7 +146,7 @@ class GuidelineWelcomeView extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: _getTopicColor(topic.icon).withOpacity(0.1),
+                    color: _getTopicColor(topic.icon).withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(

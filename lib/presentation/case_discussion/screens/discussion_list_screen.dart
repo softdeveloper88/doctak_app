@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import '../bloc/discussion_list_bloc.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
+import '../widgets/case_discussion_layout.dart';
 import '../widgets/discussion_card.dart';
 import '../widgets/shimmer_widgets.dart';
 import 'create_discussion_screen.dart';
@@ -244,7 +246,7 @@ class _DiscussionListScreenState extends State<DiscussionListScreen>
                     },
                     child: ListView.builder(
                       controller: _scrollController,
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 80),
+                      padding: CaseDiscussionLayout.listPadding,
                       itemCount: state.discussions.length +
                           (state.isLoadingMore ? 1 : 0),
                       itemBuilder: (context, index) {
@@ -261,9 +263,14 @@ class _DiscussionListScreenState extends State<DiscussionListScreen>
                         return DiscussionCard(
                           item: item,
                           onTap: () => _openDetail(item.id),
-                          onLike: () {
+                          onUpvote: () {
                             context.read<DiscussionListBloc>().add(
-                                  ToggleLikeDiscussion(item.id),
+                                  VoteDiscussion(item.id, 'up'),
+                                );
+                          },
+                          onDownvote: () {
+                            context.read<DiscussionListBloc>().add(
+                                  VoteDiscussion(item.id, 'down'),
                                 );
                           },
                           onBookmark: () {
@@ -359,27 +366,23 @@ class _DiscussionListScreenState extends State<DiscussionListScreen>
   // ── Navigation ─────────────────────────────────────────────────────────────
 
   void _openDetail(int caseId) {
-    Navigator.push(
+    AppNavigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => DiscussionDetailScreen(caseId: caseId),
-      ),
+      DiscussionDetailScreen(caseId: caseId),
     );
   }
 
   void _openCreateScreen() {
-    Navigator.push(
+    AppNavigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => CreateDiscussionBloc(
-            repository: CaseDiscussionRepository(
-              baseUrl: AppData.base2,
-              getAuthToken: () => AppData.userToken ?? '',
-            ),
+      BlocProvider(
+        create: (_) => CreateDiscussionBloc(
+          repository: CaseDiscussionRepository(
+            baseUrl: AppData.base2,
+            getAuthToken: () => AppData.userToken ?? '',
           ),
-          child: const CreateDiscussionScreen(),
         ),
+        child: const CreateDiscussionScreen(),
       ),
     ).then((result) {
       if (result == true) {

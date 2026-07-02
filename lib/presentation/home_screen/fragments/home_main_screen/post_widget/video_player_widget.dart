@@ -117,21 +117,27 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     );
   }
 
-  /// Get a safe aspect ratio, defaulting to 16:9 if invalid
+  /// Get a safe aspect ratio, clamped to a feed-friendly range.
+  /// Portrait videos are capped at 4:5 (like Instagram) so they don't
+  /// fill the entire screen.
   double get _safeAspectRatio {
     if (_controller == null) return 16 / 9;
     final ratio = _controller!.value.aspectRatio;
-    // Check for invalid values: 0, NaN, Infinity, or very extreme ratios
     if (ratio <= 0 || ratio.isNaN || ratio.isInfinite || ratio < 0.1 || ratio > 10) {
-      return 16 / 9; // Default to 16:9
+      return 16 / 9;
     }
-    return ratio;
+    return ratio.clamp(0.8, 2.4);
   }
 
   @override
   Widget build(BuildContext context) {
+    final maxVideoHeight = MediaQuery.of(context).size.height * 0.75;
+
     if (_hasError) {
-      return AspectRatio(aspectRatio: 16 / 9, child: _buildErrorWidget(_errorMessage ?? 'Unknown error occurred'));
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxVideoHeight),
+        child: AspectRatio(aspectRatio: 16 / 9, child: _buildErrorWidget(_errorMessage ?? 'Unknown error occurred')),
+      );
     }
 
     if (_controller != null && _controller!.value.isInitialized && chewieController != null) {
@@ -170,14 +176,24 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             )
           : Chewie(controller: chewieController!);
 
-      return widget.showMinimalControls ? videoWidget : AspectRatio(aspectRatio: _safeAspectRatio, child: videoWidget);
+      if (widget.showMinimalControls) return videoWidget;
+
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxVideoHeight),
+        child: AspectRatio(aspectRatio: _safeAspectRatio, child: ClipRect(child: videoWidget)),
+      );
     } else {
       Widget loadingWidget = Container(
         color: appStore.isDarkMode ? Colors.black : Colors.grey[900],
         child: Center(child: CircularProgressIndicator(color: appStore.isDarkMode ? Colors.white : Colors.blue)),
       );
 
-      return widget.showMinimalControls ? loadingWidget : AspectRatio(aspectRatio: 16 / 9, child: loadingWidget);
+      if (widget.showMinimalControls) return loadingWidget;
+
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxVideoHeight),
+        child: AspectRatio(aspectRatio: 16 / 9, child: loadingWidget),
+      );
     }
   }
 

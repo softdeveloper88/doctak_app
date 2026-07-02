@@ -66,3 +66,33 @@ class NotificationCheckIfNeedMoreDataEvent extends NotificationEvent {
   @override
   List<Object?> get props => [index];
 }
+
+class AcceptConnectionRequestEvent extends NotificationEvent {
+  final int notificationId;
+  final String? requestId;
+  final String? fromUserId;
+
+  AcceptConnectionRequestEvent({
+    required this.notificationId,
+    this.requestId,
+    this.fromUserId,
+  });
+
+  @override
+  List<Object?> get props => [notificationId, requestId, fromUserId];
+}
+
+class DeclineConnectionRequestEvent extends NotificationEvent {
+  final int notificationId;
+  final String? requestId;
+  final String? fromUserId;
+
+  DeclineConnectionRequestEvent({
+    required this.notificationId,
+    this.requestId,
+    this.fromUserId,
+  });
+
+  @override
+  List<Object?> get props => [notificationId, requestId, fromUserId];
+}

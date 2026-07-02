@@ -10,6 +10,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/doc
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job_applicant_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
+import 'package:doctak_app/widgets/profile_list_item_card.dart';
 import 'package:doctak_app/widgets/shimmer_widget/job_details_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -107,33 +108,22 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           }
         },
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.primary.withAlpha(25),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.share_outlined,
-                  color: theme.primary,
-                  size: 16,
-                ),
-              ),
-              onPressed: () {
-                if (jobsBloc.jobDetailModel.job != null) {
-                  final job = jobsBloc.jobDetailModel.job!;
-                  DeepLinkService.shareJob(
-                    jobId: job.id?.toString() ?? widget.jobId,
-                    title: job.jobTitle,
-                    company: job.companyName,
-                    location: job.location,
-                  );
-                }
-              },
+          IconButton(
+            icon: Icon(
+              Icons.share_outlined,
+              color: theme.primary,
             ),
+            onPressed: () {
+              if (jobsBloc.jobDetailModel.job != null) {
+                final job = jobsBloc.jobDetailModel.job!;
+                DeepLinkService.shareJob(
+                  jobId: job.id?.toString() ?? widget.jobId,
+                  title: job.jobTitle,
+                  company: job.companyName,
+                  location: job.location,
+                );
+              }
+            },
           ),
         ],
       ),
@@ -198,7 +188,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
           const SizedBox(height: 16),
 
           // Stats Section
-          _buildStatsGrid(job, jobsBloc.jobDetailModel.totalApplicants, isDark),
+          _buildStatsGrid(job, jobsBloc.jobDetailModel.totalApplicants, theme),
 
           // Requirements Section
           if (hasRequirements) ...[
@@ -410,21 +400,16 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     );
   }
 
-  Widget _buildStatsGrid(job, int? totalApplicants, bool isDark) {
+  Widget _buildStatsGrid(job, int? totalApplicants, OneUITheme theme) {
     const primary = Color(0xFF2563EB);
-    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final border = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    final isDark = theme.isDark;
     final labelColor =
         isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
 
     Widget statCard(String value, String label) => Expanded(
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: border),
-            ),
+            decoration: theme.cardDecoration,
             child: Column(
               children: [
                 Text(
@@ -464,6 +449,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildRequirementsSection(job, bool isDark) {
     const primary = Color(0xFF2563EB);
+    final theme = OneUITheme.of(context);
     final items = <({IconData icon, String label, String value})>[];
     if (_hasValue(job.experience))
       items.add((
@@ -498,11 +484,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     final valueColor = isDark ? Colors.white : const Color(0xFF0F172A);
 
     return Container(
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
-      ),
+      decoration: theme.cardDecoration,
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,6 +623,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
   Widget _buildApplicationWindowSection(job, bool isDark) {
     const primary = Color(0xFF2563EB);
+    final theme = OneUITheme.of(context);
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final border = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
     final boxBg = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
@@ -701,11 +684,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
-      ),
+      decoration: theme.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -736,6 +715,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
     if (desc.isEmpty) return const SizedBox.shrink();
 
     const primary = Color(0xFF2563EB);
+    final theme = OneUITheme.of(context);
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final border = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
     final labelColor =
@@ -745,11 +725,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
-      ),
+      decoration: theme.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -825,6 +801,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
   Widget _buildPostedBySection(job, bool isDark) {
     if (job.user == null) return const SizedBox.shrink();
     const primary = Color(0xFF2563EB);
+    final theme = OneUITheme.of(context);
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final border = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
     final nameColor = isDark ? Colors.white : const Color(0xFF0F172A);
@@ -837,11 +814,7 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: border),
-      ),
+      decoration: theme.cardDecoration,
       child: Row(
         children: [
           CircleAvatar(
@@ -859,13 +832,23 @@ class _JobsDetailsScreenState extends State<JobsDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  job.user?.name?.toString() ?? 'Job Poster',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: nameColor,
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        job.user?.name?.toString() ?? 'Job Poster',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: nameColor,
+                        ),
+                      ),
+                    ),
+                    if (job.user?.isVerified == true) ...[
+                      const SizedBox(width: 4),
+                      const VerifiedBadge(size: 16),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(

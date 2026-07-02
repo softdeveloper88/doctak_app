@@ -4,9 +4,12 @@ abstract class CmeEventDetailEvent extends Equatable {}
 
 class CmeLoadEventDetailEvent extends CmeEventDetailEvent {
   final String eventId;
-  CmeLoadEventDetailEvent({required this.eventId});
+  final bool silent;
+
+  CmeLoadEventDetailEvent({required this.eventId, this.silent = false});
+
   @override
-  List<Object?> get props => [eventId];
+  List<Object?> get props => [eventId, silent];
 }
 
 class CmeRegisterEvent extends CmeEventDetailEvent {

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:doctak_app/core/acting/acting_context_service.dart';
+import 'package:doctak_app/core/utils/app/app_environment.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/post_comman_widget.dart';
 import 'package:http/http.dart';
@@ -21,32 +23,14 @@ Map<String, String> buildHeaderTokens({
   Map<String, String> header = {
     HttpHeaders.contentTypeHeader:
         contentType ?? 'application/x-www-form-urlencoded',
-    // HttpHeaders.cacheControlHeader: 'no-cache',
-    // HttpHeaders.cacheControlHeader: 'no-cache',
-    // HttpHeaders.contentTypeHeader: 'application/json',
-    // 'Access-Control-Allow-Headers': '*',
-    // 'Access-Control-Allow-Headers': '*',
-    // 'Access-Control-Allow-Origin': '*',
+    HttpHeaders.acceptHeader: 'application/json',
   };
 
-  print("⚠️ AppData.logInUserId: ${AppData.logInUserId}");
-  print(
-    "⚠️ AppData.userToken: ${AppData.userToken != null ? 'Token exists' : 'Token is null'}",
-  );
-
-  if (AppData.logInUserId != '') {
-    header.putIfAbsent(
-      HttpHeaders.authorizationHeader,
-      () => 'Bearer ${AppData.userToken}',
-    );
-    print(
-      "⚠️ Added auth header: Bearer ${AppData.userToken?.substring(0, 10)}...",
-    );
-  } else {
-    print("⚠️ WARNING: No user ID found, not adding authorization header!");
+  final token = AppData.userToken?.trim();
+  if (token != null && token.isNotEmpty) {
+    header[HttpHeaders.authorizationHeader] = 'Bearer $token';
   }
 
-  log(jsonEncode(header));
   return header;
 }
 
@@ -304,6 +288,7 @@ Future<Response> buildHttpResponseV6(
   String endPoint, {
   HttpMethod method = HttpMethod.GET,
   Map? request,
+  bool jsonBody = false,
 }) async {
   if (await isNetworkAvailable()) {
     var headers = buildHeaderTokens();
@@ -316,22 +301,33 @@ Future<Response> buildHttpResponseV6(
 
       if (method == HttpMethod.POST) {
         log('Request: $request');
-        response = await http
-            .post(
-              url,
-              body: request?.entries
-                  .map(
-                    (e) =>
-                        '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
-                  )
-                  .join('&'),
-              headers: headers,
-            )
-            .timeout(
-              const Duration(seconds: 60),
-              onTimeout: () =>
-                  throw 'Timeout - Server not responding after 60 seconds',
-            );
+        if (jsonBody) {
+          headers = buildHeaderTokens(contentType: 'application/json');
+          response = await http
+              .post(url, body: jsonEncode(request), headers: headers)
+              .timeout(
+                const Duration(seconds: 60),
+                onTimeout: () =>
+                    throw 'Timeout - Server not responding after 60 seconds',
+              );
+        } else {
+          response = await http
+              .post(
+                url,
+                body: request?.entries
+                    .map(
+                      (e) =>
+                          '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
+                    )
+                    .join('&'),
+                headers: headers,
+              )
+              .timeout(
+                const Duration(seconds: 60),
+                onTimeout: () =>
+                    throw 'Timeout - Server not responding after 60 seconds',
+              );
+        }
       } else if (method == HttpMethod.DELETE) {
         response = await delete(url, headers: headers).timeout(
           const Duration(seconds: 60),
@@ -342,6 +338,16 @@ Future<Response> buildHttpResponseV6(
         var headers = buildHeaderTokens(contentType: 'application/json');
         log('Request: $request');
         response = await put(url, body: jsonEncode(request), headers: headers)
+            .timeout(
+              const Duration(seconds: 60),
+              onTimeout: () =>
+                  throw 'Timeout - Server not responding after 60 seconds',
+            );
+      } else if (method == HttpMethod.PATCH) {
+        headers = buildHeaderTokens(contentType: 'application/json');
+        log('Request: $request');
+        response = await http
+            .patch(url, body: jsonEncode(request), headers: headers)
             .timeout(
               const Duration(seconds: 60),
               onTimeout: () =>
@@ -368,6 +374,61 @@ Future<Response> buildHttpResponseV6(
   }
 }
 
+/// HTTP helper for doctak-node Next.js API routes.
+/// Always sends JSON body and expects JSON responses.
+/// [endPoint] should be a path like '/api/meetings/create'.
+Future<Response> buildHttpResponseNode(
+  String endPoint, {
+  HttpMethod method = HttpMethod.GET,
+  Map<String, dynamic>? body,
+}) async {
+  if (await isNetworkAvailable()) {
+    final base = AppData.nodeApiUrl.endsWith('/') ? AppData.nodeApiUrl.substring(0, AppData.nodeApiUrl.length - 1) : AppData.nodeApiUrl;
+    final path = endPoint.startsWith('/') ? endPoint : '/$endPoint';
+    final url = Uri.parse('$base$path');
+    final headers = {
+      ...buildHeaderTokens(contentType: 'application/json'),
+      ...ActingContextService.instance.actingHeaders(),
+    };
+
+    log('🟣 Node API [${AppEnvironment.environmentName}] $method: $url');
+
+    try {
+      Response response;
+      switch (method) {
+        case HttpMethod.POST:
+          response = await http
+              .post(url, headers: headers, body: body != null ? jsonEncode(body) : null)
+              .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding');
+          break;
+        case HttpMethod.PUT:
+          response = await http
+              .put(url, headers: headers, body: body != null ? jsonEncode(body) : null)
+              .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding');
+          break;
+        case HttpMethod.PATCH:
+          response = await http
+              .patch(url, headers: headers, body: body != null ? jsonEncode(body) : null)
+              .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding');
+          break;
+        case HttpMethod.DELETE:
+          response = await delete(url, headers: headers)
+              .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding');
+          break;
+        default: // GET
+          response = await get(url, headers: headers)
+              .timeout(const Duration(seconds: 60), onTimeout: () => throw 'Timeout - Server not responding');
+      }
+      log('Response (Node $method): $url ${response.statusCode} ${response.body}');
+      return response;
+    } catch (e) {
+      throw 'Something Went Wrong $e';
+    }
+  } else {
+    throw 'Your internet is not working';
+  }
+}
+
 //region Common
 
 Future handleResponse(Response response, [bool? avoidTokenError]) async {
@@ -382,20 +443,10 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
   }
 
   if (response.statusCode == 401) {
-    if (AppData.logInUserId == null) {
-      // Map req = {
-      //   'emailPhone': sharedPref.getString(USER_EMAIL),
-      //   'password': sharedPref.getString(USER_PASSWORD),
-      // };
-      //
-      // await logInApi(req).then((value) {
-      //   throw 'Please try again.';
-      // }).catchError((e) {
-      //   throw TokenException(e);
-      // });
-    } else {
-      throw 'Session expired. Please login again.';
-    }
+    // NOTE: We do NOT force a logout here. A 401 from an arbitrary endpoint must
+    // not bounce the user to login — only an unauthorized HOME FEED response
+    // does (handled in HomeBloc). Just surface the error to the caller.
+    throw 'Session expired. Please login again.';
   }
 
   if ((response.statusCode >= 200 && response.statusCode < 300) ||
@@ -502,7 +553,7 @@ String _extractErrorMessage(dynamic body) {
   return 'An unexpected error occurred';
 }
 
-enum HttpMethod { GET, POST, DELETE, PUT }
+enum HttpMethod { GET, POST, DELETE, PUT, PATCH }
 
 class TokenException implements Exception {
   final String message;

@@ -1,6 +1,6 @@
 import 'package:doctak_app/data/models/post_comment_model/reply_comment_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -22,7 +22,10 @@ class ReplyCommentComponent extends StatelessWidget {
         children: [
           InkWell(
             onTap: () {
-              SVProfileFragment(userId: replyCommentList.commentableId ?? '').launch(context);
+              ProfileNavigation.openUser(
+                context,
+                replyCommentList.commentableId,
+              );
             },
             child: CircleAvatar(backgroundImage: NetworkImage(AppData.fullImageUrl(replyCommentList.commenter?.profilePic ?? '')), radius: 20.0),
           ),
@@ -38,7 +41,10 @@ class ReplyCommentComponent extends StatelessWidget {
                       flex: 5,
                       child: InkWell(
                         onTap: () {
-                          SVProfileFragment(userId: replyCommentList.commenterId ?? "").launch(context);
+                          ProfileNavigation.openUser(
+                            context,
+                            replyCommentList.commenterId,
+                          );
                         },
                         child: Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,

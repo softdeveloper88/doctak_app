@@ -1,15 +1,11 @@
 // chat_screen.dart
-import 'dart:convert';
+import 'dart:async';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/pusher_service.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
-import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart' as chatItem;
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:sizer/sizer.dart';
@@ -37,138 +33,81 @@ class MeetingChatScreen extends StatefulWidget {
 
 class _MeetingChatScreenState extends State<MeetingChatScreen> {
   final TextEditingController _messageController = TextEditingController();
-  final PusherService _pusherService = PusherService();
   bool _isSending = false;
-  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
-  late PusherChannel clientListenChannel;
-  late PusherChannel clientSendChannel;
+  Timer? _pollTimer;
+  String? _lastCreatedAt;
+
   @override
   void initState() {
     super.initState();
-    ConnectPusher();
+    _pollMessages();
+    _pollTimer =
+        Timer.periodic(const Duration(seconds: 3), (_) => _pollMessages());
   }
 
-  // void _initializePusher() async {
-  //   await _pusherService.initialize();
-  //   await _pusherService.connect();
-  //   _pusherService.subscribeToChannel(widget.channelId);
-  //
-  //   _pusherService.registerEventListener('new-message', _handleNewMessage);
-  // }
-  //
-  // void _handleNewMessage(dynamic data) {
-  //   final message = Message.fromJson(data);
-  //   setState(() {
-  //     AppData.chatMessages.add(message);
-  //   });
-  // }
-
-  void onSubscriptionSucceeded(String channelName, dynamic data) {
-    print("onSubscriptionSucceeded: $channelName data: $data");
-  }
-
-  void onSubscriptionError(String message, dynamic e) {
-    print("onSubscriptionError: $message Exception: $e");
-  }
-
-  void onDecryptionFailure(String event, String reason) {
-    print("onDecryptionFailure: $event reason: $reason");
-  }
-
-  void onMemberAdded(String channelName, PusherMember member) {
-    print("onMemberAdded: $channelName member: $member");
-  }
-
-  void onMemberRemoved(String channelName, PusherMember member) {
-    print("onMemberRemoved: $channelName member: $member");
-  }
-
-  void onError(String message, int? code, dynamic e) {
-    print("onError: $message code: $code exception: $e");
-  }
-
-  // Authorizer method for Pusher - required to prevent iOS crash
-  Future<dynamic>? onAuthorizer(String channelName, String socketId, dynamic options) async {
-    print("onAuthorizer called for channel: $channelName, socketId: $socketId");
-
-    // For public channels (not starting with 'private-' or 'presence-'),
-    // return null
-    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
-      return null;
-    }
-
-    return null;
-  }
-
-  void ConnectPusher() async {
-    // Create the Pusher client
+  Future<void> _pollMessages() async {
     try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: false,
-        onSubscriptionSucceeded: onSubscriptionSucceeded,
-        onSubscriptionError: onSubscriptionError,
-        onMemberAdded: onMemberAdded,
-        onMemberRemoved: onMemberRemoved,
-        // onEvent: onEvent,
-        onDecryptionFailure: onDecryptionFailure,
-        onError: onError,
-        onSubscriptionCount: onSubscriptionCount,
-        onAuthorizer: onAuthorizer,
-      );
+      final result =
+          await getMessages(widget.channelId, afterIso: _lastCreatedAt);
+      if (!mounted) return;
+      if (!result.success) return;
 
-      pusher.connect();
+      final data = result.data as Map<String, dynamic>?;
+      final rawList = data?['messages'] as List<dynamic>?;
+      if (rawList == null || rawList.isEmpty) return;
 
-      // Successfully created and connected to Pusher
-      clientListenChannel = await pusher.subscribe(
-        channelName: "meeting-channel${widget.channelId}",
-        onMemberAdded: (member) {
-          // print("Member added: $member");
-        },
-        onMemberRemoved: (member) {
-          print("Member removed: $member");
-        },
-        onEvent: (event) {
-          String eventName = event.eventName;
-          Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
-          print('eventdata $jsonMap');
-          print('eventdata1 $eventName');
+      bool added = false;
+      for (final raw in rawList) {
+        final m = raw as Map<String, dynamic>;
+        final serverId = (m['id'] ?? '').toString();
+        final userId = (m['userId'] ?? '').toString();
+        final text = (m['message'] ?? '').toString();
+        final createdAt = (m['createdAt'] ?? '').toString();
 
-          switch (eventName) {
-            case 'new-message':
-              if (AppData.logInUserId != jsonMap['user_id']) {
-                AppData.chatMessages.add(
-                  Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: jsonMap['profile_pic'], name: '', timestamp: DateTime.timestamp(), isSentByMe: false),
-                );
-              }
-              setState(() {});
-              break;
-            case 'allow-join-request':
-              print("eventName $eventName");
-              toast(eventName);
-              break;
-            default:
-              // Handle unknown event types or ignore them
-              break;
-          }
-        },
-      );
+        if (createdAt.isNotEmpty) {
+          _lastCreatedAt = createdAt.replaceFirst(' ', 'T');
+        }
+        if (serverId.isNotEmpty && AppData.seenMessageIds.contains(serverId)) {
+          continue;
+        }
+        if (serverId.isNotEmpty) AppData.seenMessageIds.add(serverId);
+        if (userId == AppData.logInUserId) continue;
 
-      // Attach an event listener to the channel
-    } catch (e) {
-      print('eee $e');
-    }
+        AppData.chatMessages.add(Message(
+          text: text,
+          senderId: userId,
+          profilePic:
+              AppData.fullImageUrl((m['userAvatar'] ?? '').toString()),
+          name: (m['userName'] ?? '').toString(),
+          timestamp: createdAt.isNotEmpty
+              ? DateTime.tryParse(createdAt.replaceFirst(' ', 'T')) ??
+                  DateTime.now()
+              : DateTime.now(),
+          isSentByMe: false,
+        ));
+        added = true;
+      }
+
+      if (added && mounted) setState(() {});
+    } catch (_) {}
   }
-
-  void onSubscriptionCount(String channelName, int subscriptionCount) {}
   Future<void> _sendMessage() async {
     if (_messageController.text.isEmpty) return;
 
     setState(() => _isSending = true);
 
     try {
-      await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
+      final result = await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
+      final data = result.data as Map<String, dynamic>?;
+      final posted = data?['message'] as Map<String, dynamic>?;
+      final serverId = posted?['id']?.toString();
+      final createdAt = posted?['createdAt']?.toString();
+      if (createdAt != null && createdAt.isNotEmpty) {
+        _lastCreatedAt = createdAt.replaceFirst(' ', 'T');
+      }
+      if (serverId != null && serverId.isNotEmpty) {
+        AppData.seenMessageIds.add(serverId);
+      }
       AppData.chatMessages.add(
         Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: AppData.profilePicUrl),
       );
@@ -183,8 +122,8 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _messageController.dispose();
-
     super.dispose();
   }
 
@@ -204,7 +143,7 @@ class _MeetingChatScreenState extends State<MeetingChatScreen> {
               itemCount: messageList.length,
               itemBuilder: (context, index) {
                 final message = messageList[index];
-                return ChatBubble(profile: message.profilePic, message: message.text ?? '', isMe: message.isSentByMe, createAt: message.timestamp.toString());
+                return ChatBubble(profile: message.profilePic, message: message.text, isMe: message.isSentByMe, createAt: message.timestamp.toString());
               },
             ),
           ),

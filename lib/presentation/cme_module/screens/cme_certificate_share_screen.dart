@@ -1,30 +1,82 @@
-import 'package:doctak_app/data/models/cme/cme_gamification_model.dart';
+import 'package:doctak_app/data/apiClient/cme/cme_node_api_service.dart';
+import 'package:doctak_app/data/models/cme/cme_certificate_model.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificate_share_bloc.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificate_share_event.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificate_share_state.dart';
+import 'package:doctak_app/presentation/cme_module/utils/cme_certificate_pdf_service.dart';
+import 'package:doctak_app/presentation/cme_module/widgets/cme_certificate_print_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CmeCertificateShareScreen extends StatelessWidget {
+class CmeCertificateShareScreen extends StatefulWidget {
   final String certificateId;
 
   const CmeCertificateShareScreen({super.key, required this.certificateId});
 
   @override
+  State<CmeCertificateShareScreen> createState() =>
+      _CmeCertificateShareScreenState();
+}
+
+class _CmeCertificateShareScreenState extends State<CmeCertificateShareScreen> {
+  bool _downloadingPdf = false;
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => CmeCertificateShareBloc()
-        ..add(CmeLoadCertificateDetailEvent(certificateId: certificateId)),
-      child: const _CertificateShareView(),
+        ..add(CmeLoadCertificateDetailEvent(certificateId: widget.certificateId)),
+      child: _CertificateShareView(
+        certificateId: widget.certificateId,
+        downloadingPdf: _downloadingPdf,
+        onDownloadPdf: _downloadPdf,
+      ),
     );
+  }
+
+  Future<void> _downloadPdf(CmeShareableCertificate cert) async {
+    if (_downloadingPdf || cert.id == null) return;
+    setState(() => _downloadingPdf = true);
+    final theme = OneUITheme.of(context);
+    try {
+      final detail = await CmeNodeApiService.getCertificateDetail(cert.id!);
+      final file = await CmeCertificatePdfService.saveCertificatePdf(detail);
+      if (!mounted) return;
+      await Share.shareXFiles(
+        [XFile(file.path, mimeType: 'application/pdf', name: file.path.split('/').last)],
+        subject: 'CME Certificate',
+        text: 'My CME certificate',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not create PDF: $e'),
+            backgroundColor: theme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _downloadingPdf = false);
+    }
   }
 }
 
 class _CertificateShareView extends StatelessWidget {
-  const _CertificateShareView();
+  const _CertificateShareView({
+    required this.certificateId,
+    required this.downloadingPdf,
+    required this.onDownloadPdf,
+  });
+
+  final String certificateId;
+  final bool downloadingPdf;
+  final Future<void> Function(CmeShareableCertificate cert) onDownloadPdf;
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +84,28 @@ class _CertificateShareView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: theme.cardBackground,
-        foregroundColor: theme.textPrimary,
-        title: const Text('Certificate',
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 18)),
-      ),
+      appBar: const DoctakAppBar(title: 'Certificate'),
       body: BlocConsumer<CmeCertificateShareBloc, CmeCertificateShareState>(
         listener: (context, state) {
           if (state is CmeCertificateShareSharedState) {
+            final cert = context.read<CmeCertificateShareBloc>().certificate;
+            final link = cert?.shareUrl;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Share link generated'),
-                backgroundColor: const Color(0xFF34C759),
+                content: Text(
+                  link != null
+                      ? 'Share link ready — copied to clipboard'
+                      : 'Share link generated',
+                ),
+                backgroundColor: theme.success,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
             );
+            if (link != null) {
+              Clipboard.setData(ClipboardData(text: link));
+            }
           }
           if (state is CmeCertificateShareErrorState) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +145,7 @@ class _CertificateShareView extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _buildCertificatePreview(context, theme, cert),
+                CmeCertificatePrintWidget.fromShareable(cert),
                 const SizedBox(height: 16),
                 _buildDetailsCard(theme, cert),
                 const SizedBox(height: 16),
@@ -101,150 +157,6 @@ class _CertificateShareView extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildCertificatePreview(
-      BuildContext context, OneUITheme theme, CmeShareableCertificate cert) {
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: theme.cardShadow,
-        border: Border.all(color: theme.primary.withOpacity(0.2)),
-      ),
-      child: Column(
-        children: [
-          // Certificate header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.primary,
-                  theme.primary.withOpacity(0.8),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            child: Column(
-              children: [
-                const Icon(Icons.workspace_premium,
-                    color: Colors.white, size: 48),
-                const SizedBox(height: 8),
-                const Text(
-                  'Certificate of Completion',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Poppins',
-                  ),
-                ),
-                if (cert.accreditationBody != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    cert.accreditationBody!,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          // Certificate content
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                Text(
-                  'This certifies that',
-                  style: theme.caption,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  cert.holderName ?? 'N/A',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: theme.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text('has successfully completed', style: theme.caption),
-                const SizedBox(height: 8),
-                Text(
-                  cert.eventTitle ?? 'N/A',
-                  style: theme.titleMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildCertStat(theme, '${cert.creditAmount ?? 0}',
-                        'Credits'),
-                    Container(
-                      width: 1,
-                      height: 32,
-                      color: theme.divider,
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                    ),
-                    _buildCertStat(
-                        theme,
-                        cert.creditType?.toUpperCase() ?? 'CME',
-                        'Type'),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // Certificate number
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackground,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Certificate #${cert.certificateNumber ?? 'N/A'}',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      color: theme.textTertiary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCertStat(OneUITheme theme, String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: theme.primary,
-          ),
-        ),
-        Text(label, style: theme.caption),
-      ],
     );
   }
 
@@ -260,7 +172,7 @@ class _CertificateShareView extends StatelessWidget {
           _buildDetailRow(
               theme, 'Status', cert.isValid == true ? 'Valid' : 'Invalid',
               valueColor:
-                  cert.isValid == true ? const Color(0xFF34C759) : Colors.red),
+                  cert.isValid == true ? theme.success : Colors.red),
           _buildDetailRow(
               theme, 'Certificate #', cert.certificateNumber ?? 'N/A'),
           _buildDetailRow(
@@ -325,28 +237,34 @@ class _CertificateShareView extends StatelessWidget {
                 );
               },
             ),
-          // Download PDF
-          if (cert.downloadUrl != null)
+          if (cert.shareUrl != null)
             _buildActionButton(
               theme,
-              Icons.download,
-              'Download PDF',
+              Icons.ios_share,
+              'Share with others',
               () async {
-                final uri = Uri.tryParse(cert.downloadUrl!);
-                if (uri != null && await canLaunchUrl(uri)) {
-                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                }
+                await Share.share(
+                  'My CME certificate: ${cert.eventTitle ?? 'CME Activity'}\n${cert.shareUrl}',
+                  subject: 'CME Certificate',
+                );
               },
             ),
-          // Generate share link
+          // Download PDF
+          _buildActionButton(
+            theme,
+            downloadingPdf ? Icons.hourglass_top : Icons.download,
+            downloadingPdf ? 'Preparing PDF…' : 'Download PDF',
+            downloadingPdf ? () {} : () => onDownloadPdf(cert),
+          ),
+          // Refresh share link from server
           _buildActionButton(
             theme,
             Icons.share,
-            'Generate Share Link',
+            cert.shareUrl == null ? 'Generate Share Link' : 'Refresh Share Link',
             () {
               final bloc = context.read<CmeCertificateShareBloc>();
               bloc.add(CmeShareCertificateEvent(
-                  certificateId: cert.id ?? ''));
+                  certificateId: cert.id ?? certificateId));
             },
           ),
         ],
@@ -439,7 +357,7 @@ class _CertificateShareView extends StatelessWidget {
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: theme.primary,
-                side: BorderSide(color: theme.primary.withOpacity(0.3)),
+                side: BorderSide(color: theme.primary.withValues(alpha: 0.3)),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),

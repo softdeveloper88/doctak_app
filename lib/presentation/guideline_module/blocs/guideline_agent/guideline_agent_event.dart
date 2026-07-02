@@ -64,3 +64,6 @@ class SubmitMessageFeedback extends GuidelineAgentEvent {
 
 /// Start a brand new chat (reset current).
 class StartNewChat extends GuidelineAgentEvent {}
+
+/// Cancel any in-progress request (no-op for non-streaming).
+class CancelGuidelineStream extends GuidelineAgentEvent {}

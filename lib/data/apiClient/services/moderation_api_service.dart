@@ -38,6 +38,7 @@ class ModerationApiService {
             'reason': reason,
             if (description != null) 'description': description,
           },
+          jsonBody: true,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -67,6 +68,7 @@ class ModerationApiService {
             'reason': reason,
             if (description != null) 'description': description,
           },
+          jsonBody: true,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -96,6 +98,7 @@ class ModerationApiService {
             'reason': reason,
             if (description != null) 'description': description,
           },
+          jsonBody: true,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -125,6 +128,7 @@ class ModerationApiService {
           request: {
             'user_id': userId,
           },
+          jsonBody: true,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -148,6 +152,7 @@ class ModerationApiService {
           request: {
             'user_id': userId,
           },
+          jsonBody: true,
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));

@@ -6,23 +6,29 @@ import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/data/models/meeting_model/meeting_history_model.dart';
-import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
+import 'package:doctak_app/data/services/meeting_websocket_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
+import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
 
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'bloc/meeting_bloc.dart';
 import 'upcoming_meeting_screen.dart';
 import 'video_call_screen.dart';
 
 class ManageMeetingScreen extends StatefulWidget {
-  const ManageMeetingScreen({super.key, this.meetingCode, this.autoJoin = false});
+  const ManageMeetingScreen({
+    super.key,
+    this.meetingCode,
+    this.autoJoin = false,
+    this.cmeEventId,
+  });
 
   /// Optional meeting code to pre-fill (from deep link)
   final String? meetingCode;
@@ -30,31 +36,32 @@ class ManageMeetingScreen extends StatefulWidget {
   /// Whether to automatically join the meeting
   final bool autoJoin;
 
+  /// When set, CME attendance is tracked while in the call (learner live sessions).
+  final String? cmeEventId;
+
   @override
   State<ManageMeetingScreen> createState() => _ManageMeetingScreenState();
 }
 
 class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTickerProviderStateMixin {
   final TextEditingController _meetingCodeController = TextEditingController();
-  final TextEditingController _meetingTitleController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _startTimeController = TextEditingController();
-  final TextEditingController _endTimeController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
 
   late TabController _tabController;
-  bool _showNewMeeting = false;
-  bool _isScheduling = false;
-  int _durationMinutes = 60;
   String _selectedHistoryFilter = 'all';
   bool _isSearchVisible = false;
   String _searchQuery = '';
   Timer? _searchDebounce;
 
-  // Pusher related properties
-  late PusherChannel clientListenChannel;
-  late PusherChannel clientSendChannel;
-  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
+  // Meeting realtime WebSocket (replaces Pusher)
+  final MeetingWebSocketService _meetingWs = MeetingWebSocketService();
+  StreamSubscription<MeetingWsEvent>? _meetingWsSub;
+
+  // Polling fallback so a missed realtime event doesn't strand the user on the
+  // strand the user on the "waiting for host" dialog. Cancelled once the
+  // transition into VideoCallScreen has happened.
+  Timer? _waitingPollTimer;
+  bool _meetingTransitionStarted = false;
 
   // Meeting BLoC
   late MeetingBloc meetingBloc = MeetingBloc();
@@ -71,8 +78,6 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
       }
     });
     meetingBloc.add(FetchMeetings());
-    // Initialize date field with tomorrow's date
-    _dateController.text = "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(' ')[0];
 
     // Handle deep link auto-join
     if (widget.meetingCode != null && widget.meetingCode!.isNotEmpty) {
@@ -97,71 +102,28 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
   @override
   void dispose() {
     _meetingCodeController.dispose();
-    _meetingTitleController.dispose();
-    _dateController.dispose();
-    _startTimeController.dispose();
-    _endTimeController.dispose();
     _searchController.dispose();
     _searchDebounce?.cancel();
+    _waitingPollTimer?.cancel();
+    _meetingWsSub?.cancel();
+    unawaited(_meetingWs.disconnect());
     _tabController.dispose();
     super.dispose();
   }
 
-  void _selectDate() async {
-    final theme = OneUITheme.of(context);
-
-    DateTime? pickedDate = await showDatePicker(
+  void _openScheduleSheet() {
+    showModalBottomSheet(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: theme.primary, onPrimary: Colors.white, onSurface: theme.textPrimary),
-            textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: theme.primary)),
-          ),
-          child: child!,
-        );
-      },
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ScheduleMeetingSheet(
+        onSuccess: ({required String title, required String date, required String time, required int duration}) {
+          _showScheduleSuccessDialog(title: title, date: date, time: time, duration: duration);
+          meetingBloc.add(FetchMeetings());
+        },
+      ),
     );
-    if (pickedDate != null) {
-      setState(() {
-        _dateController.text = "${pickedDate.toLocal()}".split(' ')[0];
-      });
-    }
-  }
-
-  void _selectTime(TextEditingController controller) async {
-    final theme = OneUITheme.of(context);
-
-    TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: theme.primary, onPrimary: Colors.white, onSurface: theme.textPrimary),
-            timePickerTheme: TimePickerThemeData(
-              backgroundColor: theme.cardBackground,
-              hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              dayPeriodShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              dayPeriodColor: theme.primary.withValues(alpha: 0.1),
-              dayPeriodTextColor: theme.primary,
-              hourMinuteColor: theme.primary.withValues(alpha: 0.1),
-              hourMinuteTextColor: theme.primary,
-            ),
-            textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: theme.primary)),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (pickedTime != null) {
-      setState(() {
-        controller.text = pickedTime.format(context);
-      });
-    }
   }
 
   @override
@@ -293,125 +255,168 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
 
   Widget _buildJoinCreateTab(OneUITheme theme) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
       physics: const BouncingScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Join/Create card
-          Container(
-            decoration: BoxDecoration(
-              color: theme.cardBackground,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
-              boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.1), blurRadius: 12, offset: const Offset(0, 4))],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: AnimatedCrossFade(
-                duration: const Duration(milliseconds: 300),
-                crossFadeState: _showNewMeeting ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                firstChild: _buildJoinMeetingView(theme),
-                secondChild: _buildCreateMeetingView(theme),
-                sizeCurve: Curves.easeInOut,
-                firstCurve: Curves.easeInOut,
-                secondCurve: Curves.easeInOut,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Quick action buttons
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4))],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () async {
-                  ProgressDialogUtils.showProgressDialog();
-                  try {
-                    await startMeetings().then((createMeeting) async {
-                      await joinMeetings(createMeeting.data?.meeting?.meetingChannel ?? '').then((joinMeetingData) {
-                        print('Meeting data${joinMeetingData.toJson()}');
-                        ProgressDialogUtils.hideProgressDialog();
-                        VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: true).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
-                      });
-                    });
-                  } catch (error) {
-                    ProgressDialogUtils.hideProgressDialog();
-                    showToast(error.toString());
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.videocam_rounded, size: 20, color: Colors.white),
-                      const SizedBox(width: 8),
-                      Text(
-                        translation(context).lbl_create_instant_meeting,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white, fontFamily: 'Poppins'),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Features heading
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(color: theme.primary, borderRadius: BorderRadius.circular(2)),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                translation(context).lbl_key_features,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.textPrimary),
-              ),
-            ],
+          // ── Instant Meeting card ──────────────────────────
+          _buildActionCard(
+            theme: theme,
+            color: theme.success,
+            icon: Icons.videocam_rounded,
+            title: translation(context).lbl_create_instant_meeting,
+            subtitle: 'Launch a private HD video room instantly — no setup needed.',
+            buttonLabel: 'Start Now',
+            buttonIcon: Icons.play_arrow_rounded,
+            onTap: () async {
+              ProgressDialogUtils.showProgressDialog();
+              try {
+                final createMeeting = await startMeetings();
+                final joinMeetingData = await joinMeetings(createMeeting.data?.meeting?.meetingChannel ?? '');
+                ProgressDialogUtils.hideProgressDialog();
+                VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: true)
+                    .launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              } catch (error) {
+                ProgressDialogUtils.hideProgressDialog();
+                showToast(error.toString());
+              }
+            },
           ),
 
           const SizedBox(height: 12),
 
-          // Feature cards
+          // ── Schedule Meeting card ─────────────────────────
+          _buildActionCard(
+            theme: theme,
+            color: theme.primary,
+            icon: Icons.calendar_today_rounded,
+            title: translation(context).lbl_schedule_meeting,
+            subtitle: 'Plan ahead — set date, time, duration and options.',
+            buttonLabel: translation(context).lbl_schedule,
+            buttonIcon: Icons.add_rounded,
+            onTap: _openScheduleSheet,
+          ),
+
+          const SizedBox(height: 12),
+
+          // ── Join Meeting card ─────────────────────────────
+          Container(
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: theme.isDark ? theme.surfaceVariant : Colors.grey.shade200,
+                width: 1,
+              ),
+              boxShadow: theme.isDark
+                  ? []
+                  : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: theme.textSecondary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.login_rounded, color: theme.textSecondary, size: 18),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      translation(context).lbl_join_meeting,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: theme.textPrimary,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: theme.inputBackground,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: theme.surfaceVariant),
+                        ),
+                        child: TextField(
+                          controller: _meetingCodeController,
+                          style: TextStyle(color: theme.textPrimary, fontSize: 14, fontFamily: 'Poppins'),
+                          decoration: InputDecoration(
+                            hintText: 'XXX-XXXX-XX',
+                            hintStyle: TextStyle(color: theme.textTertiary, fontSize: 14),
+                            prefixIcon: Icon(Icons.meeting_room_rounded, color: theme.textSecondary, size: 18),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Material(
+                      color: theme.primary,
+                      borderRadius: BorderRadius.circular(10),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          final code = _meetingCodeController.text.trim();
+                          if (code.isNotEmpty) {
+                            _checkJoinStatus(context, code);
+                          } else {
+                            toast(translation(context).msg_please_enter_meeting_code);
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Text(
+                            'Join',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ── Features grid ─────────────────────────────────
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Container(width: 3, height: 20, decoration: BoxDecoration(color: theme.primary, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(width: 8),
+              Text(translation(context).lbl_key_features, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary)),
+            ],
+          ),
+          const SizedBox(height: 10),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            childAspectRatio: 1.1,
+            childAspectRatio: 1.2,
             children: [
               _buildFeatureCard(theme: theme, icon: Icons.hd_rounded, title: translation(context).lbl_hd_video, description: translation(context).desc_hd_video, color: theme.primary),
-              _buildFeatureCard(
-                theme: theme,
-                icon: Icons.people_alt_rounded,
-                title: translation(context).lbl_unlimited_participants,
-                description: translation(context).desc_unlimited_participants,
-                color: theme.success,
-              ),
-              _buildFeatureCard(
-                theme: theme,
-                icon: Icons.screen_share_rounded,
-                title: translation(context).lbl_screen_sharing,
-                description: translation(context).desc_screen_sharing,
-                color: theme.warning,
-              ),
+              _buildFeatureCard(theme: theme, icon: Icons.people_alt_rounded, title: translation(context).lbl_unlimited_participants, description: translation(context).desc_unlimited_participants, color: theme.success),
+              _buildFeatureCard(theme: theme, icon: Icons.screen_share_rounded, title: translation(context).lbl_screen_sharing, description: translation(context).desc_screen_sharing, color: theme.warning),
               _buildFeatureCard(theme: theme, icon: Icons.chat_rounded, title: translation(context).lbl_group_chat, description: translation(context).desc_group_chat, color: theme.secondary),
             ],
           ),
@@ -420,348 +425,95 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
     );
   }
 
-  Widget _buildJoinMeetingView(OneUITheme theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.login_rounded, color: theme.primary, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                translation(context).lbl_join_meeting,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary, fontFamily: 'Poppins'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _showNewMeeting = true;
-                });
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: theme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.add_circle_outline_rounded, size: 14, color: theme.primary),
-                  const SizedBox(width: 4),
-                  Text(
-                    translation(context).lbl_create_instead,
-                    style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.primary),
-                  ),
-                ],
-              ),
-            ),
-          ],
+  Widget _buildActionCard({
+    required OneUITheme theme,
+    required Color color,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required String buttonLabel,
+    required IconData buttonIcon,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.isDark ? theme.surfaceVariant : color.withValues(alpha: 0.15),
+          width: 1,
         ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: theme.primary.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
-          ),
-          child: Text(
-            translation(context).msg_enter_meeting_code_description,
-            style: TextStyle(color: theme.textSecondary, fontSize: 12, fontFamily: 'Poppins', height: 1.3),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        const SizedBox(height: 16),
-        _buildCustomTextField(
-          theme: theme,
-          controller: _meetingCodeController,
-          labelText: translation(context).lbl_meeting_code,
-          hintText: translation(context).hint_enter_meeting_code,
-          icon: Icons.meeting_room_rounded,
-        ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
+        boxShadow: theme.isDark
+            ? []
+            : [BoxShadow(color: color.withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 3))],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                final code = _meetingCodeController.text.trim();
-                if (code.isNotEmpty) {
-                  _checkJoinStatus(context, code);
-                } else {
-                  toast(translation(context).msg_please_enter_meeting_code);
-                }
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.login_rounded, size: 18, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Text(
-                      translation(context).lbl_join_meeting,
-                      style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
             ),
+            child: Icon(icon, color: color, size: 24),
           ),
-        ),
-        const SizedBox(height: 12),
-      ],
-    );
-  }
-
-  Widget _buildCreateMeetingView(OneUITheme theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.add_circle_rounded, color: theme.primary, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                translation(context).lbl_create_meeting,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary, fontFamily: 'Poppins'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _showNewMeeting = false;
-                });
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: theme.primary,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.login_rounded, size: 14, color: theme.primary),
-                  const SizedBox(width: 4),
-                  Text(
-                    translation(context).lbl_join_instead,
-                    style: TextStyle(fontSize: 12, fontFamily: 'Poppins', color: theme.primary),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: theme.primary.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
-          ),
-          child: Text(translation(context).msg_create_new_meeting_description, style: TextStyle(color: theme.textSecondary, fontSize: 14)),
-        ),
-        const SizedBox(height: 16),
-        AnimatedCrossFade(
-          duration: const Duration(milliseconds: 300),
-          crossFadeState: _isScheduling ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-          firstChild: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildCustomTextField(
-                theme: theme,
-                controller: _meetingTitleController,
-                labelText: translation(context).lbl_meeting_title,
-                hintText: translation(context).hint_enter_meeting_title,
-                icon: Icons.title_rounded,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildThemedButton(
-                      theme: theme,
-                      label: translation(context).lbl_start_meeting,
-                      icon: Icons.videocam_rounded,
-                      isPrimary: true,
-                      color: theme.success,
-                      onTap: () {
-                        final title = _meetingTitleController.text.trim();
-                        // Create instant meeting
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildThemedButton(
-                      theme: theme,
-                      label: translation(context).lbl_schedule,
-                      icon: Icons.calendar_today_rounded,
-                      isPrimary: false,
-                      onTap: () {
-                        setState(() {
-                          _isScheduling = true;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          secondChild: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildCustomTextField(
-                theme: theme,
-                controller: _meetingTitleController,
-                labelText: translation(context).lbl_meeting_title,
-                hintText: translation(context).hint_enter_meeting_title,
-                icon: Icons.title_rounded,
-              ),
-              const SizedBox(height: 16),
-              _buildCustomTextField(
-                theme: theme,
-                controller: _dateController,
-                labelText: translation(context).lbl_date,
-                hintText: translation(context).hint_select_date,
-                icon: Icons.calendar_today_rounded,
-                readOnly: true,
-                onTap: _selectDate,
-              ),
-              const SizedBox(height: 16),
-              _buildCustomTextField(
-                theme: theme,
-                controller: _startTimeController,
-                labelText: translation(context).lbl_time,
-                hintText: translation(context).hint_select_time,
-                icon: Icons.access_time_rounded,
-                readOnly: true,
-                onTap: () => _selectTime(_startTimeController),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.surfaceVariant.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: theme.surfaceVariant),
-                ),
-                child: DropdownButtonFormField<int>(
-                  initialValue: _durationMinutes,
-                  decoration: InputDecoration(
-                    labelText: 'Duration',
-                    labelStyle: TextStyle(color: theme.textSecondary),
-                    prefixIcon: Icon(Icons.timelapse_rounded, color: theme.primary),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    filled: false,
-                  ),
-                  items: [
-                    DropdownMenuItem(value: 30, child: Text(translation(context).lbl_30_minutes)),
-                    DropdownMenuItem(value: 60, child: Text(translation(context).lbl_1_hour)),
-                    DropdownMenuItem(value: 90, child: Text(translation(context).lbl_1_5_hours)),
-                    DropdownMenuItem(value: 120, child: Text(translation(context).lbl_2_hours)),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      _durationMinutes = value!;
-                    });
-                  },
-                  dropdownColor: theme.cardBackground,
-                  icon: Icon(Icons.arrow_drop_down, color: theme.primary),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildThemedButton(
-                      theme: theme,
-                      label: translation(context).lbl_cancel,
-                      icon: Icons.close_rounded,
-                      isPrimary: false,
-                      onTap: () {
-                        setState(() {
-                          _isScheduling = false;
-                        });
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildThemedButton(
-                      theme: theme,
-                      label: translation(context).lbl_schedule_meeting,
-                      icon: Icons.schedule_rounded,
-                      isPrimary: true,
-                      onTap: () async {
-                        if (_meetingTitleController.text.isEmpty || _dateController.text.isEmpty || _startTimeController.text.isEmpty) {
-                          toast(translation(context).msg_all_fields_required);
-                          return;
-                        }
-
-                        try {
-                          ProgressDialogUtils.showProgressDialog();
-                          final response = await setScheduleMeeting(title: _meetingTitleController.text, date: _dateController.text, time: _startTimeController.text, duration: _durationMinutes);
-
-                          Map<String, dynamic> responseData = json.decode(jsonEncode(response.data));
-                          ProgressDialogUtils.hideProgressDialog();
-
-                          toast(responseData['message']);
-                          setState(() {
-                            _isScheduling = false;
-                          });
-
-                          _meetingTitleController.clear();
-                          _dateController.text = "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(' ')[0];
-                          _startTimeController.clear();
-
-                          _showScheduleSuccessDialog();
-                          meetingBloc.add(FetchMeetings());
-                        } catch (e) {
-                          ProgressDialogUtils.hideProgressDialog();
-                          toast('${translation(context).msg_error_scheduling_meeting}: ${e.toString()}');
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
-            return Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Positioned(key: bottomChildKey, child: bottomChild),
-                Positioned(key: topChildKey, child: topChild),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: theme.textPrimary,
+                    fontFamily: 'Poppins',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(fontSize: 11, color: theme.textSecondary, height: 1.3),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ],
-            );
-          },
-        ),
-      ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Material(
+            color: color,
+            borderRadius: BorderRadius.circular(10),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(10),
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(buttonIcon, color: Colors.white, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      buttonLabel,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -833,47 +585,6 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
         ),
       );
     }
-  }
-
-  Widget _buildCustomTextField({
-    required OneUITheme theme,
-    required TextEditingController controller,
-    required String labelText,
-    required String hintText,
-    required IconData icon,
-    bool readOnly = false,
-    VoidCallback? onTap,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.surfaceVariant.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.surfaceVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: controller,
-            readOnly: readOnly,
-            onTap: onTap,
-            style: TextStyle(color: theme.textPrimary, fontSize: 16),
-            decoration: InputDecoration(
-              labelText: labelText,
-              labelStyle: TextStyle(color: theme.textSecondary),
-              hintText: hintText,
-              hintStyle: TextStyle(color: theme.textTertiary),
-              prefixIcon: Icon(icon, color: theme.primary),
-              border: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              filled: false,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildFeatureCard({required OneUITheme theme, required IconData icon, required String title, required String description, required Color color}) {
@@ -1215,18 +926,42 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
 
   // Functionality from SetScheduleScreen
   void _checkJoinStatus(BuildContext context, String channel) {
+    // Reset guards so this works on the second/third join in the same session.
+    _meetingTransitionStarted = false;
+    _cancelWaitingRoomPolling();
     ProgressDialogUtils.showProgressDialog();
     askToJoin(context, channel)
         .then((resp) async {
           print("join response ${jsonEncode(resp.data)}");
           Map<String, dynamic> responseData = json.decode(jsonEncode(resp.data));
-          if (responseData['success'] == '1') {
+
+          // Support both old backend (success='1') and node backend (success=true)
+          final success = responseData['success'] == true || responseData['success'] == '1';
+          if (!success) {
+            ProgressDialogUtils.hideProgressDialog();
+            toast(responseData['message']?.toString() ?? "Failed to join meeting");
+            return;
+          }
+
+          // Node backend: waiting room returns waiting=true or status='waiting_room'
+          final isWaiting = responseData['waiting'] == true ||
+              responseData['status']?.toString() == 'waiting_room';
+
+          if (isWaiting) {
+            // Extract meeting ID — node uses meeting.id, old backend uses meeting_id
+            final meetingId =
+                (responseData['meeting'] as Map?)?['id']?.toString() ??
+                responseData['meeting_id']?.toString();
+            _connectMeetingSocket(meetingId, channel);
+          } else {
             await joinMeetings(channel).then((joinMeetingData) {
               ProgressDialogUtils.hideProgressDialog();
-              VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              VideoCallScreen(
+                meetingDetailsModel: joinMeetingData,
+                isHost: false,
+                cmeEventId: widget.cmeEventId,
+              ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
             });
-          } else {
-            _connectPusher(responseData['meeting_id'], channel);
           }
         })
         .catchError((error) {
@@ -1235,120 +970,103 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
         });
   }
 
-  Future<void> _navigateToCallScreen(BuildContext context, String getChannelName) async {
-    if (getChannelName.isNotEmpty) {
-      _checkJoinStatus(context, getChannelName);
-    } else {
-      toast('Invalid meeting channel');
-    }
-  }
-
-  // Pusher related methods
-  void _connectPusher(meetingId, channel) async {
+  void _connectMeetingSocket(dynamic meetingId, String channel) async {
+    _startWaitingRoomPolling(channel);
     try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: false,
-        onSubscriptionSucceeded: _onSubscriptionSucceeded,
-        onSubscriptionError: _onSubscriptionError,
-        onMemberAdded: _onMemberAdded,
-        onMemberRemoved: _onMemberRemoved,
-        onDecryptionFailure: _onDecryptionFailure,
-        onError: _onError,
-        onSubscriptionCount: _onSubscriptionCount,
-        onAuthorizer: _onAuthorizer,
-      );
+      final id = meetingId?.toString() ?? '';
+      if (id.isEmpty) return;
 
-      pusher.connect();
-
-      // Successfully created and connected to Pusher
-      clientListenChannel = await pusher.subscribe(
-        channelName: "meeting-channel$meetingId",
-        onMemberAdded: (member) {
-          // print("Member added: $member");
-        },
-        onMemberRemoved: (member) {
-          print("Member removed: $member");
-        },
-        onEvent: (event) async {
-          String eventName = event.eventName;
-          print(eventName);
-          switch (eventName) {
-            case 'new-user-allowed':
-              await joinMeetings(channel).then((joinMeetingData) {
-                ProgressDialogUtils.hideProgressDialog();
-                VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
-              });
-              print("eventName $eventName");
-              toast(eventName);
-              break;
-            case 'new-user-rejected':
+      _meetingWsSub?.cancel();
+      _meetingWsSub = _meetingWs.events.listen((event) async {
+        if (event is! MeetingRealtimeEvent) return;
+        switch (event.event) {
+          case 'allow-join-request':
+          case 'new-user-allowed':
+            final targetId = event.payload['id']?.toString() ?? '';
+            if (targetId.isEmpty || targetId == AppData.logInUserId) {
+              await _enterMeetingOnce(channel);
+            }
+            break;
+          case 'reject-join-request':
+          case 'new-user-rejected':
+            final targetId = event.payload['id']?.toString() ?? '';
+            if (targetId.isEmpty || targetId == AppData.logInUserId) {
+              _cancelWaitingRoomPolling();
               ProgressDialogUtils.hideProgressDialog();
-              print("eventName $eventName");
-              toast("Meeting join request was rejected");
-              break;
-            default:
-              // Handle unknown event types or ignore them
-              break;
-          }
-        },
-      );
+              toast('Meeting join request was rejected');
+            }
+            break;
+        }
+      });
+      await _meetingWs.connect(id);
     } catch (e) {
       ProgressDialogUtils.hideProgressDialog();
-      print('Pusher error: $e');
-      toast("Connection error: ${e.toString()}");
+      toast('Connection error: ${e.toString()}');
     }
   }
 
-  void _onSubscriptionSucceeded(String channelName, dynamic data) {
-    print("onSubscriptionSucceeded: $channelName data: $data");
-  }
-
-  void _onSubscriptionError(String message, dynamic e) {
-    print("onSubscriptionError: $message Exception: $e");
-    ProgressDialogUtils.hideProgressDialog();
-    toast("Subscription error: $message");
-  }
-
-  void _onDecryptionFailure(String event, String reason) {
-    print("onDecryptionFailure: $event reason: $reason");
-  }
-
-  void _onMemberAdded(String channelName, PusherMember member) {
-    print("onMemberAdded: $channelName member: $member");
-  }
-
-  void _onMemberRemoved(String channelName, PusherMember member) {
-    print("onMemberRemoved: $channelName member: $member");
-  }
-
-  void _onError(String message, int? code, dynamic e) {
-    print("onError: $message code: $code exception: $e");
-    ProgressDialogUtils.hideProgressDialog();
-    toast("Error: $message");
-  }
-
-  void _onSubscriptionCount(String channelName, int subscriptionCount) {}
-
-  // Authorizer method for Pusher - required to prevent iOS crash
-  Future<dynamic>? _onAuthorizer(String channelName, String socketId, dynamic options) async {
-    print("_onAuthorizer called for channel: $channelName, socketId: $socketId");
-
-    // For public channels (not starting with 'private-' or 'presence-'),
-    // return null
-    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
-      return null;
+  /// Idempotent transition into the call screen. Multiple sources can race
+  /// to call this (Pusher event + polling fallback); only the first wins.
+  Future<void> _enterMeetingOnce(String channel) async {
+    if (_meetingTransitionStarted) return;
+    _meetingTransitionStarted = true;
+    _cancelWaitingRoomPolling();
+    try {
+      final joinMeetingData = await joinMeetings(channel);
+      if (!mounted) return;
+      ProgressDialogUtils.hideProgressDialog();
+      VideoCallScreen(
+        meetingDetailsModel: joinMeetingData,
+        isHost: false,
+        cmeEventId: widget.cmeEventId,
+      ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+    } catch (e) {
+      _meetingTransitionStarted = false; // allow retry
+      ProgressDialogUtils.hideProgressDialog();
+      toast("Failed to enter meeting: $e");
     }
-
-    return null;
   }
 
-  void _showScheduleSuccessDialog() {
+  /// Polls the ask-to-join endpoint as a fallback in case the Pusher
+  /// `allow-join-request` event never arrives (websocket drop / DNS failure).
+  /// The endpoint returns the participant payload including `isAllowed`,
+  /// which flips to `true` once the host approves. We also accept a
+  /// non-`waiting_room` status as proof of approval (legacy backends).
+  void _startWaitingRoomPolling(String channel) {
+    _waitingPollTimer?.cancel();
+    _waitingPollTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      if (_meetingTransitionStarted || !mounted) {
+        timer.cancel();
+        return;
+      }
+      try {
+        final resp = await askToJoin(context, channel);
+        if (resp.success != true) return;
+        final data = resp.data is Map<String, dynamic>
+            ? resp.data as Map<String, dynamic>
+            : Map<String, dynamic>.from(jsonDecode(jsonEncode(resp.data)) as Map);
+        final status = data['status']?.toString() ?? '';
+        final participant = data['participant'];
+        final isAllowed = participant is Map ? participant['isAllowed'] == true : false;
+        final approved = isAllowed || (status.isNotEmpty && status != 'waiting_room');
+        if (approved) {
+          timer.cancel();
+          await _enterMeetingOnce(channel);
+        }
+      } catch (_) {
+        // Swallow transient errors — keep polling.
+      }
+    });
+  }
+
+  void _cancelWaitingRoomPolling() {
+    _waitingPollTimer?.cancel();
+    _waitingPollTimer = null;
+  }
+
+  void _showScheduleSuccessDialog({required String title, required String date, required String time, required int duration}) {
     final theme = OneUITheme.of(context);
-    final meetingTitle = _meetingTitleController.text.trim().isEmpty ? 'Untitled Meeting' : _meetingTitleController.text.trim();
-    final meetingDate = _dateController.text;
-    final meetingTime = _startTimeController.text;
+    final meetingTitle = title.isEmpty ? 'Untitled Meeting' : title;
     final meetingCode = 'MT-${DateTime.now().millisecondsSinceEpoch.toString().substring(7, 13)}';
 
     showDialog(
@@ -1390,9 +1108,9 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
             ),
             const SizedBox(height: 12),
             _buildDialogDetailRow(theme, translation(context).lbl_meeting_title, meetingTitle),
-            _buildDialogDetailRow(theme, translation(context).lbl_date, meetingDate),
-            _buildDialogDetailRow(theme, translation(context).lbl_time, meetingTime),
-            _buildDialogDetailRow(theme, 'Duration', '$_durationMinutes minutes'),
+            _buildDialogDetailRow(theme, translation(context).lbl_date, date),
+            _buildDialogDetailRow(theme, translation(context).lbl_time, time),
+            _buildDialogDetailRow(theme, 'Duration', '$duration minutes'),
             const SizedBox(height: 16),
             Text(
               translation(context).lbl_meeting_code,
@@ -1430,9 +1148,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: Text(translation(context).lbl_close, style: TextStyle(color: theme.textSecondary)),
           ),
           Container(
@@ -1443,7 +1159,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
                 borderRadius: BorderRadius.circular(8),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _shareDialog(theme, meetingTitle, meetingDate, meetingTime, meetingCode);
+                  _shareDialog(theme, meetingTitle, date, time, meetingCode);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1491,6 +1207,7 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
     );
   }
 
+  // ignore: unused_element
   void _showCancelConfirmationDialog(String meetingId) {
     final theme = OneUITheme.of(context);
 
@@ -1665,6 +1382,454 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
           Text(
             label,
             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SCHEDULE MEETING BOTTOM SHEET
+// ═══════════════════════════════════════════════════════
+class _ScheduleMeetingSheet extends StatefulWidget {
+  final void Function({required String title, required String date, required String time, required int duration}) onSuccess;
+
+  const _ScheduleMeetingSheet({required this.onSuccess});
+
+  @override
+  State<_ScheduleMeetingSheet> createState() => _ScheduleMeetingSheetState();
+}
+
+class _ScheduleMeetingSheetState extends State<_ScheduleMeetingSheet> {
+  final _titleController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _timeController = TextEditingController();
+  final _descController = TextEditingController();
+  int _duration = 60;
+  String _type = 'meeting';
+  bool _waitingRoom = false;
+  bool _registration = false;
+  bool _autoRecord = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController.text = "${DateTime.now().add(const Duration(days: 1)).toLocal()}".split(' ')[0];
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _dateController.dispose();
+    _timeController.dispose();
+    _descController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final theme = OneUITheme.of(context);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(primary: theme.primary, onPrimary: Colors.white, onSurface: theme.textPrimary),
+          textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: theme.primary)),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() => _dateController.text = "${picked.toLocal()}".split(' ')[0]);
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final theme = OneUITheme.of(context);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(primary: theme.primary, onPrimary: Colors.white, onSurface: theme.textPrimary),
+          timePickerTheme: TimePickerThemeData(
+            backgroundColor: theme.cardBackground,
+            hourMinuteShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            dayPeriodShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            dayPeriodColor: theme.primary.withValues(alpha: 0.1),
+            dayPeriodTextColor: theme.primary,
+            hourMinuteColor: theme.primary.withValues(alpha: 0.1),
+            hourMinuteTextColor: theme.primary,
+          ),
+          textButtonTheme: TextButtonThemeData(style: TextButton.styleFrom(foregroundColor: theme.primary)),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() => _timeController.text = picked.format(context));
+    }
+  }
+
+  Widget _sectionLabel(OneUITheme theme, String label) {
+    return Row(
+      children: [
+        Container(width: 3, height: 16, decoration: BoxDecoration(color: theme.primary, borderRadius: BorderRadius.circular(2))),
+        const SizedBox(width: 8),
+        Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.textSecondary, letterSpacing: 0.5)),
+      ],
+    );
+  }
+
+  Widget _dropdown<T>({
+    required OneUITheme theme,
+    required String label,
+    required IconData icon,
+    required T value,
+    required List<DropdownMenuItem<T>> items,
+    required ValueChanged<T?> onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.surfaceVariant.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: theme.surfaceVariant),
+      ),
+      child: DropdownButtonFormField<T>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(color: theme.textSecondary, fontSize: 13),
+          prefixIcon: Icon(icon, color: theme.primary, size: 18),
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          filled: false,
+          contentPadding: const EdgeInsets.only(right: 8),
+          isDense: true,
+        ),
+        items: items,
+        onChanged: onChanged,
+        dropdownColor: theme.cardBackground,
+        icon: Icon(Icons.arrow_drop_down_rounded, color: theme.primary),
+        style: TextStyle(color: theme.textPrimary, fontSize: 14, fontFamily: 'Poppins'),
+        isExpanded: true,
+      ),
+    );
+  }
+
+  Widget _toggleTile({
+    required OneUITheme theme,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: value ? theme.primary.withValues(alpha: 0.3) : theme.surfaceVariant),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: value ? theme.primary.withValues(alpha: 0.1) : theme.surfaceVariant.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 16, color: value ? theme.primary : theme.textSecondary),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: theme.textPrimary)),
+                Text(subtitle, style: TextStyle(fontSize: 11, color: theme.textSecondary)),
+              ],
+            ),
+          ),
+          Switch(value: value, onChanged: onChanged, activeColor: theme.primary, materialTapTargetSize: MaterialTapTargetSize.shrinkWrap),
+        ],
+      ),
+    );
+  }
+
+  Widget _prefixIcon(OneUITheme theme, IconData icon) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          margin: const EdgeInsets.only(left: 8, right: 8),
+          decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
+          child: Icon(icon, size: 16, color: theme.primary),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.92,
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          const SizedBox(height: 10),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(color: Colors.grey.withValues(alpha: 0.4), borderRadius: BorderRadius.circular(2)),
+          ),
+          const SizedBox(height: 12),
+          // Title bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                  child: Icon(Icons.calendar_today_rounded, color: theme.primary, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Schedule a Meeting', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: theme.textPrimary, fontFamily: 'Poppins')),
+                      Text('Fill in the details and confirm', style: TextStyle(fontSize: 12, color: theme.textSecondary)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: Icon(Icons.close_rounded, color: theme.textSecondary),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Divider(color: theme.border, height: 1),
+          // Scrollable form
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, bottom + 100),
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _sectionLabel(theme, 'Meeting Details'),
+                  const SizedBox(height: 10),
+                  CustomTextField(
+                    controller: _titleController,
+                    hintText: 'Enter meeting title',
+                    autofocus: false,
+                    textInputAction: TextInputAction.next,
+                    prefix: _prefixIcon(theme, Icons.title_rounded),
+                    prefixConstraints: const BoxConstraints(minWidth: 60, maxHeight: 56),
+                    filled: true,
+                    fillColor: theme.inputBackground,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: _pickDate,
+                          child: AbsorbPointer(
+                            child: CustomTextField(
+                              controller: _dateController,
+                              hintText: 'Select date',
+                              isReadOnly: true,
+                              autofocus: false,
+                              prefix: _prefixIcon(theme, Icons.calendar_today_rounded),
+                              prefixConstraints: const BoxConstraints(minWidth: 60, maxHeight: 56),
+                              filled: true,
+                              fillColor: theme.inputBackground,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: _pickTime,
+                          child: AbsorbPointer(
+                            child: CustomTextField(
+                              controller: _timeController,
+                              hintText: 'Select time',
+                              isReadOnly: true,
+                              autofocus: false,
+                              prefix: _prefixIcon(theme, Icons.access_time_rounded),
+                              prefixConstraints: const BoxConstraints(minWidth: 60, maxHeight: 56),
+                              filled: true,
+                              fillColor: theme.inputBackground,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _dropdown<int>(
+                          theme: theme,
+                          label: 'Duration',
+                          icon: Icons.timelapse_rounded,
+                          value: _duration,
+                          items: const [
+                            DropdownMenuItem(value: 30, child: Text('30 min')),
+                            DropdownMenuItem(value: 60, child: Text('1 hour')),
+                            DropdownMenuItem(value: 90, child: Text('1.5 hours')),
+                            DropdownMenuItem(value: 120, child: Text('2 hours')),
+                            DropdownMenuItem(value: 180, child: Text('3 hours')),
+                          ],
+                          onChanged: (v) => setState(() => _duration = v!),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _dropdown<String>(
+                          theme: theme,
+                          label: 'Type',
+                          icon: Icons.category_rounded,
+                          value: _type,
+                          items: const [
+                            DropdownMenuItem(value: 'meeting', child: Text('Meeting')),
+                            DropdownMenuItem(value: 'webinar', child: Text('Webinar')),
+                            DropdownMenuItem(value: 'workshop', child: Text('Workshop')),
+                          ],
+                          onChanged: (v) => setState(() => _type = v!),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  CustomTextField(
+                    controller: _descController,
+                    hintText: 'Add a note or agenda for participants...',
+                    autofocus: false,
+                    maxLines: 4,
+                    minLines: 3,
+                    textInputType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    prefix: _prefixIcon(theme, Icons.notes_rounded),
+                    prefixConstraints: const BoxConstraints(minWidth: 60, maxHeight: 56),
+                    filled: true,
+                    fillColor: theme.inputBackground,
+                    onChanged: (v) {},
+                  ),
+                  const SizedBox(height: 20),
+                  _sectionLabel(theme, 'Options'),
+                  const SizedBox(height: 10),
+                  _toggleTile(
+                    theme: theme,
+                    icon: Icons.lock_clock_rounded,
+                    title: 'Enable Waiting Room',
+                    subtitle: 'Approve participants before they join',
+                    value: _waitingRoom,
+                    onChanged: (v) => setState(() => _waitingRoom = v),
+                  ),
+                  const SizedBox(height: 8),
+                  _toggleTile(
+                    theme: theme,
+                    icon: Icons.how_to_reg_rounded,
+                    title: 'Require Registration',
+                    subtitle: 'Participants must register to join',
+                    value: _registration,
+                    onChanged: (v) => setState(() => _registration = v),
+                  ),
+                  const SizedBox(height: 8),
+                  _toggleTile(
+                    theme: theme,
+                    icon: Icons.fiber_manual_record_rounded,
+                    title: 'Auto Record',
+                    subtitle: 'Start recording automatically when meeting begins',
+                    value: _autoRecord,
+                    onChanged: (v) => setState(() => _autoRecord = v),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Sticky submit bar
+          Container(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
+            decoration: BoxDecoration(
+              color: theme.cardBackground,
+              border: Border(top: BorderSide(color: theme.border, width: 0.8)),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, -2))],
+            ),
+            child: Material(
+              color: theme.primary,
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () async {
+                  if (_titleController.text.trim().isEmpty || _dateController.text.isEmpty || _timeController.text.isEmpty) {
+                    toast('Please fill in all required fields');
+                    return;
+                  }
+                  try {
+                    ProgressDialogUtils.showProgressDialog();
+                    final response = await setScheduleMeeting(
+                      title: _titleController.text.trim(),
+                      date: _dateController.text,
+                      time: _timeController.text,
+                      duration: _duration,
+                      type: _type,
+                      description: _descController.text.trim(),
+                      enableWaitingRoom: _waitingRoom,
+                      requireRegistration: _registration,
+                      autoRecord: _autoRecord,
+                    );
+                    ProgressDialogUtils.hideProgressDialog();
+                    if (!mounted) return;
+                    final responseData = json.decode(jsonEncode(response.data)) as Map<String, dynamic>;
+                    if (responseData['message'] != null) toast(responseData['message'].toString());
+                    Navigator.of(context).pop();
+                    widget.onSuccess(
+                      title: _titleController.text.trim(),
+                      date: _dateController.text,
+                      time: _timeController.text,
+                      duration: _duration,
+                    );
+                  } catch (e) {
+                    ProgressDialogUtils.hideProgressDialog();
+                    toast('Error scheduling meeting: ${e.toString()}');
+                  }
+                },
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.schedule_rounded, color: Colors.white, size: 18),
+                      SizedBox(width: 8),
+                      Text('Schedule Meeting', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600, fontFamily: 'Poppins')),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),

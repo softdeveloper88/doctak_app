@@ -1,14 +1,26 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 
-FollowerDataModel followerDataModelFromJson(String str) => FollowerDataModel.fromJson(json.decode(str));
-String followerDataModelToJson(FollowerDataModel data) => json.encode(data.toJson());
+FollowerDataModel followerDataModelFromJson(String str) =>
+    FollowerDataModel.fromJson(json.decode(str));
+String followerDataModelToJson(FollowerDataModel data) =>
+    json.encode(data.toJson());
 
 class FollowerDataModel {
-  FollowerDataModel({this.totalFollows, this.profilePicture, this.coverPicture, this.totalPosts, this.user, this.followers, this.following});
+  FollowerDataModel({
+    this.totalFollows,
+    this.profilePicture,
+    this.coverPicture,
+    this.totalPosts,
+    this.user,
+    this.followers,
+    this.following,
+  });
 
   FollowerDataModel.fromJson(dynamic json) {
-    totalFollows = json['total_follows'] != null ? TotalFollows.fromJson(json['total_follows']) : null;
+    totalFollows = json['total_follows'] != null
+        ? TotalFollows.fromJson(json['total_follows'])
+        : null;
     profilePicture = AppData.fullImageUrl(json['profile_picture']);
     coverPicture = AppData.fullImageUrl(json['cover_picture']);
     totalPosts = json['total_posts'];
@@ -59,15 +71,27 @@ Following followingFromJson(String str) => Following.fromJson(json.decode(str));
 String followingToJson(Following data) => json.encode(data.toJson());
 
 class Following {
-  Following({this.id, this.profileUrl, this.isCurrentlyFollow, this.name, this.profilePic, this.specialty});
+  Following({
+    this.id,
+    this.profileUrl,
+    this.isCurrentlyFollow,
+    this.name,
+    this.profilePic,
+    this.specialty,
+    this.isVerified,
+  });
 
   Following.fromJson(dynamic json) {
-    id = json['user_id'];
+    id = json['user_id'] ?? json['id'];
     isCurrentlyFollow = json['isCurrentlyFollow'];
     profileUrl = json['profile_url'];
-    name = json['name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
+    final rawName = (json['fullName'] ?? json['name'] ?? '').toString().trim();
+    final firstLast = '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    final username = (json['username'] ?? '').toString().trim();
+    name = rawName.isNotEmpty ? rawName : (firstLast.isNotEmpty ? firstLast : (username.isNotEmpty ? username : 'Unknown'));
+    profilePic = AppData.fullImageUrl(json['profile_pic'] ?? json['avatar'] ?? json['profilePicUrl']);
     specialty = json['specialty'];
+    isVerified = json['is_verified'] == true || json['is_verified'] == 1;
   }
   String? id;
   bool? isCurrentlyFollow;
@@ -75,6 +99,7 @@ class Following {
   String? name;
   String? profilePic;
   dynamic specialty;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -84,6 +109,7 @@ class Following {
     map['name'] = name;
     map['profile_pic'] = profilePic;
     map['specialty'] = specialty;
+    map['is_verified'] = isVerified;
     return map;
   }
 }
@@ -92,15 +118,27 @@ Followers followersFromJson(String str) => Followers.fromJson(json.decode(str));
 String followersToJson(Followers data) => json.encode(data.toJson());
 
 class Followers {
-  Followers({this.id, this.profileUrl, this.isCurrentlyFollow, this.name, this.profilePic, this.specialty});
+  Followers({
+    this.id,
+    this.profileUrl,
+    this.isCurrentlyFollow,
+    this.name,
+    this.profilePic,
+    this.specialty,
+    this.isVerified,
+  });
 
   Followers.fromJson(dynamic json) {
-    id = json['user_id'];
+    id = json['user_id'] ?? json['id'];
     isCurrentlyFollow = json['isCurrentlyFollow'];
     profileUrl = json['profile_url'];
-    name = json['name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
+    final rawName = (json['fullName'] ?? json['name'] ?? '').toString().trim();
+    final firstLast = '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    final username = (json['username'] ?? '').toString().trim();
+    name = rawName.isNotEmpty ? rawName : (firstLast.isNotEmpty ? firstLast : (username.isNotEmpty ? username : 'Unknown'));
+    profilePic = AppData.fullImageUrl(json['profile_pic'] ?? json['avatar'] ?? json['profilePicUrl']);
     specialty = json['specialty'];
+    isVerified = json['is_verified'] == true || json['is_verified'] == 1;
   }
   String? id;
   bool? isCurrentlyFollow;
@@ -108,6 +146,7 @@ class Followers {
   String? name;
   String? profilePic;
   dynamic specialty;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -117,6 +156,7 @@ class Followers {
     map['name'] = name;
     map['profile_pic'] = profilePic;
     map['specialty'] = specialty;
+    map['is_verified'] = isVerified;
     return map;
   }
 }
@@ -168,7 +208,10 @@ class User {
     lastName = json['last_name'];
     emailVerifiedAt = json['email_verified_at'];
     userType = json['user_type'];
-    name = json['name'];
+    final rawName = (json['name'] ?? '').toString().trim();
+    final firstLast = '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    final username = (json['username'] ?? '').toString().trim();
+    name = rawName.isNotEmpty ? rawName : (firstLast.isNotEmpty ? firstLast : (username.isNotEmpty ? username : 'Unknown'));
     email = json['email'];
     token = json['token'];
     phone = json['phone'];
@@ -273,7 +316,8 @@ class User {
   }
 }
 
-TotalFollows totalFollowsFromJson(String str) => TotalFollows.fromJson(json.decode(str));
+TotalFollows totalFollowsFromJson(String str) =>
+    TotalFollows.fromJson(json.decode(str));
 String totalFollowsToJson(TotalFollows data) => json.encode(data.toJson());
 
 class TotalFollows {

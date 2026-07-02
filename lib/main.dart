@@ -1282,14 +1282,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/auth_token_service.dart';
 import 'package:doctak_app/presentation/case_discussion/screens/discussion_list_screen.dart';
 import 'package:doctak_app/presentation/NoInternetScreen.dart';
-import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
+// Legacy calling_module disconnected — calling is handled solely by
+// calling_module_v2 (CallingModuleV2 / CallControllerV2). AgoraService is kept
+// because the meetings module's Provider<AgoraService> still uses it.
 import 'package:doctak_app/presentation/calling_module/services/agora_service.dart';
-import 'package:doctak_app/presentation/calling_module/services/call_service.dart';
-
-// import 'presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
-import 'package:doctak_app/presentation/calling_module/services/callkit_service.dart';
+import 'package:doctak_app/presentation/calling_module_v2/widgets/ongoing_call_banner_v2.dart';
 import 'package:doctak_app/presentation/case_discussion/bloc/create_discussion_bloc.dart';
 import 'package:doctak_app/presentation/case_discussion/bloc/discussion_detail_bloc.dart';
 import 'package:doctak_app/presentation/case_discussion/repository/case_discussion_repository.dart';
@@ -1298,6 +1298,7 @@ import 'package:doctak_app/presentation/coming_soon_screen/coming_soon_screen.da
 import 'package:doctak_app/presentation/doctak_ai_module/blocs/ai_chat/ai_chat_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/feed_video_navigator_observer.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
@@ -1339,6 +1340,7 @@ import 'core/utils/get_shared_value.dart';
 import 'core/utils/edge_to_edge_helper.dart';
 import 'firebase_options.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'presentation/calling_module_v2/calling_module_v2.dart' show CallingModuleV2, CallControllerV2;
 // Removed path_provider import - using direct paths to avoid Pigeon channel issues in release mode
 
 /// Waits for native plugin channels to be ready.
@@ -1349,20 +1351,55 @@ Future<void> _waitForPluginChannels() async {
   // Give a longer delay in release mode for plugins to initialize
   // This is a workaround for Pigeon-based plugins like path_provider
   if (kReleaseMode) {
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 150));
   } else {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await Future.delayed(const Duration(milliseconds: 16));
   }
   debugPrint('Plugin channel wait complete');
 }
 
-// Global service instances that persist throughout app lifecycle
-final CallService globalCallService = CallService();
-final CallKitService callKitService = CallKitService();
+// Global service instances that persist throughout app lifecycle.
+// (Legacy globalCallService / callKitService removed — calling_module_v2 owns
+// all call handling now.)
 
 // Store instance
 AppStore appStore = AppStore();
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+bool _isNonFatalImageFailure(FlutterErrorDetails details) {
+  final libraryName = details.library?.toLowerCase() ?? '';
+  if (libraryName.contains('image') || libraryName.contains('painting')) {
+    return true;
+  }
+
+  final typeName = details.exception.runtimeType.toString();
+  if (typeName.contains('NetworkImageLoadException') ||
+      typeName.contains('ClientException')) {
+    return true;
+  }
+
+  final stack = details.stack?.toString() ?? '';
+  if (stack.contains('image.dart') ||
+      stack.contains('image_stream.dart') ||
+      stack.contains('multi_image_stream_completer.dart') ||
+      stack.contains('cached_network_image')) {
+    if (stack.contains('ImageStreamCompleter') ||
+        stack.contains('MultiFrameImageStreamCompleter') ||
+        stack.contains('MultiImageStreamCompleter')) {
+      return true;
+    }
+  }
+
+  final message = details.exceptionAsString().toLowerCase();
+  return message.contains('failed to load network image') ||
+      message.contains('networkimageloadexception') ||
+      message.contains('invalid image data') ||
+      message.contains('http request failed') ||
+      message.contains('image codec') ||
+      message.contains('resolving an image codec') ||
+      message.contains('connection closed before full header') ||
+      message.contains('clientexception');
+}
 
 // Flag to indicate if we're handling a call at app startup
 bool isHandlingCallAtStartup = false;
@@ -1497,66 +1534,6 @@ Future<void> _cleanupStaleCallData() async {
 }
 
 // Check if there's an active call that should be prioritized
-Future<bool> _isActiveCallPending() async {
-  debugPrint('Checking for active calls...');
-  try {
-    // First check for active calls in CallKit
-    final activeCalls = await callKitService.getActiveCalls();
-    if (activeCalls.isNotEmpty) {
-      final call = activeCalls.first;
-      final callId = call['id']?.toString() ?? '';
-
-      // Verify call is recent
-      final prefs = await getSharedPreferencesWithRetry();
-      final timestamp = await prefs.getInt('active_call_timestamp') ?? 0;
-      final now = DateTime.now().millisecondsSinceEpoch;
-
-      // Only consider calls within the last 30 seconds
-      if (now - timestamp < 30000) {
-        debugPrint('Found active recent call in CallKit: $callId');
-        return true;
-      }
-
-      debugPrint('Found call in CallKit but it appears stale, clearing: $callId');
-      await callKitService.endCall(callId);
-    }
-
-    // Check for pending call info from preferences
-    final prefs = await getSharedPreferencesWithRetry();
-
-    // First check for pending calls from notifications
-    final pendingCallId = await prefs.getString('pending_call_id');
-    if (pendingCallId != null) {
-      final pendingTimestamp = await prefs.getInt('pending_call_timestamp') ?? 0;
-      final now = DateTime.now().millisecondsSinceEpoch;
-
-      // Only consider pending calls within the last 15 seconds
-      if (now - pendingTimestamp < 15000) {
-        debugPrint('Found pending call from notification: $pendingCallId');
-        return true;
-      }
-    }
-
-    // Then check for active calls from saved state
-    final savedCallId = await prefs.getString('active_call_id');
-    if (savedCallId != null) {
-      final savedTimestamp = await prefs.getInt('active_call_timestamp') ?? 0;
-      final now = DateTime.now().millisecondsSinceEpoch;
-
-      // Only consider saved calls within the last 30 seconds
-      if (now - savedTimestamp < 30000) {
-        debugPrint('Found recent saved call info: $savedCallId');
-        return true;
-      }
-    }
-
-    return false;
-  } catch (e) {
-    debugPrint('Error checking for active call: $e');
-    return false;
-  }
-}
-
 /// Entry point for Picture-in-Picture mode
 /// This is called when PiP creates a new engine for the floating window
 @pragma('vm:entry-point')
@@ -1733,42 +1710,34 @@ Future<void> main() async {
     }
 
     baseUrl = await _getBaseUrlFromPrefs();
-    try {
-      // Step 1: Initialize CallKit service FIRST - highest priority
-      debugPrint('Initializing CallKitService...');
-      await callKitService.initialize(
-        baseUrl: baseUrl,
-        shouldUpdateStatus: false, // Let CallService handle status updates
-      );
-      debugPrint('CallKitService initialized successfully');
-    } catch (e) {
-      debugPrint('Error initializing CallKitService, continuing: $e');
-      // Continue even if this fails as CallService will retry
-    }
 
     // Set up Crashlytics ONLY if Firebase initialized successfully
     if (firebaseInitialized) {
       try {
         FlutterError.onError = (errorDetails) {
-          // Filter out non-critical image loading errors to reduce noise
-          final errorString = errorDetails.exception.toString().toLowerCase();
-          final libraryName = errorDetails.library?.toLowerCase() ?? '';
-          
-          // Skip image loading errors (404s, network issues, etc.)
-          final isImageError = errorString.contains('httpclient') ||
-              errorString.contains('404') ||
-              errorString.contains('image') ||
-              errorString.contains('codec') ||
-              errorString.contains('cachednetworkimage') ||
-              libraryName.contains('image') ||
-              libraryName.contains('painting');
-          
-          if (isImageError) {
-            // Log image errors locally but don't send to Crashlytics
-            debugPrint('🖼️ Image load error (non-fatal): ${errorDetails.exceptionAsString()}');
+          if (_isNonFatalImageFailure(errorDetails)) {
+            if (kDebugMode) {
+              debugPrint(
+                '🖼️ Image load error (non-fatal): ${errorDetails.exceptionAsString()}',
+              );
+            }
             return;
           }
-          
+
+          // Always surface the real error in debug (Crashlytics is disabled there,
+          // so otherwise the actual exception is invisible).
+          if (kDebugMode) {
+            debugPrint('🔴🔴🔴 FLUTTER ERROR ════════════════════════════════');
+            debugPrint('Type: ${errorDetails.exception.runtimeType}');
+            debugPrint('Message: ${errorDetails.exceptionAsString()}');
+            if (errorDetails.library != null) {
+              debugPrint('Library: ${errorDetails.library}');
+            }
+            debugPrint('Stack:\n${errorDetails.stack}');
+            debugPrint('════════════════════════════════════════════════════');
+            FlutterError.presentError(errorDetails);
+          }
+
           try {
             FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
           } catch (e) {
@@ -1777,21 +1746,41 @@ Future<void> main() async {
         };
 
         PlatformDispatcher.instance.onError = (error, stack) {
-          // Filter out non-critical errors
-          final errorString = error.toString().toLowerCase();
-          
-          // Skip image/network loading errors
-          final isImageError = errorString.contains('httpclient') ||
-              errorString.contains('404') ||
-              errorString.contains('image') ||
-              errorString.contains('codec') ||
-              errorString.contains('socket');
-          
-          if (isImageError) {
-            debugPrint('🖼️ Image/Network error (non-fatal): $error');
+          // Only swallow genuine network/socket exceptions detected by TYPE,
+          // never by substring-matching the message (which hides real bugs).
+          final typeName = error.runtimeType.toString();
+          final stackText = stack.toString();
+          final message = error.toString().toLowerCase();
+          final isNetworkError = error is SocketException ||
+              error is HttpException ||
+              error is TimeoutException ||
+              typeName.contains('SocketException') ||
+              typeName.contains('HandshakeException') ||
+              typeName.contains('NetworkImageLoadException') ||
+              typeName.contains('ClientException') ||
+              message.contains('image codec') ||
+              message.contains('connection closed before full header') ||
+              stackText.contains('multi_image_stream_completer.dart') ||
+              stackText.contains('cached_network_image') ||
+              (stackText.contains('image.dart') &&
+                  stackText.contains('ImageStreamCompleter')) ||
+              (stackText.contains('image_stream.dart') &&
+                  stackText.contains('ImageStreamCompleter'));
+
+          if (isNetworkError) {
+            debugPrint('🌐 Network/image error (non-fatal): $error');
             return true;
           }
-          
+
+          // Always surface the real error — otherwise uncaught async errors are
+          // swallowed and only show up as a generic zone-error breakpoint with
+          // no message in the IDE.
+          debugPrint('🔴🔴🔴 UNCAUGHT ASYNC ERROR ═══════════════════════════');
+          debugPrint('Type: $typeName');
+          debugPrint('Message: $error');
+          debugPrint('Stack:\n$stack');
+          debugPrint('════════════════════════════════════════════════════');
+
           try {
             FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
           } catch (e) {
@@ -1809,28 +1798,12 @@ Future<void> main() async {
     }
 
     // IMPORTANT: Clean up any stale call data BEFORE checking for active calls
-    await _cleanupStaleCallData();
-    debugPrint('Stale call data cleaned up');
+    unawaited(_cleanupStaleCallData().then((_) => debugPrint('Stale call data cleaned up')));
 
     // Load the base URL from preferences or use default
     debugPrint('Using API base URL: $baseUrl');
 
-    // Create CallKitService instance first - no async await here
-    // This is crucial to avoid the LateInitializationError
-    try {
-      // Step 1: Initialize CallKit service FIRST - highest priority
-      debugPrint('Initializing CallKitService...');
-      await callKitService.initialize(
-        baseUrl: baseUrl,
-        shouldUpdateStatus: false, // Let CallService handle status updates
-      );
-      debugPrint('CallKitService initialized successfully');
-    } catch (e) {
-      debugPrint('Error initializing CallKitService, continuing: $e');
-      // Continue even if this fails as CallService will retry
-    }
-
-    // Initialize notification service AFTER Firebase and CallKit are initialized
+    // Initialize notification service AFTER Firebase is initialized
     try {
       await NotificationService.initialize();
       debugPrint('Notification service initialized');
@@ -1839,7 +1812,14 @@ Future<void> main() async {
       // Continue even if this fails as it's not critical for call handling
     }
 
-    // Get initial notification if app was opened from a notification
+    // Calling module v2 — defer so first frame is not blocked.
+    unawaited(
+      CallingModuleV2.initialize().then((_) => debugPrint('CallingModuleV2 initialized')).catchError(
+        (e) => debugPrint('Error initializing CallingModuleV2, continuing: $e'),
+      ),
+    );
+
+    // Get initial notification if app was opened from a (non-call) notification.
     try {
       initialRoute = await NotificationService.getInitialNotificationRoute();
       debugPrint('Initial route: ${initialRoute?.data}');
@@ -1848,85 +1828,17 @@ Future<void> main() async {
       // Continue without initial route
     }
 
-    // Check if app was launched from a call notification
-    bool isFromCallNotification = false;
+    // Calls are never routed via the startup route — calling_module_v2 rings via
+    // CallKit and navigates to CallScreenV2 on accept / cold-start reconcile.
+    // Drop any call-typed initial notification so it doesn't hit the removed
+    // legacy /call route.
     if (initialRoute != null && initialRoute.data['type'] == 'call') {
-      isFromCallNotification = true;
-      isHandlingCallAtStartup = true;
-      debugPrint('App launched from call notification: ${initialRoute.data}');
-    } else {
-      // Check if there's an active call that should be prioritized
-      try {
-        isHandlingCallAtStartup = await _isActiveCallPending();
-      } catch (e) {
-        debugPrint('Error checking for active calls: $e');
-        isHandlingCallAtStartup = false;
-      }
+      initialRoute = null;
     }
-
-    // Step 2: Initialize CallService with the same baseUrl
-    try {
-      debugPrint('Initializing CallService...');
-      await globalCallService.initialize(baseUrl: baseUrl, isFromCallNotification: isFromCallNotification);
-      debugPrint('CallService initialized successfully');
-    } catch (e) {
-      debugPrint('Error initializing CallService, continuing: $e');
-      // Continue even if this fails as we already have notification service
-    }
+    isHandlingCallAtStartup = false;
 
     // Set up notification channel for Android
     channel = const AndroidNotificationChannel('high_importance_channel', 'High Importance Notifications', importance: Importance.max);
-
-    // Step 3: Handle incoming call if launched from notification with a small delay
-    if (isFromCallNotification && initialRoute != null) {
-      // Use a small delay to ensure services are fully initialized
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // Extract call information
-      final callId = initialRoute.data['call_id'] ?? '';
-      final callerName = initialRoute.data['caller_name'] ?? 'Unknown Caller';
-      final callerId = initialRoute.data['caller_id'] ?? '';
-      final hasVideo = initialRoute.data['is_video_call'] == 'true';
-      final avatar = initialRoute.data['caller_avatar'] ?? '';
-
-      debugPrint('Handling incoming call from notification: $callId from $callerName');
-
-      try {
-        await globalCallService.handleIncomingCall(callId: callId, callerName: callerName, callerId: callerId, callerAvatar: avatar, isVideoCall: hasVideo);
-      } catch (e) {
-        debugPrint('Error handling incoming call at startup: $e');
-
-        // Try again after a longer delay if initial handling fails
-        Future.delayed(const Duration(seconds: 1), () {
-          try {
-            globalCallService.handleIncomingCall(callId: callId, callerName: callerName, callerId: callerId, callerAvatar: avatar, isVideoCall: hasVideo);
-          } catch (e) {
-            debugPrint('Second attempt also failed: $e');
-          }
-        });
-      }
-    } else if (isHandlingCallAtStartup) {
-      // There's an active call to restore
-      debugPrint('Resuming active call from startup...');
-
-      // Use a small delay to ensure services are fully initialized
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      try {
-        await callKitService.resumeCallScreenIfNeeded();
-      } catch (e) {
-        debugPrint('Error resuming call screen: $e');
-
-        // Try again with a longer delay
-        Future.delayed(const Duration(seconds: 1), () {
-          try {
-            callKitService.resumeCallScreenIfNeeded();
-          } catch (e) {
-            debugPrint('Second attempt to resume call screen failed: $e');
-          }
-        });
-      }
-    }
 
     // Initialize AdMob
     try {
@@ -1970,13 +1882,12 @@ Future<void> main() async {
       debugPrint('Error configuring edge-to-edge: $e');
     }
 
-    // Initialize Deep Link Service
-    try {
-      await deepLinkService.initialize();
-      debugPrint('DeepLinkService initialized');
-    } catch (e) {
-      debugPrint('Error initializing DeepLinkService: $e');
-    }
+    // Initialize Deep Link Service after UI is up — not needed for first paint.
+    unawaited(
+      deepLinkService.initialize().then((_) => debugPrint('DeepLinkService initialized')).catchError(
+        (e) => debugPrint('Error initializing DeepLinkService: $e'),
+      ),
+    );
   } catch (e, stackTrace) {
     // Catch ANY unhandled error during initialization
     debugPrint('CRITICAL: Unhandled error during app initialization: $e');
@@ -1986,7 +1897,27 @@ Future<void> main() async {
 
   // ALWAYS run the app, even if initialization failed
   debugPrint('Launching app UI...');
-  runApp(MyApp(message: initialRoute, initialRoute: isHandlingCallAtStartup ? 'call' : initialRoute?.data['type'] ?? '', id: initialRoute?.data['id'] ?? ''));
+
+  // Enhanced error widget to capture exact crash location for debugging
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    debugPrint('═══════════════════════════════════════════');
+    debugPrint('🔴 WIDGET BUILD ERROR:');
+    debugPrint('Exception: ${details.exception}');
+    debugPrint('Library: ${details.library}');
+    debugPrint('Context: ${details.context}');
+    debugPrint('Stack: ${details.stack}');
+    debugPrint('═══════════════════════════════════════════');
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: const Color(0x80FF0000),
+      child: Text(
+        'Error: ${details.exception}\n\nContext: ${details.context}\n\nStack: ${details.stack?.toString().split('\n').take(10).join('\n')}',
+        style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 10),
+      ),
+    );
+  };
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -2041,48 +1972,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     debugPrint('App lifecycle state changed to: $state');
 
     if (state == AppLifecycleState.resumed) {
-      // Check for active calls when app comes to foreground
-      if (globalCallService.hasActiveCall) {
-        // Verify call is still active
-        _verifyAndShowCallScreen();
-      } else {
-        // Only clear badges if not returning to a call
+      // Only clear badges if not returning to a live v2 call.
+      if (!CallControllerV2.instance.isLive) {
         NotificationService.clearBadgeCount();
       }
-    }
-
-    // Use the global instance to handle lifecycle changes
-    globalCallService.handleAppLifecycleState(state);
-  }
-
-  /// Verify if we have an active call and show the call screen
-  Future<void> _verifyAndShowCallScreen() async {
-    try {
-      // Check if we have active calls
-      final activeCalls = await callKitService.getActiveCalls();
-
-      if (activeCalls.isNotEmpty) {
-        final call = activeCalls.first;
-        final callId = call['id']?.toString() ?? '';
-
-        // Quick timeout check
-        final prefs = await getSharedPreferencesWithRetry();
-        final timestamp = await prefs.getInt('active_call_timestamp') ?? 0;
-        final now = DateTime.now().millisecondsSinceEpoch;
-
-        if (now - timestamp > 60000) {
-          // 60 seconds
-          // Call is too old, end it
-          debugPrint('Call too old, ending: $callId');
-          await callKitService.endCall(callId);
-          return;
-        }
-
-        debugPrint('Found active call, ensuring call screen is displayed: $callId');
-        await callKitService.resumeCallScreenIfNeeded();
-      }
-    } catch (e) {
-      debugPrint('Error verifying and showing call screen: $e');
+      // Refresh JWT before it expires so API calls don't fail with 401.
+      AuthTokenService.instance.refreshIfExpiringSoon();
+      // Re-register FCM in case token rotated or server registration was missed.
+      NotificationService.syncDeviceToken();
+      // Catch up on a call accepted in the FCM background isolate while the app
+      // was backgrounded (its CallKit events never reached the main isolate) —
+      // this opens the call screen on resume.
+      CallControllerV2.instance.onAppResumed();
     }
   }
 
@@ -2167,21 +2068,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> _updateConnectionStatus(List<ConnectivityResult> result) async {
+    if (!mounted) return;
+
     setState(() {
-      _connectionStatus = result;
+      _connectionStatus = result.isNotEmpty ? result : [ConnectivityResult.none];
     });
 
-    if (_connectionStatus.first == ConnectivityResult.none) {
-      isCurrentlyOnNoInternet = true;
-      launchScreen(NavigatorService.navigatorKey.currentState!.overlay!.context, NoInternetScreen());
-    } else {
-      if (isCurrentlyOnNoInternet) {
-        Navigator.pop(NavigatorService.navigatorKey.currentState!.overlay!.context);
-        isCurrentlyOnNoInternet = false;
+    final nav = NavigatorService.navigatorKey.currentState;
+    final overlayContext = nav?.overlay?.context;
+    if (overlayContext == null || !overlayContext.mounted) return;
+
+    final offline = result.isEmpty || result.contains(ConnectivityResult.none);
+
+    if (offline) {
+      if (!isCurrentlyOnNoInternet) {
+        isCurrentlyOnNoInternet = true;
+        launchScreen(overlayContext, NoInternetScreen());
       }
+    } else if (isCurrentlyOnNoInternet) {
+      if (nav?.canPop() == true) {
+        Navigator.pop(overlayContext);
+      }
+      isCurrentlyOnNoInternet = false;
     }
 
-    print('Connectivity changed: $_connectionStatus');
+    debugPrint('Connectivity changed: $_connectionStatus');
   }
 
   @override
@@ -2203,26 +2114,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
     initConnectivity();
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    NotificationService.clearBadgeCount(); // Clears badge when app resumes
-    setFCMSetting();
-    // setToken();
-    // _initializeFlutterFireFuture = _initializeFlutterFire();
+    NotificationService.clearBadgeCount();
+    // FCM permission + listeners are configured in NotificationService.initialize().
     _initializeFlutterFire();
 
-    // Check if we're handling a call at startup and setup appropriate callbacks
-    if (isHandlingCallAtStartup) {
-      print('App started with active call, setting up call screen priority');
-      // Delay app main flow if we're handling a call
-      Future.delayed(const Duration(milliseconds: 500), () {
-        // Check if any calls are active at this point
-        callKitService.getActiveCalls().then((activeCalls) {
-          if (activeCalls.isNotEmpty) {
-            print('Ensuring call screen remains visible');
-            callKitService.resumeCallScreenIfNeeded();
-          }
-        });
-      });
-    }
+    // Live-call resume on cold start is handled by CallingModuleV2.initialize()
+    // (CallControllerV2._resumeAfterColdStart) — no legacy call-startup hook here.
 
     // Initialize deep link listener for when app is running
     _initDeepLinkListener();
@@ -2290,9 +2187,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           BlocProvider(create: (context) => ProfileBloc()),
           BlocProvider(create: (context) => ChatBloc()),
 
-          // We're using a global instance, so this is just for UI components that need it
-          // It won't be used for app lifecycle events
-          ChangeNotifierProvider<CallService>.value(value: globalCallService),
           BlocProvider(create: (context) => ThemeBloc(ThemeState(themeType: PrefUtils().getThemeData()))),
         ],
         child: BlocBuilder<ThemeBloc, ThemeState>(
@@ -2304,135 +2198,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   child: MaterialApp(
                     scaffoldMessengerKey: globalMessengerKey,
                     navigatorKey: NavigatorService.navigatorKey,
-                    // If handling a call, use '/call' as our home route, otherwise use the regular route
-                    initialRoute: isHandlingCallAtStartup ? '/call' : (widget.initialRoute != null ? '/${widget.initialRoute}' : '/'),
+                    navigatorObservers: [FeedVideoNavigatorObserver.instance],
+                    initialRoute: '/',
 
-                    // Add onGenerateRoute to better handle deep linking for calls
+                    // Calls are handled entirely by calling_module_v2 (no /call
+                    // route here — it navigates to CallScreenV2 directly).
                     onGenerateRoute: (settings) {
                       print('Generating route for: ${settings.name}');
-
-                      // Handle call routes with special care
-                      if (settings.name == '/call') {
-                        // When no arguments are provided, get active call info from CallKit
-                        if (settings.arguments == null) {
-                          // Return a "loading" route that will be replaced with call info
-                          return MaterialPageRoute(
-                            settings: const RouteSettings(name: '/call'),
-                            builder: (context) {
-                              // Use a FutureBuilder to get call info and show appropriate screen
-                              return FutureBuilder<List<Map<String, dynamic>>>(
-                                future: callKitService.getActiveCalls(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
-                                    // Show a loading indicator while getting call info
-                                    return const Scaffold(body: Center(child: CircularProgressIndicator()));
-                                  }
-
-                                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                                    // We have active call data, but verify it's still active
-                                    final call = snapshot.data!.first;
-                                    final callId = call['id']?.toString() ?? '';
-
-                                    // Extract call data carefully - handling type issues
-                                    Map<String, dynamic> extra = {};
-                                    if (call['extra'] is Map) {
-                                      final rawExtra = call['extra'] as Map;
-                                      rawExtra.forEach((key, value) {
-                                        if (key is String) {
-                                          extra[key] = value;
-                                        }
-                                      });
-                                    }
-
-                                    final userId = extra['userId']?.toString() ?? '';
-                                    final name = call['nameCaller']?.toString() ?? 'Unknown';
-                                    final avatar = extra['avatar']?.toString() ?? '';
-                                    final hasVideo = extra['has_video'] == true || extra['has_video'] == 'true';
-
-                                    // Navigate to call screen - handle null safety properly
-                                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(
-                                          settings: const RouteSettings(name: '/call'),
-                                          builder: (context) =>
-                                              CallScreen(callId: callId, contactId: userId, contactName: name, contactAvatar: avatar, isIncoming: true, isVideoCall: hasVideo, token: ''),
-                                        ),
-                                      );
-                                    });
-
-                                    // Return a temporary screen while we check
-                                    return const Scaffold(
-                                      body: Center(
-                                        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [CircularProgressIndicator(), SizedBox(height: 16), Text('Preparing call...')]),
-                                      ),
-                                    );
-                                  }
-
-                                  // No active call found, check for pending calls
-                                  WidgetsBinding.instance.addPostFrameCallback((_) async {
-                                    final prefs = await getSharedPreferencesWithRetry();
-                                    final pendingCallId = await prefs.getString('pending_call_id');
-
-                                    if (pendingCallId != null) {
-                                      // Check if the pending call is recent
-                                      final pendingTimestamp = await prefs.getInt('pending_call_timestamp') ?? 0;
-                                      final now = DateTime.now().millisecondsSinceEpoch;
-
-                                      if (now - pendingTimestamp < 15000) {
-                                        // Within 15 seconds
-                                        // Extract pending call information
-                                        final callerId = await prefs.getString('pending_caller_id') ?? '';
-                                        final callerName = await prefs.getString('pending_caller_name') ?? 'Unknown';
-                                        final avatar = await prefs.getString('pending_caller_avatar') ?? '';
-                                        final hasVideo = await prefs.getBool('pending_call_has_video') ?? false;
-
-                                        // Handle the pending call
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            settings: const RouteSettings(name: '/call'),
-                                            builder: (context) => CallScreen(
-                                              callId: pendingCallId,
-                                              contactId: callerId,
-                                              contactName: callerName,
-                                              contactAvatar: avatar,
-                                              isIncoming: true,
-                                              isVideoCall: hasVideo,
-                                              token: '',
-                                            ),
-                                          ),
-                                        );
-                                        return;
-                                      }
-                                    }
-
-                                    // If we get here, no call is active, redirect to home
-                                    Navigator.of(context).pushReplacementNamed('/');
-                                  });
-
-                                  return const Scaffold(body: Center(child: CircularProgressIndicator()));
-                                },
-                              );
-                            },
-                          );
-                        }
-
-                        // Handle call with provided arguments
-                        final args = _extractCallArguments(settings.arguments);
-
-                        return MaterialPageRoute(
-                          settings: RouteSettings(name: '/call'), // Important for route recognition
-                          builder: (context) => CallScreen(
-                            callId: args['callId'] ?? '',
-                            contactId: args['contactId'] ?? '',
-                            contactName: args['contactName'] ?? 'Unknown',
-                            contactAvatar: args['contactAvatar'] ?? '',
-                            isIncoming: args['isIncoming'] ?? true,
-                            isVideoCall: args['isVideoCall'] ?? false,
-                            token: args['token'] ?? '',
-                          ),
-                        );
-                      }
 
                       // Handle message routes
                       if (settings.name == '/message_received') {
@@ -2444,6 +2216,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             username: widget.message?.notification?.title ?? "",
                             profilePic: widget.message?.data['image'] ?? '',
                           ),
+                        );
+                      }
+
+                      // Handle deep link paths from App Links / Universal Links
+                      // When flutter_deeplinking_enabled is true, the deep link URL
+                      // path (e.g. /post/123) overrides initialRoute. We must handle
+                      // these paths here, otherwise the app shows a route-not-found error.
+                      final routeName = settings.name ?? '';
+                      if (routeName.startsWith('/post/') ||
+                          routeName.startsWith('/job/') ||
+                          routeName.startsWith('/conference/') ||
+                          routeName.startsWith('/meeting/') ||
+                          routeName.startsWith('/join-meeting/') ||
+                          routeName.startsWith('/profile/') ||
+                          routeName.startsWith('/posts/') ||
+                          routeName.startsWith('/jobs/')) {
+                        // Route to splash screen — it will pick up the deep link
+                        // via deepLinkService.getInitialLink() and navigate properly.
+                        return MaterialPageRoute(
+                          settings: const RouteSettings(name: '/'),
+                          builder: (context) => UnifiedSplashUpgradeScreen(),
                         );
                       }
 
@@ -2486,7 +2279,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     darkTheme: AppTheme.darkTheme,
                     themeMode: appStore.isDarkMode ? ThemeMode.dark : ThemeMode.light,
                     builder: (context, child) {
-                      return SimpleFixedMediaQuery.wrap(context: context, child: child!);
+                      final overlay = EdgeToEdgeHelper.overlayForTheme(
+                        isDark: appStore.isDarkMode,
+                      );
+                      return AnnotatedRegion<SystemUiOverlayStyle>(
+                        value: overlay,
+                        // WhatsApp-style "tap to return to call" bar shown above
+                        // every screen while a v2 call is live but not foregrounded.
+                        child: Column(
+                          children: [
+                            const OngoingCallBannerV2(),
+                            Expanded(child: child ?? const SizedBox.shrink()),
+                          ],
+                        ),
+                      );
                     },
                     localizationsDelegates: AppLocalizations.localizationsDelegates,
                     supportedLocales: AppLocalizations.supportedLocales,
@@ -2501,27 +2307,4 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 
-  // Helper method to safely extract call arguments
-  Map<String, dynamic> _extractCallArguments(dynamic arguments) {
-    try {
-      if (arguments is Map<String, dynamic>) {
-        return arguments;
-      } else if (arguments is Map) {
-        final Map<String, dynamic> args = {};
-        arguments.forEach((key, value) {
-          if (key is String) {
-            args[key] = value;
-          }
-        });
-        return args;
-      } else if (arguments is String) {
-        return {'callId': arguments};
-      } else {
-        return {'callId': arguments?.toString() ?? ''};
-      }
-    } catch (e) {
-      debugPrint('Error extracting call arguments: $e');
-      return {'callId': ''};
-    }
-  }
 }

@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/drugs_model/drug_v6_models.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/bloc/drugs_bloc.dart';
@@ -844,11 +845,9 @@ class _DrugsListScreenState extends State<DrugsListScreen>
 
   Widget _featuredCard(OneUITheme theme, DrugV6Item drug) {
     return GestureDetector(
-      onTap: () => Navigator.push(
+      onTap: () => AppNavigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => DrugDetailScreen(drug: drug, currency: _currency),
-        ),
+        DrugDetailScreen(drug: drug, currency: _currency),
       ),
       child: Container(
         width: 160,
@@ -909,20 +908,10 @@ class _DrugsListScreenState extends State<DrugsListScreen>
   // ── Stats bar ──────────────────────────────────────────────────────────────
 
   Widget _buildStatsBar(OneUITheme theme) {
-    final total = _drugsBloc.currentMeta.total;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
         children: [
-          if (total > 0)
-            Text(
-              '$total drugs found',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: theme.textSecondary,
-              ),
-            ),
           const Spacer(),
           GestureDetector(
             onTap: () {

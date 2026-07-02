@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 // // import 'dart:async';
 // // import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 // // import 'package:flutter/material.dart';
@@ -1930,16 +1932,20 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
+import 'package:doctak_app/data/apiClient/cme/cme_node_api_service.dart';
 import 'package:doctak_app/data/models/meeting_model/meeting_details_model.dart';
 import 'package:doctak_app/presentation/calling_module/services/pip_service.dart';
 import 'package:doctak_app/presentation/calling_module/services/screen_share_service.dart';
+import 'package:doctak_app/presentation/calling_module/utils/constants.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/search_user_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/seeting_host_control_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
-import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
+import 'package:doctak_app/data/services/meeting_websocket_service.dart';
+import 'package:doctak_app/data/services/notifications_websocket_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/meeting_join_reject_dialog.dart';
 import 'package:flutter/cupertino.dart';
@@ -1947,7 +1953,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:doctak_app/core/utils/call_permission_handler.dart';
@@ -1956,9 +1961,11 @@ import 'meeting_chat_screen.dart';
 import 'meeting_chat_bottom_sheet.dart';
 import 'meeting_info_screen.dart';
 
-const defaultChannel = 'doctak';
-const appId = "f2cf99f1193a40e69546157883b2159f";
-// The Agora token will be taken from the meetingDetailsModel when available.
+// defaultChannel is intentionally empty; a missing channel means the meeting
+// data was not received properly and the join will be rejected gracefully.
+const defaultChannel = '';
+// Agora App ID is fetched from the server via /api/meetings/agora-token.
+// It is also stored in AppConstants.agoraAppId as a compile-time fallback.
 String token = '';
 
 // Constants for audio level detection
@@ -1969,7 +1976,14 @@ class VideoCallScreen extends StatefulWidget {
   MeetingDetailsModel? meetingDetailsModel;
   final bool? isHost;
   final String? channel;
-  VideoCallScreen({super.key, this.meetingDetailsModel, this.channel, this.isHost});
+  final String? cmeEventId;
+  VideoCallScreen({
+    super.key,
+    this.meetingDetailsModel,
+    this.channel,
+    this.isHost,
+    this.cmeEventId,
+  });
 
   @override
   State<VideoCallScreen> createState() => _VideoCallScreenState();
@@ -1983,7 +1997,13 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   bool _isJoined = false;
   bool _isMuted = false;
   bool _isScreenSharing = false;
+  bool _pendingScreenSharePublish = false; // set true while waiting for capture confirmation before publishing the screen track
   bool _isFrontCamera = false;
+
+  // Pending Pusher state updates that arrived before the UID→userId mapping
+  // was established (e.g. screen-share event for a placeholder tile).
+  // Flushed in onUserInfoUpdated / _refreshMeetingDetails when the mapping is ready.
+  final Map<String, List<({String action, bool status})>> _pendingStateUpdates = {};
   final bool _showControls = true;
   bool _isLocalVideoEnabled = false;
   bool _isHandRaised = false; // Track hand raise status
@@ -1993,6 +2013,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   Timer? _callTimer;
   int? _networkQuality;
   String channelName = '';
+  // Server-normalized userAccount used for Agora join + token signing. May
+  // differ from AppData.logInUserId for legacy numeric ids (prefixed "u_").
+  String _agoraUserAccount = '';
   final bool _isLogin = false;
   bool _showFloatingOptions = true;
   int? _selectedUserId;
@@ -2008,6 +2031,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   // Audio indication variables
   final Map<int, int> _userSpeakingLevels = {}; // Maps user ID to audio level
   final Map<int, bool> _userSpeakingStatus = {}; // Maps user ID to speaking status
+  final Map<int, Size> _remoteVideoSizes = {};
   bool _isLocalUserSpeaking = false;
   final int _localUserSpeakingLevel = 0;
 
@@ -2025,15 +2049,27 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
   Timer? _localUserSpeakingTimer;
   final Map<int, Timer> _speakingTimers = {};
-  // Pusher client instance
-  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
-  late PusherChannel clientListenChannel;
-  late PusherChannel clientSendChannel;
+  // Meeting realtime (native WebSocket — replaces Pusher)
+  final MeetingWebSocketService _meetingWs = MeetingWebSocketService();
+  StreamSubscription<MeetingWsEvent>? _meetingWsSub;
+  StreamSubscription<NotificationWsEvent>? _notificationWsSub;
 
   // Flag to track if meeting details are being refreshed
   bool _isRefreshingMeetingDetails = false;
   // Debouncer for meeting refresh to avoid too frequent API calls
   Timer? _meetingRefreshDebouncer;
+  // Track users whose join-request dialog is already showing to prevent duplicates
+  final Set<String> _pendingJoinUserIds = {};
+  // Host-side polling fallback for incoming join requests (when Pusher
+  // websocket fails to connect — DNS / blocked port). Periodically lists
+  // participants and surfaces the join-request dialog for any new entry that
+  // is still in waiting state.
+  Timer? _hostJoinRequestPollTimer;
+  Timer? _participantStatePollTimer;
+  final Set<String> _seenParticipantIds = {};
+
+  DateTime? _cmeLastParticipationFlush;
+  Timer? _cmeParticipationTimer;
 
   @override
   void initState() {
@@ -2063,8 +2099,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       token = widget.meetingDetailsModel?.data?.meeting?.meetingToken ?? '';
     }
 
-    // Connect to the Pusher channels
-    _initializePusher();
+    // Connect to meeting realtime channel
+    _initializeMeetingRealtime();
+    _startParticipantStatePolling();
+    // Host-side polling fallback for join requests, in case Pusher fails to
+    // deliver the `new-user-join` event (websocket DNS / blocked-port issues).
+    if (widget.isHost ?? false) {
+      _startHostJoinRequestPolling();
+    }
     // Initialize Agora engine and join channel
     _initializeAgora();
     _generateDefaultPositions();
@@ -2077,23 +2119,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     _initializeRemoteUserStates();
   }
 
-  // Initialize remote user states from meeting details
+  // Remote user states are populated from onUserJoined/onUserInfoUpdated events
+  // using the real Agora numeric UIDs. Pre-population is not possible here because
+  // the Agora UID↔userAccount mapping is only available after users join the channel.
   void _initializeRemoteUserStates() {
-    final users = widget.meetingDetailsModel?.data?.users;
-    if (users != null) {
-      for (var user in users) {
-        if (user.id != AppData.logInUserId) {
-          _remoteUserStates[int.tryParse(user.id ?? '0') ?? 0] = RemoteUserState(
-            userId: user.id ?? '',
-            isVideoOn: user.meetingDetails?.single.isVideoOn == 1,
-            isMicOn: user.meetingDetails?.single.isMicOn == 1,
-            isScreenShared: user.meetingDetails?.single.isScreenShared == 1,
-            isHandUp: user.meetingDetails?.single.isHandUp == 1,
-            userData: user,
-          );
-        }
-      }
-    }
+    // No-op: populated reactively via event handlers.
   }
 
   // Enable wakelock with error handling
@@ -2113,6 +2143,35 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       debugPrint('VideoCallScreen: Wakelock disabled successfully');
     } catch (e) {
       debugPrint('VideoCallScreen: Error disabling wakelock: $e');
+    }
+  }
+
+  void _startCmeParticipationTracking() {
+    final cmeEventId = widget.cmeEventId;
+    if (cmeEventId == null || cmeEventId.isEmpty) return;
+    _cmeLastParticipationFlush = DateTime.now();
+    _cmeParticipationTimer?.cancel();
+    _cmeParticipationTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      _flushCmeParticipation();
+    });
+  }
+
+  Future<void> _flushCmeParticipation() async {
+    final cmeEventId = widget.cmeEventId;
+    if (cmeEventId == null || cmeEventId.isEmpty || _cmeLastParticipationFlush == null) {
+      return;
+    }
+    final durationSeconds =
+        DateTime.now().difference(_cmeLastParticipationFlush!).inSeconds;
+    _cmeLastParticipationFlush = DateTime.now();
+    if (durationSeconds < 5) return;
+    try {
+      await CmeNodeApiService.trackParticipation(
+        cmeEventId,
+        durationSeconds: durationSeconds,
+      );
+    } catch (_) {
+      /* attendance tracking is best-effort */
     }
   }
 
@@ -2223,222 +2282,133 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     }
   }
 
-  // --------------------
-  // Pusher Integration
-  // --------------------
-  void onSubscriptionSucceeded(String channelName, dynamic data) {
-    debugPrint("onSubscriptionSucceeded: $channelName data: $data");
-  }
-
-  void onSubscriptionError(String message, dynamic e) {
-    debugPrint("onSubscriptionError: $message Exception: $e");
-  }
-
-  void onDecryptionFailure(String event, String reason) {
-    debugPrint("onDecryptionFailure: $event reason: $reason");
-  }
-
-  void onMemberAdded(String channelName, PusherMember member) {
-    debugPrint("onMemberAdded: $channelName member: $member");
-  }
-
-  void onMemberRemoved(String channelName, PusherMember member) {
-    debugPrint("onMemberRemoved: $channelName member: $member");
-  }
-
-  void onError(String message, int? code, dynamic e) {
-    debugPrint("onError: $message code: $code exception: $e");
-  }
-
-  void onSubscriptionCount(String channelName, int subscriptionCount) {}
-
-  // Authorizer method for Pusher - required to prevent iOS crash
-  Future<dynamic>? onAuthorizer(String channelName, String socketId, dynamic options) async {
-    debugPrint("onAuthorizer called for channel: $channelName, socketId: $socketId");
-
-    // For public channels (not starting with 'private-' or 'presence-'),
-    // return null
-    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
-      return null;
+  void _initializeMeetingRealtime() {
+    final meetingId = widget.meetingDetailsModel?.data?.meeting?.id?.toString();
+    if (meetingId == null || meetingId.isEmpty) {
+      debugPrint('Meeting WS: skipping — meetingId is null');
+      return;
     }
 
-    return null;
+    _meetingWsSub?.cancel();
+    _meetingWsSub = _meetingWs.events.listen(_handleMeetingRealtimeEvent);
+    unawaited(_meetingWs.connect(meetingId));
+
+    _notificationWsSub?.cancel();
+    _notificationWsSub = NotificationsWebSocketService().events.listen((event) {
+      if (event is! MeetingEnded) return;
+      final channel = widget.meetingDetailsModel?.data?.meeting?.meetingChannel?.toString();
+      final activeId = widget.meetingDetailsModel?.data?.meeting?.id?.toString();
+      if (event.channel.isNotEmpty && channel != null && event.channel != channel) return;
+      if (event.meetingId != null && activeId != null && '${event.meetingId}' != activeId) return;
+      unawaited(_exitMeetingBecauseHostEnded());
+    });
   }
 
-  void onConnectionStateChange(String currentState, String previousState) {
-    debugPrint("Pusher Connection State Changed: $previousState -> $currentState");
-    // If connection is established, ensure we're subscribed to the channel
-    if (currentState == 'CONNECTED' && previousState != 'CONNECTED') {
-      debugPrint('Pusher connected successfully, ready to receive events');
-    } else if (currentState == 'DISCONNECTED') {
-      debugPrint('Pusher disconnected, attempting to reconnect...');
-    }
-  }
-
-  void _initializePusher() async {
+  Future<void> _exitMeetingBecauseHostEnded() async {
+    if (!mounted) return;
+    toast('The host ended the meeting for everyone');
+    await _disableWakelock();
     try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: true,
-        onConnectionStateChange: onConnectionStateChange,
-        onSubscriptionSucceeded: onSubscriptionSucceeded,
-        onSubscriptionError: onSubscriptionError,
-        onMemberAdded: onMemberAdded,
-        onMemberRemoved: onMemberRemoved,
-        onDecryptionFailure: onDecryptionFailure,
-        onError: onError,
-        onSubscriptionCount: onSubscriptionCount,
-        onAuthorizer: onAuthorizer,
-      );
+      await _agoraEngine.leaveChannel();
+    } catch (_) {}
+    if (mounted) finish(context);
+  }
 
-      await pusher.connect();
+  void _handleMeetingRealtimeEvent(MeetingWsEvent event) {
+    if (event is MeetingWsEnded) {
+      unawaited(_exitMeetingBecauseHostEnded());
+      return;
+    }
+    if (event is! MeetingRealtimeEvent) return;
 
-      final meetingId = widget.meetingDetailsModel?.data?.meeting?.id;
-      final pusherChannelName = "meeting-channel$meetingId";
-      debugPrint('Subscribing to Pusher channel: $pusherChannelName');
+    final jsonMap = event.payload;
+    switch (event.event) {
+      case 'new-user-join':
+        if (widget.isHost ?? false) {
+          _showJoinRequestDialog(
+            userId: (jsonMap['id'] ?? '').toString(),
+            firstName: (jsonMap['first_name'] ?? '').toString(),
+            lastName: (jsonMap['last_name'] ?? '').toString(),
+            profilePic: (jsonMap['profile_pic'] ?? '').toString(),
+          );
+        }
+        break;
+      case 'allow-join-request':
+        toast('Join request allowed');
+        break;
+      case 'new-message':
+        final serverId = (jsonMap['id'] ?? '').toString();
+        if (serverId.isEmpty) break;
+        if (AppData.seenMessageIds.contains(serverId)) break;
+        AppData.seenMessageIds.add(serverId);
+        final userId = (jsonMap['userId'] ?? '').toString();
+        if (userId == AppData.logInUserId) break;
+        final text = (jsonMap['message'] ?? '').toString();
+        final createdAt = (jsonMap['createdAt'] ?? '').toString();
+        AppData.chatMessages.add(Message(
+          text: text,
+          senderId: userId,
+          profilePic: AppData.fullImageUrl((jsonMap['userAvatar'] ?? '').toString()),
+          name: (jsonMap['userName'] ?? '').toString(),
+          timestamp: createdAt.isNotEmpty
+              ? DateTime.tryParse(createdAt.replaceFirst(' ', 'T')) ?? DateTime.now()
+              : DateTime.now(),
+          isSentByMe: false,
+        ));
+        AppData.chatMessagesNotifier.value++;
+        break;
+      case 'meeting-status':
+        final String oderId = (jsonMap['userId'] ?? jsonMap['user_id'] ?? '').toString();
+        final String action = jsonMap['action'].toString();
+        final dynamic rawStatus = jsonMap['status'];
+        final bool status;
+        if (rawStatus is bool) {
+          status = rawStatus;
+        } else if (rawStatus is String) {
+          status = rawStatus.toLowerCase() == 'true' || rawStatus == '1';
+        } else if (rawStatus is int) {
+          status = rawStatus == 1;
+        } else {
+          status = rawStatus == true;
+        }
 
-      clientListenChannel = await pusher.subscribe(
-        channelName: pusherChannelName,
-        onMemberAdded: (member) {
-          // Handle when a new member is added if needed.
-          debugPrint("Pusher member added to channel: $member");
-        },
-        onMemberRemoved: (member) {
-          debugPrint("Member removed: $member");
-        },
-        onEvent: (event) {
-          String eventName = event.eventName;
-          debugPrint('Pusher raw event received - name: $eventName, data: ${event.data}');
+        _updateRemoteUserState(oderId, action, status);
+        _updateMeetingDetailsForStatus(oderId, action, status);
+        if (action == 'screen' && status && oderId != AppData.logInUserId) {
+          _ensureRemoteVideoOn(oderId);
+        }
+        _updateRemoteVideosForUser(oderId);
+        if (mounted) setState(() {});
 
-          // Handle pusher subscription events
-          if (eventName == 'pusher:subscription_succeeded' || eventName == 'pusher_internal:subscription_succeeded') {
-            debugPrint('Successfully subscribed to Pusher channel: $pusherChannelName');
-            return;
+        if (action == 'hand' && oderId != AppData.logInUserId) {
+          final user = widget.meetingDetailsModel?.data?.users?.firstWhere(
+            (u) => u.id == oderId,
+            orElse: () => Users(),
+          );
+          final userName = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
+          if (status) {
+            _showSystemMessage('✋ ${userName.isNotEmpty ? userName : 'A participant'} raised their hand');
+          } else {
+            _showSystemMessage('${userName.isNotEmpty ? userName : 'A participant'} lowered their hand');
           }
-
-          Map<String, dynamic> jsonMap = {};
-          try {
-            jsonMap = jsonDecode(event.data.toString());
-          } catch (e) {
-            debugPrint('Error parsing Pusher event data: $e');
-            return;
-          }
-
-          debugPrint('Received event: $eventName with data: $jsonMap');
-
-          // Handling meeting join events
-          switch (eventName) {
-            case 'new-user-join':
-              if (widget.isHost ?? false) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MeetingJoinRejectDialog(
-                      joinName: '${jsonMap['first_name']} ${jsonMap['last_name']}',
-                      title: ' wants to join the meeting?',
-                      yesButtonText: "Accept",
-                      profilePic: AppData.fullImageUrl(jsonMap['profile_pic']),
-                      callback: () async {
-                        // Allow join request via API call.
-                        ProgressDialogUtils.showProgressDialog(context: context);
-                        await allowJoinMeet(context, widget.meetingDetailsModel?.data?.meeting?.id, jsonMap['id']).then((resp) async {
-                          debugPrint("Allow join response: $resp");
-                          // Refresh meeting details after successful join.
-                          _refreshMeetingDetailsDebounced();
-                          ProgressDialogUtils.hideProgressDialog();
-                        });
-
-                        Navigator.of(context).pop();
-                      },
-                      noButtonText: 'Reject',
-                      callbackNegative: () async {
-                        ProgressDialogUtils.showProgressDialog(context: context);
-
-                        // Reject join request via API call.
-                        await rejectJoinMeet(context, jsonMap['id'], widget.meetingDetailsModel?.data?.meeting?.id).then((resp) {
-                          debugPrint("Reject join response: $resp");
-                        });
-                        ProgressDialogUtils.hideProgressDialog();
-
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                );
-              }
-              break;
-            case 'allow-join-request':
-              debugPrint("Event name: $eventName");
-              toast("Join request allowed");
-              break;
-            case 'new-message':
-              if (AppData.logInUserId != jsonMap['user_id']) {
-                AppData.chatMessages.add(
-                  Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: AppData.fullImageUrl(jsonMap['profile_pic']), name: '', timestamp: DateTime.timestamp(), isSentByMe: false),
-                );
-              }
-              setState(() {});
-              break;
-            case 'meeting-status':
-              // IMPROVED: Handling meeting status updates more efficiently
-              // Handle both 'userId' and 'user_id' field names from Pusher
-              final String oderId = (jsonMap['userId'] ?? jsonMap['user_id'] ?? '').toString();
-              final String action = jsonMap['action'].toString();
-
-              // Parse status correctly - handle bool, string, int formats
-              final dynamic rawStatus = jsonMap['status'];
-              final bool status;
-              if (rawStatus is bool) {
-                status = rawStatus;
-              } else if (rawStatus is String) {
-                status = rawStatus.toLowerCase() == 'true' || rawStatus == '1';
-              } else if (rawStatus is int) {
-                status = rawStatus == 1;
-              } else {
-                status = rawStatus == true;
-              }
-
-              debugPrint('📢 Meeting status update: user=$oderId, action=$action, rawStatus=$rawStatus (${rawStatus.runtimeType}), parsedStatus=$status');
-
-              // Update meeting details model
-              if (_updateMeetingDetailsForStatus(oderId, action, status)) {
-                // Find all remote videos that might need UI updates
-                _updateRemoteVideosForUser(oderId);
-
-                // Force UI refresh
-                if (mounted) setState(() {});
-
-                // Show user-friendly notification for hand raise (like Zoom/Meet)
-                debugPrint('🖐️ Hand check: action="$action", oderId="$oderId", myId="${AppData.logInUserId}", isNotMe=${oderId != AppData.logInUserId}, status=$status');
-                if (action == 'hand') {
-                  debugPrint('🖐️ Action is hand! Checking if not me...');
-                  if (oderId != AppData.logInUserId) {
-                    debugPrint('🖐️ Not me! Checking status: $status');
-                    // Find the user's name
-                    final user = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == oderId, orElse: () => Users());
-                    final userName = '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim();
-                    if (status) {
-                      debugPrint('🖐️ Status is TRUE - showing raised hand message');
-                      _showSystemMessage('✋ ${userName.isNotEmpty ? userName : 'A participant'} raised their hand');
-                    } else {
-                      debugPrint('🖐️ Status is FALSE - showing lowered hand message');
-                      _showSystemMessage('${userName.isNotEmpty ? userName : 'A participant'} lowered their hand');
-                    }
-                  } else {
-                    debugPrint('🖐️ Skipping - this is my own hand event');
-                  }
-                }
-              }
-              break;
-            default:
-              break;
-          }
-        },
-      );
-    } catch (e) {
-      debugPrint('Pusher initialization error: $e');
-      _showErrorDialog('Pusher Connection Error', 'Failed to connect to messaging service. Please try again.');
+        }
+        break;
+      case 'meeting-settings':
+        final s = widget.meetingDetailsModel?.data?.settings;
+        if (s != null) {
+          final updated = Settings.fromJson(jsonMap);
+          setState(() {
+            if (updated.muteAll != null) s.muteAll = updated.muteAll;
+            if (updated.shareScreen != null) s.shareScreen = updated.shareScreen;
+            if (updated.raisedHand != null) s.raisedHand = updated.raisedHand;
+            if (updated.toggleMicrophone != null) s.toggleMicrophone = updated.toggleMicrophone;
+            if (updated.toggleVideo != null) s.toggleVideo = updated.toggleVideo;
+            if (updated.enableWaitingRoom != null) s.enableWaitingRoom = updated.enableWaitingRoom;
+          });
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -2476,9 +2446,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           return false;
       }
 
-      // Also update the remote user state map
-      _updateRemoteUserState(userId, action, status);
-
       return true;
     } catch (e) {
       debugPrint("Error updating meeting details: $e");
@@ -2505,14 +2472,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         setState(() {
           _isLocalVideoEnabled = status;
         });
+      } else if (action == 'hand') {
+        setState(() {
+          _isHandRaised = status;
+        });
       }
-      // Also update the state map for consistency
+      // Also update the remote user state map for consistency
       _updateRemoteUserStateByUid(0, action, status);
       return;
     }
 
     if (uidValue == null) {
-      // Try to find by iterating through remote videos
+      // Try to find by iterating through remote videos (resolved tiles)
       for (var video in _remoteVideos) {
         if (video.joinUser?.id == oderId) {
           final uid = video.uid;
@@ -2520,7 +2491,21 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           return;
         }
       }
-      debugPrint('Could not find Agora UID for user: $oderId');
+
+      // Try reverse lookup through uidToUserIdMap — this works once
+      // onUserInfoUpdated has fired even if _userIdToUidMap wasn't updated yet.
+      for (final entry in _uidToUserIdMap.entries) {
+        if (entry.value == oderId) {
+          _userIdToUidMap[oderId] = entry.key; // cache for future lookups
+          _updateRemoteUserStateByUid(entry.key, action, status);
+          return;
+        }
+      }
+
+      // All lookups failed — mapping not established yet (race condition).
+      // Queue the update and apply it when the mapping becomes available.
+      debugPrint('⏳ Queuing state update for $oderId (action=$action, status=$status) — UID mapping not yet established');
+      _pendingStateUpdates.putIfAbsent(oderId, () => []).add((action: action, status: status));
       return;
     }
 
@@ -2544,6 +2529,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         break;
       case 'screen':
         userState.isScreenShared = status;
+        if (status) {
+          userState.isVideoOn = true;
+        }
         break;
       case 'mic':
         userState.isMicOn = status;
@@ -2556,6 +2544,40 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
     // Update the state map
     _remoteUserStates[uid] = userState;
+  }
+
+  // Mark a remote user's video as on by their server user ID.
+  // Used when screen sharing starts so the AgoraVideoView renders immediately,
+  // even if onRemoteVideoStateChanged fires late or not at all.
+  void _ensureRemoteVideoOn(String userId) {
+    int? uid = _userIdToUidMap[userId];
+    if (uid == null) {
+      for (final video in _remoteVideos) {
+        if (video.joinUser?.id == userId) {
+          uid = video.uid;
+          break;
+        }
+      }
+    }
+    if (uid == null) return;
+    if (_remoteUserStates.containsKey(uid)) {
+      _remoteUserStates[uid]!.isVideoOn = true;
+    } else {
+      _remoteUserStates[uid] = RemoteUserState(userId: _uidToUserIdMap[uid] ?? userId, isVideoOn: true, isMicOn: true);
+    }
+  }
+
+  /// Apply any queued state updates (mic/cam/screen/hand) for [userId] now
+  /// that the UID mapping is established. Call inside setState or standalone —
+  /// each individual update calls setState internally via
+  /// [_updateRemoteUserStateByUid].
+  void _drainPendingStateUpdates(String userId) {
+    final pending = _pendingStateUpdates.remove(userId);
+    if (pending == null || pending.isEmpty) return;
+    debugPrint('🔄 Draining ${pending.length} queued state update(s) for $userId');
+    for (final update in pending) {
+      _updateRemoteUserState(userId, update.action, update.status);
+    }
   }
 
   // Update UI components for a specific user
@@ -2574,13 +2596,196 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     }
   }
 
+  /// Reusable host-side dialog for "X wants to join the meeting?".
+  /// Called from both the Pusher `new-user-join` event handler AND the polling
+  /// fallback below — they must funnel through here so dedup works correctly.
+  void _showJoinRequestDialog({
+    required String userId,
+    required String firstName,
+    required String lastName,
+    required String profilePic,
+  }) {
+    if (userId.isEmpty || _pendingJoinUserIds.contains(userId)) {
+      return;
+    }
+    _pendingJoinUserIds.add(userId);
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return MeetingJoinRejectDialog(
+          joinName: '$firstName $lastName'.trim(),
+          title: ' wants to join the meeting?',
+          yesButtonText: 'Accept',
+          profilePic: AppData.fullImageUrl(profilePic),
+          callback: () async {
+            _pendingJoinUserIds.remove(userId);
+            ProgressDialogUtils.showProgressDialog(context: ctx);
+            try {
+              await allowJoinMeet(ctx, widget.meetingDetailsModel?.data?.meeting?.id, userId);
+              _refreshMeetingDetailsDebounced();
+            } catch (e) {
+              debugPrint('allowJoinMeet error: $e');
+            } finally {
+              ProgressDialogUtils.hideProgressDialog();
+            }
+            if (ctx.mounted) Navigator.of(ctx).pop();
+          },
+          noButtonText: 'Reject',
+          callbackNegative: () async {
+            _pendingJoinUserIds.remove(userId);
+            ProgressDialogUtils.showProgressDialog(context: ctx);
+            try {
+              await rejectJoinMeet(ctx, widget.meetingDetailsModel?.data?.meeting?.id, userId);
+            } catch (e) {
+              debugPrint('rejectJoinMeet error: $e');
+            } finally {
+              ProgressDialogUtils.hideProgressDialog();
+            }
+            if (ctx.mounted) Navigator.of(ctx).pop();
+          },
+        );
+      },
+    ).whenComplete(() => _pendingJoinUserIds.remove(userId));
+  }
+
+  void _startHostJoinRequestPolling() {
+    _hostJoinRequestPollTimer?.cancel();
+    _hostJoinRequestPollTimer = Timer.periodic(const Duration(seconds: 4), (timer) async {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      final channel = channelName;
+      if (channel.isEmpty) return;
+      try {
+        final resp = await networkUtils.handleResponse(
+          await networkUtils.buildHttpResponseNode(
+            '/api/meetings/$channel/participants',
+            method: networkUtils.HttpMethod.GET,
+          ),
+        );
+        if (resp is! Map<String, dynamic>) return;
+        if (resp['success'] != true) return;
+        final list = resp['participants'];
+        if (list is! List) return;
+        for (final raw in list) {
+          if (raw is! Map) continue;
+          final p = Map<String, dynamic>.from(raw);
+          final pid = (p['userId'] ?? '').toString();
+          if (pid.isEmpty || pid == AppData.logInUserId) continue;
+          if (_seenParticipantIds.contains(pid)) continue;
+          final isAllowed = p['isAllowed'] == true;
+          if (!isAllowed) {
+            // New, still-pending participant — surface the dialog.
+            _showJoinRequestDialog(
+              userId: pid,
+              firstName: (p['firstName'] ?? p['first_name'] ?? p['userName'] ?? '').toString(),
+              lastName: (p['lastName'] ?? p['last_name'] ?? '').toString(),
+              profilePic: (p['userAvatar'] ?? p['profile_pic'] ?? '').toString(),
+            );
+          }
+          // Mark as seen only once approved, so the dialog re-shows if a user
+          // re-requests after a reject.
+          if (isAllowed) {
+            _seenParticipantIds.add(pid);
+          }
+        }
+      } catch (_) {
+        // Swallow transient errors — keep polling.
+      }
+    });
+  }
+
+  /// Poll participant rows so hand/mic/cam stay in sync when WebSocket misses an event.
+  void _startParticipantStatePolling() {
+    _participantStatePollTimer?.cancel();
+    _participantStatePollTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      if (!mounted || !_isJoined) return;
+      final channel = channelName;
+      if (channel.isEmpty) return;
+      try {
+        final resp = await networkUtils.handleResponse(
+          await networkUtils.buildHttpResponseNode(
+            '/api/meetings/$channel/participants',
+            method: networkUtils.HttpMethod.GET,
+          ),
+        );
+        if (resp is! Map<String, dynamic> || resp['success'] != true) return;
+        final list = resp['participants'];
+        if (list is! List) return;
+        final participants = list
+            .whereType<Map>()
+            .map((p) => Users.fromParticipant(Map<String, dynamic>.from(p)))
+            .toList();
+        if (!mounted) return;
+        setState(() {
+          widget.meetingDetailsModel?.data?.users = participants;
+          _syncParticipantStatesFromApi(participants);
+        });
+      } catch (_) {
+        // Keep polling on transient errors.
+      }
+    });
+  }
+
+  void _syncParticipantStatesFromApi(List<Users> participants) {
+    for (final user in participants) {
+      final userId = user.id;
+      if (userId == null || userId.isEmpty) continue;
+      final detail = user.participantDetail ?? user.meetingDetails?.firstOrNull;
+      if (detail == null) continue;
+
+      if (userId == AppData.logInUserId) {
+        _isHandRaised = detail.isHandUp == 1;
+        continue;
+      }
+
+      void applyState(int uid) {
+        final state = _remoteUserStates[uid] ??
+            RemoteUserState(userId: userId, userData: user);
+        state.isVideoOn = detail.isVideoOn == 1;
+        state.isMicOn = detail.isMicOn == 1;
+        state.isScreenShared = detail.isScreenShared == 1;
+        state.isHandUp = detail.isHandUp == 1;
+        _remoteUserStates[uid] = state;
+      }
+
+      final mappedUid = _userIdToUidMap[userId];
+      if (mappedUid != null) {
+        applyState(mappedUid);
+        continue;
+      }
+
+      for (final video in _remoteVideos) {
+        if (video.joinUser?.id == userId) {
+          applyState(video.uid);
+          break;
+        }
+      }
+    }
+  }
+
+  String? _resolveMyParticipantId() {
+    final fromJoin = widget.meetingDetailsModel?.data?.participant?.participantDetail?.id ??
+        widget.meetingDetailsModel?.data?.participant?.meetingDetails?.firstOrNull?.id;
+    if (fromJoin != null && fromJoin.isNotEmpty) return fromJoin;
+
+    final currentUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
+      (user) => user.id == AppData.logInUserId,
+      orElse: () => Users(),
+    );
+    return currentUser?.participantDetail?.id ?? currentUser?.meetingDetails?.firstOrNull?.id;
+  }
+
   // Refresh meeting details with debouncing to prevent too many API calls
   void _refreshMeetingDetailsDebounced() {
     if (_meetingRefreshDebouncer?.isActive ?? false) {
       _meetingRefreshDebouncer!.cancel();
     }
-
-    _meetingRefreshDebouncer = Timer(const Duration(milliseconds: 500), () {
+    // 2-second delay so that onUserInfoUpdated has time to fire and populate
+    // _uidToUserIdMap before the refresh runs — this lets the refresh upgrade
+    // placeholder tiles in one pass instead of needing a second cycle.
+    _meetingRefreshDebouncer = Timer(const Duration(seconds: 2), () {
       _refreshMeetingDetails();
     });
   }
@@ -2591,16 +2796,85 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
     _isRefreshingMeetingDetails = true;
     try {
-      final updatedDetails = await joinMeetings(channelName);
-      if (mounted) {
-        setState(() {
-          widget.meetingDetailsModel = updatedDetails;
-          _isRefreshingMeetingDetails = false;
+      // Use the participants endpoint which accepts the Agora channel code
+      // (not the meeting UUID). GET /api/meetings/{channel}/participants
+      // returns all current participants via listLiveParticipants so we get
+      // real names/avatars rather than a 404 from the UUID-based route.
+      final resp = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/meetings/$channelName/participants',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
 
-          // Update remote user states from the new details
-          _initializeRemoteUserStates();
-        });
+      if (!mounted) return;
+
+      final rawList = resp['participants'] as List<dynamic>?;
+      if (rawList == null) return;
+
+      final updatedUsers = rawList.map((p) => Users.fromParticipant(p)).toList();
+
+      // For placeholder tiles that still have no UID→userId mapping, try to
+      // resolve via getUserInfoByUid now (async, must happen before setState).
+      for (final v in _remoteVideos) {
+        final hasRealId = v.joinUser?.id?.isNotEmpty == true &&
+            v.joinUser?.firstName != 'User';
+        if (hasRealId) continue;
+        if (_uidToUserIdMap.containsKey(v.uid)) continue;
+
+        // Try resolving now — succeeds once Agora has had time to populate
+        // the mapping (the initial call in onUserJoined may have raced).
+        final account = await _getCachedUserAccount(v.uid);
+        if (account != null && account.isNotEmpty) {
+          final apiUserId = _stripUserAccountPrefix(account);
+          _uidToUserIdMap[v.uid] = apiUserId;
+          _userIdToUidMap[apiUserId] = v.uid;
+        }
       }
+
+      if (!mounted) return;
+
+      setState(() {
+        // Replace the users list on the model so subsequent lookups are fresh.
+        widget.meetingDetailsModel?.data?.users = updatedUsers;
+        _syncParticipantStatesFromApi(updatedUsers);
+
+        // Upgrade any placeholder tiles (where joinUser.id is null or name is
+        // the "User {uid}" fallback) using the UID→userId map we cached above.
+        for (int i = 0; i < _remoteVideos.length; i++) {
+          final existing = _remoteVideos[i];
+          final hasRealId = existing.joinUser?.id?.isNotEmpty == true &&
+              existing.joinUser?.firstName != 'User';
+          if (hasRealId) continue;
+
+          final cachedUserId = _uidToUserIdMap[existing.uid];
+          if (cachedUserId == null) continue;
+
+          final apiUser = updatedUsers.firstWhere(
+            (u) => u.id == cachedUserId,
+            orElse: () => Users(),
+          );
+          if (apiUser.id == null) continue;
+
+          _remoteVideos[i] = existing.copyWith(joinUser: apiUser);
+          _remoteUserStates[existing.uid] = RemoteUserState(
+            userId: apiUser.id!,
+            isVideoOn: _remoteUserStates[existing.uid]?.isVideoOn ??
+                (apiUser.meetingDetails?.single.isVideoOn == 1),
+            isMicOn: _remoteUserStates[existing.uid]?.isMicOn ??
+                (apiUser.meetingDetails?.single.isMicOn == 1),
+            isScreenShared: _remoteUserStates[existing.uid]?.isScreenShared ?? false,
+            isHandUp: _remoteUserStates[existing.uid]?.isHandUp ?? false,
+            userData: apiUser,
+          );
+          debugPrint('✅ Upgraded placeholder tile uid=${existing.uid} → ${apiUser.firstName}');
+          // Drain any Pusher state updates queued before this tile was resolved.
+          // Must be called outside setState — schedule for after the frame.
+          Future.microtask(() => _drainPendingStateUpdates(cachedUserId));
+        }
+
+        _isRefreshingMeetingDetails = false;
+      });
     } catch (e) {
       debugPrint("Error refreshing meeting details: $e");
       _isRefreshingMeetingDetails = false;
@@ -2615,11 +2889,102 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       // Request required permissions
       await _requestPermissions();
 
+      // Guard: we must have a valid channel before joining
+      if (channelName.isEmpty) {
+        _showErrorDialog('Meeting Error', 'Meeting channel not available. Please try again.');
+        return;
+      }
+
+      // ── Step 1: Fetch Agora credentials from server BEFORE engine init ──
+      // The token is signed with the server's Agora App ID. The engine must be
+      // initialized with that SAME App ID, otherwise Agora rejects the token.
+      String agoraToken = '';
+      String agoraAppId = AppConstants.agoraAppId; // compile-time fallback
+      // Default the join account to the local logged-in id; will be replaced
+      // with the server-normalized value (e.g. "u_2432432432432") below so the
+      // value Agora's SDK sees matches the value the token was signed for.
+      _agoraUserAccount = AppData.logInUserId;
+      try {
+        final tokenResp = await networkUtils.handleResponse(
+          await networkUtils.buildHttpResponseNode(
+            '/api/meetings/agora-token',
+            method: networkUtils.HttpMethod.POST,
+            // CRITICAL: pass userAccount so the server signs the token via
+            // buildTokenWithUserAccount(UUID). Otherwise the token is signed for uid=0
+            // and joinChannelWithUserAccount(UUID) will fail authentication / break
+            // cross-platform sync with the website.
+            body: {'channel': channelName, 'userAccount': AppData.logInUserId},
+          ),
+        );
+        agoraToken = tokenResp['token']?.toString() ?? '';
+        final serverAppId = tokenResp['appId']?.toString() ?? '';
+        if (serverAppId.isNotEmpty) agoraAppId = serverAppId;
+        // Use the server's normalized userAccount for the actual Agora join.
+        // Required because legacy numeric user ids ("2432432432432") get
+        // prefixed with "u_" server-side to avoid Agora SDK auto-parsing them
+        // as out-of-range numeric uids.
+        final normalized = tokenResp['userAccount']?.toString();
+        if (normalized != null && normalized.isNotEmpty) {
+          _agoraUserAccount = normalized;
+        }
+        // Agora channel names are case-sensitive. The server returns the
+        // canonical channel string (the one the token was signed for). Use
+        // that for the actual join — clients on different platforms may have
+        // arrived at the meeting URL with different casing.
+        final canonicalChannel = tokenResp['channel']?.toString();
+        if (canonicalChannel != null && canonicalChannel.isNotEmpty) {
+          channelName = canonicalChannel;
+        }
+        debugPrint('Agora credentials fetched — appId: $agoraAppId, channel: $channelName, userAccount: $_agoraUserAccount');
+      } catch (e) {
+        debugPrint('Agora token fetch failed, joining without token: $e');
+      }
+
+      // ── Step 2: Init engine with the App ID that matches the token ──
+      // CRITICAL: profile must match the web Agora SDK's profile. Web uses
+      // mode: "rtc" (communication). In live broadcasting, a host who joins
+      // without immediately publishing a track is invisible to peers — that
+      // caused the cross-platform asymmetry where Flutter-as-host couldn't
+      // see web users joining. Communication profile fires onUserJoined on
+      // any channel entry.
       _agoraEngine = createAgoraRtcEngine();
-      await _agoraEngine.initialize(const RtcEngineContext(appId: appId, channelProfile: ChannelProfileType.channelProfileLiveBroadcasting));
+      await _agoraEngine.initialize(RtcEngineContext(
+        appId: agoraAppId,
+        channelProfile: ChannelProfileType.channelProfileCommunication,
+      ));
       _setupEventHandlers();
+
+      // Cloud proxy intentionally NOT enabled by default.
+      // Reason: the previously-working build (see /lib/.../video_call_screen.dart)
+      // did not use cloud proxy. TCP/UDP proxy adds latency and can silently
+      // drop higher-bitrate tracks like screen capture — local capture keeps
+      // running so the user sees their own preview, but remote peers receive
+      // no frames. The cross-platform fixes (channel canonicalization,
+      // userAccount normalization, communication profile) made cloud proxy
+      // unnecessary for cross-platform connectivity. If a specific network
+      // genuinely blocks UDP, enable proxy via debug toggle, not by default.
+      // try {
+      //   await _agoraEngine.setCloudProxy(CloudProxyType.udpProxy);
+      // } catch (e) { debugPrint('setCloudProxy failed: $e'); }
+
+      // Register the local user account up front so userAccount ↔ uid
+      // resolution is ready before the first remote user joins. Without this,
+      // the first onUserJoined callback often races with internal account
+      // mapping and getUserInfoByUid returns empty.
+      try {
+        await _agoraEngine.registerLocalUserAccount(
+          appId: agoraAppId,
+          userAccount: _agoraUserAccount,
+        );
+        debugPrint('Registered local userAccount: $_agoraUserAccount');
+      } catch (e) {
+        debugPrint('registerLocalUserAccount failed (non-fatal): $e');
+      }
+
       await _configureVideoSettings();
-      await _joinChannel();
+
+      // ── Step 3: Join with the fetched token ──
+      await _joinChannel(agoraToken: agoraToken, agoraAppId: agoraAppId);
     } catch (e) {
       debugPrint('Agora initialization error: $e');
       _showErrorDialog('Initialization Error', 'Failed to initialize video call. Please check your connection and try again.');
@@ -2679,6 +3044,13 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   final Map<int, String> _uidToUserIdMap = {};
   final Map<String, int> _userIdToUidMap = {};
 
+  /// Strip the "u_" prefix that the server adds to all-digit legacy user ids
+  /// before signing the Agora token. The raw participant API still returns
+  /// the un-prefixed id, so we de-normalize here when matching against the
+  /// participant list.
+  String _stripUserAccountPrefix(String account) =>
+      account.startsWith('u_') ? account.substring(2) : account;
+
   // Get or cache user ID from Agora UID
   Future<String?> _getCachedUserAccount(int uid) async {
     if (_uidToUserIdMap.containsKey(uid)) {
@@ -2698,29 +3070,239 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     }
   }
 
+  Future<void> _publishConfirmedScreenShareTrack({
+    required bool publishAudio,
+    required String platformLabel,
+  }) async {
+    try {
+      // Unmute local video first so Agora's engine starts sending frames.
+      // Without this, the screen-capture stream is configured but the mute
+      // flag (set when the user joined with camera off) silently blocks
+      // delivery — which is why toggling the camera first "fixes" it.
+      await _agoraEngine.muteLocalVideoStream(false);
+
+      await _agoraEngine.updateChannelMediaOptions(
+        ChannelMediaOptions(
+          publishScreenCaptureVideo: true,
+          publishScreenCaptureAudio: publishAudio,
+          publishCameraTrack: false,
+          publishMicrophoneTrack: true,
+          autoSubscribeAudio: true,
+          autoSubscribeVideo: true,
+          clientRoleType: ClientRoleType.clientRoleBroadcaster,
+        ),
+      );
+      debugPrint('📹 $platformLabel: channel options updated after capture confirmed');
+    } catch (e) {
+      debugPrint('📹 $platformLabel: failed to publish screen capture: $e');
+      try {
+        await _agoraEngine.stopScreenCapture();
+      } catch (_) {}
+      if (mounted) {
+        setState(() => _isScreenSharing = false);
+        _showSystemMessage('Screen sharing failed. Please try again.');
+      }
+      return;
+    }
+
+    try {
+      await changeMeetingStatus(
+        context,
+        widget.meetingDetailsModel?.data?.meeting?.id,
+        AppData.logInUserId,
+        'cam',
+        false,
+      );
+    } catch (error) {
+      debugPrint('📹 $platformLabel: failed to sync camera-off status: $error');
+    }
+    try {
+      await changeMeetingStatus(
+        context,
+        widget.meetingDetailsModel?.data?.meeting?.id,
+        AppData.logInUserId,
+        'screen',
+        true,
+      );
+    } catch (error) {
+      debugPrint('📹 $platformLabel: failed to sync screen-share status: $error');
+    }
+
+    if (mounted) {
+      setState(() => _isScreenSharing = true);
+      _showSystemMessage('Screen sharing started');
+    }
+  }
+
+  RenderModeType _getRemoteScreenRenderMode(int uid) {
+    // Always use Fit so the full shared screen is visible without cropping.
+    // Hidden (cover) mode would cut off wide/landscape desktop screen shares.
+    return RenderModeType.renderModeFit;
+  }
+
+  bool _isRemoteScreenShared(RemoteVideoData videoData) {
+    final remoteState = _remoteUserStates[videoData.uid];
+    return remoteState?.isScreenShared ??
+        (videoData.joinUser?.meetingDetails?.single.isScreenShared == 1);
+  }
+
+  double _getTileAspectRatio(RemoteVideoData videoData) {
+    if (!_isRemoteScreenShared(videoData)) {
+      // Use square tiles in the grid so 3-4 participants fill the screen nicely.
+      // Screen-sharing tiles keep their intrinsic ratio below.
+      return 1.0;
+    }
+
+    final Size? remoteSize = _remoteVideoSizes[videoData.uid];
+    if (remoteSize == null || remoteSize.height == 0) {
+      return 16 / 9;
+    }
+
+    final double rawRatio = remoteSize.width / remoteSize.height;
+    // Allow ultrawide desktop shares; only guard against invalid values.
+    return rawRatio.clamp(0.45, 3.5).toDouble();
+  }
+
+  RemoteVideoData? _findScreenSharingRemote() {
+    for (final video in _remoteVideos) {
+      if (_isRemoteScreenShared(video)) return video;
+    }
+    return null;
+  }
+
+  Widget _buildPresentationView(RemoteVideoData sharingRemote) {
+    final thumbnails =
+        _remoteVideos.where((video) => video.uid != sharingRemote.uid).toList();
+
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(4, 4, 4, 2),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SizedBox(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: _buildVideoWindow(
+                    sharingRemote,
+                    getColorByIndex(0),
+                    isFocused: true,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        if (thumbnails.isNotEmpty)
+          SizedBox(
+            height: 96,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 4),
+              itemCount: thumbnails.length,
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  width: 72,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: _buildVideoWindow(
+                      thumbnails[index],
+                      getColorByIndex(index + 1),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAdaptiveRemoteTile(
+    RemoteVideoData videoData,
+    Color color, {
+    required double width,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedUserId = videoData.uid;
+        });
+      },
+      child: SizedBox(
+        width: width,
+        child: AspectRatio(
+          aspectRatio: _getTileAspectRatio(videoData),
+          child: _buildVideoWindow(videoData, color),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTiledRemoteView({required int crossAxisCount}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double spacing = 4;
+        final double totalSpacing = spacing * (crossAxisCount - 1);
+        final double availableWidth = math.max(
+          120,
+          constraints.maxWidth - 8 - totalSpacing,
+        );
+        final double tileWidth = availableWidth / crossAxisCount;
+
+        return SingleChildScrollView(
+          // Extra bottom padding ensures the last row of tiles is never hidden
+          // behind the bottom navigation bar when extendBody is true.
+          padding: const EdgeInsets.fromLTRB(4, 4, 4, 16),
+          child: Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: List.generate(_remoteVideos.length, (index) {
+              return _buildAdaptiveRemoteTile(
+                _remoteVideos[index],
+                getColorByIndex(index),
+                width: tileWidth,
+              );
+            }),
+          ),
+        );
+      },
+    );
+  }
+
   // Set up Agora event handlers
   void _setupEventHandlers() {
     _agoraEngine.registerEventHandler(
       RtcEngineEventHandler(
         onLocalVideoStateChanged: (source, state, reason) {
-          // Track local video state changes including screen share
           debugPrint('📹 Local video state changed: source=$source, state=$state, reason=$reason');
 
-          // Check if screen capture started or failed (check both source types)
           if (source == VideoSourceType.videoSourceScreen || source == VideoSourceType.videoSourceScreenPrimary || source == VideoSourceType.videoSourceScreenSecondary) {
             if (state == LocalVideoStreamState.localVideoStreamStateCapturing || state == LocalVideoStreamState.localVideoStreamStateEncoding) {
               debugPrint('📹 Screen capture is now active');
-              if (!_isScreenSharing && mounted) {
+
+              if (_pendingScreenSharePublish) {
+                _pendingScreenSharePublish = false;
+                unawaited(
+                  _publishConfirmedScreenShareTrack(
+                    publishAudio: !Platform.isIOS,
+                    platformLabel: Platform.isIOS ? 'iOS' : 'Android',
+                  ),
+                );
+              } else if (!_isScreenSharing && mounted) {
                 setState(() => _isScreenSharing = true);
               }
             } else if (state == LocalVideoStreamState.localVideoStreamStateFailed) {
               debugPrint('📹 Screen capture FAILED: reason=$reason');
+              _pendingScreenSharePublish = false;
               if (mounted) {
                 setState(() => _isScreenSharing = false);
                 _showSystemMessage('Screen sharing failed. Please try again.');
               }
             } else if (state == LocalVideoStreamState.localVideoStreamStateStopped) {
               debugPrint('📹 Screen capture stopped');
+              _pendingScreenSharePublish = false;
             }
           }
         },
@@ -2732,12 +3314,16 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         },
         onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) async {
           debugPrint('User joined: $remoteUid');
+          // Deduplication: skip if this UID is already tracked
+          if (_remoteVideos.any((v) => v.uid == remoteUid)) {
+            debugPrint('User $remoteUid already tracked, skipping duplicate onUserJoined');
+            return;
+          }
           try {
             // Get user account for this UID
             final userAccount = await _getCachedUserAccount(remoteUid);
             if (userAccount == null || userAccount.isEmpty) {
-              debugPrint('Failed to get userAccount for UID: $remoteUid');
-              // Add a placeholder user to show something while we wait for user info
+              debugPrint('Failed to get userAccount for UID: $remoteUid — adding placeholder');
               setState(() {
                 _remoteVideos.add(
                   RemoteVideoData(
@@ -2749,37 +3335,41 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                     scale: 1.0,
                   ),
                 );
-
-                // Initialize speaking level
                 _userSpeakingLevels[remoteUid] = 0;
                 _userSpeakingStatus[remoteUid] = false;
+                // Add placeholder state so onRemoteVideoStateChanged can update isVideoOn
+                _remoteUserStates[remoteUid] = RemoteUserState(userId: '', isMicOn: true);
               });
-
-              // Request meeting details update in background
+              _updateParticipantCount();
+              // onUserInfoUpdated will fire once Agora resolves the UID→userAccount mapping
               _refreshMeetingDetailsDebounced();
               return;
             }
 
-            // First find if we already have user information in the meeting details
-            Users? apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == userAccount, orElse: () => Users());
+            // De-normalize: Agora userAccount may be "u_2432432432432" but
+            // the participant API returns the raw "2432432432432".
+            final apiUserId = _stripUserAccountPrefix(userAccount);
+
+            // Cache the UID ↔ userId mapping using the API-style id so other
+            // call sites (Pusher events, status updates) keep matching.
+            _uidToUserIdMap[remoteUid] = apiUserId;
+            _userIdToUidMap[apiUserId] = remoteUid;
+
+            // Look up user information in the meeting details
+            Users? apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == apiUserId, orElse: () => Users());
 
             if (apiUser?.id == null) {
-              // User not found in current meeting details, refresh to get updated info
+              // User not found yet — refresh and try once more
               await _refreshMeetingDetails();
-              // Try again to find the user
-              apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == userAccount, orElse: () => Users());
+              apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == apiUserId, orElse: () => Users());
             }
 
             if (apiUser?.id != null) {
               // Add remote video with real user information
               setState(() {
                 _remoteVideos.add(RemoteVideoData(uid: remoteUid, joinUser: apiUser, isScreenShare: false, isSpeaking: false, position: _getNextPosition(), scale: 1.0));
-
-                // Initialize speaking level
                 _userSpeakingLevels[remoteUid] = 0;
                 _userSpeakingStatus[remoteUid] = false;
-
-                // Update user state map
                 _remoteUserStates[remoteUid] = RemoteUserState(
                   userId: apiUser!.id ?? '',
                   isVideoOn: apiUser.meetingDetails?.single.isVideoOn == 1,
@@ -2789,20 +3379,35 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                   userData: apiUser,
                 );
               });
-
-              // Show welcome message
               _showSystemMessage('${apiUser?.firstName ?? ""} ${apiUser?.lastName ?? ""} joined the meeting');
-
-              // Update participant count
               _updateParticipantCount();
+            } else {
+              // User account resolved but not in meeting details — show audio-only placeholder
+              debugPrint('User $apiUserId not found in meeting details after refresh — adding audio placeholder');
+              setState(() {
+                _remoteVideos.add(RemoteVideoData(
+                  uid: remoteUid,
+                  joinUser: Users(id: apiUserId, firstName: "User", lastName: "$remoteUid"),
+                  isScreenShare: false,
+                  isSpeaking: false,
+                  position: _getNextPosition(),
+                  scale: 1.0,
+                ));
+                _userSpeakingLevels[remoteUid] = 0;
+                _userSpeakingStatus[remoteUid] = false;
+                // Add placeholder state so onRemoteVideoStateChanged can update isVideoOn
+                _remoteUserStates[remoteUid] = RemoteUserState(userId: apiUserId, isMicOn: true);
+              });
+              _updateParticipantCount();
+              _refreshMeetingDetailsDebounced();
             }
           } catch (e) {
             debugPrint('Error in onUserJoined: $e');
           }
         },
-        // onTokenPrivilegeWillExpire: (connection, token) {
-        //   _renewToken();
-        // },
+        onTokenPrivilegeWillExpire: (connection, token) {
+          _renewToken();
+        },
         onConnectionStateChanged: (RtcConnection connection, ConnectionStateType state, ConnectionChangedReasonType reason) {
           debugPrint('Connection state changed: $state, reason: $reason');
 
@@ -2821,8 +3426,11 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           } else if (state == ConnectionStateType.connectionStateConnected) {
             if (_isReconnecting) {
               _showSystemMessage('Successfully reconnected to the meeting');
-              // Refresh meeting details after reconnection
-              _refreshMeetingDetailsDebounced();
+              // Do NOT call joinMeetings here — the POST endpoint re-registers the
+              // participant on the server and triggers a Pusher "user joined" event,
+              // which causes another connection interruption (reconnection loop).
+              // Agora's own rejoin (connectionChangedRejoinSuccess) already restored
+              // the channel session; local state is still valid.
             }
 
             setState(() {
@@ -2963,23 +3571,24 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             if (existingIndex == -1) {
               // New user with video - add them
               final userAccount = await _getCachedUserAccount(remoteUid);
+              final apiUserId = userAccount != null ? _stripUserAccountPrefix(userAccount) : null;
               var apiUser = Users();
 
-              if (userAccount != null) {
-                apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == userAccount, orElse: () => Users()) ?? Users();
+              if (apiUserId != null) {
+                apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == apiUserId, orElse: () => Users()) ?? Users();
               }
 
               if (apiUser.id == null) {
                 // Try refreshing meeting details
                 await _refreshMeetingDetails();
-                if (userAccount != null) {
-                  apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == userAccount, orElse: () => Users()) ?? Users();
+                if (apiUserId != null) {
+                  apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere((u) => u.id == apiUserId, orElse: () => Users()) ?? Users();
                 }
               }
 
               // If we still don't have user info, use a placeholder
               if (apiUser.id == null) {
-                apiUser = Users(id: userAccount, firstName: "User", lastName: "$remoteUid", meetingDetails: [MeetingDetails(isVideoOn: 1, isMicOn: 1)]);
+                apiUser = Users(id: apiUserId, firstName: "User", lastName: "$remoteUid", meetingDetails: [MeetingDetails(isVideoOn: 1, isMicOn: 1)]);
               }
 
               setState(() {
@@ -2989,52 +3598,162 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 _userSpeakingLevels[remoteUid] = 0;
                 _userSpeakingStatus[remoteUid] = false;
               });
-            } else {
-              // Update existing user
-              final existingVideo = _remoteVideos[existingIndex];
-              if (existingVideo.joinUser?.meetingDetails?.single.isVideoOn == 0) {
-                // Update video state if needed
-                final userAccount = await _getCachedUserAccount(remoteUid);
-                if (userAccount != null) {
-                  try {
-                    widget.meetingDetailsModel?.data?.users?.singleWhere((user) => user.id == userAccount, orElse: () => Users()).meetingDetails?.single.isVideoOn = 1;
+            }
 
-                    if (_remoteUserStates.containsKey(remoteUid)) {
-                      _remoteUserStates[remoteUid]!.isVideoOn = true;
-                    }
-
-                    setState(() {});
-                  } catch (e) {
-                    debugPrint('Error updating remote video state: $e');
-                  }
+            // ALWAYS upsert isVideoOn = true when Agora signals the stream started.
+            // This is the authoritative signal that video frames are flowing — don't
+            // gate it on _remoteUserStates already having an entry.
+            if (mounted) {
+              setState(() {
+                if (_remoteUserStates.containsKey(remoteUid)) {
+                  _remoteUserStates[remoteUid]!.isVideoOn = true;
+                } else {
+                  _remoteUserStates[remoteUid] = RemoteUserState(
+                    userId: _uidToUserIdMap[remoteUid] ?? '',
+                    isVideoOn: true,
+                    isMicOn: true,
+                  );
                 }
-              }
+              });
             }
           } else if (state == RemoteVideoState.remoteVideoStateStopped) {
-            // Video stopped - update state
-            final userAccount = await _getCachedUserAccount(remoteUid);
-            if (userAccount != null) {
-              try {
-                widget.meetingDetailsModel?.data?.users?.singleWhere((user) => user.id == userAccount, orElse: () => Users()).meetingDetails?.single.isVideoOn = 0;
-
+            // Video stopped — upsert isVideoOn = false
+            if (mounted) {
+              setState(() {
                 if (_remoteUserStates.containsKey(remoteUid)) {
                   _remoteUserStates[remoteUid]!.isVideoOn = false;
+                } else {
+                  _remoteUserStates[remoteUid] = RemoteUserState(
+                    userId: _uidToUserIdMap[remoteUid] ?? '',
+                    isVideoOn: false,
+                    isMicOn: true,
+                  );
                 }
-
-                setState(() {});
-              } catch (e) {
-                debugPrint('Error updating remote video state: $e');
-              }
+              });
             }
           } else if (state == RemoteVideoState.remoteVideoStateFailed) {
             // Handle video failure if needed
             debugPrint('Remote video failed for UID: $remoteUid, reason: $reason');
           }
         },
+        onVideoSizeChanged: (RtcConnection connection, VideoSourceType sourceType, int uid, int width, int height, int rotation) {
+          final bool isRemoteVideo =
+              sourceType == VideoSourceType.videoSourceRemote ||
+              sourceType == VideoSourceType.videoSourceScreen ||
+              sourceType == VideoSourceType.videoSourceScreenPrimary ||
+              sourceType == VideoSourceType.videoSourceScreenSecondary;
+          if (!isRemoteVideo) {
+            return;
+          }
+
+          if (uid <= 0 || width <= 0 || height <= 0) {
+            return;
+          }
+
+          final bool swapDimensions = rotation == 90 || rotation == 270;
+          final Size resolvedSize = Size(
+            swapDimensions ? height.toDouble() : width.toDouble(),
+            swapDimensions ? width.toDouble() : height.toDouble(),
+          );
+          final Size? previousSize = _remoteVideoSizes[uid];
+
+          if (previousSize == resolvedSize) {
+            return;
+          }
+
+          debugPrint('📐 Remote video size changed: uid=$uid size=${resolvedSize.width}x${resolvedSize.height} rotation=$rotation');
+
+          if (mounted) {
+            setState(() {
+              _remoteVideoSizes[uid] = resolvedSize;
+            });
+          } else {
+            _remoteVideoSizes[uid] = resolvedSize;
+          }
+        },
+        onLocalUserRegistered: (int uid, String userAccount) {
+          // The engine has assigned a real numeric UID for our joinChannelWithUserAccount call.
+          // Update the local mapping so lookups by UID work both ways. Use the
+          // de-prefixed id so it matches the participant API's id field.
+          debugPrint('Local user registered: uid=$uid, userAccount=$userAccount');
+          final apiUserId = _stripUserAccountPrefix(userAccount);
+          _uidToUserIdMap[uid] = apiUserId;
+          _userIdToUidMap[apiUserId] = uid;
+          // Overwrite the placeholder mapping (uid=0) with the real UID
+          _uidToUserIdMap.remove(0);
+        },
+        onUserInfoUpdated: (int uid, UserInfo info) async {
+          final account = info.userAccount ?? '';
+          if (account.isEmpty) return;
+
+          // Cache the Agora UID ↔ userAccount mapping using the API-style id
+          // (de-prefixed) so all lookups against participant data work.
+          final apiUserId = _stripUserAccountPrefix(account);
+          _uidToUserIdMap[uid] = apiUserId;
+          _userIdToUidMap[apiUserId] = uid;
+
+          // Upgrade any placeholder tile that was added before the mapping resolved.
+          final idx = _remoteVideos.indexWhere((v) => v.uid == uid);
+          if (idx != -1) {
+            final existing = _remoteVideos[idx];
+            final hasRealId = existing.joinUser?.id?.isNotEmpty == true;
+            if (!hasRealId) {
+              var apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
+                    (u) => u.id == apiUserId,
+                    orElse: () => Users(),
+                  ) ??
+                  Users();
+
+              if (apiUser.id == null) {
+                // If a refresh is already in-flight (triggered by onUserJoined debounce),
+                // wait for it to complete rather than bailing out immediately.
+                if (_isRefreshingMeetingDetails) {
+                  // Poll until the flag clears (max ~3 seconds)
+                  for (int attempt = 0; attempt < 30 && _isRefreshingMeetingDetails; attempt++) {
+                    await Future.delayed(const Duration(milliseconds: 100));
+                  }
+                  // Re-check user list — the completed refresh populated it.
+                  apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
+                        (u) => u.id == apiUserId,
+                        orElse: () => Users(),
+                      ) ??
+                      Users();
+                }
+                // Still not found — do a fresh fetch.
+                if (apiUser.id == null) {
+                  await _refreshMeetingDetails();
+                  apiUser = widget.meetingDetailsModel?.data?.users?.firstWhere(
+                        (u) => u.id == apiUserId,
+                        orElse: () => Users(),
+                      ) ??
+                      Users();
+                }
+              }
+
+              if (apiUser.id != null && mounted) {
+                setState(() {
+                  _remoteVideos[idx] = _remoteVideos[idx].copyWith(joinUser: apiUser);
+                  _remoteUserStates[uid] = RemoteUserState(
+                    userId: apiUser.id!,
+                    isVideoOn: _remoteUserStates[uid]?.isVideoOn ?? (apiUser.meetingDetails?.single.isVideoOn == 1),
+                    isMicOn: _remoteUserStates[uid]?.isMicOn ?? (apiUser.meetingDetails?.single.isMicOn == 1),
+                    isScreenShared: _remoteUserStates[uid]?.isScreenShared ?? false,
+                    isHandUp: _remoteUserStates[uid]?.isHandUp ?? false,
+                    userData: apiUser,
+                  );
+                });
+                // Drain any Pusher state updates (mic/cam/screen/hand) that arrived
+                // before the UID→userId mapping was established.
+                _drainPendingStateUpdates(apiUserId);
+              }
+            }
+          }
+        },
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
           debugPrint('Successfully joined channel: ${connection.channelId}');
           setState(() => _isJoined = true);
           _updateParticipantCount();
+          _startCmeParticipationTracking();
 
           // NOW enable PiP since user has actually joined the meeting
           // Allow PiP and enable auto-enter when app goes to background
@@ -3085,6 +3804,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           // Clean up our maps
           _userSpeakingLevels.remove(remoteUid);
           _userSpeakingStatus.remove(remoteUid);
+          _remoteVideoSizes.remove(remoteUid);
           _remoteUserStates.remove(remoteUid);
           _speakingTimers[remoteUid]?.cancel();
           _speakingTimers.remove(remoteUid);
@@ -3137,20 +3857,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     }
   }
 
-  Future<void> _renewToken() async {
-    try {
-      // In a production app, you would call your backend to get a new token
-      // For now, show a message that token is expiring
-      _showSystemMessage('Session token expiring soon. You may need to rejoin.');
-
-      // Call your token renewal API and update the engine token.
-      // var newToken = await fetchNewAgoraToken(); // Implement this function as needed.
-      // await _agoraEngine.renewToken(newToken);
-    } catch (e) {
-      debugPrint('Token renewal error: $e');
-    }
-  }
-
   Future<void> _configureVideoSettings() async {
     try {
       await _agoraEngine.enableVideo();
@@ -3165,7 +3871,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
       // Start camera preview initially
       await _agoraEngine.startPreview();
-      await _agoraEngine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+      // Note: setClientRole is a no-op in communication profile (everyone is
+      // a publisher). Kept removed deliberately — see _initializeAgora.
       await _agoraEngine.enableVideo();
 
       // Enable dual-stream mode for better bandwidth adaptation
@@ -3174,26 +3881,38 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       // Set audio profile for better quality
       await _agoraEngine.setAudioProfile(profile: AudioProfileType.audioProfileDefault, scenario: AudioScenarioType.audioScenarioChatroom);
 
-      // Enable automatic fallback options for poor network
-      await _agoraEngine.setLocalPublishFallbackOption(StreamFallbackOptions.streamFallbackOptionAudioOnly);
+      // Network fallback options.
+      // LOCAL publish: DO NOT fall back to audio-only on perceived bad network.
+      // Reason: when cloud proxy is enabled (or any moderate latency), Agora
+      // can decide network is "poor" and silently stop publishing video
+      // entirely — including the screen-capture track. Local capture keeps
+      // running so the user sees their own share, but remote peers receive
+      // no frames. Symptom: "screen share works on my screen but the other
+      // side doesn't see it." Always publish video; let Agora bitrate-adapt
+      // via dual-stream instead.
+      await _agoraEngine.setLocalPublishFallbackOption(StreamFallbackOptions.streamFallbackOptionDisabled);
+      // REMOTE subscribe: keep audio-only fallback so receivers on poor
+      // networks still hear participants when video is unaffordable.
       await _agoraEngine.setRemoteSubscribeFallbackOption(StreamFallbackOptions.streamFallbackOptionAudioOnly);
 
       // Set default speaker mode
       await _agoraEngine.setDefaultAudioRouteToSpeakerphone(true);
 
-      // IMPORTANT: By default, disable local video so camera is OFF when user joins
-      // User must explicitly turn on their camera
+      // IMPORTANT: By default, camera is OFF when user joins.
+      // We keep the video pipeline alive (do NOT call enableLocalVideo(false))
+      // so that screen capture can always use it, even when the camera is off.
+      // Camera is suppressed via muteLocalVideoStream(true) + publishCameraTrack:false
+      // in the channel options — no video is transmitted to remote peers.
       await _agoraEngine.stopPreview();
       await _agoraEngine.muteLocalVideoStream(true);
-      await _agoraEngine.enableLocalVideo(false);
-      debugPrint('Camera set to OFF by default - user must enable manually');
+      debugPrint('Camera set to OFF by default (pipeline stays alive for screen share)');
     } catch (e) {
       debugPrint('Error configuring video settings: $e');
       _showErrorDialog('Setup Error', 'Failed to configure video settings. Please try again.');
     }
   }
 
-  Future<void> _joinChannel() async {
+  Future<void> _joinChannel({required String agoraToken, required String agoraAppId}) async {
     debugPrint('Joining channel: $channelName with user ID: ${AppData.logInUserId}');
     try {
       // Pre-populate our user ID to UID mapping
@@ -3202,17 +3921,28 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
       // Save channel config for iOS screen share extension
       if (Platform.isIOS) {
-        await _screenShareService.saveChannelConfig(appId: appId, channelName: channelName, token: token.isNotEmpty ? token : null, uid: 0);
+        await _screenShareService.saveChannelConfig(
+          appId: agoraAppId,
+          channelName: channelName,
+          token: agoraToken.isNotEmpty ? agoraToken : null,
+          uid: 0,
+        );
       }
 
       // Join with optimized options - camera OFF by default
+      // userAccount MUST match the value the token was signed for (the
+      // server-normalized one), not the raw AppData.logInUserId. Otherwise
+      // legacy numeric ids get mishandled by Agora's SDK uid-parsing path.
       await _agoraEngine.joinChannelWithUserAccount(
-        token: '',
+        token: agoraToken,
         channelId: channelName,
-        userAccount: AppData.logInUserId,
+        userAccount: _agoraUserAccount,
         options: const ChannelMediaOptions(
-          channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-          clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          // Communication profile so every participant is implicitly a
+          // publisher and onUserJoined fires symmetrically with the web SDK
+          // (which uses mode: "rtc"). See _initializeAgora for the full
+          // explanation of why we are not on live broadcasting.
+          channelProfile: ChannelProfileType.channelProfileCommunication,
           publishCameraTrack: false, // Camera OFF by default - user must enable manually
           publishMicrophoneTrack: true,
           autoSubscribeAudio: true,
@@ -3222,6 +3952,27 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     } catch (e) {
       debugPrint('Join channel error: $e');
       _showErrorDialog('Connection Error', 'Failed to join the meeting. Please check your connection and try again.');
+    }
+  }
+
+  /// Renew the Agora token when it is about to expire.
+  Future<void> _renewToken() async {
+    try {
+      final tokenResp = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/meetings/agora-token',
+          method: networkUtils.HttpMethod.POST,
+          body: {'channel': channelName, 'userAccount': AppData.logInUserId},
+        ),
+      );
+      final newToken = tokenResp['token']?.toString() ?? '';
+      if (newToken.isNotEmpty) {
+        await _agoraEngine.renewToken(newToken);
+        debugPrint('Agora token renewed for channel: $channelName');
+      }
+    } catch (e) {
+      debugPrint('Token renewal error: $e');
+      _showSystemMessage('Session token expiring soon. You may need to rejoin.');
     }
   }
 
@@ -3281,6 +4032,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
       // Clear chat messages
       AppData.chatMessages.clear();
+      AppData.seenMessageIds.clear();
 
       if (widget.isHost ?? false) {
         // Show loading indicator
@@ -3317,7 +4069,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         }
 
         // Call the API to end meeting
-        final resp = await endMeeting(context, widget.meetingDetailsModel?.data?.meeting?.id);
+        final resp = await endMeeting(context, widget.meetingDetailsModel?.data?.meeting?.meetingChannel);
 
         // Dismiss loading dialog
         if (mounted) {
@@ -3379,8 +4131,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     try {
       // Check if screen sharing is allowed by settings or host privilege.
       if (widget.meetingDetailsModel?.data?.settings?.shareScreen == '1' || widget.isHost == true) {
+        if (_pendingScreenSharePublish) {
+          _showSystemMessage('Screen sharing is starting...');
+          return;
+        }
+
         // When currently screen sharing, revert to normal camera video.
         if (_isScreenSharing) {
+          _pendingScreenSharePublish = false;
           if (Platform.isIOS) {
             // iOS: Stop in-app screen capture
             await _agoraEngine.stopScreenCapture();
@@ -3389,11 +4147,12 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             // Update channel media options to disable screen sharing tracks
             await _agoraEngine.updateChannelMediaOptions(
               ChannelMediaOptions(
-                publishScreenTrack: false,
+                publishScreenCaptureAudio: false,
                 publishScreenCaptureVideo: false,
                 publishCameraTrack: _isLocalVideoEnabled,
                 publishMicrophoneTrack: true,
                 autoSubscribeAudio: true,
+                autoSubscribeVideo: true,
                 clientRoleType: ClientRoleType.clientRoleBroadcaster,
               ),
             );
@@ -3436,6 +4195,10 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
 
           // Set the state to reflect that we are no longer screen sharing.
           setState(() => _isScreenSharing = false);
+          // Ensure camera mute state is correct after screen share ends.
+          if (!_isLocalVideoEnabled) {
+            await _agoraEngine.muteLocalVideoStream(true);
+          }
           // Start the camera preview if video was enabled
           if (_isLocalVideoEnabled) {
             await _agoraEngine.startPreview();
@@ -3444,9 +4207,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
         // Otherwise, switch to screen sharing mode.
         else {
           debugPrint('🖥️ Starting screen share...');
-
-          // Stop the camera preview.
-          await _agoraEngine.stopPreview();
 
           // Platform-specific screen capture configuration
           if (Platform.isIOS) {
@@ -3459,7 +4219,8 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 const ScreenCaptureParameters2(
                   captureVideo: true,
                   captureAudio: false, // iOS doesn't support audio capture in-app
-                  videoParams: ScreenVideoParameters(dimensions: VideoDimensions(width: 1280, height: 720), frameRate: 15, contentHint: VideoContentHint.contentHintDetails, bitrate: 2000),
+                  // Portrait dimensions → no letterboxing on vertical phone screen
+                  videoParams: ScreenVideoParameters(dimensions: VideoDimensions(width: 720, height: 1280), frameRate: 15, contentHint: VideoContentHint.contentHintDetails, bitrate: 2000),
                 ),
               );
               debugPrint('🖥️ iOS: startScreenCapture completed');
@@ -3480,98 +4241,51 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             // Small delay to allow preview to initialize
             await Future.delayed(const Duration(milliseconds: 200));
 
-            // Update channel media options for iOS screen sharing
-            try {
-              await _agoraEngine.updateChannelMediaOptions(
-                const ChannelMediaOptions(
-                  publishScreenTrack: true,
-                  publishScreenCaptureVideo: true,
-                  publishSecondaryScreenTrack: true, // Also try secondary track
-                  // Disable camera track while screen sharing
-                  publishCameraTrack: false,
-                  publishMicrophoneTrack: true,
-                  autoSubscribeAudio: true,
-                  autoSubscribeVideo: true,
-                  clientRoleType: ClientRoleType.clientRoleBroadcaster,
-                ),
-              );
-              debugPrint('🖥️ iOS: updateChannelMediaOptions completed');
-            } catch (e) {
-              debugPrint('🖥️ iOS: updateChannelMediaOptions FAILED: $e');
-            }
-
             // Now show the system broadcast picker to let user start the extension
             try {
-              const screenShareChannel = MethodChannel('com.doctak.app/screen_share');
-              await screenShareChannel.invokeMethod('startBroadcast');
+              _pendingScreenSharePublish = true;
+              final pickerShown = await _screenShareService.startBroadcast();
+              if (!pickerShown) {
+                _pendingScreenSharePublish = false;
+                _showSystemMessage('Failed to open screen share picker');
+                return;
+              }
               debugPrint('🖥️ iOS: Broadcast picker shown');
             } catch (e) {
+              _pendingScreenSharePublish = false;
               debugPrint('🖥️ iOS: Failed to show broadcast picker: $e');
+              _showSystemMessage('Failed to open screen share picker');
+              return;
             }
 
             debugPrint('🖥️ iOS: Screen share setup completed');
           } else {
-            // Android: Standard screen capture
+            // Android: startScreenCapture shows the system "Share your screen?" dialog.
+            // The user must grant permission before capture actually begins.
+            // We set _pendingScreenSharePublish = true and move updateChannelMediaOptions
+            // into onLocalVideoStateChanged so it fires AFTER permission is granted.
             debugPrint('🖥️ Android: Starting screen capture');
             try {
               await _agoraEngine.startScreenCapture(
                 const ScreenCaptureParameters2(
                   captureVideo: true,
                   captureAudio: true,
-                  videoParams: ScreenVideoParameters(dimensions: VideoDimensions(width: 1280, height: 720), frameRate: 15, contentHint: VideoContentHint.contentHintMotion, bitrate: 2000),
+                  // Portrait dimensions → no letterboxing on vertical phone screen
+                  videoParams: ScreenVideoParameters(dimensions: VideoDimensions(width: 720, height: 1280), frameRate: 15, contentHint: VideoContentHint.contentHintMotion, bitrate: 2000),
                 ),
               );
-              debugPrint('🖥️ Android: startScreenCapture completed');
+              debugPrint('🖥️ Android: startScreenCapture called — awaiting permission grant');
+              _pendingScreenSharePublish = true;
+              // DO NOT call updateChannelMediaOptions here — it will be called in
+              // onLocalVideoStateChanged once the system confirms capture is active.
             } catch (e) {
               debugPrint('🖥️ Android: startScreenCapture FAILED: $e');
               _showSystemMessage('Failed to start screen capture');
               return;
             }
-
-            // Update channel media options to disable camera track and enable screen sharing.
-            try {
-              await _agoraEngine.updateChannelMediaOptions(
-                const ChannelMediaOptions(
-                  publishScreenTrack: true,
-                  publishScreenCaptureAudio: true,
-                  publishScreenCaptureVideo: true,
-                  // Disable camera track while screen sharing.
-                  publishCameraTrack: false,
-                  publishMicrophoneTrack: true,
-                  publishMediaPlayerAudioTrack: true,
-                  autoSubscribeAudio: true,
-                  clientRoleType: ClientRoleType.clientRoleBroadcaster,
-                ),
-              );
-              debugPrint('🖥️ Android: updateChannelMediaOptions completed');
-            } catch (e) {
-              debugPrint('🖥️ Android: updateChannelMediaOptions FAILED: $e');
-            }
           }
 
-          debugPrint('🖥️ Screen share started');
-
-          // Update the meeting status accordingly:
-          // Indicate that the camera is off.
-          await changeMeetingStatus(context, widget.meetingDetailsModel?.data?.meeting?.id, AppData.logInUserId, 'cam', false)
-              .then((resp) {
-                debugPrint("Change status (camera) response: $resp");
-              })
-              .catchError((error) {
-                debugPrint("Error changing meeting status: $error");
-              });
-          // Indicate that the screen share is on.
-          await changeMeetingStatus(context, widget.meetingDetailsModel?.data?.meeting?.id, AppData.logInUserId, 'screen', true)
-              .then((resp) {
-                debugPrint("Change status (screen) response: $resp");
-              })
-              .catchError((error) {
-                debugPrint("Error changing meeting status: $error");
-              });
-          // Set the state to reflect that screen sharing is now active.
-          setState(() => _isScreenSharing = true);
-
-          _showSystemMessage('Screen sharing started');
+          debugPrint('🖥️ Screen share initiated');
         }
       } else {
         _showSystemMessage('Screen share permission not allowed from host');
@@ -3652,10 +4366,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   static const Color _oneUINavBar = Color(0xFF152232); // Bottom nav bar
 
   Widget _buildNormalModeView() {
-    // Calculate bottom nav bar height for positioning
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final navBarHeight = 85 + (bottomPadding > 0 ? bottomPadding : 12);
-
     return WillPopScope(
       onWillPop: () async {
         _confirmEndCall();
@@ -3663,25 +4373,23 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
       },
       child: Scaffold(
         backgroundColor: _oneUIBackground,
-        extendBody: true,
         body: Stack(
           fit: StackFit.loose,
           children: [
-            // Main video area that adapts based on number of participants
-            // Add bottom margin to not cover the bottom navigation bar
+            // Main video area — fills body naturally above the bottom nav bar.
             Positioned(
               top: 30,
               left: 0,
               right: 0,
-              bottom: 0, // Let it extend to bottom, bottomNavigationBar handles spacing
+              bottom: 0,
               child: _buildMainVideoArea(),
             ),
 
             // Local video preview
             if (_isJoined) _buildLocalPreview(),
 
-            // Floating control options - positioned above bottom nav bar
-            Positioned(bottom: navBarHeight + 16, right: 16, child: _buildFloatingControls()),
+            // Floating control options
+            Positioned(bottom: 16, right: 16, child: _buildFloatingControls()),
 
             // Top right Popup Menu
             Positioned(top: 50, right: 20, child: _buildPopupMenu()),
@@ -3872,7 +4580,6 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     final isPipMode = _isPiPEnabled;
 
     if (_remoteVideos.isEmpty) {
-      // No remote videos, show waiting message or local preview fullscreen
       if (isPipMode) {
         // NEW design for PiP mode - compact with FittedBox
         return Center(
@@ -3905,7 +4612,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           ),
         );
       }
-    } else if (_remoteVideos.length == 1 && _selectedUserId == null) {
+    }
+
+    final sharingRemote = _findScreenSharingRemote();
+    if (sharingRemote != null) {
+      return _buildPresentationView(sharingRemote);
+    }
+
+    if (_remoteVideos.length == 1 && _selectedUserId == null) {
       // Single participant - fill the screen
       return _buildSingleUserView(_remoteVideos[0]);
     } else if (_remoteVideos.length == 2 && _selectedUserId == null) {
@@ -3921,52 +4635,30 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   }
 
   Widget _buildSingleUserView(RemoteVideoData videoData) {
-    return _buildVideoWindow(videoData, getColorByIndex(0));
+    return _buildVideoWindow(videoData, getColorByIndex(0), isFocused: true);
   }
 
   Widget _buildTwoUserView() {
+    // Split the available height equally between the two remote users.
+    // No scrolling needed — both tiles are always visible.
     return Column(
       children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedUserId = _remoteVideos[0].uid;
-              });
-            },
-            child: Container(margin: const EdgeInsets.all(4), child: _buildVideoWindow(_remoteVideos[0], getColorByIndex(0))),
+        for (int i = 0; i < _remoteVideos.length; i++)
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedUserId = _remoteVideos[i].uid),
+              child: Container(
+                margin: EdgeInsets.fromLTRB(4, i == 0 ? 4 : 2, 4, i == _remoteVideos.length - 1 ? 4 : 2),
+                child: _buildVideoWindow(_remoteVideos[i], getColorByIndex(i)),
+              ),
+            ),
           ),
-        ),
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedUserId = _remoteVideos[1].uid;
-              });
-            },
-            child: Container(margin: const EdgeInsets.all(4), child: _buildVideoWindow(_remoteVideos[1], getColorByIndex(1))),
-          ),
-        ),
       ],
     );
   }
 
   Widget _buildGridView() {
-    return GridView.builder(
-      padding: const EdgeInsets.all(4),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: _getGridCrossAxisCount(), mainAxisSpacing: 4, crossAxisSpacing: 4, childAspectRatio: 3 / 4),
-      itemCount: _remoteVideos.length,
-      itemBuilder: (context, index) {
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              _selectedUserId = _remoteVideos[index].uid;
-            });
-          },
-          child: _buildVideoWindow(_remoteVideos[index], getColorByIndex(index)),
-        );
-      },
-    );
+    return _buildTiledRemoteView(crossAxisCount: _getGridCrossAxisCount());
   }
 
   Widget _buildFocusedView() {
@@ -4029,6 +4721,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     final bool isScreenShared = remoteState?.isScreenShared ?? (videoData.joinUser?.meetingDetails?.single.isScreenShared == 1);
     final bool isMicOn = remoteState?.isMicOn ?? (videoData.joinUser?.meetingDetails?.single.isMicOn == 1);
     final bool isHandUp = remoteState?.isHandUp ?? (videoData.joinUser?.meetingDetails?.single.isHandUp == 1);
+    final RenderModeType remoteScreenRenderMode = _getRemoteScreenRenderMode(videoData.uid);
 
     // Debug log hand status
     if (isHandUp) {
@@ -4069,13 +4762,22 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             // Main video content - show video, screen share, or avatar
             Positioned.fill(
               child: isScreenShared
-                  ? AgoraVideoView(
-                      controller: VideoViewController.remote(
-                        rtcEngine: _agoraEngine,
-                        canvas: VideoCanvas(uid: videoData.uid, sourceType: VideoSourceType.videoSourceRemote),
-                        connection: RtcConnection(channelId: channelName),
-                        useFlutterTexture: true,
-                        useAndroidSurfaceView: true,
+                  ? Container(
+                      // Pure black backdrop so letterboxing around the shared screen
+                      // looks intentional rather than glitchy.
+                      color: Colors.black,
+                      child: AgoraVideoView(
+                        controller: VideoViewController.remote(
+                          rtcEngine: _agoraEngine,
+                          canvas: VideoCanvas(
+                            uid: videoData.uid,
+                            sourceType: VideoSourceType.videoSourceRemote,
+                            renderMode: remoteScreenRenderMode,
+                          ),
+                          connection: RtcConnection(channelId: channelName),
+                          useFlutterTexture: true,
+                          useAndroidSurfaceView: true,
+                        ),
                       ),
                     )
                   : isVideoEnabled
@@ -4089,31 +4791,110 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       ),
                     )
                   : Container(
-                      color: color,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          center: Alignment.center,
+                          radius: 1.2,
+                          colors: [color.withValues(alpha: 0.85), Colors.black87],
+                        ),
+                      ),
                       child: Center(
-                        child: CircleAvatar(radius: isFocused ? 80 : 40, backgroundImage: NetworkImage(AppData.fullImageUrl(videoData.joinUser?.profilePic))),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
+                              ),
+                              child: Builder(builder: (context) {
+                                final hasPic = videoData.joinUser?.profilePic?.isNotEmpty ?? false;
+                                final picUrl = hasPic ? NetworkImage(AppData.fullImageUrl(videoData.joinUser?.profilePic)) as ImageProvider : null;
+                                return CircleAvatar(
+                                  radius: isFocused ? 72 : 40,
+                                  backgroundColor: color.withValues(alpha: 0.7),
+                                  backgroundImage: picUrl,
+                                  onBackgroundImageError: picUrl != null ? (_, __) {} : null,
+                                  child: !hasPic
+                                      ? Text(
+                                          displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: isFocused ? 52 : 28,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
+                                );
+                              }),
+                            ),
+                            if (isFocused) ...[
+                              const SizedBox(height: 18),
+                              Text(
+                                displayName.isNotEmpty ? displayName : 'Unknown',
+                                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, letterSpacing: 0.3),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(CupertinoIcons.video_camera_solid, color: Colors.white54, size: 16),
+                                  const SizedBox(width: 6),
+                                  const Text('Camera is off', style: TextStyle(color: Colors.white54, fontSize: 13)),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
             ),
 
+            // Bottom gradient overlay for name readability
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                height: isFocused ? 90 : 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withValues(alpha: 0.80)],
+                  ),
+                ),
+              ),
+            ),
+
             // User info overlay at bottom
             Positioned(
-              bottom: 8,
-              left: 8,
+              bottom: 10,
+              left: 10,
+              right: (_selectedUserId != null && isFocused) ? 50 : 10,
               child: Row(
                 children: [
                   // Mic status icon
-                  Icon(isMicOn ? CupertinoIcons.mic : CupertinoIcons.mic_off, color: isMicOn ? Colors.white : Colors.red, size: isFocused ? 20 : 16),
-                  const SizedBox(width: 4),
+                  Icon(isMicOn ? CupertinoIcons.mic : CupertinoIcons.mic_off, color: isMicOn ? Colors.white : Colors.red, size: isFocused ? 18 : 14),
+                  const SizedBox(width: 5),
                   // Username and mode status
-                  Text(
-                    displayName.isEmpty
-                        ? "Unknown User"
-                        : isScreenShared
-                        ? "$displayName (Screen)"
-                        : displayName,
-                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: isFocused ? 16 : 12, color: Colors.white),
-                    overflow: TextOverflow.ellipsis,
+                  Flexible(
+                    child: Text(
+                      displayName.isEmpty
+                          ? "Unknown User"
+                          : isScreenShared
+                          ? "$displayName (Screen)"
+                          : displayName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: isFocused ? 16 : 12,
+                        color: Colors.white,
+                        shadows: const [Shadow(color: Colors.black87, blurRadius: 6)],
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
                 ],
               ),
@@ -4155,28 +4936,25 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 ),
               ),
 
-            // Show hand raised indicator - prominent like Zoom/Google Meet
+            // ── Hand-raised badge ─ always top-right corner ────────────────
             if (isHandUp)
               Positioned(
-                top: 8,
-                left: 8,
+                top: 6,
+                right: isScreenShared ? 48 : 6, // shift left if screen-share badge is visible
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  padding: EdgeInsets.symmetric(horizontal: isFocused ? 10.0 : 6.0, vertical: isFocused ? 6.0 : 4.0),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [BoxShadow(color: Colors.orange.withValues(alpha: 0.4), blurRadius: 8, spreadRadius: 2)],
+                    color: Colors.orange.withValues(alpha: 0.92),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.orange.withValues(alpha: 0.5), blurRadius: 6, spreadRadius: 1)],
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(CupertinoIcons.hand_raised_fill, color: Colors.white, size: 16),
+                      Text('✋', style: TextStyle(fontSize: isFocused ? 16 : 12)),
                       if (isFocused) ...[
                         const SizedBox(width: 4),
-                        const Text(
-                          'Hand Raised',
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-                        ),
+                        const Text('Hand Raised', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                       ],
                     ],
                   ),
@@ -4267,13 +5045,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             title: Text(translation(context).lbl_information, style: const TextStyle(color: Colors.white)),
           ),
         ),
-        PopupMenuItem(
-          value: 2,
-          child: ListTile(
-            trailing: const Icon(Icons.settings, color: Colors.white),
-            title: Text(translation(context).lbl_setting, style: const TextStyle(color: Colors.white)),
+        if (widget.isHost == true)
+          PopupMenuItem(
+            value: 2,
+            child: ListTile(
+              trailing: const Icon(Icons.settings, color: Colors.white),
+              title: Text(translation(context).lbl_setting, style: const TextStyle(color: Colors.white)),
+            ),
           ),
-        ),
         PopupMenuItem(
           value: 3,
           child: ListTile(
@@ -4306,7 +5085,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             case 2:
               final update = await Navigator.push<bool>(
                 context,
-                MaterialPageRoute(builder: (_) => SettingsHostControlsScreen(widget.meetingDetailsModel?.data?.settings, widget.meetingDetailsModel?.data?.meeting?.id ?? "")),
+                MaterialPageRoute(builder: (_) => SettingsHostControlsScreen(widget.meetingDetailsModel?.data?.settings, widget.meetingDetailsModel?.data?.meeting?.meetingChannel ?? "")),
               );
               if (update == true) {
                 _refreshMeetingDetails();
@@ -4472,9 +5251,9 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "You",
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -4500,6 +5279,22 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(8)),
                       child: const Icon(Icons.screen_share, color: Colors.white, size: 12),
+                    ),
+                  ),
+
+                // Hand-raised badge on local preview (top-left, away from screen-share badge)
+                if (_isHandRaised)
+                  Positioned(
+                    top: 4,
+                    left: 4,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [BoxShadow(color: Colors.orange.withValues(alpha: 0.5), blurRadius: 4, spreadRadius: 1)],
+                      ),
+                      child: const Text('✋', style: TextStyle(fontSize: 12)),
                     ),
                   ),
               ],
@@ -4540,7 +5335,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
             icon: icChat,
             label: translation(context).lbl_chat,
             onPressed: () {
-              showMeetingChatBottomSheet(context: context, channelId: widget.meetingDetailsModel?.data?.meeting?.id ?? "");
+              showMeetingChatBottomSheet(context: context, channelId: widget.meetingDetailsModel?.data?.meeting?.meetingChannel ?? "");
             },
             useSvg: true,
           ),
@@ -4617,7 +5412,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
                 icon: Icons.chat_bubble_outline,
                 color: const Color(0xFF3D4D55),
                 onPressed: () {
-                  showMeetingChatBottomSheet(context: context, channelId: widget.meetingDetailsModel?.data?.meeting?.id ?? "");
+                  showMeetingChatBottomSheet(context: context, channelId: widget.meetingDetailsModel?.data?.meeting?.meetingChannel ?? "");
                 },
                 buttonSize: buttonSize,
                 iconSize: iconSize,
@@ -4659,28 +5454,51 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
   // Audio & Video Toggle Functions
   // --------------------
 
-  /// Toggle hand raise status and notify other users via API
+  /// Toggle hand raise status and sync to all participants via Node API + Pusher.
+  ///
+  /// Uses POST /api/meetings/participants/{id}/state which:
+  ///   1. Persists isHandUp in the DB
+  ///   2. Triggers a `meeting-status` Pusher event so web AND Flutter participants
+  ///      update their UI in real-time.
   Future<void> _toggleHandRaise() async {
     try {
+      final allowHand = widget.isHost == true ||
+          widget.meetingDetailsModel?.data?.settings?.raisedHand != '0';
+      if (!allowHand) {
+        _showSystemMessage('Raise hand is disabled by the host');
+        return;
+      }
+
       final newHandState = !_isHandRaised;
       setState(() => _isHandRaised = newHandState);
 
-      // Call API with action="hand" to notify other users
-      await changeMeetingStatus(
-        context,
-        widget.meetingDetailsModel?.data?.meeting?.id,
-        AppData.logInUserId,
-        'hand', // action for hand raise
-        newHandState,
-      ).then((resp) {
-        debugPrint("Change hand status response: $resp");
+      final participantId = _resolveMyParticipantId();
 
+      if (participantId == null || participantId.isEmpty) {
+        debugPrint('⚠️ _toggleHandRaise: participantId not found, cannot sync hand state');
         if (newHandState) {
           _showSystemMessage('Hand raised');
         } else {
           _showSystemMessage('Hand lowered');
         }
-      });
+        return;
+      }
+
+      final resp = await updateMeetingParticipantState(participantId, isHandUp: newHandState);
+      debugPrint('✋ updateParticipantState (hand=$newHandState): $resp');
+
+      final data = resp.data as Map<String, dynamic>?;
+      final returned = data?['participant'];
+      if (returned is Map) {
+        final cached = Users.fromParticipant(Map<String, dynamic>.from(returned));
+        widget.meetingDetailsModel?.data?.participant = cached;
+      }
+
+      if (newHandState) {
+        _showSystemMessage('Hand raised');
+      } else {
+        _showSystemMessage('Hand lowered');
+      }
     } catch (e) {
       debugPrint('Error toggling hand raise: $e');
       // Revert the state if there was an error
@@ -4746,15 +5564,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
           ),
         );
 
-        // Enable/disable local video
-        await _agoraEngine.enableLocalVideo(newVideoState);
-        await _agoraEngine.muteLocalVideoStream(!newVideoState);
-
-        // Start or stop preview based on video state
+        // Enable/disable local camera.
+        // IMPORTANT: never call enableLocalVideo(false) — doing so kills the
+        // video pipeline and prevents screen capture from working even when
+        // camera is off. Instead, suppress the camera via muteLocalVideoStream
+        // and publishCameraTrack:false (set above in updateChannelMediaOptions).
         if (newVideoState) {
+          await _agoraEngine.enableLocalVideo(true);
+          await _agoraEngine.muteLocalVideoStream(false);
           await _agoraEngine.startPreview();
           debugPrint('📹 Camera enabled - track published to remote users');
         } else {
+          await _agoraEngine.muteLocalVideoStream(true);
           await _agoraEngine.stopPreview();
           debugPrint('📹 Camera disabled - track unpublished from remote users');
         }
@@ -4896,9 +5717,18 @@ class _VideoCallScreenState extends State<VideoCallScreen> with SingleTickerProv
     _callTimer?.cancel();
     _callDurationNotifier.dispose();
     _meetingRefreshDebouncer?.cancel();
+    _hostJoinRequestPollTimer?.cancel();
+    _participantStatePollTimer?.cancel();
     _localUserSpeakingTimer?.cancel();
     _speakingTimers.forEach((_, timer) => timer.cancel());
     _speakingTimers.clear();
+    _cmeParticipationTimer?.cancel();
+    if (widget.cmeEventId != null && widget.cmeEventId!.isNotEmpty) {
+      _flushCmeParticipation();
+    }
+    _meetingWsSub?.cancel();
+    _notificationWsSub?.cancel();
+    unawaited(_meetingWs.disconnect());
 
     // Animation controller
     _speakingAnimationController.dispose();
@@ -4927,11 +5757,11 @@ class RemoteVideoData {
 
   RemoteVideoData({required this.uid, required this.position, this.joinUser, required this.isScreenShare, required this.isSpeaking, this.scale = 1.0});
 
-  RemoteVideoData copyWith({Offset? position, bool? isScreenShare, bool? isSpeaking, double? scale}) {
+  RemoteVideoData copyWith({Offset? position, bool? isScreenShare, bool? isSpeaking, double? scale, Users? joinUser}) {
     return RemoteVideoData(
       uid: uid,
       position: position ?? this.position,
-      joinUser: joinUser ?? Users(),
+      joinUser: joinUser ?? this.joinUser,
       isScreenShare: isScreenShare ?? this.isScreenShare,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       scale: scale ?? this.scale,

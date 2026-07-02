@@ -4,16 +4,22 @@ import 'package:doctak_app/data/models/notification_model/notification_model.dar
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/api_response.dart';
 
 /// Notification API Service
-/// Handles all notification related API calls
+/// Handles all notification related API calls via the Node `/api/v1/notifications` routes.
 class NotificationApiService {
   static final NotificationApiService _instance = NotificationApiService._internal();
   factory NotificationApiService() => _instance;
   NotificationApiService._internal();
 
   /// Get all notifications
-  Future<ApiResponse<NotificationModel>> getNotifications({required String page}) async {
+  Future<ApiResponse<NotificationModel>> getNotifications({required String page, String? filter}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications?page=$page', method: networkUtils.HttpMethod.GET));
+      final filterQuery = filter != null && filter.isNotEmpty ? '&filter=$filter' : '';
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications?page=$page$filterQuery',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
       return ApiResponse.success(NotificationModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -27,20 +33,19 @@ class NotificationApiService {
     required String page,
     required String readStatus, // "read", "unread", "all"
   }) async {
-    try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$readStatus?page=$page', method: networkUtils.HttpMethod.GET));
-      return ApiResponse.success(NotificationModel.fromJson(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
-    } catch (e) {
-      return ApiResponse.error('Failed to get filtered notifications: $e');
-    }
+    final filter = readStatus == 'all' ? null : readStatus;
+    return getNotifications(page: page, filter: filter);
   }
 
   /// Mark all notifications as read
   Future<ApiResponse<Map<String, dynamic>>> markAllNotificationsAsRead() async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/mark-read', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications/mark-read',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -52,7 +57,12 @@ class NotificationApiService {
   /// Mark specific notification as read
   Future<ApiResponse<Map<String, dynamic>>> markNotificationAsRead({required String notificationId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$notificationId/mark-read', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications/$notificationId/mark-read',
+          method: networkUtils.HttpMethod.POST,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -64,16 +74,16 @@ class NotificationApiService {
   /// Get unread notifications count
   Future<ApiResponse<Map<String, dynamic>>> getUnreadNotificationCount() async {
     try {
-      final response = await getFilteredNotifications(page: '1', readStatus: 'unread');
-      if (response.success && response.data != null) {
-        final unreadCount = response.data!.notifications?.data?.length ?? 0;
-        return ApiResponse.success({
-          'unreadCount': unreadCount,
-          'totalPages': 1, // NotificationModel doesn't have totalPages property
-        });
-      } else {
-        return ApiResponse.error('Failed to get unread count');
-      }
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications/unread/count',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      final unreadCount = response['unread_count'] ?? response['unreadCount'] ?? 0;
+      return ApiResponse.success({'unreadCount': unreadCount});
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
     } catch (e) {
       return ApiResponse.error('Failed to get unread notification count: $e');
     }
@@ -92,8 +102,12 @@ class NotificationApiService {
   /// Delete notification (if supported)
   Future<ApiResponse<Map<String, dynamic>>> deleteNotification({required String notificationId}) async {
     try {
-      // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/$notificationId/delete', method: networkUtils.HttpMethod.DELETE));
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponseNode(
+          '/api/v1/notifications/$notificationId/delete',
+          method: networkUtils.HttpMethod.DELETE,
+        ),
+      );
       return ApiResponse.success(Map<String, dynamic>.from(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -102,52 +116,9 @@ class NotificationApiService {
     }
   }
 
-  /// Clear all notifications (if supported)
-  Future<ApiResponse<Map<String, dynamic>>> clearAllNotifications() async {
-    try {
-      // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/clear-all', method: networkUtils.HttpMethod.POST));
-      return ApiResponse.success(Map<String, dynamic>.from(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
-    } catch (e) {
-      return ApiResponse.error('Failed to clear all notifications: $e');
-    }
-  }
-
-  /// Get notification settings (if supported)
-  Future<ApiResponse<Map<String, dynamic>>> getNotificationSettings() async {
-    try {
-      // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/notifications/settings', method: networkUtils.HttpMethod.GET));
-      return ApiResponse.success(Map<String, dynamic>.from(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
-    } catch (e) {
-      return ApiResponse.error('Failed to get notification settings: $e');
-    }
-  }
-
-  /// Update notification settings (if supported)
-  Future<ApiResponse<Map<String, dynamic>>> updateNotificationSettings({required Map<String, bool> settings}) async {
-    try {
-      // Note: This endpoint might not exist in the original API
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse('/notifications/settings/update', method: networkUtils.HttpMethod.POST, request: settings.map((key, value) => MapEntry(key, value.toString()))),
-      );
-      return ApiResponse.success(Map<String, dynamic>.from(response));
-    } on ApiException catch (e) {
-      return ApiResponse.error(e.message, statusCode: e.statusCode);
-    } catch (e) {
-      return ApiResponse.error('Failed to update notification settings: $e');
-    }
-  }
-
-  // ================================== BACKWARD COMPATIBILITY ==================================
-
   /// Get my notifications (backward compatibility)
-  Future<ApiResponse<NotificationModel>> getMyNotifications({required String page}) async {
-    return getNotifications(page: page);
+  Future<ApiResponse<NotificationModel>> getMyNotifications({required String page, String? filter}) async {
+    return getNotifications(page: page, filter: filter);
   }
 
   /// Read all selected notifications (backward compatibility)

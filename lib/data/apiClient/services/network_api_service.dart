@@ -1,28 +1,32 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:http/http.dart' as http;
+import 'package:doctak_app/core/utils/auth_token_service.dart';
 
 /// API service for network/connections/friend requests
-/// Uses v5 endpoints (/api/v5/...)
+/// Uses compatibility endpoints exposed by the migrated Node backend.
 class NetworkApiService {
   static final NetworkApiService _instance = NetworkApiService._internal();
   factory NetworkApiService() => _instance;
   NetworkApiService._internal();
 
-  String get _baseUrl => AppData.remoteUrl2.replaceAll('/v4', '/v5');
+  final AuthTokenService _auth = AuthTokenService.instance;
 
-  Map<String, String> get _headers => {
-    'Authorization': 'Bearer ${AppData.userToken}',
-    'Accept': 'application/json',
-    'Content-Type': 'application/x-www-form-urlencoded',
-  };
+  String get _baseUrl => AppData.remoteUrl2;
+
+  String _normalizeRequestType(String type) {
+    switch (type) {
+      case 'received':
+        return 'incoming';
+      case 'sent':
+        return 'outgoing';
+      default:
+        return type;
+    }
+  }
 
   Future<Map<String, dynamic>> _get(String endpoint) async {
-    final url = '$_baseUrl$endpoint';
-    final response = await http.get(
-      Uri.parse(url),
-      headers: _headers,
-    ).timeout(const Duration(seconds: 15));
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final response = await _auth.get(url);
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     }
@@ -30,18 +34,67 @@ class NetworkApiService {
     throw Exception('API Error: ${response.statusCode}');
   }
 
+  Future<Map<String, dynamic>> _delete(String endpoint) async {
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final response = await _auth.delete(url);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    print('NetworkApiService._delete FAILED: $url → ${response.statusCode}');
+    throw Exception('API Error: ${response.statusCode}');
+  }
+
   Future<Map<String, dynamic>> _post(String endpoint, [Map<String, String>? body]) async {
-    final url = '$_baseUrl$endpoint';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: _headers,
-      body: body ?? {},
-    ).timeout(const Duration(seconds: 15));
+    final url = Uri.parse('$_baseUrl$endpoint');
+    final response = await _auth.post(url, body: body ?? {});
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     }
     print('NetworkApiService._post FAILED: $url → ${response.statusCode} body=${response.body.length > 300 ? response.body.substring(0, 300) : response.body}');
     throw Exception('API Error: ${response.statusCode} ${response.body}');
+  }
+
+  // ── Network Home (bootstrap) ──
+  Future<Map<String, dynamic>> getNetworkHome() async {
+    try {
+      return await _get('/network/home');
+    } catch (e) {
+      print('NetworkApiService.getNetworkHome ERROR: $e');
+      rethrow;
+    }
+  }
+
+  // ── Organizations / Businesses ──
+  Future<Map<String, dynamic>> getNetworkBusinesses({
+    String search = '',
+    int page = 1,
+    int limit = 12,
+  }) async {
+    try {
+      final q = search.isNotEmpty ? '&search=${Uri.encodeQueryComponent(search)}' : '';
+      return await _get('/network/businesses?page=$page&limit=$limit$q');
+    } catch (e) {
+      print('NetworkApiService.getNetworkBusinesses ERROR: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> followOrganization(String organizationId) async {
+    try {
+      return await _post('/organizations/$organizationId/follow');
+    } catch (e) {
+      print('NetworkApiService.followOrganization ERROR: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> unfollowOrganization(String organizationId) async {
+    try {
+      return await _delete('/organizations/$organizationId/follow');
+    } catch (e) {
+      print('NetworkApiService.unfollowOrganization ERROR: $e');
+      rethrow;
+    }
   }
 
   // ── Network Stats ──
@@ -55,9 +108,16 @@ class NetworkApiService {
   }
 
   // ── Connections ──
-  Future<Map<String, dynamic>> getConnections({String search = '', int page = 1}) async {
+  Future<Map<String, dynamic>> getConnections({
+    String search = '',
+    int page = 1,
+    String viewUserId = '',
+  }) async {
     try {
-      return await _get('/connections?search=$search&page=$page');
+      final endpoint = viewUserId.isNotEmpty
+          ? '/connections/$viewUserId?search=$search&page=$page'
+          : '/connections?search=$search&page=$page';
+      return await _get(endpoint);
     } catch (e) {
       print('NetworkApiService.getConnections ERROR: $e');
       rethrow;
@@ -71,13 +131,14 @@ class NetworkApiService {
     String search = '',
     int page = 1,
   }) async {
-    final endpoint = '/friend-requests?type=$type&status=$status&search=$search&page=$page';
+    final normalizedType = _normalizeRequestType(type);
+    final endpoint = '/friend-requests?type=$normalizedType&status=$status&search=$search&page=$page';
     try {
       final result = await _get(endpoint);
-      print('NetworkApiService.getFriendRequests($type) OK: keys=${result.keys.toList()}, total=${result['total']}');
+      print('NetworkApiService.getFriendRequests($normalizedType) OK: keys=${result.keys.toList()}, total=${result['total']}');
       return result;
     } catch (e) {
-      print('NetworkApiService.getFriendRequests($type) ERROR: $e');
+      print('NetworkApiService.getFriendRequests($normalizedType) ERROR: $e');
       rethrow;
     }
   }
@@ -194,11 +255,13 @@ class NetworkApiService {
     int limit = 20,
     String specialty = '',
     String country = '',
+    String type = 'all',
   }) async {
     try {
       final params = <String, String>{
         'page': '$page',
         'limit': '$limit',
+        'type': type,
       };
       if (query.isNotEmpty) params['q'] = query;
       if (specialty.isNotEmpty) params['specialty'] = specialty;
@@ -212,10 +275,15 @@ class NetworkApiService {
   }
 
   // ── Quick Search Suggestions (typeahead) ──
-  Future<Map<String, dynamic>> searchSuggestions({required String query, int limit = 7}) async {
+  Future<Map<String, dynamic>> searchSuggestions({
+    required String query,
+    int limit = 7,
+    String type = 'all',
+  }) async {
     try {
       final q = Uri.encodeQueryComponent(query);
-      return await _get('/search-suggestions?q=$q&limit=$limit');
+      final t = Uri.encodeQueryComponent(type);
+      return await _get('/search-suggestions?q=$q&limit=$limit&type=$t');
     } catch (e) {
       print('NetworkApiService.searchSuggestions ERROR: $e');
       rethrow;

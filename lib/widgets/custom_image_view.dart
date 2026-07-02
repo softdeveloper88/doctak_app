@@ -2,6 +2,8 @@
 
 import 'dart:io';
 
+import 'package:doctak_app/core/utils/app/AppData.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -141,7 +143,7 @@ class CustomImageView extends StatelessWidget {
             // height: height,
             width: width,
             fit: fit ?? BoxFit.cover,
-            imageUrl: validPath,
+            imageUrl: AppData.fullImageUrl(validPath),
             color: color,
             cacheManager: CustomCacheManager(),
             fadeInDuration: const Duration(milliseconds: 150),

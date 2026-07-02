@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/presentation/guideline_module/blocs/guideline_agent/guideline_agent_bloc.dart';
 import 'package:doctak_app/presentation/guideline_module/data/models/guideline_chat_model.dart';
@@ -26,6 +28,10 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _inputController = TextEditingController();
   bool _showWelcome = true;
+
+  // Typing animation state
+  bool _isTyping = false;
+  String _currentTyped = '';
 
   @override
   void initState() {
@@ -56,12 +62,41 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
 
   void _sendMessage(String message) {
     if (message.trim().isEmpty) return;
+    // Cancel any ongoing typing animation
+    if (_isTyping) {
+      setState(() {
+        _isTyping = false;
+        _currentTyped = '';
+      });
+    }
     setState(() => _showWelcome = false);
     context
         .read<GuidelineAgentBloc>()
         .add(SendGuidelineMessage(message: message.trim()));
     _inputController.clear();
     _scrollToBottom();
+  }
+
+  /// Plays a character-by-character reveal animation for the latest AI message.
+  Future<void> _animateResponse(String fullText) async {
+    if (!mounted) return;
+    setState(() {
+      _isTyping = true;
+      _currentTyped = '';
+    });
+    for (int i = 1; i <= fullText.length; i++) {
+      await Future.delayed(const Duration(milliseconds: 6));
+      if (!mounted || !_isTyping) return;
+      setState(() => _currentTyped = fullText.substring(0, i));
+      if (i % 15 == 0) _scrollToBottom();
+    }
+    if (mounted) {
+      setState(() {
+        _isTyping = false;
+        _currentTyped = '';
+      });
+      _scrollToBottom();
+    }
   }
 
   void _showSourceSelector() {
@@ -99,7 +134,11 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
           sessions: sessions,
           onSessionTap: (sessionId) {
             Navigator.pop(ctx);
-            setState(() => _showWelcome = false);
+            setState(() {
+              _showWelcome = false;
+              _isTyping = false;
+              _currentTyped = '';
+            });
             bloc.add(LoadSessionMessages(sessionId: sessionId));
           },
           onSessionDelete: (sessionId) {
@@ -127,7 +166,11 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
             icon: Icon(Icons.add, color: theme.iconColor, size: 22),
             tooltip: 'New Chat',
             onPressed: () {
-              setState(() => _showWelcome = true);
+              setState(() {
+                _showWelcome = true;
+                _isTyping = false;
+                _currentTyped = '';
+              });
               context.read<GuidelineAgentBloc>().add(StartNewChat());
             },
           ),
@@ -172,6 +215,12 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
                 listener: (context, state) {
                   if (state is GuidelineMessageReceived) {
                     _scrollToBottom();
+                    // Kick off typing animation for the latest assistant message
+                    if (state.messages.isNotEmpty &&
+                        state.messages.last.isAssistant) {
+                      unawaited(
+                          _animateResponse(state.messages.last.content));
+                    }
                   }
                   if (state is GuidelineQuotaExceeded) {
                     _showQuotaDialog();
@@ -297,10 +346,10 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0A84FF).withOpacity(0.08),
+                            color: const Color(0xFF0A84FF).withValues(alpha:0.08),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFF0A84FF).withOpacity(0.2),
+                              color: const Color(0xFF0A84FF).withValues(alpha:0.2),
                             ),
                           ),
                           child: Row(
@@ -378,8 +427,13 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
           return _buildTypingIndicator(theme);
         }
         final message = state.messages[index];
+        // Show typing animation for the last assistant message
+        final isLastAssistant = _isTyping &&
+            index == state.messages.length - 1 &&
+            message.isAssistant;
         return GuidelineMessageBubble(
           message: message,
+          streamingContent: isLastAssistant ? _currentTyped : null,
           onFeedback: message.id != null && message.isAssistant
               ? (rating) {
                   context.read<GuidelineAgentBloc>().add(
@@ -411,7 +465,7 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha:0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -483,9 +537,9 @@ class _GuidelineAgentScreenState extends State<GuidelineAgentScreen> {
                   size: 14,
                   color: Color(0xFF0A84FF),
                 ),
-                backgroundColor: const Color(0xFF0A84FF).withOpacity(0.08),
+                backgroundColor: const Color(0xFF0A84FF).withValues(alpha:0.08),
                 side: BorderSide(
-                  color: const Color(0xFF0A84FF).withOpacity(0.2),
+                  color: const Color(0xFF0A84FF).withValues(alpha:0.2),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),

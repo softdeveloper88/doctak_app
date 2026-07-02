@@ -1,3 +1,6 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/theme/doctak_palette.dart';
+import 'package:doctak_app/widgets/doctak_app_loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -27,11 +30,26 @@ class OneUITheme {
   // CORE COLORS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Primary brand color - Samsung One UI Blue
+  /// Primary brand color — Samsung One UI Blue.
   Color get primary => const Color(0xFF0A84FF);
 
-  /// Secondary accent color
+  /// Secondary accent color.
   Color get secondary => const Color(0xFF5AC8FA);
+
+  /// Brand accent alias (kept for callers; same as primary, not orange).
+  Color get accent => primary;
+
+  /// Darker primary for active labels.
+  Color get accentInk => const Color(0xFF0066CC);
+
+  /// Soft primary surface tint.
+  Color get accentSoft => const Color(0xFFE5F2FF);
+
+  /// Post / verified blue.
+  Color get brandBlue => primary;
+
+  /// Poll green.
+  Color get brandGreen => const Color(0xFF34C759);
 
   /// Success/Positive color
   Color get success => const Color(0xFF34C759);
@@ -46,42 +64,116 @@ class OneUITheme {
   Color get likeColor => const Color(0xFFFF3B30);
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // BACKGROUND COLORS
+  // BACKGROUND COLORS (DocTak web tokens via [DoctakPalette])
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Main scaffold/page background
-  Color get scaffoldBackground => isDark ? const Color(0xFF0D1B2A) : const Color(0xFFF7F7F7);
+  /// Main scaffold/page background (`--dt-bg`).
+  Color get scaffoldBackground =>
+      isDark ? const Color(0xFF0D1B2A) : DoctakPalette.bg;
 
-  /// Card/Surface background
-  Color get cardBackground => isDark ? const Color(0xFF1B2838) : Colors.white;
+  /// Card/Surface background (`--dt-surface`).
+  Color get cardBackground =>
+      isDark ? const Color(0xFF1B2838) : DoctakPalette.surface;
 
-  /// Secondary surface (for nested cards, etc.)
-  Color get surfaceVariant => isDark ? const Color(0xFF2D3E50) : const Color(0xFFF0F0F0);
+  /// Secondary surface (chips, nested panels).
+  Color get surfaceVariant =>
+      isDark ? const Color(0xFF2D3E50) : DoctakPalette.surfaceSoft;
 
   /// Navigation bar background
-  Color get navBarBackground => isDark ? const Color(0xFF152232) : Colors.white;
+  Color get navBarBackground =>
+      isDark ? const Color(0xFF152232) : DoctakPalette.surface;
 
   /// App bar background
-  Color get appBarBackground => isDark ? const Color(0xFF1B2838) : Colors.white;
+  Color get appBarBackground =>
+      isDark ? const Color(0xFF1B2838) : DoctakPalette.surface;
 
-  /// Input field background
-  Color get inputBackground => isDark ? const Color(0xFF2D3E50) : const Color(0xFFF5F5F5);
+  /// Text fields, dropdowns, and general inputs (`#FAF8F2`).
+  Color get inputBackground =>
+      isDark ? const Color(0xFF2D3E50) : DoctakPalette.inputFill;
+
+  /// Search bars in app bar and lists — same fill as [inputBackground].
+  Color get searchFieldBackground => inputBackground;
 
   /// Avatar/placeholder background
   Color get avatarBackground => isDark ? const Color(0xFF2D3E50) : const Color(0xFFE5F2FF);
+
+  /// Drawer profile header (`--dt-surface-soft`).
+  Color get drawerHeaderBackground =>
+      isDark ? const Color(0xFF1E2A38) : DoctakPalette.surfaceSoft;
+
+  /// Drawer profile header gradient — soft warm fade into the drawer body.
+  LinearGradient get drawerHeaderGradient => isDark
+      ? LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFF243447), scaffoldBackground],
+        )
+      : const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [DoctakPalette.surfaceSoft, DoctakPalette.surfaceElevated],
+        );
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SHIMMER & LOADING
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /// Skeleton placeholder fill before the shimmer sweep.
+  Color get shimmerBase => isDark
+      ? surfaceVariant.withValues(alpha: 0.55)
+      : surfaceVariant.withValues(alpha: 0.75);
+
+  /// Shimmer animation highlight sweep color.
+  Color get shimmerHighlight => isDark
+      ? cardBackground.withValues(alpha: 0.85)
+      : cardBackground;
+
+  /// Notification list shimmer card fill.
+  Color get shimmerNotificationCardFill =>
+      isDark ? primary.withValues(alpha: 0.12) : primary.withValues(alpha: 0.08);
+
+  /// Notification list shimmer card border.
+  Color get shimmerNotificationCardBorder =>
+      isDark ? primary.withValues(alpha: 0.28) : primary.withValues(alpha: 0.2);
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SEGMENTED CONTROLS (filter pills, tabs)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /// Track behind segmented filter pills.
+  Color get segmentedTrack => isDark
+      ? surfaceVariant.withValues(alpha: 0.55)
+      : surfaceVariant;
+
+  /// Selected pill fill inside a segmented control.
+  Color get segmentedSelected => cardBackground;
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NOTIFICATION SURFACES
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /// Unread notification row background tint.
+  Color get unreadNotificationBackground =>
+      isDark ? primary.withValues(alpha: 0.14) : const Color(0xFFEFF6FF);
+
+  /// Unread accent bar and dot.
+  Color get unreadNotificationAccent => const Color(0xFF0B6BCB);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // TEXT COLORS
   // ═══════════════════════════════════════════════════════════════════════════
 
   /// Primary text color (headings, important content)
-  Color get textPrimary => isDark ? Colors.white : const Color(0xFF1C1C1E);
+  Color get textPrimary =>
+      isDark ? Colors.white : DoctakPalette.text;
 
   /// Secondary text color (subtitles, descriptions)
-  Color get textSecondary => isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF8E8E93);
+  Color get textSecondary =>
+      isDark ? Colors.white.withValues(alpha: 0.7) : DoctakPalette.textMuted;
 
   /// Tertiary text color (hints, timestamps)
-  Color get textTertiary => isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFFAEAEB2);
+  Color get textTertiary =>
+      isDark ? Colors.white.withValues(alpha: 0.5) : DoctakPalette.textSoft;
 
   /// Link/Action text color
   Color get textLink => primary;
@@ -91,6 +183,15 @@ class OneUITheme {
 
   /// Verified badge color
   Color get verifiedBadge => primary;
+
+  /// Post composer icon tint.
+  Color get composePostColor => primary;
+
+  /// Poll composer icon tint.
+  Color get composePollColor => brandGreen;
+
+  /// Blog composer icon tint.
+  Color get composeBlogColor => const Color(0xFF5856D6);
 
   /// Delete/destructive red color
   Color get deleteRed => error;
@@ -115,14 +216,16 @@ class OneUITheme {
   /// Standard divider color
   Color get divider => isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.06);
 
-  /// Subtle border color
-  Color get border => isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.08);
+  /// Subtle border color (`--dt-border`).
+  Color get border =>
+      isDark ? Colors.white.withValues(alpha: 0.1) : DoctakPalette.border;
 
   /// Avatar border color
   Color get avatarBorder => isDark ? primary.withValues(alpha: 0.4) : primary.withValues(alpha: 0.2);
 
   /// Input field border color
-  Color get inputBorder => isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.1);
+  Color get inputBorder =>
+      isDark ? Colors.white.withValues(alpha: 0.15) : DoctakPalette.border;
 
   /// Focus border color
   Color get focusBorder => primary;
@@ -133,6 +236,19 @@ class OneUITheme {
 
   /// Primary button background
   Color get buttonPrimary => primary;
+
+  /// Primary CTA pill decoration (Respond / Join / Apply).
+  BoxDecoration get primaryButtonDecoration => BoxDecoration(
+    color: primary,
+    borderRadius: BorderRadius.circular(10),
+    boxShadow: [
+      BoxShadow(
+        color: primary.withValues(alpha: 0.25),
+        blurRadius: 8,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  );
 
   /// Primary button text
   Color get buttonPrimaryText => Colors.white;
@@ -153,12 +269,79 @@ class OneUITheme {
   // DECORATIONS & SHADOWS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Standard card decoration
-  BoxDecoration get cardDecoration => BoxDecoration(
-    color: cardBackground,
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: border, width: 0.5),
-    boxShadow: cardShadow,
+  /// Card decoration for scroll-heavy lists — same surface style as [cardDecoration].
+  BoxDecoration get feedCardDecoration => surfaceCardDecoration();
+
+  /// Visible 1px border matching web `--dt-border` / reference `--border`.
+  Color get feedStripBorderColor =>
+      isDark ? Colors.white.withValues(alpha: 0.12) : const Color(0xFFE5E7EB);
+
+  /// Full-width horizontal strip module (`.mod` in reference — top/bottom border only).
+  BoxDecoration get feedStripModuleDecoration => BoxDecoration(
+        color: cardBackground,
+        border: Border(
+          top: BorderSide(color: feedStripBorderColor, width: 1),
+          bottom: BorderSide(color: feedStripBorderColor, width: 1),
+        ),
+      );
+
+  /// Individual tile inside a feed strip rail (`.mini` in reference).
+  BoxDecoration get feedStripTileDecoration => BoxDecoration(
+        color: cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: feedStripBorderColor, width: 1),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: const Color(0xFF0B1220).withValues(alpha: 0.04),
+                  blurRadius: 0,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+      );
+
+  /// Flat surface card — border only, no elevation (reference: Network screen).
+  BoxDecoration surfaceCardDecoration() {
+    return BoxDecoration(
+      color: isDark ? cardBackground : Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: isDark ? border : const Color(0x1A0B1220),
+        width: 1,
+      ),
+    );
+  }
+
+  /// Default card surface — flat, border-defined.
+  BoxDecoration get cardDecoration => surfaceCardDecoration();
+
+  /// Profile header card decoration — same flat surface style.
+  BoxDecoration get profileCardDecoration => surfaceCardDecoration();
+
+  /// Profile cover gradient — matches reference design exactly.
+  LinearGradient get coverGradient => isDark
+      ? const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+        )
+      : const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF1A3A6B), // dark navy
+            Color(0xFF0B6BCB), // clinical blue
+            Color(0xFF0F9D9A), // teal
+          ],
+          stops: [0.0, 0.55, 1.0],
+        );
+
+  /// Points badge gradient (orange star — matches reference).
+  LinearGradient get pointsBadgeGradient => const LinearGradient(
+    colors: [Color(0xFFFBBF24), Color(0xFFF97316)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
   );
 
   /// App bar decoration
@@ -181,10 +364,8 @@ class OneUITheme {
     ],
   );
 
-  /// Standard card shadow
-  List<BoxShadow> get cardShadow => [
-    BoxShadow(color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.06), blurRadius: isDark ? 8 : 12, offset: const Offset(0, 2), spreadRadius: isDark ? 0 : 1),
-  ];
+  /// Standard card shadow — removed; cards use border only.
+  List<BoxShadow> get cardShadow => const [];
 
   /// Elevated shadow (for floating elements)
   List<BoxShadow> get elevatedShadow => [
@@ -225,8 +406,14 @@ class OneUITheme {
   /// Button text style
   TextStyle get buttonText => const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: Colors.white);
 
-  /// App bar title style
-  TextStyle get appBarTitle => TextStyle(fontSize: 20, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: primary, letterSpacing: 0.3);
+  /// App bar title style (reference `.app-head__title`).
+  TextStyle get appBarTitle => TextStyle(
+        fontSize: 21,
+        fontWeight: FontWeight.w600,
+        fontFamily: 'Poppins',
+        color: textPrimary,
+        letterSpacing: -0.02,
+      );
 
   // ═══════════════════════════════════════════════════════════════════════════
   // BORDER RADIUS
@@ -254,7 +441,19 @@ class OneUITheme {
   // INPUT DECORATION
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Standard input decoration
+  /// Search bar decoration (white field on cream page — matches web).
+  InputDecoration searchFieldDecoration({
+    String? hint,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+  }) =>
+      inputDecoration(
+        hint: hint,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+      ).copyWith(fillColor: searchFieldBackground);
+
+  /// Standard input / TextField decoration
   InputDecoration inputDecoration({String? hint, String? label, Widget? prefix, Widget? suffix, Widget? prefixIcon, Widget? suffixIcon}) => InputDecoration(
     hintText: hint,
     labelText: label,
@@ -353,7 +552,7 @@ class OneUITheme {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(size / 2),
         child: imageUrl != null && imageUrl.isNotEmpty
-            ? Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildAvatarFallback(fallbackText ?? 'U', size))
+            ? Image.network(AppData.fullImageUrl(imageUrl), fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildAvatarFallback(fallbackText ?? 'U', size))
             : _buildAvatarFallback(fallbackText ?? 'U', size),
       ),
     ),
@@ -369,15 +568,11 @@ class OneUITheme {
     ),
   );
 
-  /// Build a verification badge
-  Widget buildVerifiedBadge({double size = 14}) => Container(
-    padding: const EdgeInsets.all(2),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(colors: [primary, primary.withValues(alpha: 0.8)]),
-      shape: BoxShape.circle,
-      boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.3), blurRadius: 4, offset: const Offset(0, 1))],
-    ),
-    child: Icon(CupertinoIcons.checkmark_alt, size: size * 0.7, color: Colors.white),
+  /// Build a verification badge (matches profile screen style)
+  Widget buildVerifiedBadge({double size = 14}) => Icon(
+    Icons.verified_rounded,
+    size: size,
+    color: const Color(0xFF1DA1F2),
   );
 
   /// Build action button (like, comment, share row)
@@ -412,43 +607,81 @@ class OneUITheme {
   // AUTH SCREEN HELPERS
   // ═══════════════════════════════════════════════════════════════════════════
 
-  /// Auth screen background gradient
+  /// Auth page base fill (cream in light mode).
+  Color get authBackgroundColor =>
+      isDark ? scaffoldBackground : DoctakPalette.bg;
+
+  /// Auth screen background — matches standalone HTML:
+  /// `radial-gradient(120% 60% at 50% -8%, accent-50, transparent 60%), bg`.
   BoxDecoration get authBackground => BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: isDark ? [scaffoldBackground, const Color(0xFF152232)] : [Colors.white, const Color(0xFFE3F2FD).withValues(alpha: 0.6)],
-      stops: const [0.3, 1.0],
-    ),
+    color: authBackgroundColor,
+    gradient: isDark
+        ? null
+        : const RadialGradient(
+            center: Alignment(0, -0.92),
+            radius: 1.35,
+            colors: [
+              DoctakPalette.authGlow,
+              Color(0x00FEF6EA),
+            ],
+            stops: [0.0, 0.62],
+          ),
   );
 
   /// Auth card decoration
   BoxDecoration get authCardDecoration => BoxDecoration(
     color: cardBackground,
-    borderRadius: BorderRadius.circular(24),
-    border: Border.all(color: border, width: 0.5),
-    boxShadow: [BoxShadow(color: isDark ? Colors.black.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.06), blurRadius: 24, spreadRadius: 0, offset: const Offset(0, 8))],
+    borderRadius: BorderRadius.circular(28),
+    border: Border.all(
+      color: isDark ? border : DoctakPalette.border.withValues(alpha: 0.5),
+      width: 1,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: isDark
+            ? Colors.black.withValues(alpha: 0.4)
+            : const Color(0xFF0B1220).withValues(alpha: 0.08),
+        blurRadius: 24,
+        offset: const Offset(0, 8),
+      ),
+    ],
   );
 
   /// Auth logo container decoration
   BoxDecoration get authLogoDecoration => BoxDecoration(
-    color: cardBackground,
-    borderRadius: BorderRadius.circular(20),
+    borderRadius: BorderRadius.circular(22),
+    gradient: LinearGradient(
+      begin: const Alignment(-0.2, -1),
+      end: const Alignment(0.5, 1),
+      colors: isDark
+          ? [cardBackground, surfaceVariant]
+          : [DoctakPalette.surface, DoctakPalette.surfaceElevated],
+    ),
+    border: Border.all(color: accentSoft.withValues(alpha: 0.9)),
     boxShadow: [
       BoxShadow(
-        color: primary.withValues(alpha: isDark ? 0.2 : 0.12),
-        blurRadius: 24,
-        spreadRadius: 1,
-        offset: const Offset(0, 8),
+        color: primary.withValues(alpha: isDark ? 0.2 : 0.28),
+        blurRadius: 30,
+        offset: const Offset(0, 14),
       ),
     ],
   );
 
   /// Auth primary button decoration
   BoxDecoration get authPrimaryButtonDecoration => BoxDecoration(
-    borderRadius: BorderRadius.circular(14),
-    gradient: LinearGradient(colors: [primary, primary.withValues(alpha: 0.8)]),
-    boxShadow: [BoxShadow(color: primary.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 6))],
+    borderRadius: BorderRadius.circular(15),
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [primary.withValues(alpha: 0.92), primary],
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: primary.withValues(alpha: 0.45),
+        blurRadius: 26,
+        offset: const Offset(0, 12),
+      ),
+    ],
   );
 
   /// Auth social button decoration
@@ -460,13 +693,47 @@ class OneUITheme {
   );
 
   /// Auth input decoration (field label style)
-  TextStyle get authLabelStyle => TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: textSecondary);
+  TextStyle get authLabelStyle => authFieldLabelStyle;
 
-  /// Auth title style
-  TextStyle get authTitleStyle => TextStyle(fontSize: 24, fontWeight: FontWeight.w700, fontFamily: 'Poppins', color: primary, letterSpacing: -0.3);
+  /// Compact field label (HTML `.field__label`).
+  TextStyle get authFieldLabelStyle => TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Poppins',
+    color: isDark ? textSecondary : DoctakPalette.text,
+    letterSpacing: -0.005,
+  );
+
+  /// Eyebrow above auth headline.
+  TextStyle get authEyebrowStyle => TextStyle(
+    fontSize: 13,
+    fontWeight: FontWeight.w600,
+    fontFamily: 'Poppins',
+    color: DoctakPalette.textMuted,
+    letterSpacing: 0.02,
+  );
+
+  /// Main auth headline.
+  TextStyle get authHeadlineStyle => TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    fontFamily: 'Poppins',
+    color: isDark ? textPrimary : DoctakPalette.text,
+    letterSpacing: -0.025,
+    height: 1.1,
+  );
+
+  /// Auth title style (legacy callers)
+  TextStyle get authTitleStyle => authHeadlineStyle;
 
   /// Auth subtitle style
-  TextStyle get authSubtitleStyle => TextStyle(fontSize: 15, fontWeight: FontWeight.w500, fontFamily: 'Poppins', color: textSecondary);
+  TextStyle get authSubtitleStyle => TextStyle(
+    fontSize: 13.5,
+    fontWeight: FontWeight.w500,
+    fontFamily: 'Poppins',
+    color: DoctakPalette.textMuted,
+    height: 1.4,
+  );
 
   /// Auth link text style
   TextStyle get authLinkStyle => TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: primary);
@@ -543,24 +810,70 @@ class OneUITheme {
     // Otherwise use the classic implementation with external isLoading state
     return Container(
       width: double.infinity,
-      height: 56,
+      height: 52,
       decoration: authPrimaryButtonDecoration,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
         child: isLoading
-            ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: const AlwaysStoppedAnimation<Color>(Colors.white)))
-            : Text(
-                label,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: Colors.white),
+            ? const SizedBox(width: 28, height: 28, child: DoctakAppLoader.compact())
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: Colors.white, letterSpacing: -0.01),
+                  ),
+                  if (icon != null) ...[
+                    const SizedBox(width: 9),
+                    Icon(icon, size: 19, color: Colors.white),
+                  ],
+                ],
               ),
       ),
     );
   }
+
+  /// Full-width social pill (HTML `.btn-social`).
+  Widget buildAuthSocialPill({
+    required String label,
+    required Widget icon,
+    required VoidCallback onTap,
+  }) =>
+      SizedBox(
+        height: 50,
+        width: double.infinity,
+        child: OutlinedButton(
+          onPressed: onTap,
+          style: OutlinedButton.styleFrom(
+            backgroundColor: cardBackground,
+            side: BorderSide(color: border, width: 1.5),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              icon,
+              const SizedBox(width: 11),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                  color: textSecondary,
+                  letterSpacing: -0.01,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
   /// Build social login button
   Widget buildSocialButton({required Widget icon, required VoidCallback onTap, double size = 56}) => Container(
@@ -578,14 +891,14 @@ class OneUITheme {
   );
 
   /// Build OR divider
-  Widget buildOrDivider({String text = 'OR'}) => Row(
+  Widget buildOrDivider({String text = 'or continue with'}) => Row(
     children: [
       Expanded(child: Container(height: 1, color: divider)),
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Text(
           text,
-          style: TextStyle(fontSize: 13, color: textTertiary, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
+          style: TextStyle(fontSize: 12.5, color: DoctakPalette.textSoft, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
         ),
       ),
       Expanded(child: Container(height: 1, color: divider)),
@@ -869,7 +1182,7 @@ class _AuthPrimaryButtonWithLoadingState extends State<_AuthPrimaryButtonWithLoa
                           key: const ValueKey('loading'),
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(width: 20, height: 20, child: CupertinoActivityIndicator(color: Colors.white)),
+                            const SizedBox(width: 24, height: 24, child: DoctakAppLoader.compact()),
                             const SizedBox(width: 12),
                             const Text(
                               'Please wait...',

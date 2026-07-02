@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ Future<void> setAiDataConsent(bool granted) async {
   await prefs.setBool(kAiDataConsentKey, granted);
 }
 
-/// Shows the AI data consent dialog if the user has not yet consented.
+/// Navigates to the AI data consent screen if the user has not yet consented.
 ///
 /// Returns `true` if the user has already consented or presses "I Agree".
 /// Returns `false` if the user declines — the caller should block access.
@@ -34,203 +35,314 @@ Future<bool> showAiConsentIfNeeded(BuildContext context) async {
 
   if (!context.mounted) return false;
 
-  final bool? agreed = await showDialog<bool>(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) => const _AiDataConsentDialog(),
-  );
+  final bool? agreed =
+      await AppNavigator.push<bool>(context, const AiDataConsentScreen());
 
   final granted = agreed == true;
-  await setAiDataConsent(granted);
+  if (granted) {
+    await setAiDataConsent(granted);
+  }
   return granted;
 }
 
-// ─── Internal dialog widget ────────────────────────────────────────────────
+// ─── Full-screen consent page ──────────────────────────────────────────────
 
-class _AiDataConsentDialog extends StatelessWidget {
-  const _AiDataConsentDialog();
+class AiDataConsentScreen extends StatelessWidget {
+  const AiDataConsentScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: theme.cardBackground,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(0),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackground,
+      body: SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // ── Header ──────────────────────────────────────────────────
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
-              decoration: BoxDecoration(
-                color: theme.primary,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.privacy_tip_outlined, color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'AI Data Processing Notice',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Please read before using AI features',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Poppins',
-                      color: Colors.white.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── What data is sent ─────────────────────────────────
-                  _SectionCard(
-                    theme: theme,
-                    icon: Icons.upload_rounded,
-                    iconColor: Colors.orange,
-                    title: 'What data is shared',
-                    items: const [
-                      'Your text questions & clinical summaries',
-                      'Medical images you upload for analysis',
-                      'Your AI session identifier (anonymous)',
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Who receives it ───────────────────────────────────
-                  _SectionCard(
-                    theme: theme,
-                    icon: Icons.cloud_outlined,
-                    iconColor: Colors.blue,
-                    title: 'Who processes this data',
-                    items: const [
-                      'DocTak servers (doctak.net) — your data is first sent securely to our backend',
-                      'OpenAI (GPT-4o) — our backend forwards your query to OpenAI\'s AI model to generate a response',
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ── Why & purpose ─────────────────────────────────────
-                  _SectionCard(
-                    theme: theme,
-                    icon: Icons.fact_check_outlined,
-                    iconColor: Colors.green,
-                    title: 'Purpose of sharing',
-                    items: const [
-                      'To provide AI-powered medical image analysis and clinical Q&A',
-                      'Your data is NOT used to train AI models',
-                      'OpenAI processes data under its Privacy Policy and API usage terms',
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ── Important notice ──────────────────────────────────
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.amber.withValues(alpha: 0.4)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Do not include highly sensitive personal identifiers (e.g. full name, national ID) in your queries. Use clinical summaries only.',
+            // ── Scrollable content ──────────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    // ── Hero header ─────────────────────────────────────
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 32),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            theme.primary,
+                            theme.primary.withValues(alpha: 0.85),
+                          ],
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          // Shield icon
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.shield_outlined,
+                              color: Colors.white,
+                              size: 36,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          const Text(
+                            'AI Data Processing',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                               fontFamily: 'Poppins',
-                              color: theme.textPrimary,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Your privacy matters. Please review how\nwe handle your data before continuing.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontFamily: 'Poppins',
+                              color: Colors.white.withValues(alpha: 0.9),
                               height: 1.5,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 12),
-
-                  // ── Privacy Policy link ───────────────────────────────
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const TermsAndConditionScreen()),
-                      );
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.open_in_new, size: 14, color: theme.primary),
-                        const SizedBox(width: 4),
-                        Text(
-                          'View Full Privacy Policy & Terms',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                            color: theme.primary,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                            decorationColor: theme.primary,
+                    // ── Body content ────────────────────────────────────
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                      child: Column(
+                        children: [
+                          // Section: What data is shared
+                          _ConsentSection(
+                            theme: theme,
+                            icon: Icons.upload_rounded,
+                            iconBg: const Color(0xFFFFF3E0),
+                            iconColor: const Color(0xFFFF9800),
+                            title: 'What data is shared',
+                            items: const [
+                              'Your text questions & clinical summaries',
+                              'Medical images you upload for analysis',
+                              'Your AI session identifier (anonymous)',
+                            ],
                           ),
-                        ),
-                      ],
+
+                          const SizedBox(height: 16),
+
+                          // Section: Who processes this data
+                          _ConsentSection(
+                            theme: theme,
+                            icon: Icons.cloud_outlined,
+                            iconBg: const Color(0xFFE3F2FD),
+                            iconColor: const Color(0xFF2196F3),
+                            title: 'Who processes this data',
+                            items: const [
+                              'DocTak servers (doctak.net) — your data is first sent securely to our backend',
+                              'A trusted third-party AI service — our backend forwards your query to generate a response',
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Section: Purpose of sharing
+                          _ConsentSection(
+                            theme: theme,
+                            icon: Icons.verified_outlined,
+                            iconBg: const Color(0xFFE8F5E9),
+                            iconColor: const Color(0xFF4CAF50),
+                            title: 'Purpose of sharing',
+                            items: const [
+                              'To provide AI-powered medical image analysis and clinical Q&A',
+                              'Your data is NOT used to train AI models',
+                              'Third-party AI services process data under their respective privacy policies and API usage terms',
+                            ],
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // Section: Your rights
+                          _ConsentSection(
+                            theme: theme,
+                            icon: Icons.gavel_rounded,
+                            iconBg: const Color(0xFFF3E5F5),
+                            iconColor: const Color(0xFF9C27B0),
+                            title: 'Your rights',
+                            items: const [
+                              'You can withdraw consent anytime from Settings',
+                              'You may request deletion of your AI session data',
+                              'Declining will not affect access to other DocTak features',
+                            ],
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          // ── Warning notice ────────────────────────────
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF8E1),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: const Color(0xFFFFE082),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                      0xFFFFE082,
+                                    ).withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.warning_amber_rounded,
+                                    color: Color(0xFFF9A825),
+                                    size: 18,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Important',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          fontFamily: 'Poppins',
+                                          color: const Color(0xFF4E342E),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Do not include highly sensitive personal identifiers (e.g. full name, national ID) in your queries. Use clinical summaries only.',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontFamily: 'Poppins',
+                                          color: const Color(0xFF5D4037),
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          // ── Privacy Policy link ───────────────────────
+                          InkWell(
+                            onTap: () {
+                              AppNavigator.push(
+                                context,
+                                const TermsAndConditionScreen(),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.primary.withValues(alpha: 0.06),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: theme.primary.withValues(alpha: 0.15),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.description_outlined,
+                                    size: 16,
+                                    color: theme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'View Full Privacy Policy & Terms',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontFamily: 'Poppins',
+                                      color: theme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 12,
+                                    color: theme.primary,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+
+            // ── Bottom action bar ───────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+              decoration: BoxDecoration(
+                color: theme.cardBackground,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, -4),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  // ── Action buttons ────────────────────────────────────
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.of(context).pop(false),
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: theme.primary.withValues(alpha: 0.5)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(
+                              color: theme.textSecondary.withValues(alpha: 0.3),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: Text(
                             'Decline',
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
-                              color: theme.textPrimary,
+                              fontSize: 14,
+                              color: theme.textSecondary,
                             ),
                           ),
                         ),
@@ -243,29 +355,37 @@ class _AiDataConsentDialog extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: theme.primary,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'I Agree & Continue',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.check_circle_outline, size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                'I Agree & Continue',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Text(
                     'You can withdraw consent anytime from Settings.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontFamily: 'Poppins',
                       color: theme.textSecondary,
                     ),
@@ -280,18 +400,20 @@ class _AiDataConsentDialog extends StatelessWidget {
   }
 }
 
-// ─── Reusable section card ─────────────────────────────────────────────────
+// ─── Reusable section widget ───────────────────────────────────────────────
 
-class _SectionCard extends StatelessWidget {
-  final dynamic theme;
+class _ConsentSection extends StatelessWidget {
+  final OneUITheme theme;
   final IconData icon;
+  final Color iconBg;
   final Color iconColor;
   final String title;
   final List<String> items;
 
-  const _SectionCard({
+  const _ConsentSection({
     required this.theme,
     required this.icon,
+    required this.iconBg,
     required this.iconColor,
     required this.title,
     required this.items,
@@ -300,47 +422,71 @@ class _SectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: (theme as OneUITheme).inputBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: (theme as OneUITheme).primary.withValues(alpha: 0.08)),
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.border.withValues(alpha: 0.5)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 16, color: iconColor),
-              const SizedBox(width: 6),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'Poppins',
-                  color: (theme as OneUITheme).textPrimary,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 18, color: iconColor),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Poppins',
+                    color: theme.textPrimary,
+                  ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           ...items.map(
             (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 5),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.circle, size: 5, color: (theme as OneUITheme).textSecondary),
-                  const SizedBox(width: 8),
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    width: 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.6),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       item,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         fontFamily: 'Poppins',
-                        color: (theme as OneUITheme).textPrimary,
-                        height: 1.45,
+                        color: theme.textPrimary,
+                        height: 1.5,
                       ),
                     ),
                   ),

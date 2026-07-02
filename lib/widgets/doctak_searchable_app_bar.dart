@@ -248,7 +248,7 @@ class DoctakSearchableAppBarState extends State<DoctakSearchableAppBar>
       key: const ValueKey('search'),
       height: 48,
       decoration: BoxDecoration(
-        color: theme.inputBackground,
+        color: theme.searchFieldBackground,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: theme.primary.withValues(alpha: 0.15),
@@ -489,7 +489,7 @@ class _DoctakCollapsibleSearchFieldState
             margin: widget.margin,
             height: widget.height - widget.margin.vertical,
             decoration: BoxDecoration(
-              color: theme.inputBackground,
+              color: theme.searchFieldBackground,
               borderRadius: BorderRadius.circular(24),
             ),
             child: ClipRRect(

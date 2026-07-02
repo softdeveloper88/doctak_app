@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../repository/case_discussion_repository.dart';
 import '../models/case_discussion_models.dart';
+import '../models/case_vote_snapshot.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EVENTS
@@ -56,6 +57,35 @@ class DeleteComment extends DiscussionDetailEvent {
   List<Object> get props => [commentId];
 }
 
+class UpdateComment extends DiscussionDetailEvent {
+  final int commentId;
+  final String comment;
+  const UpdateComment({required this.commentId, required this.comment});
+  @override
+  List<Object> get props => [commentId, comment];
+}
+
+class UpdateReply extends DiscussionDetailEvent {
+  final int commentId;
+  final int replyId;
+  final String reply;
+  const UpdateReply({
+    required this.commentId,
+    required this.replyId,
+    required this.reply,
+  });
+  @override
+  List<Object> get props => [commentId, replyId, reply];
+}
+
+class DeleteReply extends DiscussionDetailEvent {
+  final int commentId;
+  final int replyId;
+  const DeleteReply(this.commentId, this.replyId);
+  @override
+  List<Object> get props => [commentId, replyId];
+}
+
 class ToggleLikeComment extends DiscussionDetailEvent {
   final int commentId;
   const ToggleLikeComment(this.commentId);
@@ -63,11 +93,36 @@ class ToggleLikeComment extends DiscussionDetailEvent {
   List<Object> get props => [commentId];
 }
 
+class VoteComment extends DiscussionDetailEvent {
+  final int commentId;
+  final String direction;
+  const VoteComment(this.commentId, this.direction);
+  @override
+  List<Object> get props => [commentId, direction];
+}
+
+class VoteReply extends DiscussionDetailEvent {
+  final int commentId;
+  final int replyId;
+  final String direction;
+  const VoteReply(this.commentId, this.replyId, this.direction);
+  @override
+  List<Object> get props => [commentId, replyId, direction];
+}
+
 class ToggleLikeCase extends DiscussionDetailEvent {
   final int caseId;
   const ToggleLikeCase(this.caseId);
   @override
   List<Object> get props => [caseId];
+}
+
+class VoteCase extends DiscussionDetailEvent {
+  final int caseId;
+  final String direction;
+  const VoteCase(this.caseId, this.direction);
+  @override
+  List<Object> get props => [caseId, direction];
 }
 
 class ToggleBookmarkCase extends DiscussionDetailEvent {
@@ -97,6 +152,13 @@ class AddReply extends DiscussionDetailEvent {
   const AddReply({required this.commentId, required this.reply});
   @override
   List<Object> get props => [commentId, reply];
+}
+
+class DeleteCase extends DiscussionDetailEvent {
+  final int caseId;
+  const DeleteCase(this.caseId);
+  @override
+  List<Object> get props => [caseId];
 }
 
 class LoadReplies extends DiscussionDetailEvent {
@@ -238,6 +300,8 @@ class DiscussionDetailError extends DiscussionDetailState {
   List<Object> get props => [message];
 }
 
+class DiscussionDetailDeleted extends DiscussionDetailState {}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // BLOC
 // ─────────────────────────────────────────────────────────────────────────────
@@ -256,8 +320,14 @@ class DiscussionDetailBloc
     on<LoadMoreComments>(_onLoadMoreComments);
     on<AddComment>(_onAddComment);
     on<DeleteComment>(_onDeleteComment);
+    on<UpdateComment>(_onUpdateComment);
+    on<UpdateReply>(_onUpdateReply);
+    on<DeleteReply>(_onDeleteReply);
     on<ToggleLikeComment>(_onToggleLikeComment);
+    on<VoteComment>(_onVoteComment);
+    on<VoteReply>(_onVoteReply);
     on<ToggleLikeCase>(_onToggleLikeCase);
+    on<VoteCase>(_onVoteCase);
     on<ToggleBookmarkCase>(_onToggleBookmarkCase);
     on<ToggleFollowCase>(_onToggleFollowCase);
     on<GenerateAISummary>(_onGenerateAISummary);
@@ -267,6 +337,7 @@ class DiscussionDetailBloc
     on<AddCaseUpdate>(_onAddCaseUpdate);
     on<EditCaseUpdate>(_onEditCaseUpdate);
     on<DeleteCaseUpdate>(_onDeleteCaseUpdate);
+    on<DeleteCase>(_onDeleteCase);
   }
 
   Future<void> _onLoadDetail(
@@ -405,62 +476,311 @@ class DiscussionDetailBloc
     }
   }
 
+  Future<void> _onUpdateComment(
+      UpdateComment event, Emitter<DiscussionDetailState> emit) async {
+    final currentState = state;
+    if (currentState is! DiscussionDetailLoaded) return;
+
+    final text = event.comment.trim();
+    if (text.isEmpty) return;
+
+    try {
+      await repository.updateComment(event.commentId, text);
+
+      final updatedComments = currentState.comments.map((comment) {
+        if (comment.id != event.commentId) return comment;
+        return comment.copyWith(comment: text);
+      }).toList();
+
+      emit(currentState.copyWith(comments: updatedComments));
+    } catch (_) {}
+  }
+
+  Future<void> _onUpdateReply(
+      UpdateReply event, Emitter<DiscussionDetailState> emit) async {
+    final currentState = state;
+    if (currentState is! DiscussionDetailLoaded) return;
+
+    final text = event.reply.trim();
+    if (text.isEmpty) return;
+
+    try {
+      await repository.updateReply(event.replyId, text);
+
+      final updatedComments = currentState.comments.map((comment) {
+        if (comment.id != event.commentId) return comment;
+        final updatedReplies = comment.replies.map((reply) {
+          if (reply.id != event.replyId) return reply;
+          return reply.copyWith(reply: text);
+        }).toList();
+        return comment.copyWith(replies: updatedReplies);
+      }).toList();
+
+      emit(currentState.copyWith(comments: updatedComments));
+    } catch (_) {}
+  }
+
+  Future<void> _onDeleteReply(
+      DeleteReply event, Emitter<DiscussionDetailState> emit) async {
+    final currentState = state;
+    if (currentState is! DiscussionDetailLoaded) return;
+
+    try {
+      await repository.deleteReply(event.replyId);
+
+      final updatedComments = currentState.comments.map((comment) {
+        if (comment.id != event.commentId) return comment;
+        final updatedReplies =
+            comment.replies.where((reply) => reply.id != event.replyId).toList();
+        return comment.copyWith(
+          replies: updatedReplies,
+          repliesCount: updatedReplies.length > 0
+              ? updatedReplies.length
+              : (comment.repliesCount > 0 ? comment.repliesCount - 1 : 0),
+        );
+      }).toList();
+
+      emit(currentState.copyWith(comments: updatedComments));
+    } catch (_) {}
+  }
+
   Future<void> _onToggleLikeComment(
       ToggleLikeComment event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
-    if (currentState is DiscussionDetailLoaded) {
-      final idx =
-          currentState.comments.indexWhere((c) => c.id == event.commentId);
-      if (idx == -1) return;
+    if (currentState is! DiscussionDetailLoaded) return;
+    final idx = currentState.comments.indexWhere((c) => c.id == event.commentId);
+    if (idx == -1) return;
+    add(VoteComment(event.commentId, 'up'));
+  }
 
-      final comment = currentState.comments[idx];
-      final wasLiked = comment.isLiked;
+  Future<void> _onVoteComment(
+      VoteComment event, Emitter<DiscussionDetailState> emit) async {
+    final currentState = state;
+    if (currentState is! DiscussionDetailLoaded) return;
+    final idx = currentState.comments.indexWhere((c) => c.id == event.commentId);
+    if (idx == -1) return;
 
-      // Optimistic
-      final updated = comment.copyWith(
-        isLiked: !wasLiked,
-        likes: wasLiked ? comment.likes - 1 : comment.likes + 1,
-      );
-      final updatedComments = List<CaseComment>.from(currentState.comments);
-      updatedComments[idx] = updated;
-      emit(currentState.copyWith(comments: updatedComments));
+    final comment = currentState.comments[idx];
+    final direction = event.direction;
+    var likes = comment.likes;
+    var dislikes = comment.dislikes;
+    var isLiked = comment.isLiked;
+    var isDisliked = comment.isDisliked;
 
-      try {
-        await repository.performCommentAction(
-          commentId: event.commentId,
-          action: wasLiked ? 'unlike' : 'like',
-        );
-      } catch (_) {
-        // Revert
-        final reverted = List<CaseComment>.from(currentState.comments);
-        emit(currentState.copyWith(comments: reverted));
+    if (direction == 'up') {
+      if (isLiked) {
+        isLiked = false;
+        likes -= 1;
+      } else if (isDisliked) {
+        isDisliked = false;
+        isLiked = true;
+        dislikes -= 1;
+        likes += 1;
+      } else {
+        isLiked = true;
+        likes += 1;
       }
+    } else {
+      if (isDisliked) {
+        isDisliked = false;
+        dislikes -= 1;
+      } else if (isLiked) {
+        isLiked = false;
+        isDisliked = true;
+        likes -= 1;
+        dislikes += 1;
+      } else {
+        isDisliked = true;
+        dislikes += 1;
+      }
+    }
+
+    final updated = comment.copyWith(
+      likes: likes,
+      dislikes: dislikes,
+      isLiked: isLiked,
+      isDisliked: isDisliked,
+    );
+    final updatedComments = List<CaseComment>.from(currentState.comments);
+    updatedComments[idx] = updated;
+    emit(currentState.copyWith(comments: updatedComments));
+
+    try {
+      final response = await repository.voteComment(
+        commentId: event.commentId,
+        direction: direction,
+      );
+      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
+      if (snapshot != null) {
+        final synced = updated.copyWith(
+          likes: snapshot.likes,
+          dislikes: snapshot.dislikes,
+          isLiked: snapshot.isLiked,
+          isDisliked: snapshot.isDisliked,
+        );
+        final syncedComments = List<CaseComment>.from(currentState.comments);
+        syncedComments[idx] = synced;
+        emit(currentState.copyWith(comments: syncedComments));
+      }
+    } catch (_) {
+      final reverted = List<CaseComment>.from(currentState.comments);
+      emit(currentState.copyWith(comments: reverted));
+    }
+  }
+
+  Future<void> _onVoteReply(
+      VoteReply event, Emitter<DiscussionDetailState> emit) async {
+    final currentState = state;
+    if (currentState is! DiscussionDetailLoaded) return;
+
+    final commentIdx =
+        currentState.comments.indexWhere((c) => c.id == event.commentId);
+    if (commentIdx == -1) return;
+
+    final comment = currentState.comments[commentIdx];
+    final replyIdx = comment.replies.indexWhere((r) => r.id == event.replyId);
+    if (replyIdx == -1) return;
+
+    final reply = comment.replies[replyIdx];
+    final direction = event.direction;
+    var likes = reply.likes;
+    var dislikes = reply.dislikes;
+    var isLiked = reply.isLiked;
+    var isDisliked = reply.isDisliked;
+
+    if (direction == 'up') {
+      if (isLiked) {
+        isLiked = false;
+        likes -= 1;
+      } else if (isDisliked) {
+        isDisliked = false;
+        isLiked = true;
+        dislikes -= 1;
+        likes += 1;
+      } else {
+        isLiked = true;
+        likes += 1;
+      }
+    } else {
+      if (isDisliked) {
+        isDisliked = false;
+        dislikes -= 1;
+      } else if (isLiked) {
+        isLiked = false;
+        isDisliked = true;
+        likes -= 1;
+        dislikes += 1;
+      } else {
+        isDisliked = true;
+        dislikes += 1;
+      }
+    }
+
+    final updatedReply = reply.copyWith(
+      likes: likes,
+      dislikes: dislikes,
+      isLiked: isLiked,
+      isDisliked: isDisliked,
+    );
+    final updatedReplies = List<CaseReply>.from(comment.replies);
+    updatedReplies[replyIdx] = updatedReply;
+    final updatedComments = List<CaseComment>.from(currentState.comments);
+    updatedComments[commentIdx] = comment.copyWith(replies: updatedReplies);
+    emit(currentState.copyWith(comments: updatedComments));
+
+    try {
+      final response = await repository.voteComment(
+        commentId: event.replyId,
+        direction: direction,
+        targetType: 'reply',
+      );
+      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
+      if (snapshot != null) {
+        final syncedReply = updatedReply.copyWith(
+          likes: snapshot.likes,
+          dislikes: snapshot.dislikes,
+          isLiked: snapshot.isLiked,
+          isDisliked: snapshot.isDisliked,
+        );
+        final syncedReplies = List<CaseReply>.from(comment.replies);
+        syncedReplies[replyIdx] = syncedReply;
+        final syncedComments = List<CaseComment>.from(currentState.comments);
+        syncedComments[commentIdx] = comment.copyWith(replies: syncedReplies);
+        emit(currentState.copyWith(comments: syncedComments));
+      }
+    } catch (_) {
+      emit(currentState);
     }
   }
 
   Future<void> _onToggleLikeCase(
       ToggleLikeCase event, Emitter<DiscussionDetailState> emit) async {
+    add(VoteCase(event.caseId, 'up'));
+  }
+
+  Future<void> _onVoteCase(
+      VoteCase event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
-    if (currentState is DiscussionDetailLoaded) {
-      final d = currentState.discussion;
-      final wasLiked = d.isLiked;
+    if (currentState is! DiscussionDetailLoaded) return;
+    final d = currentState.discussion;
+    final direction = event.direction;
+    var likes = d.likes;
+    var dislikes = d.dislikes;
+    var isLiked = d.isLiked;
+    var isDisliked = d.isDisliked;
 
-      // Optimistic
-      emit(currentState.copyWith(
-        discussion: d.copyWith(
-          isLiked: !wasLiked,
-          likes: wasLiked ? d.likes - 1 : d.likes + 1,
-        ),
-      ));
-
-      try {
-        await repository.performCaseAction(
-          caseId: event.caseId,
-          action: wasLiked ? 'unlike' : 'like',
-        );
-      } catch (_) {
-        emit(currentState.copyWith(discussion: d));
+    if (direction == 'up') {
+      if (isLiked) {
+        isLiked = false;
+        likes -= 1;
+      } else if (isDisliked) {
+        isDisliked = false;
+        isLiked = true;
+        dislikes -= 1;
+        likes += 1;
+      } else {
+        isLiked = true;
+        likes += 1;
       }
+    } else {
+      if (isDisliked) {
+        isDisliked = false;
+        dislikes -= 1;
+      } else if (isLiked) {
+        isLiked = false;
+        isDisliked = true;
+        likes -= 1;
+        dislikes += 1;
+      } else {
+        isDisliked = true;
+        dislikes += 1;
+      }
+    }
+
+    emit(currentState.copyWith(
+      discussion: d.copyWith(
+        likes: likes,
+        dislikes: dislikes,
+        isLiked: isLiked,
+        isDisliked: isDisliked,
+      ),
+    ));
+
+    try {
+      final response = await repository.voteCase(caseId: event.caseId, direction: direction);
+      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
+      if (snapshot != null) {
+        emit(currentState.copyWith(
+          discussion: d.copyWith(
+            likes: snapshot.likes,
+            dislikes: snapshot.dislikes,
+            isLiked: snapshot.isLiked,
+            isDisliked: snapshot.isDisliked,
+          ),
+        ));
+      }
+    } catch (_) {
+      emit(currentState.copyWith(discussion: d));
     }
   }
 
@@ -684,5 +1004,13 @@ class DiscussionDetailBloc
         emit(currentState.copyWith(discussion: updatedDiscussion));
       } catch (_) {}
     }
+  }
+
+  Future<void> _onDeleteCase(
+      DeleteCase event, Emitter<DiscussionDetailState> emit) async {
+    try {
+      await repository.deleteCase(event.caseId);
+      emit(DiscussionDetailDeleted());
+    } catch (_) {}
   }
 }

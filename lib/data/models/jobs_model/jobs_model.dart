@@ -42,29 +42,29 @@ class Jobs {
   });
 
   Jobs.fromJson(dynamic json) {
-    currentPage = json['current_page'];
+    currentPage = json['current_page'] is int ? json['current_page'] : int.tryParse(json['current_page']?.toString() ?? '');
     if (json['data'] != null) {
       data = [];
       json['data'].forEach((v) {
         data?.add(Data.fromJson(v));
       });
     }
-    firstPageUrl = json['first_page_url'];
-    from = json['from'];
-    lastPage = json['last_page'];
-    lastPageUrl = json['last_page_url'];
+    firstPageUrl = json['first_page_url']?.toString();
+    from = json['from'] is int ? json['from'] : int.tryParse(json['from']?.toString() ?? '');
+    lastPage = json['last_page'] is int ? json['last_page'] : int.tryParse(json['last_page']?.toString() ?? '');
+    lastPageUrl = json['last_page_url']?.toString();
     if (json['links'] != null) {
       links = [];
       json['links'].forEach((v) {
         links?.add(Links.fromJson(v));
       });
     }
-    nextPageUrl = json['next_page_url'];
-    path = json['path'];
-    perPage = json['per_page'];
+    nextPageUrl = json['next_page_url']?.toString();
+    path = json['path']?.toString();
+    perPage = json['per_page'] is int ? json['per_page'] : int.tryParse(json['per_page']?.toString() ?? '');
     prevPageUrl = json['prev_page_url'];
-    to = json['to'];
-    total = json['total'];
+    to = json['to'] is int ? json['to'] : int.tryParse(json['to']?.toString() ?? '');
+    total = json['total'] is int ? json['total'] : int.tryParse(json['total']?.toString() ?? '');
   }
   int? currentPage;
   List<Data>? data;
@@ -162,26 +162,26 @@ class Data {
 
   Data.fromJson(dynamic json) {
     id = json['id'];
-    jobTitle = json['job_title'];
+    jobTitle = json['job_title']?.toString();
     jobType = json['job_type']?.toString();
-    companyName = json['company_name'];
-    experience = json['experience'];
-    location = json['location'];
-    description = json['description'];
-    link = json['link'];
-    preferredLanguage = json['preferred_language'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    companyName = json['company_name']?.toString();
+    experience = json['experience']?.toString();
+    location = json['location']?.toString();
+    description = json['description']?.toString();
+    link = json['link']?.toString();
+    preferredLanguage = json['preferred_language']?.toString();
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
     userId = json['user_id']?.toString();
     jobImage = json['job_image'];
     countryId = json['country_id']?.toString();
-    lastDate = json['last_date'];
+    lastDate = json['last_date']?.toString();
     totalJobs = json['total_jobs'];
     specialty = json['specialty'];
     noOfJobs = json['no_of_jobs'];
-    postedAt = json['posted_at'];
-    salaryRange = json['salary_range'];
-    promoted = json['promoted'];
+    postedAt = json['posted_at']?.toString();
+    salaryRange = json['salary_range']?.toString();
+    promoted = json['promoted'] == true || json['promoted'] == 1;
     views = json['views'];
     clicks = json['clicks'];
     if (json['specialties'] != null) {
@@ -271,11 +271,11 @@ class User {
 
   User.fromJson(dynamic json) {
     id = json['id']?.toString();
-    name = json['name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
+    name = json['name']?.toString();
+    profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());
   }
   String? id;
-  dynamic name;
+  String? name;
   String? profilePic;
 
   Map<String, dynamic> toJson() {
@@ -333,40 +333,40 @@ class Applicants {
 
   Applicants.fromJson(dynamic json) {
     id = json['id']?.toString();
-    firstName = json['first_name'];
-    lastName = json['last_name'];
-    emailVerifiedAt = json['email_verified_at'];
-    userType = json['user_type'];
-    name = json['name'];
-    email = json['email'];
+    firstName = json['first_name']?.toString();
+    lastName = json['last_name']?.toString();
+    emailVerifiedAt = json['email_verified_at']?.toString();
+    userType = json['user_type']?.toString();
+    name = json['name']?.toString();
+    email = json['email']?.toString();
     token = json['token'];
-    phone = json['phone'];
-    licenseNo = json['license_no'];
-    specialty = json['specialty'];
-    status = json['status'];
-    role = json['role'];
-    gender = json['gender'];
-    dob = json['dob'];
-    clinicName = json['clinic_name'];
-    college = json['college'];
-    countryOrigin = json['country_origin'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
-    practicingCountry = json['practicing_country'];
+    phone = json['phone']?.toString();
+    licenseNo = json['license_no']?.toString();
+    specialty = json['specialty']?.toString();
+    status = json['status']?.toString();
+    role = json['role']?.toString();
+    gender = json['gender']?.toString();
+    dob = json['dob']?.toString();
+    clinicName = json['clinic_name']?.toString();
+    college = json['college']?.toString();
+    countryOrigin = json['country_origin']?.toString();
+    profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());
+    practicingCountry = json['practicing_country']?.toString();
     otpCode = json['otp_code'];
-    balance = json['balance'];
-    title = json['title'];
-    city = json['city'];
-    country = json['country'];
+    balance = json['balance']?.toString();
+    title = json['title']?.toString();
+    city = json['city']?.toString();
+    country = json['country']?.toString();
     isAdmin = json['is_admin'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    activeStatus = json['active_status'];
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
+    activeStatus = json['active_status']?.toString();
     avatar = json['avatar'];
-    darkMode = json['dark_mode'];
+    darkMode = json['dark_mode']?.toString();
     messengerColor = json['messenger_color'];
-    isPremium = json['is_premium'];
-    background = AppData.fullImageUrl(json['background']);
-    lastActivity = json['last_activity'];
+    isPremium = json['is_premium']?.toString();
+    background = AppData.fullImageUrl(json['background']?.toString());
+    lastActivity = json['last_activity']?.toString();
     pivot = json['pivot'] != null ? Pivot.fromJson(json['pivot']) : null;
   }
   String? id;
@@ -459,7 +459,7 @@ class Pivot {
   Pivot.fromJson(dynamic json) {
     jobId = json['job_id']?.toString();
     userId = json['user_id']?.toString();
-    isViewedByAdmin = json['is_viewed_by_admin'];
+    isViewedByAdmin = json['is_viewed_by_admin']?.toString();
   }
   String? jobId;
   String? userId;
@@ -483,15 +483,15 @@ class Specialties {
 
   Specialties.fromJson(dynamic json) {
     id = json['id']?.toString();
-    name = json['name'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    name = json['name']?.toString();
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
     pivot = json['pivot'] != null ? Pivot.fromJson(json['pivot']) : null;
   }
   String? id;
   String? name;
-  dynamic createdAt;
-  dynamic updatedAt;
+  String? createdAt;
+  String? updatedAt;
   Pivot? pivot;
 
   Map<String, dynamic> toJson() {

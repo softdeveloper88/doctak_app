@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:doctak_app/core/utils/navigator_service.dart';
+import 'package:doctak_app/presentation/calling_module_v2/services/callkit_event_hub.dart';
 import 'call_api_service.dart';
 import '../screens/call_screen.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +28,6 @@ class CallKitService {
   // Flag to determine if this service should update status or defer to CallService
   bool _shouldUpdateStatus = true;
   //
-  // Add event tracking to prevent duplicate events
-  String? _lastHandledCallEvent;
-  DateTime? _lastEventTime;
   final Map<String, DateTime> _lastEventsByType = {};
   //
   // Add these properties for better debouncing
@@ -112,8 +110,6 @@ class CallKitService {
       avatar: avatar,
       handle: '', // Hide the call ID/handle
       type: hasVideo ? 1 : 0,
-      textAccept: 'Accept',
-      textDecline: 'Decline',
       duration: 30000,
       extra: {'userId': callerId, 'has_video': hasVideo, 'avatar': avatar, 'callerName': callerName},
       android: AndroidParams(
@@ -123,6 +119,8 @@ class CallKitService {
         backgroundColor: '#1A2332', // OneUI 8.5 dark background
         actionColor: '#0955fa', // OneUI primary blue
         textColor: '#ffffff',
+        textAccept: 'Accept',
+        textDecline: 'Decline',
         incomingCallNotificationChannelName: 'Doctak.net Calls',
         missedCallNotificationChannelName: 'Doctak.net Missed Calls',
         isShowCallID: false, // Hide call ID
@@ -181,91 +179,149 @@ class CallKitService {
   }
 
   //
+  Future<({String callId, String userId, String callerName, String avatar, bool hasVideo})?> _resolveCallContext(
+    String callId, {
+    CallKitParams? params,
+  }) async {
+    if (params != null) {
+      final extra = params.extra ?? <String, dynamic>{};
+      return (
+        callId: params.id,
+        userId: extra['userId']?.toString() ?? '',
+        callerName: extra['callerName']?.toString() ?? params.nameCaller ?? 'Unknown',
+        avatar: extra['avatar']?.toString() ?? params.avatar ?? '',
+        hasVideo: extra['has_video'] == true || extra['has_video'] == 'true' || params.type == 1,
+      );
+    }
+
+    final prefs = SecureStorageService.instance;
+    await prefs.initialize();
+    final savedId = await prefs.getString('active_call_id');
+    if (savedId == callId) {
+      return (
+        callId: callId,
+        userId: await prefs.getString('active_call_user_id') ?? '',
+        callerName: await prefs.getString('active_call_name') ?? 'Unknown',
+        avatar: await prefs.getString('active_call_avatar') ?? '',
+        hasVideo: await prefs.getBool('active_call_has_video') ?? false,
+      );
+    }
+
+    for (final call in await FlutterCallkitIncoming.activeCalls()) {
+      if (call.id != callId) continue;
+      final extra = call.extra ?? <String, dynamic>{};
+      return (
+        callId: call.id,
+        userId: extra['userId']?.toString() ?? '',
+        callerName: extra['callerName']?.toString() ?? call.nameCaller ?? 'Unknown',
+        avatar: extra['avatar']?.toString() ?? call.avatar ?? '',
+        hasVideo: extra['has_video'] == true || extra['has_video'] == 'true' || call.type == 1,
+      );
+    }
+
+    return null;
+  }
+
+  /// True when the CallKit entry belongs to calling_module_v2
+  /// (extra.signalVersion == '2') — those events must not be handled here.
+  Future<bool> _isV2ModuleCall(String callId, CallEvent event) async {
+    bool isV2Extra(dynamic extra) =>
+        extra is Map && extra['signalVersion']?.toString() == '2';
+
+    if (event is CallEventActionCallIncoming) {
+      return isV2Extra(event.callKitParams.extra);
+    }
+    try {
+      for (final call in await FlutterCallkitIncoming.activeCalls()) {
+        final dynamic entry = call;
+        final String entryId = entry is Map
+            ? (entry['id']?.toString() ?? '')
+            : (entry.id?.toString() ?? '');
+        if (entryId != callId) continue;
+        final dynamic extra = entry is Map ? entry['extra'] : entry.extra;
+        return isV2Extra(extra);
+      }
+    } catch (_) {}
+    return false;
+  }
+
+  //
   /// Listen to CallKit events with proper debouncing and type safety
   void listenToCallEvents() {
     // Cancel any existing subscription to prevent duplicates
     _callKitEventSubscription?.cancel();
     //
     try {
-      _callKitEventSubscription = FlutterCallkitIncoming.onEvent.listen((event) async {
-        final eventType = event?.event;
-        //
-        // Safely extract data - fix for the type error by explicit type conversion
-        final Map<String, dynamic> data = {};
-        //
-        // Extract call data safely by converting types
-        if (event?.body != null) {
-          // Convert Object? keys and values to String and dynamic explicitly
-          (event!.body as Map<Object?, Object?>).forEach((key, value) {
-            if (key != null) {
-              data[key.toString()] = value;
-            }
-          });
-        }
-        //
-        final extra = data['extra'] is Map ? Map<String, dynamic>.from(data['extra'] as Map) : <String, dynamic>{};
-        final callId = data['id']?.toString() ?? '';
-        //
-        // Skip if we shouldn't process this action
-        if (!_shouldProcessAction(callId, eventType.toString())) {
+      // Via CallKitEventHub: the raw FlutterCallkitIncoming.onEvent channel
+      // feeds only its LAST subscriber, and this service re-subscribing used
+      // to disconnect calling_module_v2's listener (lost accepts). The hub
+      // owns the single platform subscription and rebroadcasts to everyone.
+      _callKitEventSubscription = CallKitEventHub.instance.stream.listen((event) async {
+        if (event == null) return;
+
+        final callId = switch (event) {
+          CallEventActionCallAccept(:final id) => id,
+          CallEventActionCallDecline(:final id) => id,
+          CallEventActionCallEnded(:final id) => id,
+          CallEventActionCallTimeout(:final id) => id,
+          CallEventActionCallStart(:final id) => id,
+          CallEventActionCallCallback(:final id) => id,
+          CallEventActionCallIncoming(:final callKitParams) => callKitParams.id,
+          _ => '',
+        };
+
+        if (callId.isEmpty) return;
+
+        // Calling module v2 owns calls it created (extra.signalVersion == '2').
+        // Ignore them here so both modules don't race the same CallKit event
+        // (the legacy handler would otherwise hijack the accept and open the
+        // legacy call screen with a dead Laravel token flow).
+        if (await _isV2ModuleCall(callId, event)) {
+          debugPrint('CallKit event ${event.eventName} for v2 call $callId — handled by calling_module_v2');
           return;
         }
-        //
-        // Extract call data with proper type safety
-        final callerName = extra['callerName']?.toString() ?? 'Unknown';
-        final avatar = extra['avatar']?.toString() ?? '';
-        final userId = extra['userId']?.toString() ?? '';
-        final hasVideo = extra['has_video'] == true || extra['has_video'] == 'true';
-        //
-        debugPrint('CallKit event: $eventType for call: $callId');
-        //
-        switch (eventType) {
-          case Event.actionCallAccept:
+
+        if (!_shouldProcessAction(callId, event.eventName)) {
+          return;
+        }
+
+        final params = event is CallEventActionCallIncoming ? event.callKitParams : null;
+        final context = await _resolveCallContext(callId, params: params);
+        final userId = context?.userId ?? '';
+        final callerName = context?.callerName ?? 'Unknown';
+        final avatar = context?.avatar ?? '';
+        final hasVideo = context?.hasVideo ?? false;
+
+        debugPrint('CallKit event: ${event.eventName} for call: $callId');
+
+        switch (event) {
+          case CallEventActionCallAccept():
             try {
-              // Update status to busy via API (safely) - only if needed
               await _safeUpdateCallStatus('busy');
-              //
-              // Check if service is initialized before making API calls
-              // if (_isInitialized && _callApiService != null) {
-              // Call accept API with proper type safety
-              var callkit = CallApiService(baseUrl: AppData.remoteUrl3);
+
+              final callkit = CallApiService(baseUrl: AppData.remoteUrl3);
               await callkit.acceptCall(callId: callId, callerId: userId);
-              // }
-              //
-              // Save call info for potential resuming
+
               await _saveCallInfo(callId, userId, callerName, avatar, hasVideo);
-              // Launch the application if it's closed using CallKit's capabilities
-              // await FlutterCallkitIncoming.showCallkitIncoming(
-              //   CallKitParams(
-              //     id: callId,
-              //     nameCaller: callerName,
-              //     handle: userId,
-              //     type: hasVideo ? 1 : 0,
-              //     extra: extra,
-              //   ),
-              // );
-              //
-              // Use a longer delay to ensure the app is fully launched
               await Future.delayed(const Duration(milliseconds: 1500));
-              // Navigate to call screen with proper data
-              _navigateToCallScreen(callId: callId, userId: userId, callerName: callerName, avatar: avatar, hasVideo: hasVideo);
+              _navigateToCallScreen(
+                callId: callId,
+                userId: userId,
+                callerName: callerName,
+                avatar: avatar,
+                hasVideo: hasVideo,
+              );
             } catch (e) {
               debugPrint('Error accepting call: $e');
             }
-            break;
-          //
-          case Event.actionCallDecline:
+          case CallEventActionCallDecline():
             try {
-              // Update status to available via API (safely)
               await _safeUpdateCallStatus('available');
-              //
-              // Check if service is initialized before making API calls
+
               if (_isInitialized && _callApiService != null) {
-                // Call reject API
                 await _callApiService!.rejectCall(callId: callId, callerId: userId);
               }
-              //
-              // Clear notification - wrap in try-catch as CallKit may have already ended the call
+
               try {
                 await FlutterCallkitIncoming.endCall(callId);
               } catch (e) {
@@ -275,22 +331,15 @@ class CallKitService {
             } catch (e) {
               debugPrint('Error rejecting call: $e');
             }
-            break;
-          //
-          case Event.actionCallTimeout:
+          case CallEventActionCallTimeout():
             try {
-              // Only process if not already handling an end call for this callId
               if (_callEndProcessed[callId] != true) {
-                // Update status to available via API (safely)
                 await _safeUpdateCallStatus('available');
-                //
-                // Check if service is initialized before making API calls
+
                 if (_isInitialized && _callApiService != null) {
-                  // Call missed API
                   await _callApiService!.missCall(callId: callId, callerId: userId);
                 }
-                //
-                // Clear notification - wrap in try-catch as CallKit may have already ended the call
+
                 try {
                   await FlutterCallkitIncoming.endCall(callId);
                 } catch (e) {
@@ -301,24 +350,19 @@ class CallKitService {
             } catch (e) {
               debugPrint('Error marking call missed: $e');
             }
-            break;
-          //
-          case Event.actionCallEnded:
-            // Check if this is a recently started outgoing call - if so, ignore the end event
+          case CallEventActionCallEnded():
             final outgoingStartTime = _outgoingCallsStartTime[callId];
             if (outgoingStartTime != null) {
               final timeSinceStart = DateTime.now().difference(outgoingStartTime);
               if (timeSinceStart < _outgoingCallProtectionDuration) {
-                debugPrint('📞 Ignoring actionCallEnded for protected outgoing call $callId (started ${timeSinceStart.inSeconds}s ago)');
-                return; // Don't end the call
+                debugPrint(
+                  '📞 Ignoring actionCallEnded for protected outgoing call $callId (started ${timeSinceStart.inSeconds}s ago)',
+                );
+                return;
               }
-              // Remove from tracking after protection period
               _outgoingCallsStartTime.remove(callId);
             }
-            // Use our improved endCall method
             await endCall(callId);
-            break;
-          //
           default:
             break;
         }
@@ -556,44 +600,23 @@ class CallKitService {
   //
   /// Check if there are any active calls
   Future<bool> hasActiveCalls() async {
-    final result = await FlutterCallkitIncoming.activeCalls();
-    final calls = result as List?;
-    return calls != null && calls.isNotEmpty;
+    final calls = await FlutterCallkitIncoming.activeCalls();
+    return calls.isNotEmpty;
   }
 
   //
   /// Get all active calls with proper type conversion
   Future<List<Map<String, dynamic>>> getActiveCalls() async {
-    final result = await FlutterCallkitIncoming.activeCalls();
-    final List<dynamic> rawCalls = result as List? ?? [];
-    //
-    // Convert each call to Map<String, dynamic> with proper type safety
-    return rawCalls.map((call) {
-      final Map<String, dynamic> safeCall = {};
-      //
-      if (call is Map<Object?, Object?>) {
-        call.forEach((key, value) {
-          if (key != null) {
-            final String keyStr = key.toString();
-            //
-            // Handle 'extra' field specially as it's another map
-            if (keyStr == 'extra' && value is Map) {
-              final Map<String, dynamic> extraMap = {};
-              (value as Map<Object?, Object?>).forEach((extraKey, extraValue) {
-                if (extraKey != null) {
-                  extraMap[extraKey.toString()] = extraValue;
-                }
-              });
-              safeCall[keyStr] = extraMap;
-            } else {
-              safeCall[keyStr] = value;
-            }
-          }
-        });
-      }
-      //
-      return safeCall;
-    }).toList();
+    final calls = await FlutterCallkitIncoming.activeCalls();
+    return calls
+        .map(
+          (call) => <String, dynamic>{
+            'id': call.id,
+            'nameCaller': call.nameCaller,
+            'extra': call.extra ?? <String, dynamic>{},
+          },
+        )
+        .toList();
   }
 
   //
@@ -725,6 +748,14 @@ class CallKitService {
         final call = calls.first;
         final callId = call['id']?.toString() ?? '';
         //
+        // calling_module_v2 calls are resumed by CallControllerV2 — never
+        // open the legacy call screen for them.
+        final v2Extra = call['extra'];
+        if (v2Extra is Map && v2Extra['signalVersion']?.toString() == '2') {
+          debugPrint('resumeCallScreenIfNeeded: $callId is a v2 call — skipping legacy resume');
+          return;
+        }
+        //
         // Additional verification - check if the call is recent
         final prefs = SecureStorageService.instance;
         await prefs.initialize();
@@ -817,8 +848,6 @@ class CallKitService {
   // Make sure to clean up when the service is disposed
   void dispose() {
     _callKitEventSubscription?.cancel();
-    _lastHandledCallEvent = null;
-    _lastEventTime = null;
     _lastEventsByType.clear();
     _callEndProcessed.clear();
     _lastActionForCall.clear();

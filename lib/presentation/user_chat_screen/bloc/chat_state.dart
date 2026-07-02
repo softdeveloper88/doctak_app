@@ -24,3 +24,18 @@ class DataError extends ChatState {
 class FileUploadingState extends ChatState {}
 
 class FileUploadedState extends ChatState {}
+
+/// Someone is typing (or stopped typing) in the current conversation.
+class TypingState extends ChatState {
+  final String userId;
+  final bool isTyping;
+  TypingState({required this.userId, required this.isTyping});
+}
+
+/// Online/offline status of a peer changed.
+class PresenceUpdatedState extends ChatState {
+  final String userId;
+  final bool isOnline;
+  PresenceUpdatedState({required this.userId, required this.isOnline});
+}
+

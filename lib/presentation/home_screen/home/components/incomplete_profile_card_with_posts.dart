@@ -1,5 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/common_navigator.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
@@ -154,7 +154,7 @@ class IncompleteProfileCard extends StatelessWidget {
                 backgroundColor: Colors.blue,
               ),
               onPressed: () {
-                launchScreen(context, const CompleteProfileScreen());
+                AppNavigator.push(context, const CompleteProfileScreen());
               },
               child: Text(
                 translation(context).lbl_complete_profile,

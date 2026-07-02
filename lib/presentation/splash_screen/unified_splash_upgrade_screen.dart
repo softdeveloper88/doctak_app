@@ -5,14 +5,19 @@ import 'dart:io';
 // TODO: app_links temporarily disabled due to SDK compatibility
 // import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/notification_service.dart';
+import 'package:doctak_app/core/notification_navigation.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
+import 'package:doctak_app/core/utils/session_manager.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/language_selection_screen/language_selection_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
+import 'package:doctak_app/presentation/splash_screen/splash_branding.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -88,6 +93,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   // Deep linking - TODO: AppLinks temporarily disabled due to SDK compatibility
   // late AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
+  DateTime? _splashStart;
 
   @override
   void initState() {
@@ -246,11 +252,19 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     }
   }
 
+  Future<void> _ensureMinSplashElapsed() async {
+    if (_splashStart == null) return;
+    final elapsed = DateTime.now().difference(_splashStart!);
+    if (elapsed < SplashBranding.minDuration) {
+      await Future.delayed(SplashBranding.minDuration - elapsed);
+    }
+  }
+
   // Initialize splash screen logic
   Future<void> _initializeSplashScreen() async {
+    _splashStart = DateTime.now();
     try {
       setStatusBarColor(Colors.transparent);
-      await const Duration(seconds: 1).delay;
 
       // Fire off dropdown data loads in background (non-blocking)
       // These are for settings/forms later, not required for login/navigation
@@ -292,6 +306,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
     // If first time or no language selected, show language selection screen
     if (isFirstTime || selectedLanguage == null) {
+      await _ensureMinSplashElapsed();
       const LanguageSelectionScreen().launch(context, isNewTask: true);
       return;
     }
@@ -299,6 +314,20 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     bool rememberMe = await prefs.getBool('rememberMe') ?? false;
     String? userToken = await prefs.getString('token');
     String? userId = await prefs.getString('userId');
+
+    // iOS keeps Keychain data after an uninstall, so a reinstall can still hold a
+    // stale/revoked token and would auto-navigate to home. Validate it with the
+    // server once per install. A normal app update keeps a valid token, so the
+    // user is never logged out; only a genuinely invalid session routes to login.
+    if (rememberMe && userToken != null && userToken.isNotEmpty) {
+      final check = await SessionManager.verifyStoredSessionOncePerInstall(
+        token: userToken,
+        userId: userId,
+      );
+      if (check == SessionCheck.invalid) {
+        userToken = null; // session was cleared — fall through to login below
+      }
+    }
 
     if (userToken != null) {
       // Initialize user data
@@ -310,13 +339,28 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       AppData.profilePicNotifier.value = AppData.profilePicUrl;
       AppData.background = await prefs.getString('background') ?? '';
       AppData.email = await prefs.getString('email') ?? '';
-      AppData.specialty = await prefs.getString('specialty') ?? '';
+      final rawSpecialty = await prefs.getString('specialty') ?? '';
+      await SpecialtyDisplay.instance.ensureLoaded();
+      final resolvedSpecialty =
+          SpecialtyDisplay.instance.resolve(rawSpecialty).isNotEmpty
+              ? SpecialtyDisplay.instance.resolve(rawSpecialty)
+              : rawSpecialty;
+      AppData.specialty = resolvedSpecialty;
+      if (resolvedSpecialty != rawSpecialty && resolvedSpecialty.isNotEmpty) {
+        await prefs.setString('specialty', resolvedSpecialty);
+      }
+      final isVerified = await prefs.getString('is_verified') ?? 'false';
+      AppData.isVerified = isVerified == 'true';
       AppData.university = await prefs.getString('university') ?? '';
       AppData.userType = await prefs.getString('user_type') ?? '';
       AppData.city = await prefs.getString('city') ?? '';
       AppData.countryName = await prefs.getString('country') ?? '';
       AppData.currency = await prefs.getString('currency') ?? '';
+      // Re-register FCM after restoring a remembered session (non-blocking).
+      unawaited(NotificationService.syncDeviceToken());
     }
+
+    await _ensureMinSplashElapsed();
 
     if (rememberMe) {
       if (userToken != null) {
@@ -357,6 +401,10 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
       // No deep link, navigate to dashboard
       const SVDashboardScreen().launch(context, isNewTask: true);
+      await Future.delayed(const Duration(milliseconds: 350));
+      if (mounted) {
+        await NotificationNavigation.consumePendingTap();
+      }
 
       // Start listening for future deep links
       deepLinkService.listenForLinks((uri) {
@@ -430,11 +478,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo with scale and fade animations
-                Image.asset(
-                      'assets/logo/logo.png',
-                      width: 40.w,
-                      fit: BoxFit.contain,
-                    )
+                SplashLogoLottie(width: 40.w)
                     .animate()
                     .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
                     .scale(
@@ -531,22 +575,9 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo with scale and fade animations
                 Padding(
                   padding: const EdgeInsets.all(15),
-                  child:
-                      Image.asset(
-                            'assets/logo/logo.png',
-                            width: 40.w,
-                            fit: BoxFit.contain,
-                          )
-                          .animate()
-                          .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
-                          .scale(
-                            begin: const Offset(0.8, 0.8),
-                            end: const Offset(1.0, 1.0),
-                            duration: 600.ms,
-                          ),
+                  child: SplashLogoLottie(width: 40.w),
                 ),
                 const SizedBox(height: 35),
 

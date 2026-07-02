@@ -25,4 +25,5 @@
 library;
 
 export 'post_cache_service.dart';
+export 'feed_cache_service.dart';
 export '../repository/post_repository.dart';

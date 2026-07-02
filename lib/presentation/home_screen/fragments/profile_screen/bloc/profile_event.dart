@@ -19,6 +19,16 @@ class LoadFullProfileEvent extends ProfileEvent {
   List<Object?> get props => [userId];
 }
 
+/// Load completed surveys for the signed-in user's profile tab.
+class LoadProfileSurveysEvent extends ProfileEvent {
+  final bool force;
+
+  LoadProfileSurveysEvent({this.force = false});
+
+  @override
+  List<Object?> get props => [force];
+}
+
 /// Refresh a specific profile section after CRUD
 class RefreshProfileSectionEvent extends ProfileEvent {
   final String section; // experiences, education, publications, awards, licenses, social_profiles, business_hours

@@ -374,11 +374,8 @@ class _DrugDetailScreenState extends State<DrugDetailScreen> {
     if (rows.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: theme.cardShadow,
-      ),
+      clipBehavior: Clip.antiAlias,
+      decoration: theme.cardDecoration,
       child: Column(
         children: List.generate(rows.length, (i) {
           final row = rows[i];
@@ -457,11 +454,7 @@ class _DrugDetailScreenState extends State<DrugDetailScreen> {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: theme.cardShadow,
-          ),
+          decoration: theme.cardDecoration,
           child: Text(
             _drug.indications!,
             style: TextStyle(
@@ -515,7 +508,6 @@ class _DrugDetailScreenState extends State<DrugDetailScreen> {
                   color: theme.cardBackground,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: theme.primary.withValues(alpha: 0.3)),
-                  boxShadow: theme.cardShadow,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

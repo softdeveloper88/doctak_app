@@ -191,6 +191,21 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
     print(event.specialty);
     try {
       Dio dio = Dio();
+      // Split stored full name into first/last for the API
+      final nameParts = AppData.name.trim().split(RegExp(r'\s+'));
+      final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+      final Map<String, dynamic> formFields = {
+        'country': event.country,
+        'state': event.state,
+        'specialty': event.specialty,
+        'user_type': AppData.userType,
+      };
+      if (firstName.isNotEmpty) formFields['first_name'] = firstName;
+      if (lastName.isNotEmpty) formFields['last_name'] = lastName;
+      if (AppData.phone.isNotEmpty) formFields['phone'] = AppData.phone;
+
       Response response1 = await dio.post(
         '${AppData.remoteUrlV6}/complete-profile',
         options: Options(
@@ -198,9 +213,9 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
             'Authorization': 'Bearer ${AppData.userToken}',
           },
         ),
-        data: FormData.fromMap({'country': event.country, 'state': event.state, 'specialty': event.specialty}),
+        data: FormData.fromMap(formFields),
       );
-      if (response1.statusCode == 200) {
+      if (response1.statusCode == 200 && response1.data['success'] != false) {
         AppData.countryName = event.country;
         AppData.city = event.state;
         AppData.specialty = event.specialty;
@@ -211,15 +226,12 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
         prefs.setString('city', event.state);
         ProgressDialogUtils.hideProgressDialog();
         emit(DataCompleteLoaded(response1.data));
-        // emit(DropdownLoaded1(response: response.response.data));
       } else {
-        emit(DropdownError(response1.data));
         ProgressDialogUtils.hideProgressDialog();
-        // emit(LoginFailure(error: 'Invalid credentials'));
+        final message = response1.data is Map ? (response1.data['message'] ?? 'Something went wrong') : response1.data.toString();
+        emit(DropdownError(message));
       }
     } catch (e) {
-      toast('Something went wrong please try again');
-
       ProgressDialogUtils.hideProgressDialog();
       emit(DropdownError(e.toString()));
     }

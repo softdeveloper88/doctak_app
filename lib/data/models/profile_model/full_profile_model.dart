@@ -75,40 +75,51 @@ class FullProfileModel {
       stats: json['stats'] != null
           ? FullProfileStats.fromJson(json['stats'] as Map<String, dynamic>)
           : null,
-      experiences: (json['experiences'] as List<dynamic>?)
+      experiences:
+          (json['experiences'] as List<dynamic>?)
               ?.map((e) => ExperienceModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      education: (json['education'] as List<dynamic>?)
-              ?.map((e) =>
-                  EducationDetailModel.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
-      publications: (json['publications'] as List<dynamic>?)
+      education:
+          (json['education'] as List<dynamic>?)
               ?.map(
-                  (e) => PublicationModel.fromJson(e as Map<String, dynamic>))
+                (e) => EducationDetailModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      awards: (json['awards'] as List<dynamic>?)
+      publications:
+          (json['publications'] as List<dynamic>?)
+              ?.map((e) => PublicationModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      awards:
+          (json['awards'] as List<dynamic>?)
               ?.map((e) => AwardModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
-      licenses: (json['licenses'] as List<dynamic>?)
-              ?.map((e) =>
-                  MedicalLicenseModel.fromJson(e as Map<String, dynamic>))
+      licenses:
+          (json['licenses'] as List<dynamic>?)
+              ?.map(
+                (e) => MedicalLicenseModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      socialProfiles: (json['social_profiles'] as List<dynamic>?)
-              ?.map((e) =>
-                  SocialProfileModel.fromJson(e as Map<String, dynamic>))
+      socialProfiles:
+          (json['social_profiles'] as List<dynamic>?)
+              ?.map(
+                (e) => SocialProfileModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      businessHours: (json['business_hours'] as List<dynamic>?)
-              ?.map((e) =>
-                  BusinessHourModel.fromJson(e as Map<String, dynamic>))
+      businessHours:
+          (json['business_hours'] as List<dynamic>?)
+              ?.map(
+                (e) => BusinessHourModel.fromJson(e as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      interests: (json['interests'] as List<dynamic>?)
+      interests:
+          (json['interests'] as List<dynamic>?)
               ?.map((e) => InterestModel.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
@@ -119,7 +130,8 @@ class FullProfileModel {
           ? (json['profile_completion']['percentage'] as num?)?.toInt()
           : null,
       profileCompletionSections: json['profile_completion'] != null
-          ? (json['profile_completion']['sections'] as Map?)?.cast<String, dynamic>()
+          ? (json['profile_completion']['sections'] as Map?)
+                ?.cast<String, dynamic>()
           : null,
     );
   }
@@ -231,7 +243,7 @@ class FullProfileUser {
       gender: json['gender'] as String?,
       dob: json['dob'] as String?,
       userType: json['user_type'] as String?,
-      verified: json['verified'] is bool ? json['verified'] : false,
+      verified: json['verified'] == true || json['verified'] == 1,
       username: json['username'] as String?,
       title: json['title'] as String?,
       profilePic: AppData.fullImageUrl(json['profile_pic'] as String?),

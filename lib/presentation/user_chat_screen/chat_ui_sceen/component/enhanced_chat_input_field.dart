@@ -4,6 +4,7 @@ import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:permission_handler/permission_handler.dart';
 
 /// Enhanced chat input field with advanced animations
 /// Features:
@@ -41,6 +42,8 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
   bool _showEmoji = false;
   final FocusNode _focusNode = FocusNode();
   bool _isPressed = false;
+  bool _longPressActive = false;
+  bool _permissionRequestInFlight = false;
 
   // Animation controllers
   late AnimationController _emojiController;
@@ -53,6 +56,12 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
   late Animation<double> _micPulseAnimation;
   late Animation<double> _micScaleAnimation;
   late Animation<double> _buttonTransitionAnimation;
+
+  // Stable merged listenable — must NOT be re-created on every build.
+  // Re-creating it every build causes _AnimatedState.didUpdateWidget to
+  // call addListener on the new _MergingListenable, which crashes when
+  // any constituent AnimationController has already been disposed.
+  late Listenable _mergedButtonAnimation;
 
   @override
   void initState() {
@@ -77,6 +86,13 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
     // Button transition (mic <-> send)
     _buttonTransitionController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
     _buttonTransitionAnimation = CurvedAnimation(parent: _buttonTransitionController, curve: Curves.easeInOut);
+
+    // Build once and reuse — prevents crash from new object on every build.
+    _mergedButtonAnimation = Listenable.merge([
+      _micPulseAnimation,
+      _micScaleAnimation,
+      _buttonTransitionAnimation,
+    ]);
   }
 
   void _onTextChanged() {
@@ -91,6 +107,9 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
   @override
   void dispose() {
     widget.controller.removeListener(_onTextChanged);
+    // Dispose CurvedAnimation/derived animations before their parent controllers.
+    (_emojiAnimation as CurvedAnimation).dispose();
+    (_buttonTransitionAnimation as CurvedAnimation).dispose();
     _emojiController.dispose();
     _micPulseController.dispose();
     _micScaleController.dispose();
@@ -111,8 +130,29 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
     });
   }
 
-  void _onMicPress(LongPressStartDetails details) {
-    if (widget.isLoading || widget.controller.text.trim().isNotEmpty) return;
+  Future<void> _onMicPress(LongPressStartDetails details) async {
+    if (widget.isLoading ||
+        widget.controller.text.trim().isNotEmpty ||
+        _permissionRequestInFlight) {
+      return;
+    }
+
+    _longPressActive = true;
+
+    _permissionRequestInFlight = true;
+    final granted = await _ensureMicrophonePermission();
+    _permissionRequestInFlight = false;
+
+    if (!mounted || !_longPressActive) {
+      _resetMicPressState();
+      return;
+    }
+
+    if (!granted) {
+      _resetMicPressState();
+      _showMicrophonePermissionMessage();
+      return;
+    }
 
     setState(() => _isPressed = true);
     _micScaleController.forward();
@@ -121,8 +161,8 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
   }
 
   void _onMicRelease(LongPressEndDetails details) {
-    setState(() => _isPressed = false);
-    _micScaleController.reverse();
+    _longPressActive = false;
+    _resetMicPressState();
 
     if (widget.isRecording) {
       widget.onRecordStateChanged(false);
@@ -130,8 +170,44 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
   }
 
   void _onMicCancel() {
+    _longPressActive = false;
+    _resetMicPressState();
+  }
+
+  void _resetMicPressState() {
+    if (!_isPressed && _micScaleController.status == AnimationStatus.dismissed) {
+      return;
+    }
     setState(() => _isPressed = false);
     _micScaleController.reverse();
+  }
+
+  Future<bool> _ensureMicrophonePermission() async {
+    var status = await Permission.microphone.status;
+    if (status.isGranted) return true;
+
+    if (status.isPermanentlyDenied) {
+      return false;
+    }
+
+    status = await Permission.microphone.request();
+    return status.isGranted;
+  }
+
+  void _showMicrophonePermissionMessage() {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return;
+
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: const Text('Microphone permission is required to record voice messages.'),
+        action: SnackBarAction(
+          label: 'Settings',
+          onPressed: openAppSettings,
+        ),
+      ),
+    );
   }
 
   void _onSendTap() {
@@ -261,7 +337,7 @@ class _EnhancedChatInputFieldState extends State<EnhancedChatInputField> with Ti
 
   Widget _buildActionButton(OneUITheme theme) {
     return AnimatedBuilder(
-      animation: Listenable.merge([_micPulseAnimation, _micScaleAnimation, _buttonTransitionAnimation]),
+      animation: _mergedButtonAnimation,
       builder: (context, child) {
         final hasText = widget.controller.text.trim().isNotEmpty;
         final isMicMode = !hasText && !widget.isLoading;

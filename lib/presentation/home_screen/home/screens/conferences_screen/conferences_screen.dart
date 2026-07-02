@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/conference_display.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/virtualized_conferences_list.dart';
@@ -16,6 +17,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'bloc/conference_bloc.dart';
 import 'bloc/conference_event.dart';
 import 'bloc/conference_state.dart';
+import 'conferences_month_filter.dart';
 
 class ConferencesScreen extends StatefulWidget {
   const ConferencesScreen({this.isFromSplash = false, super.key});
@@ -89,8 +91,8 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                 builder: (context, state) {
                   if (state is CountriesDataLoaded1) {
                     List<dynamic> list = state.countriesModelList;
-                    // Get the selected country name or default to "All"
-                    String selectedCountryName = state.countryName.isEmpty
+                    final selectedFilter = conferenceBloc.selectedCountry;
+                    final selectedCountryName = state.countryName.isEmpty
                         ? 'All'
                         : state.countryName;
                     return Row(
@@ -163,7 +165,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                         style: TextStyle(
                                           fontSize: 14,
                                           fontWeight:
-                                              selectedCountryName == 'All'
+                                              selectedFilter == 'all'
                                               ? FontWeight.w600
                                               : FontWeight.normal,
                                           color: theme.textPrimary,
@@ -174,21 +176,16 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                                 ),
                                 const PopupMenuDivider(),
                               ];
-                              // Add country items - handle both Map and String formats
+                              // Add country items - API returns { id, name } or legacy strings
                               for (final item in list) {
-                                String countryName;
-                                if (item is Map) {
-                                  countryName = item['name']?.toString() ?? '';
-                                } else {
-                                  countryName = item?.toString() ?? '';
-                                }
-                                if (countryName.isEmpty) continue;
+                                final filterValue = conferenceCountryFilterValue(item);
+                                final countryName = conferenceCountryDisplayName(item);
+                                if (filterValue.isEmpty || countryName.isEmpty) continue;
 
-                                final bool isSelected =
-                                    countryName == selectedCountryName;
+                                final bool isSelected = filterValue == selectedFilter;
                                 items.add(
                                   PopupMenuItem<String>(
-                                    value: countryName,
+                                    value: filterValue,
                                     child: Row(
                                       children: [
                                         Icon(
@@ -216,15 +213,16 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                               }
                               return items;
                             },
-                            onSelected: (String newValue) {
-                              final String displayName = newValue == 'all'
+                            onSelected: (String filterValue) {
+                              final displayName = filterValue == 'all'
                                   ? ''
-                                  : newValue;
+                                  : conferenceCountryNameFromList(list, filterValue);
                               conferenceBloc.add(
                                 LoadPageEvent(
                                   page: 1,
-                                  countryName: newValue,
+                                  countryName: filterValue,
                                   searchTerm: state.searchTerms ?? '',
+                                  month: conferenceBloc.selectedMonth,
                                 ),
                               );
                               _splashBloc?.add(
@@ -315,6 +313,7 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
                   page: 1,
                   countryName: state.countryName,
                   searchTerm: searchTxt,
+                  month: conferenceBloc.selectedMonth,
                 ),
               );
               _splashBloc?.add(LoadDropdownData1(state.countryName, searchTxt));
@@ -392,9 +391,31 @@ class _ConferencesScreenState extends State<ConferencesScreen> {
           return Expanded(child: ConferencesShimmerLoader());
         } else if (state is PaginationLoadedState) {
           return Expanded(
-            child: VirtualizedConferencesList(
-              conferenceBloc: conferenceBloc,
-              scrollController: _scrollController,
+            child: Column(
+              children: [
+                ConferencesMonthFilter(
+                  monthBuckets: conferenceBloc.monthBuckets,
+                  selectedMonth: conferenceBloc.selectedMonth,
+                  showing: conferenceBloc.conferenceList.length,
+                  total: conferenceBloc.totalCount,
+                  onChanged: (month) {
+                    conferenceBloc.add(
+                      LoadPageEvent(
+                        page: 1,
+                        countryName: conferenceBloc.selectedCountry,
+                        searchTerm: conferenceBloc.selectedSearch,
+                        month: month,
+                      ),
+                    );
+                  },
+                ),
+                Expanded(
+                  child: VirtualizedConferencesList(
+                    conferenceBloc: conferenceBloc,
+                    scrollController: _scrollController,
+                  ),
+                ),
+              ],
             ),
           );
         } else if (state is DataError) {

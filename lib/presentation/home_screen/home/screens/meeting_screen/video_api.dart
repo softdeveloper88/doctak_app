@@ -21,11 +21,18 @@ Future<GetMeetingModel> getMeetings() async {
 ///
 
 Future<CreateMeetingModel> startMeetings() async {
-  return CreateMeetingModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/create-meeting', method: networkUtils.HttpMethod.POST)));
+  return CreateMeetingModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponseNode('/api/meetings/create', method: networkUtils.HttpMethod.POST)));
 }
 
 Future<MeetingDetailsModel> joinMeetings(String meetingCode) async {
-  return MeetingDetailsModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/join-meeting?meeting_channel=$meetingCode', method: networkUtils.HttpMethod.GET)));
+  return MeetingDetailsModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponseNode('/api/meetings/join/$meetingCode', method: networkUtils.HttpMethod.POST)));
+}
+
+/// Fetches meeting details WITHOUT re-registering the participant.
+/// Use this for in-call refreshes (participant list updates, settings changes).
+/// Use [joinMeetings] only on the initial join.
+Future<MeetingDetailsModel> getMeetingDetails(String meetingCode) async {
+  return MeetingDetailsModel.fromJson(await networkUtils.handleResponse(await networkUtils.buildHttpResponseNode('/api/meetings/$meetingCode', method: networkUtils.HttpMethod.GET)));
 }
 
 Future<SearchUserModel> searchUserForMeeting(String query) async {
@@ -52,16 +59,12 @@ Future<ApiResponse> askToJoin(context, channelName) async {
 
 Future<ApiResponse> allowJoinMeet(context, meetingId, userId) async {
   try {
-    // ProgressDialogUtils.showProgressDialog();
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/allow-join-request?userId=$userId&meetingId=$meetingId', method: networkUtils.HttpMethod.GET),
+      await networkUtils.buildHttpResponse('/allow-join-request?participantId=$userId&meetingId=$meetingId', method: networkUtils.HttpMethod.GET),
     );
-
-    // ProgressDialogUtils.hideProgressDialog();
 
     return ApiResponse.success(response);
   } on ApiException catch (e) {
-    // ProgressDialogUtils.hideProgressDialog();
     print('Error: ${e.statusCode} - ${e.message}');
     return ApiResponse.error("Something went wrong");
   }
@@ -84,26 +87,23 @@ Future<ApiResponse> testFCMCall(userId) async {
 
 Future<ApiResponse> rejectJoinMeet(context, meetingId, userId) async {
   try {
-    ProgressDialogUtils.showProgressDialog();
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/reject-join-request', method: networkUtils.HttpMethod.GET, request: {'userId': userId, 'meetingId': meetingId}),
+      await networkUtils.buildHttpResponse('/reject-join-request?participantId=$userId&meetingId=$meetingId', method: networkUtils.HttpMethod.GET),
     );
-
-    ProgressDialogUtils.hideProgressDialog();
 
     return ApiResponse.success(response);
   } on ApiException catch (e) {
-    ProgressDialogUtils.hideProgressDialog();
     print('Error: ${e.statusCode} - ${e.message}');
     return ApiResponse.error("Something went wrong");
   }
 }
 
-Future<ApiResponse> endMeeting(context, meetingId) async {
+Future<ApiResponse> endMeeting(context, meetingChannel) async {
   try {
-    // Don't show progress dialog here - let the caller handle UI feedback
-    Map<String, dynamic> response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/close-meeting', method: networkUtils.HttpMethod.POST, request: {'meeting_id': meetingId}));
-
+    // meetingChannel is the Agora channel code, e.g. "abc123"
+    Map<String, dynamic> response = await networkUtils.handleResponse(
+      await networkUtils.buildHttpResponseNode('/api/meetings/$meetingChannel/end', method: networkUtils.HttpMethod.POST),
+    );
     return ApiResponse.success(response);
   } on ApiException catch (e) {
     debugPrint('End meeting API error: ${e.statusCode} - ${e.message}');
@@ -114,12 +114,34 @@ Future<ApiResponse> endMeeting(context, meetingId) async {
   }
 }
 
-Future<ApiResponse> sendMessage(meetingId, message, senderId) async {
+Future<ApiResponse> sendMessage(channel, message, senderId) async {
   try {
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/send-message-meeting', method: networkUtils.HttpMethod.POST, request: {'meeting_id': meetingId, 'message': message, 'user_id': senderId}),
+      await networkUtils.buildHttpResponseNode(
+        '/api/meetings/$channel/messages',
+        method: networkUtils.HttpMethod.POST,
+        body: {'message': message},
+      ),
     );
+    return ApiResponse.success(response);
+  } on ApiException catch (e) {
+    print('Error: ${e.statusCode} - ${e.message}');
+    return ApiResponse.error("Something went wrong");
+  }
+}
 
+/// Polls chat messages from the server (same approach as the web).
+/// [channel] is the Agora meeting channel code (e.g. "FUb-Awks-29").
+/// [afterIso] is the ISO timestamp of the last known message; when null,
+/// all messages for the meeting are returned.
+Future<ApiResponse> getMessages(String channel, {String? afterIso}) async {
+  try {
+    final path = afterIso != null
+        ? '/api/meetings/$channel/messages?after=${Uri.encodeQueryComponent(afterIso)}'
+        : '/api/meetings/$channel/messages';
+    Map<String, dynamic> response = await networkUtils.handleResponse(
+      await networkUtils.buildHttpResponseNode(path, method: networkUtils.HttpMethod.GET),
+    );
     return ApiResponse.success(response);
   } on ApiException catch (e) {
     print('Error: ${e.statusCode} - ${e.message}');
@@ -156,9 +178,12 @@ Future<ApiResponse> closeMeetingStatus(context, meetingId, userId, action, statu
 Future<ApiResponse> sendInviteMeeting(channel, userId) async {
   try {
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/send-meeting-invitation', method: networkUtils.HttpMethod.POST, request: {'channel': channel, 'userId': userId}),
+      await networkUtils.buildHttpResponseNode(
+        '/api/meetings/$channel/invite',
+        method: networkUtils.HttpMethod.POST,
+        body: {'userId': userId},
+      ),
     );
-
     return ApiResponse.success(response);
   } on ApiException catch (e) {
     print('Error: ${e.statusCode} - ${e.message}');
@@ -167,37 +192,31 @@ Future<ApiResponse> sendInviteMeeting(channel, userId) async {
 }
 
 Future<ApiResponse> updateMeetingSetting({
-  meetingId,
-  startStopMeeting,
-  addRemoveHost,
+  meetingChannel,
+  muteAll,
   shareScreen,
   raisedHand,
   sendReactions,
   toggleMicrophone,
   toggleVideo,
   enableWaitingRoom,
-  requirePassword,
 }) async {
   try {
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse(
-        '/meeting-settings/update',
+      await networkUtils.buildHttpResponseNode(
+        '/api/meetings/$meetingChannel/settings',
         method: networkUtils.HttpMethod.POST,
-        request: {
-          'meeting_id': meetingId,
-          'start_stop_meetingCheckbox': startStopMeeting,
-          'addRemoveHostCheckbox': addRemoveHost,
-          'shareScreenCheckbox': shareScreen,
-          'raiseHandCheckbox': raisedHand,
-          'sendReactionsCheckbox': sendReactions,
-          'toggleMicCheckbox': toggleMicrophone,
-          'toggleVideoCheckbox': toggleVideo,
-          'enableWaitingRoomCheckbox': enableWaitingRoom,
-          'requirePasswordCheckbox': requirePassword,
+        body: {
+          if (muteAll != null) 'muteAll': muteAll,
+          if (shareScreen != null) 'shareScreen': shareScreen,
+          if (raisedHand != null) 'raisedHand': raisedHand,
+          if (sendReactions != null) 'sendReactions': sendReactions,
+          if (toggleMicrophone != null) 'toggleMicrophone': toggleMicrophone,
+          if (toggleVideo != null) 'toggleVideo': toggleVideo,
+          if (enableWaitingRoom != null) 'enableWaitingRoom': enableWaitingRoom,
         },
       ),
     );
-
     return ApiResponse.success(response);
   } on ApiException catch (e) {
     print('Error: ${e.statusCode} - ${e.message}');
@@ -205,12 +224,70 @@ Future<ApiResponse> updateMeetingSetting({
   }
 }
 
-Future<ApiResponse> setScheduleMeeting({title, date, time, int duration = 60}) async {
+
+/// Update the caller's own participant-state row via the Node backend.
+/// [participantId] is the `meeting_details` primary-key UUID returned in the
+/// join response (stored in `Users.meetingDetails[0].id`).
+///
+/// Triggers a `meeting-status` Pusher event so all other participants (Flutter
+/// AND web) see the change in real-time.
+Future<ApiResponse> updateMeetingParticipantState(
+  String participantId, {
+  bool? isHandUp,
+  bool? isMicOn,
+  bool? isVideoOn,
+  bool? isScreenShared,
+}) async {
   try {
-    ProgressDialogUtils.showProgressDialog();
+    final Map<String, dynamic> body = {};
+    if (isHandUp != null) body['isHandUp'] = isHandUp;
+    if (isMicOn != null) body['isMicOn'] = isMicOn;
+    if (isVideoOn != null) body['isVideoOn'] = isVideoOn;
+    if (isScreenShared != null) body['isScreenShared'] = isScreenShared;
 
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse('/save-schedule-meeting?title=$title&date=$date&time=$time&duration=$duration', method: networkUtils.HttpMethod.GET),
+      await networkUtils.buildHttpResponseNode(
+        '/api/meetings/participants/$participantId/state',
+        method: networkUtils.HttpMethod.POST,
+        body: body,
+      ),
+    );
+    return ApiResponse.success(response);
+  } on ApiException catch (e) {
+    debugPrint('updateMeetingParticipantState error: ${e.statusCode} - ${e.message}');
+    return ApiResponse.error("Something went wrong");
+  }
+}
+
+Future<ApiResponse> setScheduleMeeting({
+  title,
+  date,
+  time,
+  int duration = 60,
+  String type = 'meeting',
+  String description = '',
+  bool enableWaitingRoom = false,
+  bool requireRegistration = false,
+  bool autoRecord = false,
+}) async {
+  try {
+    ProgressDialogUtils.showProgressDialog();
+    Map<String, dynamic> response = await networkUtils.handleResponse(
+      await networkUtils.buildHttpResponseNode(
+        '/api/meetings/scheduled',
+        method: networkUtils.HttpMethod.POST,
+        body: {
+          'title': title,
+          'date': date,
+          'time': time,
+          'duration': duration,
+          'type': type,
+          'description': description,
+          'enableWaitingRoom': enableWaitingRoom,
+          'requireRegistration': requireRegistration,
+          'autoRecord': autoRecord,
+        },
+      ),
     );
     ProgressDialogUtils.hideProgressDialog();
 
@@ -228,9 +305,10 @@ Future<MeetingHistoryResponse> getMeetingHistory({
   String search = '',
   int page = 1,
 }) async {
+  final status = filter == 'all' ? 'ended' : filter;
   final response = await networkUtils.handleResponse(
-    await networkUtils.buildHttpResponse(
-      '/meeting-history?filter=$filter&search=${Uri.encodeComponent(search)}&page=$page',
+    await networkUtils.buildHttpResponseNode(
+      '/api/v1/meeting-history?filter=$filter&search=${Uri.encodeComponent(search)}&page=$page&status=$status',
       method: networkUtils.HttpMethod.GET,
     ),
   );
@@ -247,9 +325,9 @@ Future<MeetingHistoryResponse> getMeetingHistory({
 Future<ApiResponse> cancelScheduledMeeting(int meetingId) async {
   try {
     Map<String, dynamic> response = await networkUtils.handleResponse(
-      await networkUtils.buildHttpResponse(
-        '/cancel-scheduled-meeting/$meetingId',
-        method: networkUtils.HttpMethod.POST,
+      await networkUtils.buildHttpResponseNode(
+        '/api/meetings/scheduled/$meetingId',
+        method: networkUtils.HttpMethod.DELETE,
       ),
     );
     return ApiResponse.success(response);

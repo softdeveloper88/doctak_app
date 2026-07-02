@@ -1,5 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
@@ -45,7 +45,7 @@ class _UserChatComponentState extends State<UserChatComponent> {
 
                     return GestureDetector(
                       onTap: () {
-                        SVProfileFragment(userId: contact.id).launch(context);
+                        ProfileNavigation.openUser(context, contact.id);
                       },
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

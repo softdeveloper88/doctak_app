@@ -7,7 +7,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/one_ui_profile_components.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:doctak_app/widgets/one_ui_form_dropdown.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -156,23 +156,16 @@ class _ProfessionalInfoScreenState extends State<ProfessionalInfoScreen> with Si
                                   }
 
                                   if (isLoaded) {
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: theme.border),
-                                      ),
-                                      child: CustomDropdownButtonFormField(
-                                        itemBuilder: (item) => Text(item, style: TextStyle(color: theme.textPrimary)),
-                                        items: specialties,
-                                        value: selectedSpecialty,
-                                        width: double.infinity,
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                        onChanged: (String? newValue) {
-                                          widget.profileBloc.specialtyName = newValue!;
-                                          widget.profileBloc.userProfile?.user?.specialty = newValue;
-                                          widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
-                                        },
-                                      ),
+                                    return OneUIFormDropdown<String>(
+                                      label: 'Specialty',
+                                      items: specialties,
+                                      value: selectedSpecialty,
+                                      itemLabel: (item) => item,
+                                      onChanged: (String? newValue) {
+                                        widget.profileBloc.specialtyName = newValue!;
+                                        widget.profileBloc.userProfile?.user?.specialty = newValue;
+                                        widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
+                                      },
                                     );
                                   } else {
                                     return const Center(child: CircularProgressIndicator());

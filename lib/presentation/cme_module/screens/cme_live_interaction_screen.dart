@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/data/apiClient/cme/cme_api_service.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/data/models/cme/cme_chat_poll_model.dart';
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_live_interaction_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:doctak_app/presentation/cme_module/bloc/cme_live_interaction_eve
 import 'package:doctak_app/presentation/cme_module/bloc/cme_live_interaction_state.dart';
 import 'package:doctak_app/presentation/cme_module/screens/cme_quiz_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,6 +18,7 @@ class CmeLiveInteractionScreen extends StatelessWidget {
   final String? eventTitle;
   final bool isHost;
   final List<CmeModule>? modules;
+  final bool isEmbedded;
 
   const CmeLiveInteractionScreen({
     super.key,
@@ -23,6 +26,7 @@ class CmeLiveInteractionScreen extends StatelessWidget {
     this.eventTitle,
     this.isHost = false,
     this.modules,
+    this.isEmbedded = false,
   });
 
   @override
@@ -38,6 +42,7 @@ class CmeLiveInteractionScreen extends StatelessWidget {
         eventTitle: eventTitle,
         isHost: isHost,
         modules: modules,
+        isEmbedded: isEmbedded,
       ),
     );
   }
@@ -48,12 +53,14 @@ class _CmeLiveInteractionView extends StatefulWidget {
   final String? eventTitle;
   final bool isHost;
   final List<CmeModule>? modules;
+  final bool isEmbedded;
 
   const _CmeLiveInteractionView({
     required this.eventId,
     this.eventTitle,
     required this.isHost,
     this.modules,
+    this.isEmbedded = false,
   });
 
   @override
@@ -117,158 +124,117 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
     final theme = OneUITheme.of(context);
     final bloc = context.read<CmeLiveInteractionBloc>();
 
+    final tabBar = TabBar(
+      controller: _tabController,
+      labelColor: theme.primary,
+      unselectedLabelColor: theme.textTertiary,
+      indicatorColor: theme.primary,
+      dividerColor: theme.divider,
+      labelStyle: const TextStyle(
+          fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600),
+      tabs: const [
+        Tab(icon: Icon(Icons.chat_bubble_outline, size: 18), text: 'Chat'),
+        Tab(icon: Icon(Icons.poll_outlined, size: 18), text: 'Polls'),
+        Tab(icon: Icon(Icons.view_module_outlined, size: 18), text: 'Modules'),
+      ],
+    );
+
+    final body = BlocListener<CmeLiveInteractionBloc, CmeLiveInteractionState>(
+      listener: (context, state) {
+        if (state is CmePollCreatedState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: theme.success,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        } else if (state is CmeLiveInteractionErrorState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      child: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildChatTab(theme),
+          _buildPollsTab(theme),
+          _buildModulesTab(theme),
+        ],
+      ),
+    );
+
+    // ─── Embedded mode (inside bottom sheet) ───
+    if (widget.isEmbedded) {
+      return Column(
+        children: [
+          Material(
+            color: theme.cardBackground,
+            child: tabBar,
+          ),
+          Expanded(child: body),
+        ],
+      );
+    }
+
+    // ─── Standalone mode (full screen) ───
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: theme.cardBackground,
-        foregroundColor: theme.textPrimary,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.eventTitle ?? 'Live Session',
-              style: const TextStyle(fontFamily: 'Poppins', fontSize: 14, fontWeight: FontWeight.w600),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            BlocBuilder<CmeLiveInteractionBloc, CmeLiveInteractionState>(
-              builder: (context, state) {
-                return Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF34C759),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatDuration(bloc.sessionSeconds),
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11,
-                        color: theme.textTertiary,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Icon(Icons.people_outline, size: 13, color: theme.textTertiary),
-                    const SizedBox(width: 3),
-                    Text(
-                      '${bloc.totalParticipants}',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11,
-                        color: theme.textTertiary,
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+      appBar: DoctakAppBar(
+        title: widget.eventTitle ?? 'Live Session',
+        subtitle: _buildSubtitleText(bloc),
+        showOnlineIndicator: true,
         actions: [
           if (widget.isHost)
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: theme.textPrimary),
-              onSelected: (value) => _handleHostAction(value),
-              itemBuilder: (_) => [
-                const PopupMenuItem(value: 'mute_all', child: Row(
-                  children: [
-                    Icon(Icons.volume_off_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Mute All', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                  ],
-                )),
-                const PopupMenuItem(value: 'manage_modules', child: Row(
-                  children: [
-                    Icon(Icons.view_module_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Manage Modules', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                  ],
-                )),
-                const PopupMenuItem(value: 'manage_speakers', child: Row(
-                  children: [
-                    Icon(Icons.record_voice_over_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Manage Speakers', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                  ],
-                )),
-                const PopupMenuItem(value: 'create_poll', child: Row(
-                  children: [
-                    Icon(Icons.poll_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Create Poll', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                  ],
-                )),
-                const PopupMenuItem(value: 'participants', child: Row(
-                  children: [
-                    Icon(Icons.people_outline, size: 20),
-                    SizedBox(width: 10),
-                    Text('Participants', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                  ],
-                )),
-                const PopupMenuItem(value: 'generate_certificates', child: Row(
-                  children: [
-                    Icon(Icons.workspace_premium_outlined, size: 20),
-                    SizedBox(width: 10),
-                    Text('Generate Certificates', style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
-                  ],
-                )),
-                PopupMenuItem(value: 'end_event', child: Row(
-                  children: [
-                    const Icon(Icons.power_settings_new, size: 20, color: Colors.red),
-                    const SizedBox(width: 10),
-                    Text('End Event', style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: Colors.red.shade700)),
-                  ],
-                )),
-              ],
-            ),
+            _buildHostMenuButton(theme),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: theme.primary,
-          unselectedLabelColor: theme.textTertiary,
-          indicatorColor: theme.primary,
-          labelStyle: const TextStyle(
-              fontFamily: 'Poppins', fontSize: 13, fontWeight: FontWeight.w600),
-          tabs: const [
-            Tab(icon: Icon(Icons.chat_bubble_outline, size: 18), text: 'Chat'),
-            Tab(icon: Icon(Icons.poll_outlined, size: 18), text: 'Polls'),
-            Tab(icon: Icon(Icons.view_module_outlined, size: 18), text: 'Modules'),
-          ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: tabBar,
         ),
       ),
-      body: BlocListener<CmeLiveInteractionBloc, CmeLiveInteractionState>(
-        listener: (context, state) {
-          if (state is CmePollCreatedState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: const Color(0xFF34C759),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          } else if (state is CmeLiveInteractionErrorState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildChatTab(theme),
-            _buildPollsTab(theme),
-            _buildModulesTab(theme),
-          ],
-        ),
+      body: body,
+    );
+  }
+
+  String _buildSubtitleText(CmeLiveInteractionBloc bloc) {
+    return '${_formatDuration(bloc.sessionSeconds)}  •  ${bloc.totalParticipants} participants';
+  }
+
+  Widget _buildHostMenuButton(OneUITheme theme) {
+    return PopupMenuButton<String>(
+      icon: Icon(Icons.more_vert, color: theme.textPrimary),
+      color: theme.cardBackground,
+      surfaceTintColor: Colors.transparent,
+      onSelected: (value) => _handleHostAction(value),
+      itemBuilder: (_) => [
+        _buildMenuItem(theme, 'mute_all', Icons.volume_off_outlined, 'Mute All'),
+        _buildMenuItem(theme, 'manage_modules', Icons.view_module_outlined, 'Manage Modules'),
+        _buildMenuItem(theme, 'manage_speakers', Icons.record_voice_over_outlined, 'Manage Speakers'),
+        _buildMenuItem(theme, 'create_poll', Icons.poll_outlined, 'Create Poll'),
+        _buildMenuItem(theme, 'participants', Icons.people_outline, 'Participants'),
+        _buildMenuItem(theme, 'generate_certificates', Icons.workspace_premium_outlined, 'Generate Certificates'),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _buildMenuItem(
+      OneUITheme theme, String value, IconData icon, String label) {
+    return PopupMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: theme.iconColor),
+          const SizedBox(width: 10),
+          Text(label,
+              style: TextStyle(
+                  fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary)),
+        ],
       ),
     );
   }
@@ -292,9 +258,6 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
         break;
       case 'generate_certificates':
         _generateCertificates();
-        break;
-      case 'end_event':
-        _confirmEndEvent();
         break;
     }
   }
@@ -508,68 +471,14 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
     );
   }
 
-  // ─── End Event Confirmation ───
-
-  void _confirmEndEvent() {
-    final theme = OneUITheme.of(context);
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        title: Text('End Event?',
-            style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary)),
-        content: Text(
-          'This will end the live session for all participants.',
-          style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel',
-                style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary)),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              try {
-                await CmeApiService.endEvent(widget.eventId);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Event ended successfully'),
-                      backgroundColor: Color(0xFF34C759),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  Navigator.pop(context);
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to end event: $e'),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                }
-              }
-            },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('End Event', style: TextStyle(fontFamily: 'Poppins')),
-          ),
-        ],
-      ),
-    );
-  }
-
   // ─── Mute All ───
 
   void _muteAllParticipants() {
+    final theme = OneUITheme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Text('All participants have been muted'),
-        backgroundColor: Color(0xFF34C759),
+        backgroundColor: theme.success,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -605,7 +514,7 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(result['message'] ?? 'Certificates generated'),
-                      backgroundColor: const Color(0xFF34C759),
+                      backgroundColor: theme.success,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -766,7 +675,7 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
                             SnackBar(
                               content:
                                   Text('Switched to ${m.title ?? "module"}'),
-                              backgroundColor: const Color(0xFF34C759),
+                              backgroundColor: theme.success,
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -892,7 +801,7 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
                           horizontal: 4, vertical: 1),
                       decoration: BoxDecoration(
                         color: msg.isSpeaker
-                            ? const Color(0xFFFF9500).withValues(alpha: 0.15)
+                            ? theme.warning.withValues(alpha: 0.15)
                             : theme.primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(3),
                       ),
@@ -903,7 +812,7 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
                           fontSize: 9,
                           fontWeight: FontWeight.w600,
                           color: msg.isSpeaker
-                              ? const Color(0xFFFF9500)
+                              ? theme.warning
                               : theme.primary,
                         ),
                       ),
@@ -1002,7 +911,7 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              backgroundColor: const Color(0xFF34C759),
+              backgroundColor: theme.success,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -1081,6 +990,8 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
   }
 
   Widget _buildPollCard(OneUITheme theme, CmePollData poll) {
+    final hasVoted = poll.hasVoted == true;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -1125,10 +1036,40 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
           ...(poll.options ?? []).map(
             (option) => _buildPollOption(theme, poll, option),
           ),
-          const SizedBox(height: 8),
-          Text(
-            '${poll.totalVotes ?? 0} votes',
-            style: theme.caption,
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                '${poll.totalVotes ?? 0} votes',
+                style: theme.caption,
+              ),
+              if (hasVoted) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: theme.success.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check_circle_outline, size: 11, color: theme.success),
+                      const SizedBox(width: 3),
+                      Text(
+                        'You voted',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: theme.success,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
@@ -1138,8 +1079,11 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
   Widget _buildPollOption(
       OneUITheme theme, CmePollData poll, CmePollOption option) {
     final hasVoted = poll.hasVoted == true;
-    final isVoted = poll.votedOptionId == option.id ||
-        poll.votedOptionId == option.text;
+    final votedId = poll.votedOptionId;
+    final isVoted = hasVoted &&
+        votedId != null &&
+        votedId.isNotEmpty &&
+        (votedId == option.id || votedId == option.text);
     final pct = option.percentage ?? 0;
 
     return Padding(
@@ -1156,67 +1100,95 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
                     );
               }
             : null,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isVoted
                   ? theme.primary
-                  : theme.border,
+                  : hasVoted
+                      ? theme.border.withValues(alpha: 0.5)
+                      : theme.border,
               width: isVoted ? 1.5 : 1,
             ),
+            color: isVoted
+                ? theme.primary.withValues(alpha: 0.06)
+                : null,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  if (isVoted)
-                    Icon(Icons.check_circle,
-                        size: 16, color: theme.primary),
-                  if (isVoted) const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      option.text ?? '',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 13,
-                        fontWeight:
-                            isVoted ? FontWeight.w600 : FontWeight.w400,
-                        color: theme.textPrimary,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(7),
+            child: Stack(
+              children: [
+                // Percentage fill bar (like X/Facebook)
+                if (hasVoted)
+                  Positioned.fill(
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: pct / 100,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isVoted
+                              ? theme.primary.withValues(alpha: 0.12)
+                              : theme.textTertiary.withValues(alpha: 0.08),
+                        ),
                       ),
                     ),
                   ),
-                  if (hasVoted)
-                    Text(
-                      '${pct.toStringAsFixed(1)}%',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isVoted ? theme.primary : theme.textSecondary,
+                // Content
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Row(
+                    children: [
+                      if (isVoted)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Icon(Icons.check_circle,
+                              size: 16, color: theme.primary),
+                        )
+                      else if (!hasVoted)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: Container(
+                            width: 16,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.textTertiary.withValues(alpha: 0.5),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      Expanded(
+                        child: Text(
+                          option.text ?? '',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 13,
+                            fontWeight:
+                                isVoted ? FontWeight.w600 : FontWeight.w400,
+                            color: theme.textPrimary,
+                          ),
+                        ),
                       ),
-                    ),
-                ],
-              ),
-              if (hasVoted) ...[
-                const SizedBox(height: 6),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: pct / 100,
-                    backgroundColor: theme.divider,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isVoted
-                          ? theme.primary
-                          : theme.textTertiary.withValues(alpha: 0.4),
-                    ),
-                    minHeight: 4,
+                      if (hasVoted)
+                        Text(
+                          '${pct.toStringAsFixed(pct.truncateToDouble() == pct ? 0 : 1)}%',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: isVoted ? theme.primary : theme.textSecondary,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -1338,15 +1310,12 @@ class _CmeLiveInteractionViewState extends State<_CmeLiveInteractionView>
                 if (hasQuiz)
                   TextButton.icon(
                     onPressed: () {
-                      Navigator.push(
+                      AppNavigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => CmeQuizScreen(
-                            eventId: widget.eventId,
-                            moduleId: module.id!,
-                            quizId: module.quiz!.id!,
-                            quizTitle: module.quiz?.title,
-                          ),
+                        CmeQuizScreen(
+                          eventId: widget.eventId,
+                          moduleId: module.id,
+                          quizTitle: module.quiz?.title,
                         ),
                       );
                     },

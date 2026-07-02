@@ -9,7 +9,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/com
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_date_widget.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/component/profile_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/custom_dropdown_button_from_field.dart';
+import 'package:doctak_app/widgets/one_ui_form_dropdown.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -281,119 +281,46 @@ class _PersonalInfoScreenState extends State<PersonalInfoScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Country dropdown
-                    Text(translation(context).lbl_country, style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: theme.radiusM,
-                        border: Border.all(color: theme.border),
-                      ),
-                      child: CustomDropdownButtonFormField(
-                        itemBuilder: (item) => Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item.countryName ?? '',
-                                style: TextStyle(color: theme.textPrimary),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Text(item.flag ?? ''),
-                          ],
-                        ),
-                        selectedItemBuilder: (context) => countries.map((item) {
-                          return Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              item.countryName ?? '',
-                              style: TextStyle(color: theme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
-                            ),
-                          );
-                        }).toList(),
-                        items: countries,
-                        value: findModelByNameOrDefault(countries, selectedCountry, countries.isNotEmpty ? countries.first : Countries()),
-                        width: double.infinity,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        onChanged: (newValue) {
-                          widget.profileBloc.country = newValue?.countryName ?? '';
-                          widget.profileBloc.userProfile?.user?.country = newValue?.countryName ?? '';
-                          widget.profileBloc.add(UpdateSecondDropdownValues(newValue?.countryName ?? ""));
-                        },
-                      ),
+                    OneUIFormDropdown<Countries>(
+                      label: translation(context).lbl_country,
+                      items: countries,
+                      value: findModelByNameOrDefault(countries, selectedCountry, countries.isNotEmpty ? countries.first : Countries()),
+                      itemLabel: (item) => item.countryName ?? '',
+                      itemTrailing: (item) => Text(item.flag ?? ''),
+                      onChanged: (newValue) {
+                        widget.profileBloc.country = newValue?.countryName ?? '';
+                        widget.profileBloc.userProfile?.user?.country = newValue?.countryName ?? '';
+                        widget.profileBloc.add(UpdateSecondDropdownValues(newValue?.countryName ?? ""));
+                      },
                     ),
 
                     const SizedBox(height: 16),
 
                     // State dropdown
-                    Text(translation(context).lbl_state, style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: theme.radiusM,
-                        border: Border.all(color: theme.border),
-                      ),
-                      child: CustomDropdownButtonFormField(
-                        itemBuilder: (item) => Text(
-                          item ?? '',
-                          style: TextStyle(color: theme.textPrimary),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        selectedItemBuilder: (context) => states.map((item) {
-                          return Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              item ?? '',
-                              style: TextStyle(color: theme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
-                            ),
-                          );
-                        }).toList(),
-                        items: states,
-                        value: selectedState,
-                        width: double.infinity,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        onChanged: (String? newValue) {
-                          widget.profileBloc.stateName = newValue!;
-                          widget.profileBloc.userProfile?.user?.state = newValue;
-                        },
-                      ),
+                    OneUIFormDropdown<String>(
+                      label: translation(context).lbl_state,
+                      items: states,
+                      value: selectedState,
+                      itemLabel: (item) => item,
+                      onChanged: (String? newValue) {
+                        widget.profileBloc.stateName = newValue!;
+                        widget.profileBloc.userProfile?.user?.state = newValue;
+                      },
                     ),
 
                     // Specialty dropdown for doctors
                     if (AppData.userType == "doctor") ...[
                       const SizedBox(height: 16),
-                      Text(translation(context).lbl_specialty, style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: theme.radiusM,
-                          border: Border.all(color: theme.border),
-                        ),
-                        child: CustomDropdownButtonFormField(
-                          itemBuilder: (item) => Text(
-                            item ?? '',
-                            style: TextStyle(color: theme.textPrimary),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          selectedItemBuilder: (context) => specialties.map((item) {
-                            return Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                item ?? '',
-                                style: TextStyle(color: theme.textPrimary, fontSize: 14, fontWeight: FontWeight.w500, overflow: TextOverflow.ellipsis),
-                              ),
-                            );
-                          }).toList(),
-                          items: specialties,
-                          value: selectedSpecialty,
-                          width: double.infinity,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          onChanged: (String? newValue) {
-                            widget.profileBloc.specialtyName = newValue!;
-                            widget.profileBloc.userProfile?.user?.specialty = newValue;
-                            widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
-                          },
-                        ),
+                      OneUIFormDropdown<String>(
+                        label: translation(context).lbl_specialty,
+                        items: specialties,
+                        value: selectedSpecialty,
+                        itemLabel: (item) => item,
+                        onChanged: (String? newValue) {
+                          widget.profileBloc.specialtyName = newValue!;
+                          widget.profileBloc.userProfile?.user?.specialty = newValue;
+                          widget.profileBloc.add(UpdateSpecialtyDropdownValue(newValue));
+                        },
                       ),
                     ],
                   ],

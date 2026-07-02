@@ -1,5 +1,7 @@
 import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -23,45 +25,28 @@ class JobCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final theme = OneUITheme.of(context);
+    final isDark = theme.isDark;
+    final material = Theme.of(context);
 
     return InkWell(
       onTap: onJobTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppCardLayout.radius),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: AppCardLayout.listItemMargin,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF0F172A)
-              : Colors.white, // slate-900 / white
-          borderRadius: BorderRadius.circular(12), // rounded-xl
-          border: Border.all(
-            color: isDark
-                ? const Color(0xFF1E293B)
-                : const Color(0xFFF1F5F9), // slate-800 / slate-100
-          ),
-          boxShadow: isDark
-              ? null
-              : [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.02),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-        ),
+        clipBehavior: Clip.antiAlias,
+        decoration: theme.cardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildJobHeader(theme, isDark),
+            _buildJobHeader(material, isDark),
             const SizedBox(height: 16),
             _buildJobMetadataRow(isDark),
             const SizedBox(height: 20),
             _buildDateBoxes(isDark),
             const SizedBox(height: 20),
-            _buildActionRow(theme, isDark, context),
+            _buildActionRow(material, isDark, context),
           ],
         ),
       ),

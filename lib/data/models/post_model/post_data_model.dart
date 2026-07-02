@@ -92,6 +92,7 @@ class Post {
   int? id;
   String? userId;
   String? title;
+  String? body;
   dynamic lat;
   dynamic lng;
   dynamic country;
@@ -99,7 +100,24 @@ class Post {
   String? createdAt;
   String? updatedAt;
   String? backgroundColor;
-  int? relevanceScore;
+  String? privacy;
+  String? postType;
+  Map<String, dynamic>? poll;
+  dynamic tagging;
+  int? views;
+  double? relevanceScore;
+  String? tags;
+  String? displayTitle;
+  String? displayBody;
+  bool? highlightHashtagsInBody;
+  String? organizationId;
+  String? organizationSlug;
+  String? accountType;
+  String? authorName;
+  String? authorAvatar;
+  bool? authorVerified;
+  bool? isBusinessPagePost;
+  PostMeta? meta;
   List<Comments>? comments;
   Commenter? user;
   List<Media>? media;
@@ -109,6 +127,7 @@ class Post {
     this.id,
     this.userId,
     this.title,
+    this.body,
     this.lat,
     this.lng,
     this.country,
@@ -116,7 +135,24 @@ class Post {
     this.createdAt,
     this.updatedAt,
     this.backgroundColor,
+    this.privacy,
+    this.postType,
+    this.poll,
+    this.tagging,
+    this.views,
     this.relevanceScore,
+    this.tags,
+    this.displayTitle,
+    this.displayBody,
+    this.highlightHashtagsInBody,
+    this.organizationId,
+    this.organizationSlug,
+    this.accountType,
+    this.authorName,
+    this.authorAvatar,
+    this.authorVerified,
+    this.isBusinessPagePost,
+    this.meta,
     this.comments,
     this.user,
     this.media,
@@ -125,16 +161,44 @@ class Post {
 
   Post.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    userId = json['user_id'];
-    title = json['title'];
+    userId = json['user_id']?.toString();
+    title = json['title']?.toString();
+    body = json['body']?.toString();
     lat = json['lat'];
     lng = json['lng'];
     country = json['country'];
     image = json['image'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    backgroundColor = json['background_color'];
-    relevanceScore = json['relevance_score'];
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
+    backgroundColor = json['background_color']?.toString();
+    privacy = json['privacy']?.toString();
+    postType = json['post_type']?.toString();
+    if (json['poll'] is Map) {
+      poll = Map<String, dynamic>.from(json['poll'] as Map);
+    }
+    tagging = json['tagging'];
+    views = json['views'] is num ? (json['views'] as num).toInt() : int.tryParse('${json['views'] ?? ''}');
+    relevanceScore = (json['relevance_score'] as num?)?.toDouble();
+    tags = json['tags']?.toString();
+    displayTitle = json['displayTitle']?.toString();
+    displayBody = json['displayBody']?.toString();
+    highlightHashtagsInBody = json['highlightHashtagsInBody'] == true
+        ? true
+        : json['highlightHashtagsInBody'] == false
+            ? false
+            : null;
+    organizationId =
+        json['organizationId']?.toString() ?? json['organization_id']?.toString();
+    organizationSlug = json['organizationSlug']?.toString() ??
+        json['organization_slug']?.toString();
+    accountType =
+        json['accountType']?.toString() ?? json['account_type']?.toString();
+    authorName = json['authorName']?.toString();
+    authorAvatar = json['authorAvatar']?.toString();
+    authorVerified = json['authorVerified'] == true;
+    isBusinessPagePost = json['isBusinessPagePost'] == true ||
+        (organizationId != null && organizationId!.isNotEmpty);
+    meta = json['meta'] != null ? PostMeta.fromJson(json['meta']) : null;
     if (json['comments'] != null) {
       comments = <Comments>[];
       json['comments'].forEach((v) {
@@ -161,6 +225,7 @@ class Post {
     data['id'] = id;
     data['user_id'] = userId;
     data['title'] = title;
+    data['body'] = body;
     data['lat'] = lat;
     data['lng'] = lng;
     data['country'] = country;
@@ -168,7 +233,17 @@ class Post {
     data['created_at'] = createdAt;
     data['updated_at'] = updatedAt;
     data['background_color'] = backgroundColor;
+    data['privacy'] = privacy;
+    data['post_type'] = postType;
+    if (poll != null) {
+      data['poll'] = poll;
+    }
+    data['tagging'] = tagging;
+    data['views'] = views;
     data['relevance_score'] = relevanceScore;
+    if (meta != null) {
+      data['meta'] = meta!.toJson();
+    }
     if (comments != null) {
       data['comments'] = comments!.map((v) => v.toJson()).toList();
     }
@@ -183,6 +258,31 @@ class Post {
     }
     return data;
   }
+}
+
+/// Deep-link metadata for a feed item, emitted by `GET /api/v1/posts`.
+/// `deepLink` is a `doctak://post/<id>` URI; `webUrl` is the public https URL.
+class PostMeta {
+  String? type;
+  String? deepLink;
+  String? webUrl;
+  String? ctaLabel;
+
+  PostMeta({this.type, this.deepLink, this.webUrl, this.ctaLabel});
+
+  PostMeta.fromJson(Map<String, dynamic> json) {
+    type = json['type'];
+    deepLink = json['deepLink'];
+    webUrl = json['webUrl'];
+    ctaLabel = json['ctaLabel'];
+  }
+
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'deepLink': deepLink,
+        'webUrl': webUrl,
+        'ctaLabel': ctaLabel,
+      };
 }
 
 class Comments {
@@ -261,13 +361,26 @@ class Commenter {
   String? id;
   String? name;
   String? profilePic;
+  bool? isVerified;
+  String? specialty;
+  String? city;
+  String? state;
+  String? country;
 
-  Commenter({this.id, this.name, this.profilePic});
+  Commenter({this.id, this.name, this.profilePic, this.isVerified, this.specialty, this.city, this.state, this.country});
 
   Commenter.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
+    id = json['id']?.toString();
+    final rawName = (json['name'] ?? '').toString().trim();
+    final firstLast = '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    final username = (json['username'] ?? '').toString().trim();
+    name = rawName.isNotEmpty ? rawName : (firstLast.isNotEmpty ? firstLast : (username.isNotEmpty ? username : 'Unknown'));
     profilePic = AppData.fullImageUrl(json['profile_pic']);
+    isVerified = json['is_verified'] == true || json['is_verified'] == 1;
+    specialty = (json['specialty'] ?? '').toString().trim().isEmpty ? null : json['specialty'].toString().trim();
+    city = (json['city'] ?? '').toString().trim().isEmpty ? null : json['city'].toString().trim();
+    state = (json['state'] ?? '').toString().trim().isEmpty ? null : json['state'].toString().trim();
+    country = (json['country'] ?? '').toString().trim().isEmpty ? null : json['country'].toString().trim();
   }
 
   Map<String, dynamic> toJson() {
@@ -275,6 +388,11 @@ class Commenter {
     data['id'] = id;
     data['name'] = name;
     data['profile_pic'] = profilePic;
+    data['is_verified'] = isVerified;
+    data['specialty'] = specialty;
+    data['city'] = city;
+    data['state'] = state;
+    data['country'] = country;
     return data;
   }
 }
@@ -291,11 +409,13 @@ class Media {
 
   Media.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    postId = json['post_id'];
-    mediaType = json['media_type'];
-    mediaPath = json['media_path'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    postId = json['post_id']?.toString();
+    mediaType = json['media_type']?.toString() ?? json['mediaType']?.toString();
+    mediaPath = json['media_path']?.toString() ??
+        json['mediaPath']?.toString() ??
+        json['url']?.toString();
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
   }
 
   Map<String, dynamic> toJson() {

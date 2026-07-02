@@ -6955,7 +6955,7 @@ abstract class AppLocalizations {
   /// No description provided for @lbl_connections_short.
   ///
   /// In en, this message translates to:
-  /// **'Conns'**
+  /// **'Connections'**
   String get lbl_connections_short;
 
   /// No description provided for @lbl_report_user.

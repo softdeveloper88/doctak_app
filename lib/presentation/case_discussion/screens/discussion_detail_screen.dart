@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/app/app_environment.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
@@ -14,6 +15,7 @@ import '../bloc/discussion_detail_bloc.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
+import '../widgets/case_discussion_layout.dart';
 import '../widgets/comment_card.dart';
 import '../widgets/comment_input.dart';
 import '../widgets/discussion_header.dart';
@@ -68,29 +70,39 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
-      builder: (context, state) {
-        return Scaffold(
-          backgroundColor: theme.scaffoldBackground,
-          appBar: DoctakAppBar(
-            title: 'Case Discussion',
-            actions: _buildAppBarActions(state, theme),
-          ),
-          body: _buildBody(state, theme),
-          bottomNavigationBar: state is DiscussionDetailLoaded
-              ? CommentInput(
-                  onSubmit: (text, tags) {
-                    _bloc.add(AddComment(
-                      caseId: widget.caseId,
-                      comment: text,
-                      clinicalTags: tags.isNotEmpty ? tags.join(',') : null,
-                    ));
-                  },
-                  isLoading: state.isAddingComment,
-                )
-              : null,
-        );
+    return BlocListener<DiscussionDetailBloc, DiscussionDetailState>(
+      listener: (context, state) {
+        if (state is DiscussionDetailDeleted) {
+          Navigator.pop(context, 'deleted');
+        }
       },
+      child: BlocBuilder<DiscussionDetailBloc, DiscussionDetailState>(
+        builder: (context, state) {
+          return Scaffold(
+            backgroundColor: theme.scaffoldBackground,
+            resizeToAvoidBottomInset: true,
+            appBar: DoctakAppBar(
+              title: 'Case Discussion',
+              actions: _buildAppBarActions(state, theme),
+            ),
+            body: Column(
+              children: [
+                Expanded(child: _buildBody(state, theme)),
+                if (state is DiscussionDetailLoaded)
+                  CommentInput(
+                    onSubmit: (text) {
+                      _bloc.add(AddComment(
+                        caseId: widget.caseId,
+                        comment: text,
+                      ));
+                    },
+                    isLoading: state.isAddingComment,
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -115,6 +127,9 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               break;
             case 'copy_link':
               _copyLink(discussion);
+              break;
+            case 'delete':
+              _confirmDeleteCase(discussion);
               break;
             case 'report':
               _reportCase(discussion);
@@ -142,16 +157,28 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
               ],
             ),
           ),
-          const PopupMenuItem(
-            value: 'report',
-            child: Row(
-              children: [
-                Icon(Icons.flag_outlined, size: 18, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('Report'),
-              ],
+          if (discussion.isOwner)
+            const PopupMenuItem(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                  SizedBox(width: 8),
+                  Text('Delete', style: TextStyle(color: Colors.red)),
+                ],
+              ),
             ),
-          ),
+          if (!discussion.isOwner)
+            const PopupMenuItem(
+              value: 'report',
+              child: Row(
+                children: [
+                  Icon(Icons.flag_outlined, size: 18, color: Colors.orange),
+                  SizedBox(width: 8),
+                  Text('Report'),
+                ],
+              ),
+            ),
         ],
       ),
     ];
@@ -210,8 +237,11 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
         SliverToBoxAdapter(
           child: DiscussionHeader(
             discussion: discussion,
-            onLike: () {
-              _bloc.add(ToggleLikeCase(discussion.id));
+            onUpvote: () {
+              _bloc.add(VoteCase(discussion.id, 'up'));
+            },
+            onDownvote: () {
+              _bloc.add(VoteCase(discussion.id, 'down'));
             },
             onBookmark: () {
               _bloc.add(ToggleBookmarkCase(discussion.id));
@@ -249,138 +279,178 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
           ),
         ),
 
-        // ── Comments Header ──
-        SliverToBoxAdapter(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Row(
-              children: [
-                Text(
-                  'Comments',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Poppins',
-                    color: theme.textPrimary,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${discussion.commentsCount}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: theme.primary,
+        // ── Comments (single card) ──
+        SliverPadding(
+          padding: CaseDiscussionLayout.sectionMargin,
+          sliver: DecoratedSliver(
+            decoration: theme.cardDecoration,
+            sliver: SliverMainAxisGroup(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                    child: Row(
+                      children: [
+                        Icon(Icons.chat_bubble_outline,
+                            size: 18, color: theme.primary),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Comments',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: theme.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: theme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${discussion.commentsCount}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              color: theme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
+                if (state.isLoadingComments && comments.isEmpty)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Center(
+                          child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                  )
+                else if (comments.isEmpty)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Icon(Icons.chat_bubble_outline,
+                                size: 40, color: theme.textTertiary),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No comments yet',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                color: theme.textTertiary,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Be the first to contribute your clinical insights.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Poppins',
+                                color: theme.textTertiary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index >= comments.length) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                            child: state.isLoadingComments
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2))
+                                : OutlinedButton.icon(
+                                    onPressed: () {
+                                      _bloc.add(LoadMoreComments());
+                                    },
+                                    icon: const Icon(Icons.expand_more,
+                                        size: 18),
+                                    label: const Text('Load More Comments'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: theme.primary,
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                          );
+                        }
+
+                        final comment = comments[index];
+                        final isLastComment = index == comments.length - 1;
+                        return CommentCard(
+                          comment: comment,
+                          showDivider:
+                              !isLastComment || state.hasMoreComments,
+                          onUpvote: () {
+                            _bloc.add(VoteComment(comment.id, 'up'));
+                          },
+                          onDownvote: () {
+                            _bloc.add(VoteComment(comment.id, 'down'));
+                          },
+                          onDelete: () {
+                            _bloc.add(DeleteComment(comment.id));
+                          },
+                          onUpdateComment: (text) {
+                            _bloc.add(UpdateComment(
+                              commentId: comment.id,
+                              comment: text,
+                            ));
+                          },
+                          onReply: (text) {
+                            _bloc.add(AddReply(
+                              commentId: comment.id,
+                              reply: text,
+                            ));
+                          },
+                          onLoadReplies: (commentId) {
+                            _bloc.add(LoadReplies(commentId));
+                          },
+                          onVoteReply: (replyId, direction) {
+                            _bloc.add(
+                                VoteReply(comment.id, replyId, direction));
+                          },
+                          onDeleteReply: (replyId) {
+                            _bloc.add(DeleteReply(comment.id, replyId));
+                          },
+                          onUpdateReply: (replyId, text) {
+                            _bloc.add(UpdateReply(
+                              commentId: comment.id,
+                              replyId: replyId,
+                              reply: text,
+                            ));
+                          },
+                        );
+                      },
+                      childCount: comments.length +
+                          (state.hasMoreComments ? 1 : 0),
+                    ),
+                  ),
               ],
             ),
           ),
         ),
-
-        // ── Comments List ──
-        if (state.isLoadingComments && comments.isEmpty)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-            ),
-          )
-        else if (comments.isEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.chat_bubble_outline,
-                        size: 40, color: theme.textTertiary),
-                    const SizedBox(height: 12),
-                    Text(
-                      'No comments yet',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        color: theme.textTertiary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Be the first to contribute your clinical insights.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        color: theme.textTertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        else
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index >= comments.length) {
-                  // Load More button
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    child: state.isLoadingComments
-                        ? const Center(
-                            child: CircularProgressIndicator(strokeWidth: 2))
-                        : OutlinedButton.icon(
-                            onPressed: () {
-                              _bloc.add(LoadMoreComments());
-                            },
-                            icon: const Icon(Icons.expand_more, size: 18),
-                            label: const Text('Load More Comments'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: theme.primary,
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                  );
-                }
-
-                final comment = comments[index];
-                return CommentCard(
-                  comment: comment,
-                  onLike: () {
-                    _bloc.add(ToggleLikeComment(comment.id));
-                  },
-                  onDelete: () {
-                    _bloc.add(DeleteComment(comment.id));
-                  },
-                  onReply: (text) {
-                    _bloc.add(AddReply(
-                      commentId: comment.id,
-                      reply: text,
-                    ));
-                  },
-                  onLoadReplies: (commentId) {
-                    _bloc.add(LoadReplies(commentId));
-                  },
-                );
-              },
-              childCount:
-                  comments.length + (state.hasMoreComments ? 1 : 0),
-            ),
-          ),
 
         // Bottom padding
         const SliverToBoxAdapter(child: SizedBox(height: 16)),
@@ -389,17 +459,44 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   }
 
   void _shareCase(CaseDiscussion discussion) {
-    final url = '${AppData.base2}/discuss-case/${discussion.id}';
+    final url = '${AppData.base2}/discuss-cases/${discussion.id}';
     SharePlus.instance.share(ShareParams(
       text: '${discussion.title}\n\n$url',
     ));
   }
 
   void _copyLink(CaseDiscussion discussion) {
-    final url = '${AppData.base2}/discuss-case/${discussion.id}';
+    final url = '${AppData.base2}/discuss-cases/${discussion.id}';
     Clipboard.setData(ClipboardData(text: url));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Link copied to clipboard')),
+    );
+  }
+
+  void _confirmDeleteCase(CaseDiscussion discussion) {
+    final theme = OneUITheme.of(context);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Case'),
+        content: const Text(
+            'Are you sure you want to delete this case discussion? This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel',
+                style: TextStyle(color: theme.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _bloc.add(DeleteCase(discussion.id));
+            },
+            child:
+                const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -419,18 +516,16 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   }
 
   void _editCase(CaseDiscussion discussion) {
-    Navigator.push(
+    AppNavigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) => CreateDiscussionBloc(
-            repository: CaseDiscussionRepository(
-              baseUrl: AppData.base2,
-              getAuthToken: () => AppData.userToken ?? '',
-            ),
+      BlocProvider(
+        create: (_) => CreateDiscussionBloc(
+          repository: CaseDiscussionRepository(
+            baseUrl: AppData.base2,
+            getAuthToken: () => AppData.userToken ?? '',
           ),
-          child: CreateDiscussionScreen(existingCase: discussion),
         ),
+        child: CreateDiscussionScreen(existingCase: discussion),
       ),
     ).then((result) {
       if (result == true) {
@@ -471,7 +566,8 @@ class _AISummarySection extends StatelessWidget {
     final quotaExhausted = !isPaid && (remaining != null && remaining <= 0);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(0, 2, 0, 0),
+      margin: CaseDiscussionLayout.sectionMargin,
+      clipBehavior: Clip.antiAlias,
       decoration: theme.cardDecoration,
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -787,11 +883,9 @@ class _AISummarySection extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () {
-                Navigator.push(
+                AppNavigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const SubscriptionScreen(),
-                  ),
+                  const SubscriptionScreen(),
                 );
               },
               icon: const Icon(Icons.star, size: 16, color: Colors.white),
@@ -843,6 +937,8 @@ class _UpdatesTimeline extends StatelessWidget {
     final contentController = TextEditingController();
     final List<XFile> pickedImages = [];
     final ImagePicker picker = ImagePicker();
+    String? titleError;
+    String? contentError;
 
     showModalBottomSheet(
       context: context,
@@ -897,9 +993,14 @@ class _UpdatesTimeline extends StatelessWidget {
                     const SizedBox(height: 20),
                     TextField(
                       controller: titleController,
+                      onChanged: (_) {
+                        if (titleError != null) setState(() => titleError = null);
+                      },
                       decoration: InputDecoration(
                         labelText: 'Update Title',
                         hintText: 'e.g., Follow-up results, Treatment change...',
+                        errorText: titleError,
+                        errorStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -916,9 +1017,14 @@ class _UpdatesTimeline extends StatelessWidget {
                     TextField(
                       controller: contentController,
                       maxLines: 4,
+                      onChanged: (_) {
+                        if (contentError != null) setState(() => contentError = null);
+                      },
                       decoration: InputDecoration(
                         labelText: 'Update Content',
                         hintText: 'Describe the update details...',
+                        errorText: contentError,
+                        errorStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1005,12 +1111,12 @@ class _UpdatesTimeline extends StatelessWidget {
                         onPressed: () {
                           final title = titleController.text.trim();
                           final content = contentController.text.trim();
-                          if (title.isEmpty || content.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please fill in both title and content'),
-                              ),
-                            );
+                          final hasError = title.isEmpty || content.isEmpty;
+                          if (hasError) {
+                            setState(() {
+                              titleError = title.isEmpty ? 'Title is required' : null;
+                              contentError = content.isEmpty ? 'Content is required' : null;
+                            });
                             return;
                           }
                           bloc.add(AddCaseUpdate(
@@ -1055,6 +1161,8 @@ class _UpdatesTimeline extends StatelessWidget {
     final List<String> removedImages = [];
     final List<XFile> newImages = [];
     final ImagePicker picker = ImagePicker();
+    String? editTitleError;
+    String? editContentError;
 
     showModalBottomSheet(
       context: context,
@@ -1100,8 +1208,13 @@ class _UpdatesTimeline extends StatelessWidget {
                     const SizedBox(height: 20),
                     TextField(
                       controller: titleController,
+                      onChanged: (_) {
+                        if (editTitleError != null) setState(() => editTitleError = null);
+                      },
                       decoration: InputDecoration(
                         labelText: 'Update Title',
+                        errorText: editTitleError,
+                        errorStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1118,8 +1231,13 @@ class _UpdatesTimeline extends StatelessWidget {
                     TextField(
                       controller: contentController,
                       maxLines: 4,
+                      onChanged: (_) {
+                        if (editContentError != null) setState(() => editContentError = null);
+                      },
                       decoration: InputDecoration(
                         labelText: 'Update Content',
+                        errorText: editContentError,
+                        errorStyle: const TextStyle(fontFamily: 'Poppins', fontSize: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -1250,12 +1368,12 @@ class _UpdatesTimeline extends StatelessWidget {
                         onPressed: () {
                           final title = titleController.text.trim();
                           final content = contentController.text.trim();
-                          if (title.isEmpty || content.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please fill in both title and content'),
-                              ),
-                            );
+                          final hasError = title.isEmpty || content.isEmpty;
+                          if (hasError) {
+                            setState(() {
+                              editTitleError = title.isEmpty ? 'Title is required' : null;
+                              editContentError = content.isEmpty ? 'Content is required' : null;
+                            });
                             return;
                           }
                           bloc.add(EditCaseUpdate(
@@ -1297,7 +1415,8 @@ class _UpdatesTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 2),
+      margin: CaseDiscussionLayout.sectionMargin,
+      clipBehavior: Clip.antiAlias,
       decoration: theme.cardDecoration,
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1630,11 +1749,11 @@ class _TimelineItem extends StatelessWidget {
 
   void _showFullScreenImage(BuildContext context, List<String> imageUrls, int initialIndex) {
     final controller = PageController(initialPage: initialIndex);
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
+    AppNavigator.push(
+      context,
+      Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
             backgroundColor: Colors.black,
             iconTheme: const IconThemeData(color: Colors.white),
             title: Text(
@@ -1662,7 +1781,6 @@ class _TimelineItem extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }

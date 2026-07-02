@@ -2,6 +2,7 @@ import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_job_list.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/feed_video_navigator_observer.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
@@ -47,6 +48,7 @@ class _SearchScreenState extends State<SearchScreen> with SingleTickerProviderSt
 
   void _handleTabChange() {
     if (_tabController != null && !_tabController!.indexIsChanging) {
+      pauseFeedVideosForUiChange();
       setState(() {
         selectIndex = _tabController!.index;
       });

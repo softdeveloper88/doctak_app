@@ -1,10 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/network/custom_cache_manager.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/apiClient/services/network_api_service.dart';
 import 'package:doctak_app/data/apiClient/services/v5_profile_api_service.dart';
+import 'package:doctak_app/data/apiClient/shared_api_service.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/api_response.dart';
+import 'package:doctak_app/data/models/profile_model/profile_completed_survey_model.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/data/models/profile_model/award_model.dart';
@@ -29,6 +34,7 @@ import 'profile_state.dart';
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final ApiServiceManager apiManager = ApiServiceManager();
   final V5ProfileApiService v5Api = V5ProfileApiService();
+  final SharedApiService _sharedApi = SharedApiService();
 
   // Legacy fields (kept for backward compatibility)
   UserProfile? userProfile;
@@ -61,6 +67,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   List<SocialProfileModel> socialProfiles = [];
   List<BusinessHourModel> businessHours = [];
   Map<String, dynamic> interestMap = {}; // v5 interests (key-value)
+  List<ProfileCompletedSurvey> completedSurveys = [];
+  bool surveysLoading = false;
+  String? surveysError;
+  bool surveysLoaded = false;
+  static const int _maxSurveyLoadAttempts = 3;
 
   ProfileBloc() : super(DataInitial()) {
     on<UpdateFirstDropdownValue>(_updateFirstDropdownValue);
@@ -81,6 +92,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     // ── V5 Full Profile Handlers ──
     on<LoadFullProfileEvent>(_onLoadFullProfile);
+    on<LoadProfileSurveysEvent>(_onLoadProfileSurveys);
     on<RefreshProfileSectionEvent>(_onRefreshSection);
     on<StoreExperienceEvent>(_onStoreExperience);
     on<UpdateExperienceEvent>(_onUpdateExperience);
@@ -484,12 +496,36 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             );
           }).toList();
         }
+        if ('$userId' == '${AppData.logInUserId}') {
+          await _syncOwnProfileGlobals(fpUser);
+        }
         _emitCurrentLoadedState(emit);
         print('📋 [ProfileBloc] Profile re-fetched after v5 update');
       }
     } catch (e) {
       print('📋 [ProfileBloc] Failed to refresh profile: $e');
     }
+  }
+
+  Future<void> _syncOwnProfileGlobals(FullProfileUser? fpUser) async {
+    if (fpUser == null) return;
+    await SpecialtyDisplay.instance.ensureLoaded();
+    final resolvedSpecialty =
+        SpecialtyDisplay.instance.resolve(fpUser.specialty).isNotEmpty
+            ? SpecialtyDisplay.instance.resolve(fpUser.specialty)
+            : (fpUser.specialty ?? '');
+    if (resolvedSpecialty.isNotEmpty) {
+      AppData.specialty = resolvedSpecialty;
+    }
+    AppData.isVerified = fpUser.verified == true;
+    try {
+      final prefs = SecureStorageService.instance;
+      await prefs.initialize();
+      if (resolvedSpecialty.isNotEmpty) {
+        await prefs.setString('specialty', resolvedSpecialty);
+      }
+      await prefs.setString('is_verified', AppData.isVerified.toString());
+    } catch (_) {}
   }
 
   void _updateSecondDropdownValues(UpdateSecondDropdownValues event, Emitter<ProfileState> emit) async {
@@ -510,20 +546,18 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         secondDropdownValues = ['No states available'];
       }
 
+      // Add "Select State" placeholder at the top
+      secondDropdownValues.insert(0, 'Select State');
+
       print('States loaded: ${secondDropdownValues.toList()}');
 
       // Find the user's current state in the loaded states
-      String selectedState = '';
+      String selectedState = 'Select State';
       if (userProfile?.user?.state != null && userProfile!.user!.state!.isNotEmpty) {
         // Check if user's state exists in the loaded states
         if (secondDropdownValues.contains(userProfile!.user!.state!)) {
           selectedState = userProfile!.user!.state!;
-        } else {
-          // If not found, use the first available state
-          selectedState = secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '';
         }
-      } else {
-        selectedState = secondDropdownValues.isNotEmpty ? secondDropdownValues.first : '';
       }
 
       emit(
@@ -819,7 +853,19 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         _reemitFullProfileState(emit);
       }
     } catch (e) {
-      print('Error sending connection request: $e');
+      final errorStr = e.toString();
+      // Handle "friend request already exists" — treat as pending_sent
+      if (errorStr.contains('already exists')) {
+        fullProfile?.connectionStatus = 'pending_sent';
+        // Try to extract friend_request_id from the error body
+        final idMatch = RegExp(r'"friend_request_id"\s*:\s*"([^"]+)"').firstMatch(errorStr);
+        if (idMatch != null) {
+          fullProfile?.friendRequestId = idMatch.group(1);
+        }
+        _reemitFullProfileState(emit);
+      } else {
+        print('Error sending connection request: $e');
+      }
     }
   }
 
@@ -939,7 +985,51 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  /// Load full profile from v5 API (with v4 fallback)
+  Future<void> _onLoadProfileSurveys(
+    LoadProfileSurveysEvent event,
+    Emitter<ProfileState> emit,
+  ) async {
+    if (!isMe || isClosed || surveysLoading) return;
+    if (surveysLoaded && !event.force) return;
+
+    if (event.force) {
+      surveysError = null;
+      surveysLoaded = false;
+    }
+
+    surveysLoading = true;
+    surveysError = null;
+    _reemitFullProfileState(emit);
+
+    ApiResponse<List<ProfileCompletedSurvey>>? lastRes;
+    for (var attempt = 1; attempt <= _maxSurveyLoadAttempts; attempt++) {
+      if (isClosed) return;
+
+      lastRes = await _sharedApi.getProfileCompletedSurveys();
+      if (lastRes.success && lastRes.data != null) {
+        completedSurveys = lastRes.data!;
+        surveysLoaded = true;
+        surveysError = null;
+        surveysLoading = false;
+        _reemitFullProfileState(emit);
+        return;
+      }
+
+      if (attempt < _maxSurveyLoadAttempts) {
+        await Future<void>.delayed(Duration(milliseconds: 350 * attempt));
+      }
+    }
+
+    if (isClosed) return;
+
+    surveysLoading = false;
+    surveysLoaded = true;
+    completedSurveys = [];
+    surveysError = lastRes?.message ?? 'Failed to load surveys';
+    _reemitFullProfileState(emit);
+  }
+
+  /// Load full profile from v1 API
   Future<void> _onLoadFullProfile(LoadFullProfileEvent event, Emitter<ProfileState> emit) async {
     if (isClosed) return;
     emit(PaginationLoadingState());
@@ -947,21 +1037,22 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       final userId = event.userId ?? AppData.logInUserId;
       currentUserId = userId;
       pageNumber = 1;
+      completedSurveys = [];
+      surveysLoaded = false;
+      surveysError = null;
+      surveysLoading = false;
 
       print('📋 [ProfileBloc] _onLoadFullProfile start, userId=$userId');
 
-      bool v5Loaded = false;
-
-      // ── Step 1: Try v5 Full Profile API ──
+      // ── Step 1: Load Full Profile ──
       try {
-        print('📋 [ProfileBloc] Trying v5 API...');
+        print('📋 [ProfileBloc] Loading full profile...');
         final profileResponse = await v5Api.getFullProfile(userId: userId.toString());
         if (isClosed) return;
         if (profileResponse.success && profileResponse.data != null) {
-          v5Loaded = true;
           fullProfile = profileResponse.data!;
           isMe = fullProfile!.isOwnProfile ?? (userId.toString() == AppData.logInUserId.toString());
-          print('📋 [ProfileBloc] v5 loaded OK, isMe=$isMe');
+          print('📋 [ProfileBloc] Profile loaded OK, isMe=$isMe, connectionStatus=${fullProfile!.connectionStatus}, friendRequestId=${fullProfile!.friendRequestId}');
 
           // Populate section lists from full profile
           experiences = fullProfile!.experiences;
@@ -1005,6 +1096,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
               phone: fpUser?.phone,
               college: fpUser?.college,
               dob: fpUser?.dob,
+              username: fpUser?.username,
             ),
             profile: Profile(
               aboutMe: fpProfile?.aboutMe,
@@ -1033,73 +1125,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           print('📋 [ProfileBloc] v5 API returned error: ${profileResponse.message}');
         }
       } catch (v5Error) {
-        print('📋 [ProfileBloc] v5 API failed, falling back to v4: $v5Error');
+        print('📋 [ProfileBloc] v5 API failed: $v5Error');
       }
 
       if (isClosed) return;
 
-      // ── Step 2: If v5 failed, fall back to v4 API ──
-      if (!v5Loaded) {
-        print('📋 [ProfileBloc] Using v4 fallback for profile data...');
-        try {
-          UserProfile response = await apiManager.getProfile(
-            'Bearer ${AppData.userToken}', userId.toString(),
-          );
-          if (isClosed) return;
-          userProfile = response;
-          isMe = (userId.toString() == AppData.logInUserId.toString());
-          print('📋 [ProfileBloc] v4 profile loaded: ${response.user?.firstName}');
-
-          List<InterestModel> interests = await apiManager.getInterests(
-            'Bearer ${AppData.userToken}', userId.toString(),
-          );
-          interestList = interests;
-
-          List<WorkEducationModel> workEdu = await apiManager.getWorkEducation(
-            'Bearer ${AppData.userToken}', userId.toString(),
-          );
-          workEducationList = workEdu;
-        } catch (v4Error) {
-          print('📋 [ProfileBloc] v4 fallback also failed: $v4Error');
-        }
-
-        // Also try loading section data individually (v5Api will auto-fallback to v4 URL)
-        if (isClosed) return;
-        try {
-          print('📋 [ProfileBloc] Loading section data individually...');
-          final expResult = await v5Api.getExperiences(userId: userId.toString());
-          if (expResult.success) experiences = expResult.data ?? [];
-        } catch (_) {}
-        try {
-          final eduResult = await v5Api.getEducation(userId: userId.toString());
-          if (eduResult.success) educationList = eduResult.data ?? [];
-        } catch (_) {}
-        try {
-          final pubResult = await v5Api.getPublications(userId: userId.toString());
-          if (pubResult.success) publications = pubResult.data ?? [];
-        } catch (_) {}
-        try {
-          final awardResult = await v5Api.getAwards(userId: userId.toString());
-          if (awardResult.success) awards = awardResult.data ?? [];
-        } catch (_) {}
-        try {
-          final licResult = await v5Api.getLicenses(userId: userId.toString());
-          if (licResult.success) licenses = licResult.data ?? [];
-        } catch (_) {}
-        try {
-          final socialResult = await v5Api.getSocialProfiles(userId: userId.toString());
-          if (socialResult.success) socialProfiles = socialResult.data ?? [];
-        } catch (_) {}
-        try {
-          final bhResult = await v5Api.getBusinessHours(userId: userId.toString());
-          if (bhResult.success) businessHours = bhResult.data ?? [];
-        } catch (_) {}
-        print('📋 [ProfileBloc] Section data: exp=${experiences.length} edu=${educationList.length} pub=${publications.length} awards=${awards.length}');
-      }
-
-      if (isClosed) return;
-
-      // ── Step 3: Load posts (always v4) ──
+      // ── Step 2: Load posts ──
       try {
         postList.clear();
         PostDataModel postDataModelResponse = await apiManager.getMyPosts(

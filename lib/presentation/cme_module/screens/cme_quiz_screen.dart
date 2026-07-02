@@ -2,34 +2,31 @@ import 'package:doctak_app/data/models/cme/cme_quiz_model.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_quiz_bloc.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_quiz_event.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_quiz_state.dart';
+import 'package:doctak_app/presentation/cme_module/widgets/cme_quiz_head.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CmeQuizScreen extends StatelessWidget {
-  final String eventId;
-  final String moduleId;
-  final String quizId;
-  final String? quizTitle;
-
   const CmeQuizScreen({
     super.key,
     required this.eventId,
-    required this.moduleId,
-    required this.quizId,
+    this.moduleId,
     this.quizTitle,
   });
+
+  final String eventId;
+  final String? moduleId;
+  final String? quizTitle;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => CmeQuizBloc()
-        ..add(CmeLoadQuizEvent(
-            eventId: eventId, moduleId: moduleId, quizId: quizId)),
+        ..add(CmeLoadQuizEvent(eventId: eventId, moduleId: moduleId)),
       child: _CmeQuizView(
         eventId: eventId,
-        moduleId: moduleId,
-        quizId: quizId,
         quizTitle: quizTitle,
       ),
     );
@@ -37,17 +34,13 @@ class CmeQuizScreen extends StatelessWidget {
 }
 
 class _CmeQuizView extends StatelessWidget {
-  final String eventId;
-  final String moduleId;
-  final String quizId;
-  final String? quizTitle;
-
   const _CmeQuizView({
     required this.eventId,
-    required this.moduleId,
-    required this.quizId,
     this.quizTitle,
   });
+
+  final String eventId;
+  final String? quizTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -55,26 +48,30 @@ class _CmeQuizView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: _buildAppBar(context, theme),
+      appBar: DoctakAppBar(
+        title: quizTitle ?? 'Assessment',
+        actions: [
+          BlocBuilder<CmeQuizBloc, CmeQuizState>(
+            builder: (context, state) {
+              final bloc = context.read<CmeQuizBloc>();
+              if (bloc.quiz?.hasTimeLimit == true &&
+                  (bloc.phase == CmeQuizPhase.question || bloc.phase == CmeQuizPhase.review) &&
+                  bloc.remainingSeconds > 0) {
+                return _TimerChip(theme: theme, bloc: bloc);
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      ),
       body: BlocConsumer<CmeQuizBloc, CmeQuizState>(
         listener: (context, state) {
-          if (state is CmeQuizSubmittedState) {
-            _showResultsDialog(context, theme);
-          } else if (state is CmeQuizTimerExpiredState) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Time\'s up! Quiz auto-submitted.'),
-                backgroundColor: Color(0xFFFF9500),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          } else if (state is CmeQuizAutoSavedState) {
+          if (state is CmeQuizTimerExpiredState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Progress saved'),
-                backgroundColor: theme.primary,
+                content: const Text('Time\'s up — quiz submitted.'),
+                backgroundColor: theme.warning,
                 behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 1),
               ),
             );
           }
@@ -85,65 +82,52 @@ class _CmeQuizView extends StatelessWidget {
           if (state is CmeQuizLoadingState) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          if (state is CmeQuizErrorState) {
-            return _buildError(context, theme, state.message);
+          if (state is CmeQuizErrorState && bloc.quiz == null) {
+            return _ErrorView(
+              message: state.message,
+              onRetry: () => bloc.add(CmeLoadQuizEvent(eventId: eventId)),
+            );
           }
-
           if (bloc.quiz == null) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: Text('No quiz available.', style: theme.bodySecondary));
           }
 
-          if (state is CmeQuizResultsLoadedState || bloc.results != null) {
-            return _buildResultsView(context, theme, bloc);
+          if (bloc.quiz!.attemptsLeft <= 0 && bloc.phase != CmeQuizPhase.result) {
+            return _NoAttemptsView(theme: theme);
           }
 
-          return _buildQuizBody(context, theme, bloc);
+          return switch (bloc.phase) {
+            CmeQuizPhase.intro => _IntroView(bloc: bloc),
+            CmeQuizPhase.question => _QuestionView(bloc: bloc, eventId: eventId),
+            CmeQuizPhase.review => _ReviewView(bloc: bloc, eventId: eventId),
+            CmeQuizPhase.result => _ResultView(bloc: bloc),
+          };
         },
       ),
     );
   }
+}
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, OneUITheme theme) {
-    return AppBar(
-      backgroundColor: theme.cardBackground,
-      foregroundColor: theme.textPrimary,
-      title: Text(
-        quizTitle ?? 'Quiz',
-        style: const TextStyle(fontFamily: 'Poppins', fontSize: 16),
-      ),
-      actions: [
-        BlocBuilder<CmeQuizBloc, CmeQuizState>(
-          builder: (context, state) {
-            final bloc = context.read<CmeQuizBloc>();
-            if (bloc.quiz?.hasTimeLimit == true &&
-                state is! CmeQuizSubmittedState) {
-              return _buildTimer(theme, bloc);
-            }
-            return const SizedBox.shrink();
-          },
-        ),
-      ],
-    );
-  }
+class _TimerChip extends StatelessWidget {
+  const _TimerChip({required this.theme, required this.bloc});
 
-  Widget _buildTimer(OneUITheme theme, CmeQuizBloc bloc) {
-    final isUrgent = bloc.remainingSeconds < 60;
+  final OneUITheme theme;
+  final CmeQuizBloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    final urgent = bloc.remainingSeconds < 60;
     return Container(
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: isUrgent
-            ? const Color(0xFFFF3B30).withValues(alpha: 0.1)
-            : theme.primary.withValues(alpha: 0.1),
+        color: urgent ? theme.error.withValues(alpha: 0.1) : theme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.timer_outlined,
-              size: 16,
-              color: isUrgent ? const Color(0xFFFF3B30) : theme.primary),
+          Icon(Icons.timer_outlined, size: 16, color: urgent ? theme.error : theme.primary),
           const SizedBox(width: 4),
           Text(
             bloc.timerDisplay,
@@ -151,674 +135,602 @@ class _CmeQuizView extends StatelessWidget {
               fontFamily: 'Poppins',
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isUrgent ? const Color(0xFFFF3B30) : theme.primary,
+              color: urgent ? theme.error : theme.primary,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildQuizBody(
-      BuildContext context, OneUITheme theme, CmeQuizBloc bloc) {
-    final questions = bloc.quiz!.questions ?? [];
-    if (questions.isEmpty) {
-      return Center(
-        child: Text('No questions available', style: theme.bodySecondary),
-      );
-    }
+class _IntroView extends StatelessWidget {
+  const _IntroView({required this.bloc});
 
-    final currentQ = questions[bloc.currentQuestionIndex];
+  final CmeQuizBloc bloc;
 
-    return Column(
-      children: [
-        // Progress bar
-        _buildProgressBar(theme, bloc, questions.length),
-        // Question content
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildQuestionHeader(theme, bloc, questions.length),
-                const SizedBox(height: 16),
-                _buildQuestionCard(context, theme, currentQ, bloc),
-              ],
-            ),
-          ),
-        ),
-        // Navigation buttons
-        _buildNavigationBar(context, theme, bloc, questions.length),
-      ],
-    );
-  }
-
-  Widget _buildProgressBar(
-      OneUITheme theme, CmeQuizBloc bloc, int totalQuestions) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: theme.cardBackground,
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${bloc.answeredCount}/$totalQuestions answered',
-                style: theme.caption,
-              ),
-              Text(
-                'Question ${bloc.currentQuestionIndex + 1} of $totalQuestions',
-                style: theme.caption,
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: totalQuestions > 0
-                  ? bloc.answeredCount / totalQuestions
-                  : 0,
-              backgroundColor: theme.divider,
-              valueColor:
-                  AlwaysStoppedAnimation<Color>(theme.primary),
-              minHeight: 4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuestionHeader(
-      OneUITheme theme, CmeQuizBloc bloc, int totalQuestions) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: theme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            'Q${bloc.currentQuestionIndex + 1}',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: theme.primary,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        if (bloc.quiz!.questions![bloc.currentQuestionIndex].points != null)
-          Text(
-            '${bloc.quiz!.questions![bloc.currentQuestionIndex].points} pts',
-            style: theme.caption,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildQuestionCard(BuildContext context, OneUITheme theme,
-      CmeQuizQuestion question, CmeQuizBloc bloc) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: theme.cardDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question.questionText ?? '',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: theme.textPrimary,
-              height: 1.5,
-            ),
-          ),
-          if (question.imageUrl != null) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                question.imageUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              ),
-            ),
-          ],
-          const SizedBox(height: 20),
-          if (question.isMultipleChoice || question.isTrueFalse)
-            _buildOptions(context, theme, question, bloc),
-          if (question.isShortAnswer)
-            _buildShortAnswer(context, theme, question, bloc),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOptions(BuildContext context, OneUITheme theme,
-      CmeQuizQuestion question, CmeQuizBloc bloc) {
-    final options = question.options ?? [];
-    final selectedId = bloc.selectedAnswers[question.id];
-
-    return Column(
-      children: options.map((option) {
-        final isSelected = selectedId == option.id.toString();
-
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () {
-                context.read<CmeQuizBloc>().add(CmeSelectAnswerEvent(
-                      questionId: question.id!,
-                      answer: option.id.toString(),
-                    ));
-              },
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? theme.primary.withValues(alpha: 0.08)
-                      : theme.scaffoldBackground,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color:
-                        isSelected ? theme.primary : theme.border,
-                    width: isSelected ? 1.5 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.primary
-                            : theme.scaffoldBackground,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected
-                              ? theme.primary
-                              : theme.textTertiary,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: isSelected
-                          ? const Icon(Icons.check,
-                              size: 16, color: Colors.white)
-                          : Center(
-                              child: Text(
-                                option.label ??
-                                    String.fromCharCode(65 +
-                                        (options.indexOf(option))),
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.textTertiary,
-                                ),
-                              ),
-                            ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        option.text ?? '',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          fontWeight:
-                              isSelected ? FontWeight.w500 : FontWeight.w400,
-                          color: isSelected
-                              ? theme.primary
-                              : theme.textPrimary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildShortAnswer(BuildContext context, OneUITheme theme,
-      CmeQuizQuestion question, CmeQuizBloc bloc) {
-    return TextField(
-      onChanged: (value) {
-        context.read<CmeQuizBloc>().add(CmeSelectAnswerEvent(
-              questionId: question.id!,
-              answer: value,
-            ));
-      },
-      decoration: InputDecoration(
-        hintText: 'Type your answer here...',
-        hintStyle: TextStyle(
-            fontFamily: 'Poppins', color: theme.textTertiary),
-        filled: true,
-        fillColor: theme.inputBackground,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: theme.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: theme.primary),
-        ),
-      ),
-      maxLines: 3,
-      style: TextStyle(
-          fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
-    );
-  }
-
-  Widget _buildNavigationBar(
-      BuildContext context, OneUITheme theme, CmeQuizBloc bloc, int total) {
-    final isFirst = bloc.currentQuestionIndex == 0;
-    final isLast = bloc.currentQuestionIndex == total - 1;
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-          16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        border: Border(top: BorderSide(color: theme.divider, width: 0.5)),
-      ),
-      child: Row(
-        children: [
-          if (!isFirst)
-            OutlinedButton.icon(
-              onPressed: () => bloc.add(CmeNavigateQuestionEvent(
-                  questionIndex: bloc.currentQuestionIndex - 1)),
-              icon: const Icon(Icons.chevron_left, size: 18),
-              label: const Text('Previous',
-                  style: TextStyle(fontFamily: 'Poppins')),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.textSecondary,
-                side: BorderSide(color: theme.border),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-          const Spacer(),
-          if (isLast)
-            ElevatedButton.icon(
-              onPressed: bloc.allAnswered
-                  ? () => _confirmSubmit(context, theme, bloc)
-                  : null,
-              icon: const Icon(Icons.send, size: 16),
-              label: const Text('Submit Quiz',
-                  style: TextStyle(
-                      fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF34C759),
-                foregroundColor: Colors.white,
-                disabledBackgroundColor:
-                    theme.textTertiary.withValues(alpha: 0.2),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-            )
-          else
-            ElevatedButton.icon(
-              onPressed: () => bloc.add(CmeNavigateQuestionEvent(
-                  questionIndex: bloc.currentQuestionIndex + 1)),
-              label: const Text('Next',
-                  style: TextStyle(fontFamily: 'Poppins')),
-              icon: const Icon(Icons.chevron_right, size: 18),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmSubmit(
-      BuildContext context, OneUITheme theme, CmeQuizBloc bloc) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text('Submit Quiz?', style: theme.titleMedium),
-        content: Text(
-          'You have answered ${bloc.answeredCount} of ${bloc.totalQuestions} questions. '
-          'Are you sure you want to submit?',
-          style: theme.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel',
-                style: TextStyle(
-                    fontFamily: 'Poppins', color: theme.textSecondary)),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              bloc.add(CmeSubmitQuizEvent(
-                  eventId: eventId, moduleId: moduleId, quizId: quizId));
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF34C759),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Submit',
-                style:
-                    TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showResultsDialog(BuildContext context, OneUITheme theme) {
-    final bloc = context.read<CmeQuizBloc>();
-    final results = bloc.results;
-
-    if (results == null) {
-      Navigator.pop(context);
-      return;
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Row(
-          children: [
-            Icon(
-              results.passed == true
-                  ? Icons.celebration
-                  : Icons.info_outline,
-              color: results.passed == true
-                  ? const Color(0xFF34C759)
-                  : const Color(0xFFFF9500),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              results.passed == true ? 'Congratulations!' : 'Quiz Results',
-              style: theme.titleMedium,
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _resultRow(theme, 'Score', results.displayScore),
-            _resultRow(theme, 'Percentage', results.displayPercentage),
-            _resultRow(theme, 'Status',
-                results.passed == true ? 'Passed' : 'Not Passed'),
-            if (results.timeTaken != null)
-              _resultRow(theme, 'Time Taken', results.displayTimeTaken),
-          ],
-        ),
-        actions: [
-          if (bloc.quiz!.showResults == true)
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                // Show detailed results
-              },
-              child: Text('View Details',
-                  style: TextStyle(
-                      fontFamily: 'Poppins', color: theme.primary)),
-            ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Done',
-                style:
-                    TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _resultRow(OneUITheme theme, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: theme.bodySecondary),
-          Text(value,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: theme.textPrimary,
-              )),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildResultsView(
-      BuildContext context, OneUITheme theme, CmeQuizBloc bloc) {
-    final results = bloc.results!;
-    final answers = results.answers ?? [];
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final quiz = bloc.quiz!;
+    final questions = quiz.questions?.length ?? 0;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Score card
+          CmeQuizHead(quiz: quiz),
+          const SizedBox(height: 16),
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             decoration: theme.cardDecoration,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  results.passed == true
-                      ? Icons.emoji_events_rounded
-                      : Icons.assignment_outlined,
-                  size: 48,
-                  color: results.passed == true
-                      ? const Color(0xFFFFD700)
-                      : theme.primary,
-                ),
+                Text('Before you begin', style: theme.titleSmall),
                 const SizedBox(height: 12),
-                Text(results.displayPercentage,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 32,
-                      fontWeight: FontWeight.w700,
-                      color: theme.textPrimary,
-                    )),
-                Text(
-                  results.passed == true ? 'Passed!' : 'Not passed',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: results.passed == true
-                        ? const Color(0xFF34C759)
-                        : const Color(0xFFFF9500),
+                _rule(theme, '$questions questions · ${quiz.passingScore ?? 70}% to pass'),
+                _rule(theme, '${quiz.attemptsLeft} attempt${quiz.attemptsLeft == 1 ? '' : 's'} available'),
+                _rule(
+                  theme,
+                  quiz.hasTimeLimit
+                      ? '${quiz.timeLimit} minute time limit — quiz auto-submits when time runs out'
+                      : 'No time limit — take as long as you need',
+                ),
+                _rule(theme, 'You can review your answers before submitting'),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => bloc.add(CmeBeginQuizEvent()),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.primary,
+                      foregroundColor: theme.buttonPrimaryText,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: const Text(
+                      'Begin assessment',
+                      style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text('Score: ${results.displayScore}',
-                    style: theme.bodySecondary),
-                if (results.timeTaken != null)
-                  Text('Time: ${results.displayTimeTaken}',
-                      style: theme.caption),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          // Answer details
-          if (answers.isNotEmpty) ...[
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Answer Review', style: theme.titleSmall),
-            ),
-            const SizedBox(height: 10),
-            ...answers.asMap().entries.map((entry) {
-              final idx = entry.key;
-              final answer = entry.value;
-              return _buildAnswerReview(theme, idx + 1, answer);
-            }),
-          ],
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text('Back to Module',
-                  style: TextStyle(
-                      fontFamily: 'Poppins', fontWeight: FontWeight.w600)),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildAnswerReview(
-      OneUITheme theme, int index, CmeQuizAnswerResult answer) {
-    final isCorrect = answer.isCorrect == true;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isCorrect
-            ? const Color(0xFF34C759).withValues(alpha: 0.05)
-            : const Color(0xFFFF3B30).withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: isCorrect
-              ? const Color(0xFF34C759).withValues(alpha: 0.3)
-              : const Color(0xFFFF3B30).withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
+  Widget _rule(OneUITheme theme, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(
-                isCorrect ? Icons.check_circle : Icons.cancel,
-                size: 18,
-                color: isCorrect
-                    ? const Color(0xFF34C759)
-                    : const Color(0xFFFF3B30),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                'Question $index',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: theme.textPrimary,
-                ),
-              ),
-              const Spacer(),
-              if (answer.pointsEarned != null)
-                Text(
-                  '${answer.pointsEarned} pts',
-                  style: theme.caption,
-                ),
-            ],
-          ),
-          if (!isCorrect && answer.correctAnswer != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              'Correct answer: ${answer.correctAnswer}',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                color: const Color(0xFF34C759),
-              ),
-            ),
-          ],
-          if (answer.explanation != null) ...[
-            const SizedBox(height: 6),
-            Text(answer.explanation!,
-                style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    color: theme.textSecondary,
-                    fontStyle: FontStyle.italic)),
-          ],
+          Icon(Icons.circle, size: 6, color: theme.primary),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text, style: theme.bodyMedium)),
         ],
       ),
     );
   }
+}
 
-  Widget _buildError(BuildContext context, OneUITheme theme, String message) {
+class _QuestionView extends StatelessWidget {
+  const _QuestionView({required this.bloc, required this.eventId});
+
+  final CmeQuizBloc bloc;
+  final String eventId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final questions = bloc.quiz!.questions ?? [];
+    if (questions.isEmpty) {
+      return Center(child: Text('No questions available.', style: theme.bodySecondary));
+    }
+
+    final current = questions[bloc.currentQuestionIndex];
+    final total = questions.length;
+
+    return Column(
+      children: [
+        _ProgressHeader(bloc: bloc, total: total),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: theme.cardDecoration,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(current.typeHint, style: theme.caption.copyWith(color: theme.primary)),
+                  const SizedBox(height: 8),
+                  Text(current.questionText ?? '', style: theme.titleSmall),
+                  const SizedBox(height: 4),
+                  Text('${current.points ?? 1} pt${current.points == 1 ? '' : 's'}', style: theme.caption),
+                  if (current.imageUrl != null) ...[
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(current.imageUrl!, fit: BoxFit.cover),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  _QuestionInput(question: current, bloc: bloc),
+                ],
+              ),
+            ),
+          ),
+        ),
+        _QuestionNavBar(bloc: bloc, total: total, eventId: eventId),
+      ],
+    );
+  }
+}
+
+class _QuestionInput extends StatelessWidget {
+  const _QuestionInput({required this.question, required this.bloc});
+
+  final CmeQuizQuestion question;
+  final CmeQuizBloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final options = question.options ?? [];
+
+    if (question.isMultipleSelect) {
+      final selected = bloc.answerFor(question.id);
+      final selectedList = selected is List
+          ? selected.map((e) => e.toString()).toList()
+          : <String>[];
+      return Column(
+        children: options.map((option) {
+          final value = option.value;
+          final isSelected = selectedList.contains(value);
+          return _OptionTile(
+            theme: theme,
+            label: option.label ?? String.fromCharCode(65 + options.indexOf(option)),
+            text: option.text ?? value,
+            isSelected: isSelected,
+            multi: true,
+            onTap: () => bloc.add(CmeToggleMultiAnswerEvent(questionId: question.id!, value: value)),
+          );
+        }).toList(),
+      );
+    }
+
+    if (question.isMultipleChoice || question.isTrueFalse) {
+      final selected = bloc.answerFor(question.id)?.toString();
+      return Column(
+        children: options.map((option) {
+          final value = option.value;
+          return _OptionTile(
+            theme: theme,
+            label: option.label ?? String.fromCharCode(65 + options.indexOf(option)),
+            text: option.text ?? value,
+            isSelected: selected == value,
+            onTap: () => bloc.add(CmeSelectAnswerEvent(questionId: question.id!, answer: value)),
+          );
+        }).toList(),
+      );
+    }
+
+    return TextField(
+      maxLines: 5,
+      onChanged: (value) => bloc.add(CmeSetEssayAnswerEvent(questionId: question.id!, text: value)),
+      decoration: InputDecoration(
+        hintText: 'Type your answer here…',
+        filled: true,
+        fillColor: theme.inputBackground,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+}
+
+class _OptionTile extends StatelessWidget {
+  const _OptionTile({
+    required this.theme,
+    required this.label,
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+    this.multi = false,
+  });
+
+  final OneUITheme theme;
+  final String label;
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool multi;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: isSelected ? theme.primary.withValues(alpha: 0.08) : theme.scaffoldBackground,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: isSelected ? theme.primary : theme.border, width: isSelected ? 1.5 : 1),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: isSelected ? theme.primary : theme.scaffoldBackground,
+                  shape: multi ? BoxShape.rectangle : BoxShape.circle,
+                  borderRadius: multi ? BorderRadius.circular(6) : null,
+                  border: Border.all(color: isSelected ? theme.primary : theme.textTertiary),
+                ),
+                child: isSelected
+                    ? Icon(multi ? Icons.check : Icons.check, size: 16, color: theme.buttonPrimaryText)
+                    : Text(label, style: theme.caption),
+              ),
+              const SizedBox(width: 12),
+              Expanded(child: Text(text, style: theme.bodyMedium)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressHeader extends StatelessWidget {
+  const _ProgressHeader({required this.bloc, required this.total});
+
+  final CmeQuizBloc bloc;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      color: theme.cardBackground,
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: total > 0 ? (bloc.currentQuestionIndex + 1) / total : 0,
+              minHeight: 4,
+              backgroundColor: theme.divider,
+              valueColor: AlwaysStoppedAnimation(theme.primary),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Question ${bloc.currentQuestionIndex + 1} of $total · ${bloc.answeredCount} answered',
+            style: theme.caption,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuestionNavBar extends StatelessWidget {
+  const _QuestionNavBar({
+    required this.bloc,
+    required this.total,
+    required this.eventId,
+  });
+
+  final CmeQuizBloc bloc;
+  final int total;
+  final String eventId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final questions = bloc.quiz!.questions ?? [];
+
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 12),
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        border: Border(top: BorderSide(color: theme.divider)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(questions.length, (index) {
+              final answered = bloc.isQuestionAnswered(questions[index].id);
+              final current = index == bloc.currentQuestionIndex;
+              return GestureDetector(
+                onTap: () => bloc.add(CmeNavigateQuestionEvent(questionIndex: index)),
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: current
+                        ? theme.primary
+                        : answered
+                            ? theme.primary.withValues(alpha: 0.35)
+                            : theme.divider,
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              if (bloc.currentQuestionIndex > 0)
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: bloc.goPreviousQuestion,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text('Previous'),
+                  ),
+                ),
+              if (bloc.currentQuestionIndex > 0) const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: bloc.goNextQuestion,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primary,
+                    foregroundColor: theme.buttonPrimaryText,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(
+                    bloc.currentQuestionIndex == total - 1 ? 'Review' : 'Next',
+                    style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewView extends StatelessWidget {
+  const _ReviewView({required this.bloc, required this.eventId});
+
+  final CmeQuizBloc bloc;
+  final String eventId;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final questions = bloc.quiz!.questions ?? [];
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: theme.cardDecoration,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Review your answers', style: theme.titleSmall),
+            const SizedBox(height: 8),
+            Text(
+              'Check everything before submitting. You answered ${bloc.answeredCount} of ${questions.length} questions.',
+              style: theme.bodySecondary,
+            ),
+            const SizedBox(height: 16),
+            for (var i = 0; i < questions.length; i++) ...[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${i + 1}. ${questions[i].questionText}', style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 4),
+                        Text(
+                          bloc.answerSummary(questions[i]).isEmpty ? 'No answer selected' : bloc.answerSummary(questions[i]),
+                          style: theme.caption,
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => bloc.add(CmeNavigateQuestionEvent(questionIndex: i)),
+                    child: const Text('Edit'),
+                  ),
+                ],
+              ),
+              const Divider(),
+            ],
+            const SizedBox(height: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton(
+                  onPressed: () => bloc.add(CmeSubmitQuizEvent(eventId: eventId)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.primary,
+                    foregroundColor: theme.buttonPrimaryText,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text(
+                    'Submit assessment',
+                    style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton(
+                  onPressed: bloc.goPreviousQuestion,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('Back to questions'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ResultView extends StatelessWidget {
+  const _ResultView({required this.bloc});
+
+  final CmeQuizBloc bloc;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final result = bloc.submissionResult;
+    if (result == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (result.pendingEssayReview) {
+      return _ResultCard(
+        theme: theme,
+        icon: Icons.hourglass_top,
+        iconColor: theme.warning,
+        title: 'Submitted — awaiting review',
+        body: 'Provisional score: ${result.score.round()}%\n\nYour written responses need manual grading. Once reviewed, your final score will be updated.',
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Back to event'),
+          ),
+        ],
+      );
+    }
+
+    final attemptsLeft = bloc.quiz?.attemptsLeft ?? 0;
+
+    return _ResultCard(
+      theme: theme,
+      icon: result.passed ? Icons.celebration : Icons.info_outline,
+      iconColor: result.passed ? theme.success : theme.warning,
+      title: result.passed ? 'Congratulations — you passed!' : 'Not quite there yet',
+      body: 'Your score: ${result.score.round()}%\n${result.earnedPoints} of ${result.totalPoints} points · Passing score: ${result.passingScore}%'
+          '${!result.passed && attemptsLeft > 0 ? '\nYou have $attemptsLeft more attempt${attemptsLeft == 1 ? '' : 's'}.' : ''}',
+      actions: [
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Back to event'),
+        ),
+        if (!result.passed && attemptsLeft > 0)
+          OutlinedButton(
+            onPressed: () => bloc.add(CmeResetQuizEvent()),
+            child: const Text('Try again'),
+          ),
+      ],
+    );
+  }
+}
+
+class _ResultCard extends StatelessWidget {
+  const _ResultCard({
+    required this.theme,
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.body,
+    required this.actions,
+  });
+
+  final OneUITheme theme;
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String body;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: theme.textTertiary),
-            const SizedBox(height: 16),
-            Text(message,
-                textAlign: TextAlign.center, style: theme.bodySecondary),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => context.read<CmeQuizBloc>().add(
-                  CmeLoadQuizEvent(
-                      eventId: eventId,
-                      moduleId: moduleId,
-                      quizId: quizId)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.all(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: theme.cardDecoration,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 48, color: iconColor),
+              const SizedBox(height: 12),
+              Text(title, style: theme.titleMedium, textAlign: TextAlign.center),
+              const SizedBox(height: 12),
+              Text(body, style: theme.bodyMedium, textAlign: TextAlign.center),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                alignment: WrapAlignment.center,
+                children: actions,
               ),
-              child: const Text('Retry',
-                  style: TextStyle(fontFamily: 'Poppins')),
-            ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _NoAttemptsView extends StatelessWidget {
+  const _NoAttemptsView({required this.theme});
+
+  final OneUITheme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          'No attempts remaining for this assessment.',
+          style: theme.bodyMedium,
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(message, textAlign: TextAlign.center, style: theme.bodySecondary),
+            const SizedBox(height: 12),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ),
       ),

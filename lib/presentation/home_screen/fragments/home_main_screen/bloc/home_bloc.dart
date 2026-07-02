@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/session_manager.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
 import 'package:doctak_app/data/cache/post_cache_service.dart';
 import 'package:doctak_app/data/repository/post_repository.dart';
@@ -367,6 +368,12 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       // Clear loading flag on error
       _isLoadingPage = false;
 
+      // Only the home feed redirects to login on an unauthorized/expired session.
+      if (_isUnauthorizedError(e)) {
+        await SessionManager.handleUnauthorized(reason: 'home-feed-401');
+        return;
+      }
+
       final errorMessage = _parseErrorMessage(e);
       _recordApiFailure(errorMessage);
 
@@ -378,6 +385,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         emit(PostDataError(errorMessage));
       }
     }
+  }
+
+  /// Whether a feed error represents an unauthorized / expired session.
+  /// Only the home feed uses this to bounce the user to login — other API
+  /// errors must NOT log the user out.
+  bool _isUnauthorizedError(dynamic error) {
+    final s = error.toString().toLowerCase();
+    return s.contains('session expired') ||
+        s.contains('unauthorized') ||
+        s.contains('unauthenticated') ||
+        s.contains('401');
   }
 
   /// Parse error message to user-friendly format
@@ -447,7 +465,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         // Fresh data is same as cached, no UI update needed
       }
     } catch (e) {
-      // Don't show error - we already have cached data displayed
+      // Background refresh: stay silent on normal errors (cached data is shown),
+      // but still bounce to login if the feed session is unauthorized/expired.
+      if (_isUnauthorizedError(e)) {
+        await SessionManager.handleUnauthorized(reason: 'home-feed-401-bg');
+      }
     }
   }
 

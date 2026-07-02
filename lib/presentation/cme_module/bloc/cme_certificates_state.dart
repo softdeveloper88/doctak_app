@@ -12,6 +12,8 @@ class CmeCertificatesErrorState extends CmeCertificatesState {
 }
 
 class CmeCertificateDownloadState extends CmeCertificatesState {
-  final String downloadUrl;
-  CmeCertificateDownloadState(this.downloadUrl);
+  final String localFilePath;
+  CmeCertificateDownloadState(this.localFilePath);
 }
+
+class CmeCertificateDownloadingState extends CmeCertificatesState {}

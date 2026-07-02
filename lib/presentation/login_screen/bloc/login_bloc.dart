@@ -33,28 +33,55 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     return {'device_id': deviceId, 'device_type': deviceType};
   }
 
+  String _messageFromDio(DioException e, {String fallback = 'An error occurred'}) {
+    final data = e.response?.data;
+    if (data is Map) {
+      final message = data['message'];
+      if (message is String && message.trim().isNotEmpty) {
+        return message.trim();
+      }
+    }
+    if (e.response?.statusCode == 401) {
+      return 'Invalid email or password';
+    }
+    return fallback;
+  }
+
   void _onLoginButtonPressed(LoginButtonPressed event, Emitter<LoginState> emit) async {
-    emit(LoginLoading());
+    emit(LoginLoading(isShowPassword: state.isShowPassword));
     ProgressDialogUtils.showProgressDialog();
     try {
       final deviceInfo = await _getDeviceInfo();
+      final email = event.username.trim();
+      final password = event.password;
 
-      Dio dio = Dio();
-      Response response1 = await dio.post(
+      if (email.isEmpty || password.isEmpty) {
+        ProgressDialogUtils.hideProgressDialog();
+        emit(LoginFailure(error: 'Please enter your email and password'));
+        return;
+      }
+
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: const {'Accept': 'application/json'},
+      ));
+
+      final response1 = await dio.post(
         '${AppData.remoteUrlV6}/login',
         data: FormData.fromMap({
-          'email': event.username,
-          'password': event.password,
+          'email': email,
+          'password': password,
           'device_token': event.deviceToken,
           'device_type': deviceInfo['device_type'],
           'device_id': deviceInfo['device_id'],
+          'remember': event.rememberMe ? '1' : '0',
         }),
       );
 
-      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(response1.data);
+      final response = PostLoginDeviceAuthResp.fromJson(response1.data);
 
-      if (response.success == true) {
-        // Use centralized session helper to persist all user & subscription data
+      if (response.success == true && (response.token?.isNotEmpty ?? false)) {
         await AuthSessionHelper.persistSession(
           response,
           deviceToken: event.deviceToken,
@@ -65,24 +92,30 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         ProgressDialogUtils.hideProgressDialog();
       } else {
         ProgressDialogUtils.hideProgressDialog();
-        emit(LoginFailure(error: 'Invalid credentials'));
+        emit(LoginFailure(error: 'Invalid email or password'));
       }
+    } on DioException catch (e) {
+      ProgressDialogUtils.hideProgressDialog();
+      emit(LoginFailure(error: _messageFromDio(e)));
     } catch (e) {
       ProgressDialogUtils.hideProgressDialog();
-      print(e);
-      emit(LoginFailure(error: 'An error occurred'));
+      emit(LoginFailure(error: 'An error occurred. Please try again.'));
     }
   }
 
   void _onSocialLoginButtonPressed(SocialLoginButtonPressed event, Emitter<LoginState> emit) async {
-    emit(LoginLoading());
+    emit(LoginLoading(isShowPassword: state.isShowPassword));
     ProgressDialogUtils.showProgressDialog();
     try {
       final deviceInfo = await _getDeviceInfo();
 
-      Dio dio = Dio();
-      // Use v6 social-login endpoint with actual OAuth id_token
-      Response response1 = await dio.post(
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: const {'Accept': 'application/json'},
+      ));
+
+      final response1 = await dio.post(
         '${AppData.remoteUrlV6}/social-login',
         data: FormData.fromMap({
           'email': event.email,
@@ -93,16 +126,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           'device_token': event.deviceToken,
           'device_type': deviceInfo['device_type'],
           'device_id': deviceInfo['device_id'],
+          'remember': '1',
         }),
       );
 
-      PostLoginDeviceAuthResp response = PostLoginDeviceAuthResp.fromJson(response1.data);
+      final response = PostLoginDeviceAuthResp.fromJson(response1.data);
 
       log(response.user?.userType ?? '');
       if (response.success == true) {
         ProgressDialogUtils.hideProgressDialog();
 
-        // Use centralized session helper
         await AuthSessionHelper.persistSession(
           response,
           deviceToken: event.deviceToken,
@@ -114,26 +147,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         ProgressDialogUtils.hideProgressDialog();
         emit(LoginFailure(error: 'Invalid credentials'));
       }
+    } on DioException catch (e) {
+      ProgressDialogUtils.hideProgressDialog();
+      emit(LoginFailure(error: _messageFromDio(e)));
     } catch (e) {
       ProgressDialogUtils.hideProgressDialog();
-      print('=== Social Login Error ===');
-      print('Error type: ${e.runtimeType}');
-      print('Error: $e');
-
-      if (e is DioException) {
-        print('Status Code: ${e.response?.statusCode}');
-        print('Response Data: ${e.response?.data}');
-        print('Request Data: ${e.requestOptions.data}');
-        print('URL: ${e.requestOptions.uri}');
-      }
-      print('========================');
-
-      emit(LoginFailure(error: 'An error occurred'));
+      emit(LoginFailure(error: 'An error occurred. Please try again.'));
     }
   }
 
   void _changePasswordVisibility(ChangePasswordVisibilityEvent event, Emitter<LoginState> emit) {
-    emit(LoginState(isShowPassword: event.value));
-    // emit(state.copyWith(isShowPassword: event.value));
+    emit(state.copyWith(isShowPassword: event.value));
   }
 }

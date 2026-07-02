@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:doctak_app/data/apiClient/cme/cme_api_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -44,6 +45,7 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
   String _selectedType = 'conference';
   String _selectedFormat = 'in_person';
   String _selectedCreditType = 'AMA PRA Category 1';
+  bool _saveAsDraft = true;
   DateTime? _startDate;
   DateTime? _endDate;
   DateTime? _registrationDeadline;
@@ -114,6 +116,9 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
     if (data['credit_type'] != null) {
       _selectedCreditType = data['credit_type'];
     }
+    if (data['status'] != null) {
+      _saveAsDraft = data['status'] == 'draft';
+    }
     if (data['start_date'] != null) {
       _startDate = DateTime.tryParse(data['start_date']);
     }
@@ -153,13 +158,8 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      appBar: AppBar(
-        backgroundColor: theme.cardBackground,
-        foregroundColor: theme.textPrimary,
-        title: Text(
-          isEditing ? 'Edit Event' : 'Create CME Event',
-          style: const TextStyle(fontFamily: 'Poppins', fontSize: 18),
-        ),
+      appBar: DoctakAppBar(
+        title: isEditing ? 'Edit Event' : 'Create CME Event',
         actions: [
           TextButton(
             onPressed: _isLoading ? null : _submitForm,
@@ -263,7 +263,30 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
             if (_selectedFormat != 'in_person') ...[
               _sectionTitle(theme, 'Virtual Meeting'),
               const SizedBox(height: 10),
-              _buildTextField(theme, _meetingLinkCtrl, 'Meeting Link'),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: theme.primary.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.videocam, size: 20, color: theme.primary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Agora video meeting will be auto-created for this event.',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          color: theme.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
             ],
 
@@ -327,6 +350,44 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
             _buildTextField(theme, _targetAudienceCtrl, 'Target Audience'),
             const SizedBox(height: 30),
 
+            // ── Publish Option ──
+            _sectionTitle(theme, 'Publishing'),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.inputBackground,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: theme.border),
+              ),
+              child: SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  _saveAsDraft ? 'Save as Draft' : 'Publish Immediately',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: theme.textPrimary,
+                  ),
+                ),
+                subtitle: Text(
+                  _saveAsDraft
+                      ? 'Event will be saved as draft for review'
+                      : 'Event will be published and visible to users',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 11,
+                    color: theme.textTertiary,
+                  ),
+                ),
+                value: !_saveAsDraft,
+                activeColor: theme.primary,
+                onChanged: (v) => setState(() => _saveAsDraft = !v),
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // ── Submit ──
             SizedBox(
               width: double.infinity,
@@ -346,7 +407,9 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white))
                     : Text(
-                        isEditing ? 'Update Event' : 'Create Event',
+                        isEditing
+                            ? 'Update Event'
+                            : (_saveAsDraft ? 'Save as Draft' : 'Publish Event'),
                         style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
@@ -481,17 +544,19 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: theme.inputBackground,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.border),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.inputBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
           dropdownColor: theme.cardBackground,
+          icon: Icon(Icons.arrow_drop_down, color: theme.textSecondary),
           style: TextStyle(
             fontFamily: 'Poppins',
-            fontSize: 13,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
             color: theme.textPrimary,
           ),
           hint: Text(label, style: TextStyle(
@@ -516,11 +581,32 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
   ) {
     return InkWell(
       onTap: () async {
+        final pickerTheme = theme.isDark
+            ? ThemeData.dark().copyWith(
+                colorScheme: ColorScheme.dark(
+                  primary: theme.primary,
+                  onPrimary: Colors.white,
+                  surface: theme.cardBackground,
+                  onSurface: theme.textPrimary,
+                ),
+                dialogBackgroundColor: theme.cardBackground,
+              )
+            : ThemeData.light().copyWith(
+                colorScheme: ColorScheme.light(
+                  primary: theme.primary,
+                  onPrimary: Colors.white,
+                  surface: theme.cardBackground,
+                  onSurface: theme.textPrimary,
+                ),
+              );
+
         final date = await showDatePicker(
           context: context,
           initialDate: value ?? DateTime.now(),
           firstDate: DateTime.now().subtract(const Duration(days: 30)),
           lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+          builder: (context, child) =>
+              Theme(data: pickerTheme, child: child!),
         );
         if (date == null) return;
 
@@ -529,6 +615,8 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
           initialTime: value != null
               ? TimeOfDay.fromDateTime(value)
               : TimeOfDay.now(),
+          builder: (context, child) =>
+              Theme(data: pickerTheme, child: child!),
         );
 
         final dateTime = DateTime(
@@ -578,6 +666,7 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
+    final theme = OneUITheme.of(context);
 
     setState(() => _isLoading = true);
 
@@ -589,6 +678,7 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
         'type': _selectedType,
         'format': _selectedFormat,
         'credit_type': _selectedCreditType,
+        'status': _saveAsDraft ? 'draft' : 'published',
       };
 
       if (_creditAmountCtrl.text.isNotEmpty) {
@@ -656,7 +746,7 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
             content: Text(isEditing
                 ? 'Event updated successfully'
                 : 'Event created successfully'),
-            backgroundColor: const Color(0xFF34C759),
+            backgroundColor: theme.success,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -667,7 +757,7 @@ class _CmeEventCreationScreenState extends State<CmeEventCreationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed: ${e.toString()}'),
-            backgroundColor: const Color(0xFFFF3B30),
+            backgroundColor: theme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );

@@ -16,6 +16,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? customLeading;
   final PreferredSizeWidget? bottom;
   final double? elevation;
+  final bool showShadow;
   final Color? backgroundColor;
   final Color? titleColor;
   final double? titleFontSize;
@@ -25,6 +26,7 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Optional search field widget that renders below the title row
   /// inside the same app bar container (sharing the same background).
   final Widget? searchField;
+  final double searchFieldHeight;
 
   const DoctakAppBar({
     super.key,
@@ -40,17 +42,22 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.customLeading,
     this.bottom,
     this.elevation = 0,
+    this.showShadow = true,
     this.backgroundColor,
     this.titleColor,
     this.titleFontSize = 17,
     this.titleFontWeight = FontWeight.w500,
     this.automaticallyImplyLeading = true,
     this.searchField,
+    this.searchFieldHeight = 72,
   });
 
   @override
-  Size get preferredSize =>
-      Size.fromHeight(toolbarHeight + (bottom?.preferredSize.height ?? 0.0));
+  Size get preferredSize => Size.fromHeight(
+    toolbarHeight +
+        (bottom?.preferredSize.height ?? 0.0) +
+        (searchField != null ? searchFieldHeight : 0.0),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +72,9 @@ class DoctakAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       decoration: isTransparent
           ? const BoxDecoration(color: Colors.transparent)
-          : theme.appBarDecoration.copyWith(color: resolvedBg),
+          : showShadow
+              ? theme.appBarDecoration.copyWith(color: resolvedBg)
+              : BoxDecoration(color: resolvedBg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -35,7 +35,7 @@ class GuidelineHistorySheet extends StatelessWidget {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.textSecondary.withOpacity(0.3),
+                color: theme.textSecondary.withValues(alpha:0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -97,7 +97,7 @@ class GuidelineHistorySheet extends StatelessWidget {
           Icon(
             Icons.chat_bubble_outline_rounded,
             size: 48,
-            color: theme.textSecondary.withOpacity(0.3),
+            color: theme.textSecondary.withValues(alpha:0.3),
           ),
           const SizedBox(height: 12),
           Text(
@@ -112,7 +112,7 @@ class GuidelineHistorySheet extends StatelessWidget {
           Text(
             'Start asking about medical guidelines',
             style: TextStyle(
-              color: theme.textSecondary.withOpacity(0.6),
+              color: theme.textSecondary.withValues(alpha:0.6),
               fontSize: 13,
             ),
           ),
@@ -153,7 +153,7 @@ class GuidelineHistorySheet extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0A84FF).withOpacity(0.1),
+                  color: const Color(0xFF0A84FF).withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(

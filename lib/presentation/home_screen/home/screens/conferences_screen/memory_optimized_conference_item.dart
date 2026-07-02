@@ -1,368 +1,433 @@
+import 'package:doctak_app/core/utils/conference_display.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conference_detail_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Memory-optimized conference item widget with One UI 8.5 styling
 class MemoryOptimizedConferenceItem extends StatefulWidget {
   final Data conference;
   final Function(BuildContext, Data)? onItemTap;
 
-  const MemoryOptimizedConferenceItem({super.key, required this.conference, this.onItemTap});
+  const MemoryOptimizedConferenceItem({
+    super.key,
+    required this.conference,
+    this.onItemTap,
+  });
 
   @override
-  State<MemoryOptimizedConferenceItem> createState() => _MemoryOptimizedConferenceItemState();
+  State<MemoryOptimizedConferenceItem> createState() =>
+      _MemoryOptimizedConferenceItemState();
 }
 
-class _MemoryOptimizedConferenceItemState extends State<MemoryOptimizedConferenceItem> {
+class _MemoryOptimizedConferenceItemState
+    extends State<MemoryOptimizedConferenceItem> {
+  DateTime? _parseDate(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value.split(' ').first);
+  }
+
+  String _formatLongDate(String? value) {
+    final parsed = _parseDate(value);
+    if (parsed == null) return value ?? 'Date TBA';
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return '${weekdays[parsed.weekday - 1]}, ${months[parsed.month - 1]} ${parsed.day}, ${parsed.year}';
+  }
+
+  String _locationLabel() {
+    return conferenceLocationLabel(
+      city: widget.conference.city,
+      state: widget.conference.state,
+      country: widget.conference.country,
+      countryName: widget.conference.countryName,
+    );
+  }
+
+  String _excerpt() {
+    return conferenceExcerpt(widget.conference.description);
+  }
+
+  String _topicsPreview() {
+    final source = widget.conference.specialtiesTargeted?.trim().isNotEmpty == true
+        ? widget.conference.specialtiesTargeted
+        : widget.conference.keywords;
+    return conferenceTopicsPreview(source);
+  }
+
+  String _organizerInitials() {
+    final name = widget.conference.organizer?.trim();
+    if (name == null || name.isEmpty) return 'CF';
+    final parts = name.split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+    final startDate = _parseDate(widget.conference.startDate);
+    const shortMonths = [
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+    ];
+    final day = startDate != null
+        ? startDate.day.toString().padLeft(2, '0')
+        : '--';
+    final month = startDate != null ? shortMonths[startDate.month - 1] : '---';
+    final location = _locationLabel();
+    final excerpt = _excerpt();
+    final topics = _topicsPreview();
+    final metaParts = [
+      if (widget.conference.specialty?.trim().isNotEmpty == true)
+        widget.conference.specialty!.trim(),
+      if (location.isNotEmpty) location,
+    ];
 
     return RepaintBoundary(
-      child: GestureDetector(
-        onTap: () {
-          if (widget.onItemTap != null) {
-            widget.onItemTap!(context, widget.conference);
-          }
-        },
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(20), boxShadow: theme.cardShadow),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Conference image
-                _buildConferenceImageOrPlaceholder(theme),
-
-                // Conference header with title and dates
-                _buildConferenceHeader(theme),
-
-                // Conference description
-                _buildConferenceDescription(theme),
-
-                // Conference details (city, venue, etc.)
-                _buildConferenceDetails(theme),
-
-                // Register button and actions
-                _buildActionRow(theme),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Conference image or placeholder
-  Widget _buildConferenceImageOrPlaceholder(OneUITheme theme) {
-    if (widget.conference.thumbnail != null && widget.conference.thumbnail!.isNotEmpty) {
-      return Container(
-        height: 180,
-        width: double.infinity,
-        decoration: BoxDecoration(color: theme.surfaceVariant),
-        child: Image.network(
-          widget.conference.thumbnail!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.image_not_supported_rounded, color: theme.textTertiary, size: 32),
-                  const SizedBox(height: 8),
-                  Text(
-                    translation(context).msg_image_not_available,
-                    style: TextStyle(color: theme.textTertiary, fontSize: 12, fontFamily: 'Poppins'),
-                  ),
-                ],
-              ),
-            );
-          },
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null,
-                strokeWidth: 2,
-                color: theme.primary,
-              ),
-            );
-          },
-        ),
-      );
-    } else {
-      return Container(
-        height: 100,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.1), theme.primary.withValues(alpha: 0.05)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        ),
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16)),
-            child: Icon(Icons.event_rounded, size: 36, color: theme.primary),
-          ),
-        ),
-      );
-    }
-  }
-
-  // Conference header with title and organizer
-  Widget _buildConferenceHeader(OneUITheme theme) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Event icon container
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))],
-            ),
-            child: const Icon(Icons.event_rounded, color: Colors.white, size: 22),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.conference.title ?? translation(context).lbl_not_available,
-                  style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 16, color: theme.textPrimary, height: 1.3),
-                ),
-                const SizedBox(height: 6),
-                // Date row with chip style
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(color: theme.success.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.calendar_today_rounded, size: 12, color: theme.success),
-                      const SizedBox(width: 6),
-                      Flexible(
-                        child: Text(
-                          '${widget.conference.startDate ?? ''} - ${widget.conference.endDate ?? ''}',
-                          style: TextStyle(color: theme.success, fontSize: 11, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 6),
-                if (widget.conference.organizer != null && widget.conference.organizer!.isNotEmpty)
-                  Row(
-                    children: [
-                      Icon(Icons.person_rounded, size: 14, color: theme.textSecondary),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          widget.conference.organizer ?? '',
-                          style: TextStyle(color: theme.textSecondary, fontSize: 13, fontFamily: 'Poppins'),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          // Share button - One UI style
-          Material(
-            color: theme.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () {
-                _shareConference();
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                child: Icon(Icons.share_rounded, color: theme.primary, size: 20),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Conference description
-  Widget _buildConferenceDescription(OneUITheme theme) {
-    if (widget.conference.description == null || widget.conference.description!.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        decoration: theme.cardDecoration,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(color: theme.secondary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                child: Icon(Icons.description_rounded, size: 14, color: theme.secondary),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                translation(context).lbl_description,
-                style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 14, color: theme.textPrimary),
+              _ConferenceDateColumn(day: day, month: month, theme: theme),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          if (widget.conference.specialty?.trim().isNotEmpty == true)
+                            _Badge(
+                              label: widget.conference.specialty!.trim(),
+                              theme: theme,
+                              style: _BadgeStyle.spec,
+                            ),
+                          _Badge(
+                            label: 'Upcoming',
+                            theme: theme,
+                            style: _BadgeStyle.upcoming,
+                          ),
+                          if (widget.conference.cmeCredits?.trim().isNotEmpty == true)
+                            _Badge(
+                              label: '${widget.conference.cmeCredits} CME',
+                              theme: theme,
+                              style: _BadgeStyle.cme,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 9),
+                      InkWell(
+                        onTap: _hasWebsite ? _launchWebsite : null,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Text(
+                          widget.conference.title ??
+                              translation(context).lbl_not_available,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: _hasWebsite ? theme.primary : theme.textPrimary,
+                            height: 1.3,
+                            decoration: _hasWebsite ? TextDecoration.underline : null,
+                            decorationColor: theme.primary.withValues(alpha: 0.35),
+                          ),
+                        ),
+                      ),
+                      if (metaParts.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          metaParts.join(' · '),
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontFamily: 'Poppins',
+                            color: theme.textSecondary,
+                          ),
+                        ),
+                      ],
+                      if (excerpt.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          excerpt,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Poppins',
+                            color: theme.textPrimary.withValues(alpha: 0.82),
+                            height: 1.55,
+                          ),
+                        ),
+                      ],
+                      if (topics.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text.rich(
+                          TextSpan(
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontFamily: 'Poppins',
+                              color: theme.textSecondary,
+                              fontStyle: FontStyle.italic,
+                              height: 1.45,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Call for papers: ',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.normal,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.textPrimary.withValues(alpha: 0.8),
+                                ),
+                              ),
+                              TextSpan(text: topics),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Container(
+                            width: 26,
+                            height: 26,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: theme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Text(
+                              _organizerInitials(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.conference.organizer ??
+                                      'Conference organizer',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Poppins',
+                                    color: theme.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  _formatLongDate(widget.conference.startDate),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
+                                    color: theme.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                      FilledButton(
+                          onPressed: _openDetailScreen,
+                              style: FilledButton.styleFrom(
+                                backgroundColor: theme.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                translation(context).lbl_view_details,
+                                style: const TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          IconButton(
+                            onPressed: _shareConference,
+                            icon: Icon(
+                              Icons.share_outlined,
+                              size: 18,
+                              color: theme.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            widget.conference.description ?? translation(context).msg_no_description,
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary, height: 1.4),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  // Conference details (location, credits, etc.)
-  Widget _buildConferenceDetails(OneUITheme theme) {
+  bool get _hasWebsite {
+    final website = widget.conference.website?.trim();
+    return website != null && website.isNotEmpty;
+  }
+
+  Future<void> _launchWebsite() async {
+    final website = widget.conference.website?.trim();
+    if (website == null || website.isEmpty) return;
+    final uri = Uri.tryParse(website);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void _openDetailScreen() {
+    final id = widget.conference.id?.toString();
+    if (id == null || id.isEmpty) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ConferenceDetailScreen(
+          conferenceId: id,
+          initialConference: widget.conference,
+        ),
+      ),
+    );
+  }
+
+  void _shareConference() {
+    DeepLinkService.shareConference(
+      conferenceId: widget.conference.id?.toString() ?? '',
+      title: widget.conference.title ?? '',
+    );
+  }
+}
+
+class _ConferenceDateColumn extends StatelessWidget {
+  const _ConferenceDateColumn({
+    required this.day,
+    required this.month,
+    required this.theme,
+  });
+
+  final String day;
+  final String month;
+  final OneUITheme theme;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(14),
+      width: 54,
+      padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: BoxDecoration(
-        color: theme.surfaceVariant,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.border, width: 0.5),
+        color: theme.inputBackground,
+        border: Border(
+          right: BorderSide(color: theme.divider),
+        ),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildDetailRow(Icons.location_on_rounded, theme.success, '${widget.conference.city ?? ''}, ${widget.conference.country ?? ''}', theme),
-          if (widget.conference.venue != null && widget.conference.venue!.isNotEmpty) _buildDetailRow(Icons.meeting_room_rounded, theme.warning, widget.conference.venue!, theme),
-          if (widget.conference.cmeCredits != null || widget.conference.mocCredits != null)
-            _buildDetailRow(Icons.school_rounded, theme.secondary, 'CME: ${widget.conference.cmeCredits ?? 'N/A'}, MOC: ${widget.conference.mocCredits ?? 'N/A'}', theme),
-          if (widget.conference.specialtiesTargeted != null && widget.conference.specialtiesTargeted!.isNotEmpty)
-            _buildDetailRow(Icons.medical_services_rounded, theme.primary, widget.conference.specialtiesTargeted!, theme),
-        ],
-      ),
-    );
-  }
-
-  // Helper method to build a detail row - One UI 8.5 style
-  Widget _buildDetailRow(IconData icon, Color color, String text, OneUITheme theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, size: 16, color: color),
+          Text(
+            day,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Poppins',
+              color: theme.textPrimary,
+              height: 1,
+            ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                text,
-                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
-              ),
+          const SizedBox(height: 4),
+          Text(
+            month,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Poppins',
+              color: theme.textSecondary,
+              letterSpacing: 0.5,
+              height: 1,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  // Register button and actions - One UI 8.5 style
-  Widget _buildActionRow(OneUITheme theme) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: theme.divider, width: 1)),
-      ),
-      child: widget.conference.registrationLink != null && widget.conference.registrationLink!.isNotEmpty
-          ? Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [theme.primary, theme.primary.withValues(alpha: 0.85)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 3))],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => _launchRegistrationLink(),
-                  borderRadius: BorderRadius.circular(14),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
-                          child: const Icon(Icons.app_registration_rounded, size: 16, color: Colors.white),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          translation(context).lbl_register_now,
-                          style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 14, color: Colors.white, letterSpacing: 0.3),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            )
-          : Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(color: theme.surfaceVariant, borderRadius: BorderRadius.circular(12)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.info_outline_rounded, size: 16, color: theme.textTertiary),
-                  const SizedBox(width: 8),
-                  Text(
-                    translation(context).lbl_registration_unavailable,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textTertiary, fontStyle: FontStyle.italic),
-                  ),
-                ],
-              ),
-            ),
-    );
-  }
+enum _BadgeStyle { spec, upcoming, cme }
 
-  // Share conference details
-  void _shareConference() {
-    // Build location string from available fields
-    final locationParts = <String>[
-      if (widget.conference.venue != null && widget.conference.venue!.isNotEmpty) widget.conference.venue!,
-      if (widget.conference.city != null && widget.conference.city!.isNotEmpty) widget.conference.city!,
-      if (widget.conference.country != null && widget.conference.country!.isNotEmpty) widget.conference.country!,
-    ];
-    final location = locationParts.isNotEmpty ? locationParts.join(', ') : null;
+class _Badge extends StatelessWidget {
+  const _Badge({
+    required this.label,
+    required this.theme,
+    required this.style,
+  });
 
-    DeepLinkService.shareConference(conferenceId: widget.conference.id?.toString() ?? '', title: widget.conference.title, date: widget.conference.startDate, location: location);
-  }
+  final String label;
+  final OneUITheme theme;
+  final _BadgeStyle style;
 
-  // Launch registration link
-  void _launchRegistrationLink() async {
-    if (widget.conference.registrationLink != null && widget.conference.registrationLink!.isNotEmpty) {
-      final Uri registrationUri = Uri.parse(widget.conference.registrationLink!);
-      if (await canLaunchUrl(registrationUri)) {
-        await launchUrl(registrationUri, mode: LaunchMode.externalApplication);
-      }
+  @override
+  Widget build(BuildContext context) {
+    Color bg;
+    Color fg;
+    Border? border;
+
+    switch (style) {
+      case _BadgeStyle.spec:
+        bg = theme.inputBackground;
+        fg = theme.textPrimary;
+        border = Border.all(color: theme.border);
+      case _BadgeStyle.upcoming:
+        bg = theme.primary.withValues(alpha: 0.1);
+        fg = theme.primary;
+      case _BadgeStyle.cme:
+        bg = const Color(0xFFFEFCE8);
+        fg = const Color(0xFF854D0E);
+        border = Border.all(color: const Color(0xFFFDE68A));
     }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+        border: border,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          fontFamily: 'Poppins',
+          color: fg,
+        ),
+      ),
+    );
   }
 }

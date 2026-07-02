@@ -279,14 +279,40 @@ class SearchApiService {
   // ================================== ADDITIONAL SEARCH METHODS ==================================
 
   /// Search conferences (backward compatibility)
-  Future<ApiResponse<SearchConferenceModel>> searchConferences({required String page, String? keyword, String? country}) async {
+  Future<ApiResponse<Map<String, dynamic>>> getConferenceDetail({
+    required String id,
+  }) async {
     try {
-      String queryParams = 'page=$page';
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/conferences/$id',
+          method: networkUtils.HttpMethod.GET,
+        ),
+      );
+      return ApiResponse.success(Map<String, dynamic>.from(response));
+    } on ApiException catch (e) {
+      return ApiResponse.error(e.message, statusCode: e.statusCode);
+    } catch (e) {
+      return ApiResponse.error('Failed to load conference details: $e');
+    }
+  }
+
+  Future<ApiResponse<SearchConferenceModel>> searchConferences({
+    required String page,
+    String? keyword,
+    String? country,
+    String? month,
+  }) async {
+    try {
+      String queryParams = 'page=$page&upcoming=1';
       if (country != null && country.isNotEmpty && country != 'all') {
         queryParams += '&country=$country';
       }
       if (keyword != null && keyword.isNotEmpty) {
         queryParams += '&search_term=$keyword';
+      }
+      if (month != null && month.isNotEmpty) {
+        queryParams += '&month=$month';
       }
       final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/search-conferences?$queryParams', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(SearchConferenceModel.fromJson(response));

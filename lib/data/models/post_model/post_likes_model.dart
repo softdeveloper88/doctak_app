@@ -10,7 +10,10 @@ class PostLikesModel {
   PostLikesModel.fromJson(dynamic json) {
     id = json['id'];
     profilePic = AppData.fullImageUrl(json['profile_pic']);
-    name = json['name'];
+    final rawName = (json['name'] ?? '').toString().trim();
+    final firstLast = '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    final username = (json['username'] ?? '').toString().trim();
+    name = rawName.isNotEmpty ? rawName : (firstLast.isNotEmpty ? firstLast : (username.isNotEmpty ? username : 'Unknown'));
   }
 
   String? id;

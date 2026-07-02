@@ -31,19 +31,19 @@ class GuidelineQuotaBanner extends StatelessWidget {
     final IconData icon;
 
     if (isExhausted) {
-      bgColor = const Color(0xFFFF3B30).withOpacity(0.06);
+      bgColor = const Color(0xFFFF3B30).withValues(alpha:0.06);
       borderColor = const Color(0xFFFF3B30);
       textColor = const Color(0xFFFF3B30);
       progressColor = const Color(0xFFFF3B30);
       icon = Icons.block_rounded;
     } else if (isLow) {
-      bgColor = const Color(0xFFFF9500).withOpacity(0.06);
+      bgColor = const Color(0xFFFF9500).withValues(alpha:0.06);
       borderColor = const Color(0xFFFF9500);
       textColor = const Color(0xFFFF9500);
       progressColor = const Color(0xFFFF9500);
       icon = Icons.warning_amber_rounded;
     } else {
-      bgColor = const Color(0xFF0A84FF).withOpacity(0.04);
+      bgColor = const Color(0xFF0A84FF).withValues(alpha:0.04);
       borderColor = const Color(0xFF0A84FF);
       textColor = const Color(0xFF0A84FF);
       progressColor = const Color(0xFF0A84FF);
@@ -59,7 +59,7 @@ class GuidelineQuotaBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         border: Border(
-          bottom: BorderSide(color: borderColor.withOpacity(0.3), width: 1),
+          bottom: BorderSide(color: borderColor.withValues(alpha:0.3), width: 1),
         ),
       ),
       child: Column(
@@ -116,7 +116,7 @@ class GuidelineQuotaBanner extends StatelessWidget {
               value: usage.dailyLimit > 0
                   ? usage.dailyUsed / usage.dailyLimit
                   : 0,
-              backgroundColor: progressColor.withOpacity(0.12),
+              backgroundColor: progressColor.withValues(alpha:0.12),
               color: progressColor,
               minHeight: 3,
             ),

@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/user_profile_privacy_model.dart';
@@ -95,13 +96,11 @@ class _PrivacyInfoScreenState extends State<PrivacyInfoScreen>
     return InkWell(
       onTap: () {
         // Navigate to own profile in "other user" mode to preview public view
-        Navigator.push(
+        AppNavigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => SVProfileFragment(
-              userId: AppData.logInUserId,
-              viewAsPublic: true,
-            ),
+          SVProfileFragment(
+            userId: AppData.logInUserId,
+            viewAsPublic: true,
           ),
         );
       },

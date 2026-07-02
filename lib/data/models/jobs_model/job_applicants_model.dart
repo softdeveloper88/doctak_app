@@ -33,13 +33,13 @@ class Applicants {
   Applicants({this.id, this.userId, this.jobId, this.isViewedByAdmin, this.createdAt, this.updatedAt, this.cv, this.user});
 
   Applicants.fromJson(dynamic json) {
-    id = json['id'];
-    userId = json['user_id'];
-    jobId = json['job_id'];
+    id = json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '');
+    userId = json['user_id']?.toString();
+    jobId = json['job_id']?.toString();
     isViewedByAdmin = json['is_viewed_by_admin'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
-    cv = json['cv'];
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
+    cv = json['cv']?.toString();
     user = json['user'] != null ? User.fromJson(json['user']) : null;
   }
   int? id;
@@ -74,10 +74,10 @@ class User {
   User({this.id, this.name, this.profilePic, this.email});
 
   User.fromJson(dynamic json) {
-    id = json['id'];
-    name = json['name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
-    email = json['email'];
+    id = json['id']?.toString();
+    name = json['name']?.toString();
+    profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());
+    email = json['email']?.toString();
   }
   String? id;
   String? name;

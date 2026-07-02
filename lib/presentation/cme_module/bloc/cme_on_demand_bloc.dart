@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/apiClient/cme/cme_api_service.dart';
-import '../../../data/models/cme/cme_gamification_model.dart';
+import '../../../data/models/cme/cme_on_demand_model.dart';
 import 'cme_on_demand_event.dart';
 import 'cme_on_demand_state.dart';
 

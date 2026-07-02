@@ -54,7 +54,7 @@ class CustomAlertDialog extends StatelessWidget {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () {
-                    Navigator.of(context, rootNavigator: true).pop('dialog');
+                    Navigator.of(context).pop('dialog');
                     callbackNegative?.call();
                   },
                   style: OutlinedButton.styleFrom(
@@ -72,7 +72,7 @@ class CustomAlertDialog extends StatelessWidget {
               Expanded(
                 child: FilledButton(
                   onPressed: () {
-                    Navigator.of(context, rootNavigator: true).pop('dialog');
+                    Navigator.of(context).pop('dialog');
                     callback();
                   },
                   style: FilledButton.styleFrom(

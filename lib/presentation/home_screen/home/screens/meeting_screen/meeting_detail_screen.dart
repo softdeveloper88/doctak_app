@@ -3,14 +3,13 @@ import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_call_screen.dart';
-import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_waiting_room_controller.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 
 import '../../../../../data/models/meeting_model/fetching_meeting_model.dart';
 import '../../../../../localization/app_localization.dart';
@@ -26,29 +25,64 @@ class MeetingDetailScreen extends StatefulWidget {
 }
 
 class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
-  late PusherChannel clientListenChannel;
-  late PusherChannel clientSendChannel;
-  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
+  final MeetingWaitingRoomController _waitingRoom = MeetingWaitingRoomController();
+
+  @override
+  void dispose() {
+    _waitingRoom.dispose();
+    super.dispose();
+  }
 
   void _joinMeeting() {
     ProgressDialogUtils.showProgressDialog();
     askToJoin(context, widget.sessions.channel)
         .then((resp) async {
           Map<String, dynamic> responseData = json.decode(jsonEncode(resp.data));
-          if (responseData['success'] == '1') {
+          // Support both old Laravel backend (success='1') and Node backend (success=true)
+          final isSuccess = responseData['success'] == true || responseData['success'] == '1';
+          // Node backend: waiting room returns waiting=true or status='waiting_room'
+          final isWaiting = responseData['waiting'] == true ||
+              responseData['status']?.toString() == 'waiting_room';
+
+          if (isSuccess && !isWaiting) {
             await joinMeetings(widget.sessions.channel).then((joinMeetingData) {
               ProgressDialogUtils.hideProgressDialog();
               VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
             });
+          } else if (isSuccess && isWaiting) {
+            final meetingId =
+                (responseData['meeting'] as Map?)?['id']?.toString() ??
+                responseData['meeting_id']?.toString() ??
+                '';
+            _waitingRoom.connect(
+              context: context,
+              meetingId: meetingId,
+              channel: widget.sessions.channel,
+              onApproved: () async {
+                final joinMeetingData =
+                    await joinMeetings(widget.sessions.channel);
+                if (!mounted) return;
+                ProgressDialogUtils.hideProgressDialog();
+                VideoCallScreen(
+                  meetingDetailsModel: joinMeetingData,
+                  isHost: false,
+                ).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
+              },
+              onRejected: () {
+                if (!mounted) return;
+                toast(translation(context).msg_user_rejected);
+              },
+            );
           } else {
-            ConnectPusher(context, responseData['meeting_id'], widget.sessions.channel);
+            // Not started or other failure
+            ProgressDialogUtils.hideProgressDialog();
+            showToast(responseData['message']?.toString() ?? 'Meeting has not started yet');
           }
         })
         .catchError((error) {
           ProgressDialogUtils.hideProgressDialog();
-          // If the meeting hasn't started yet (404), shows user-friendly message
           final errMsg = error.toString();
-          if (errMsg.contains('No query results') || errMsg.contains('404')) {
+          if (errMsg.contains('not started') || errMsg.contains('No query results') || errMsg.contains('404')) {
             showToast('Meeting has not started yet');
           } else {
             showToast(translation(context).msg_something_wrong);
@@ -457,102 +491,4 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
     );
   }
 
-  void onSubscriptionSucceeded(String channelName, dynamic data) {
-    print("onSubscriptionSucceeded: $channelName data: $data");
-  }
-
-  void onSubscriptionError(String message, dynamic e) {
-    print("onSubscriptionError: $message Exception: $e");
-  }
-
-  void onDecryptionFailure(String event, String reason) {
-    print("onDecryptionFailure: $event reason: $reason");
-  }
-
-  void onMemberAdded(String channelName, PusherMember member) {
-    print("onMemberAdded: $channelName member: $member");
-  }
-
-  void onMemberRemoved(String channelName, PusherMember member) {
-    print("onMemberRemoved: $channelName member: $member");
-  }
-
-  void onError(String message, int? code, dynamic e) {
-    print("onError: $message code: $code exception: $e");
-  }
-
-  void onSubscriptionCount(String channelName, int subscriptionCount) {}
-
-  // Authorizer method for Pusher - required to prevent iOS crash
-  Future<dynamic>? onAuthorizer(String channelName, String socketId, dynamic options) async {
-    print("onAuthorizer called for channel: $channelName, socketId: $socketId");
-
-    // For public channels (not starting with 'private-' or 'presence-'),
-    // return null
-    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
-      return null;
-    }
-
-    return null;
-  }
-
-  void ConnectPusher(context, meetingId, channel) async {
-    // Create the Pusher client
-    try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: false,
-        onSubscriptionSucceeded: onSubscriptionSucceeded,
-        onSubscriptionError: onSubscriptionError,
-        onMemberAdded: onMemberAdded,
-        onMemberRemoved: onMemberRemoved,
-        // onEvent: onEvent,
-        onDecryptionFailure: onDecryptionFailure,
-        onError: onError,
-        onSubscriptionCount: onSubscriptionCount,
-        onAuthorizer: onAuthorizer,
-      );
-
-      pusher.connect();
-
-      // Successfully created and connected to Pusher
-      clientListenChannel = await pusher.subscribe(
-        channelName: "meeting-channel$meetingId",
-        onMemberAdded: (member) {
-          // print("Member added: $member");
-        },
-        onMemberRemoved: (member) {
-          print("Member removed: $member");
-        },
-        onEvent: (event) async {
-          String eventName = event.eventName;
-          print(eventName);
-          switch (eventName) {
-            case 'new-user-allowed':
-              await joinMeetings(channel).then((joinMeetingData) {
-                ProgressDialogUtils.hideProgressDialog();
-                VideoCallScreen(meetingDetailsModel: joinMeetingData, isHost: false).launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
-              });
-              print("eventName $eventName");
-              toast(translation(context).msg_user_allowed);
-              break;
-            case 'new-user-rejected':
-              ProgressDialogUtils.hideProgressDialog();
-
-              print("eventName $eventName");
-              toast(translation(context).msg_user_rejected);
-              break;
-            default:
-              // Handle unknown event types or ignore them
-              break;
-          }
-        },
-      );
-
-      // Attach an event listener to the channel
-    } catch (e) {
-      print('eee $e');
-    }
-  }
 }

@@ -1,50 +1,53 @@
 import 'package:flutter/material.dart';
 
-/// Simple and reliable fixed MediaQuery that focuses only on essential properties
+/// Locks text scale while keeping the real device size and safe-area insets.
 class SimpleFixedMediaQuery {
-  /// Fixed dimensions based on iPhone 14 Pro
-  static const Size _fixedSize = Size(393.0, 852.0);
-  static const double _fixedPixelRatio = 3.0;
+  static const double _maxBottomInset = 48;
 
-  /// Creates a minimal fixed MediaQueryData
+  static double _clampBottom(double value) => value.clamp(0, _maxBottomInset);
+
+  static EdgeInsets _clampBottomEdgeInsets(EdgeInsets insets) {
+    return EdgeInsets.fromLTRB(
+      insets.left,
+      insets.top,
+      insets.right,
+      _clampBottom(insets.bottom),
+    );
+  }
+
+  /// Creates MediaQueryData with fixed text scale and clamped bottom insets.
   static MediaQueryData createFixedData(BuildContext context) {
     final original = MediaQuery.of(context);
 
     return MediaQueryData(
-      // Fixed core properties
-      size: _fixedSize,
-      devicePixelRatio: _fixedPixelRatio,
+      size: original.size,
+      devicePixelRatio: original.devicePixelRatio,
       textScaler: const TextScaler.linear(1.0),
-
-      // Essential system properties (preserve originals)
-      padding: original.padding,
+      padding: _clampBottomEdgeInsets(original.padding),
       viewInsets: original.viewInsets,
-      viewPadding: original.viewPadding,
+      viewPadding: _clampBottomEdgeInsets(original.viewPadding),
       systemGestureInsets: original.systemGestureInsets,
-
-      // Fixed accessibility properties
       boldText: false,
       highContrast: false,
       disableAnimations: false,
       invertColors: false,
       accessibleNavigation: false,
-
-      // System properties (preserve originals)
       platformBrightness: original.platformBrightness,
       alwaysUse24HourFormat: original.alwaysUse24HourFormat,
-
-      // Preserve gesture and display settings
       gestureSettings: original.gestureSettings,
       displayFeatures: original.displayFeatures,
     );
   }
 
-  /// Wraps a widget with fixed MediaQuery
+  /// Wraps a widget with normalized MediaQuery.
   static Widget wrap({required Widget child, BuildContext? context}) {
     return Builder(
       builder: (builderContext) {
         final contextToUse = context ?? builderContext;
-        return MediaQuery(data: createFixedData(contextToUse), child: child);
+        return MediaQuery(
+          data: createFixedData(contextToUse),
+          child: child,
+        );
       },
     );
   }

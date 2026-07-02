@@ -62,9 +62,10 @@ class LikeReplyComment extends CommentEvent {
 class FetchReplyComment extends CommentEvent {
   String? commentId;
   String? postId;
-  FetchReplyComment({this.commentId, this.postId});
+  final bool forceRefresh;
+  FetchReplyComment({this.commentId, this.postId, this.forceRefresh = false});
   @override
-  List<Object?> get props => [commentId, postId];
+  List<Object?> get props => [commentId, postId, forceRefresh];
 }
 
 class DeleteCommentEvent extends CommentEvent {
@@ -91,8 +92,15 @@ class UpdateReplyCommentEvent extends CommentEvent {
 
 class CheckIfNeedMoreDataEvent extends CommentEvent {
   final int index;
-  final int postId;
-  CheckIfNeedMoreDataEvent({required this.postId, required this.index});
+  CheckIfNeedMoreDataEvent({required this.index});
   @override
   List<Object?> get props => [index];
+}
+
+class UpdateMainCommentEvent extends CommentEvent {
+  String? commentId;
+  String? content;
+  UpdateMainCommentEvent({this.commentId, this.content});
+  @override
+  List<Object?> get props => [commentId, content];
 }

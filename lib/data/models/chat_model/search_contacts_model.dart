@@ -126,24 +126,27 @@ Data dataFromJson(String str) => Data.fromJson(json.decode(str));
 String dataToJson(Data data) => json.encode(data.toJson());
 
 class Data {
-  Data({this.id, this.firstName, this.lastName, this.profilePic});
+  Data({this.id, this.firstName, this.lastName, this.profilePic, this.isVerified});
 
   Data.fromJson(dynamic json) {
     id = json['id'];
     firstName = json['first_name'];
     lastName = json['last_name'];
     profilePic = AppData.fullImageUrl(json['profile_pic']);
+    isVerified = json['is_verified'] == true || json['is_verified'] == 1;
   }
   String? id;
   String? firstName;
   String? lastName;
   String? profilePic;
+  bool? isVerified;
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['id'] = id;
     map['first_name'] = firstName;
     map['last_name'] = lastName;
     map['profile_pic'] = profilePic;
+    map['is_verified'] = isVerified;
     return map;
   }
 }

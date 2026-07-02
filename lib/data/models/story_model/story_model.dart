@@ -3,6 +3,28 @@
 /// Matches the backend API response format from StoryController
 import 'package:doctak_app/core/utils/app/AppData.dart';
 
+/// Safely parse an [int] from a value that may arrive as an int, String,
+/// double, or null in the API response.
+int _parseInt(dynamic value, [int fallback = 0]) {
+  if (value == null) return fallback;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  if (value is String) return int.tryParse(value) ?? fallback;
+  return fallback;
+}
+
+/// Safely parse a [bool] that may arrive as a bool, int (0/1), or String.
+bool _parseBool(dynamic value, [bool fallback = false]) {
+  if (value == null) return fallback;
+  if (value is bool) return value;
+  if (value is int) return value != 0;
+  if (value is String) {
+    final v = value.toLowerCase();
+    return v == 'true' || v == '1';
+  }
+  return fallback;
+}
+
 class StoryUserModel {
   final String id;
   final String fullName;
@@ -56,15 +78,15 @@ class StoryItemModel {
 
   factory StoryItemModel.fromJson(Map<String, dynamic> json) {
     return StoryItemModel(
-      id: json['id'] ?? 0,
+      id: _parseInt(json['id']),
       type: json['type'] ?? 'text',
       mediaUrl: json['media_url'],
       content: json['content'],
       backgroundColor: json['background_color'] ?? '#0d6efd',
       timeAgo: json['time_ago'] ?? '',
-      viewCount: json['view_count'] ?? 0,
-      hasViewed: json['has_viewed'] ?? false,
-      isOwn: json['is_own'] ?? false,
+      viewCount: _parseInt(json['view_count']),
+      hasViewed: _parseBool(json['has_viewed']),
+      isOwn: _parseBool(json['is_own']),
       user: json['user'] != null
           ? StoryUserModel.fromJson(json['user'])
           : null,
@@ -103,12 +125,12 @@ class StoryGroupModel {
     return StoryGroupModel(
       userId: (json['user_id'] ?? '').toString(),
       user: StoryUserModel.fromJson(json['user'] ?? {}),
-      storyCount: json['story_count'] ?? 0,
+      storyCount: _parseInt(json['story_count']),
       stories: (json['stories'] as List<dynamic>?)
               ?.map((s) => StoryItemModel.fromJson(s))
               .toList() ??
           [],
-      hasUnviewed: json['has_unviewed'] ?? false,
+      hasUnviewed: _parseBool(json['has_unviewed']),
     );
   }
 }
@@ -145,7 +167,7 @@ class StoryFeedResponse {
 
   factory StoryFeedResponse.fromJson(Map<String, dynamic> json) {
     return StoryFeedResponse(
-      success: json['success'] ?? false,
+      success: _parseBool(json['success']),
       data: (json['data'] as List<dynamic>?)
               ?.map((g) => StoryGroupModel.fromJson(g))
               .toList() ??

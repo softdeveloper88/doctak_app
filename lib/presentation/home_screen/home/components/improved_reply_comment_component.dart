@@ -1,55 +1,98 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/post_comment_model/reply_comment_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/comment_sheet_widgets.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
 
-import '../../../../core/utils/app/AppData.dart';
-
-class ImprovedReplyCommentComponent extends StatelessWidget {
+class ImprovedReplyCommentComponent extends StatefulWidget {
   final CommentsModel replyComment;
   final Function? onDelete;
   final Function? onEdit;
+  final VoidCallback? onLike;
 
-  const ImprovedReplyCommentComponent({required this.replyComment, this.onDelete, this.onEdit, super.key});
+  const ImprovedReplyCommentComponent({
+    required this.replyComment,
+    this.onDelete,
+    this.onEdit,
+    this.onLike,
+    super.key,
+  });
+
+  @override
+  State<ImprovedReplyCommentComponent> createState() =>
+      _ImprovedReplyCommentComponentState();
+}
+
+class _ImprovedReplyCommentComponentState
+    extends State<ImprovedReplyCommentComponent> {
+  String? _resolvedSpecialty(String? raw) {
+    if (raw == null) return null;
+    final resolved = displaySpecialty(raw).trim();
+    if (resolved.isNotEmpty) return resolved;
+    final original = raw.trim();
+    return original.isEmpty || SpecialtyDisplay.isNumericId(original) ? null : original;
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+    final name = widget.replyComment.commenter?.name ?? 'Member';
+    final isOwn = widget.replyComment.commenterId == AppData.logInUserId;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
-          _buildAvatar(context, theme),
-
-          const SizedBox(width: 12),
-
-          // Content
+          SizedBox(
+            width: 16,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: 2,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: CommentSheetTokens.threadLine,
+                  borderRadius: BorderRadius.circular(1),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          CommentSheetAvatar(
+            name: name,
+            imageUrl: widget.replyComment.commenter?.profilePic,
+            size: CommentSheetTokens.avatarReply,
+            onTap: () => ProfileNavigation.openUser(
+                  context,
+                  widget.replyComment.commenterId,
+                ),
+          ),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with username and actions
-                _buildHeader(context, theme),
-
-                // Comment text
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6.0),
-                  child: Text(
-                    replyComment.comment ?? translation(context).lbl_no_name,
-                    style: TextStyle(fontSize: 14.0, fontFamily: 'Poppins', color: theme.textPrimary),
-                  ),
+                CommentSheetBubble(
+                  name: name,
+                  body: widget.replyComment.comment ?? '',
+                  specialty: _resolvedSpecialty(widget.replyComment.commenter?.specialty),
+                  verified: widget.replyComment.commenter?.isVerified == true,
+                  theme: theme,
                 ),
-
-                // Timestamp
-                Text(
-                  timeAgo.format(DateTime.parse(replyComment.createdAt!)),
-                  style: TextStyle(fontSize: 12, color: theme.textTertiary, fontFamily: 'Poppins', fontWeight: FontWeight.w400),
+                CommentSheetActionRow(
+                  theme: theme,
+                  timeLabel: commentShortRelativeTime(widget.replyComment.createdAt),
+                  liked: widget.replyComment.userHasLiked ?? false,
+                  likeCount: widget.replyComment.likeCount ?? 0,
+                  onLike: widget.onLike,
+                  onReply: null,
+                  trailingMenu: isOwn ? _ownMenu(context, theme) : null,
                 ),
               ],
             ),
@@ -59,126 +102,65 @@ class ImprovedReplyCommentComponent extends StatelessWidget {
     );
   }
 
-  // Build avatar widget
-  Widget _buildAvatar(BuildContext context, OneUITheme theme) {
-    return InkWell(
-      onTap: () {
-        SVProfileFragment(userId: replyComment.commenterId ?? '').launch(context);
-      },
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), shape: BoxShape.circle),
-        child: replyComment.commenter?.profilePic != null && replyComment.commenter!.profilePic!.isNotEmpty
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  replyComment.commenter?.profilePic ?? '',
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Text(
-                        (replyComment.commenter?.name ?? '')[0].toUpperCase(),
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.primary),
-                      ),
-                    );
-                  },
-                ),
-              )
-            : Center(
-                child: Text(
-                  (replyComment.commenter?.name ?? '')[0].toUpperCase(),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: theme.primary),
-                ),
-              ),
-      ),
-    );
-  }
-
-  // Build header with username and actions
-  Widget _buildHeader(BuildContext context, OneUITheme theme) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        // Username with verification
-        Expanded(
-          child: InkWell(
-            onTap: () {
-              SVProfileFragment(userId: replyComment.commenterId ?? "").launch(context);
-            },
+  Widget _ownMenu(BuildContext context, OneUITheme theme) {
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: PopupMenuButton<String>(
+        icon: const Icon(
+          Icons.more_horiz_rounded,
+          color: CommentSheetTokens.metaText,
+          size: 18,
+        ),
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            value: 'edit',
+            height: 40,
             child: Row(
               children: [
+                Icon(Icons.edit_outlined, size: 16, color: theme.primary),
+                const SizedBox(width: 8),
                 Text(
-                  replyComment.commenter?.name ?? '',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: theme.primary, fontFamily: 'Poppins'),
+                  translation(context).lbl_update,
+                  style: TextStyle(fontSize: CommentSheetTokens.actionSize, fontFamily: 'Poppins'),
                 ),
-                const SizedBox(width: 4),
-                Image.asset('images/socialv/icons/ic_TickSquare.png', height: 12, width: 12, fit: BoxFit.cover),
               ],
             ),
           ),
-        ),
-
-        // Actions menu (only for own replies)
-        if (replyComment.commenterId == AppData.logInUserId)
-          PopupMenuButton(
-            padding: EdgeInsets.zero,
-            icon: Icon(Icons.more_vert, color: theme.textSecondary, size: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (context) {
-              return [
-                // Edit option
-                PopupMenuItem(
-                  value: "Update",
-                  height: 40,
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit_outlined, size: 16, color: theme.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        translation(context).lbl_update,
-                        style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
-                      ),
-                    ],
-                  ),
+          PopupMenuItem(
+            value: 'delete',
+            height: 40,
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline, size: 16, color: theme.error),
+                const SizedBox(width: 8),
+                Text(
+                  translation(context).lbl_delete,
+                  style: TextStyle(fontSize: CommentSheetTokens.actionSize, fontFamily: 'Poppins'),
                 ),
-                // Delete option
-                PopupMenuItem(
-                  value: "Delete",
-                  height: 40,
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, size: 16, color: theme.error),
-                      const SizedBox(width: 8),
-                      Text(
-                        translation(context).lbl_delete,
-                        style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textPrimary),
-                      ),
-                    ],
-                  ),
-                ),
-              ];
-            },
-            onSelected: (value) {
-              if (value == 'Delete') {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CustomAlertDialog(
-                      title: translation(context).msg_confirm_delete_comment,
-                      callback: () {
-                        onDelete?.call();
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                );
-              } else if (value == 'Update') {
-                onEdit?.call();
-              }
-            },
+              ],
+            ),
           ),
-      ],
+        ],
+        onSelected: (value) {
+          if (value == 'delete') {
+            showDialog(
+              context: context,
+              useRootNavigator: false,
+              builder: (BuildContext context) {
+                return CustomAlertDialog(
+                  title: translation(context).msg_confirm_delete_comment,
+                  callback: () => widget.onDelete?.call(),
+                );
+              },
+            );
+          } else if (value == 'edit') {
+            widget.onEdit?.call();
+          }
+        },
+      ),
     );
   }
 }

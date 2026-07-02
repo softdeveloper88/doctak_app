@@ -1,29 +1,28 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:clear_all_notifications/clear_all_notifications.dart';
+import 'package:doctak_app/core/notification_counter_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/app/app_environment.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
-import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
-import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
+import 'package:doctak_app/core/notification_navigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:doctak_app/firebase_options.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:doctak_app/core/utils/auth_token_service.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
-import '../presentation/calling_module/services/call_api_service.dart';
-import '../presentation/calling_module/services/call_service.dart';
-import '../presentation/case_discussion/screens/discussion_list_screen.dart';
+import '../presentation/calling_module_v2/services/call_push_v2.dart';
 
 @pragma('vm:entry-point')
 class NotificationService {
@@ -44,47 +43,347 @@ class NotificationService {
   // Lock to prevent multiple simultaneous notification handling
   static bool _isHandlingNotification = false;
 
-  // Helper method to check for active calls and send busy signal if needed
-  static Future<bool> _shouldSendBusySignal(String callId, String callerId) async {
+  static String _titleFromMessage(RemoteMessage message) {
+    final fromNotification = message.notification?.title?.trim();
+    if (fromNotification != null && fromNotification.isNotEmpty) {
+      return fromNotification;
+    }
+    final fromData = message.data['title']?.toString().trim();
+    return (fromData != null && fromData.isNotEmpty) ? fromData : 'Doctak';
+  }
+
+  static String _bodyFromMessage(RemoteMessage message) {
+    final fromNotification = message.notification?.body?.trim();
+    if (fromNotification != null && fromNotification.isNotEmpty) {
+      return fromNotification;
+    }
+    return message.data['body']?.toString().trim() ?? '';
+  }
+
+  /// Whether a message carries a real title/body worth showing. Silent data
+  /// messages (sync triggers, counter pings) have neither and must NOT be
+  /// rendered — otherwise they show up as an empty "Doctak" notification.
+  static bool _hasDisplayableContent(RemoteMessage message) {
+    final title = (message.notification?.title ?? message.data['title'] ?? '').toString().trim();
+    final body = (message.notification?.body ?? message.data['body'] ?? '').toString().trim();
+    return title.isNotEmpty || body.isNotEmpty;
+  }
+
+  static String _loggedInUserId() => AppData.logInUserId?.toString() ?? '';
+
+  /// Conversation the user is actively viewing — suppress message pushes for it.
+  static int? activeChatConversationId;
+
+  /// Returns true when this push should not be shown (own action or active chat).
+  static bool shouldSuppressPush(RemoteMessage message) {
+    final myId = _loggedInUserId();
+    if (myId.isEmpty) return false;
+
+    final data = message.data;
+    final actorId = (data['actorUserId'] ?? data['senderId'] ?? data['sender_id'] ?? '')
+        .toString();
+    if (actorId.isNotEmpty && actorId == myId) {
+      return true;
+    }
+
+    final type = (data['type'] ?? '').toString();
+    if (type.contains('message')) {
+      final convId = data['conversationId'] ?? data['entityId'] ?? data['id'];
+      if (convId != null &&
+          activeChatConversationId != null &&
+          convId.toString() == activeChatConversationId.toString()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Remove this device's FCM registration for the current user (call on logout).
+  static Future<void> deregisterDeviceToken() async {
     try {
-      // Get active calls from CallKit
-      final result = await FlutterCallkitIncoming.activeCalls();
-      final activeCalls = result as List? ?? [];
+      final storedToken = AppData.deviceToken.trim();
+      final token = storedToken.isNotEmpty ? storedToken : await getFcmTokenSafely();
+      final auth = AppData.userToken?.trim() ?? '';
 
-      // Check if there's an active call different from this one
-      for (var call in activeCalls) {
-        final activeCallId = call['id']?.toString() ?? '';
-        if (activeCallId != callId && activeCallId.isNotEmpty) {
-          debugPrint('User has another active call, sending busy signal for: $callId');
+      String deviceId = '';
+      final deviceInfo = DeviceInfoPlugin();
+      if (Platform.isAndroid) {
+        deviceId = (await deviceInfo.androidInfo).id;
+      } else if (Platform.isIOS) {
+        deviceId = (await deviceInfo.iosInfo).identifierForVendor ?? '';
+      }
 
-          try {
-            // Create API service instance
-            final apiService = CallApiService(baseUrl: AppData.remoteUrl3);
+      if (auth.isNotEmpty) {
+        final base = AppEnvironment.nodeApiUrl.endsWith('/')
+            ? AppEnvironment.nodeApiUrl.substring(0, AppEnvironment.nodeApiUrl.length - 1)
+            : AppEnvironment.nodeApiUrl;
 
-            // Send busy signal
-            await apiService.sendBusySignal(callId: callId, callerId: callerId);
+        if (token.isNotEmpty) {
+          final uri = Uri.parse('$base/api/notifications/devices').replace(
+            queryParameters: {'token': token},
+          );
+          await http.delete(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $auth',
+              'Accept': 'application/json',
+            },
+          );
+        } else if (deviceId.isNotEmpty) {
+          final uri = Uri.parse('$base/api/notifications/devices').replace(
+            queryParameters: {'deviceId': deviceId},
+          );
+          await http.delete(
+            uri,
+            headers: {
+              'Authorization': 'Bearer $auth',
+              'Accept': 'application/json',
+            },
+          );
+        }
+      }
 
-            debugPrint('Busy signal sent successfully for call: $callId');
-            return true; // Busy signal sent, don't show call UI
-          } catch (e) {
-            debugPrint('Error sending busy signal: $e');
-            return false; // Continue with normal call handling
+      try {
+        await _firebaseMessaging.unsubscribeFromTopic(broadcastTopic);
+      } catch (_) {}
+
+      debugPrint('FCM deregisterDeviceToken completed');
+    } catch (e) {
+      debugPrint('FCM deregisterDeviceToken failed: $e');
+    }
+  }
+
+  static Future<void> _ensureAndroidNotificationPermission() async {
+    if (!Platform.isAndroid) return;
+    try {
+      final status = await Permission.notification.status;
+      if (status.isGranted) return;
+      final result = await Permission.notification.request();
+      debugPrint('Android notification permission: $result');
+    } catch (e) {
+      debugPrint('Android notification permission request failed: $e');
+    }
+  }
+
+  static Future<Map<String, dynamic>> _registerTokenWithServer(String token) async {
+    await AuthTokenService.instance.ensureTokenLoaded();
+    var auth = await AuthTokenService.instance.getToken();
+    if (token.isEmpty || auth == null) {
+      debugPrint('FCM server registration skipped: missing token or auth');
+      return {'ok': false, 'error': 'missing token or auth'};
+    }
+
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+      String deviceId = '';
+      String deviceType = '';
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        deviceType = 'android';
+        deviceId = androidInfo.id;
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        deviceType = 'ios';
+        deviceId = iosInfo.identifierForVendor ?? '';
+      }
+
+      final base = AppEnvironment.nodeApiUrl.endsWith('/')
+          ? AppEnvironment.nodeApiUrl.substring(0, AppEnvironment.nodeApiUrl.length - 1)
+          : AppEnvironment.nodeApiUrl;
+
+      Future<http.Response> post(String bearer) {
+        return http.post(
+          Uri.parse('$base/api/notifications/devices'),
+          headers: {
+            'Authorization': 'Bearer $bearer',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode({
+            'token': token,
+            'deviceType': deviceType,
+            'deviceId': deviceId,
+          }),
+        );
+      }
+
+      var response = await post(auth);
+      if (response.statusCode == 401) {
+        final refreshed = await AuthTokenService.instance.refreshToken();
+        if (refreshed) {
+          auth = await AuthTokenService.instance.getToken();
+          if (auth != null) {
+            response = await post(auth);
           }
         }
       }
-      return false; // No other active calls, proceed normally
+
+      debugPrint(
+        'FCM server registration: ${response.statusCode} ${response.body.length > 120 ? response.body.substring(0, 120) : response.body}',
+      );
+      return {
+        'ok': response.statusCode >= 200 && response.statusCode < 300,
+        'statusCode': response.statusCode,
+        'body': response.body,
+        'deviceId': deviceId,
+        'deviceType': deviceType,
+      };
     } catch (e) {
-      debugPrint('Error checking active calls: $e');
-      return false; // Proceed with normal call handling
+      debugPrint('FCM token registration failed: $e');
+      return {'ok': false, 'error': e.toString()};
     }
   }
+
+  /// Debug helper: gathers the current push-registration state for an on-screen
+  /// diagnostics view (FCM token, iOS APNS token, device identifiers, target
+  /// node URL and whether the user is authenticated).
+  static Future<Map<String, dynamic>> debugFcmStatus() async {
+    final result = <String, dynamic>{};
+    try {
+      result['fcmToken'] = await getFcmTokenSafely();
+      if (Platform.isIOS) {
+        result['apnsToken'] = await _firebaseMessaging.getAPNSToken() ?? '';
+      }
+      final deviceInfo = DeviceInfoPlugin();
+      if (Platform.isAndroid) {
+        final a = await deviceInfo.androidInfo;
+        result['deviceType'] = 'android';
+        result['deviceId'] = a.id;
+      } else if (Platform.isIOS) {
+        final i = await deviceInfo.iosInfo;
+        result['deviceType'] = 'ios';
+        result['deviceId'] = i.identifierForVendor ?? '';
+      }
+      result['userId'] = _loggedInUserId();
+      result['nodeApiUrl'] = AppEnvironment.nodeApiUrl;
+      result['authPresent'] = (AppData.userToken ?? '').isNotEmpty;
+    } catch (e) {
+      result['error'] = e.toString();
+    }
+    return result;
+  }
+
+  /// Debug helper: re-fetches the FCM token and re-registers it with the
+  /// doctak-node server, returning the server response (status + body, which
+  /// now echoes the saved device row).
+  static Future<Map<String, dynamic>> debugRegisterCurrentToken() async {
+    final token = await getFcmTokenSafely();
+    if (token.isEmpty) {
+      return {'ok': false, 'error': 'FCM token unavailable (APNS not set on iOS?)'};
+    }
+    AppData.deviceToken = token;
+    final result = await _registerTokenWithServer(token);
+    await _subscribeToBroadcastTopic();
+    return {...result, 'fcmToken': token};
+  }
+
+  static const String broadcastTopic = 'doctak-all';
+
+  /// Prints the full FCM token in debug builds so you can copy it for server tests.
+  static void logFcmTokenForTesting(String token, {String source = 'app'}) {
+    if (token.isEmpty) {
+      debugPrint('[FCM] ($source) No device token available');
+      return;
+    }
+    if (!kDebugMode) return;
+
+    debugPrint('');
+    debugPrint('══════════ FCM DEVICE TOKEN — copy the next line ══════════');
+    debugPrint('source: $source');
+    final userId = _loggedInUserId();
+    debugPrint('userId: ${userId.isNotEmpty ? userId : "(not set yet)"}');
+    debugPrint(token);
+    debugPrint('═══════════════════════════════════════════════════════════');
+    debugPrint('');
+    // Some terminals surface `print` more reliably than `debugPrint`.
+    print('FCM_DEVICE_TOKEN=$token');
+  }
+
+  static Future<void> _subscribeToBroadcastTopic() async {
+    try {
+      await _firebaseMessaging.subscribeToTopic(broadcastTopic);
+      debugPrint('FCM subscribed to topic: $broadcastTopic');
+    } catch (e) {
+      debugPrint('FCM topic subscribe failed: $e');
+    }
+  }
+
+  /// Returns the FCM device token, ensuring on iOS that the APNS token has been
+  /// set first. On iOS `getToken()` throws (`apns-token-not-set`) or returns
+  /// null until the OS has delivered the APNS token, which previously left iOS
+  /// devices unregistered — so the server had no token and pushes never arrived.
+  /// Waits briefly for the APNS token, then retries `getToken()`.
+  static Future<String> getFcmTokenSafely() async {
+    try {
+      if (Platform.isIOS) {
+        String? apnsToken = await _firebaseMessaging.getAPNSToken();
+        for (int i = 0; i < 5 && (apnsToken == null || apnsToken.isEmpty); i++) {
+          await Future.delayed(const Duration(seconds: 1));
+          apnsToken = await _firebaseMessaging.getAPNSToken();
+        }
+        if (apnsToken == null || apnsToken.isEmpty) {
+          debugPrint('FCM: APNS token still unavailable — getToken may fail on iOS');
+        }
+      }
+
+      for (int attempt = 1; attempt <= 3; attempt++) {
+        try {
+          final token = await _firebaseMessaging.getToken();
+          if (token != null && token.isNotEmpty) return token;
+        } catch (e) {
+          debugPrint('FCM getToken attempt $attempt failed: $e');
+          if (e.toString().contains('FIS_AUTH_ERROR')) {
+            try {
+              await _firebaseMessaging.deleteToken();
+              await Future.delayed(const Duration(milliseconds: 500));
+            } catch (_) {}
+          }
+        }
+        if (attempt < 3) await Future.delayed(const Duration(seconds: 2));
+      }
+    } catch (e) {
+      debugPrint('FCM getFcmTokenSafely error: $e');
+    }
+    return '';
+  }
+
+  static Future<void> syncDeviceToken() async {
+    try {
+      await _ensureAndroidNotificationPermission();
+      final token = await getFcmTokenSafely();
+      if (token.isEmpty) {
+        debugPrint('FCM syncDeviceToken: token unavailable');
+        return;
+      }
+
+      AppData.deviceToken = token;
+      try {
+        final prefs = SecureStorageService.instance;
+        await prefs.initialize();
+        await prefs.setString('device_token', token);
+      } catch (e) {
+        debugPrint('FCM: failed to persist device_token: $e');
+      }
+
+      final userId = _loggedInUserId();
+      logFcmTokenForTesting(token, source: userId.isNotEmpty ? 'login' : 'syncDeviceToken');
+      await _registerTokenWithServer(token);
+      await _subscribeToBroadcastTopic();
+    } catch (e, stackTrace) {
+      debugPrint('FCM syncDeviceToken failed: $e');
+      debugPrint('$stackTrace');
+    }
+  }
+
 
   @pragma('vm:entry-point')
   static Future<dynamic> _throwGetMessage(RemoteMessage message) async {
     // Ensure Flutter bindings and plugins are registered before using platform channels
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    debugPrint('PUSH RECEIVED ${message.data}');
+    debugPrint('PUSH RECEIVED (bg): hasNotification=${message.notification != null} '
+        'title="${message.notification?.title ?? message.data['title']}" data=${message.data}');
 
     // Generate a unique notification ID
     final String notificationId = _getNotificationId(message);
@@ -99,30 +398,47 @@ class NotificationService {
     // Mark this notification as handled in background map
     _markBackgroundNotificationHandled(notificationId);
 
+    // Calling module v2: data-only call pushes (incoming_call /
+    // call_cancelled with signalVersion=2) show/dismiss the native call UI
+    // from this background isolate and are fully handled here.
+    if (await CallPushV2.maybeHandleBackground(message)) {
+      return;
+    }
+
+    if (shouldSuppressPush(message)) {
+      debugPrint('Skipping background push (own message or active chat)');
+      return;
+    }
+
     await NotificationService.incrementBadgeCount();
 
-    // Check if it's a call notification
+    // Calls are handled entirely by CallPushV2 above; any legacy `type == 'call'`
+    // push that isn't a v2 call is ignored (legacy calling_module disconnected).
     if (message.data['type'] == 'call') {
-      final callId = message.data['call_id'] ?? '';
-      final callerId = message.data['caller_id'] ?? '';
+      return;
+    }
 
-      // Check if user is already on a call - if so, send busy signal
-      if (await _shouldSendBusySignal(callId, callerId)) {
-        // Busy signal was sent, don't proceed with showing the call UI
+    if (message.notification == null) {
+      // Data-only message: the OS shows nothing automatically, so we post it
+      // ourselves — but only if it actually has content. Silent data messages
+      // (no title/body) must not appear as an empty "Doctak" notification.
+      if (!_hasDisplayableContent(message)) {
+        debugPrint('Skipping silent data message (no title/body): ${message.data}');
         return;
       }
-
-      await _handleCallNotification(message);
-    } else {
-      // Handle regular notifications
       await showNotificationWithCustomIcon(
         message.notification,
         message.data,
-        message.notification?.title ?? '',
-        message.notification?.body ?? '',
+        _titleFromMessage(message),
+        _bodyFromMessage(message),
         message.data['image'] ?? '',
         message.data['banner'] ?? '',
       );
+    } else {
+      // Message has a `notification` payload: while backgrounded the Android
+      // system tray already displays it automatically. Posting our own here too
+      // produced a DUPLICATE notification, so we skip manual display.
+      debugPrint('Background notification has a notification payload — letting the OS display it (no duplicate)');
     }
   }
 
@@ -199,54 +515,6 @@ class NotificationService {
     map.removeWhere((key, timestamp) => (now - timestamp > 600000));
   }
 
-  // Handle call notifications with better deduplication and busy signal check
-  static Future<void> _handleCallNotification(RemoteMessage message) async {
-    // Use a lock to prevent multiple simultaneous processing
-    if (_isHandlingNotification) {
-      debugPrint('Already handling a notification, skipping');
-      return;
-    }
-
-    _isHandlingNotification = true;
-
-    try {
-      final callId = message.data['call_id'] ?? '';
-      final callerName = message.data['caller_name'] ?? 'Unknown Caller';
-      final callerId = message.data['caller_id'] ?? '';
-      final hasVideo = message.data['is_video_call'] == 'true';
-      final avatar = message.data['caller_avatar'] ?? '';
-
-      // Check for active calls in CallKit before processing this new call
-      if (await _shouldSendBusySignal(callId, callerId)) {
-        // Busy signal was sent, don't proceed with showing the call UI
-        return;
-      }
-
-      // Save the call data to preferences for later recovery if needed
-      final prefs = SecureStorageService.instance;
-      await prefs.initialize();
-      await prefs.setString('pending_call_id', callId);
-      await prefs.setInt('pending_call_timestamp', DateTime.now().millisecondsSinceEpoch);
-      await prefs.setString('pending_caller_id', callerId);
-      await prefs.setString('pending_caller_name', callerName);
-      await prefs.setString('pending_caller_avatar', avatar);
-      await prefs.setBool('pending_call_has_video', hasVideo);
-
-      // Check if the call service is already initialized
-      final callService = CallService();
-
-      // Try to initialize the call service if not already done
-      if (!callService.isInitialized) {
-        await callService.initialize(baseUrl: AppData.remoteUrl3);
-      }
-
-      // Handle the incoming call
-      await callService.handleIncomingCall(callId: callId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
-    } finally {
-      _isHandlingNotification = false;
-    }
-  }
-
   // Initialize the notification services (both local and FCM)
   static Future<void> initialize() async {
     // Initialize local notifications
@@ -264,40 +532,54 @@ class NotificationService {
     await _localNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
-        print('notification ${notificationResponse.payload}');
-        if (notificationResponse.payload != null) {
-          // Handle notification tap
-          _handleNotificationTap(
-            '', // Title will be populated later if needed
-            '', // Profile pic will be populated later if needed
-            notificationResponse.payload!,
-            '', // ID will be populated later if needed
-          );
-        }
+        final payload = notificationResponse.payload;
+        if (payload == null || payload.isEmpty) return;
+        await _handleNotificationPayload(payload);
       },
     );
 
-    // Initialize FCM and handle background/terminated state with proper iOS permissions
-    final settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false, // Use normal notifications that respect device mute settings
-      provisional: false,
-      sound: true,
-    );
+    await _ensureAndroidNotificationPermission();
+
+    // Skip the permission dialog when already granted (saves ~200–800ms on warm start).
+    NotificationSettings settings;
+    final currentSettings = await _firebaseMessaging.getNotificationSettings();
+    if (currentSettings.authorizationStatus == AuthorizationStatus.notDetermined) {
+      settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+    } else {
+      settings = currentSettings;
+    }
 
     debugPrint('📱 FCM Permission status: ${settings.authorizationStatus}');
     debugPrint('📱 Alert permission: ${settings.alert}');
     debugPrint('📱 Badge permission: ${settings.badge}');
     debugPrint('📱 Sound permission: ${settings.sound}');
 
+    // iOS: allow FCM to surface foreground notifications via the system UI too
+    // (we also show a local notification in onMessage for both platforms).
+    if (Platform.isIOS) {
+      await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    }
+
     // Set background message handler
     FirebaseMessaging.onBackgroundMessage(_throwGetMessage);
 
     // Handle messages when app is in foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      debugPrint(
+        '📩 FCM foreground: id=${message.messageId} title=${message.notification?.title ?? message.data['title']} type=${message.data['type']}',
+      );
       // Generate a notification ID for checking duplicates
       final String notificationId = _getNotificationId(message);
 
@@ -310,8 +592,38 @@ class NotificationService {
       // Mark as handled in foreground map
       _markForegroundNotificationHandled(notificationId);
 
-      await NotificationService.incrementBadgeCount();
-      _showLocalNotification(message);
+      // Calling module v2: route call pushes to the call controller
+      // (rings via CallKit + in-app screen) instead of the notification tray.
+      if (await CallPushV2.maybeHandle(message)) {
+        return;
+      }
+
+      if (shouldSuppressPush(message)) {
+        debugPrint('Skipping foreground push (own message or active chat)');
+        return;
+      }
+
+      // v2 calls already handled above. Show the notification FIRST — badge/
+      // counter updates must never block it. Skip silent data messages that
+      // would otherwise show as an empty "Doctak".
+      if (_hasDisplayableContent(message)) {
+        try {
+          await _showLocalNotification(message);
+        } catch (e, st) {
+          debugPrint('Failed to show foreground notification: $e');
+          debugPrint('$st');
+        }
+      } else {
+        debugPrint('Skipping silent foreground data message (no title/body): ${message.data}');
+      }
+
+      // Badge + in-app counter are best-effort; failures here are non-fatal.
+      try {
+        await NotificationService.incrementBadgeCount();
+        NotificationCounterService().onFCMForegroundPush();
+      } catch (e) {
+        debugPrint('Badge/counter update failed: $e');
+      }
     });
 
     // Handle messages when app is opened from notification
@@ -330,38 +642,23 @@ class NotificationService {
       // Mark as handled in opened map
       _markScreenOpenedNotificationHandled(notificationId);
 
-      // Handle notification tap based on type
-      if (message.data['type'] == 'call') {
-        // Call notifications are handled by CallKit/CallService
-        // Just make sure if there's an active call, we navigate to it
-        final callId = message.data['call_id'] ?? '';
-        final callerId = message.data['caller_id'] ?? '';
+      // Calls open via CallKit / calling_module_v2, not the notification tray.
+      if (message.data['type'] == 'call') return;
 
-        // Check if user is already on a call - if so, send busy signal
-        if (await _shouldSendBusySignal(callId, callerId)) {
-          // Busy signal was sent, don't proceed with showing the call UI
-          return;
-        }
-
-        // Try to initialize the call service if needed
-        final callService = CallService();
-        if (!callService.isInitialized) {
-          await callService.initialize(baseUrl: AppData.remoteUrl3);
-        }
-
-        // Try to handle it as a new call
-        final callerName = message.data['caller_name'] ?? 'Unknown Caller';
-        final hasVideo = message.data['is_video_call'] == 'true';
-        final avatar = message.data['caller_avatar'] ?? '';
-
-        await callService.handleIncomingCall(callId: callId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
-      } else {
-        _handleNotificationTap(message.notification?.title ?? '', message.data['image'] ?? '', message.data['type'] ?? '', message.data['id'] ?? '');
-      }
+      _handleNotificationPayload(jsonEncode(message.data));
     });
 
-    // Create notification channel for Android
+    // Create notification channels for Android
     await _createCallNotificationChannel();
+
+    _firebaseMessaging.onTokenRefresh.listen((token) async {
+      AppData.deviceToken = token;
+      await _registerTokenWithServer(token);
+      await _subscribeToBroadcastTopic();
+    });
+
+    // Token fetch + server registration are network-heavy — defer past first frame.
+    scheduleMicrotask(() => unawaited(syncDeviceToken()));
   }
 
   // Create call notification channel for Android
@@ -377,6 +674,20 @@ class NotificationService {
             'high_importance_channel',
             'High Priority Notifications',
             description: 'Channel for high priority notifications including calls and messages',
+            importance: Importance.max,
+            playSound: true,
+            enableVibration: true,
+            showBadge: true,
+            enableLights: true,
+          ),
+        );
+
+        // FCM system notifications use this channel id from the server payload.
+        await androidPlugin.createNotificationChannel(
+          const AndroidNotificationChannel(
+            'doctak_default',
+            'Doctak Notifications',
+            description: 'Default channel for push notifications from Doctak',
             importance: Importance.max,
             playSound: true,
             enableVibration: true,
@@ -422,48 +733,37 @@ class NotificationService {
       // Mark as handled in initial map
       _markInitialNotificationHandled(notificationId);
 
-      // Special handling for call notifications when app is opened from terminated state
+      // Calls are delivered via CallPushV2 + CallKit and resumed by
+      // calling_module_v2 on cold start — never route them through here.
       if (initialMessage.data['type'] == 'call') {
-        final callId = initialMessage.data['call_id'] ?? '';
-        final callerId = initialMessage.data['caller_id'] ?? '';
-
-        // Check if user is already on a call - if so, send busy signal
-        if (await _shouldSendBusySignal(callId, callerId)) {
-          // Busy signal was sent, don't proceed with showing the call UI
-          return null;
-        }
-
-        final callerName = initialMessage.data['caller_name'] ?? 'Unknown Caller';
-        final hasVideo = initialMessage.data['is_video_call'] == 'true';
-        final avatar = initialMessage.data['caller_avatar'] ?? '';
-
-        // Save the call data to preferences
-        final prefs = SecureStorageService.instance;
-        await prefs.initialize();
-        await prefs.setString('pending_call_id', callId);
-        await prefs.setInt('pending_call_timestamp', DateTime.now().millisecondsSinceEpoch);
-        await prefs.setString('pending_caller_id', callerId);
-        await prefs.setString('pending_caller_name', callerName);
-        await prefs.setString('pending_caller_avatar', avatar);
-        await prefs.setBool('pending_call_has_video', hasVideo);
-
-        // Try to initialize and handle the call
-        try {
-          final callService = CallService();
-          await callService.initialize(baseUrl: AppData.remoteUrl3, isFromCallNotification: true);
-
-          // Handle as a new incoming call
-          await callService.handleIncomingCall(callId: callId, callerId: callerId, callerName: callerName, callerAvatar: avatar, isVideoCall: hasVideo);
-        } catch (e) {
-          // The main app initialization will try again if this fails
-          debugPrint('Error handling initial call notification: $e');
-        }
+        return null;
       }
 
-      // Extract the route or screen from the notification data
+      NotificationNavigation.setPendingTap(
+        Map<String, dynamic>.from(initialMessage.data),
+      );
+
       return initialMessage;
     }
-    // For local notifications
+
+    // Terminated app opened from a tray notification we showed locally (foreground FCM).
+    final launchDetails = await _localNotificationsPlugin.getNotificationAppLaunchDetails();
+    if (launchDetails?.didNotificationLaunchApp == true) {
+      final payload = launchDetails?.notificationResponse?.payload;
+      if (payload != null && payload.isNotEmpty) {
+        try {
+          final decoded = jsonDecode(payload);
+          if (decoded is Map) {
+            NotificationNavigation.setPendingTap(Map<String, dynamic>.from(decoded));
+          } else {
+            NotificationNavigation.setPendingTap({'type': payload});
+          }
+        } catch (_) {
+          NotificationNavigation.setPendingTap({'type': payload});
+        }
+      }
+    }
+
     return null;
   }
 
@@ -485,155 +785,143 @@ class NotificationService {
     // Mark as handled for local processing
     _lastHandledPushNotifications[notificationId] = now;
 
-    if (message.data['type'] == 'call') {
-      final callId = message.data['call_id'] ?? '';
-      final callerId = message.data['caller_id'] ?? '';
+    // Calls render via CallKit / calling_module_v2, never as a tray notification.
+    if (message.data['type'] == 'call') return;
 
-      // Check if user is already on a call - if so, send busy signal
-      if (await _shouldSendBusySignal(callId, callerId)) {
-        // Busy signal was sent, don't proceed with showing the call UI
-        return;
-      }
-
-      await _handleCallNotification(message);
-    } else {
-      await showNotificationWithCustomIcon(
-        message.notification,
-        message.data,
-        message.notification?.title ?? '',
-        message.notification?.body ?? '',
-        message.data['image'] ?? '',
-        message.data['banner'] ?? '',
-      );
-    }
+    await showNotificationWithCustomIcon(
+      message.notification,
+      message.data,
+      _titleFromMessage(message),
+      _bodyFromMessage(message),
+      message.data['image'] ?? '',
+      message.data['banner'] ?? '',
+    );
   }
 
   @pragma('vm:entry-point')
-  static Future<ByteArrayAndroidBitmap> _getImageFromUrl(String imageUrl) async {
-    final response = await http.get(Uri.parse(imageUrl));
-    final directory = await getTemporaryDirectory();
-    final filePath = '${directory.path}/user_image.png';
-    final file = File(filePath);
-    await file.writeAsBytes(response.bodyBytes);
-    final Uint8List imageBytes = await file.readAsBytes();
-    return ByteArrayAndroidBitmap(imageBytes);
+  static Future<ByteArrayAndroidBitmap?> _getImageFromUrl(String imageUrl) async {
+    try {
+      final uri = Uri.tryParse(imageUrl);
+      if (uri == null || !uri.hasScheme) {
+        return null;
+      }
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+        return null;
+      }
+      final directory = await getTemporaryDirectory();
+      final filePath = '${directory.path}/user_image.png';
+      final file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+      final Uint8List imageBytes = await file.readAsBytes();
+      return ByteArrayAndroidBitmap(imageBytes);
+    } catch (e) {
+      debugPrint('Failed to load notification image: $e');
+      return null;
+    }
   }
 
   @pragma('vm:entry-point')
   static Future<void> showNotificationWithCustomIcon(notification, data, String title, String body, String imageUrl, String bannerImage) async {
-    ByteArrayAndroidBitmap largeIcon = ByteArrayAndroidBitmap(Uint8List(0));
-    if (imageUrl != '') {
-      largeIcon = await _getImageFromUrl(imageUrl);
-    }
-    ByteArrayAndroidBitmap banner;
-    if (bannerImage != '') {
-      banner = await _getImageFromUrl(bannerImage);
-    } else {
-      banner = ByteArrayAndroidBitmap(Uint8List(0));
-    }
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    //
-    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('ic_stat_name');
-    const DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      defaultPresentSound: true,
-      defaultPresentAlert: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-      defaultPresentBadge: true,
-      requestCriticalPermission: true, // For critical alerts
-    );
-    const InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
-    //
-    await flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse notificationResponse) async {
-        print('notificationResponse $notificationResponse');
-        if (notificationResponse.payload != null) {
-          _handleNotificationTap(title, imageUrl, notificationResponse.payload!, data['id'] ?? '');
-        }
-      },
-    );
-    var channel = const AndroidNotificationChannel(
-      'high_importance_channel', // id
-      'High Importance Notifications', // title // description
+    final ByteArrayAndroidBitmap? largeIcon = imageUrl != '' ? await _getImageFromUrl(imageUrl) : null;
+    final ByteArrayAndroidBitmap? banner = bannerImage != '' ? await _getImageFromUrl(bannerImage) : null;
+
+    const androidIcon = AndroidInitializationSettings('ic_stat_name');
+    const channel = AndroidNotificationChannel(
+      'high_importance_channel',
+      'High Importance Notifications',
       importance: Importance.max,
       showBadge: true,
     );
-
-    await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
 
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
       channel.id,
       channel.name,
       channelDescription: channel.description,
       channelShowBadge: true,
-      icon: initializationSettingsAndroid.defaultIcon,
+      icon: androidIcon.defaultIcon,
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
       ongoing: false,
-      autoCancel: false,
+      autoCancel: true,
       timeoutAfter: 0,
-      fullScreenIntent: true,
-      category: AndroidNotificationCategory.event,
+      fullScreenIntent: false,
+      category: AndroidNotificationCategory.message,
       visibility: NotificationVisibility.public,
       color: Colors.transparent,
       largeIcon: largeIcon,
-      styleInformation: bannerImage != '' ? BigPictureStyleInformation(banner, contentTitle: title, summaryText: body) : null,
+      styleInformation: banner != null
+          ? BigPictureStyleInformation(banner, contentTitle: title, summaryText: body)
+          : null,
     );
 
-    // Generate a semi-unique ID for the notification to avoid overwriting previous ones
-    final int notificationId = notification.hashCode + DateTime.now().millisecondsSinceEpoch.toInt() % 10000;
+    final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(100000);
+    final payloadMap = Map<String, dynamic>.from(data);
+    payloadMap.putIfAbsent('title', () => title);
+    payloadMap.putIfAbsent('body', () => body);
+    if (imageUrl.isNotEmpty) payloadMap.putIfAbsent('image', () => imageUrl);
 
-    _localNotificationsPlugin.show(
-      notificationId,
-      title,
-      body,
-      payload: data['type'],
-      NotificationDetails(
-        iOS: const DarwinNotificationDetails(
-          badgeNumber: 1,
-          presentBadge: true,
-          presentSound: true,
-          presentAlert: true,
-          sound: 'default', // Specify default sound
-          interruptionLevel: InterruptionLevel.timeSensitive, // Important for iOS 15+
+    try {
+      await _localNotificationsPlugin.show(
+        notificationId,
+        title,
+        body,
+        NotificationDetails(
+          iOS: const DarwinNotificationDetails(
+            badgeNumber: 1,
+            presentBadge: true,
+            presentSound: true,
+            presentAlert: true,
+            sound: 'default',
+            interruptionLevel: InterruptionLevel.timeSensitive,
+          ),
+          android: androidPlatformChannelSpecifics,
         ),
-        android: androidPlatformChannelSpecifics,
-      ),
-    );
+        payload: jsonEncode(payloadMap),
+      );
+      debugPrint('🔔 Local notification shown: id=$notificationId title="$title"');
+    } catch (e, st) {
+      debugPrint('❌ _localNotificationsPlugin.show failed: $e');
+      debugPrint('$st');
+    }
   }
 
-  // Handle notification tap (local or FCM)
-  @pragma('vm:entry-point')
-  static Future<void> _handleNotificationTap(String title, String profilePic, String payload, String id) async {
-    // Check if we're already handling a notification tap
+  static Future<void> _handleNotificationPayload(String payload) async {
     if (_isHandlingNotification) {
       debugPrint('Already handling a notification tap, skipping');
       return;
     }
 
     _isHandlingNotification = true;
-
     try {
-      // Save the payload to secure storage for later retrieval
+      Map<String, dynamic> data;
+      try {
+        final decoded = jsonDecode(payload);
+        if (decoded is Map) {
+          data = Map<String, dynamic>.from(decoded);
+        } else {
+          data = {'type': payload};
+        }
+      } catch (_) {
+        data = {'type': payload};
+      }
+
       final prefs = SecureStorageService.instance;
       await prefs.initialize();
-      await prefs.setString(_payloadKey, payload);
-      await prefs.setString(_payloadId, id);
+      await prefs.setString(_payloadKey, data['type']?.toString() ?? '');
+      await prefs.setString(
+        _payloadId,
+        data['id']?.toString() ?? data['entityId']?.toString() ?? '',
+      );
 
-      // Clear all notifications to prevent duplicates
       try {
         if (Platform.isAndroid) {
           await ClearAllNotifications.clear();
         }
-      } catch (e) {
-        // Ignore errors
-      }
+      } catch (_) {}
 
-      // Use Navigator to go to the specific screen
-      _navigateToScreen(title, profilePic, payload, id);
+      await NotificationNavigation.openWhenReady(data);
     } finally {
       _isHandlingNotification = false;
     }
@@ -653,43 +941,16 @@ class NotificationService {
     await prefs.remove(_payloadKey);
   }
 
-  // Navigate to the specific screen based on the payload
-  static void _navigateToScreen(String username, String profilePic, String payload, String id) {
-    print('payload $payload');
-    print('username $username');
-    print('id $id');
-
-    if (NavigatorService.navigatorKey.currentState != null) {
-      NavigatorService.navigatorKey.currentState?.push(
-        MaterialPageRoute(
-          builder: (context) {
-            if (payload == 'message_received') {
-              return ChatRoomScreen(id: id, conversationId: 0, username: username, profilePic: profilePic);
-            } else if (payload == 'follow_request' || payload == 'follower_notification' || payload == 'un_follower_notification' || payload == 'friend_request') {
-              return SVProfileFragment(userId: id);
-            } else if (payload == 'comments_on_posts' || payload == 'reply_to_comment' || payload == 'like_comment_on_post' || payload == 'like_comments') {
-              return PostDetailsScreen(commentId: int.parse(id));
-            } else if (payload == 'new_like' || payload == 'like_on_posts') {
-              return PostDetailsScreen(postId: int.parse(id));
-            } else if (payload == 'new_job_posted' || payload == 'job_update' || payload == 'job_post_notification') {
-              return JobsDetailsScreen(jobId: id);
-            } else if (payload == 'conference_invitation') {
-              return ConferencesScreen();
-            } else if (payload == 'new_discuss_case' || payload == 'discuss_case_comment') {
-              return const DiscussionListScreen();
-            }
-            return UnifiedSplashUpgradeScreen(); // Default route if payload does not match
-          },
-        ),
-      );
-    }
-  }
-
   static int notificationCount = 0;
 
   static Future<void> incrementBadgeCount() async {
     notificationCount++;
-    await AppBadgePlus.updateBadge(notificationCount);
+    try {
+      await AppBadgePlus.updateBadge(notificationCount);
+    } catch (e) {
+      // Some launchers/devices don't support app badges — never let this throw.
+      debugPrint('AppBadgePlus.updateBadge failed: $e');
+    }
   }
 
   static Future<void> clearBadgeCount() async {

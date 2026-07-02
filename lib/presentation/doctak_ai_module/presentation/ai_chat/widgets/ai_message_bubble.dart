@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:doctak_app/core/utils/tts_service.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
@@ -31,10 +32,12 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
   bool _isTyping = true;
   Timer? _typingTimer;
   int _currentCharIndex = 0;
+  final TtsService _tts = TtsService.instance;
 
   @override
   void initState() {
     super.initState();
+    _tts.setOnStateChanged(_onTtsStateChanged);
     if (widget.isNewMessage) {
       // Only start typing animation for new messages
       _startTypingAnimation();
@@ -46,9 +49,14 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
     }
   }
 
+  void _onTtsStateChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
     _typingTimer?.cancel();
+    _tts.setOnStateChanged(null);
     super.dispose();
   }
 
@@ -199,6 +207,23 @@ class _AiMessageBubbleState extends State<AiMessageBubble> with SingleTickerProv
                         duration: const Duration(seconds: 2),
                         backgroundColor: theme.primary,
                       ),
+                    );
+                  },
+                ),
+
+                // Button 4: Speak / Stop TTS
+                _buildActionButton(
+                  theme: theme,
+                  icon: _tts.isSpeaking(widget.message.id.toString())
+                      ? Icons.stop_circle_outlined
+                      : Icons.volume_up_outlined,
+                  label: _tts.isSpeaking(widget.message.id.toString())
+                      ? 'Stop'
+                      : 'Speak',
+                  onPressed: () async {
+                    await _tts.speak(
+                      widget.message.content,
+                      id: widget.message.id.toString(),
                     );
                   },
                 ),

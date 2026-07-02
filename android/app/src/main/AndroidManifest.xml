@@ -74,6 +74,15 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_priority"
             android:value="high" />
+        <!-- FCM reads these from <application> ONLY. Previously they were nested
+             inside <activity>, so the system-tray notification fell back to the
+             launcher icon and rendered as a white square. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_name" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_color" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
@@ -118,63 +127,32 @@
             <meta-data
                 android:name="flutter_deeplinking_enabled"
                 android:value="true" />
-            <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_stat_name" />
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_color"
-                android:resource="@android:color/transparent" />
+            <!-- Deep links for doctak.net (all paths in one filter for reliable verification) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.net" />
+                <data android:scheme="https" android:host="doctak.net" />
                 <data android:pathPrefix="/post/" />
-            </intent-filter>
-            <!-- Deep links for Jobs -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.net" />
                 <data android:pathPrefix="/job/" />
-            </intent-filter>
-            <!-- Deep links for Conferences -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.net" />
                 <data android:pathPrefix="/conference/" />
-            </intent-filter>
-            <!-- Deep links for Meetings -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.net" />
                 <data android:pathPrefix="/meeting/" />
-            </intent-filter>
-            <!-- Deep links for Calls -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.net" />
+                <data android:pathPrefix="/join-meeting/" />
                 <data android:pathPrefix="/call/" />
+                <data android:pathPrefix="/profile/" />
             </intent-filter>
-            <!-- Deep links for User Profiles -->
+            <!-- Deep links for www.doctak.net -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.net" />
+                <data android:scheme="https" android:host="www.doctak.net" />
+                <data android:pathPrefix="/post/" />
+                <data android:pathPrefix="/job/" />
+                <data android:pathPrefix="/conference/" />
+                <data android:pathPrefix="/meeting/" />
+                <data android:pathPrefix="/join-meeting/" />
+                <data android:pathPrefix="/call/" />
                 <data android:pathPrefix="/profile/" />
             </intent-filter>
             <!-- Deep links for Firebase Dynamic Links domain -->
@@ -182,8 +160,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" />
-                <data android:host="doctak.page.link" />
+                <data android:scheme="https" android:host="doctak.page.link" />
             </intent-filter>
             <!-- Custom URL Scheme (works without server verification) -->
             <intent-filter>

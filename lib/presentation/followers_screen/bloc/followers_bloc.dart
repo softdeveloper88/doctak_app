@@ -135,16 +135,16 @@ class FollowersBloc extends Bloc<FollowersEvent, FollowersState> {
   }
 
   Future<void> _setUserFollow(SetUserFollow event, Emitter<FollowersState> emit) async {
-    // emit(DrugsDataInitial());
-    // ProgressDialogUtils.showProgressDialog();
     print(event.userId);
     try {
       await apiManager.setUserFollow('Bearer ${AppData.userToken}', event.userId, event.follow);
-      // setLoading(false);
+      // Remove the unfollowed user from the local following list immediately
+      if (event.follow == 'unfollow') {
+        followerDataModel?.following?.removeWhere((f) => f.id == event.userId);
+      }
       emit(FollowersPaginationLoadedState());
     } catch (e) {
       print(e);
-
       emit(FollowersDataError('No Data Found'));
     }
   }

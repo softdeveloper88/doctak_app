@@ -1,6 +1,6 @@
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/bloc/jobs_state.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -77,7 +77,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                     borderRadius: BorderRadius.circular(16),
                     onTap: () {
                       if (user?.id != null) {
-                        SVProfileFragment(userId: user!.id.toString()).launch(context);
+                        ProfileNavigation.openUser(context, user!.id.toString());
                       }
                     },
                     child: Padding(

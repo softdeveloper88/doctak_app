@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/apiClient/services/moderation_api_service.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/moderation_screen/blocked_users_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/moderation_screen/report_history_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -97,10 +98,7 @@ class _ModerationPrivacyScreenState extends State<ModerationPrivacyScreen> {
                   : '$_blockedCount user${_blockedCount == 1 ? '' : 's'} blocked',
               onTap: () async {
                 HapticFeedback.lightImpact();
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const BlockedUsersScreen()),
-                );
+                await AppNavigator.push(context, const BlockedUsersScreen());
                 _loadCounts(); // Refresh counts after returning
               },
             ),
@@ -117,10 +115,7 @@ class _ModerationPrivacyScreenState extends State<ModerationPrivacyScreen> {
                   : '$_reportCount report${_reportCount == 1 ? '' : 's'} submitted',
               onTap: () {
                 HapticFeedback.lightImpact();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ReportHistoryScreen()),
-                );
+                AppNavigator.push(context, const ReportHistoryScreen());
               },
             ),
             const SizedBox(height: 24),

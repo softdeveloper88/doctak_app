@@ -17,6 +17,25 @@ bool isValidEmail(String? inputString, {bool isRequired = false}) {
   return isInputStringValid;
 }
 
+enum PasswordStrengthLevel { none, weak, medium, strong }
+
+/// Visual-only strength meter for signup (does not block account creation).
+PasswordStrengthLevel getPasswordStrengthLevel(String password) {
+  if (password.isEmpty) return PasswordStrengthLevel.none;
+
+  var score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (RegExp(r'[A-Z]').hasMatch(password)) score++;
+  if (RegExp(r'[a-z]').hasMatch(password)) score++;
+  if (RegExp(r'\d').hasMatch(password)) score++;
+  if (RegExp(r'[^A-Za-z0-9]').hasMatch(password)) score++;
+
+  if (score <= 2) return PasswordStrengthLevel.weak;
+  if (score <= 4) return PasswordStrengthLevel.medium;
+  return PasswordStrengthLevel.strong;
+}
+
 /// Password should have,
 /// at least a upper case letter
 ///  at least a lower case letter

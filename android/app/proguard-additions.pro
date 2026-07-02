@@ -129,3 +129,39 @@
 
 # Allow R8 to optimize but keep required members
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+
+# ========================================
+# APACHE COMMONS IMAGING / TIKA (photo_manager metadata)
+# Desktop-only java.awt / javax.imageio — not on Android
+# ========================================
+-dontwarn org.apache.commons.imaging.**
+-dontwarn org.apache.tika.**
+-dontwarn java.awt.**
+-dontwarn javax.imageio.**
+-dontwarn javax.xml.stream.**
+-dontwarn java.awt.Dimension
+-dontwarn java.awt.Point
+-dontwarn java.awt.Rectangle
+-dontwarn java.awt.RenderingHints$Key
+-dontwarn java.awt.RenderingHints
+-dontwarn java.awt.color.ColorSpace
+-dontwarn java.awt.color.ICC_ColorSpace
+-dontwarn java.awt.color.ICC_Profile
+-dontwarn java.awt.image.BandedSampleModel
+-dontwarn java.awt.image.BufferedImage
+-dontwarn java.awt.image.ColorConvertOp
+-dontwarn java.awt.image.ColorModel
+-dontwarn java.awt.image.ComponentColorModel
+-dontwarn java.awt.image.DataBuffer
+-dontwarn java.awt.image.DataBufferByte
+-dontwarn java.awt.image.DataBufferFloat
+-dontwarn java.awt.image.DataBufferInt
+-dontwarn java.awt.image.DirectColorModel
+-dontwarn java.awt.image.ImagingOpException
+-dontwarn java.awt.image.IndexColorModel
+-dontwarn java.awt.image.Raster
+-dontwarn java.awt.image.RasterFormatException
+-dontwarn java.awt.image.SampleModel
+-dontwarn java.awt.image.WritableRaster
+-dontwarn javax.imageio.ImageIO
+-dontwarn javax.xml.stream.XMLStreamException

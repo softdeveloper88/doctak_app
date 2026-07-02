@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/data/models/login_device_auth/post_login_device_auth_resp.dart';
 
 /// Centralised helper that persists a [PostLoginDeviceAuthResp] to
@@ -25,6 +30,10 @@ class AuthSessionHelper {
     await prefs.setBool('rememberMe', rememberMe);
     await prefs.setString('device_token', deviceToken);
     await prefs.setString('token', response.token ?? '');
+    final expiresAt = response.expiresAt;
+    if (expiresAt != null && expiresAt > 0) {
+      await prefs.setString('token_expires_at', '$expiresAt');
+    }
     await prefs.setString('email_verified_at', response.user?.emailVerifiedAt ?? '');
 
     // ── User fields ──
@@ -34,7 +43,17 @@ class AuthSessionHelper {
     await prefs.setString('email', response.user?.email ?? '');
     await prefs.setString('phone', response.user?.phone ?? '');
     await prefs.setString('background', response.user?.background ?? '');
-    await prefs.setString('specialty', response.user?.specialty ?? '');
+    await SpecialtyDisplay.instance.ensureLoaded();
+    final rawSpecialty = response.user?.specialty ?? '';
+    final resolvedSpecialty =
+        SpecialtyDisplay.instance.resolve(rawSpecialty).isNotEmpty
+            ? SpecialtyDisplay.instance.resolve(rawSpecialty)
+            : rawSpecialty;
+    await prefs.setString('specialty', resolvedSpecialty);
+    await prefs.setString(
+      'is_verified',
+      (response.user?.isVerified == true).toString(),
+    );
     await prefs.setString('licenseNo', response.user?.licenseNo ?? '');
     await prefs.setString('title', response.user?.title ?? '');
     await prefs.setString('city', response.user?.state ?? '');
@@ -50,7 +69,12 @@ class AuthSessionHelper {
     }
     await prefs.setString('practicingCountry', response.user?.practicingCountry ?? '');
     await prefs.setString('gender', response.user?.gender ?? '');
-    await prefs.setString('country', response.user?.country.toString() ?? '');
+    // Prefer the country object's name; fall back to user.country (which may be
+    // a name or a legacy numeric ID).
+    final resolvedCountry = (response.country?.countryName != null && response.country!.countryName!.isNotEmpty)
+        ? response.country!.countryName!
+        : (response.user?.country != null ? response.user!.country.toString() : '');
+    await prefs.setString('country', resolvedCountry);
 
     // ── Subscription (v6) ──
     if (response.subscription != null) {
@@ -58,6 +82,11 @@ class AuthSessionHelper {
       await prefs.setString('account_type', response.subscription!.accountType);
       await prefs.setString('plan_name', response.subscription!.planName ?? '');
       await prefs.setString('plan_slug', response.subscription!.planSlug ?? '');
+      await prefs.setString('subscription_json', jsonEncode(response.subscription!.toJson()));
+    }
+    // ── Features map (v6) ──
+    if (response.features != null) {
+      await prefs.setString('features_json', jsonEncode(response.features!.toJson()));
     }
 
     // ── Read back & populate AppData ──
@@ -68,6 +97,7 @@ class AuthSessionHelper {
     final background = await prefs.getString('background') ?? '';
     final email = await prefs.getString('email') ?? '';
     final specialty = await prefs.getString('specialty') ?? '';
+    final isVerified = await prefs.getString('is_verified') ?? 'false';
     final userType = await prefs.getString('user_type') ?? '';
     final university = await prefs.getString('university') ?? '';
     final countryName = await prefs.getString('country') ?? '';
@@ -85,10 +115,16 @@ class AuthSessionHelper {
       AppData.userType = userType;
       AppData.background = background;
       AppData.email = email;
-      AppData.specialty = specialty;
+      AppData.specialty = SpecialtyDisplay.instance.resolve(specialty).isNotEmpty
+          ? SpecialtyDisplay.instance.resolve(specialty)
+          : specialty;
+      AppData.isVerified = isVerified == 'true';
       AppData.countryName = countryName;
       AppData.city = city;
       AppData.currency = currency;
+
+      // Register FCM with the server after login (non-blocking).
+      unawaited(NotificationService.syncDeviceToken());
     }
 
     // ── Populate subscription globals (v6) ──

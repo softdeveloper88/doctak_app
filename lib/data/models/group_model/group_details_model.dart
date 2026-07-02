@@ -10,16 +10,22 @@ class GroupDetailsModel {
   GroupDetailsModel.fromJson(dynamic json) {
     group = json['group'] != null ? Group.fromJson(json['group']) : null;
     groupStatus = json['group_status'] != null ? GroupStatus.fromJson(json['group_status']) : null;
-    if (json['group_members'] != null) {
+    if (json['group_members'] is List) {
       groupMembers = [];
-      json['group_members'].forEach((v) {
+      for (final v in json['group_members'] as List) {
         groupMembers?.add(GroupMembers.fromJson(v));
-      });
+      }
     }
-    totalMembers = json['total_members'];
-    membersRequest = json['members_request'];
-    postsRequest = json['posts_request'];
+    totalMembers = _parseInt(json['total_members']);
+    membersRequest = _parseInt(json['members_request']);
+    postsRequest = _parseInt(json['posts_request']);
     isAdmin = json['isAdmin'];
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
   }
   Group? group;
   GroupStatus? groupStatus;
@@ -103,11 +109,11 @@ class Group {
   Group({this.id, this.name, this.privacySetting, this.logo, this.banner});
 
   Group.fromJson(dynamic json) {
-    id = json['id'];
-    name = json['name'];
-    privacySetting = json['privacy_setting'];
-    logo = json['logo'];
-    banner = json['banner'];
+    id = json['id']?.toString();
+    name = json['name']?.toString();
+    privacySetting = json['privacy_setting']?.toString();
+    logo = AppData.fullImageUrl(json['logo']?.toString());
+    banner = AppData.fullImageUrl(json['banner']?.toString());
   }
   String? id;
   String? name;

@@ -9,96 +9,78 @@ class ConferenceBloc extends Bloc<ConferenceEvent, ConferenceState> {
   final ApiServiceManager apiManager = ApiServiceManager();
   int pageNumber = 1;
   int numberOfPage = 1;
+  int totalCount = 0;
   List<Data> conferenceList = [];
+  List<ConferenceMonthBucket> monthBuckets = [];
+  String selectedCountry = 'all';
+  String selectedSearch = '';
+  String selectedMonth = '';
   final int nextPageTrigger = 1;
 
   ConferenceBloc() : super(PaginationInitialState()) {
     on<LoadPageEvent>(_onGetJobs);
-    // on<GetConferences>(_onGetJobs1);
     on<LoadDropdownData>(_listCountryList);
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
-      // emit(PaginationLoadingState());
       if (event.index == conferenceList.length - nextPageTrigger) {
-        add(LoadPageEvent(page: pageNumber));
+        add(LoadPageEvent(
+          page: pageNumber,
+          countryName: selectedCountry,
+          searchTerm: selectedSearch,
+          month: selectedMonth,
+        ));
       }
     });
   }
+
   Future<void> _onGetJobs(LoadPageEvent event, Emitter<ConferenceState> emit) async {
-    // emit(DrugsDataInitial());
-    print('33 ${event.page}');
-    if (event.page == 1) {
+    final requestedPage = event.page ?? pageNumber;
+    selectedCountry = event.countryName ?? selectedCountry;
+    selectedSearch = event.searchTerm ?? selectedSearch;
+    selectedMonth = event.month ?? selectedMonth;
+
+    if (requestedPage == 1) {
       conferenceList.clear();
       pageNumber = 1;
       emit(PaginationLoadingState());
-      print(event.countryName);
-      print(event.searchTerm);
     }
-    // ProgressDialogUtils.showProgressDialog();
+
     try {
-      SearchConferenceModel response = await apiManager.searchConferences('Bearer ${AppData.userToken}', '$pageNumber', event.countryName ?? "all", event.searchTerm ?? '');
+      final response = await apiManager.searchConferences(
+        'Bearer ${AppData.userToken}',
+        '$requestedPage',
+        selectedCountry,
+        selectedSearch,
+        month: selectedMonth.isEmpty ? null : selectedMonth,
+      );
+
       numberOfPage = response.conferences?.lastPage ?? 0;
-      if (pageNumber < numberOfPage + 1) {
-        pageNumber = pageNumber + 1;
+      totalCount = response.conferences?.total ?? conferenceList.length;
+      monthBuckets = response.monthBuckets;
+
+      if (requestedPage == 1) {
+        conferenceList = List<Data>.from(response.conferences?.data ?? []);
+        pageNumber = conferenceList.isEmpty ? 1 : 2;
+      } else if (requestedPage < numberOfPage + 1) {
         conferenceList.addAll(response.conferences?.data ?? []);
+        pageNumber = requestedPage + 1;
       }
-      emit(PaginationLoadedState());
 
-      // emit(DataLoaded(conferenceList));
+      emit(PaginationLoadedState());
     } catch (e) {
-      print(e);
-
       emit(PaginationLoadedState());
-
-      // emit(DataError('An error occurred $e'));
     }
   }
 
-  // _onGetJobs1(GetConferences event, Emitter<ConferenceState> emit) async {
-  //   // emit(PaginationInitialState());
-  //   // ProgressDialogUtils.showProgressDialog();
-  //   // emit(PaginationLoadingState());
-  //   try {
-  //     final response = await apiManager.searchConferences(
-  //         'Bearer ${AppData.userToken}',
-  //         "1",
-  //         "USA",
-  //         event.searchTerm);
-  //     // print("ddd${response.data?.data!.length}");
-  //     conferenceList.clear();
-  //     conferenceList.addAll(response.conferences?.data ?? []);
-  //     emit(PaginationLoadedState());
-  //     // emit(DataLoaded(conferenceList));
-  //   } catch (e) {
-  //     // ProgressDialogUtils.hideProgressDialog();
-  //     print(e);
-  //
-  //     emit(DataError('No Data Found'));
-  //   }
-  // }
   Future<void> _listCountryList(LoadDropdownData event, Emitter<ConferenceState> emit) async {
     try {
       final response = await apiManager.getConferenceCountries('Bearer ${AppData.userToken}');
-      print('333s${response.data['countries']}');
-
-      emit(CountriesDataLoaded(countriesModel: response.data['countries'], countryName: event.countryName, searchTerms: event.searchTerms));
-      // add(LoadDropdownData(event.newValue,event.typeValue));
+      emit(CountriesDataLoaded(
+        countriesModel: response.data['countries'],
+        countryName: event.countryName,
+        searchTerms: event.searchTerms,
+      ));
     } catch (e) {
       emit(DataError('$e'));
     }
   }
-
-  // Future<List<String>> _onGetCountries() async {
-  //   // emit(DataLoading());
-  //   try {
-  //     final response = await apiManager.getConferenceCountries(
-  //       'Bearer ${AppData.userToken}',
-  //     );
-  //
-  //     return response.data;
-  //
-  //   } catch (e) {
-  //     print(e);
-  //     emit(DataError( 'An error occurred'));
-  //   }
-  // }
 }

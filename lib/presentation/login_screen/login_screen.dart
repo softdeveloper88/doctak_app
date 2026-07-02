@@ -4,17 +4,18 @@ import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/notification_service.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/forgot_password/forgot_password.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_event.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
 import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
+import 'package:doctak_app/presentation/auth/auth_screen_widgets.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/custom_text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -295,40 +296,14 @@ class LoginScreenState extends State<LoginScreen> {
 
   /// Safely get FCM token with retry logic for FIS_AUTH_ERROR
   Future<String> _getSafeFcmToken() async {
-    const maxRetries = 3;
-    const retryDelay = Duration(seconds: 2);
-
-    for (int attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        final token = await FirebaseMessaging.instance.getToken();
-        if (token != null && token.isNotEmpty) {
-          print("FCM token obtained on attempt $attempt: ${token.substring(0, 20)}...");
-          return token;
-        }
-      } catch (e) {
-        print("FCM token attempt $attempt failed: $e");
-
-        // Check if it's a FIS_AUTH_ERROR
-        if (e.toString().contains('FIS_AUTH_ERROR')) {
-          print("FIS_AUTH_ERROR detected, attempting to delete and reinstall Firebase Installations...");
-          try {
-            // Delete the Firebase Installation ID to force re-authentication
-            await FirebaseMessaging.instance.deleteToken();
-            await Future.delayed(const Duration(milliseconds: 500));
-          } catch (deleteError) {
-            print("Error deleting token: $deleteError");
-          }
-        }
-
-        if (attempt < maxRetries) {
-          print("Retrying in ${retryDelay.inSeconds} seconds...");
-          await Future.delayed(retryDelay);
-        }
-      }
+    // Delegate to the shared, APNS-aware getter. On iOS the FCM token cannot be
+    // issued until the APNS token is set, so this waits for it first; otherwise
+    // login would send an empty device_token and the device gets no pushes.
+    final token = await NotificationService.getFcmTokenSafely();
+    if (token.isEmpty) {
+      print("All FCM token attempts failed, proceeding without token");
     }
-
-    print("All FCM token attempts failed, proceeding without token");
-    return "";
+    return token;
   }
 
   void _onUsernameSelected(String username) async {
@@ -367,7 +342,7 @@ class LoginScreenState extends State<LoginScreen> {
       },
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        backgroundColor: theme.scaffoldBackground,
+        backgroundColor: theme.authBackgroundColor,
         body: BlocListener<LoginBloc, LoginState>(
           bloc: loginBloc,
           listener: (context, state) {
@@ -378,213 +353,129 @@ class LoginScreenState extends State<LoginScreen> {
                 toasty(context, translation(context).msg_login_success, bgColor: theme.success, textColor: Colors.white);
               }
               if (mounted) {
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const SVDashboardScreen()));
+                AppNavigator.pushReplacement(context, const SVDashboardScreen());
               }
             } else if (state is LoginFailure) {
               if (mounted) {
                 TextInput.finishAutofillContext(shouldSave: false);
-                toasty(context, translation(context).msg_login_failed, bgColor: theme.error, textColor: Colors.white);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error), backgroundColor: theme.error));
+                toasty(context, state.error, bgColor: theme.error, textColor: Colors.white);
               }
             }
           },
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: theme.authBackground,
-            child: SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
-                child: Container(
-                  width: double.infinity,
-                  constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom),
-                  child: AutofillGroup(
-                    child: Form(
-                      key: _formKey,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                            // Logo
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: theme.authLogoDecoration,
-                              child: Hero(
-                                tag: 'app_logo',
-                                child: Image.asset('assets/logo/logo.png', width: MediaQuery.of(context).size.width * 0.18),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            // Welcome Text
-                            Text(translation(context).lbl_welcome_back, style: theme.authSubtitleStyle),
-                            const SizedBox(height: 4),
-                            Text(translation(context).lbl_login_button, style: theme.authTitleStyle),
-                            const SizedBox(height: 32),
-                            // Login Card
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(24),
-                              decoration: theme.authCardDecoration,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Email Field
-                                  Text(translation(context).lbl_enter_your_email_colon, style: theme.authLabelStyle),
-                                  const SizedBox(height: 10),
-                                  CustomTextFormField(
-                                    fillColor: theme.inputBackground,
-                                    filled: true,
-                                    autofocus: false,
-                                    autofillHint: const [AutofillHints.username],
-                                    focusNode: focusNode1,
-                                    controller: emailController,
-                                    hintText: translation(context).msg_enter_your_email,
-                                    textInputType: TextInputType.emailAddress,
-                                    prefix: Container(
-                                      margin: const EdgeInsets.fromLTRB(16, 14, 10, 14),
-                                      child: Icon(CupertinoIcons.mail, color: theme.primary, size: 20),
-                                    ),
-                                    prefixConstraints: const BoxConstraints(maxHeight: 54),
-                                    validator: (value) {
-                                      if (value == null || !isValidEmail(value, isRequired: true)) {
-                                        return translation(context).err_msg_please_enter_valid_email;
-                                      }
-                                      return null;
-                                    },
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                                    borderDecoration: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                      borderSide: BorderSide(color: theme.border, width: 0.5),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  // Password Field
-                                  Text(translation(context).lbl_enter_your_password_colon, style: theme.authLabelStyle),
-                                  const SizedBox(height: 10),
-                                  BlocBuilder<LoginBloc, LoginState>(
-                                    bloc: loginBloc,
-                                    builder: (context, state) {
-                                      return CustomTextFormField(
-                                        fillColor: theme.inputBackground,
-                                        filled: true,
-                                        autofocus: false,
-                                        autofillHint: const [AutofillHints.password],
-                                        focusNode: focusNode2,
-                                        controller: passwordController,
-                                        hintText: translation(context).msg_enter_new_password,
-                                        textInputType: TextInputType.visiblePassword,
-                                        textInputAction: TextInputAction.done,
-                                        prefix: Container(
-                                          margin: const EdgeInsets.fromLTRB(16, 14, 10, 14),
-                                          child: Icon(CupertinoIcons.lock, color: theme.primary, size: 20),
-                                        ),
-                                        prefixConstraints: const BoxConstraints(maxHeight: 54),
-                                        suffix: InkWell(
-                                          onTap: () {
-                                            loginBloc.add(ChangePasswordVisibilityEvent(value: !state.isShowPassword));
-                                          },
-                                          child: Container(
-                                            margin: const EdgeInsets.symmetric(horizontal: 14),
-                                            child: Icon(state.isShowPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye, color: theme.textTertiary, size: 20),
-                                          ),
-                                        ),
-                                        suffixConstraints: const BoxConstraints(maxHeight: 54),
-                                        obscureText: !state.isShowPassword,
-                                        borderDecoration: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(14),
-                                          borderSide: BorderSide(color: theme.border, width: 0.5),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  // Remember Me & Forgot Password
-                                  Row(
-                                    children: [
-                                      SizedBox(
-                                        height: 22,
-                                        width: 22,
-                                        child: Checkbox(
-                                          value: _rememberMe,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                                          activeColor: theme.primary,
-                                          side: BorderSide(color: theme.border, width: 1.5),
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _rememberMe = value!;
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Text(
-                                        translation(context).lbl_remember_me,
-                                        style: TextStyle(fontSize: 14, color: theme.textSecondary, fontWeight: FontWeight.w500, fontFamily: 'Poppins'),
-                                      ),
-                                      const Spacer(),
-                                      GestureDetector(
-                                        onTap: () => onTapTxtForgotPassword(context),
-                                        child: Text(translation(context).msg_forgot_password, style: theme.authLinkStyle),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 28),
-                                  // Login Button
-                                  theme.buildAuthPrimaryButton(
-                                    label: translation(context).lbl_login_button,
-                                    onPressed: () async {
-                                      if (_formKey.currentState!.validate()) {
-                                        _formKey.currentState!.save();
-                                        final token = await _getSafeFcmToken();
-                                        loginBloc.add(LoginButtonPressed(username: emailController.text, password: passwordController.text, rememberMe: _rememberMe, deviceToken: token));
-                                      }
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 28),
-                            // Sign Up Link
-                            theme.buildAuthNavLink(message: translation(context).msg_don_t_have_an_account, actionText: translation(context).lbl_sign_up, onTap: () => onTapTxtSignUp(context)),
-                            const SizedBox(height: 28),
-                            // OR Divider
-                            theme.buildOrDivider(text: translation(context).lbl_or),
-                            const SizedBox(height: 28),
-                            // Social Login Buttons
-                            _buildSocial(context, theme),
-                            SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-                          ],
-                        ),
-                      ),
+          child: AuthScaffold(
+            child: AutofillGroup(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AuthBrandHeader(
+                      eyebrow: translation(context).lbl_welcome_back,
+                      title: 'Log in to DocTak',
+                      subtitle: 'The professional network built for doctors.',
                     ),
-                  ),
+                    AuthFormCard(
+                      children: [
+                        AuthField(
+                          label: 'Email address',
+                          child: AuthFormInput(
+                            icon: CupertinoIcons.mail,
+                            controller: emailController,
+                            focusNode: focusNode1,
+                            hint: translation(context).msg_enter_your_email,
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              if (value == null || !isValidEmail(value, isRequired: true)) {
+                                return translation(context).err_msg_please_enter_valid_email;
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        BlocBuilder<LoginBloc, LoginState>(
+                          bloc: loginBloc,
+                          builder: (context, state) {
+                            return AuthField(
+                              label: 'Password',
+                              child: AuthFormInput(
+                                icon: CupertinoIcons.lock,
+                                controller: passwordController,
+                                focusNode: focusNode2,
+                                hint: translation(context).msg_enter_new_password,
+                                obscureText: !state.isShowPassword,
+                                textInputAction: TextInputAction.done,
+                                suffix: IconButton(
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  icon: Icon(
+                                    state.isShowPassword ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                                    size: 21,
+                                    color: theme.textTertiary,
+                                  ),
+                                  onPressed: () => loginBloc.add(
+                                    ChangePasswordVisibilityEvent(value: !state.isShowPassword),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return translation(context).err_msg_please_enter_valid_password;
+                                  }
+                                  return null;
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                        AuthRememberForgotRow(
+                          rememberMe: _rememberMe,
+                          onRememberChanged: (v) => setState(() => _rememberMe = v),
+                          rememberLabel: translation(context).lbl_remember_me,
+                          forgotLabel: translation(context).msg_forgot_password,
+                          onForgot: () => onTapTxtForgotPassword(context),
+                        ),
+                        theme.buildAuthPrimaryButton(
+                          label: translation(context).lbl_login_button,
+                          icon: Icons.arrow_forward_rounded,
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              _formKey.currentState!.save();
+                              final token = await _getSafeFcmToken();
+                              loginBloc.add(LoginButtonPressed(
+                                username: emailController.text,
+                                password: passwordController.text,
+                                rememberMe: _rememberMe,
+                                deviceToken: token,
+                              ));
+                            }
+                          },
+                        ),
+                        theme.buildOrDivider(),
+                        theme.buildAuthSocialPill(
+                          label: 'Continue with Google',
+                          icon: SvgPicture.asset(imgGoogle, height: 20, width: 20),
+                          onTap: onPressedGoogleLogin,
+                        ),
+                        if (Platform.isIOS)
+                          theme.buildAuthSocialPill(
+                            label: 'Continue with Apple',
+                            icon: CustomImageView(imagePath: imgApple, height: 20, width: 20, color: theme.textPrimary),
+                            onTap: signInWithApple,
+                          ),
+                      ],
+                    ),
+                    AuthFooterLink(
+                      message: translation(context).msg_don_t_have_an_account,
+                      actionText: translation(context).lbl_sign_up,
+                      onTap: () => onTapTxtSignUp(context),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  /// Section Widget
-  Widget _buildSocial(BuildContext context, OneUITheme theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Google Sign-in Button
-        theme.buildSocialButton(icon: SvgPicture.asset(imgGoogle, height: 24, width: 24), onTap: () => onPressedGoogleLogin()),
-        if (Platform.isIOS) const SizedBox(width: 20),
-        // Apple Sign-in Button (iOS only)
-        if (Platform.isIOS)
-          theme.buildSocialButton(
-            icon: CustomImageView(imagePath: imgApple, height: 24, width: 24, color: theme.isDark ? Colors.white : Colors.black),
-            onTap: () => signInWithApple(),
-          ),
-      ],
     );
   }
 
@@ -680,8 +571,12 @@ class LoginScreenState extends State<LoginScreen> {
       final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
       final email = googleUser.email; // googleUser.email is non-null
 
-      // Prefer ID token, fall back to Google user id
-      final tokenToSend = googleAuth.idToken ?? googleUser.id;
+      final String? idToken = googleAuth.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        debugPrint('Google Sign-In failed: no id_token returned');
+        if (mounted) toast(translation(context).msg_something_wrong);
+        return;
+      }
 
       // Debug: Print the data being sent
       debugPrint('=== Google Sign-In Data ===');
@@ -689,12 +584,12 @@ class LoginScreenState extends State<LoginScreen> {
       debugPrint('First Name: $firstName');
       debugPrint('Last Name: $lastName');
       debugPrint('Provider: google');
-      debugPrint('Token length: ${tokenToSend.length}');
+      debugPrint('Token length: ${idToken.length}');
       debugPrint('Device Token: $deviceToken');
       debugPrint('========================');
 
       // Send login event to BLoC
-      loginBloc.add(SocialLoginButtonPressed(email: email, firstName: firstName, lastName: lastName, isSocialLogin: true, provider: 'google', token: tokenToSend, deviceToken: deviceToken));
+      loginBloc.add(SocialLoginButtonPressed(email: email, firstName: firstName, lastName: lastName, isSocialLogin: true, provider: 'google', token: idToken, deviceToken: deviceToken));
 
       // Sign out to allow different account selection next time
       try {
@@ -765,10 +660,8 @@ class LoginScreenState extends State<LoginScreen> {
 
       final String deviceToken = await _getSafeFcmToken();
 
-      // Resolve email: Apple credential → Firebase → empty string (backend handles missing email)
-      final String email = appleCredential.authorizationCode.isNotEmpty
-          ? (firebaseEmail ?? '')
-          : (firebaseEmail ?? '');
+      // Resolve email: Apple credential → Firebase → empty (backend looks up returning users by provider id)
+      final String email = appleCredential.email ?? firebaseEmail ?? '';
 
       // Resolve name parts
       final nameParts = (firebaseDisplayName ?? '').split(' ');
@@ -822,7 +715,7 @@ class LoginScreenState extends State<LoginScreen> {
         //     builder: (BuildContext context) => const SVDashboardScreen(),
         //   ),
         // );
-        const SVDashboardScreen().launch(context, isNewTask: true, pageRouteAnimation: PageRouteAnimation.Slide);
+        AppNavigator.toDashboard(context);
       }
     });
   }

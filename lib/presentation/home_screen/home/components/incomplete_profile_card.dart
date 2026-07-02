@@ -1,5 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/common_navigator.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -168,7 +168,7 @@ class IncompleteProfileCard extends StatelessWidget {
                 color: theme.primary,
                 borderRadius: BorderRadius.circular(20),
                 child: InkWell(
-                  onTap: () => launchScreen(context, const CompleteProfileScreen()),
+                  onTap: () => AppNavigator.push(context, const CompleteProfileScreen()),
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),

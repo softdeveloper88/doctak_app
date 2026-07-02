@@ -28,7 +28,7 @@ class ChatApiService {
   /// Search contacts
   Future<ApiResponse<SearchContactsModel>> searchContacts({required String page, required String keyword}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse('/search-contacts?page=$page&keyword=$keyword', method: networkUtils.HttpMethod.POST));
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/search-contacts?page=$page&keyword=$keyword', method: networkUtils.HttpMethod.POST));
       return ApiResponse.success(SearchContactsModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);

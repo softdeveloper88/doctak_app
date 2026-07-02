@@ -29,7 +29,7 @@ class GuidelineChatInput extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha:0.04),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -70,7 +70,7 @@ class GuidelineChatInput extends StatelessWidget {
                           decoration: InputDecoration(
                             hintText: 'Ask about medical guidelines...',
                             hintStyle: TextStyle(
-                              color: theme.textSecondary.withOpacity(0.6),
+                              color: theme.textSecondary.withValues(alpha:0.6),
                               fontSize: 14,
                             ),
                             border: InputBorder.none,
@@ -95,12 +95,12 @@ class GuidelineChatInput extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: isSending
-                      ? const Color(0xFF0A84FF).withOpacity(0.5)
+                      ? const Color(0xFF0A84FF).withValues(alpha:0.5)
                       : const Color(0xFF0A84FF),
                   borderRadius: BorderRadius.circular(21),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0A84FF).withOpacity(0.3),
+                      color: const Color(0xFF0A84FF).withValues(alpha:0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

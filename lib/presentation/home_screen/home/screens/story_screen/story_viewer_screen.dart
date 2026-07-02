@@ -1,4 +1,5 @@
 import 'package:doctak_app/data/models/story_model/story_model.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/bloc/story_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/create_story_screen.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
@@ -28,6 +29,7 @@ class StoryViewerScreen extends StatefulWidget {
 
 class _StoryViewerScreenState extends State<StoryViewerScreen>
     with TickerProviderStateMixin {
+  late final List<StoryGroupModel> _storyGroups;
   late PageController _pageController;
   late int _currentGroupIndex;
   int _currentStoryIndex = 0;
@@ -41,14 +43,31 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   @override
   void initState() {
     super.initState();
-    _currentGroupIndex = widget.initialGroupIndex.clamp(
-      0,
-      widget.storyGroups.length - 1,
+    _storyGroups = widget.storyGroups
+        .where((group) => group.stories.isNotEmpty)
+        .toList();
+
+    final selectedIndex = _storyGroups.indexWhere(
+      (group) => group.userId == widget.currentGroup.userId,
     );
+    _currentGroupIndex = _storyGroups.isEmpty
+        ? 0
+        : (selectedIndex >= 0
+              ? selectedIndex
+              : widget.initialGroupIndex.clamp(0, _storyGroups.length - 1));
     _pageController = PageController(initialPage: _currentGroupIndex);
 
     // Immersive mode
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    if (_storyGroups.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
+      return;
+    }
 
     _loadStory();
   }
@@ -62,10 +81,9 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
     super.dispose();
   }
 
-  StoryGroupModel get _currentGroup => widget.storyGroups[_currentGroupIndex];
+  StoryGroupModel get _currentGroup => _storyGroups[_currentGroupIndex];
 
-  StoryItemModel get _currentStory =>
-      _currentGroup.stories[_currentStoryIndex];
+  StoryItemModel get _currentStory => _currentGroup.stories[_currentStoryIndex];
 
   void _loadStory() {
     _progressController?.dispose();
@@ -87,20 +105,22 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   void _loadVideoStory(StoryItemModel story) {
-    _videoController = VideoPlayerController.networkUrl(
-      Uri.parse(story.mediaUrl!),
-    )..initialize().then((_) {
-        if (!mounted) return;
-        setState(() {});
-        _videoController!.play();
+    _videoController =
+        VideoPlayerController.networkUrl(Uri.parse(story.mediaUrl!))
+          ..initialize()
+              .then((_) {
+                if (!mounted) return;
+                setState(() {});
+                _videoController!.play();
 
-        final duration = _videoController!.value.duration;
-        _startProgress(duration);
-      }).catchError((e) {
-        print('🔴 Video load error: $e');
-        // Fallback to default timer
-        _startImageTimer();
-      });
+                final duration = _videoController!.value.duration;
+                _startProgress(duration);
+              })
+              .catchError((e) {
+                print('🔴 Video load error: $e');
+                // Fallback to default timer
+                _startImageTimer();
+              });
   }
 
   void _startImageTimer() {
@@ -108,10 +128,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   void _startProgress(Duration duration) {
-    _progressController = AnimationController(
-      vsync: this,
-      duration: duration,
-    );
+    _progressController = AnimationController(vsync: this, duration: duration);
 
     _progressController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -145,7 +162,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
   }
 
   void _nextGroup() {
-    if (_currentGroupIndex < widget.storyGroups.length - 1) {
+    if (_currentGroupIndex < _storyGroups.length - 1) {
       setState(() {
         _currentGroupIndex++;
         _currentStoryIndex = 0;
@@ -214,6 +231,10 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_storyGroups.isEmpty) {
+      return const Scaffold(backgroundColor: Colors.black);
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -316,10 +337,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            bgColor,
-            bgColor.withValues(alpha: 0.7),
-          ],
+          colors: [bgColor, bgColor.withValues(alpha: 0.7)],
         ),
       ),
       child: Center(
@@ -350,41 +368,38 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
 
   Widget _buildProgressBars() {
     return Row(
-      children: List.generate(
-        _currentGroup.stories.length,
-        (index) {
-          return Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              height: 3,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(2),
-                child: index == _currentStoryIndex
-                    ? AnimatedBuilder(
-                        animation: _progressController ??
-                            AlwaysStoppedAnimation(0.0),
-                        builder: (context, child) {
-                          return LinearProgressIndicator(
-                            value: _progressController?.value ?? 0.0,
-                            backgroundColor: Colors.white30,
-                            valueColor: const AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          );
-                        },
-                      )
-                    : LinearProgressIndicator(
-                        value: index < _currentStoryIndex ? 1.0 : 0.0,
-                        backgroundColor: Colors.white30,
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          Colors.white,
-                        ),
+      children: List.generate(_currentGroup.stories.length, (index) {
+        return Expanded(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            height: 3,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: index == _currentStoryIndex
+                  ? AnimatedBuilder(
+                      animation:
+                          _progressController ?? AlwaysStoppedAnimation(0.0),
+                      builder: (context, child) {
+                        return LinearProgressIndicator(
+                          value: _progressController?.value ?? 0.0,
+                          backgroundColor: Colors.white30,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        );
+                      },
+                    )
+                  : LinearProgressIndicator(
+                      value: index < _currentStoryIndex ? 1.0 : 0.0,
+                      backgroundColor: Colors.white30,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
                       ),
-              ),
+                    ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
 
@@ -428,12 +443,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
                   fontFamily: 'Poppins',
-                  shadows: [
-                    Shadow(
-                      color: Colors.black38,
-                      blurRadius: 4,
-                    ),
-                  ],
+                  shadows: [Shadow(color: Colors.black38, blurRadius: 4)],
                 ),
               ),
               Text(
@@ -471,8 +481,7 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   children: [
                     Icon(Icons.visibility, color: Colors.white70, size: 20),
                     SizedBox(width: 8),
-                    Text('View Seen By',
-                        style: TextStyle(color: Colors.white)),
+                    Text('View Seen By', style: TextStyle(color: Colors.white)),
                   ],
                 ),
               ),
@@ -482,8 +491,10 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
                   children: [
                     Icon(Icons.delete, color: Colors.redAccent, size: 20),
                     SizedBox(width: 8),
-                    Text('Delete Story',
-                        style: TextStyle(color: Colors.redAccent)),
+                    Text(
+                      'Delete Story',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
                   ],
                 ),
               ),
@@ -522,13 +533,16 @@ class _StoryViewerScreenState extends State<StoryViewerScreen>
         ),
         // Add new story button
         GestureDetector(
-          onTap: () {
+          onTap: () async {
             _close();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => CreateStoryScreen(storyBloc: widget.storyBloc),
-              ),
+            await AppNavigator.push(
+              context,
+              CreateStoryScreen(storyBloc: widget.storyBloc),
             );
+            // Reload feed in the background (bloc may or may not still be open)
+            if (!widget.storyBloc.isClosed) {
+              widget.storyBloc.add(const LoadStoryFeedEvent());
+            }
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

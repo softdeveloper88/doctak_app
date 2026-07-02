@@ -41,6 +41,9 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
   bool _isLocked = false;
   bool _isCancelling = false;
   bool _isSending = false;
+  /// Finger-up arrived before the native recorder finished starting (common after
+  /// the first permission grant). Flushed once [_isRecording] becomes true.
+  bool _pendingStopAndSend = false;
   int _recordDuration = 0;
   String? _recordPath;
   Timer? _durationTimer;
@@ -88,12 +91,10 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
       _gestureActive = true;
       _didCancelHaptic = false;
       _didLockHaptic = false;
-
-      // Add global pointer route to track movements
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
-      });
     }
+
+    // Register immediately so a finger-up during async recorder init is not lost.
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
   }
 
   void _handleGlobalPointerEvent(PointerEvent event) {
@@ -183,6 +184,27 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
       _verticalDrag = 0;
     });
 
+    _requestStopAndSend();
+  }
+
+  /// Queue stop+send when the recorder is not ready yet (first permission grant).
+  void _requestStopAndSend() {
+    if (_isCancelling || _isSending || _isLocked) return;
+
+    if (!_isRecording) {
+      _pendingStopAndSend = true;
+      return;
+    }
+
+    _pendingStopAndSend = false;
+    _sendRecording();
+  }
+
+  void _flushPendingStopIfNeeded() {
+    if (_isCancelling || _isSending || _isLocked || !_isRecording) return;
+    if (!_pendingStopAndSend && !widget.shouldStopAndSend) return;
+
+    _pendingStopAndSend = false;
     _sendRecording();
   }
 
@@ -233,7 +255,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
     super.didUpdateWidget(oldWidget);
     // Only auto-send if not locked - when locked, user must tap send button
     if (widget.shouldStopAndSend && !oldWidget.shouldStopAndSend && !_isLocked) {
-      _sendRecording();
+      _requestStopAndSend();
     }
   }
 
@@ -264,14 +286,11 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
 
   Future<void> _startRecording() async {
     try {
-      // Check permission
+      // Permission is checked before this widget mounts; verify again here.
       final status = await Permission.microphone.status;
       if (!status.isGranted) {
-        final result = await Permission.microphone.request();
-        if (!result.isGranted) {
-          _cancel();
-          return;
-        }
+        if (mounted) widget.onCancel();
+        return;
       }
 
       // Get temp directory and create file path
@@ -286,6 +305,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
           _isRecording = true;
           _recordDuration = 0;
         });
+        _flushPendingStopIfNeeded();
       }
 
       // Light haptic on start
@@ -324,6 +344,7 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
       if (_recordDuration < _minRecordDuration) {
         debugPrint('Recording too short: $_recordDuration seconds');
         await _deleteRecordingFile();
+        _isSending = false;
         if (mounted) widget.onCancel();
         return;
       }
@@ -338,19 +359,25 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
         }
       }
 
+      _isSending = false;
       if (mounted) widget.onCancel();
     } catch (e) {
       debugPrint('Error sending recording: $e');
+      _isSending = false;
       if (mounted) widget.onCancel();
     }
   }
 
   Future<void> _cancel() async {
-    if (_isCancelling) return;
+    if (_isCancelling || _isDisposed) return;
 
-    setState(() {
+    if (mounted) {
+      setState(() {
+        _isCancelling = true;
+      });
+    } else {
       _isCancelling = true;
-    });
+    }
 
     _durationTimer?.cancel();
 
@@ -580,8 +607,15 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
           final baseScale = _isLocked ? 0.9 : _micScaleAnimation.value;
           final dragScale = 1.0 + lockProgress * 0.15;
 
+          final showSendIcon = _isRecording &&
+              !_isLocked &&
+              (!_gestureActive || _pendingStopAndSend || widget.shouldStopAndSend);
           return GestureDetector(
-            onTap: _isLocked ? _sendRecording : null,
+            onTap: _isLocked
+                ? _sendRecording
+                : _isRecording
+                    ? _requestStopAndSend
+                    : null,
             child: Transform.scale(
               scale: baseScale * dragScale,
               child: Container(
@@ -607,8 +641,14 @@ class _AnimatedVoiceRecorderState extends State<AnimatedVoiceRecorder> with Tick
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
                     child: Icon(
-                      isCancelMode ? Icons.delete_rounded : (_isLocked ? Icons.send_rounded : Icons.mic),
-                      key: ValueKey(isCancelMode ? 'delete' : (_isLocked ? 'send' : 'mic')),
+                      isCancelMode
+                          ? Icons.delete_rounded
+                          : (_isLocked || showSendIcon)
+                              ? Icons.send_rounded
+                              : Icons.mic,
+                      key: ValueKey(
+                        isCancelMode ? 'delete' : (_isLocked || showSendIcon ? 'send' : 'mic'),
+                      ),
                       color: Colors.white,
                       size: 24,
                     ),

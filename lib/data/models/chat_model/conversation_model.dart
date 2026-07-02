@@ -35,6 +35,8 @@ class Conversation extends Equatable {
   final String? updatedAt;
   final ConversationLastMessage? lastMessage;
   final List<ConversationParticipant>? participants;
+  // New backend: peer is the other user in a direct conversation
+  final ConversationPeer? peer;
 
   const Conversation({
     this.id,
@@ -46,6 +48,7 @@ class Conversation extends Equatable {
     this.updatedAt,
     this.lastMessage,
     this.participants,
+    this.peer,
   });
 
   factory Conversation.fromJson(dynamic json) {
@@ -58,20 +61,40 @@ class Conversation extends Equatable {
     }
 
     ConversationLastMessage? lastMsg;
-    if (json['last_message'] != null) {
-      lastMsg = ConversationLastMessage.fromJson(json['last_message']);
+    // Backend returns 'lastMessage' (camelCase) or 'last_message' (snake_case)
+    final rawLastMsg = json['lastMessage'] ?? json['last_message'];
+    if (rawLastMsg != null) {
+      lastMsg = ConversationLastMessage.fromJson(rawLastMsg);
+    }
+
+    ConversationPeer? peer;
+    if (json['peer'] != null) {
+      peer = ConversationPeer.fromJson(json['peer']);
+    }
+
+    // Resolve display name: backend may return name or derive from peer
+    String? displayName = json['name'];
+    if ((displayName == null || displayName.isEmpty) && peer != null) {
+      displayName = peer.name;
+    }
+
+    // Resolve avatar: from peer.avatarUrl or legacy avatar field
+    String? displayAvatar = peer?.avatarUrl ?? json['avatarUrl'];
+    if (displayAvatar == null && json['avatar'] != null) {
+      displayAvatar = AppData.fullImageUrl(json['avatar'].toString());
     }
 
     return Conversation(
       id: _safeInt(json['id']),
-      name: json['name'],
-      avatar: json['avatar'] != null ? AppData.fullImageUrl(json['avatar'].toString()) : null,
+      name: displayName,
+      avatar: displayAvatar,
       type: json['type'],
-      unreadCount: _safeInt(json['unread_count']) ?? 0,
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      unreadCount: _safeInt(json['unreadCount'] ?? json['unread_count']) ?? 0,
+      createdAt: json['createdAt'] ?? json['created_at'],
+      updatedAt: json['updatedAt'] ?? json['updated_at'],
       lastMessage: lastMsg,
       participants: participants,
+      peer: peer,
     );
   }
 
@@ -93,6 +116,7 @@ class Conversation extends Equatable {
     String? updatedAt,
     ConversationLastMessage? lastMessage,
     List<ConversationParticipant>? participants,
+    ConversationPeer? peer,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -104,11 +128,39 @@ class Conversation extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       lastMessage: lastMessage ?? this.lastMessage,
       participants: participants ?? this.participants,
+      peer: peer ?? this.peer,
     );
   }
 
   @override
   List<Object?> get props => [id, name, avatar, type, unreadCount, createdAt];
+}
+
+/// The other participant in a direct conversation (new backend format).
+class ConversationPeer {
+  final String id;
+  final String? name;
+  final String? specialty;
+  final String? avatarUrl;
+  final bool isAi;
+
+  ConversationPeer({
+    required this.id,
+    this.name,
+    this.specialty,
+    this.avatarUrl,
+    this.isAi = false,
+  });
+
+  factory ConversationPeer.fromJson(dynamic json) {
+    return ConversationPeer(
+      id: (json['id'] ?? '').toString(),
+      name: json['name'],
+      specialty: json['specialty'],
+      avatarUrl: json['avatarUrl'] ?? json['avatar_url'],
+      isAi: json['isAi'] == true || json['is_ai'] == true,
+    );
+  }
 }
 
 class ConversationLastMessage {
@@ -135,13 +187,13 @@ class ConversationLastMessage {
   factory ConversationLastMessage.fromJson(dynamic json) {
     return ConversationLastMessage(
       id: _safeInt(json['id']),
-      conversationId: _safeInt(json['conversation_id']),
-      senderId: json['sender_id'] ?? json['from_id'],
+      conversationId: _safeInt(json['conversationId'] ?? json['conversation_id']),
+      senderId: json['senderId'] ?? json['sender_id'] ?? json['from_id'],
       type: json['type'],
       body: json['body'] ?? json['content'] ?? json['message'],
       content: json['content'] ?? json['body'] ?? json['message'],
       status: json['status'],
-      createdAt: json['created_at'],
+      createdAt: json['createdAt'] ?? json['created_at'],
     );
   }
 }
@@ -186,8 +238,9 @@ class ParticipantUser {
   final String? firstName;
   final String? lastName;
   final String? profilePic;
+  final bool isVerified;
 
-  ParticipantUser({this.id, this.firstName, this.lastName, this.profilePic});
+  ParticipantUser({this.id, this.firstName, this.lastName, this.profilePic, this.isVerified = false});
 
   factory ParticipantUser.fromJson(dynamic json) {
     return ParticipantUser(
@@ -195,6 +248,7 @@ class ParticipantUser {
       firstName: json['first_name'],
       lastName: json['last_name'],
       profilePic: json['profile_pic'],
+      isVerified: json['is_verified'] == true || json['is_verified'] == 1,
     );
   }
 
@@ -205,14 +259,19 @@ class CreateConversationResponse {
   final bool? success;
   final int? conversationId;
   final bool? isNew;
+  final Conversation? conversation;
 
-  CreateConversationResponse({this.success, this.conversationId, this.isNew});
+  CreateConversationResponse({this.success, this.conversationId, this.isNew, this.conversation});
 
   factory CreateConversationResponse.fromJson(dynamic json) {
+    Conversation? conv;
+    final rawConv = json['conversation'] ?? json['data'];
+    if (rawConv != null) conv = Conversation.fromJson(rawConv);
     return CreateConversationResponse(
       success: json['success'],
-      conversationId: _safeInt(json['conversation_id']),
-      isNew: json['is_new'],
+      conversationId: _safeInt(json['conversationId'] ?? json['conversation_id']),
+      isNew: json['isNew'] ?? json['is_new'],
+      conversation: conv,
     );
   }
 }
@@ -228,7 +287,23 @@ class FindConversationResponse {
     return FindConversationResponse(
       success: json['success'],
       exists: json['exists'],
-      conversationId: _safeInt(json['conversation_id']),
+      conversationId: _safeInt(json['conversationId'] ?? json['conversation_id']),
+    );
+  }
+}
+
+/// Response from GET /api/chat/ws-ticket
+class WsTicketResponse {
+  /// Null when WebSocket is not configured; client should fall back to polling.
+  final String? wsUrl;
+  final int conversationId;
+
+  WsTicketResponse({this.wsUrl, required this.conversationId});
+
+  factory WsTicketResponse.fromJson(dynamic json) {
+    return WsTicketResponse(
+      wsUrl: json['wsUrl'],
+      conversationId: _safeInt(json['conversationId']) ?? 0,
     );
   }
 }

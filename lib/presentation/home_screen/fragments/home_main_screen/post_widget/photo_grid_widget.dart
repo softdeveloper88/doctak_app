@@ -1,10 +1,8 @@
 import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:doctak_app/core/network/custom_cache_manager.dart';
 import 'package:doctak_app/core/utils/media_type_detector.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
-import 'package:doctak_app/widgets/s3_image_loader.dart';
+import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 
@@ -30,53 +28,14 @@ class PhotoGrid extends StatelessWidget {
     );
   }
 
-  /// Helper method to determine if URL is an S3 URL
-  bool _isS3Url(String url) {
-    return url.contains('s3.') || url.contains('.amazonaws.com') || url.contains('s3-');
-  }
-
-  /// Helper method to build image widget with appropriate loader
+  /// Builds an image widget via the shared R2-aware cached image loader.
   Widget _buildImageWidget(String imageUrl, double width, double height) {
-    if (_isS3Url(imageUrl)) {
-      return S3ImageLoader(imageUrl: imageUrl, width: width, height: height, fit: BoxFit.cover);
-    } else {
-      return CachedNetworkImage(
-        imageUrl: imageUrl,
-        fit: BoxFit.cover,
-        height: height,
-        width: width,
-        cacheManager: CustomCacheManager(),
-        httpHeaders: const {
-          'User-Agent': 'Mozilla/5.0 (compatible; DocTak/1.0)',
-          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/jpeg,image/png,image/gif,image/*,*/*;q=0.8',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Connection': 'keep-alive',
-        },
-        placeholder: (context, url) => Container(
-          color: Colors.grey[300],
-          child: const Center(child: CircularProgressIndicator(color: Colors.grey, strokeWidth: 2)),
-        ),
-        errorWidget: (context, url, error) {
-          // Silently handle image load errors
-          return Container(
-            color: Colors.grey[300],
-            child: const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.broken_image_rounded, color: Colors.grey, size: 32),
-                  SizedBox(height: 4),
-                  Text(
-                    'Image failed to load',
-                    style: TextStyle(color: Colors.grey, fontSize: 12, fontFamily: 'Poppins'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    }
+    return AppCachedNetworkImage(
+      imageUrl: imageUrl,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+    );
   }
 
   List<Widget> buildImages(BuildContext context) {

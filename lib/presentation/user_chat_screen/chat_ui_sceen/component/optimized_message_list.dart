@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/chat_model/conversation_message_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'chat_bubble.dart';
@@ -14,6 +16,9 @@ class OptimizedMessageList extends StatefulWidget {
   final String profilePic;
   final ScrollController scrollController;
   final bool isSomeoneTyping;
+  /// Called when the user taps "Edit" on their own message.
+  /// The parent should pre-fill the input field and show an edit banner.
+  final void Function(ConversationMessage msg)? onEditRequested;
 
   const OptimizedMessageList({
     super.key,
@@ -23,6 +28,7 @@ class OptimizedMessageList extends StatefulWidget {
     required this.profilePic,
     required this.scrollController,
     required this.isSomeoneTyping,
+    this.onEditRequested,
   });
 
   @override
@@ -33,6 +39,9 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
   final Map<int, Widget> _cachedMessages = {};
   final Set<int> _visibleIndices = {};
   int _lastMessageCount = -1;
+  // Fingerprint of all receiptStates: clears cache when any tick changes.
+  int _receiptFingerprint = 0;
+  double? _scrollExtentBeforeLoadMore;
 
   @override
   void dispose() {
@@ -71,35 +80,16 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
     // Build attachment info
     String? attachmentJson;
     String? attachmentType;
-    if (msg.hasAttachment) {
-      attachmentType = msg.type;
-      // Use fileUrl if available, otherwise use first file from files list
-      if (msg.fileUrl != null && msg.fileUrl!.isNotEmpty) {
-        attachmentJson = msg.fileUrl;
-      } else if (msg.files != null && msg.files!.isNotEmpty) {
-        attachmentJson = msg.files!.first.fileUrl;
-      }
+    if (msg.hasAttachment || msg.isVoiceOrAudioMessage) {
+      attachmentType = msg.isVoiceOrAudioMessage ? 'audio' : (msg.attachmentCategory == 'file' ? msg.type : msg.attachmentCategory);
+      attachmentJson = msg.resolvedFileUrl;
     }
 
-    // Map status to seen value (0 = sent, 1 = read)
-    final int seen = (msg.status == 'read') ? 1 : 0;
+    // Map status/receiptState for tick display
+    final String? receiptState = msg.receiptState ?? (msg.status == 'read' ? 'seen' : null);
 
-    final messageWidget = InkWell(
-      onLongPress: () {
-        if (isMe) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return CustomAlertDialog(
-                title: translation(context).msg_confirm_delete_message,
-                callback: () {
-                  bloc.add(DeleteConversationMessageEvent(messageId: msg.id!));
-                },
-              );
-            },
-          );
-        }
-      },
+    final messageWidget = GestureDetector(
+      onLongPress: () => _showReactionSheet(context, msg, isMe),
       child: Padding(
         padding: EdgeInsets.only(top: isLastOfOwnMessage ? 16 : 8),
         child: VisibilityDetector(
@@ -125,7 +115,14 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
             attachmentJson: attachmentJson,
             attachmentType: attachmentType,
             createAt: msg.createdAt,
-            seen: seen,
+            receiptState: receiptState,
+            messageId: msg.id,
+            reactions: msg.reactions,
+            onReact: (emoji) {
+              if (msg.id != null) {
+                widget.chatBloc.add(ToggleReactionEvent(messageId: msg.id!, emoji: emoji));
+              }
+            },
           ),
         ),
       ),
@@ -141,6 +138,152 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
     if (oldWidget.chatBloc.conversationMessages.length != widget.chatBloc.conversationMessages.length) {
       _cachedMessages.clear();
     }
+
+    if (oldWidget.chatBloc.isLoadingMore && !widget.chatBloc.isLoadingMore) {
+      final before = _scrollExtentBeforeLoadMore;
+      _scrollExtentBeforeLoadMore = null;
+      if (before != null && widget.scrollController.hasClients) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!widget.scrollController.hasClients) return;
+          final position = widget.scrollController.position;
+          final delta = position.maxScrollExtent - before;
+          if (delta > 0) {
+            position.jumpTo(position.pixels + delta);
+          }
+        });
+      }
+    }
+  }
+
+  // Quick emojis shown in the reaction picker (WhatsApp-style)
+  static const _quickEmojis = ['❤️', '😂', '😮', '😢', '👍', '🙏'];
+
+  void _showReactionSheet(BuildContext context, ConversationMessage msg, bool isMe) {
+    final theme = OneUITheme.of(context);
+    final isDark = theme.isDark;
+    // receiptState: null/'sent'/'delivered'/'seen'
+    final String? receiptState = msg.receiptState ?? (msg.status == 'read' ? 'seen' : null);
+    final bool alreadyRead = receiptState == 'seen';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white24 : Colors.black12,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Quick emoji row — only for OTHER people's messages, not your own
+              if (!isMe)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: _quickEmojis.map((emoji) {
+                    final alreadyReacted = msg.reactions
+                            ?.any((r) => r.emoji == emoji && r.userIds.contains(AppData.logInUserId?.toString())) ??
+                        false;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        if (msg.id != null) {
+                          widget.chatBloc.add(ToggleReactionEvent(messageId: msg.id!, emoji: emoji));
+                        }
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: alreadyReacted
+                              ? theme.primary.withValues(alpha: 0.15)
+                              : (isDark ? Colors.white10 : Colors.grey.shade100),
+                          shape: BoxShape.circle,
+                          border: alreadyReacted
+                              ? Border.all(color: theme.primary, width: 1.5)
+                              : null,
+                        ),
+                        child: Text(emoji, style: const TextStyle(fontSize: 26)),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              // Edit + Delete options for own messages
+              if (isMe && msg.id != null) ...[
+                if (!isMe) const Divider(height: 24),
+                // Edit — disabled once the other side has read the message
+                if (msg.type == null || msg.type == 'text')
+                  Opacity(
+                    opacity: alreadyRead ? 0.4 : 1.0,
+                    child: ListTile(
+                      leading: Icon(
+                        Icons.edit_outlined,
+                        color: alreadyRead
+                            ? (isDark ? Colors.white38 : Colors.black38)
+                            : theme.primary,
+                      ),
+                      title: Text(
+                        alreadyRead ? 'Edit (read by recipient)' : 'Edit',
+                        style: TextStyle(
+                          color: alreadyRead
+                              ? (isDark ? Colors.white38 : Colors.black38)
+                              : (isDark ? Colors.white : Colors.black87),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onTap: alreadyRead
+                          ? null
+                          : () {
+                              Navigator.pop(ctx);
+                              widget.onEditRequested?.call(msg);
+                            },
+                    ),
+                  ),
+                const Divider(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                  title: Text(
+                    translation(context).msg_confirm_delete_message,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogCtx) {
+                        return CustomAlertDialog(
+                          title: translation(context).msg_confirm_delete_message,
+                          callback: () {
+                            widget.chatBloc.add(DeleteConversationMessageEvent(messageId: msg.id!));
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -151,6 +294,20 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
       _cachedMessages.clear();
       _visibleIndices.clear();
       _lastMessageCount = bloc.conversationMessages.length;
+      _receiptFingerprint = 0;
+    } else {
+      // Invalidate cache when any message's receiptState changes (e.g. sent→delivered→seen).
+      // XOR of (id * 31) ^ receiptState.hashCode is cheap and order-independent.
+      int fp = 0;
+      for (final m in bloc.conversationMessages) {
+        fp ^= ((m.id ?? 0) * 31) ^
+            (m.receiptState?.hashCode ?? 0) ^
+            (m.resolvedFileUrl?.hashCode ?? 0);
+      }
+      if (fp != _receiptFingerprint) {
+        _receiptFingerprint = fp;
+        _cachedMessages.clear();
+      }
     }
 
     return CustomScrollView(
@@ -169,7 +326,7 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
                 attachmentJson: null,
                 attachmentType: null,
                 createAt: null,
-                seen: 0,
+                receiptState: null,
                 message: translation(context).lbl_typing,
               ),
             ),
@@ -185,6 +342,10 @@ class _OptimizedMessageListState extends State<OptimizedMessageList> {
                   if (bloc.hasMoreMessages && !bloc.isLoadingMore) {
                     SchedulerBinding.instance.addPostFrameCallback((_) {
                       if (widget.conversationId > 0) {
+                        if (widget.scrollController.hasClients) {
+                          _scrollExtentBeforeLoadMore =
+                              widget.scrollController.position.maxScrollExtent;
+                        }
                         bloc.add(LoadMoreMessagesEvent(conversationId: widget.conversationId));
                       }
                     });

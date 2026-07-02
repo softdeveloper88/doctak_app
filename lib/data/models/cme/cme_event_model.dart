@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 
 CmeEventsResponse cmeEventsResponseFromJson(String str) =>
     CmeEventsResponse.fromJson(json.decode(str));
@@ -82,6 +83,7 @@ class CmeEventData {
     this.isPublished,
     this.meetingLink,
     this.agoraChannel,
+    this.learningObjectives,
     this.organizer,
     this.speakers,
     this.modules,
@@ -90,6 +92,16 @@ class CmeEventData {
     this.isRegistered,
     this.isAttending,
     this.isHost,
+    this.canManage,
+    this.myProgressPercent,
+    this.myFeedbackSubmitted,
+    this.myCertificateId,
+    this.attendancePercentage,
+    this.learnerProgress,
+    this.capabilities,
+    this.liveMeetingCode,
+    this.segmentsCount,
+    this.speakersCount,
     this.createdAt,
     this.updatedAt,
   });
@@ -119,8 +131,8 @@ class CmeEventData {
     accreditationNumber = json['accreditation_number'];
     specialties = json['specialties'];
     targetAudience = json['target_audience'];
-    thumbnail = json['thumbnail'];
-    bannerImage = json['banner_image'];
+    thumbnail = _fixStorageUrl(json['thumbnail']);
+    bannerImage = _fixStorageUrl(json['banner_image']);
     registrationFee = json['registration_fee'];
     earlyBirdFee = json['early_bird_fee'];
     registrationDeadline = json['registration_deadline'];
@@ -128,6 +140,7 @@ class CmeEventData {
     isPublished = json['is_published'];
     meetingLink = json['meeting_link'];
     agoraChannel = json['agora_channel'];
+    learningObjectives = json['learning_objectives'];
     if (json['organizer'] != null) {
       organizer = CmeOrganizer.fromJson(json['organizer']);
     }
@@ -154,8 +167,148 @@ class CmeEventData {
     isRegistered = json['is_registered'];
     isAttending = json['is_attending'];
     isHost = json['is_host'];
+    myProgressPercent = json['user_progress'] ?? json['my_progress_percent'];
+    attendancePercentage = _asNum(json['attendance_percentage']);
     createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    updatedAt = json['updated_at'] ?? json['updatedAt'];
+    _applyRegistrationFields(json);
+  }
+
+  void _applyRegistrationFields(dynamic json) {
+    final status = registrationStatus?.toString();
+    if (status != null && status.isNotEmpty) {
+      isRegistered = status != 'cancelled' &&
+          (status == 'registered' || status == 'attended' || status == 'waitlist');
+      isAttending = status == 'attended';
+    }
+    myProgressPercent ??= attendancePercentage ?? json['user_progress'] ?? json['my_progress_percent'];
+    if (myProgressPercent == null && attendancePercentage != null) {
+      myProgressPercent = attendancePercentage;
+    }
+  }
+
+  /// Node `/api/cme/events` DTO (camelCase) — web parity.
+  factory CmeEventData.fromNodeJson(Map<String, dynamic> json) {
+    final event = CmeEventData();
+    event.id = json['id']?.toString();
+    event.title = json['title'] as String?;
+    event.description = json['description'] as String?;
+    event.shortDescription = json['shortDescription'] as String?;
+    event.type = json['eventType'] as String? ?? json['type'] as String?;
+    event.format = json['format'] as String?;
+    event.status = json['status'] as String?;
+    event.startDate = json['startDate'] as String? ?? json['start_date'] as String?;
+    event.endDate = json['endDate'] as String? ?? json['end_date'] as String?;
+    event.timezone = json['timezone'] as String?;
+    event.location = json['location'] as String?;
+    event.venue = json['venueDetails'] as String? ?? json['venue'] as String?;
+    event.maxParticipants = json['maxCapacity'] ?? json['max_participants'];
+    event.currentParticipants = json['registrationsCount'] ?? json['current_participants'];
+    event.creditAmount = json['credits'] ?? json['credit_amount'];
+    event.creditType = json['creditType'] as String? ?? json['credit_type'] as String?;
+    event.accreditationBody =
+        json['accreditationBody'] as String? ?? json['accreditation_body'] as String?;
+    final cover = json['coverImage'] ?? json['thumbnail'] ?? json['banner_image'];
+    event.thumbnail = _fixStorageUrl(cover);
+    event.bannerImage = event.thumbnail;
+    event.meetingLink = json['meetingLink'] as String? ?? json['meeting_link'] as String?;
+    event.registrationStatus = json['myRegistrationStatus'] as String? ?? json['registration_status'] as String?;
+    event.isRegistered = event.registrationStatus == 'registered' || event.registrationStatus == 'attended';
+    event.isAttending = event.registrationStatus == 'attended';
+    event.isHost = json['canManage'] == true || json['is_host'] == true;
+    event.canManage = json['canManage'] == true;
+    event.myProgressPercent = json['myProgressPercent'] ?? json['my_progress_percent'];
+    event.myFeedbackSubmitted = json['myFeedbackSubmitted'] == true;
+    event.myCertificateId = json['myCertificateId'] as String?;
+    event.attendancePercentage = _asNum(json['attendancePercentage'] ?? json['attendance_percentage']);
+    if (event.myProgressPercent == null && event.attendancePercentage != null) {
+      event.myProgressPercent = event.attendancePercentage;
+    }
+    event.segmentsCount = _asInt(json['segmentsCount']);
+    event.speakersCount = _asInt(json['speakersCount']);
+    event.liveMeetingCode = json['liveMeetingCode'] as String?;
+    event.learningObjectives = json['learningObjectives'] as String? ?? event.learningObjectives;
+    final progress = json['myLearnerProgress'] as Map<String, dynamic>?;
+    if (progress != null) {
+      event.learnerProgress = CmeLearnerProgress.fromJson(progress);
+    }
+    final caps = json['capabilities'] as Map<String, dynamic>?;
+    if (caps != null) {
+      event.capabilities = CmeEventCapabilities.fromJson(caps);
+      event.canManage = event.canManage == true || event.capabilities!.canManage;
+      event.isHost = event.isHost == true || event.capabilities!.canManage;
+    }
+    event.createdAt = json['createdAt'] as String? ?? json['created_at'] as String?;
+    event.updatedAt = json['updatedAt'] as String? ?? json['updated_at'] as String?;
+    final org = json['organization'] as Map<String, dynamic>?;
+    if (org != null) {
+      event.organizer = CmeOrganizer(
+        id: org['id']?.toString(),
+        name: org['name'] as String?,
+        profilePic: _fixStorageUrl(org['logoUrl'] ?? org['logo']),
+      );
+    }
+    final faculty = json['facultyPreview'] as List<dynamic>?;
+    if (faculty != null && faculty.isNotEmpty) {
+      event.speakers = faculty
+          .map((u) => CmeSpeaker.fromJson(u is Map<String, dynamic> ? u : {'user': u}))
+          .toList();
+    }
+    event._applyRegistrationFields(json);
+    return event;
+  }
+
+  /// Full detail from Node `GET /api/cme/events/:id`.
+  factory CmeEventData.fromNodeDetailJson(Map<String, dynamic> json) {
+    return CmeEventData.fromNodeJson(json);
+  }
+
+  static int? _asInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString());
+  }
+
+  static num? _asNum(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value;
+    return num.tryParse(value.toString());
+  }
+
+  /// Rewrites server-relative storage URLs to use the app's actual base URL.
+  /// The API returns `asset('storage/...')` which uses APP_URL (often
+  /// http://localhost), but the Flutter app connects to a different host
+  /// (e.g. 10.0.2.2 for emulator or doctak.net for prod).
+  static String? _fixStorageUrl(dynamic url) {
+    if (url == null || url.toString().isEmpty) return null;
+    final str = url.toString().trim();
+    if (str.startsWith('/profile-media/') ||
+        str.startsWith('profile-media/') ||
+        str.startsWith('/legacy-media/') ||
+        str.startsWith('legacy-media/') ||
+        str.startsWith('/r2-media/') ||
+        str.startsWith('r2-media/')) {
+      final resolved = AppData.fullImageUrl(str);
+      return resolved.isEmpty ? null : resolved;
+    }
+    // Already a valid non-localhost URL — keep as-is
+    if (str.startsWith('https://')) return str;
+    if (str.startsWith('http://')) {
+      final resolved = AppData.fullImageUrl(str);
+      return resolved.isEmpty ? str : resolved;
+    }
+    // Extract path after '/storage/' and reconstruct with app base URL
+    final storageIdx = str.indexOf('/storage/');
+    if (storageIdx != -1) {
+      final relativePath = str.substring(storageIdx + 1);
+      return '${AppData.base}$relativePath';
+    }
+    // Relative path without /storage/ prefix — assume it's a storage path
+    if (!str.startsWith('http')) {
+      return '${AppData.base}storage/$str';
+    }
+    return str;
   }
 
   String? id;
@@ -191,6 +344,7 @@ class CmeEventData {
   dynamic isPublished;
   String? meetingLink;
   String? agoraChannel;
+  String? learningObjectives;
   CmeOrganizer? organizer;
   List<CmeSpeaker>? speakers;
   List<CmeModule>? modules;
@@ -199,6 +353,16 @@ class CmeEventData {
   dynamic isRegistered;
   dynamic isAttending;
   dynamic isHost;
+  bool? canManage;
+  dynamic myProgressPercent;
+  bool? myFeedbackSubmitted;
+  String? myCertificateId;
+  num? attendancePercentage;
+  CmeLearnerProgress? learnerProgress;
+  CmeEventCapabilities? capabilities;
+  String? liveMeetingCode;
+  int? segmentsCount;
+  int? speakersCount;
   String? createdAt;
   String? updatedAt;
 
@@ -237,6 +401,7 @@ class CmeEventData {
     map['is_published'] = isPublished;
     map['meeting_link'] = meetingLink;
     map['agora_channel'] = agoraChannel;
+    map['learning_objectives'] = learningObjectives;
     if (organizer != null) {
       map['organizer'] = organizer?.toJson();
     }
@@ -261,15 +426,208 @@ class CmeEventData {
       currentParticipants != null &&
       currentParticipants! >= maxParticipants!;
 
-  bool get isUpcoming => status == 'upcoming' || status == 'published';
-  bool get isLive => status == 'live' || status == 'in_progress';
-  bool get isCompleted => status == 'completed' || status == 'ended';
+  /// Parse start/end dates for time-based checks (matching web behaviour).
+  DateTime? get _parsedStart => startDate != null ? DateTime.tryParse(startDate!) : null;
+  DateTime? get _parsedEnd => endDate != null ? DateTime.tryParse(endDate!) : null;
+
+  /// True when the event is currently within its scheduled time window
+  /// (start_date <= now <= end_date) AND is published/live.
+  /// Matches the web's `$isSessionTime = now()->between(start, end)`.
+  bool get isSessionTime {
+    final start = _parsedStart;
+    final end = _parsedEnd;
+    if (start == null || end == null) return false;
+    final now = DateTime.now().toUtc();
+    return now.isAfter(start) && now.isBefore(end);
+  }
+
+  /// Whether the event is before its session time.
+  bool get isBeforeSession {
+    final start = _parsedStart;
+    if (start == null) return false;
+    return DateTime.now().toUtc().isBefore(start);
+  }
+
+  /// Whether the event is after its session time.
+  bool get isAfterSession {
+    final end = _parsedEnd;
+    if (end == null) return false;
+    return DateTime.now().toUtc().isAfter(end);
+  }
+
+  /// Whether this is a live/virtual/hybrid event (website uses event_type + format).
+  bool get isVirtualType =>
+      type == 'live' || type == 'virtual' || type == 'hybrid' ||
+      format == 'virtual' || format == 'hybrid';
+
+  /// UI status aligned with website time-window logic (not raw DB status alone).
+  String? get displayStatus {
+    if (isCancelled) return 'cancelled';
+    if (isLive) return 'live';
+    if (isCompleted) return 'completed';
+    if (isBeforeSession) return 'upcoming';
+    switch (status?.toLowerCase()) {
+      case 'published':
+      case 'upcoming':
+        return 'upcoming';
+      case 'completed':
+      case 'ended':
+        return 'completed';
+      case 'live':
+      case 'in_progress':
+        return 'live';
+      case 'cancelled':
+        return 'cancelled';
+      default:
+        return status;
+    }
+  }
+
+  bool get isUpcoming =>
+      displayStatus == 'upcoming';
+
+  /// True if event is live now — time-based check (web parity) OR status-based fallback.
+  bool get isLive =>
+      status == 'live' || status == 'in_progress' ||
+      (isSessionTime && (status == 'published' || status == 'upcoming'));
+
+  bool get isCompleted =>
+      status == 'completed' || status == 'ended' ||
+      (isAfterSession && status != 'cancelled');
+
   bool get isCancelled => status == 'cancelled';
 
   String get displayCredits {
     if (creditAmount == null) return '';
     return '${creditAmount} ${creditType ?? 'CME'} Credits';
   }
+
+  bool get showLearnerProgress =>
+      capabilities?.showLearnerProgress ??
+      ((isRegistered == true || registrationStatus != null) && canManage != true);
+
+  bool get hasLearnerQuiz => learnerProgress?.hasQuiz ?? false;
+
+  ({String moduleId, String quizId, String? title})? get primaryQuizTarget {
+    for (final module in modules ?? const <CmeModule>[]) {
+      final quiz = module.quiz;
+      if (module.id != null && quiz?.id != null) {
+        return (moduleId: module.id!, quizId: quiz!.id!, title: quiz.title);
+      }
+    }
+    return null;
+  }
+}
+
+class CmeLearnerProgress {
+  CmeLearnerProgress({
+    this.hasQuiz = false,
+    this.quizPassed = false,
+    this.quizPendingReview = false,
+    this.feedbackSubmitted = false,
+    this.quizAttemptsUsed = 0,
+    this.quizAttemptsMax = 0,
+    this.certificateId,
+  });
+
+  factory CmeLearnerProgress.fromJson(Map<String, dynamic> json) {
+    return CmeLearnerProgress(
+      hasQuiz: json['hasQuiz'] == true,
+      quizPassed: json['quizPassed'] == true,
+      quizPendingReview: json['quizPendingReview'] == true,
+      feedbackSubmitted: json['feedbackSubmitted'] == true,
+      quizAttemptsUsed: CmeEventData._asInt(json['quizAttemptsUsed']) ?? 0,
+      quizAttemptsMax: CmeEventData._asInt(json['quizAttemptsMax']) ?? 0,
+      certificateId: json['certificateId']?.toString(),
+    );
+  }
+
+  final bool hasQuiz;
+  final bool quizPassed;
+  final bool quizPendingReview;
+  final bool feedbackSubmitted;
+  final int quizAttemptsUsed;
+  final int quizAttemptsMax;
+  final String? certificateId;
+}
+
+class CmeEventCapabilities {
+  CmeEventCapabilities({
+    this.canManage = false,
+    this.canPresent = false,
+    this.canRegister = false,
+    this.registrationFull = false,
+    this.canJoinLive = false,
+    this.canStartLive = false,
+    this.canEndLiveSession = false,
+    this.liveSessionEnded = false,
+    this.canSubmitQuiz = false,
+    this.canLeaveFeedback = false,
+    this.canViewCertificate = false,
+    this.showLearnerProgress = false,
+  });
+
+  factory CmeEventCapabilities.fromJson(Map<String, dynamic> json) {
+    return CmeEventCapabilities(
+      canManage: json['canManage'] == true,
+      canPresent: json['canPresent'] == true,
+      canRegister: json['canRegister'] == true,
+      registrationFull: json['registrationFull'] == true,
+      canJoinLive: json['canJoinLive'] == true,
+      canStartLive: json['canStartLive'] == true,
+      canEndLiveSession: json['canEndLiveSession'] == true,
+      liveSessionEnded: json['liveSessionEnded'] == true,
+      canSubmitQuiz: json['canSubmitQuiz'] == true,
+      canLeaveFeedback: json['canLeaveFeedback'] == true,
+      canViewCertificate: json['canViewCertificate'] == true,
+      showLearnerProgress: json['showLearnerProgress'] == true,
+    );
+  }
+
+  final bool canManage;
+  final bool canPresent;
+  final bool canRegister;
+  final bool registrationFull;
+  final bool canJoinLive;
+  final bool canStartLive;
+  final bool canEndLiveSession;
+  final bool liveSessionEnded;
+  final bool canSubmitQuiz;
+  final bool canLeaveFeedback;
+  final bool canViewCertificate;
+  final bool showLearnerProgress;
+}
+
+class CmeSegment {
+  CmeSegment({
+    this.id,
+    this.title,
+    this.description,
+    this.sequenceOrder,
+    this.durationMinutes,
+    this.moduleType,
+    this.hasQuiz,
+  });
+
+  factory CmeSegment.fromJson(Map<String, dynamic> json) {
+    return CmeSegment(
+      id: json['id']?.toString(),
+      title: json['title'] as String?,
+      description: json['description'] as String?,
+      sequenceOrder: CmeEventData._asInt(json['sequenceOrder']),
+      durationMinutes: CmeEventData._asInt(json['durationMinutes']),
+      moduleType: json['moduleType'] as String?,
+      hasQuiz: json['hasQuiz'] == true,
+    );
+  }
+
+  final String? id;
+  final String? title;
+  final String? description;
+  final int? sequenceOrder;
+  final int? durationMinutes;
+  final String? moduleType;
+  final bool? hasQuiz;
 }
 
 class CmeOrganizer {
@@ -278,8 +636,9 @@ class CmeOrganizer {
   CmeOrganizer.fromJson(dynamic json) {
     id = json['id'];
     name = json['name'];
-    profilePic = json['profile_pic'];
-    specialty = json['specialty'];
+    final pic = json['profile_pic'] ?? json['avatar'] ?? json['logoUrl'] ?? json['logo'];
+    profilePic = CmeEventData._fixStorageUrl(pic);
+    specialty = json['specialty']?.toString();
   }
 
   String? id;
@@ -308,12 +667,17 @@ class CmeSpeaker {
   });
 
   CmeSpeaker.fromJson(dynamic json) {
-    id = json['id'];
-    name = json['name'];
-    title = json['title'];
-    bio = json['bio'];
-    profilePic = json['profile_pic'];
-    specialty = json['specialty'];
+    final user = json['user'] as Map<String, dynamic>?;
+    id = json['id'] ?? user?['id'];
+    name = json['name'] ?? user?['name'];
+    title = json['title'] ?? json['speaker_role'];
+    bio = json['bio'] ?? json['speaker_bio'];
+    final pic = json['profile_pic'] ??
+        json['avatar'] ??
+        user?['avatar'] ??
+        user?['profile_pic'];
+    profilePic = CmeEventData._fixStorageUrl(pic);
+    specialty = json['specialty']?.toString() ?? user?['specialty']?.toString();
   }
 
   String? id;

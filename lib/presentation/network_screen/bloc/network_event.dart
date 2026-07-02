@@ -16,7 +16,9 @@ class LoadFriendRequestsEvent extends NetworkEvent {
 class LoadConnectionsEvent extends NetworkEvent {
   final String search;
   final int page;
-  const LoadConnectionsEvent({this.search = '', this.page = 1});
+  /// When set, loads this user's connections instead of the logged-in user's
+  final String viewUserId;
+  const LoadConnectionsEvent({this.search = '', this.page = 1, this.viewUserId = ''});
 }
 
 /// Load people you may know
@@ -57,16 +59,37 @@ class RemoveConnectionEvent extends NetworkEvent {
   const RemoveConnectionEvent({required this.userId});
 }
 
-/// Network search — search all users with connection status + filters
+/// Bootstrap the Network tab (stats, requests, suggestions, connections, businesses)
+class LoadNetworkHomeEvent extends NetworkEvent {
+  final bool silent;
+  const LoadNetworkHomeEvent({this.silent = false});
+}
+
+/// Load recommended organizations / businesses
+class LoadOrganizationsEvent extends NetworkEvent {
+  final String search;
+  final int page;
+  const LoadOrganizationsEvent({this.search = '', this.page = 1});
+}
+
+/// Follow or unfollow an organization
+class ToggleOrganizationFollowEvent extends NetworkEvent {
+  final String organizationId;
+  const ToggleOrganizationFollowEvent({required this.organizationId});
+}
+
+/// Network search — people and/or organizations with connection status + filters
 class NetworkSearchEvent extends NetworkEvent {
   final String query;
   final int page;
   final String specialty;
   final String country;
+  final String scope; // all | people | organizations
   const NetworkSearchEvent({
     required this.query,
     this.page = 1,
     this.specialty = '',
     this.country = '',
+    this.scope = 'all',
   });
 }

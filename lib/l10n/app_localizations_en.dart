@@ -3670,7 +3670,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lbl_education_info => 'Education';
 
   @override
-  String get lbl_connections_short => 'Conns';
+  String get lbl_connections_short => 'Connections';
 
   @override
   String get lbl_report_user => 'Report User';

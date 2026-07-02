@@ -5,6 +5,8 @@ import AVKit
 import AVFoundation
 import CoreMedia
 import ReplayKit
+import PushKit
+import flutter_callkit_incoming
 
 // MARK: - AgoraPiPController for native iOS PiP with AVPlayer
 @available(iOS 15.0, *)
@@ -36,7 +38,7 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     
     // Frame update timer for live widget capture
     private var frameUpdateTimer: Timer?
-    private var lastFrameData: Data?
+    private var lastFrameData: Foundation.Data?
     private var useSampleBufferMode = false  // Whether to use live widget frames
     
     // Callback to Flutter
@@ -78,7 +80,7 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     }
     
     // MARK: - Update PiP with Flutter Widget Frame
-    func updateFrame(_ imageData: Data, width: Int, height: Int) {
+    func updateFrame(_ imageData: Foundation.Data, width: Int, height: Int) {
         guard useSampleBufferMode else { return }
         lastFrameData = imageData
         
@@ -96,7 +98,7 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
         }
     }
     
-    private func createSampleBuffer(from imageData: Data, width: Int, height: Int) -> CMSampleBuffer? {
+    private func createSampleBuffer(from imageData: Foundation.Data, width: Int, height: Int) -> CMSampleBuffer? {
         guard let image = UIImage(data: imageData),
               let cgImage = image.cgImage else {
             return nil
@@ -792,24 +794,28 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
     // MARK: - AppDelegate
     
     @main
-    @objc class AppDelegate: FlutterAppDelegate {
-        
+    @objc class AppDelegate: FlutterAppDelegate, PKPushRegistryDelegate {
+
         private var pipChannel: FlutterMethodChannel?
         private var screenShareChannel: FlutterMethodChannel?
         private let screenShareAppGroup = "group.com.doctak.screenshare"
-        
+        private var voipRegistry: PKPushRegistry?
+
         override func application(
             _ application: UIApplication,
             didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
         ) -> Bool {
-            
+
             GeneratedPluginRegistrant.register(with: self)
-            
+
             // Setup native PiP method channel for iOS 15+
             setupNativePiPChannel()
-            
+
             // Setup screen share method channel
             setupScreenShareChannel()
+
+            // Calling module v2: PushKit (VoIP) for killed-app CallKit delivery.
+            registerVoipPush()
             
             // Configure audio session for PiP and background audio - do this AFTER Flutter is ready
             // and on a slight delay to avoid blocking app launch
@@ -967,7 +973,71 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
             }
         }
         
-        override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        // MARK: - PushKit / VoIP (calling module v2)
+
+        /// Registers for VoIP pushes so a killed app can be woken to show the
+        /// native CallKit incoming-call UI (§5.2). The VoIP token is handed to
+        /// flutter_callkit_incoming, which the Dart side reads via
+        /// getDevicePushTokenVoIP() and registers with the server.
+        private func registerVoipPush() {
+            let registry = PKPushRegistry(queue: .main)
+            registry.delegate = self
+            registry.desiredPushTypes = [.voIP]
+            voipRegistry = registry
+        }
+
+        func pushRegistry(_ registry: PKPushRegistry, didUpdate pushCredentials: PKPushCredentials, for type: PKPushType) {
+            guard type == .voIP else { return }
+            let token = pushCredentials.token.map { String(format: "%02x", $0) }.joined()
+            print("📞 VoIP push token: \(token)")
+            SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP(token)
+        }
+
+        func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
+            guard type == .voIP else { return }
+            SwiftFlutterCallkitIncomingPlugin.sharedInstance?.setDevicePushTokenVoIP("")
+        }
+
+        /// MUST report an incoming call to CallKit synchronously, or iOS will
+        /// terminate the app for abusing VoIP pushes. The server's VoIP payload
+        /// (lib/server/calls/apns-voip.ts) carries the plugin's CallKitParams
+        /// fields at the root and the v2 contract under `extra`.
+        func pushRegistry(
+            _ registry: PKPushRegistry,
+            didReceiveIncomingPushWith payload: PKPushPayload,
+            for type: PKPushType,
+            completion: @escaping () -> Void
+        ) {
+            guard type == .voIP else {
+                completion()
+                return
+            }
+
+            let dict = payload.dictionaryPayload
+            let extra = dict["extra"] as? [String: Any] ?? [:]
+            let callId = (dict["id"] as? String) ?? (extra["callId"] as? String) ?? UUID().uuidString
+            let nameCaller = (dict["nameCaller"] as? String) ?? (extra["callerName"] as? String) ?? "Unknown"
+            let avatar = (dict["avatar"] as? String) ?? (extra["callerAvatar"] as? String) ?? ""
+            let callTypeInt = (dict["type"] as? Int) ?? ((extra["callType"] as? String) == "video" ? 1 : 0)
+
+            let data = flutter_callkit_incoming.Data(
+                id: callId,
+                nameCaller: nameCaller,
+                handle: nameCaller,
+                type: callTypeInt
+            )
+            data.avatar = avatar
+            data.extra = extra as NSDictionary
+            data.duration = 45000
+
+            // The completion variant reports the call to CallKit and only then
+            // signals completion — required so iOS doesn't kill the app.
+            SwiftFlutterCallkitIncomingPlugin.sharedInstance?.showCallkitIncoming(data, fromPushKit: true) {
+                completion()
+            }
+        }
+
+        override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Foundation.Data) {
             print("📱 Registered for remote notifications")
         }
         

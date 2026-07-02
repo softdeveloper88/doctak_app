@@ -7,24 +7,21 @@ class LoadDataValues extends ConferenceEvent {
   List<Object?> get props => [];
 }
 
-// class GetConferences extends ConferenceEvent {
-//   final String page;
-//   final String countryName;
-//   final String searchTerm;
-//
-//   GetConferences({required this.page,required this.countryName,required this.searchTerm,});
-//   @override
-//   List<Object> get props => [page,countryName,searchTerm];
-// }
-
 class LoadPageEvent extends ConferenceEvent {
-  int? page;
+  final int? page;
   final String? countryName;
   final String? searchTerm;
+  final String? month;
 
-  LoadPageEvent({this.page, this.countryName, this.searchTerm});
+  LoadPageEvent({
+    this.page,
+    this.countryName,
+    this.searchTerm,
+    this.month,
+  });
+
   @override
-  List<Object?> get props => [page, countryName, searchTerm];
+  List<Object?> get props => [page, countryName, searchTerm, month];
 }
 
 class LoadDropdownData extends ConferenceEvent {

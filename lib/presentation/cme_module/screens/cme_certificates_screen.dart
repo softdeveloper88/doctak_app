@@ -2,13 +2,13 @@ import 'package:doctak_app/data/models/cme/cme_certificate_model.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificates_bloc.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificates_event.dart';
 import 'package:doctak_app/presentation/cme_module/bloc/cme_certificates_state.dart';
-import 'package:doctak_app/presentation/cme_module/screens/cme_certificate_share_screen.dart';
+import 'package:doctak_app/presentation/cme_module/widgets/cme_certificate_bottom_sheet.dart';
 import 'package:doctak_app/presentation/cme_module/widgets/cme_credit_badge.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 class CmeCertificatesScreen extends StatefulWidget {
   const CmeCertificatesScreen({super.key});
@@ -19,6 +19,7 @@ class CmeCertificatesScreen extends StatefulWidget {
 
 class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
   CmeCertificatesBloc get _bloc => context.read<CmeCertificatesBloc>();
+  bool _sharingPdf = false;
 
   @override
   void initState() {
@@ -32,21 +33,54 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
 
     return BlocConsumer<CmeCertificatesBloc, CmeCertificatesState>(
       listener: (context, state) {
-        if (state is CmeCertificateDownloadState) {
-          _launchDownload(state.downloadUrl);
+        if (state is CmeCertificateDownloadingState) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Preparing PDF…'),
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else if (state is CmeCertificateDownloadState) {
+          _sharePdfFile(state.localFilePath);
         } else if (state is CmeCertificatesErrorState) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage),
-              backgroundColor: const Color(0xFFFF3B30),
+              backgroundColor: theme.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
         }
       },
       builder: (context, state) {
-        if (state is CmeCertificatesLoadingState) {
+        if (state is CmeCertificatesLoadingState && _bloc.certificatesList.isEmpty) {
           return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is CmeCertificatesErrorState && _bloc.certificatesList.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 48, color: theme.textTertiary),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    state.errorMessage,
+                    style: theme.bodySecondary,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => _bloc.add(CmeLoadCertificatesEvent()),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
         }
 
         if (_bloc.certificatesList.isEmpty) {
@@ -95,7 +129,7 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
                   height: 52,
                   decoration: BoxDecoration(
                     color: cert.isValid
-                        ? const Color(0xFF34C759).withValues(alpha: 0.1)
+                        ? theme.success.withValues(alpha: 0.1)
                         : theme.textTertiary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -103,7 +137,7 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
                     Icons.workspace_premium_rounded,
                     size: 28,
                     color: cert.isValid
-                        ? const Color(0xFF34C759)
+                        ? theme.success
                         : theme.textTertiary,
                   ),
                 ),
@@ -167,8 +201,8 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: cert.isValid
-                            ? const Color(0xFF34C759).withValues(alpha: 0.1)
-                            : const Color(0xFFFF3B30).withValues(alpha: 0.1),
+                            ? theme.success.withValues(alpha: 0.1)
+                            : theme.error.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -178,8 +212,8 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                           color: cert.isValid
-                              ? const Color(0xFF34C759)
-                              : const Color(0xFFFF3B30),
+                              ? theme.success
+                              : theme.error,
                         ),
                       ),
                     ),
@@ -205,137 +239,13 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
   }
 
   void _showCertificateDetail(OneUITheme theme, CmeCertificateData cert) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: theme.cardBackground,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.textTertiary.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Icon(Icons.workspace_premium_rounded,
-                  size: 56,
-                  color: cert.isValid
-                      ? const Color(0xFF34C759)
-                      : theme.textTertiary),
-              const SizedBox(height: 12),
-              Text('CME Certificate', style: theme.titleMedium),
-              const SizedBox(height: 4),
-              Text(cert.eventTitle ?? '', style: theme.bodySecondary,
-                  textAlign: TextAlign.center),
-              const SizedBox(height: 20),
-              _detailRow(theme, 'Certificate #', cert.certificateNumber ?? 'N/A'),
-              _detailRow(theme, 'Credits', cert.displayCredits),
-              _detailRow(theme, 'Accreditation', cert.accreditationBody ?? 'N/A'),
-              _detailRow(theme, 'Issued', cert.issuedDate != null
-                  ? _formatDate(cert.issuedDate!) : 'N/A'),
-              if (cert.expiryDate != null)
-                _detailRow(theme, 'Expires', _formatDate(cert.expiryDate!)),
-              _detailRow(theme, 'Status',
-                  cert.isValid ? 'Valid' : 'Expired'),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (cert.id != null) {
-                          _bloc.add(CmeDownloadCertificateEvent(
-                              certificateId: cert.id!));
-                          Navigator.pop(context);
-                        }
-                      },
-                      icon: const Icon(Icons.download, size: 18),
-                      label: const Text('Download'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius:
-                                theme.radiusM),
-                      ),
-                    ),
-                  ),
-                  if (cert.verificationUrl != null) ...[
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _launchDownload(cert.verificationUrl!),
-                        icon: const Icon(Icons.verified_outlined, size: 18),
-                        label: const Text('Verify'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: theme.primary,
-                          side: BorderSide(color: theme.primary),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  theme.radiusM),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    if (cert.id != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => CmeCertificateShareScreen(
-                              certificateId: cert.id!),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.share_outlined, size: 18),
-                  label: const Text('Share Certificate'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: theme.primary,
-                    side: BorderSide(color: theme.primary.withOpacity(0.3)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: theme.radiusM),
-                  ),
-                ),
-              ),
-              SizedBox(height: MediaQuery.of(context).padding.bottom + 8),
-            ],
-          ),
-        );
+    if (cert.id == null) return;
+    showCmeCertificateBottomSheet(
+      context,
+      certificateId: cert.id!,
+      onDownload: (id) async {
+        _bloc.add(CmeDownloadCertificateEvent(certificateId: id));
       },
-    );
-  }
-
-  Widget _detailRow(OneUITheme theme, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: theme.caption),
-          Text(value, style: theme.bodyMedium),
-        ],
-      ),
     );
   }
 
@@ -347,11 +257,11 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFFFF9500).withValues(alpha: 0.1),
+              color: theme.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(24),
             ),
-            child: const Icon(Icons.workspace_premium_outlined,
-                size: 48, color: Color(0xFFFF9500)),
+            child: Icon(Icons.workspace_premium_outlined,
+                size: 48, color: theme.warning),
           ),
           const SizedBox(height: 16),
           Text(
@@ -381,10 +291,17 @@ class _CmeCertificatesScreenState extends State<CmeCertificatesScreen> {
     }
   }
 
-  Future<void> _launchDownload(String url) async {
-    final uri = Uri.tryParse(url);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> _sharePdfFile(String path) async {
+    if (_sharingPdf) return;
+    _sharingPdf = true;
+    try {
+      await Share.shareXFiles(
+        [XFile(path, mimeType: 'application/pdf', name: path.split('/').last)],
+        subject: 'CME Certificate',
+        text: 'My CME certificate',
+      );
+    } finally {
+      _sharingPdf = false;
     }
   }
 }

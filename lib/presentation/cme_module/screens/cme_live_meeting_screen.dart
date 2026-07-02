@@ -5,6 +5,7 @@ import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:doctak_app/data/apiClient/cme/cme_api_service.dart';
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
 import 'package:doctak_app/presentation/cme_module/screens/cme_live_interaction_screen.dart';
+import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -39,7 +40,10 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
   bool _loading = true;
   String? _error;
 
-  // Controls state
+  // Role info from API (is_speaker from getAgoraToken response)
+  bool _isSpeaker = false;
+
+  // Controls state — attendees join with mic/cam off, hosts/speakers on
   bool _micEnabled = true;
   bool _camEnabled = true;
   bool _showControls = true;
@@ -49,6 +53,14 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
   // Remote users
   final Set<int> _remoteUsers = {};
   int? _activeSpeakerUid;
+
+  // Tap-to-fullscreen: which uid is shown full screen (null = auto layout)
+  int? _fullScreenUid;
+  // Special sentinel: -1 means local user is fullscreen
+  static const int _localUserSentinel = -1;
+
+  // Session timer for participation tracking
+  final Stopwatch _sessionStopwatch = Stopwatch();
 
   @override
   void initState() {
@@ -60,9 +72,20 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
   @override
   void dispose() {
     _controlsTimer?.cancel();
+    _trackParticipationOnLeave();
     _engine?.leaveChannel();
     _engine?.release();
     super.dispose();
+  }
+
+  /// Track participation duration when leaving the meeting.
+  void _trackParticipationOnLeave() {
+    if (_sessionStopwatch.elapsed.inSeconds > 0) {
+      CmeApiService.trackParticipation(
+        widget.eventId,
+        duration: _sessionStopwatch.elapsed.inSeconds,
+      ).catchError((_) => <String, dynamic>{}); // Fire-and-forget
+    }
   }
 
   Future<void> _initMeeting() async {
@@ -88,6 +111,9 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
           ? tokenData['uid'] as int
           : int.tryParse(tokenData['uid'].toString());
 
+      // Read role info from API response
+      _isSpeaker = tokenData['is_speaker'] == true;
+
       if (_token == null || _appId == null || _channel == null) {
         setState(() {
           _error = 'Failed to get meeting credentials';
@@ -95,6 +121,12 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
         });
         return;
       }
+
+      // Role-based A/V defaults: hosts/speakers start with cam+mic on,
+      // attendees start muted with camera off (matching web behavior)
+      final isPublisher = widget.isHost || _isSpeaker;
+      _micEnabled = isPublisher;
+      _camEnabled = isPublisher;
 
       // Initialize Agora engine — use Communication profile to match web (mode: "rtc")
       _engine = createAgoraRtcEngine();
@@ -106,6 +138,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
       // Register event handlers
       _engine!.registerEventHandler(RtcEngineEventHandler(
         onJoinChannelSuccess: (connection, elapsed) {
+          _sessionStopwatch.start();
           if (mounted) setState(() => _joined = true);
         },
         onUserJoined: (connection, remoteUid, elapsed) {
@@ -134,6 +167,19 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
             setState(() => _activeSpeakerUid = loudest);
           }
         },
+        // Token refresh — fetch a new token before the current one expires
+        onTokenPrivilegeWillExpire: (connection, token) async {
+          try {
+            final newData = await CmeApiService.getAgoraToken(widget.eventId);
+            final newToken = newData['token'] as String?;
+            if (newToken != null) {
+              await _engine?.renewToken(newToken);
+              _token = newToken;
+            }
+          } catch (e) {
+            debugPrint('Token refresh failed: $e');
+          }
+        },
         onError: (err, msg) {
           debugPrint('Agora error: $err $msg');
         },
@@ -142,6 +188,11 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
       // Configure engine
       await _engine!.enableVideo();
       await _engine!.enableAudio();
+      // Ensure local video rendering is enabled
+      await _engine!.enableLocalVideo(_camEnabled);
+      if (_camEnabled) {
+        await _engine!.startPreview();
+      }
       await _engine!.enableAudioVolumeIndication(
         interval: 500,
         smooth: 3,
@@ -155,14 +206,14 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
         ),
       );
 
-      // Join channel
+      // Join channel — attendees join as subscribers only (no publish)
       await _engine!.joinChannel(
         token: _token!,
         channelId: _channel!,
         uid: _uid!,
-        options: const ChannelMediaOptions(
-          publishCameraTrack: true,
-          publishMicrophoneTrack: true,
+        options: ChannelMediaOptions(
+          publishCameraTrack: _camEnabled,
+          publishMicrophoneTrack: _micEnabled,
           autoSubscribeAudio: true,
           autoSubscribeVideo: true,
         ),
@@ -194,7 +245,13 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
 
   void _toggleCamera() async {
     _camEnabled = !_camEnabled;
+    await _engine?.enableLocalVideo(_camEnabled);
     await _engine?.muteLocalVideoStream(!_camEnabled);
+    if (_camEnabled) {
+      await _engine?.startPreview();
+    } else {
+      await _engine?.stopPreview();
+    }
     setState(() {});
     _resetControlsTimer();
   }
@@ -205,24 +262,35 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
   }
 
   void _leaveMeeting() {
+    final theme = OneUITheme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Leave Meeting?',
-            style: TextStyle(fontFamily: 'Poppins')),
-        content: const Text('Are you sure you want to leave this live session?',
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 14)),
+        backgroundColor: theme.cardBackground,
+        shape: RoundedRectangleBorder(borderRadius: theme.radiusL),
+        title: Text('Leave Meeting?',
+            style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary)),
+        content: Text('Are you sure you want to leave this live session?',
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Stay', style: TextStyle(fontFamily: 'Poppins')),
+            child: Text('Stay', style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary)),
           ),
           FilledButton(
             onPressed: () {
+              _sessionStopwatch.stop();
+              // Track participation before leaving
+              CmeApiService.trackParticipation(
+                widget.eventId,
+                duration: _sessionStopwatch.elapsed.inSeconds,
+              ).catchError((_) => <String, dynamic>{});
+              // Reset so dispose doesn't double-track  
+              _sessionStopwatch.reset();
               Navigator.pop(ctx);
               Navigator.pop(context);
             },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: theme.error),
             child:
                 const Text('Leave', style: TextStyle(fontFamily: 'Poppins')),
           ),
@@ -231,46 +299,75 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
     );
   }
 
+  /// Host-only: Generate certificates for all attendees.
+  void _generateCertificates() async {
+    try {
+      await CmeApiService.generateCertificates(widget.eventId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Certificates generated successfully')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to generate certificates: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
     if (_loading) {
-      return _buildLoadingScreen();
+      return _buildLoadingScreen(theme);
     }
     if (_error != null) {
-      return _buildErrorScreen();
+      return _buildErrorScreen(theme);
     }
 
+    // Meeting UI always uses dark background for video
+    final meetingBg = theme.isDark
+        ? theme.scaffoldBackground
+        : const Color(0xFF0D1117);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: meetingBg,
       body: Stack(
         children: [
           // Video grid
           GestureDetector(
             onTap: _resetControlsTimer,
-            child: _buildVideoGrid(),
+            child: _buildVideoGrid(theme),
           ),
 
           // Top bar
-          if (_showControls) _buildTopBar(),
+          if (_showControls && !_showInteractionPanel) _buildTopBar(theme),
 
           // Bottom controls
-          if (_showControls) _buildBottomControls(),
+          if (_showControls && !_showInteractionPanel) _buildBottomControls(theme),
 
-          // Interaction panel (chat/polls/modules) slide-in
-          if (_showInteractionPanel) _buildInteractionPanel(),
+          // Interaction panel (chat/polls/modules) slide-up sheet
+          if (_showInteractionPanel) _buildInteractionPanel(theme),
         ],
       ),
     );
   }
 
-  Widget _buildLoadingScreen() {
+  Widget _buildLoadingScreen(OneUITheme theme) {
+    final meetingBg = theme.isDark
+        ? theme.scaffoldBackground
+        : const Color(0xFF0D1117);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: meetingBg,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: Colors.white),
+            CircularProgressIndicator(color: theme.primary),
             const SizedBox(height: 20),
             Text(
               'Joining ${widget.eventTitle ?? 'Live Session'}...',
@@ -295,9 +392,13 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
     );
   }
 
-  Widget _buildErrorScreen() {
+  Widget _buildErrorScreen(OneUITheme theme) {
+    final meetingBg = theme.isDark
+        ? theme.scaffoldBackground
+        : const Color(0xFF0D1117);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: meetingBg,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
@@ -310,7 +411,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              Icon(Icons.error_outline, size: 64, color: theme.error),
               const SizedBox(height: 16),
               Text(
                 _error ?? 'Unknown error',
@@ -341,6 +442,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
                       });
                       _initMeeting();
                     },
+                    style: FilledButton.styleFrom(backgroundColor: theme.primary),
                     child: const Text('Retry',
                         style: TextStyle(fontFamily: 'Poppins')),
                   ),
@@ -355,33 +457,114 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
 
   // ─── Video Grid ───
 
-  Widget _buildVideoGrid() {
+  Widget _buildVideoGrid(OneUITheme theme) {
     final allUsers = <int?>[null, ..._remoteUsers]; // null = local user
+    final tileBg = theme.isDark
+        ? theme.surfaceVariant
+        : const Color(0xFF161B22);
+
+    // If a user is selected for fullscreen view
+    if (_fullScreenUid != null) {
+      final fsUid = _fullScreenUid == _localUserSentinel ? null : _fullScreenUid;
+      // Build list of other users for the strip
+      final others = allUsers.where((u) {
+        if (fsUid == null) return u != null; // local is fullscreen, show remotes
+        return u != fsUid; // remote is fullscreen, show others including local
+      }).toList();
+
+      return Stack(
+        children: [
+          // Full screen video
+          GestureDetector(
+            onTap: () {
+              _resetControlsTimer();
+              setState(() => _fullScreenUid = null); // Tap to exit fullscreen
+            },
+            child: _buildVideoTile(fsUid, fullScreen: true, tileBg: tileBg),
+          ),
+          // Thumbnail strip at top-right
+          if (others.isNotEmpty)
+            Positioned(
+              right: 8,
+              top: MediaQuery.of(context).padding.top + 56,
+              child: Column(
+                children: others.take(4).map((uid) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: GestureDetector(
+                      onTap: () {
+                        _resetControlsTimer();
+                        setState(() {
+                          _fullScreenUid = uid == null ? _localUserSentinel : uid;
+                        });
+                      },
+                      child: Container(
+                        width: 90,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: _activeSpeakerUid == uid
+                                ? theme.success
+                                : Colors.white24,
+                            width: _activeSpeakerUid == uid ? 2 : 1,
+                          ),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: _buildVideoTile(uid, tileBg: tileBg),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      );
+    }
 
     if (allUsers.length == 1) {
       // Only local user — full screen
-      return _buildVideoTile(null, fullScreen: true);
+      return GestureDetector(
+        onTap: _resetControlsTimer,
+        child: _buildVideoTile(null, fullScreen: true, tileBg: tileBg),
+      );
     }
 
     if (allUsers.length == 2) {
-      // 1 remote — big remote, small local pip
+      // 1 remote — big remote, small local pip, tap either to swap
       return Stack(
         children: [
-          _buildVideoTile(_remoteUsers.first, fullScreen: true),
+          GestureDetector(
+            onTap: () {
+              _resetControlsTimer();
+              setState(() => _fullScreenUid = _remoteUsers.first);
+            },
+            child: _buildVideoTile(_remoteUsers.first, fullScreen: true, tileBg: tileBg),
+          ),
           Positioned(
             right: 12,
             top: MediaQuery.of(context).padding.top + 56,
             child: GestureDetector(
-              onTap: _resetControlsTimer,
+              onTap: () {
+                _resetControlsTimer();
+                setState(() => _fullScreenUid = _localUserSentinel);
+              },
               child: Container(
                 width: 110,
                 height: 150,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.white24, width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: _buildVideoTile(null),
+                child: _buildVideoTile(null, tileBg: tileBg),
               ),
             ),
           ),
@@ -389,7 +572,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
       );
     }
 
-    // 3+ users — grid layout
+    // 3+ users — grid layout, tap any tile for fullscreen
     return GridView.builder(
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 50,
@@ -405,24 +588,35 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
       ),
       itemCount: allUsers.length,
       itemBuilder: (_, i) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: _activeSpeakerUid == allUsers[i]
-                ? Border.all(color: const Color(0xFF34C759), width: 2)
-                : null,
+        final uid = allUsers[i];
+        return GestureDetector(
+          onTap: () {
+            _resetControlsTimer();
+            setState(() {
+              _fullScreenUid = uid == null ? _localUserSentinel : uid;
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: _activeSpeakerUid == allUsers[i]
+                  ? Border.all(color: theme.success, width: 2)
+                  : null,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: _buildVideoTile(allUsers[i], tileBg: tileBg),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: _buildVideoTile(allUsers[i]),
         );
       },
     );
   }
 
-  Widget _buildVideoTile(int? uid, {bool fullScreen = false}) {
+  Widget _buildVideoTile(int? uid, {bool fullScreen = false, Color? tileBg}) {
+    final bgColor = tileBg ?? const Color(0xFF161B22);
+
     if (_engine == null) {
       return Container(
-        color: const Color(0xFF161B22),
+        color: bgColor,
         child: const Center(
           child: Icon(Icons.videocam_off, color: Colors.white24, size: 40),
         ),
@@ -433,7 +627,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
 
     if (isLocal && !_camEnabled) {
       return Container(
-        color: const Color(0xFF161B22),
+        color: bgColor,
         child: const Center(
           child: Icon(Icons.videocam_off, color: Colors.white24, size: 48),
         ),
@@ -456,14 +650,14 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
           );
 
     return Container(
-      color: const Color(0xFF161B22),
+      color: bgColor,
       child: AgoraVideoView(controller: controller),
     );
   }
 
   // ─── Top Bar ───
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(OneUITheme theme) {
     return Positioned(
       top: 0,
       left: 0,
@@ -504,8 +698,8 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
                         height: 8,
                         decoration: BoxDecoration(
                           color: _joined
-                              ? const Color(0xFF34C759)
-                              : Colors.orange,
+                              ? theme.success
+                              : theme.warning,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -536,20 +730,66 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
               ),
             ),
             if (widget.isHost)
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, color: Colors.white, size: 20),
+                color: theme.cardBackground,
+                shape: RoundedRectangleBorder(borderRadius: theme.radiusM),
+                onSelected: (value) {
+                  switch (value) {
+                    case 'generate_certs':
+                      _generateCertificates();
+                      break;
+                  }
+                },
+                itemBuilder: (_) => [
+                  PopupMenuItem(
+                    value: 'generate_certs',
+                    child: Row(
+                      children: [
+                        Icon(Icons.card_membership, size: 18, color: theme.primary),
+                        const SizedBox(width: 8),
+                        Text('Generate Certificates',
+                            style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            if (widget.isHost)
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.2),
+                  color: theme.error.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6),
                   border:
-                      Border.all(color: Colors.red.withValues(alpha: 0.5)),
+                      Border.all(color: theme.error.withValues(alpha: 0.5)),
                 ),
-                child: const Text(
+                child: Text(
                   'HOST',
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    color: Colors.red,
+                    color: theme.error,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              )
+            else if (_isSpeaker)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: theme.primary.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(6),
+                  border:
+                      Border.all(color: theme.primary.withValues(alpha: 0.5)),
+                ),
+                child: Text(
+                  'SPEAKER',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    color: theme.primary,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
@@ -563,7 +803,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
 
   // ─── Bottom Controls ───
 
-  Widget _buildBottomControls() {
+  Widget _buildBottomControls(OneUITheme theme) {
     return Positioned(
       bottom: 0,
       left: 0,
@@ -613,6 +853,7 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
               icon: Icons.call_end,
               label: 'Leave',
               isDestructive: true,
+              destructiveColor: theme.error,
               onTap: _leaveMeeting,
             ),
           ],
@@ -626,9 +867,12 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
     required String label,
     bool active = true,
     bool isDestructive = false,
+    Color? destructiveColor,
     String? badge,
     required VoidCallback onTap,
   }) {
+    final errorColor = destructiveColor ?? Colors.red;
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -639,19 +883,17 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
             height: 48,
             decoration: BoxDecoration(
               color: isDestructive
-                  ? Colors.red
+                  ? errorColor
                   : active
                       ? Colors.white.withValues(alpha: 0.15)
-                      : Colors.red.withValues(alpha: 0.3),
+                      : errorColor.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Icon(icon,
-                    color: isDestructive || !active
-                        ? Colors.white
-                        : Colors.white,
+                    color: Colors.white,
                     size: 22),
                 if (badge != null)
                   Positioned(
@@ -659,8 +901,8 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
                     right: 4,
                     child: Container(
                       padding: const EdgeInsets.all(3),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF3B30),
+                      decoration: BoxDecoration(
+                        color: errorColor,
                         shape: BoxShape.circle,
                       ),
                       child: Text(badge,
@@ -687,77 +929,67 @@ class _CmeLiveMeetingScreenState extends State<CmeLiveMeetingScreen> {
 
   // ─── Interaction Panel (Chat / Polls / Modules) ───
 
-  Widget _buildInteractionPanel() {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: MediaQuery.of(context).size.height * 0.55,
-      child: GestureDetector(
-        onVerticalDragEnd: (details) {
-          if (details.primaryVelocity != null &&
-              details.primaryVelocity! > 300) {
-            setState(() => _showInteractionPanel = false);
-          }
-        },
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8F9FA),
+  Widget _buildInteractionPanel(OneUITheme theme) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.55,
+      minChildSize: 0.3,
+      maxChildSize: 0.85,
+      snap: true,
+      snapSizes: const [0.3, 0.55, 0.85],
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.cardBackground,
             borderRadius:
-                BorderRadius.vertical(top: Radius.circular(16)),
+                const BorderRadius.vertical(top: Radius.circular(20)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, -2),
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
               ),
             ],
           ),
           child: Column(
             children: [
-              // Drag handle
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 4),
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              // Close button row
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+              // Compact drag handle + close
+              Container(
+                padding: const EdgeInsets.only(top: 8, bottom: 4, left: 16, right: 8),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 20),
-                      onPressed: () =>
-                          setState(() => _showInteractionPanel = false),
+                    Expanded(
+                      child: Center(
+                        child: Container(
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: theme.textTertiary.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => setState(() => _showInteractionPanel = false),
+                      child: Icon(Icons.close, size: 20, color: theme.iconColor),
                     ),
                   ],
                 ),
               ),
-              // Embed the interaction screen
+              // Embed the interaction screen (embedded mode - no Scaffold/AppBar)
               Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(8)),
-                  child: CmeLiveInteractionScreen(
-                    eventId: widget.eventId,
-                    eventTitle: widget.eventTitle,
-                    isHost: widget.isHost,
-                    modules: widget.modules,
-                  ),
+                child: CmeLiveInteractionScreen(
+                  eventId: widget.eventId,
+                  eventTitle: widget.eventTitle,
+                  isHost: widget.isHost,
+                  modules: widget.modules,
+                  isEmbedded: true,
                 ),
               ),
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

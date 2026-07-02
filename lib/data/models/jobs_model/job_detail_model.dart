@@ -15,8 +15,8 @@ class JobDetailModel {
 
   JobDetailModel.fromJson(dynamic json) {
     job = json['job'] != null ? Job.fromJson(json['job']) : null;
-    hasApplied = json['hasApplied'];
-    totalApplicants = json['totalApplicants'];
+    hasApplied = json['hasApplied'] == true || json['hasApplied'] == 1;
+    totalApplicants = json['totalApplicants'] is int ? json['totalApplicants'] : int.tryParse(json['totalApplicants']?.toString() ?? '');
     isViewedByAdmin = json['isViewedByAdmin'];
   }
   Job? job;
@@ -70,40 +70,38 @@ class Job {
 
   Job.fromJson(dynamic json) {
     id = json['id'];
-    jobTitle = json['job_title'];
+    jobTitle = json['job_title']?.toString();
     jobType = json['job_type']?.toString();
-    companyName = json['company_name'];
-    experience = json['experience'];
-    location = json['location'];
-    description = json['description'];
-    link = json['link'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    companyName = json['company_name']?.toString();
+    experience = json['experience']?.toString();
+    location = json['location']?.toString();
+    description = json['description']?.toString();
+    link = json['link']?.toString();
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
     userId = json['user_id'];
     jobImage = json['job_image'];
     countryId = json['country_id']?.toString();
-    lastDate = json['last_date'];
+    lastDate = json['last_date']?.toString();
     totalJobs = json['total_jobs'];
     specialty = json['specialty'];
     noOfJobs = json['no_of_jobs']?.toString();
-    postedAt = json['posted_at'];
-    preferredLanguage = json['preferred_language'];
-    salaryRange = json['salary_range'];
+    postedAt = json['posted_at']?.toString();
+    preferredLanguage = json['preferred_language']?.toString();
+    salaryRange = json['salary_range']?.toString();
     promoted = json['promoted'] is bool
         ? (json['promoted'] ? 1 : 0)
         : json['promoted'];
-    views = json['views'];
-    clicks = json['clicks'];
+    views = json['views'] is int ? json['views'] : int.tryParse(json['views']?.toString() ?? '');
+    clicks = json['clicks'] is int ? json['clicks'] : int.tryParse(json['clicks']?.toString() ?? '');
     if (json['specialties'] != null) {
       specialties = [];
       json['specialties'].forEach((v) {
         if (v is int) {
-          // Handle case where specialties is just array of IDs
           specialties?.add(Specialties(id: v));
         } else if (v is Map<String, dynamic>) {
           specialties?.add(Specialties.fromJson(v));
         } else {
-          // Handle string IDs
           specialties?.add(Specialties(id: v));
         }
       });
@@ -175,22 +173,25 @@ User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
 
 class User {
-  User({this.id, this.name, this.profilePic});
+  User({this.id, this.name, this.profilePic, this.isVerified});
 
   User.fromJson(dynamic json) {
     id = json['id'];
-    name = json['name'];
-    profilePic = AppData.fullImageUrl(json['profile_pic']);
+    name = json['name']?.toString();
+    profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());
+    isVerified = json['is_verified'] == true || json['is_verified'] == 1;
   }
   dynamic id;
   dynamic name;
   String? profilePic;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['id'] = id;
     map['name'] = name;
     map['profile_pic'] = profilePic;
+    map['is_verified'] = isVerified;
     return map;
   }
 }
@@ -204,9 +205,9 @@ class Specialties {
 
   Specialties.fromJson(dynamic json) {
     id = json['id'];
-    name = json['name'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    name = json['name']?.toString();
+    createdAt = json['created_at']?.toString();
+    updatedAt = json['updated_at']?.toString();
     pivot = json['pivot'] != null ? Pivot.fromJson(json['pivot']) : null;
   }
   dynamic id;
@@ -235,8 +236,8 @@ class Pivot {
   Pivot({this.jobId, this.specialityId});
 
   Pivot.fromJson(dynamic json) {
-    jobId = json['job_id'];
-    specialityId = json['speciality_id'];
+    jobId = json['job_id']?.toString();
+    specialityId = json['speciality_id']?.toString();
   }
   String? jobId;
   String? specialityId;

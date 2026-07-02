@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/profile_model/award_model.dart';
 import 'package:doctak_app/data/models/profile_model/business_hour_model.dart';
@@ -20,12 +19,8 @@ class V5ProfileApiService {
   factory V5ProfileApiService() => _instance;
   V5ProfileApiService._internal();
 
-  /// Get v5 base URL by replacing v4 with v5 in the current API URL
-  static String get _v5BaseUrl =>
-      AppData.remoteUrl2.replaceAll('/v4', '/v5');
-
-  /// Get v4 base URL (the standard API URL)
-  static String get _v4BaseUrl => AppData.remoteUrl2;
+  /// Base URL for all API calls (v1 node backend)
+  static String get _baseUrl => AppData.remoteUrl2;
 
   /// Build headers with Bearer token
   Map<String, String> _headers({String contentType = 'application/x-www-form-urlencoded'}) {
@@ -36,27 +31,12 @@ class V5ProfileApiService {
     };
   }
 
-  /// Try a request on v5 first, fall back to v4 if v5 returns 404/unreachable
-  Future<http.Response> _tryRequest(
-    Future<http.Response> Function(String baseUrl) requestFn,
-  ) async {
-    try {
-      final response = await requestFn(_v5BaseUrl).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 404) return response;
-      print('🌐 V5 returned 404, trying v4 fallback...');
-    } catch (e) {
-      print('🌐 V5 request failed ($e), trying v4 fallback...');
-    }
-    // Fallback to v4
-    return await requestFn(_v4BaseUrl).timeout(const Duration(seconds: 15));
-  }
-
-  /// Generic GET request (tries v5 then v4)
+  /// Generic GET request
   Future<Map<String, dynamic>> _getRequest(String endpoint) async {
     print('🌐 API GET: $endpoint');
-    final response = await _tryRequest(
-      (baseUrl) => http.get(Uri.parse('$baseUrl$endpoint'), headers: _headers()),
-    );
+    final response = await http
+        .get(Uri.parse('$_baseUrl$endpoint'), headers: _headers())
+        .timeout(const Duration(seconds: 15));
     print('🌐 API Response: ${response.statusCode}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
@@ -65,15 +45,15 @@ class V5ProfileApiService {
     }
   }
 
-  /// Generic POST request (tries v5 then v4)
+  /// Generic POST request
   Future<Map<String, dynamic>> _postRequest(
     String endpoint,
     Map<String, String> body,
   ) async {
     print('🌐 API POST: $endpoint');
-    final response = await _tryRequest(
-      (baseUrl) => http.post(Uri.parse('$baseUrl$endpoint'), headers: _headers(), body: body),
-    );
+    final response = await http
+        .post(Uri.parse('$_baseUrl$endpoint'), headers: _headers(), body: body)
+        .timeout(const Duration(seconds: 15));
     print('🌐 API Response: ${response.statusCode}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
@@ -82,19 +62,19 @@ class V5ProfileApiService {
     }
   }
 
-  /// Generic PUT request (tries v5 then v4, JSON body)
+  /// Generic PUT request (JSON body)
   Future<Map<String, dynamic>> _putRequest(
     String endpoint,
     Map<String, dynamic> body,
   ) async {
     print('🌐 API PUT: $endpoint');
-    final response = await _tryRequest(
-      (baseUrl) => http.put(
-        Uri.parse('$baseUrl$endpoint'),
-        headers: _headers(contentType: 'application/json'),
-        body: jsonEncode(body),
-      ),
-    );
+    final response = await http
+        .put(
+          Uri.parse('$_baseUrl$endpoint'),
+          headers: _headers(contentType: 'application/json'),
+          body: jsonEncode(body),
+        )
+        .timeout(const Duration(seconds: 15));
     print('🌐 API Response: ${response.statusCode}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
@@ -103,12 +83,12 @@ class V5ProfileApiService {
     }
   }
 
-  /// Generic DELETE request (tries v5 then v4)
+  /// Generic DELETE request
   Future<Map<String, dynamic>> _deleteRequest(String endpoint) async {
     print('🌐 API DELETE: $endpoint');
-    final response = await _tryRequest(
-      (baseUrl) => http.delete(Uri.parse('$baseUrl$endpoint'), headers: _headers()),
-    );
+    final response = await http
+        .delete(Uri.parse('$_baseUrl$endpoint'), headers: _headers())
+        .timeout(const Duration(seconds: 15));
     print('🌐 API Response: ${response.statusCode}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       return jsonDecode(response.body) as Map<String, dynamic>;
@@ -271,13 +251,13 @@ class V5ProfileApiService {
   }) async {
     try {
       // Need JSON body for nested map
-      final response = await _tryRequest(
-        (baseUrl) => http.post(
-          Uri.parse('$baseUrl/privacy-settings'),
-          headers: _headers(contentType: 'application/json'),
-          body: jsonEncode({'settings': settings}),
-        ),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/privacy-settings'),
+            headers: _headers(contentType: 'application/json'),
+            body: jsonEncode({'settings': settings}),
+          )
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         return ApiResponse.success(data);
@@ -935,13 +915,9 @@ class V5ProfileApiService {
   Future<ApiResponse<Map<String, dynamic>>> getInterests({String? userId}) async {
     try {
       final userParam = userId != null ? '?user_id=$userId' : '';
-      // Legacy interests are at /interests-legacy on v5 (CRUD interests took /interests)
-      // On v4, use /interests-v5 suffix to avoid collision with old v4 controller
-      final response = await _tryRequest((baseUrl) {
-        final isV4 = baseUrl.contains('/v4');
-        final path = isV4 ? '/interests-v5$userParam' : '/interests-legacy$userParam';
-        return http.get(Uri.parse('$baseUrl$path'), headers: _headers());
-      });
+      final response = await http
+          .get(Uri.parse('$_baseUrl/interests-legacy$userParam'), headers: _headers())
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {
@@ -976,12 +952,9 @@ class V5ProfileApiService {
         'favt_writers': favtWriters ?? '',
         if (privacy != null) 'privacy': privacy,
       };
-      // Legacy interests at /interests-legacy on v5 (CRUD interests took /interests)
-      final response = await _tryRequest((baseUrl) {
-        final isV4 = baseUrl.contains('/v4');
-        final path = isV4 ? '/interests-v5' : '/interests-legacy';
-        return http.post(Uri.parse('$baseUrl$path'), headers: _headers(), body: body);
-      });
+      final response = await http
+          .post(Uri.parse('$_baseUrl/interests-legacy'), headers: _headers(), body: body)
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         if (data['success'] == true) {

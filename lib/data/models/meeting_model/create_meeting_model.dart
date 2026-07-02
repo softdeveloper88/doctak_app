@@ -4,18 +4,28 @@ CreateMeetingModel createMeetingModelFromJson(String str) => CreateMeetingModel.
 String createMeetingModelToJson(CreateMeetingModel data) => json.encode(data.toJson());
 
 class CreateMeetingModel {
-  CreateMeetingModel({this.success, this.data});
+  CreateMeetingModel({this.success, this.data, this.code});
 
+  /// Parses doctak-node response: {success, code, meeting, settings}
+  /// Falls back to old Laravel shape: {success, data: {meeting, settings, user}}
   CreateMeetingModel.fromJson(dynamic json) {
     success = json['success'];
-    data = json['data'] != null ? Meetings.fromJson(json['data']) : null;
+    code = json['code']?.toString();
+    if (json['data'] != null) {
+      data = Meetings.fromJson(json['data']);
+    } else if (json['meeting'] != null) {
+      data = Meetings.fromJson(json);
+    }
   }
   bool? success;
+  /// Channel code for the meeting (doctak-node only)
+  String? code;
   Meetings? data;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
     map['success'] = success;
+    map['code'] = code;
     if (data != null) {
       map['data'] = data?.toJson();
     }
@@ -101,20 +111,20 @@ class Settings {
 
   Settings.fromJson(dynamic json) {
     id = json['id'];
-    meetingId = json['meeting_id'];
-    startStopMeeting = json['start_stop_meeting'];
-    muteAll = json['mute_all'];
-    unmuteAll = json['unmute_all'];
-    addRemoveHost = json['add_remove_host'];
-    shareScreen = json['share_screen'];
-    raisedHand = json['raised_hand'];
-    sendReactions = json['send_reactions'];
-    toggleMicrophone = json['toggle_microphone'];
-    toggleVideo = json['toggle_video'];
-    enableWaitingRoom = json['enable_waiting_room'];
-    requirePassword = json['require_password'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    meetingId = (json['meetingId'] ?? json['meeting_id'])?.toString();
+    startStopMeeting = (json['startStopMeeting'] ?? json['start_stop_meeting'])?.toString();
+    muteAll = (json['muteAll'] ?? json['mute_all'])?.toString();
+    unmuteAll = (json['unmuteAll'] ?? json['unmute_all'])?.toString();
+    addRemoveHost = (json['addRemoveHost'] ?? json['add_remove_host'])?.toString();
+    shareScreen = (json['shareScreen'] ?? json['share_screen'])?.toString();
+    raisedHand = (json['raisedHand'] ?? json['raised_hand'])?.toString();
+    sendReactions = json['sendReactions'] ?? json['send_reactions'];
+    toggleMicrophone = json['toggleMicrophone'] ?? json['toggle_microphone'];
+    toggleVideo = json['toggleVideo'] ?? json['toggle_video'];
+    enableWaitingRoom = json['enableWaitingRoom'] ?? json['enable_waiting_room'];
+    requirePassword = json['requirePassword'] ?? json['require_password'];
+    createdAt = (json['createdAt'] ?? json['created_at'])?.toString();
+    updatedAt = (json['updatedAt'] ?? json['updated_at'])?.toString();
   }
   int? id;
   String? meetingId;
@@ -157,21 +167,29 @@ Meeting meetingFromJson(String str) => Meeting.fromJson(json.decode(str));
 String meetingToJson(Meeting data) => json.encode(data.toJson());
 
 class Meeting {
-  Meeting({this.id, this.meetingToken, this.meetingChannel, this.userId, this.isEnded, this.createdAt, this.updatedAt});
+  Meeting({this.id, this.meetingToken, this.meetingChannel, this.userId, this.isEnded, this.createdAt, this.updatedAt, this.name, this.title, this.hostUserId});
 
+  /// Parses both camelCase (doctak-node) and snake_case (Laravel) field names.
   Meeting.fromJson(dynamic json) {
-    id = json['id'];
-    meetingToken = json['meetingToken'];
-    meetingChannel = json['meetingChannel'];
-    userId = json['userId'];
-    isEnded = json['isEnded'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    id = json['id']?.toString();
+    // New doctak-node field: 'token' / 'channel'; old: 'meetingToken' / 'meetingChannel'
+    meetingToken = (json['token'] ?? json['meetingToken'])?.toString();
+    meetingChannel = (json['channel'] ?? json['meetingChannel'])?.toString();
+    userId = (json['hostUserId'] ?? json['userId'])?.toString();
+    hostUserId = (json['hostUserId'] ?? json['userId'])?.toString();
+    name = json['name']?.toString();
+    title = json['title']?.toString();
+    isEnded = json['isEnded'] == true || json['isEnded'] == 1;
+    createdAt = json['createdAt']?.toString() ?? json['created_at']?.toString();
+    updatedAt = json['updatedAt']?.toString() ?? json['updated_at']?.toString();
   }
   String? id;
   String? meetingToken;
   String? meetingChannel;
   String? userId;
+  String? hostUserId;
+  String? name;
+  String? title;
   bool? isEnded;
   String? createdAt;
   String? updatedAt;

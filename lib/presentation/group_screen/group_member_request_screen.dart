@@ -1,10 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -58,6 +59,9 @@ class MemberRequestItem extends StatelessWidget {
   Function? onPressAccept;
   @override
   Widget build(BuildContext context) {
+    final avatarUrl = AppData.fullImageUrl(groupMember?.profilePic);
+    final avatarProvider = avatarUrl.isEmpty ? null : CachedNetworkImageProvider(avatarUrl);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Column(
@@ -67,7 +71,8 @@ class MemberRequestItem extends StatelessWidget {
               // Profile picture
               CircleAvatar(
                 radius: 30,
-                backgroundImage: CachedNetworkImageProvider(groupMember?.profilePic ?? ''), // Replace with actual image URL
+                backgroundImage: avatarProvider,
+                child: avatarUrl.isEmpty ? const Icon(Icons.person) : null,
               ),
               const SizedBox(width: 16),
               // Request details
@@ -76,7 +81,12 @@ class MemberRequestItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(groupMember?.name ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text(timeAgo.format(DateTime.parse(groupMember?.joinedAt ?? "")), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(
+                      groupMember?.joinedAt == null || groupMember!.joinedAt!.trim().isEmpty
+                          ? 'Recently'
+                          : timeAgo.format(DateTime.tryParse(groupMember!.joinedAt!) ?? DateTime.now()),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
                 ),
               ),

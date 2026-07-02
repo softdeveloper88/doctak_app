@@ -110,6 +110,9 @@ class ApiCaller {
         return response.body;
       }
     } else {
+      // NOTE: A 401 here is surfaced as an ApiException to the caller. We do NOT
+      // force a logout — only an unauthorized HOME FEED response routes the user
+      // to login (handled in HomeBloc).
       dynamic errorBody;
       try {
         errorBody = jsonDecode(response.body);

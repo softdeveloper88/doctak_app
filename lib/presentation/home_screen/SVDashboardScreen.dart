@@ -1,9 +1,12 @@
+import 'dart:async';
+
+import 'package:doctak_app/core/notification_navigation.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/chat_gpt_with_image_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_tab_fragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../core/utils/app/AppData.dart';
@@ -13,6 +16,8 @@ import 'fragments/add_post/bloc/add_post_bloc.dart';
 import 'fragments/home_main_screen/SVHomeFragment.dart';
 import 'fragments/home_main_screen/bloc/home_bloc.dart';
 import 'fragments/profile_screen/SVProfileFragment.dart';
+import 'fragments/home_main_screen/post_widget/feed_video_autoplay_registry.dart';
+import 'fragments/home_main_screen/post_widget/feed_video_navigator_observer.dart';
 import 'home/components/SVHomeDrawerComponent.dart';
 
 class SVDashboardScreen extends StatefulWidget {
@@ -22,25 +27,46 @@ class SVDashboardScreen extends StatefulWidget {
   State<SVDashboardScreen> createState() => _SVDashboardScreenState();
 }
 
-class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindingObserver, TickerProviderStateMixin {
+class _SVDashboardScreenState extends State<SVDashboardScreen>
+    with WidgetsBindingObserver, TickerProviderStateMixin {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
   final HomeBloc homeBloc = HomeBloc();
   final AddPostBloc addPostBloc = AddPostBloc();
-  late final List<Widget> _fragments;
+  late final SVHomeFragment _homeFragment;
+  Widget? _networkFragment;
+  Widget? _profileFragment;
   late final AnimationController _animationController;
-  late final Animation<double> _scaleAnimation;
+
+  /// Tabs are built on first visit so Network/Profile API work does not run
+  /// on home startup (IndexedStack used to mount every tab immediately).
+  void _ensureTabBuilt(int index) {
+    switch (index) {
+      case 1:
+        _networkFragment ??= NetworkTabFragment(
+          openDrawer: () => scaffoldKey.currentState?.openDrawer(),
+        );
+      case 3:
+        _profileFragment ??= const SVProfileFragment();
+    }
+  }
+
+  List<Widget> get _stackChildren => [
+        _homeFragment,
+        _networkFragment ?? const SizedBox.shrink(),
+        const SizedBox.shrink(),
+        _profileFragment ?? const SizedBox.shrink(),
+      ];
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('state change ');
     if (state == AppLifecycleState.resumed) {
-      // NotificationService.clearBadgeCount(); // Clears badge when app resumes
-
-      //TODO: set status to online here in firestore
-    } else {
-      // NotificationService.clearBadgeCount(); // Clears badge when app resumes
-      //TODO: set status to offline here in firestore
+      FeedVideoAutoplayRegistry.instance.resume();
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      FeedVideoAutoplayRegistry.instance.pauseAll();
     }
   }
 
@@ -49,7 +75,6 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
     WidgetsBinding.instance.removeObserver(this);
     _animationController.dispose();
     addPostBloc.close();
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -58,46 +83,67 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
     setStatusBarColor(Colors.transparent);
     WidgetsBinding.instance.addObserver(this);
 
-    _animationController = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
 
-    _fragments = [
-      SVHomeFragment(homeBloc: homeBloc, openDrawer: () => scaffoldKey.currentState?.openDrawer()),
-      NetworkTabFragment(openDrawer: () => scaffoldKey.currentState?.openDrawer()),
-      SVAddPostFragment(
-        refresh: () {
-          setState(() => selectedIndex = 0);
-          homeBloc.add(PostLoadPageEvent(page: 1));
-        },
-        addPostBloc: addPostBloc,
-      ),
-      // SVSearchFragment(
-      //   backPress: () => setState(() => selectedIndex = 0),
-      // ),
-      const SVProfileFragment(),
-    ];
+    _homeFragment = SVHomeFragment(
+      homeBloc: homeBloc,
+      openDrawer: () => scaffoldKey.currentState?.openDrawer(),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(NotificationNavigation.consumePendingTap());
+    });
     super.initState();
+  }
+
+  void _selectTab(int index) {
+    if (selectedIndex == index) return;
+    pauseFeedVideosForUiChange();
+    _ensureTabBuilt(index);
+    setState(() => selectedIndex = index);
+    _animationController.forward().then((_) => _animationController.reverse());
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  void _openAddPost() {
+    pauseFeedVideosForUiChange(resumeNextFrame: false);
+    SVAddPostFragment(
+      refresh: () {
+        setState(() => selectedIndex = 0);
+        homeBloc.add(PostLoadPageEvent(page: 1));
+      },
+      addPostBloc: addPostBloc,
+    ).launch(context);
+    _animationController.forward().then((_) => _animationController.reverse());
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (selectedIndex != 0) {
+    return PopScope(
+      canPop: selectedIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && selectedIndex != 0) {
           setState(() => selectedIndex = 0);
-          return false;
-        } else {
-          return true;
         }
       },
       child: Scaffold(
         backgroundColor: svGetScaffoldColor(),
-        extendBody: true,
-        extendBodyBehindAppBar: true,
-        body: IndexedStack(index: selectedIndex, children: _fragments),
         key: scaffoldKey,
         drawer: SVHomeDrawerComponent(),
-        bottomNavigationBar: _buildModernBottomNavigationBar(),
+        body: Column(
+          children: [
+            Expanded(
+              child: IndexedStack(
+                index: selectedIndex,
+                children: _stackChildren,
+              ),
+            ),
+            _buildModernBottomNavigationBar(),
+          ],
+        ),
       ),
     );
   }
@@ -105,19 +151,27 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
   Widget _buildModernBottomNavigationBar() {
     final theme = OneUITheme.of(context);
     final isRTL = Directionality.of(context) == TextDirection.rtl;
+    final bottomInset = MediaQuery.of(context).padding.bottom;
 
-    // Minimalist bottom navigation matching the clean design
     return Container(
+      width: double.infinity,
+      clipBehavior: Clip.none,
       decoration: BoxDecoration(
         color: theme.navBarBackground,
-        border: Border(top: BorderSide(color: theme.divider, width: 1)),
+        border: Border(top: BorderSide(color: theme.divider)),
       ),
-      child: SafeArea(
-        top: false,
-        child: Container(
-          height: 70,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, crossAxisAlignment: CrossAxisAlignment.center, children: isRTL ? _buildRTLNavigationItems() : _buildLTRNavigationItems()),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          6,
+          6,
+          6,
+          bottomInset > 0 ? bottomInset + 6 : 10,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: isRTL
+              ? _buildRTLNavigationItems()
+              : _buildLTRNavigationItems(),
         ),
       ),
     );
@@ -125,8 +179,16 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
 
   List<Widget> _buildLTRNavigationItems() {
     return [
-      _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, translation(context).lbl_home),
-      _buildNavItem(1, CupertinoIcons.person_2_fill, CupertinoIcons.person_2, translation(context).lbl_my_network),
+      _buildNavItem(
+        0,
+        FeedIconAssets.navHome,
+        translation(context).lbl_home,
+      ),
+      _buildNavItem(
+        1,
+        FeedIconAssets.navNetwork,
+        translation(context).lbl_my_network,
+      ),
       _buildAddButton(),
       _buildProfileNavItem(),
       _buildAINavItem(),
@@ -138,42 +200,51 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
       _buildAINavItem(),
       _buildProfileNavItem(),
       _buildAddButton(),
-      _buildNavItem(1, CupertinoIcons.person_2_fill, CupertinoIcons.person_2, translation(context).lbl_my_network),
-      _buildNavItem(0, CupertinoIcons.house_fill, CupertinoIcons.house, translation(context).lbl_home),
+      _buildNavItem(
+        1,
+        FeedIconAssets.navNetwork,
+        translation(context).lbl_my_network,
+      ),
+      _buildNavItem(
+        0,
+        FeedIconAssets.navHome,
+        translation(context).lbl_home,
+      ),
     ];
   }
 
-  Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon, String label) {
+  TextStyle _navLabelStyle(OneUITheme theme, {required bool isSelected}) {
+    return TextStyle(
+      fontSize: 10.5,
+      fontWeight: FontWeight.w600,
+      color: isSelected ? theme.accentInk : theme.textTertiary,
+    );
+  }
+
+  Widget _buildNavItem(
+    int index,
+    String svgAsset,
+    String label,
+  ) {
     final isSelected = selectedIndex == index;
     final theme = OneUITheme.of(context);
 
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (selectedIndex != index) {
-            setState(() => selectedIndex = index);
-            _animationController.forward().then((_) => _animationController.reverse());
-          }
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
+        onTap: () => _selectTab(index),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              isSelected ? activeIcon : inactiveIcon,
-              size: 22,
-              color: isSelected ? theme.primary : theme.iconInactive,
+            FeedIcon(
+              asset: svgAsset,
+              size: 25,
+              color: isSelected ? theme.accentInk : theme.textTertiary,
             ),
             const SizedBox(height: 4),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? theme.primary : theme.iconInactive,
-              ),
+              style: _navLabelStyle(theme, isSelected: isSelected),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -189,26 +260,41 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          _fragments[2].launch(context);
-          _animationController.forward().then((_) => _animationController.reverse());
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
+        onTap: _openAddPost,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.plus, size: 22, color: theme.iconInactive),
-            const SizedBox(height: 4),
-            Text(
-              translation(context).lbl_post,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                color: theme.iconInactive,
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: theme.accent,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.accent.withValues(alpha: 0.22),
+                    blurRadius: 6,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              child: Center(
+                child: FeedIcon(
+                  asset: FeedIconAssets.navPost,
+                  size: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            // Keeps the + aligned with other tab icons (label row below).
+            Opacity(
+              opacity: 0,
+              child: Text(
+                ' ',
+                style: _navLabelStyle(theme, isSelected: false),
+              ),
             ),
           ],
         ),
@@ -223,13 +309,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
     return Expanded(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (selectedIndex != 3) {
-            setState(() => selectedIndex = 3);
-            _animationController.forward().then((_) => _animationController.reverse());
-          }
-          FocusManager.instance.primaryFocus?.unfocus();
-        },
+        onTap: () => _selectTab(3),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -240,7 +320,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? theme.primary : theme.iconInactive,
+                  color: isSelected ? theme.accent : Colors.transparent,
                   width: 2,
                 ),
               ),
@@ -248,10 +328,22 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
                 child: ValueListenableBuilder<String>(
                   valueListenable: AppData.profilePicNotifier,
                   builder: (_, picUrl, __) {
-                    final url = picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                    final url = picUrl.isNotEmpty
+                        ? picUrl
+                        : AppData.profilePicUrl;
                     return (url.isNotEmpty && url.toLowerCase() != 'null')
-                        ? AppCachedNetworkImage(imageUrl: url, fit: BoxFit.cover)
-                        : Image.asset('assets/images/person.png', fit: BoxFit.cover);
+                        ? AppCachedNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => Image.asset(
+                              'assets/images/person.png',
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Image.asset(
+                            'assets/images/person.png',
+                            fit: BoxFit.cover,
+                          );
                   },
                 ),
               ),
@@ -259,11 +351,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
             const SizedBox(height: 4),
             Text(
               translation(context).lbl_profile,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? theme.primary : theme.iconInactive,
-              ),
+              style: _navLabelStyle(theme, isSelected: isSelected),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -280,28 +368,39 @@ class _SVDashboardScreenState extends State<SVDashboardScreen> with WidgetsBindi
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
+          pauseFeedVideosForUiChange(resumeNextFrame: false);
           ChatGptWithImageScreen(isFromMainScreen: true).launch(context);
-          _animationController.forward().then((_) => _animationController.reverse());
+          _animationController.forward().then(
+            (_) => _animationController.reverse(),
+          );
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              theme.isDark ? 'assets/images/docktak_ai_light.png' : 'assets/images/docktak_ai_light.png',
-              width: 22,
-              height: 22,
-              fit: BoxFit.contain,
+            Container(
+              width: 27,
+              height: 27,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0EA5E9), Color(0xFF0D9488)],
+                ),
+              ),
+              child: Center(
+                child: FeedIcon(
+                  asset: FeedIconAssets.navImages,
+                  size: 15,
+                  color: Colors.white,
+                ),
+              ),
             ),
             const SizedBox(height: 4),
             Text(
-              translation(context).lbl_ai,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w400,
-                color: theme.iconInactive,
-              ),
+              translation(context).lbl_images,
+              style: _navLabelStyle(theme, isSelected: false),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

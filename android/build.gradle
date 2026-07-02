@@ -6,7 +6,7 @@ plugins {
 allprojects {
     // Shared versions for Android compilation across all modules/plugins
     // Use a Kotlin version compatible with compiled plugin artifacts
-    ext.kotlin_version = '2.2.0' // Required by Flutter plugins and some third-party plugins
+    ext.kotlin_version = '2.2.20'
     ext.compileSdkVersion = 36
     ext.targetSdkVersion = 36
     ext.minSdkVersion = 24

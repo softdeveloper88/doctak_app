@@ -1,32 +1,28 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/one_ui_shimmer.dart';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
 class UserShimmer extends StatelessWidget {
   const UserShimmer({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    final theme = OneUITheme.of(context);
+    final base = theme.shimmerBase;
 
     return ListView.builder(
       shrinkWrap: true,
       scrollDirection: Axis.vertical,
       physics: const BouncingScrollPhysics(),
       itemCount: 10,
-      itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: baseColor,
-        highlightColor: highlightColor,
+      itemBuilder: (context, index) => OneUIShimmer(
         child: ListTile(
-          leading: CircleAvatar(backgroundColor: baseColor),
+          leading: CircleAvatar(backgroundColor: base),
           title: Container(
             height: 10,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: baseColor,
+              color: base,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -34,7 +30,7 @@ class UserShimmer extends StatelessWidget {
             height: 10,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: baseColor,
+              color: base,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
@@ -50,11 +46,8 @@ class NotificationShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-    final shimmerColor = isDark ? Colors.grey[700]! : Colors.grey[300]!;
+    final base = theme.shimmerBase;
+    final placeholder = theme.shimmerBase;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -63,20 +56,18 @@ class NotificationShimmer extends StatelessWidget {
       physics: const BouncingScrollPhysics(),
       itemCount: 8,
       itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
+        return OneUIShimmer(
           period: const Duration(milliseconds: 1500),
           child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: theme.primary.withValues(alpha: 0.08),
+              color: theme.shimmerNotificationCardFill,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: theme.primary.withValues(alpha: 0.2),
+                color: theme.shimmerNotificationCardBorder,
                 width: 1,
               ),
-              boxShadow: isDark
+              boxShadow: theme.isDark
                   ? null
                   : [
                       BoxShadow(
@@ -97,10 +88,10 @@ class NotificationShimmer extends StatelessWidget {
                         width: 50,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: shimmerColor,
+                          color: placeholder,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: theme.primary.withValues(alpha: 0.2),
+                            color: theme.shimmerNotificationCardBorder,
                             width: 2,
                           ),
                         ),
@@ -111,7 +102,7 @@ class NotificationShimmer extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(3),
                           decoration: BoxDecoration(
-                            color: _getShimmerNotificationColor(index),
+                            color: _shimmerBadgeColor(theme, index),
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: theme.cardBackground,
@@ -122,7 +113,7 @@ class NotificationShimmer extends StatelessWidget {
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: theme.cardBackground.withValues(alpha: 0.7),
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -139,7 +130,7 @@ class NotificationShimmer extends StatelessWidget {
                           height: 14,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: shimmerColor,
+                            color: placeholder,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -148,7 +139,7 @@ class NotificationShimmer extends StatelessWidget {
                           height: 14,
                           width: MediaQuery.of(context).size.width * 0.45,
                           decoration: BoxDecoration(
-                            color: shimmerColor,
+                            color: placeholder,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -159,7 +150,7 @@ class NotificationShimmer extends StatelessWidget {
                               width: 14,
                               height: 14,
                               decoration: BoxDecoration(
-                                color: shimmerColor,
+                                color: placeholder,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -168,7 +159,7 @@ class NotificationShimmer extends StatelessWidget {
                               height: 12,
                               width: 70 + (index % 3) * 15,
                               decoration: BoxDecoration(
-                                color: shimmerColor,
+                                color: placeholder,
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
@@ -180,14 +171,14 @@ class NotificationShimmer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: theme.primary.withValues(alpha: 0.1),
+                      color: theme.primary.withValues(alpha: theme.isDark ? 0.14 : 0.1),
                       shape: BoxShape.circle,
                     ),
                     child: Container(
                       width: 14,
                       height: 14,
                       decoration: BoxDecoration(
-                        color: shimmerColor,
+                        color: base,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -201,13 +192,13 @@ class NotificationShimmer extends StatelessWidget {
     );
   }
 
-  Color _getShimmerNotificationColor(int index) {
+  Color _shimmerBadgeColor(OneUITheme theme, int index) {
     final colors = [
-      Colors.green,
-      Colors.red,
-      Colors.blue,
-      Colors.purple,
-      Colors.orange,
+      theme.success,
+      theme.likeColor,
+      theme.primary,
+      theme.secondary,
+      theme.warning,
     ];
     return colors[index % colors.length];
   }
@@ -219,10 +210,7 @@ class ProfileListShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+    final base = theme.shimmerBase;
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -235,37 +223,22 @@ class ProfileListShimmer extends StatelessWidget {
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: isDark
-                ? null
-                : [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      offset: const Offset(0, 2),
-                      blurRadius: 8,
-                      spreadRadius: 0,
-                    ),
-                  ],
-          ),
+          decoration: theme.surfaceCardDecoration(),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Shimmer.fromColors(
-                  baseColor: baseColor,
-                  highlightColor: highlightColor,
+                OneUIShimmer(
                   period: const Duration(milliseconds: 1500),
                   child: Container(
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: baseColor,
+                      color: base,
                       border: Border.all(
-                        color: theme.primary.withValues(alpha: 0.2),
+                        color: theme.border,
                         width: 2,
                       ),
                     ),
@@ -280,9 +253,7 @@ class ProfileListShimmer extends StatelessWidget {
                       Row(
                         children: [
                           Flexible(
-                            child: Shimmer.fromColors(
-                              baseColor: baseColor,
-                              highlightColor: highlightColor,
+                            child: OneUIShimmer(
                               period: const Duration(milliseconds: 1500),
                               child: Container(
                                 height: 16,
@@ -290,7 +261,7 @@ class ProfileListShimmer extends StatelessWidget {
                                   maxWidth: 120 + (index % 3) * 20,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: baseColor,
+                                  color: base,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -298,15 +269,13 @@ class ProfileListShimmer extends StatelessWidget {
                           ),
                           if (isFollowed) ...[
                             const SizedBox(width: 6),
-                            Shimmer.fromColors(
-                              baseColor: baseColor,
-                              highlightColor: highlightColor,
+                            OneUIShimmer(
                               period: const Duration(milliseconds: 1500),
                               child: Container(
                                 width: 14,
                                 height: 14,
                                 decoration: BoxDecoration(
-                                  color: baseColor,
+                                  color: base,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -315,15 +284,13 @@ class ProfileListShimmer extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Shimmer.fromColors(
-                        baseColor: baseColor,
-                        highlightColor: highlightColor,
+                      OneUIShimmer(
                         period: const Duration(milliseconds: 1500),
                         child: Container(
                           height: 14,
                           width: 90 + (index % 4) * 20,
                           decoration: BoxDecoration(
-                            color: baseColor,
+                            color: base,
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
@@ -332,18 +299,16 @@ class ProfileListShimmer extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Shimmer.fromColors(
-                  baseColor: baseColor,
-                  highlightColor: highlightColor,
+                OneUIShimmer(
                   period: const Duration(milliseconds: 1500),
                   child: Container(
                     width: 90,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: baseColor,
+                      color: base,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: theme.primary.withValues(alpha: 0.3),
+                        color: theme.border,
                         width: 1.5,
                       ),
                     ),

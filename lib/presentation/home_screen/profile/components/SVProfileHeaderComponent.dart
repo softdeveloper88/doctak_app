@@ -2,9 +2,12 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/network/custom_cache_manager.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/edge_to_edge_helper.dart';
 import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/data/models/profile_model/profile_model.dart';
 import 'package:doctak_app/presentation/followers_screen/follower_screen.dart';
@@ -14,17 +17,17 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/profile_image_screen/profile_image_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
+import 'package:doctak_app/presentation/verification/verification_screen.dart';
 import 'package:doctak_app/widgets/communication/communication_gate.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/report_content_bottom_sheet.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'SVProfilePostsComponent.dart';
-
-// ── Primary blue matching the design reference ──
-const Color _kPrimary = Color(0xFF1D4ED8);
 
 // ── Frosted glass circle button used on the cover area ──
 class _CoverButton extends StatelessWidget {
@@ -56,7 +59,11 @@ class _CoverButton extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, size: 20, color: isDark ? Colors.white70 : Colors.grey[700]),
+            child: Icon(
+              icon,
+              size: 20,
+              color: isDark ? Colors.white70 : Colors.grey[700],
+            ),
           ),
         ),
       ),
@@ -93,7 +100,9 @@ class StatItem extends StatelessWidget {
               ? BoxDecoration(
                   border: BorderDirectional(
                     end: BorderSide(
-                      color: theme.isDark ? Colors.white12 : const Color(0xFFE2E8F0),
+                      color: theme.isDark
+                          ? Colors.white12
+                          : const Color(0xFFE2E8F0),
                       width: 1,
                     ),
                   ),
@@ -118,7 +127,9 @@ class StatItem extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.8,
                   fontFamily: 'Inter',
-                  color: theme.isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                  color: theme.isDark
+                      ? Colors.white38
+                      : const Color(0xFF94A3B8),
                 ),
               ),
             ],
@@ -130,10 +141,10 @@ class StatItem extends StatelessWidget {
 }
 
 class SVProfileHeaderComponent extends StatefulWidget {
-  UserProfile? userProfile;
-  ProfileBloc? profileBoc;
-  bool? isMe;
-  bool viewAsPublic;
+  final UserProfile? userProfile;
+  final ProfileBloc? profileBoc;
+  final bool? isMe;
+  final bool viewAsPublic;
 
   SVProfileHeaderComponent({
     this.userProfile,
@@ -153,6 +164,32 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
   late AnimationController _controller;
   late Animation<double> _profileImageAnimation;
 
+  /// Check privacy for a field in the header.
+  /// Returns true if the field should be shown.
+  bool _canViewField(String recordType) {
+    // Own profile (not viewAsPublic): show everything
+    if ((widget.isMe ?? false) && !widget.viewAsPublic) return true;
+
+    final privacySettings = widget.profileBoc?.fullProfile?.privacySettings;
+    if (privacySettings == null || privacySettings.isEmpty) {
+      return !widget.viewAsPublic;
+    }
+
+    String visibility = (privacySettings[recordType] ?? 'public').toString();
+    if (visibility == 'lock') visibility = 'only_me';
+    if (visibility == 'group') visibility = 'friends';
+
+    if (widget.viewAsPublic) {
+      return visibility == 'public';
+    }
+
+    // Viewing another user's profile
+    final isFriend = widget.profileBoc?.fullProfile?.isFriend ?? false;
+    if (visibility == 'only_me') return false;
+    if (visibility == 'friends') return isFriend;
+    return true; // public
+  }
+
   @override
   void initState() {
     super.initState();
@@ -160,8 +197,10 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _profileImageAnimation = Tween<double>(begin: 0.8, end: 1.0)
-        .animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
+    _profileImageAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _controller.forward();
   }
 
@@ -175,13 +214,18 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     final isDark = theme.isDark;
-    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9);
     final textPrimary = isDark ? Colors.white : const Color(0xFF0F172A);
-    final textSecondary = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final textSecondary = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
+    final embeddedInDashboard = widget.isMe == true && !widget.viewAsPublic;
     return SingleChildScrollView(
-      padding: EdgeInsets.only(bottom: kBottomNavigationBarHeight + 80),
+      padding: EdgeInsets.only(
+        bottom: embeddedInDashboard
+            ? EdgeToEdgeHelper.dashboardTabBottomPadding(context)
+            : MediaQuery.of(context).padding.bottom + 24,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -192,48 +236,44 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             clipBehavior: Clip.none,
             children: [
               // Non-positioned child to define the Stack size including overflow area
-              // 200px cover + 60px space for avatar/buttons overflow
-              const SizedBox(height: 260, width: double.infinity),
+              // 168px cover + 56px space for avatar/buttons overflow
+              const SizedBox(height: 224, width: double.infinity),
               // ── Cover image ──
               Positioned(
                 top: 0,
                 left: 0,
                 right: 0,
                 child: GestureDetector(
-                onTap: () => ProfileImageScreen(
-                  imageUrl: '${widget.userProfile?.coverPicture}',
-                ).launch(context),
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: isDark
-                          ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-                          : [const Color(0xFFDBEAFE), const Color(0xFFEFF6FF)],
+                  onTap: () => ProfileImageScreen(
+                    imageUrl: '${widget.userProfile?.coverPicture}',
+                  ).launch(context),
+                  child: Container(
+                    height: 168,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      gradient: theme.coverGradient,
                     ),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _buildCoverImage(),
-                      // Subtle gradient overlay like the reference
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.15),
-                            ],
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _buildCoverImage(),
+                    // Gradient overlay for depth
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.35),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
               ),
 
               // ── Overlay action buttons ──
@@ -263,15 +303,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                             onTap: () async {
                               final hasPermission =
                                   await PermissionUtils.requestGalleryPermissionWithUI(
-                                    context, showRationale: false);
+                                    context,
+                                    showRationale: false,
+                                  );
                               if (hasPermission) _showFileOptions(false);
                             },
                           ),
                         if (!(widget.isMe ?? false)) ...[
-                          _CoverButton(
-                            icon: Icons.share,
-                            onTap: () {},
-                          ),
+                          _CoverButton(icon: Icons.share, onTap: _shareProfile),
                           const SizedBox(width: 8),
                         ],
                         if (!(widget.isMe ?? false))
@@ -284,7 +323,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
 
               // ── Avatar positioned to overlap the cover ──
               PositionedDirectional(
-                top: 200 - 56, // half of avatar hangs over cover
+                top: 168 - 44, // half of 88px avatar hangs over cover
                 start: 20,
                 child: ScaleTransition(
                   scale: _profileImageAnimation,
@@ -292,48 +331,76 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                 ),
               ),
 
-              // ── Follow + Message buttons (other users) / Camera (own) ──
+              // ── Follow + Message buttons (other users) / Edit Profile (own) ──
               PositionedDirectional(
-                top: 200 + 8,
+                top: 168 + 8,
+                start: 124, // Clear the avatar (20 start + 88 width + 16 gap)
                 end: 20,
-                child: _buildActionButtons(theme),
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: _buildActionButtons(theme),
+                ),
               ),
             ],
           ),
 
-          // ── Name + Points badge ──
+          // ── Name + Verified badge + Points badge ──
           Padding(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 8),
             child: Row(
               children: [
-                Expanded(
-                  child: Text(
-                    '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Inter',
-                      color: textPrimary,
-                      letterSpacing: -0.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width - 120,
+                        ),
+                        child: Text(
+                          '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Inter',
+                            color: textPrimary,
+                            letterSpacing: -0.3,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (widget.profileBoc?.fullProfile?.user?.verified ==
+                          true) ...[
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.verified_rounded,
+                          size: 20,
+                          color: Color(0xFF1DA1F2),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                if (widget.isMe ?? false) ...[                  
+                if (widget.isMe ?? false) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFFBBF24), Color(0xFFF59E0B)],
-                      ),
+                      gradient: theme.pointsBadgeGradient,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.star_rounded, size: 14, color: Colors.white),
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 14,
+                          color: Colors.white,
+                        ),
                         const SizedBox(width: 3),
                         Text(
                           translation(context).lbl_points_format('300'),
@@ -352,73 +419,62 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             ),
           ),
 
-          // ── Specialty + Location ──
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
-            child: Row(
-              children: [
-                if (widget.userProfile?.user?.specialty != null &&
-                    widget.userProfile!.user!.specialty!.isNotEmpty) ...[
-                  Icon(Icons.medical_services, size: 14, color: _kPrimary),
-                  const SizedBox(width: 4),
+          // ── Specialty row (dedicated) ──
+          if (specialtyLabelOrNull(widget.userProfile?.user?.specialty) != null &&
+              _canViewField('specialty'))
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+              child: Row(
+                children: [
+                  Icon(Icons.phone_outlined, size: 14, color: theme.primary),
+                  const SizedBox(width: 5),
                   Flexible(
                     child: Text(
-                      widget.userProfile!.user!.specialty!,
+                      specialtyLabelOrNull(widget.userProfile!.user!.specialty)!,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
                         fontFamily: 'Inter',
-                        color: textSecondary,
+                        color: textPrimary,
                       ),
                     ),
                   ),
                 ],
-                if (widget.userProfile?.user?.specialty != null &&
-                    widget.userProfile!.user!.specialty!.isNotEmpty &&
-                    _hasLocation()) ...[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text('•', style: TextStyle(color: isDark ? Colors.white24 : const Color(0xFFCBD5E1), fontSize: 14)),
-                  ),
-                ],
-                if (_hasLocation())
+              ),
+            ),
+
+          // ── Location row (dedicated, never truncated) ──
+          if (_hasLocation() && _canViewField('country'))
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 3),
+              child: Row(
+                children: [
+                  Icon(Icons.location_on_outlined, size: 14, color: textSecondary),
+                  const SizedBox(width: 4),
                   Flexible(
                     child: Text(
                       _locationText(),
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12.5,
                         fontFamily: 'Inter',
                         color: textSecondary,
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
 
           // ═══════════════════════════════════════════
-          //  STATS CARD
+          //  STATS ROW (white card — design reference)
           // ═══════════════════════════════════════════
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 4),
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: borderColor),
-                boxShadow: isDark
-                    ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: theme.profileCardDecoration,
               child: Row(
                 children: [
                   StatItem(
@@ -429,34 +485,42 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                     showBorder: true,
                   ),
                   StatItem(
-                    count: '${widget.profileBoc?.fullProfile?.stats?.totalConnections ?? widget.userProfile?.totalFollows?.totalFollowings ?? '0'}',
+                    count:
+                        '${widget.profileBoc?.fullProfile?.stats?.totalConnections ?? widget.userProfile?.totalFollows?.totalFollowings ?? '0'}',
                     label: translation(context).lbl_connections_short,
                     onTap: () {
-                      const NetworkScreen(initialTab: 3).launch(context);
+                      final userId = (widget.isMe ?? false)
+                          ? AppData.logInUserId
+                          : (widget.userProfile?.user?.id ?? '');
+                      NetworkScreen(viewUserId: userId).launch(context);
                     },
                     icon: Icons.people_alt_rounded,
                     showBorder: true,
                   ),
                   StatItem(
-                    count: widget.userProfile?.totalFollows?.totalFollowers ?? '0',
+                    count:
+                        widget.userProfile?.totalFollows?.totalFollowers ?? '0',
                     label: translation(context).lbl_followers,
                     onTap: () {
                       final userId = (widget.isMe ?? false)
                           ? AppData.logInUserId
                           : (widget.userProfile?.user?.id ?? '');
-                      FollowerScreen(isFollowersScreen: true, userId: userId).launch(context);
+                      FollowerScreen(isFollowersScreen: true, userId: userId)
+                          .launch(context);
                     },
                     icon: Icons.person_add_rounded,
                     showBorder: true,
                   ),
                   StatItem(
-                    count: widget.userProfile?.totalFollows?.totalFollowings ?? '0',
+                    count:
+                        widget.userProfile?.totalFollows?.totalFollowings ?? '0',
                     label: translation(context).lbl_following,
                     onTap: () {
                       final userId = (widget.isMe ?? false)
                           ? AppData.logInUserId
                           : (widget.userProfile?.user?.id ?? '');
-                      FollowerScreen(isFollowersScreen: false, userId: userId).launch(context);
+                      FollowerScreen(isFollowersScreen: false, userId: userId)
+                          .launch(context);
                     },
                     icon: Icons.person_add_rounded,
                   ),
@@ -466,9 +530,99 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
           ),
 
           // ═══════════════════════════════════════════
+          //  GET VERIFIED CARD (own profile, not verified)
+          // ═══════════════════════════════════════════
+          if ((widget.isMe ?? false) &&
+              widget.profileBoc?.fullProfile?.user?.verified != true)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onTap: () {
+                  AppNavigator.push(
+                    context,
+                    const VerificationScreen(),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [const Color(0xFF1E293B), const Color(0xFF0D1B2A)]
+                          : [const Color(0xFFEFF6FF), const Color(0xFFDBEAFE)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? theme.primary.withValues(alpha: 0.2)
+                          : const Color(0xFFBFDBFE),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: theme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.verified_rounded,
+                          color: theme.primary,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Get Verified',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Inter',
+                                color: theme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Verify your professional credentials',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Inter',
+                                color: theme.primary.withValues(alpha: 0.7),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 16,
+                        color: theme.primary,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+          if ((widget.isMe ?? false) &&
+              widget.profileBoc?.fullProfile?.user?.verified != true)
+            const SizedBox(height: 16),
+
+          // ═══════════════════════════════════════════
           //  TAB SECTION
           // ═══════════════════════════════════════════
-          SVProfilePostsComponent(widget.profileBoc!, viewAsPublic: widget.viewAsPublic),
+          SVProfilePostsComponent(
+            widget.profileBoc!,
+            viewAsPublic: widget.viewAsPublic,
+          ),
         ],
       ),
     );
@@ -477,37 +631,25 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
   // ── Cover image widget ──
   Widget _buildCoverImage() {
     final coverPic = widget.userProfile?.coverPicture;
-    final isDefault = coverPic == null ||
+    final isDefault =
+        coverPic == null ||
         coverPic.isEmpty ||
         coverPic.contains('default-profile-bg.jpg');
 
-    if (isDefault) {
-      return Image.asset(
-        'assets/images/img_cover.png',
-        width: double.infinity,
-        height: 200,
-        fit: BoxFit.cover,
-      );
-    }
+    // No custom cover — let the branded gradient show through
+    if (isDefault) return const SizedBox.shrink();
+
     return CachedNetworkImage(
-      key: ValueKey('cover_${coverPic}_${widget.profileBoc?.imageVersion ?? 0}'),
-      imageUrl: coverPic!,
-      height: 200,
+      key: ValueKey(
+        'cover_${coverPic}_${widget.profileBoc?.imageVersion ?? 0}',
+      ),
+      imageUrl: coverPic,
+      height: 168,
       width: double.infinity,
       fit: BoxFit.cover,
       cacheManager: CustomCacheManager(),
-      placeholder: (context, url) => Container(
-        height: 200,
-        width: double.infinity,
-        color: Colors.grey[200],
-        child: const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2))),
-      ),
-      errorWidget: (context, url, error) => Image.asset(
-        'assets/images/img_cover.png',
-        height: 200,
-        width: double.infinity,
-        fit: BoxFit.cover,
-      ),
+      placeholder: (context, url) => const SizedBox(height: 168),
+      errorWidget: (context, url, error) => const SizedBox(height: 168),
     );
   }
 
@@ -516,13 +658,13 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
     return Stack(
       children: [
         Container(
-          width: 112,
-          height: 112,
+          width: 88,
+          height: 88,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
               color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
-              width: 4,
+              width: 3.5,
             ),
             boxShadow: [
               BoxShadow(
@@ -541,31 +683,45 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
               child: ClipOval(
                 child: Container(
                   color: theme.isDark ? const Color(0xFF1E293B) : Colors.white,
-                  child: (widget.userProfile?.profilePicture == null || widget.userProfile!.profilePicture!.isEmpty)
+                  child:
+                      (widget.userProfile?.profilePicture == null ||
+                          widget.userProfile!.profilePicture!.isEmpty)
                       ? Image.asset(
                           'images/socialv/faces/face_5.png',
-                          width: 104,
-                          height: 104,
+                          width: 80,
+                          height: 80,
                           fit: BoxFit.cover,
                         )
                       : CachedNetworkImage(
                           key: ValueKey(
-                              'profile_${widget.userProfile?.profilePicture}_${widget.profileBoc?.imageVersion ?? 0}'),
+                            'profile_${widget.userProfile?.profilePicture}_${widget.profileBoc?.imageVersion ?? 0}',
+                          ),
                           imageUrl: widget.userProfile!.profilePicture!,
-                          width: 104,
-                          height: 104,
+                          width: 80,
+                          height: 80,
                           fit: BoxFit.cover,
                           cacheManager: CustomCacheManager(),
                           placeholder: (context, url) => Container(
-                            width: 104,
-                            height: 104,
-                            color: theme.isDark ? const Color(0xFF1E293B) : Colors.grey[200],
-                            child: Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: theme.primary))),
+                            width: 80,
+                            height: 80,
+                            color: theme.isDark
+                                ? const Color(0xFF1E293B)
+                                : Colors.grey[200],
+                            child: Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: theme.primary,
+                                ),
+                              ),
+                            ),
                           ),
                           errorWidget: (context, url, error) => Image.asset(
                             'images/socialv/faces/face_5.png',
-                            width: 104,
-                            height: 104,
+                            width: 80,
+                            height: 80,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -574,48 +730,57 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             ),
           ),
         ),
-        // Verified badge (bottom-end)
-        PositionedDirectional(
-          bottom: 4,
-          end: 4,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: _kPrimary,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
-                width: 2,
+        // Verified badge (bottom-end) — only for verified users
+        if (widget.profileBoc?.fullProfile?.user?.verified == true)
+          PositionedDirectional(
+            bottom: 4,
+            end: 4,
+            child: Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: theme.primary,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
+                  width: 2,
+                ),
               ),
+              child: const Icon(Icons.verified, size: 14, color: Colors.white),
             ),
-            child: const Icon(Icons.verified, size: 14, color: Colors.white),
           ),
-        ),
-        // Camera button for own profile
+        // Camera button for own profile (bottom-end per design)
         if (widget.isMe ?? false)
           PositionedDirectional(
-            top: 0,
+            bottom: 0,
             end: 0,
             child: GestureDetector(
               onTap: () async {
                 final hasPermission =
                     await PermissionUtils.requestGalleryPermissionWithUI(
-                        context, showRationale: false);
+                      context,
+                      showRationale: false,
+                    );
                 if (hasPermission) _showFileOptions(true);
               },
               child: Container(
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: _kPrimary,
+                  color: theme.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
+                    color: theme.isDark
+                        ? const Color(0xFF0F172A)
+                        : Colors.white,
                     width: 2,
                   ),
                 ),
-                child: const Icon(Icons.camera_alt_outlined, size: 16, color: Colors.white),
+                child: const Icon(
+                  Icons.camera_alt_outlined,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -625,40 +790,47 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
 
   // ── Action buttons (Follow/Connect/Message for other users) ──
   Widget _buildActionButtons(OneUITheme theme) {
-    if (widget.isMe ?? false) return const SizedBox.shrink();
+    if (widget.isMe ?? false) {
+      return const SizedBox.shrink();
+    }
 
-    final connectionStatus = widget.profileBoc?.fullProfile?.connectionStatus ?? 'none';
+    final connectionStatus =
+        widget.profileBoc?.fullProfile?.connectionStatus ?? 'none';
     final friendRequestId = widget.profileBoc?.fullProfile?.friendRequestId;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    return Wrap(
+      spacing: 4,
+      runSpacing: 4,
+      alignment: WrapAlignment.end,
       children: [
         // Follow button — pill shaped, filled
         GestureDetector(
           onTap: () {
             if (widget.userProfile!.isFollowing ?? false) {
               widget.profileBoc?.add(
-                  SetUserFollow(widget.userProfile?.user?.id ?? '', 'unfollow'));
+                SetUserFollow(widget.userProfile?.user?.id ?? '', 'unfollow'),
+              );
               widget.userProfile!.isFollowing = false;
             } else {
               widget.profileBoc?.add(
-                  SetUserFollow(widget.userProfile?.user?.id ?? '', 'follow'));
+                SetUserFollow(widget.userProfile?.user?.id ?? '', 'follow'),
+              );
               widget.userProfile!.isFollowing = true;
             }
             setState(() {});
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               color: (widget.userProfile?.isFollowing ?? false)
                   ? (theme.isDark ? Colors.white12 : const Color(0xFFF1F5F9))
-                  : _kPrimary,
+                  : theme.primary,
               borderRadius: BorderRadius.circular(999),
               boxShadow: (widget.userProfile?.isFollowing ?? false)
                   ? null
                   : [
                       BoxShadow(
-                        color: _kPrimary.withValues(alpha: 0.3),
+                        color: theme.primary.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -669,7 +841,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   ? translation(context).lbl_following
                   : translation(context).lbl_follow,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Inter',
                 color: (widget.userProfile?.isFollowing ?? false)
@@ -679,15 +851,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             ),
           ),
         ),
-        const SizedBox(width: 8),
         // Connect button — pill shaped, outlined or filled based on status
         _buildConnectButton(theme, connectionStatus, friendRequestId),
-        const SizedBox(width: 8),
         // Message icon button — outlined circle
         GestureDetector(
           onTap: () {
             final userId = '${widget.userProfile?.user?.id}';
-            final userName = '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}';
+            final userName =
+                '${widget.userProfile?.user?.firstName} ${widget.userProfile?.user?.lastName}';
             CommunicationGate.guardMessage(
               context: context,
               targetUserId: userId,
@@ -703,13 +874,15 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             );
           },
           child: Container(
-            width: 44,
-            height: 44,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: theme.isDark ? const Color(0xFF1E293B) : Colors.white,
               shape: BoxShape.circle,
               border: Border.all(
-                color: theme.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                color: theme.isDark
+                    ? const Color(0xFF334155)
+                    : const Color(0xFFE2E8F0),
               ),
               boxShadow: theme.isDark
                   ? null
@@ -723,8 +896,10 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             ),
             child: Icon(
               Icons.mail_outline_rounded,
-              size: 20,
-              color: theme.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+              size: 18,
+              color: theme.isDark
+                  ? const Color(0xFFCBD5E1)
+                  : const Color(0xFF475569),
             ),
           ),
         ),
@@ -732,26 +907,32 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
     );
   }
 
-  Widget _buildConnectButton(OneUITheme theme, String connectionStatus, String? friendRequestId) {
+  Widget _buildConnectButton(
+    OneUITheme theme,
+    String connectionStatus,
+    String? friendRequestId,
+  ) {
     final userId = widget.userProfile?.user?.id ?? '';
 
     // Already connected — show checkmark pill
     if (connectionStatus == 'connected') {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: theme.isDark ? const Color(0xFF1E3A2F) : const Color(0xFFECFDF5),
+          color: theme.isDark
+              ? const Color(0xFF1E3A2F)
+              : const Color(0xFFECFDF5),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.check_circle, size: 16, color: const Color(0xFF059669)),
-            const SizedBox(width: 4),
+            Icon(Icons.check_circle, size: 14, color: const Color(0xFF059669)),
+            const SizedBox(width: 3),
             Text(
               translation(context).lbl_connections_short,
               style: const TextStyle(
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Inter',
                 color: Color(0xFF059669),
@@ -767,31 +948,42 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
       return GestureDetector(
         onTap: () {
           if (friendRequestId != null && friendRequestId.isNotEmpty) {
-            widget.profileBoc?.add(CancelConnectionRequestEvent(friendRequestId));
+            widget.profileBoc?.add(
+              CancelConnectionRequestEvent(friendRequestId),
+            );
           }
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: theme.isDark ? Colors.white12 : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: theme.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              color: theme.isDark
+                  ? const Color(0xFF334155)
+                  : const Color(0xFFE2E8F0),
             ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.hourglass_top_rounded, size: 15,
-                  color: theme.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B)),
-              const SizedBox(width: 4),
+              Icon(
+                Icons.hourglass_top_rounded,
+                size: 14,
+                color: theme.isDark
+                    ? const Color(0xFFCBD5E1)
+                    : const Color(0xFF64748B),
+              ),
+              const SizedBox(width: 3),
               Text(
                 translation(context).lbl_pending,
                 style: TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Inter',
-                  color: theme.isDark ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                  color: theme.isDark
+                      ? const Color(0xFFCBD5E1)
+                      : const Color(0xFF64748B),
                 ),
               ),
             ],
@@ -806,24 +998,28 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
         widget.profileBoc?.add(SendConnectionRequestEvent(userId));
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: _kPrimary, width: 1.5),
+          border: Border.all(color: theme.primary, width: 1.5),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.person_add_alt_1_rounded, size: 16, color: _kPrimary),
-            const SizedBox(width: 4),
+            Icon(
+              Icons.person_add_alt_1_rounded,
+              size: 14,
+              color: theme.primary,
+            ),
+            const SizedBox(width: 3),
             Text(
               translation(context).lbl_connect,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Inter',
-                color: _kPrimary,
+                color: theme.primary,
               ),
             ),
           ],
@@ -852,8 +1048,11 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                   : Colors.white.withValues(alpha: 0.8),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.more_vert, size: 20,
-                color: theme.isDark ? Colors.white70 : Colors.grey[700]),
+            child: Icon(
+              Icons.more_vert,
+              size: 20,
+              color: theme.isDark ? Colors.white70 : Colors.grey[700],
+            ),
           ),
         ),
       ),
@@ -864,11 +1063,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
             children: [
               Icon(CupertinoIcons.flag, color: theme.warning, size: 20),
               const SizedBox(width: 12),
-              Text(translation(context).lbl_report_user,
-                  style: TextStyle(
-                      color: theme.warning,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500)),
+              Text(
+                translation(context).lbl_report_user,
+                style: TextStyle(
+                  color: theme.warning,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ),
@@ -876,13 +1078,20 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
           value: 'Block',
           child: Row(
             children: [
-              Icon(CupertinoIcons.hand_raised, color: theme.deleteRed, size: 20),
+              Icon(
+                CupertinoIcons.hand_raised,
+                color: theme.deleteRed,
+                size: 20,
+              ),
               const SizedBox(width: 12),
-              Text(translation(context).lbl_block_user,
-                  style: TextStyle(
-                      color: theme.deleteRed,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w500)),
+              Text(
+                translation(context).lbl_block_user,
+                style: TextStyle(
+                  color: theme.deleteRed,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ),
@@ -920,7 +1129,8 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
     final user = widget.userProfile?.user;
     final parts = <String>[];
     if (user?.state != null && user!.state!.isNotEmpty) parts.add(user.state!);
-    if (user?.country != null && user!.country!.isNotEmpty) parts.add(user.country!);
+    if (user?.country != null && user!.country!.isNotEmpty)
+      parts.add(user.country!);
     return parts.join(', ');
   }
 
@@ -949,5 +1159,24 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
         );
       });
     }
+  }
+
+  void _shareProfile() {
+    final userId = widget.userProfile?.user?.id ?? '';
+    final username = widget.userProfile?.user?.username ?? '';
+    final name =
+        '${widget.userProfile?.user?.firstName ?? ''} ${widget.userProfile?.user?.lastName ?? ''}'
+            .trim();
+    if (userId.isEmpty) return;
+
+    final link = DeepLinkService.generateProfileLink(
+      userId,
+      username: username,
+    );
+    final shareText = name.isNotEmpty
+        ? 'Check out $name\'s profile on DocTak\n\n$link'
+        : 'Check out this profile on DocTak\n\n$link';
+
+    SharePlus.instance.share(ShareParams(text: shareText));
   }
 }

@@ -363,11 +363,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Usage/Plan banner
-                            if (state1.response.usage != null) ...[  
-                              const SizedBox(height: 6),
-                              _buildUsageBanner(theme, state1.response.usage!),
-                            ],
                             const SizedBox(height: 8),
 
                             // Hero Icon

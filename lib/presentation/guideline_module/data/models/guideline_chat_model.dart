@@ -5,6 +5,7 @@ class GuidelineChatMessage {
   final String content;
   final int? rating;
   final DateTime? createdAt;
+  final List<Map<String, dynamic>> sources;
 
   const GuidelineChatMessage({
     this.id,
@@ -12,10 +13,19 @@ class GuidelineChatMessage {
     required this.content,
     this.rating,
     this.createdAt,
+    this.sources = const <Map<String, dynamic>>[],
   });
 
   bool get isUser => role == 'user';
   bool get isAssistant => role == 'assistant';
+
+  static List<Map<String, dynamic>> _parseSources(dynamic value) {
+    if (value is! List) return const <Map<String, dynamic>>[];
+    return value
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
 
   factory GuidelineChatMessage.fromJson(Map<String, dynamic> json) {
     return GuidelineChatMessage(
@@ -26,6 +36,7 @@ class GuidelineChatMessage {
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'].toString())
           : null,
+      sources: _parseSources(json['sources']),
     );
   }
 
@@ -41,6 +52,7 @@ class GuidelineChatMessage {
         'content': content,
         'rating': rating,
         'created_at': createdAt?.toIso8601String(),
+        'sources': sources,
       };
 
   GuidelineChatMessage copyWith({
@@ -49,6 +61,7 @@ class GuidelineChatMessage {
     String? content,
     int? rating,
     DateTime? createdAt,
+    List<Map<String, dynamic>>? sources,
   }) {
     return GuidelineChatMessage(
       id: id ?? this.id,
@@ -56,6 +69,7 @@ class GuidelineChatMessage {
       content: content ?? this.content,
       rating: rating ?? this.rating,
       createdAt: createdAt ?? this.createdAt,
+      sources: sources ?? this.sources,
     );
   }
 }
@@ -163,22 +177,19 @@ class GuidelineAgentResponse {
 
   const GuidelineAgentResponse({
     required this.response,
-    this.sources = const [],
-    this.suggestions = const [],
+    this.sources = const <Map<String, dynamic>>[],
+    this.suggestions = const <String>[],
     required this.sessionId,
   });
 
   factory GuidelineAgentResponse.fromJson(Map<String, dynamic> json) {
     return GuidelineAgentResponse(
       response: json['response'] ?? '',
-      sources: (json['sources'] as List?)
-              ?.map((e) => Map<String, dynamic>.from(e))
-              .toList() ??
-          [],
+      sources: GuidelineChatMessage._parseSources(json['sources']),
       suggestions: (json['suggestions'] as List?)
               ?.map((e) => e.toString())
               .toList() ??
-          [],
+          const <String>[],
       sessionId: json['session_id'] ?? '',
     );
   }

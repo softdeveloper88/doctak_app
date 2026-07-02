@@ -10,10 +10,15 @@ class GuidelineMessageBubble extends StatelessWidget {
   final GuidelineChatMessage message;
   final Function(String rating)? onFeedback;
 
+  /// When non-null, this is a streaming bubble showing partial content.
+  /// The bubble hides action buttons and shows a blinking cursor.
+  final String? streamingContent;
+
   const GuidelineMessageBubble({
     super.key,
     required this.message,
     this.onFeedback,
+    this.streamingContent,
   });
 
   @override
@@ -42,7 +47,7 @@ class GuidelineMessageBubble extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF0A84FF).withOpacity(0.2),
+              color: const Color(0xFF0A84FF).withValues(alpha:0.2),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -61,6 +66,9 @@ class GuidelineMessageBubble extends StatelessWidget {
   }
 
   Widget _buildAssistantBubble(BuildContext context, OneUITheme theme) {
+    final isStreaming = streamingContent != null;
+    final displayContent = streamingContent ?? message.content;
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
@@ -74,22 +82,18 @@ class GuidelineMessageBubble extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0A84FF).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Icon(
-                      Icons.local_hospital_rounded,
-                      size: 12,
-                      color: Color(0xFF0A84FF),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.asset(
+                      'assets/logo/logo.png',
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
                     ),
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Guideline Agent',
+                    'Medical guidelines assistant',
                     style: TextStyle(
                       color: theme.textSecondary,
                       fontSize: 11,
@@ -117,7 +121,7 @@ class GuidelineMessageBubble extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withValues(alpha:0.03),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -128,8 +132,8 @@ class GuidelineMessageBubble extends StatelessWidget {
                 children: [
                   // Markdown content
                   MarkdownBody(
-                    data: message.content,
-                    selectable: true,
+                    data: displayContent,
+                    selectable: !isStreaming,
                     styleSheet: MarkdownStyleSheet(
                       p: TextStyle(
                         color: theme.textPrimary,
@@ -166,7 +170,7 @@ class GuidelineMessageBubble extends StatelessWidget {
                       code: TextStyle(
                         color: const Color(0xFF0A84FF),
                         backgroundColor:
-                            const Color(0xFF0A84FF).withOpacity(0.08),
+                            const Color(0xFF0A84FF).withValues(alpha:0.08),
                         fontSize: 13,
                       ),
                       blockquote: TextStyle(
@@ -177,7 +181,7 @@ class GuidelineMessageBubble extends StatelessWidget {
                       blockquoteDecoration: BoxDecoration(
                         border: Border(
                           left: BorderSide(
-                            color: const Color(0xFF0A84FF).withOpacity(0.5),
+                            color: const Color(0xFF0A84FF).withValues(alpha:0.5),
                             width: 3,
                           ),
                         ),
@@ -209,9 +213,21 @@ class GuidelineMessageBubble extends StatelessWidget {
                     },
                   ),
 
-                  // Action buttons
-                  const SizedBox(height: 10),
-                  Row(
+                  // Blinking cursor during streaming
+                  if (isStreaming) ...[
+                    const SizedBox(height: 4),
+                    _BlinkingCursor(),
+                  ],
+
+                  // Action buttons (hidden during streaming)
+                  if (!isStreaming) ...[
+                    // Sources used (matching web sidebar "Sources Used")
+                    if (message.sources.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      _buildSourcesSection(context, theme, message.sources),
+                    ],
+                    const SizedBox(height: 10),
+                    Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildActionButton(
@@ -252,11 +268,91 @@ class GuidelineMessageBubble extends StatelessWidget {
                       ],
                     ],
                   ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSourcesSection(
+    BuildContext context,
+    OneUITheme theme,
+    List<Map<String, dynamic>> sources,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A84FF).withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: const Color(0xFF0A84FF).withValues(alpha: 0.15),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.verified_outlined,
+                  size: 13, color: const Color(0xFF0A84FF)),
+              const SizedBox(width: 4),
+              Text(
+                'Sources Used',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF0A84FF),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ...sources.map((source) {
+            final name = source['source']?.toString() ??
+                source['name']?.toString() ??
+                source['title']?.toString() ??
+                'Unknown Source';
+            final url = source['url']?.toString();
+            return Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: InkWell(
+                onTap: url != null
+                    ? () => launchUrl(Uri.parse(url),
+                        mode: LaunchMode.externalApplication)
+                    : null,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.circle,
+                      size: 5,
+                      color: theme.textSecondary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: url != null
+                              ? const Color(0xFF0A84FF)
+                              : theme.textSecondary,
+                          decoration: url != null
+                              ? TextDecoration.underline
+                              : TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -282,6 +378,47 @@ class GuidelineMessageBubble extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(6),
           child: Icon(icon, size: 16, color: color),
+        ),
+      ),
+    );
+  }
+}
+
+/// A small blinking cursor shown at the end of streaming text.
+class _BlinkingCursor extends StatefulWidget {
+  @override
+  State<_BlinkingCursor> createState() => _BlinkingCursorState();
+}
+
+class _BlinkingCursorState extends State<_BlinkingCursor>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 8,
+        height: 16,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A84FF),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
     );

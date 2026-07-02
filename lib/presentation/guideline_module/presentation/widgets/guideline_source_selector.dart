@@ -62,7 +62,7 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
               width: 36,
               height: 4,
               decoration: BoxDecoration(
-                color: theme.textSecondary.withOpacity(0.3),
+                color: theme.textSecondary.withValues(alpha:0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -128,7 +128,7 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
                 decoration: InputDecoration(
                   hintText: 'Search sources...',
                   hintStyle: TextStyle(
-                    color: theme.textSecondary.withOpacity(0.6),
+                    color: theme.textSecondary.withValues(alpha:0.6),
                   ),
                   prefixIcon:
                       Icon(Icons.search, color: theme.textSecondary, size: 20),
@@ -204,7 +204,7 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Material(
         color: isSelected
-            ? const Color(0xFF0A84FF).withOpacity(0.06)
+            ? const Color(0xFF0A84FF).withValues(alpha:0.06)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
@@ -224,7 +224,7 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
               borderRadius: BorderRadius.circular(12),
               border: isSelected
                   ? Border.all(
-                      color: const Color(0xFF0A84FF).withOpacity(0.3),
+                      color: const Color(0xFF0A84FF).withValues(alpha:0.3),
                       width: 1,
                     )
                   : null,
@@ -243,7 +243,7 @@ class _GuidelineSourceSelectorState extends State<GuidelineSourceSelector> {
                     border: Border.all(
                       color: isSelected
                           ? const Color(0xFF0A84FF)
-                          : theme.textSecondary.withOpacity(0.4),
+                          : theme.textSecondary.withValues(alpha:0.4),
                       width: 1.5,
                     ),
                   ),

@@ -1,4 +1,6 @@
+import 'package:doctak_app/core/utils/edge_to_edge_helper.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -15,12 +17,10 @@ class AppTheme {
         hoverColor: Colors.white54,
         dividerColor: viewLineColor,
         fontFamily: 'Poppins',
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: SVAppLayoutBackground,
-          iconTheme: IconThemeData(color: textPrimaryColor),
-          systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarIconBrightness: Brightness.dark,
-          ),
+          iconTheme: const IconThemeData(color: textPrimaryColor),
+          systemOverlayStyle: EdgeToEdgeHelper.overlayForTheme(isDark: false),
         ),
         textSelectionTheme: const TextSelectionThemeData(
           cursorColor: Colors.black,
@@ -56,12 +56,10 @@ class AppTheme {
         useMaterial3: true,
         scaffoldBackgroundColor: appBackgroundColorDark,
         highlightColor: appBackgroundColorDark,
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: appBackgroundColorDark,
-          iconTheme: IconThemeData(color: blackColor),
-          systemOverlayStyle: SystemUiOverlayStyle(
-            statusBarIconBrightness: Brightness.light,
-          ),
+          iconTheme: const IconThemeData(color: blackColor),
+          systemOverlayStyle: EdgeToEdgeHelper.overlayForTheme(isDark: true),
         ),
         primaryColor: color_primary_black,
         dividerColor: const Color(0xFFDADADA).withValues(alpha: 0.3),

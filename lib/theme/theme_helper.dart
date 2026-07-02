@@ -1,3 +1,4 @@
+import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../core/app_export.dart';
@@ -83,7 +84,7 @@ class ThemeHelper {
       seedColor: const Color(0xFF227DDE), // Using your primary blue
       brightness: Brightness.light,
     ),
-    scaffoldBackgroundColor: const Color(0xFFF7F8FA), // Light grey background
+    scaffoldBackgroundColor: DoctakPalette.bg,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.transparent,
       foregroundColor: Color(0xFF0B0C0C), // Your onPrimary color
@@ -117,15 +118,11 @@ class ThemeHelper {
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xFFE0E2E4), // Your gray300
-        ),
+        borderSide: const BorderSide(color: DoctakPalette.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xFFE0E2E4), // Your gray300
-        ),
+        borderSide: const BorderSide(color: DoctakPalette.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -134,10 +131,13 @@ class ThemeHelper {
         ),
       ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: DoctakPalette.inputFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     ),
-    drawerTheme: const DrawerThemeData(backgroundColor: Colors.white, elevation: 0),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: DoctakPalette.surface,
+      elevation: 0,
+    ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: const Color(0xFF227DDE), // Your primary color
       foregroundColor: Colors.white,

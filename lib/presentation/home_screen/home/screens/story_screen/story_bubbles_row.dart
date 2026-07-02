@@ -1,6 +1,8 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/data/models/story_model/story_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/bloc/story_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/story_viewer_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/create_story_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -11,7 +13,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Horizontal row of story bubbles at the top of the home feed
 /// Shows "Your Story" button + stories from connected/following users
 class StoryBubblesRow extends StatefulWidget {
-  const StoryBubblesRow({super.key});
+  final Listenable? refreshListenable;
+
+  const StoryBubblesRow({super.key, this.refreshListenable});
 
   @override
   State<StoryBubblesRow> createState() => _StoryBubblesRowState();
@@ -24,10 +28,25 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
   void initState() {
     super.initState();
     _storyBloc = StoryBloc()..add(const LoadStoryFeedEvent());
+    widget.refreshListenable?.addListener(_reloadStories);
+  }
+
+  @override
+  void didUpdateWidget(StoryBubblesRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshListenable != widget.refreshListenable) {
+      oldWidget.refreshListenable?.removeListener(_reloadStories);
+      widget.refreshListenable?.addListener(_reloadStories);
+    }
+  }
+
+  void _reloadStories() {
+    if (mounted) _storyBloc.add(const LoadStoryFeedEvent());
   }
 
   @override
   void dispose() {
+    widget.refreshListenable?.removeListener(_reloadStories);
     _storyBloc.close();
     super.dispose();
   }
@@ -38,6 +57,11 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
 
     return BlocConsumer<StoryBloc, StoryState>(
       bloc: _storyBloc,
+      buildWhen: (previous, current) =>
+          previous.runtimeType != current.runtimeType ||
+          (previous is StoryFeedLoadedState &&
+              current is StoryFeedLoadedState &&
+              previous.storyGroups.length != current.storyGroups.length),
       listener: (context, state) {
         if (state is StoryCreatedState) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -52,21 +76,34 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
       builder: (context, state) {
         final hasStories = _storyBloc.storyGroups.isNotEmpty;
 
-        return SizedBox(
-          height: 106,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            itemCount: (hasStories ? _storyBloc.storyGroups.length : 0) + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                // "Your Story" / Add story button
-                return _buildAddStoryBubble(context, theme);
-              }
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.cardBackground,
+            border: Border(bottom: BorderSide(color: theme.divider)),
+          ),
+          child: SizedBox(
+            height: 118,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              primary: false,
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+              cacheExtent: 200,
+              addRepaintBoundaries: true,
+              itemCount: (hasStories ? _storyBloc.storyGroups.length : 0) + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _buildAddStoryBubble(context, theme);
+                }
 
-              final group = _storyBloc.storyGroups[index - 1];
-              return _buildStoryBubble(context, theme, group, index - 1);
-            },
+                final adjustedIndex = index - 1;
+                if (adjustedIndex >= _storyBloc.storyGroups.length) {
+                  return const SizedBox.shrink();
+                }
+
+                final group = _storyBloc.storyGroups[adjustedIndex];
+                return _buildStoryBubble(context, theme, group, adjustedIndex);
+              },
+            ),
           ),
         );
       },
@@ -99,64 +136,45 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
           children: [
             // Profile pic with + badge
             Stack(
+              clipBehavior: Clip.none,
               children: [
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 66,
+                  height: 66,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: myStoryGroup != null
-                          ? theme.primary
-                          : theme.divider,
-                      width: 2.5,
+                      color: theme.accentSoft,
+                      width: 2,
+                      strokeAlign: BorderSide.strokeAlignOutside,
                     ),
+                    color: theme.surfaceVariant,
                   ),
-                  padding: const EdgeInsets.all(2),
-                  child: ClipOval(
-                    child: ValueListenableBuilder<String>(
-                      valueListenable: AppData.profilePicNotifier,
-                      builder: (context, picUrl, _) {
-                        return picUrl.isNotEmpty
-                            ? AppCachedNetworkImage(
-                                imageUrl: picUrl,
-                                height: 56,
-                                width: 56,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                width: 56,
-                                height: 56,
-                                color: theme.surfaceVariant,
-                                child: Icon(
-                                  Icons.person_rounded,
-                                  size: 28,
-                                  color: theme.textSecondary,
-                                ),
-                              );
-                      },
+                  child: Center(
+                    child: FeedIcon(
+                      asset: FeedIconAssets.storyPhoto,
+                      size: 26,
+                      color: theme.primary,
                     ),
                   ),
                 ),
-                // + badge
                 Positioned(
-                  bottom: 0,
-                  right: 0,
+                  bottom: -1,
+                  right: -1,
                   child: Container(
                     width: 22,
                     height: 22,
                     decoration: BoxDecoration(
                       color: theme.primary,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: theme.scaffoldBackground,
-                        width: 2,
-                      ),
+                      border: Border.all(color: theme.cardBackground, width: 2.5),
                     ),
-                    child: const Icon(
-                      Icons.add,
-                      size: 14,
-                      color: Colors.white,
+                    child: Center(
+                      child: FeedIcon(
+                        asset: FeedIconAssets.storyPlus,
+                        size: 13,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -164,7 +182,7 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
             ),
             const SizedBox(height: 6),
             SizedBox(
-              width: 68,
+              width: 66,
               child: Text(
                 'Your Story',
                 overflow: TextOverflow.ellipsis,
@@ -172,9 +190,9 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
                 maxLines: 1,
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  fontSize: 11,
+                  fontSize: 11.5,
                   fontWeight: FontWeight.w500,
-                  color: theme.textSecondary,
+                  color: theme.textPrimary,
                 ),
               ),
             ),
@@ -205,34 +223,24 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Avatar with gradient ring if unviewed
+            // Avatar with accent ring if unviewed (avoid SweepGradient — costly while scrolling)
             Container(
-              width: 64,
-              height: 64,
+              width: 66,
+              height: 66,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: hasUnviewed
-                    ? LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          theme.primary,
-                          theme.primary.withValues(alpha: 0.6),
-                          Colors.deepPurple,
-                        ],
-                      )
-                    : null,
-                border: hasUnviewed
-                    ? null
-                    : Border.all(color: theme.divider, width: 2),
+                border: Border.all(
+                  color: hasUnviewed ? theme.primary : theme.divider,
+                  width: hasUnviewed ? 2.5 : 2,
+                ),
               ),
-              padding: const EdgeInsets.all(2.5),
+              padding: const EdgeInsets.all(3),
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: theme.scaffoldBackground,
+                  color: theme.cardBackground,
                 ),
-                padding: const EdgeInsets.all(2),
+                padding: const EdgeInsets.all(2.5),
                 child: ClipOval(
                   child: group.user.profilePicUrl.isNotEmpty
                       ? AppCachedNetworkImage(
@@ -240,15 +248,27 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
                           height: 52,
                           width: 52,
                           fit: BoxFit.cover,
+                          memCacheWidth: 104,
+                          memCacheHeight: 104,
+                          fadeInDuration: Duration.zero,
+                          fadeOutDuration: Duration.zero,
+                          filterQuality: FilterQuality.low,
                         )
                       : Container(
                           width: 52,
                           height: 52,
                           color: theme.surfaceVariant,
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 28,
-                            color: theme.textSecondary,
+                          alignment: Alignment.center,
+                          child: Text(
+                            group.user.fullName.isNotEmpty
+                                ? group.user.fullName[0].toUpperCase()
+                                : 'D',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                              fontFamily: 'Poppins',
+                            ),
                           ),
                         ),
                 ),
@@ -256,9 +276,11 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
             ),
             const SizedBox(height: 6),
             SizedBox(
-              width: 68,
+              width: 66,
               child: Text(
-                group.user.fullName.split(' ').first,
+                group.user.fullName.isNotEmpty
+                    ? group.user.fullName.split(' ').first
+                    : 'User',
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -343,20 +365,29 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
     StoryGroupModel group, {
     bool showAddOption = false,
   }) {
+    final viewableGroups = _storyBloc.storyGroups
+        .where(
+          (storyGroup) =>
+              (storyGroup.userId != AppData.logInUserId || showAddOption) &&
+              storyGroup.stories.isNotEmpty,
+        )
+        .toList();
+
+    if (viewableGroups.isEmpty) {
+      return;
+    }
+
+    final initialGroupIndex = viewableGroups.indexWhere(
+      (storyGroup) => storyGroup.userId == group.userId,
+    );
+
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
         pageBuilder: (context, animation, secondaryAnimation) {
           return StoryViewerScreen(
-            storyGroups: _storyBloc.storyGroups
-                .where((g) => g.userId != AppData.logInUserId || showAddOption)
-                .toList(),
-            initialGroupIndex: showAddOption
-                ? 0
-                : _storyBloc.storyGroups
-                    .where((g) => g.userId != AppData.logInUserId)
-                    .toList()
-                    .indexOf(group),
+            storyGroups: viewableGroups,
+            initialGroupIndex: initialGroupIndex >= 0 ? initialGroupIndex : 0,
             storyBloc: _storyBloc,
             currentGroup: group,
           );
@@ -369,11 +400,14 @@ class _StoryBubblesRowState extends State<StoryBubblesRow> {
     );
   }
 
-  void _openCreateStory(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CreateStoryScreen(storyBloc: _storyBloc),
-      ),
+  void _openCreateStory(BuildContext context) async {
+    await AppNavigator.push(
+      context,
+      CreateStoryScreen(storyBloc: _storyBloc),
     );
+    // Refresh the feed after returning from story creation
+    if (mounted) {
+      _storyBloc.add(const LoadStoryFeedEvent());
+    }
   }
 }

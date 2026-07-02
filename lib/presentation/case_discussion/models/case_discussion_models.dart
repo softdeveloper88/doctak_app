@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'clinical_snapshot.dart';
 
 /// Safely parse a dynamic value to int (handles String, int, double, null).
 int _parseInt(dynamic value, [int fallback = 0]) {
@@ -25,6 +26,7 @@ class CaseDiscussionListItem {
   final String? description;
   final String? tags;
   final int likes;
+  final int dislikes;
   final int views;
   final String? attachedFile;
   final bool promoted;
@@ -34,8 +36,10 @@ class CaseDiscussionListItem {
   final String? specialty;
   final int commentsCount;
   final bool isLiked;
+  final bool isDisliked;
   final bool isBookmarked;
   final bool isOwner;
+  final bool isVerified;
 
   CaseDiscussionListItem({
     required this.id,
@@ -43,6 +47,7 @@ class CaseDiscussionListItem {
     this.description,
     this.tags,
     required this.likes,
+    this.dislikes = 0,
     required this.views,
     this.attachedFile,
     this.promoted = false,
@@ -52,8 +57,10 @@ class CaseDiscussionListItem {
     this.specialty,
     required this.commentsCount,
     this.isLiked = false,
+    this.isDisliked = false,
     this.isBookmarked = false,
     this.isOwner = false,
+    this.isVerified = false,
   });
 
   factory CaseDiscussionListItem.fromJson(Map<String, dynamic> json) {
@@ -72,6 +79,7 @@ class CaseDiscussionListItem {
       description: json['description']?.toString(),
       tags: json['tags']?.toString(),
       likes: _parseInt(json['likes']),
+      dislikes: _parseInt(json['dislikes']),
       views: _parseInt(json['views']),
       attachedFile: attachedFile,
       promoted: json['promoted'] == 1 || json['promoted'] == true,
@@ -81,9 +89,11 @@ class CaseDiscussionListItem {
       profilePic: AppData.fullImageUrl(json['profile_pic']),
       specialty: json['specialty']?.toString(),
       commentsCount: _parseInt(json['comments_count'] ?? json['comments']),
-      isLiked: json['is_liked'] == true || json['is_liked'] == 1,
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || json['user_vote'] == 'up',
+      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || json['user_vote'] == 'down',
       isBookmarked: json['is_bookmarked'] == true || json['is_bookmarked'] == 1,
       isOwner: json['is_owner'] == true || json['is_owner'] == 1,
+      isVerified: json['is_verified'] == true || json['is_verified'] == 1,
     );
   }
 
@@ -123,9 +133,13 @@ class CaseDiscussionListItem {
         profilePic: profilePic,
       );
 
+  int get score => likes - dislikes;
+
   CaseDiscussionListItem copyWith({
     int? likes,
+    int? dislikes,
     bool? isLiked,
+    bool? isDisliked,
     bool? isBookmarked,
     int? commentsCount,
   }) {
@@ -135,6 +149,7 @@ class CaseDiscussionListItem {
       description: description,
       tags: tags,
       likes: likes ?? this.likes,
+      dislikes: dislikes ?? this.dislikes,
       views: views,
       attachedFile: attachedFile,
       promoted: promoted,
@@ -144,6 +159,7 @@ class CaseDiscussionListItem {
       specialty: specialty,
       commentsCount: commentsCount ?? this.commentsCount,
       isLiked: isLiked ?? this.isLiked,
+      isDisliked: isDisliked ?? this.isDisliked,
       isBookmarked: isBookmarked ?? this.isBookmarked,
       isOwner: isOwner,
     );
@@ -179,6 +195,7 @@ class CaseDiscussion {
   final String description;
   final String? tags;
   final int likes;
+  final int dislikes;
   final int views;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -186,6 +203,7 @@ class CaseDiscussion {
   final String? specialty;
   final int? specialtyId;
   final String? countryName;
+  final int? countryId;
   final String? countryFlag;
   final List<CaseAttachment> attachments;
   final AISummary? aiSummary;
@@ -196,6 +214,7 @@ class CaseDiscussion {
   final int commentsCount;
   final int followersCount;
   final bool isLiked;
+  final bool isDisliked;
   final bool isBookmarked;
   final bool isFollowing;
   final bool isOwner;
@@ -209,6 +228,7 @@ class CaseDiscussion {
     required this.description,
     this.tags,
     required this.likes,
+    this.dislikes = 0,
     required this.views,
     required this.createdAt,
     required this.updatedAt,
@@ -216,6 +236,7 @@ class CaseDiscussion {
     this.specialty,
     this.specialtyId,
     this.countryName,
+    this.countryId,
     this.countryFlag,
     this.attachments = const [],
     this.aiSummary,
@@ -226,6 +247,7 @@ class CaseDiscussion {
     this.commentsCount = 0,
     this.followersCount = 0,
     this.isLiked = false,
+    this.isDisliked = false,
     this.isBookmarked = false,
     this.isFollowing = false,
     this.isOwner = false,
@@ -255,6 +277,10 @@ class CaseDiscussion {
         name: caseData['name'] ?? 'Unknown User',
         specialty: caseData['specialty'] ?? '',
         profilePic: AppData.fullImageUrl(caseData['profile_pic']),
+        isVerified: caseData['is_verified'] == true ||
+            caseData['is_verified'] == 1 ||
+            data['is_verified'] == true ||
+            data['is_verified'] == 1,
       );
     }
 
@@ -306,6 +332,7 @@ class CaseDiscussion {
       description: caseData['description'] ?? '',
       tags: caseData['tags']?.toString(),
       likes: _parseInt(caseData['likes']),
+      dislikes: _parseInt(caseData['dislikes']),
       views: _parseInt(caseData['views']),
       createdAt: DateTime.parse(
           caseData['created_at'] ?? DateTime.now().toIso8601String()),
@@ -317,6 +344,9 @@ class CaseDiscussion {
           ? _parseInt(caseData['specialty_id'])
           : null,
       countryName: caseData['country_name']?.toString(),
+      countryId: caseData['country_id'] != null
+          ? _parseInt(caseData['country_id'])
+          : null,
       countryFlag: caseData['country_flag']?.toString(),
       attachments: attachments,
       aiSummary: aiSummary,
@@ -326,7 +356,8 @@ class CaseDiscussion {
       relatedCases: relatedCases,
       commentsCount: _parseInt(caseData['comments_count'] ?? caseData['comments']),
       followersCount: _parseInt(data['followers_count']),
-      isLiked: data['is_liked'] == true || data['is_liked'] == 1,
+      isLiked: data['is_liked'] == true || data['is_liked'] == 1 || data['user_vote'] == 'up',
+      isDisliked: data['is_disliked'] == true || data['is_disliked'] == 1 || data['user_vote'] == 'down',
       isBookmarked:
           data['is_bookmarked'] == true || data['is_bookmarked'] == 1,
       isFollowing:
@@ -356,11 +387,15 @@ class CaseDiscussion {
     }
   }
 
+  int get score => likes - dislikes;
+
   CaseDiscussion copyWith({
     int? likes,
+    int? dislikes,
     int? commentsCount,
     int? followersCount,
     bool? isLiked,
+    bool? isDisliked,
     bool? isBookmarked,
     bool? isFollowing,
     AISummary? aiSummary,
@@ -375,6 +410,7 @@ class CaseDiscussion {
       description: description,
       tags: tags,
       likes: likes ?? this.likes,
+      dislikes: dislikes ?? this.dislikes,
       views: views,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -382,6 +418,7 @@ class CaseDiscussion {
       specialty: specialty,
       specialtyId: specialtyId,
       countryName: countryName,
+      countryId: countryId,
       countryFlag: countryFlag,
       attachments: attachments,
       aiSummary: aiSummary ?? this.aiSummary,
@@ -392,6 +429,7 @@ class CaseDiscussion {
       commentsCount: commentsCount ?? this.commentsCount,
       followersCount: followersCount ?? this.followersCount,
       isLiked: isLiked ?? this.isLiked,
+      isDisliked: isDisliked ?? this.isDisliked,
       isBookmarked: isBookmarked ?? this.isBookmarked,
       isFollowing: isFollowing ?? this.isFollowing,
       isOwner: isOwner,
@@ -469,12 +507,14 @@ class CaseAuthor {
   final String name;
   final String specialty;
   final String? profilePic;
+  final bool isVerified;
 
   CaseAuthor({
     required this.id,
     required this.name,
     required this.specialty,
     this.profilePic,
+    this.isVerified = false,
   });
 
   factory CaseAuthor.fromJson(Map<String, dynamic> json) {
@@ -488,6 +528,10 @@ class CaseAuthor {
       name: name.isEmpty ? 'Unknown User' : name,
       specialty: json['specialty'] ?? '',
       profilePic: AppData.fullImageUrl(json['profile_pic']),
+      isVerified: json['is_verified'] == true ||
+          json['is_verified'] == 1 ||
+          json['verified'] == true ||
+          json['verified'] == 1,
     );
   }
 
@@ -496,6 +540,7 @@ class CaseAuthor {
         'name': name,
         'specialty': specialty,
         'profile_pic': profilePic,
+        'is_verified': isVerified,
       };
 }
 
@@ -649,6 +694,7 @@ class CaseComment {
         name: json['user_name'] ?? 'Unknown User',
         specialty: json['specialty'] ?? '',
         profilePic: AppData.fullImageUrl(json['profile_pic']),
+        isVerified: json['is_verified'] == true || json['is_verified'] == 1,
       );
     }
 
@@ -684,8 +730,11 @@ class CaseComment {
   }
 
   CaseComment copyWith({
+    String? comment,
     int? likes,
+    int? dislikes,
     bool? isLiked,
+    bool? isDisliked,
     int? repliesCount,
     List<CaseReply>? replies,
   }) {
@@ -693,16 +742,16 @@ class CaseComment {
       id: id,
       caseId: caseId,
       userId: userId,
-      comment: comment,
+      comment: comment ?? this.comment,
       clinicalTags: clinicalTags,
       likes: likes ?? this.likes,
-      dislikes: dislikes,
+      dislikes: dislikes ?? this.dislikes,
       createdAt: createdAt,
       updatedAt: updatedAt,
       author: author,
       repliesCount: repliesCount ?? this.repliesCount,
       isLiked: isLiked ?? this.isLiked,
-      isDisliked: isDisliked,
+      isDisliked: isDisliked ?? this.isDisliked,
       isOwner: isOwner,
       replies: replies ?? this.replies,
     );
@@ -730,6 +779,11 @@ class CaseReply {
   final String reply;
   final DateTime createdAt;
   final CaseAuthor author;
+  final int likes;
+  final int dislikes;
+  final bool isLiked;
+  final bool isDisliked;
+  final bool isOwner;
 
   CaseReply({
     required this.id,
@@ -738,7 +792,37 @@ class CaseReply {
     required this.reply,
     required this.createdAt,
     required this.author,
+    this.likes = 0,
+    this.dislikes = 0,
+    this.isLiked = false,
+    this.isDisliked = false,
+    this.isOwner = false,
   });
+
+  int get score => likes - dislikes;
+
+  CaseReply copyWith({
+    String? reply,
+    int? likes,
+    int? dislikes,
+    bool? isLiked,
+    bool? isDisliked,
+    bool? isOwner,
+  }) {
+    return CaseReply(
+      id: id,
+      commentId: commentId,
+      userId: userId,
+      reply: reply ?? this.reply,
+      createdAt: createdAt,
+      author: author,
+      likes: likes ?? this.likes,
+      dislikes: dislikes ?? this.dislikes,
+      isLiked: isLiked ?? this.isLiked,
+      isDisliked: isDisliked ?? this.isDisliked,
+      isOwner: isOwner ?? this.isOwner,
+    );
+  }
 
   factory CaseReply.fromJson(Map<String, dynamic> json) {
     CaseAuthor author;
@@ -749,7 +833,8 @@ class CaseReply {
         id: json['user_id'] ?? 0,
         name: json['user_name'] ?? 'Unknown User',
         specialty: '',
-        profilePic: null,
+        profilePic: AppData.fullImageUrl(json['profile_pic']?.toString()),
+        isVerified: json['is_verified'] == true || json['is_verified'] == 1,
       );
     }
 
@@ -761,6 +846,11 @@ class CaseReply {
       createdAt: DateTime.parse(
           json['created_at'] ?? DateTime.now().toIso8601String()),
       author: author,
+      likes: _parseInt(json['likes']),
+      dislikes: _parseInt(json['dislikes']),
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || json['user_vote'] == 'up',
+      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || json['user_vote'] == 'down',
+      isOwner: json['is_owner'] == true || json['is_owner'] == 1,
     );
   }
 }
@@ -895,6 +985,9 @@ class CaseMetadata {
     return null;
   }
 
+  ClinicalSnapshot get clinicalSnapshot =>
+      ClinicalSnapshot.fromDemographics(parsedDemographics);
+
   /// Parse clinical keywords
   List<String> get parsedKeywords {
     if (clinicalKeywords == null || clinicalKeywords!.isEmpty) return [];
@@ -1016,6 +1109,8 @@ class CreateCaseRequest {
   final bool? isAnonymized;
   final List<String>? attachedFiles;
   final List<String>? existingFileUrls;
+  final int? specialtyId;
+  final int? countryId;
 
   CreateCaseRequest({
     required this.title,
@@ -1027,6 +1122,8 @@ class CreateCaseRequest {
     this.isAnonymized,
     this.attachedFiles,
     this.existingFileUrls,
+    this.specialtyId,
+    this.countryId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -1039,6 +1136,8 @@ class CreateCaseRequest {
           'clinical_complexity': clinicalComplexity,
         if (teachingValue != null) 'teaching_value': teachingValue,
         if (isAnonymized != null) 'is_anonymized': isAnonymized,
+        if (specialtyId != null) 'specialty_id': specialtyId,
+        if (countryId != null) 'country_id': countryId,
       };
 }
 

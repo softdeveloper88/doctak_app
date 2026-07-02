@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/models/chat_model/conversation_message_model.dart';
 import 'package:doctak_app/data/models/chat_model/conversation_model.dart';
+import 'package:doctak_app/data/services/notifications_websocket_service.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
@@ -14,12 +15,9 @@ import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_co
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
-import '../Pusher/PusherConfig.dart';
 import 'chat_room_screen.dart';
 
 class UserChatScreen extends StatefulWidget {
@@ -29,14 +27,18 @@ class UserChatScreen extends StatefulWidget {
   State<UserChatScreen> createState() => _UserChatScreenState();
 }
 
-class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObserver {
+class _UserChatScreenState extends State<UserChatScreen>
+    with WidgetsBindingObserver {
   ChatBloc chatBloc = ChatBloc();
+  final NotificationsWebSocketService _notificationsWs =
+      NotificationsWebSocketService();
+  StreamSubscription<NotificationWsEvent>? _wsSub;
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
     setStatusBarColor(svGetScaffoldColor());
-    _connectPusher();
+    _connectNotificationsWs();
     chatBloc.add(LoadPageEvent(page: 1));
     super.initState();
   }
@@ -53,111 +55,30 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      _connectPusher();
+      _connectNotificationsWs();
       chatBloc.add(LoadPageEvent(page: 1));
     }
   }
 
-  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
-  bool isSomeoneTyping = false;
-  String? typingUserId;
-  int? typingConversationId;
-  Timer? typingTimer;
-  final Set<String> _subscribedChannels = {};
-
-  Future<dynamic> onAuthorizer(String channelName, String socketId, dynamic options) async {
-    // Use the new API auth endpoint for conversation channels
-    final String authUrl = channelName.startsWith('private-conversation')
-        ? '${AppData.chatApiUrl}/pusher/auth'
-        : '${AppData.chatifyUrl}chat/auth';
-    final Uri uri = Uri.parse(authUrl);
-    final Map<String, String> queryParams = {'socket_id': socketId, 'channel_name': channelName};
-    final response = await http.post(uri.replace(queryParameters: queryParams), headers: {'Authorization': 'Bearer ${AppData.userToken!}'});
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception(translation(context).msg_pusher_auth_failed);
-    }
+  void _connectNotificationsWs() {
+    _wsSub ??= _notificationsWs.events.listen(_onNotificationWsEvent);
+    _notificationsWs.connect();
   }
 
-  void _connectPusher() async {
-    try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: false,
-        onAuthorizer: onAuthorizer,
-        onSubscriptionSucceeded: (channelName, data) {},
-        onSubscriptionError: (message, e) {
-          debugPrint("Pusher subscription error: $message");
-        },
-        onError: (message, code, e) {
-          debugPrint("Pusher error: $message");
-        },
-        onEvent: (event) {},
-        onSubscriptionCount: (channelName, count) {},
-        onMemberAdded: (channelName, member) {},
-        onMemberRemoved: (channelName, member) {},
-        onDecryptionFailure: (event, reason) {},
-      );
-      await pusher.connect();
-    } catch (e) {
-      debugPrint('Pusher connection error: $e');
-    }
-  }
-
-  /// Subscribe to Pusher channels for all conversations
-  void _subscribeToConversations() {
-    for (final conv in chatBloc.conversationsList) {
-      final channelName = 'private-conversation.${conv.id}';
-      if (_subscribedChannels.contains(channelName)) continue;
-      _subscribedChannels.add(channelName);
-
-      pusher.subscribe(
-        channelName: channelName,
-        onEvent: (event) {
-          _handleConversationEvent(conv.id!, event);
-        },
-        onMemberAdded: (member) {},
-        onMemberRemoved: (member) {},
-      );
-    }
-  }
-
-  void _handleConversationEvent(int conversationId, PusherEvent event) {
-    final eventName = event.eventName;
-    switch (eventName) {
-      case 'message.sent':
-        // New message - reload conversations to update preview and unread count
-        chatBloc.add(LoadPageEvent(page: 1));
-        break;
-      case 'user.typing':
-        final data = jsonDecode(event.data ?? '{}');
-        final userId = (data['user']?['id'] ?? data['user_id'])?.toString();
-        if (userId != AppData.logInUserId) {
-          setState(() {
-            isSomeoneTyping = true;
-            typingUserId = userId;
-            typingConversationId = conversationId;
-          });
-          typingTimer?.cancel();
-          typingTimer = Timer(const Duration(seconds: 3), () {
-            if (mounted) {
-              setState(() {
-                isSomeoneTyping = false;
-                typingUserId = null;
-                typingConversationId = null;
-              });
-            }
-          });
-        }
-        break;
-      case 'user.stopped.typing':
-        setState(() {
-          isSomeoneTyping = false;
-          typingUserId = null;
-          typingConversationId = null;
-        });
+  void _onNotificationWsEvent(NotificationWsEvent event) {
+    switch (event) {
+      case ChatMessageNotification e:
+        chatBloc.add(ChatListMessageEvent(
+          conversationId: e.conversationId,
+          message: e.message,
+        ));
+      case ChatTypingNotification e:
+        chatBloc.add(ChatListTypingEvent(
+          conversationId: e.conversationId,
+          userId: e.userId,
+          isTyping: e.isTyping,
+        ));
+      default:
         break;
     }
   }
@@ -165,7 +86,8 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    typingTimer?.cancel();
+    _wsSub?.cancel();
+    chatBloc.close();
     super.dispose();
   }
 
@@ -206,12 +128,9 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
             if (state is DataError) {
               showDialog(
                 context: context,
-                builder: (context) => AlertDialog(content: Text(state.errorMessage)),
+                builder: (context) =>
+                    AlertDialog(content: Text(state.errorMessage)),
               );
-            }
-            if (state is PaginationLoadedState) {
-              // Subscribe to Pusher channels after conversations are loaded
-              _subscribeToConversations();
             }
           },
           builder: (context, state) {
@@ -227,7 +146,9 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
                 },
               );
             } else {
-              return Center(child: Text(translation(context).msg_notification_error));
+              return Center(
+                child: Text(translation(context).msg_notification_error),
+              );
             }
           },
         ),
@@ -291,7 +212,13 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
     final otherParticipant = conversation.getOtherParticipant(AppData.logInUserId);
     final displayName = conversation.name ?? otherParticipant?.user?.fullName ?? 'Unknown';
     final profilePic = conversation.avatar ?? otherParticipant?.user?.profilePic ?? '';
-    final userId = otherParticipant?.userId?.toString() ?? '';
+    // Peer id: the v6 API's `peer` is authoritative; participants are a
+    // fallback. An empty id breaks calls and profile navigation
+    // ("Could not identify this user").
+    final peerId = conversation.peer?.id ?? '';
+    final userId = peerId.isNotEmpty
+        ? peerId
+        : (otherParticipant?.userId?.toString() ?? '');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
@@ -378,32 +305,35 @@ class _UserChatScreenState extends State<UserChatScreen> with WidgetsBindingObse
   }
 
   Widget _buildMessagePreview(OneUITheme theme, Conversation conversation) {
-    // Check typing indicator
-    if (isSomeoneTyping && typingConversationId == conversation.id) {
-      return Row(
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            margin: const EdgeInsets.only(right: 4),
-            decoration: BoxDecoration(color: theme.primary, shape: BoxShape.circle),
-          ),
-          Text(
-            translation(context).lbl_typing,
-            style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 14, color: theme.primary),
-          ),
-        ],
+    if (chatBloc.isConversationTyping(conversation.id)) {
+      return Text(
+        translation(context).lbl_typing,
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          color: theme.primary,
+          fontSize: 14,
+          height: 1.5,
+          fontStyle: FontStyle.italic,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       );
     }
 
     final lastMsg = conversation.lastMessage;
     String preview = lastMsg?.body ?? lastMsg?.content ?? 'Start a conversation';
 
-    // Show type indicator for non-text messages
-    if (lastMsg?.type == 'image') preview = '📷 Photo';
-    if (lastMsg?.type == 'video') preview = '📹 Video';
-    if (lastMsg?.type == 'audio') preview = '🎵 Voice message';
-    if (lastMsg?.type == 'file') preview = '📎 File';
+    if (ConversationMessage.looksLikeVoiceFileName(preview)) {
+      preview = '🎵 Voice message';
+    } else if (lastMsg?.type == 'image') {
+      preview = '📷 Photo';
+    } else if (lastMsg?.type == 'video') {
+      preview = '📹 Video';
+    } else if (lastMsg?.type == 'audio' || lastMsg?.type == 'voice') {
+      preview = '🎵 Voice message';
+    } else if (lastMsg?.type == 'file') {
+      preview = '📎 File';
+    }
 
     if (preview.length > 30) preview = '${preview.substring(0, 30)}...';
 

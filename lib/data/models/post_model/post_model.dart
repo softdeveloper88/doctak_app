@@ -257,13 +257,24 @@ class Commenter {
   String? id;
   String? name;
   String? profilePic;
+  String? specialty;
+  String? city;
+  String? state;
+  String? country;
 
-  Commenter({this.id, this.name, this.profilePic});
+  Commenter({this.id, this.name, this.profilePic, this.specialty, this.city, this.state, this.country});
 
   Commenter.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
+    id = json['id']?.toString();
+    final rawName = (json['name'] ?? '').toString().trim();
+    final firstLast = '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
+    final username = (json['username'] ?? '').toString().trim();
+    name = rawName.isNotEmpty ? rawName : (firstLast.isNotEmpty ? firstLast : (username.isNotEmpty ? username : 'Unknown'));
     profilePic = AppData.fullImageUrl(json['profile_pic']);
+    specialty = (json['specialty'] ?? '').toString().trim().isEmpty ? null : json['specialty'].toString().trim();
+    city = (json['city'] ?? '').toString().trim().isEmpty ? null : json['city'].toString().trim();
+    state = (json['state'] ?? '').toString().trim().isEmpty ? null : json['state'].toString().trim();
+    country = (json['country'] ?? '').toString().trim().isEmpty ? null : json['country'].toString().trim();
   }
 
   Map<String, dynamic> toJson() {
@@ -271,6 +282,10 @@ class Commenter {
     data['id'] = id;
     data['name'] = name;
     data['profile_pic'] = profilePic;
+    data['specialty'] = specialty;
+    data['city'] = city;
+    data['state'] = state;
+    data['country'] = country;
     return data;
   }
 }

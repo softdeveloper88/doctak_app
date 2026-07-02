@@ -3,6 +3,8 @@ import 'package:doctak_app/core/utils/post_utils.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/l10n/app_localizations.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/reaction_picker.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,6 +33,9 @@ class PostItemWidget extends StatefulWidget {
   final bool isLiked;
   final bool isCurrentUser;
   final bool isShowComment;
+  final bool isVerified;
+  final String? specialty;
+  final String? location;
   final VoidCallback onProfileTap;
   final VoidCallback onDeleteTap;
   final VoidCallback onLikeTap;
@@ -41,6 +46,14 @@ class PostItemWidget extends StatefulWidget {
   final VoidCallback onViewCommentsTap;
   final Function(String value) onAddComment;
   dynamic postData;
+
+  /// Optional multi-reaction support (forwarded to [InteractionRowWidget]).
+  final String? currentReaction;
+  final ValueChanged<String?>? onReact;
+
+  /// Optional repost action (forwarded to [InteractionRowWidget]).
+  final VoidCallback? onRepost;
+  final bool isReposted;
 
   PostItemWidget({
     super.key,
@@ -55,6 +68,9 @@ class PostItemWidget extends StatefulWidget {
     required this.isLiked,
     required this.isCurrentUser,
     required this.isShowComment,
+    this.isVerified = false,
+    this.specialty,
+    this.location,
     required this.onProfileTap,
     required this.onDeleteTap,
     required this.likes,
@@ -67,6 +83,10 @@ class PostItemWidget extends StatefulWidget {
     required this.onViewCommentsTap,
     required this.onAddComment,
     required this.postData,
+    this.currentReaction,
+    this.onReact,
+    this.onRepost,
+    this.isReposted = false,
   });
 
   @override
@@ -268,8 +288,8 @@ class _PostItemWidgetState extends State<PostItemWidget> {
 
     return RepaintBoundary(
       child: Container(
-        padding: const EdgeInsets.only(top: 8),
-        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(top: 4),
+        margin: const EdgeInsets.only(bottom: 6),
         decoration: theme.cardDecoration,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,6 +298,9 @@ class _PostItemWidgetState extends State<PostItemWidget> {
               profilePicUrl: widget.profilePicUrl,
               userName: widget.userName,
               createdAt: widget.createdAt,
+              specialty: widget.specialty,
+              location: widget.location,
+              isVerified: widget.isVerified,
               onProfileTap: () => widget.onProfileTap(),
               onDeleteTap: () => widget.onDeleteTap(),
               isCurrentUser: widget.isCurrentUser, // Adjust based on your logic
@@ -294,6 +317,10 @@ class _PostItemWidgetState extends State<PostItemWidget> {
               onViewCommentsTap: widget.onViewCommentsTap,
               likes: widget.likes?.length ?? 0,
               comments: widget.comments?.length ?? 0,
+              currentReaction: widget.currentReaction,
+              onReact: widget.onReact,
+              onRepost: widget.onRepost,
+              isReposted: widget.isReposted,
             ),
             // const Divider(color: Colors.grey, thickness: 0.2),
             //
@@ -394,6 +421,17 @@ class InteractionRowWidget extends StatelessWidget {
   final int likes;
   final int comments;
 
+  /// Optional multi-reaction support. When [onReact] is provided, the Like
+  /// button is replaced by a website-parity reaction picker driven by
+  /// [currentReaction].
+  final String? currentReaction;
+  final ValueChanged<String?>? onReact;
+
+  /// Optional repost button. When [onRepost] is provided, a Repost action is
+  /// shown using [isReposted] for its active state.
+  final VoidCallback? onRepost;
+  final bool isReposted;
+
   const InteractionRowWidget({
     super.key,
     required this.isLiked,
@@ -404,12 +442,16 @@ class InteractionRowWidget extends StatelessWidget {
     required this.onViewCommentsTap,
     required this.likes,
     required this.comments,
+    this.currentReaction,
+    this.onReact,
+    this.onRepost,
+    this.isReposted = false,
   });
 
   Widget _buildActionBtn(
     BuildContext context, {
-    required IconData icon,
-    required String label,
+    IconData? icon,
+    String? svgAsset,
     required VoidCallback onTap,
     required Color color,
   }) {
@@ -417,22 +459,10 @@ class InteractionRowWidget extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: color),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: svgAsset != null
+            ? FeedIcon(asset: svgAsset, size: 20, color: color)
+            : Icon(icon, size: 20, color: color),
       ),
     );
   }
@@ -445,7 +475,7 @@ class InteractionRowWidget extends StatelessWidget {
       children: [
         // Stats Row - likes left, comments right
         Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 10.0, bottom: 10.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 6.0, bottom: 6.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -470,31 +500,42 @@ class InteractionRowWidget extends StatelessWidget {
         Divider(height: 1, thickness: 0.5, color: theme.divider),
         // Action Buttons Row
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // Like Button
-              _buildActionBtn(
-                context,
-                icon: isLiked ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-                label: translation(context).lbl_like,
-                onTap: onLikeTap,
-                color: isLiked ? theme.likeColor : theme.textSecondary,
-              ),
+              // Like / Reaction Button
+              if (onReact != null)
+                ReactionButton(
+                  currentReaction: currentReaction,
+                  onChanged: onReact!,
+                )
+              else
+                _buildActionBtn(
+                  context,
+                  svgAsset: FeedIconAssets.like,
+                  onTap: onLikeTap,
+                  color: isLiked ? theme.likeColor : theme.textSecondary,
+                ),
               // Comment Button
               _buildActionBtn(
                 context,
                 icon: CupertinoIcons.chat_bubble,
-                label: translation(context).lbl_comment,
                 onTap: onToggleComment,
                 color: theme.textSecondary,
               ),
-              // Send Button
+              // Repost Button (optional)
+              if (onRepost != null)
+                _buildActionBtn(
+                  context,
+                  icon: Icons.repeat,
+                  onTap: onRepost!,
+                  color: isReposted ? theme.primary : theme.textSecondary,
+                ),
+              // Share Button
               _buildActionBtn(
                 context,
                 icon: CupertinoIcons.paperplane,
-                label: translation(context).lbl_send,
                 onTap: onShareTap,
                 color: theme.textSecondary,
               ),

@@ -23,11 +23,17 @@ class PaginationInitialState extends NotificationState {
 
 class PaginationLoadedState extends NotificationState {
   final int notificationCount;
+  final int itemCount;
+  final bool isLoadingMore;
 
-  const PaginationLoadedState({this.notificationCount = 0});
+  const PaginationLoadedState({
+    this.notificationCount = 0,
+    this.itemCount = 0,
+    this.isLoadingMore = false,
+  });
 
   @override
-  List<Object?> get props => [notificationCount];
+  List<Object?> get props => [notificationCount, itemCount, isLoadingMore];
 }
 
 class PaginationLoadingState extends NotificationState {

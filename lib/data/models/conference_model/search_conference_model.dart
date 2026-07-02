@@ -3,13 +3,32 @@ import 'dart:convert';
 SearchConferenceModel searchConferenceModelFromJson(String str) => SearchConferenceModel.fromJson(json.decode(str));
 String searchConferenceModelToJson(SearchConferenceModel data) => json.encode(data.toJson());
 
+class ConferenceMonthBucket {
+  ConferenceMonthBucket({this.key, required this.label, this.count = 0});
+
+  ConferenceMonthBucket.fromJson(dynamic json)
+      : key = json['key']?.toString(),
+        label = json['label']?.toString() ?? '',
+        count = int.tryParse(json['count']?.toString() ?? '') ?? 0;
+
+  final String? key;
+  final String label;
+  final int count;
+}
+
 class SearchConferenceModel {
-  SearchConferenceModel({this.conferences});
+  SearchConferenceModel({this.conferences, this.monthBuckets = const []});
 
   SearchConferenceModel.fromJson(dynamic json) {
     conferences = json['conferences'] != null ? Conferences.fromJson(json['conferences']) : null;
+    if (json['month_buckets'] is List) {
+      monthBuckets = (json['month_buckets'] as List)
+          .map((item) => ConferenceMonthBucket.fromJson(item))
+          .toList();
+    }
   }
   Conferences? conferences;
+  List<ConferenceMonthBucket> monthBuckets = [];
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -156,6 +175,10 @@ class Data {
     this.phoneNo,
     this.keywords,
     this.thumbnail,
+    this.image,
+    this.website,
+    this.specialty,
+    this.location,
     this.conferenceStatus,
     this.additianalNotes,
     this.createdAt,
@@ -163,35 +186,45 @@ class Data {
   });
 
   Data.fromJson(dynamic json) {
-    id = json['id'];
-    title = json['title'];
-    description = json['description'];
-    startDate = json['start_date'];
-    endDate = json['end_date'];
-    city = json['city'];
-    state = json['state'];
-    country = json['country'];
-    venue = json['venue'];
-    organizer = json['organizer'];
-    cmeCredits = json['cme_credits'];
-    mocCredits = json['moc_credits'];
-    specialtiesTargeted = json['specialties_targeted'];
-    registrationLink = json['registration_link'];
-    conferenceAgendaLink = json['conference_agenda_link'];
-    earlyBirdPrice = json['early_bird_price'];
-    regularPrice = json['regular_price'];
-    latePrice = json['late_price'];
-    accommodationDetails = json['accommodationDetails'];
-    speakers = json['speakers'];
-    sponsors = json['sponsors'];
-    email = json['email'];
-    phoneNo = json['phone_no'];
-    keywords = json['keywords'];
-    thumbnail = json['thumbnail'];
-    conferenceStatus = json['conference_status'];
-    additianalNotes = json['additianal_notes'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    String? pick(String snake, String camel) {
+      final value = json[snake] ?? json[camel];
+      return value?.toString();
+    }
+
+    id = pick('id', 'id');
+    title = pick('title', 'title');
+    description = pick('description', 'description');
+    startDate = pick('start_date', 'startDate');
+    endDate = pick('end_date', 'endDate');
+    city = pick('city', 'city');
+    state = pick('state', 'state');
+    country = pick('country', 'country');
+    countryName = pick('country_name', 'countryName');
+    venue = pick('venue', 'venue');
+    organizer = pick('organizer', 'organizer');
+    cmeCredits = pick('cme_credits', 'cmeCredits');
+    mocCredits = pick('moc_credits', 'mocCredits');
+    specialtiesTargeted = pick('specialties_targeted', 'specialtiesTargeted');
+    registrationLink = pick('registration_link', 'registrationLink');
+    conferenceAgendaLink = pick('conference_agenda_link', 'conferenceAgendaLink');
+    earlyBirdPrice = pick('early_bird_price', 'earlyBirdPrice');
+    regularPrice = pick('regular_price', 'regularPrice');
+    latePrice = pick('late_price', 'latePrice');
+    accommodationDetails = pick('accommodationDetails', 'accommodationDetails');
+    speakers = pick('speakers', 'speakers');
+    sponsors = pick('sponsors', 'sponsors');
+    email = pick('email', 'email');
+    phoneNo = pick('phone_no', 'phoneNo');
+    keywords = pick('keywords', 'keywords');
+    thumbnail = pick('thumbnail', 'thumbnail');
+    image = pick('image', 'image');
+    website = pick('website', 'website');
+    specialty = pick('specialty', 'specialty');
+    location = pick('location', 'location');
+    conferenceStatus = pick('conference_status', 'conferenceStatus');
+    additianalNotes = pick('additianal_notes', 'additionalNotes');
+    createdAt = pick('created_at', 'createdAt');
+    updatedAt = pick('updated_at', 'updatedAt');
   }
   String? id;
   String? title;
@@ -201,6 +234,7 @@ class Data {
   String? city;
   String? state;
   String? country;
+  String? countryName;
   String? venue;
   String? organizer;
   String? cmeCredits;
@@ -218,6 +252,10 @@ class Data {
   String? phoneNo;
   String? keywords;
   String? thumbnail;
+  String? image;
+  String? website;
+  String? specialty;
+  String? location;
   String? conferenceStatus;
   String? additianalNotes;
   String? createdAt;
@@ -250,6 +288,8 @@ class Data {
     map['phone_no'] = phoneNo;
     map['keywords'] = keywords;
     map['thumbnail'] = thumbnail;
+    map['website'] = website;
+    map['specialty'] = specialty;
     map['conference_status'] = conferenceStatus;
     map['additianal_notes'] = additianalNotes;
     map['created_at'] = createdAt;

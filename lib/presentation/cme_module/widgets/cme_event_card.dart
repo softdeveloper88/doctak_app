@@ -1,5 +1,5 @@
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
-import 'package:doctak_app/presentation/cme_module/widgets/cme_credit_badge.dart';
+import 'package:doctak_app/data/models/cme/cme_segment_utils.dart';
 import 'package:doctak_app/presentation/cme_module/widgets/cme_status_badge.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
@@ -7,94 +7,143 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class CmeEventCard extends StatelessWidget {
+  const CmeEventCard({
+    super.key,
+    required this.event,
+    this.onTap,
+    this.showProviderMeta = false,
+  });
+
   final CmeEventData event;
   final VoidCallback? onTap;
-
-  const CmeEventCard({super.key, required this.event, this.onTap});
+  final bool showProviderMeta;
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+    final hasCover = (event.thumbnail != null && event.thumbnail!.isNotEmpty) ||
+        (event.bannerImage != null && event.bannerImage!.isNotEmpty);
 
-    return GestureDetector(
-      onTap: onTap,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: theme.cardDecoration,
         clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Thumbnail / Banner
-            if (event.thumbnail != null || event.bannerImage != null)
-              _buildBanner(theme),
-
-            Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Status + Type row
-                  Row(
-                    children: [
-                      if (event.status != null)
-                        CmeStatusBadge(status: event.status!),
-                      if (event.status != null && event.type != null)
-                        const SizedBox(width: 8),
-                      if (event.type != null)
-                        _buildTypeChip(theme),
-                      const Spacer(),
-                      if (event.creditType != null)
-                        CmeCreditBadge(
-                          creditType: event.creditType!,
-                          creditAmount: event.creditAmount,
-                          compact: true,
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Title
-                  Text(
-                    event.title ?? '',
-                    style: theme.titleMedium,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 6),
-
-                  // Short description
-                  if (event.shortDescription != null)
+        decoration: theme.cardDecoration,
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasCover) _buildBanner(theme) else _buildPlaceholderHeader(theme),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Transform.translate(
+                      offset: const Offset(0, -22),
+                      child: _buildProviderAvatar(theme),
+                    ),
+                    const SizedBox(height: 2),
+                    _buildMetaLine(theme),
+                    const SizedBox(height: 8),
                     Text(
-                      event.shortDescription!,
-                      style: theme.bodySecondary,
+                      event.title ?? 'Untitled activity',
+                      style: theme.titleMedium.copyWith(height: 1.25),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-
-                  const SizedBox(height: 10),
-
-                  // Date + Location row
-                  _buildInfoRow(theme),
-
-                  // Speakers row
-                  if (event.speakers != null && event.speakers!.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    _buildSpeakersRow(theme),
-                  ],
-
-                  // Capacity bar
-                  if (event.maxParticipants != null) ...[
+                    if (event.shortDescription != null &&
+                        event.shortDescription!.trim().isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        event.shortDescription!,
+                        style: theme.bodySecondary,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     const SizedBox(height: 10),
-                    _buildCapacityBar(theme),
+                    _buildProviderLine(theme),
+                    if (event.speakers != null && event.speakers!.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      _buildFacultyStack(theme),
+                    ],
+                    if (event.maxParticipants != null) ...[
+                      const SizedBox(height: 12),
+                      _buildCapacityBar(theme),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildPlaceholderHeader(OneUITheme theme) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          height: 120,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                theme.primary.withValues(alpha: 0.85),
+                theme.primary.withValues(alpha: 0.55),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -12,
+                bottom: -16,
+                child: Icon(
+                  _typeIcon(),
+                  size: 72,
+                  color: Colors.white.withValues(alpha: 0.15),
+                ),
+              ),
+              Positioned(
+                top: 10,
+                left: 10,
+                child: _buildCoverBadges(theme),
+              ),
+              if (event.isLive)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: _livePill(),
+                ),
+              Positioned(
+                right: 12,
+                bottom: 12,
+                child: _buildCreditPill(theme),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  IconData _typeIcon() {
+    switch ((event.type ?? '').toLowerCase()) {
+      case 'recorded':
+      case 'on_demand':
+        return Icons.play_circle_outline;
+      case 'hybrid':
+        return Icons.hub_outlined;
+      default:
+        return Icons.school_outlined;
+    }
   }
 
   Widget _buildBanner(OneUITheme theme) {
@@ -107,133 +156,254 @@ class CmeEventCard extends StatelessWidget {
             imageUrl: event.bannerImage ?? event.thumbnail ?? '',
             fit: BoxFit.cover,
           ),
-          // Live indicator overlay
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.35),
+                ],
+              ),
+            ),
+          ),
+          Positioned(top: 10, left: 10, child: _buildCoverBadges(theme)),
           if (event.isLive)
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFF3B30),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.fiber_manual_record, size: 8, color: Colors.white),
-                    SizedBox(width: 4),
-                    Text(
-                      'LIVE NOW',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          // Format badge
-          if (event.format != null)
-            Positioned(
-              top: 10,
-              left: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  event.format!.toUpperCase(),
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            Positioned(top: 10, right: 10, child: _livePill()),
+          Positioned(
+            right: 12,
+            bottom: 12,
+            child: _buildCreditPill(theme, onDark: true),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTypeChip(OneUITheme theme) {
+  Widget _buildCoverBadges(OneUITheme theme) {
+    final badgeStatus = cmeCardCoverBadgeStatus(event);
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        if (badgeStatus != null)
+          CmeStatusBadge(status: badgeStatus, onDark: true),
+        if (event.type != null) _buildTypeChip(theme, onDark: true),
+      ],
+    );
+  }
+
+  Widget _buildCreditPill(OneUITheme theme, {bool onDark = false}) {
+    final amount = event.creditAmount?.toString() ?? '0';
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(4),
+        color: onDark
+            ? Colors.black.withValues(alpha: 0.55)
+            : theme.cardBackground.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            amount,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: onDark ? Colors.white : theme.textPrimary,
+            ),
+          ),
+          Text(
+            'CME credit${(double.tryParse(amount) ?? 0) > 1 ? 's' : ''}',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 9,
+              color: onDark
+                  ? Colors.white.withValues(alpha: 0.85)
+                  : theme.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProviderAvatar(OneUITheme theme) {
+    final name = event.organizer?.name ?? 'CME provider';
+    final logo = event.organizer?.profilePic;
+    final initial = name.trim().isNotEmpty ? name.trim()[0].toUpperCase() : 'C';
+
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: theme.cardBackground, width: 3),
+        color: theme.primary,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: logo != null && logo.isNotEmpty
+          ? AppCachedNetworkImage(
+              imageUrl: logo,
+              width: 52,
+              height: 52,
+              fit: BoxFit.cover,
+              errorWidget: (_, __, ___) => _avatarInitial(initial, theme),
+            )
+          : _avatarInitial(initial, theme),
+    );
+  }
+
+  Widget _avatarInitial(String initial, OneUITheme theme) {
+    return Container(
+      color: theme.primary,
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetaLine(OneUITheme theme) {
+    final date = _formatDateRange();
+    final location = _formatLocation();
+    final parts = <String>[];
+    if (date.isNotEmpty) parts.add(date);
+    if (location.isNotEmpty) parts.add(location);
+    if (parts.isEmpty) return const SizedBox.shrink();
+
+    return Text(
+      parts.join(' · '),
+      style: theme.caption,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildProviderLine(OneUITheme theme) {
+    final provider = event.organizer?.name ?? 'CME provider';
+    final accred = event.accreditationBody ?? 'ACCME';
+    final count = event.currentParticipants ?? 0;
+    return Text(
+      '$accred · $provider · $count registered',
+      style: theme.caption,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildFacultyStack(OneUITheme theme) {
+    final speakers = event.speakers!.take(4).toList();
+    final total = event.speakers!.length;
+    return Row(
+      children: [
+        SizedBox(
+          height: 28,
+          width: (speakers.length * 20.0) + 8,
+          child: Stack(
+            children: [
+              for (var i = 0; i < speakers.length; i++)
+                Positioned(
+                  left: i * 20.0,
+                  child: _facultyAvatar(speakers[i], theme),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            total > speakers.length
+                ? '+${total - speakers.length} faculty'
+                : '$total faculty',
+            style: theme.caption,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _facultyAvatar(CmeSpeaker speaker, OneUITheme theme) {
+    final pic = speaker.profilePic;
+    final initial = (speaker.name ?? '?').trim().isNotEmpty
+        ? speaker.name!.trim()[0].toUpperCase()
+        : '?';
+    return Container(
+      width: 28,
+      height: 28,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: theme.cardBackground, width: 2),
+        color: theme.primary.withValues(alpha: 0.12),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: pic != null && pic.isNotEmpty
+          ? AppCachedNetworkImage(
+              imageUrl: pic,
+              width: 28,
+              height: 28,
+              fit: BoxFit.cover,
+              errorWidget: (_, __, ___) => Center(
+                child: Text(initial, style: theme.caption),
+              ),
+            )
+          : Center(child: Text(initial, style: theme.caption)),
+    );
+  }
+
+  Widget _livePill() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE53935),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.fiber_manual_record, size: 8, color: Colors.white),
+          SizedBox(width: 4),
+          Text(
+            'LIVE',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeChip(OneUITheme theme, {bool onDark = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: onDark
+            ? Colors.black.withValues(alpha: 0.55)
+            : theme.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
-        event.type ?? '',
+        (event.type ?? '').replaceAll('_', ' '),
         style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 10,
-          fontWeight: FontWeight.w500,
-          color: theme.primary,
+          fontWeight: FontWeight.w600,
+          color: onDark ? Colors.white : theme.primary,
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(OneUITheme theme) {
-    return Row(
-      children: [
-        Icon(Icons.calendar_today_outlined, size: 14, color: theme.textTertiary),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            _formatDateRange(),
-            style: theme.caption,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        if (_hasLocation) ...[
-          const SizedBox(width: 12),
-          Icon(Icons.location_on_outlined, size: 14, color: theme.textTertiary),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              _formatLocation(),
-              style: theme.caption,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildSpeakersRow(OneUITheme theme) {
-    final speakers = event.speakers!.take(3).toList();
-    return Row(
-      children: [
-        Icon(Icons.people_outline, size: 14, color: theme.textTertiary),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            speakers.map((s) => s.name ?? '').join(', '),
-            style: theme.caption,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        if (event.speakers!.length > 3)
-          Text(
-            ' +${event.speakers!.length - 3}',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: theme.primary,
-            ),
-          ),
-      ],
     );
   }
 
@@ -242,14 +412,11 @@ class CmeEventCard extends StatelessWidget {
     final max = event.maxParticipants ?? 1;
     final ratio = max > 0 ? (current / max).clamp(0.0, 1.0) : 0.0;
 
-    Color barColor;
-    if (ratio >= 0.9) {
-      barColor = const Color(0xFFFF3B30);
-    } else if (ratio >= 0.7) {
-      barColor = const Color(0xFFFF9500);
-    } else {
-      barColor = theme.primary;
-    }
+    final barColor = ratio >= 0.9
+        ? theme.error
+        : ratio >= 0.7
+            ? theme.warning
+            : theme.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,10 +424,7 @@ class CmeEventCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '$current / $max spots filled',
-              style: theme.caption,
-            ),
+            Text('$current / $max spots filled', style: theme.caption),
             if (event.isFull)
               Text(
                 'FULL',
@@ -268,18 +432,18 @@ class CmeEventCard extends StatelessWidget {
                   fontFamily: 'Poppins',
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: const Color(0xFFFF3B30),
+                  color: theme.error,
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
+          borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: ratio,
-            minHeight: 3,
-            backgroundColor: theme.textTertiary.withValues(alpha: 0.15),
+            minHeight: 4,
+            backgroundColor: theme.textTertiary.withValues(alpha: 0.12),
             valueColor: AlwaysStoppedAnimation(barColor),
           ),
         ),
@@ -294,10 +458,12 @@ class CmeEventCard extends StatelessWidget {
       final dateFormat = DateFormat('MMM d, yyyy');
       if (event.endDate != null) {
         final end = DateTime.parse(event.endDate!);
-        if (start.year == end.year && start.month == end.month && start.day == end.day) {
+        if (start.year == end.year &&
+            start.month == end.month &&
+            start.day == end.day) {
           return dateFormat.format(start);
         }
-        return '${DateFormat('MMM d').format(start)} - ${dateFormat.format(end)}';
+        return '${DateFormat('MMM d').format(start)} – ${dateFormat.format(end)}';
       }
       return dateFormat.format(start);
     } catch (_) {
@@ -305,14 +471,20 @@ class CmeEventCard extends StatelessWidget {
     }
   }
 
-  bool get _hasLocation =>
-      event.city != null || event.country != null || event.venue != null;
-
   String _formatLocation() {
+    if (event.location != null && event.location!.trim().isNotEmpty) {
+      return event.location!.trim();
+    }
     final parts = <String>[];
-    if (event.venue != null) parts.add(event.venue!);
-    if (event.city != null) parts.add(event.city!);
-    if (event.country != null) parts.add(event.country!);
+    if (event.venue != null && event.venue!.trim().isNotEmpty) {
+      parts.add(event.venue!.trim());
+    }
+    if (event.city != null && event.city!.trim().isNotEmpty) {
+      parts.add(event.city!.trim());
+    }
+    if (event.country != null && event.country!.trim().isNotEmpty) {
+      parts.add(event.country!.trim());
+    }
     return parts.join(', ');
   }
 }

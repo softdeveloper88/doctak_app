@@ -7,12 +7,13 @@ PostLoginDeviceAuthResp postLogingDeviceAuthReqsFromJson(String str) => PostLogi
 String postLogingDeviceAuthReqsToJson(PostLoginDeviceAuthResp data) => json.encode(data.toJson());
 
 class PostLoginDeviceAuthResp {
-  PostLoginDeviceAuthResp({this.success, this.user, this.token, this.recentCreated, this.university, this.country, this.subscription, this.features});
+  PostLoginDeviceAuthResp({this.success, this.user, this.token, this.expiresAt, this.recentCreated, this.university, this.country, this.subscription, this.features});
 
   PostLoginDeviceAuthResp.fromJson(dynamic json) {
     success = json['success'];
     user = json['user'] != null ? User.fromJson(json['user']) : null;
     token = json['token'];
+    expiresAt = _toInt(json['expires_at'] ?? json['expiresAt']);
     recentCreated = json['recent_created'];
     university = json['university'] != null ? University.fromJson(json['university']) : null;
     country = json['country'] != null ? Country.fromJson(json['country']) : null;
@@ -24,9 +25,17 @@ class PostLoginDeviceAuthResp {
         : null;
   }
 
+  static int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
   bool? success;
   User? user;
   String? token;
+  int? expiresAt;
   bool? recentCreated;
   University? university;
   Country? country;
@@ -40,6 +49,7 @@ class PostLoginDeviceAuthResp {
       map['user'] = user?.toJson();
     }
     map['token'] = token;
+    map['expires_at'] = expiresAt;
     map['recent_created'] = recentCreated;
     if (university != null) {
       map['university'] = university?.toJson();
@@ -252,6 +262,7 @@ class User {
     this.background,
     this.userType,
     this.state,
+    this.isVerified,
   });
 
   User.fromJson(dynamic json) {
@@ -289,6 +300,10 @@ class User {
     background = AppData.fullImageUrl(json['background']);
     userType = json['user_type'];
     state = json['state'];
+    isVerified = json['is_verified'] == true ||
+        json['is_verified'] == 1 ||
+        json['verified'] == true ||
+        json['verified'] == 1;
   }
 
   String? id;
@@ -325,6 +340,7 @@ class User {
   String? background;
   String? userType;
   String? state;
+  bool? isVerified;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -362,6 +378,7 @@ class User {
     map['background'] = background;
     map['user_type'] = userType;
     map['state'] = state;
+    map['is_verified'] = isVerified;
     return map;
   }
 }

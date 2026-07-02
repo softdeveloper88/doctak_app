@@ -66,20 +66,20 @@ class CmePollData {
 
   factory CmePollData.fromJson(Map<String, dynamic> json) {
     return CmePollData(
-      id: json['id'],
-      eventId: json['event_id'],
-      question: json['question'],
+      id: json['id']?.toString(),
+      eventId: json['event_id']?.toString(),
+      question: json['question']?.toString(),
       options: json['options'] != null
           ? (json['options'] as List)
               .map((o) => CmePollOption.fromJson(o))
               .toList()
           : null,
-      status: json['status'],
-      totalVotes: json['total_votes'],
-      hasVoted: json['has_voted'],
-      votedOptionId: json['voted_option_id'],
-      createdAt: json['created_at'],
-      closedAt: json['closed_at'],
+      status: json['status']?.toString(),
+      totalVotes: json['total_votes'] is int ? json['total_votes'] : int.tryParse(json['total_votes']?.toString() ?? ''),
+      hasVoted: json['has_voted'] == true || json['has_voted'] == 1,
+      votedOptionId: json['voted_option_id']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      closedAt: json['closed_at']?.toString(),
     );
   }
 
@@ -97,10 +97,12 @@ class CmePollOption {
 
   factory CmePollOption.fromJson(Map<String, dynamic> json) {
     return CmePollOption(
-      id: json['id'],
-      text: json['text'] ?? json['option_text'],
-      votes: json['votes'],
-      percentage: (json['percentage'] as num?)?.toDouble(),
+      id: json['id']?.toString(),
+      text: (json['text'] ?? json['option_text'])?.toString(),
+      votes: json['votes'] is int ? json['votes'] : int.tryParse(json['votes']?.toString() ?? ''),
+      percentage: (json['percentage'] is num)
+          ? (json['percentage'] as num).toDouble()
+          : double.tryParse(json['percentage']?.toString() ?? ''),
     );
   }
 }

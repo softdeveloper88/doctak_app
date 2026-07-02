@@ -1,5 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/subscription_screen/subscription_content.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_event.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_state.dart';
@@ -9,9 +11,14 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/interested_info_screen/interested_info_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/privacy_info_screen/privacy_info_screen.dart';
+import 'package:doctak_app/data/models/profile_model/profile_completed_survey_model.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/survey_screen/survey_fill_screen.dart';
+import 'package:doctak_app/widgets/retry_widget.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/feed_video_navigator_observer.dart';
 import 'package:doctak_app/presentation/home_screen/profile/components/my_post_component.dart';
 import 'package:doctak_app/presentation/network_screen/network_screen.dart';
 import 'package:doctak_app/data/models/profile_model/experience_model.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/expandable_post_text.dart';
 import 'package:doctak_app/data/models/profile_model/education_detail_model.dart';
 import 'package:doctak_app/data/models/profile_model/publication_model.dart';
 import 'package:doctak_app/data/models/profile_model/award_model.dart';
@@ -19,6 +26,7 @@ import 'package:doctak_app/data/models/profile_model/medical_license_model.dart'
 import 'package:doctak_app/data/models/profile_model/social_profile_model.dart';
 import 'package:doctak_app/data/models/profile_model/business_hour_model.dart';
 import 'package:doctak_app/core/utils/app/app_environment.dart';
+import 'package:doctak_app/core/utils/edge_to_edge_helper.dart';
 import 'package:doctak_app/data/models/countries_model/countries_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,14 +53,24 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  // 6-tab layout matching website profile
-  static const List<_TabInfo> _tabIcons = [
+  bool get _showSubscriptionTab => widget.profileBloc.isMe && !widget.viewAsPublic;
+
+  bool get _showSurveysTab => widget.profileBloc.isMe && !widget.viewAsPublic;
+
+  // Base 6-tab layout matching website profile
+  static const List<_TabInfo> _baseTabIcons = [
     _TabInfo(Icons.person_rounded),
     _TabInfo(Icons.work_rounded),
     _TabInfo(Icons.school_rounded),
     _TabInfo(Icons.emoji_events_rounded),
     _TabInfo(Icons.science_rounded),
     _TabInfo(Icons.article_rounded),
+  ];
+
+  List<_TabInfo> get _tabIcons => [
+    ..._baseTabIcons,
+    if (_showSurveysTab) const _TabInfo(Icons.poll_rounded),
+    if (_showSubscriptionTab) const _TabInfo(Icons.workspace_premium_rounded),
   ];
 
   List<String> _tabLabels(BuildContext context) => [
@@ -62,6 +80,19 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent>
     translation(context).lbl_portfolio,
     translation(context).lbl_research,
     translation(context).lbl_posts,
+    if (_showSurveysTab) 'Surveys',
+    if (_showSubscriptionTab) 'Subscription',
+  ];
+
+  List<String> get _tabKeys => [
+    'about',
+    'experience',
+    'education',
+    'portfolio',
+    'research',
+    'posts',
+    if (_showSurveysTab) 'surveys',
+    if (_showSubscriptionTab) 'subscription',
   ];
 
   @override
@@ -113,6 +144,7 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent>
                     child: GestureDetector(
                       onTap: () {
                         _animationController.reset();
+                        pauseFeedVideosForUiChange();
                         setState(() => selectedIndex = index);
                         _animationController.forward();
                       },
@@ -165,22 +197,247 @@ class _SVProfilePostsComponentState extends State<SVProfilePostsComponent>
   }
 
   Widget _buildTabContent() {
-    switch (selectedIndex) {
-      case 0:
+    if (selectedIndex < 0 || selectedIndex >= _tabKeys.length) {
+      return const SizedBox.shrink();
+    }
+
+    switch (_tabKeys[selectedIndex]) {
+      case 'about':
         return _AboutTab(profileBloc: widget.profileBloc, viewAsPublic: widget.viewAsPublic);
-      case 1:
+      case 'experience':
         return _ExperienceTab(profileBloc: widget.profileBloc);
-      case 2:
+      case 'education':
         return _EducationTab(profileBloc: widget.profileBloc);
-      case 3:
+      case 'portfolio':
         return _PortfolioTab(profileBloc: widget.profileBloc);
-      case 4:
+      case 'research':
         return _ResearchTab(profileBloc: widget.profileBloc);
-      case 5:
+      case 'posts':
         return MyPostComponent(widget.profileBloc);
+      case 'surveys':
+        return _SurveysTab(profileBloc: widget.profileBloc);
+      case 'subscription':
+        return const SubscriptionContent(shrinkWrap: true);
       default:
         return const SizedBox.shrink();
     }
+  }
+}
+
+class _SurveysTab extends StatefulWidget {
+  const _SurveysTab({required this.profileBloc});
+
+  final ProfileBloc profileBloc;
+
+  @override
+  State<_SurveysTab> createState() => _SurveysTabState();
+}
+
+class _SurveysTabState extends State<_SurveysTab> {
+  ProfileBloc get profileBloc => widget.profileBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    if (profileBloc.isMe) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        profileBloc.add(LoadProfileSurveysEvent(force: profileBloc.surveysLoaded));
+      });
+    }
+  }
+
+  String _formatCategory(String? raw) {
+    if (raw == null || raw.isEmpty) return 'Survey';
+    return raw.replaceAll('_', ' ');
+  }
+
+  String _formatDate(String? raw) {
+    if (raw == null || raw.isEmpty) return '';
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return raw;
+    return '${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+
+    if (profileBloc.surveysLoading && !profileBloc.surveysLoaded) {
+      return SizedBox(
+        height: 220,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: CircularProgressIndicator(color: theme.primary),
+          ),
+        ),
+      );
+    }
+
+    if (profileBloc.surveysError != null && profileBloc.completedSurveys.isEmpty) {
+      return SizedBox(
+        height: 260,
+        child: RetryWidget(
+          errorMessage: profileBloc.surveysError!,
+          onRetry: () => profileBloc.add(
+            LoadProfileSurveysEvent(force: true),
+          ),
+        ),
+      );
+    }
+
+    final surveys = profileBloc.completedSurveys;
+    if (profileBloc.surveysLoaded && surveys.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+        child: Column(
+          children: [
+            Icon(Icons.poll_outlined, size: 40, color: theme.textSecondary),
+            const SizedBox(height: 12),
+            Text(
+              'No surveys completed',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: theme.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Surveys you respond to will appear here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13, color: theme.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Completed surveys (${surveys.length})',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: theme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...surveys.map((survey) => _SurveyCard(
+                survey: survey,
+                theme: theme,
+                formatCategory: _formatCategory,
+                formatDate: _formatDate,
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+class _SurveyCard extends StatelessWidget {
+  const _SurveyCard({
+    required this.survey,
+    required this.theme,
+    required this.formatCategory,
+    required this.formatDate,
+  });
+
+  final ProfileCompletedSurvey survey;
+  final OneUITheme theme;
+  final String Function(String?) formatCategory;
+  final String Function(String?) formatDate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => SurveyFillScreen(surveyId: survey.id).launch(context),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        survey.title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: theme.textPrimary,
+                        ),
+                      ),
+                      if (survey.description != null &&
+                          survey.description!.trim().isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          survey.description!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 13, color: theme.textSecondary),
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 4,
+                        children: [
+                          Text(
+                            formatCategory(survey.surveyCategory),
+                            style: TextStyle(fontSize: 12, color: theme.textSecondary),
+                          ),
+                          Text(
+                            '${survey.questionCount} questions',
+                            style: TextStyle(fontSize: 12, color: theme.textSecondary),
+                          ),
+                          if (survey.organizationName != null &&
+                              survey.organizationName!.isNotEmpty)
+                            Text(
+                              survey.organizationName!,
+                              style: TextStyle(fontSize: 12, color: theme.textSecondary),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Responded',
+                      style: TextStyle(fontSize: 11, color: theme.textSecondary),
+                    ),
+                    Text(
+                      formatDate(survey.respondedAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: theme.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -703,11 +960,9 @@ class _AboutTab extends StatelessWidget {
               iconColor: theme.warning,
               backgroundColor: theme.warning.withValues(alpha: 0.08),
               title: 'View Profile as Public',
-              onTap: () => Navigator.push(
+              onTap: () => AppNavigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => SVProfileFragment(userId: AppData.logInUserId, viewAsPublic: true),
-                ),
+                SVProfileFragment(userId: AppData.logInUserId, viewAsPublic: true),
               ),
             ),
           ],
@@ -851,33 +1106,56 @@ class _ExperienceCard extends StatelessWidget {
             if (experience.location != null &&
                 experience.location!.isNotEmpty) ...[
               const SizedBox(height: 6),
-              Row(children: [
-                Icon(Icons.location_on_outlined,
-                    size: 14, color: theme.textSecondary),
-                const SizedBox(width: 4),
-                Text(experience.location!,
-                    style: theme.caption.copyWith(
-                        color: theme.textSecondary)),
-              ]),
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined,
+                      size: 14, color: theme.textSecondary),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      experience.location!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.caption.copyWith(
+                        color: theme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
             if (experience.displayDateRange.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Row(children: [
-                Icon(Icons.calendar_today_outlined,
-                    size: 14, color: theme.textSecondary),
-                const SizedBox(width: 4),
-                Text(experience.displayDateRange,
-                    style: theme.caption.copyWith(
-                        color: theme.textSecondary)),
-              ]),
+              Row(
+                children: [
+                  Icon(Icons.calendar_today_outlined,
+                      size: 14, color: theme.textSecondary),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      experience.displayDateRange,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.caption.copyWith(
+                        color: theme.textSecondary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
             if (experience.description != null &&
                 experience.description!.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text(experience.description!,
-                  style: theme.bodySecondary.copyWith(
-                      color: theme.textPrimary,
-                      height: 1.4)),
+              ExpandablePostText(
+                text: experience.description!,
+                highlightHashtags: false,
+                collapsedMaxLines: 3,
+                style: theme.bodySecondary.copyWith(
+                  color: theme.textPrimary,
+                  height: 1.4,
+                ),
+              ),
             ],
           ],
         ),
@@ -1597,18 +1875,7 @@ class _SectionCard extends StatelessWidget {
           width: double.infinity,
           margin: const EdgeInsets.only(bottom: 24),
           padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.border),
-            boxShadow: theme.isDark
-                ? null
-                : [BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  )],
-          ),
+          decoration: theme.profileCardDecoration,
           child: child,
         ),
       ],
@@ -1760,20 +2027,13 @@ class _ProfileCompletionCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.isDark ? const Color(0xFF1E293B) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.border.withValues(alpha: 0.5)),
-        boxShadow: theme.isDark
-            ? null
-            : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
+      decoration: theme.profileCardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.pie_chart_outline, size: 20, color: percentage >= 100 ? Colors.green : Colors.orange[700]),
+              Icon(Icons.check_circle_outline_rounded, size: 20, color: theme.primary),
               const SizedBox(width: 8),
               Text(translation(context).lbl_profile_completion,
                   style: theme.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: theme.textPrimary)),
@@ -1782,7 +2042,7 @@ class _ProfileCompletionCard extends StatelessWidget {
                   style: theme.bodyMedium.copyWith(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
-                    color: percentage >= 80 ? Colors.green : (percentage >= 50 ? Colors.orange : Colors.red),
+                    color: theme.primary,
                   )),
             ],
           ),
@@ -1793,9 +2053,7 @@ class _ProfileCompletionCard extends StatelessWidget {
               value: percentage / 100.0,
               minHeight: 6,
               backgroundColor: theme.isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                percentage >= 80 ? Colors.green : (percentage >= 50 ? Colors.orange : Colors.red),
-              ),
+              valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
             ),
           ),
           if (sections != null) ...[
@@ -1808,12 +2066,12 @@ class _ProfileCompletionCard extends StatelessWidget {
                 return Chip(
                   label: Text(
                     _localizedSectionName(context, entry.key),
-                    style: TextStyle(fontSize: 11, color: isDone ? Colors.green[800] : theme.textSecondary),
+                    style: TextStyle(fontSize: 11, color: isDone ? theme.primary : theme.textSecondary),
                   ),
                   avatar: Icon(isDone ? Icons.check_circle : Icons.circle_outlined,
-                      size: 14, color: isDone ? Colors.green : theme.textSecondary),
+                      size: 14, color: isDone ? theme.primary : theme.textSecondary),
                   backgroundColor: isDone
-                      ? Colors.green.withValues(alpha: 0.1)
+                      ? theme.primary.withValues(alpha: 0.08)
                       : (theme.isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9)),
                   visualDensity: VisualDensity.compact,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -2279,34 +2537,33 @@ void _safeBlocAdd(ProfileBloc bloc, ProfileEvent event) {
 // ── Contact Info Edit Form ──
 void _showContactInfoForm(BuildContext context, ProfileBloc bloc) {
   final user = bloc.fullProfile?.user;
+  final emailCtrl = TextEditingController(text: user?.email ?? '');
   final phoneCtrl = TextEditingController(text: user?.phone ?? '');
   final cityCtrl = TextEditingController(text: user?.city ?? '');
   final clinicCtrl = TextEditingController(text: user?.clinicName ?? '');
 
-  // For country/state dropdowns
   List<Countries> countries = [];
   List<String> states = [];
   String selectedCountry = user?.country ?? '';
   String selectedState = user?.state ?? '';
   bool isLoadingCountries = true;
   bool isLoadingStates = false;
-  bool _sheetMounted = true;
+  bool sheetMounted = true;
 
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx2, setSheetState) {
-          // Safe setState wrapper to prevent calling after disposal
           void safeSetState(VoidCallback fn) {
-            if (_sheetMounted) setSheetState(fn);
+            if (sheetMounted) setSheetState(fn);
           }
 
-          // Load countries on first build
           if (isLoadingCountries && countries.isEmpty) {
             bloc.getCountries().then((list) {
               if (list != null) {
@@ -2314,8 +2571,7 @@ void _showContactInfoForm(BuildContext context, ProfileBloc bloc) {
                   countries = list;
                   isLoadingCountries = false;
                 });
-                // If we have a pre-selected country, load its states
-                if (selectedCountry.isNotEmpty && _sheetMounted) {
+                if (selectedCountry.isNotEmpty && sheetMounted) {
                   safeSetState(() => isLoadingStates = true);
                   bloc.getStates(selectedCountry).then((stateList) {
                     safeSetState(() {
@@ -2338,24 +2594,42 @@ void _showContactInfoForm(BuildContext context, ProfileBloc bloc) {
               final state = selectedState;
               final country = selectedCountry;
               final clinic = clinicCtrl.text;
-              _sheetMounted = false;
+              sheetMounted = false;
               Navigator.pop(ctx);
-              _safeBlocAdd(bloc, UpdateProfileV5Event(
-                phone: phone.isNotEmpty ? phone : null,
-                city: city.isNotEmpty ? city : null,
-                state: state.isNotEmpty ? state : null,
-                country: country.isNotEmpty ? country : null,
-                clinicName: clinic.isNotEmpty ? clinic : null,
-              ));
+              _safeBlocAdd(
+                bloc,
+                UpdateProfileV5Event(
+                  phone: phone.isNotEmpty ? phone : null,
+                  city: city.isNotEmpty ? city : null,
+                  state: state.isNotEmpty ? state : null,
+                  country: country.isNotEmpty ? country : null,
+                  clinicName: clinic.isNotEmpty ? clinic : null,
+                ),
+              );
             },
             children: [
-              _FormField(label: translation(context).lbl_phone, controller: phoneCtrl),
-              _FormField(label: translation(context).lbl_city, controller: cityCtrl),
-              // Country searchable dropdown
+              // ── CONTACT DETAILS ──────────────────────────
+              const _FormSectionHeader(label: 'CONTACT DETAILS'),
+              _FormField(
+                label: 'Email address',
+                controller: emailCtrl,
+                prefixIcon: Icons.email_outlined,
+                readOnly: true,
+              ),
+              _PhoneFormField(
+                label: 'Phone number',
+                controller: phoneCtrl,
+                countryName: selectedCountry,
+              ),
+              // ── LOCATION ─────────────────────────────────
+              const _FormSectionHeader(label: 'LOCATION'),
               _SearchableDropdownField(
                 label: translation(context).lbl_country,
                 value: selectedCountry,
-                items: countries.map((c) => c.countryName ?? '').where((s) => s.isNotEmpty).toList(),
+                items: countries
+                    .map((c) => c.countryName ?? '')
+                    .where((s) => s.isNotEmpty)
+                    .toList(),
                 isLoading: isLoadingCountries,
                 onSelected: (val) {
                   safeSetState(() {
@@ -2372,7 +2646,6 @@ void _showContactInfoForm(BuildContext context, ProfileBloc bloc) {
                   });
                 },
               ),
-              // State searchable dropdown
               _SearchableDropdownField(
                 label: translation(context).lbl_state_province,
                 value: selectedState,
@@ -2383,14 +2656,23 @@ void _showContactInfoForm(BuildContext context, ProfileBloc bloc) {
                   safeSetState(() => selectedState = val);
                 },
               ),
-              _FormField(label: translation(context).lbl_clinic_workplace, controller: clinicCtrl),
+              _FormField(
+                label: translation(context).lbl_city,
+                controller: cityCtrl,
+              ),
+              // ── WORKPLACE ────────────────────────────────
+              const _FormSectionHeader(label: 'WORKPLACE'),
+              _FormField(
+                label: translation(context).lbl_clinic_workplace,
+                controller: clinicCtrl,
+              ),
             ],
           );
         },
       );
     },
   ).whenComplete(() {
-    _sheetMounted = false;
+    sheetMounted = false;
   });
 }
 
@@ -2402,6 +2684,7 @@ void _showAboutMeForm(BuildContext context, ProfileBloc bloc) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2437,6 +2720,7 @@ void _showProfessionalInfoForm(BuildContext context, ProfileBloc bloc) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2529,6 +2813,7 @@ void _showPersonalDetailsForm(BuildContext context, ProfileBloc bloc) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2666,6 +2951,7 @@ void _showExperienceForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2774,6 +3060,7 @@ void _showEducationForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2917,6 +3204,7 @@ void _showPublicationForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -2996,6 +3284,7 @@ void _showSocialProfileForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3124,6 +3413,7 @@ void _showAwardForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3206,6 +3496,7 @@ void _showLicenseForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3300,6 +3591,7 @@ void _showBusinessHourForm(BuildContext context, ProfileBloc bloc,
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -3624,74 +3916,230 @@ class _FormBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final scrollBottomPad = keyboardInset > 0
+        ? 16.0
+        : EdgeToEdgeHelper.modalSheetBottomPadding(context);
+
     return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.85,
-        ),
-        decoration: BoxDecoration(
-          color: theme.cardBackground,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle bar
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.textSecondary.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            // Title bar
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(title,
-                      style: theme.titleMedium.copyWith(
-                          color: theme.textPrimary)),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(translation(context).lbl_cancel,
-                        style: theme.bodyMedium.copyWith(
-                            color: theme.textSecondary)),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: onSave,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.primary,
-                      foregroundColor: theme.scaffoldBackground,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(translation(context).lbl_save,
-                        style: theme.buttonText),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: children,
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      child: SafeArea(
+        top: false,
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          ),
+          decoration: BoxDecoration(
+            color: theme.cardBackground,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.textSecondary.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-          ],
+              // Title bar: Cancel | Title (centered) | Save
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        translation(context).lbl_cancel,
+                        style: theme.bodyMedium.copyWith(
+                          color: theme.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: theme.titleMedium.copyWith(
+                          color: theme.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: onSave,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 10),
+                      ),
+                      child: Text(
+                        translation(context).lbl_save,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, scrollBottomPad),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Column(
+                    children: children,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _FormSectionHeader extends StatelessWidget {
+  final String label;
+  const _FormSectionHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 10),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
+          color: theme.textSecondary,
+          fontFamily: 'Poppins',
+        ),
+      ),
+    );
+  }
+}
+
+class _PhoneFormField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String countryName;
+
+  const _PhoneFormField({
+    required this.label,
+    required this.controller,
+    this.countryName = '',
+  });
+
+  String _resolveCode(String country) {
+    const codes = {
+      'Afghanistan': '+93', 'Pakistan': '+92', 'India': '+91',
+      'United States': '+1', 'United Kingdom': '+44', 'Saudi Arabia': '+966',
+      'UAE': '+971', 'United Arab Emirates': '+971', 'Turkey': '+90',
+      'Egypt': '+20', 'Iran': '+98', 'Iraq': '+964', 'Jordan': '+962',
+      'Kuwait': '+965', 'Lebanon': '+961', 'Libya': '+218', 'Morocco': '+212',
+      'Oman': '+968', 'Qatar': '+974', 'Syria': '+963', 'Tunisia': '+216',
+      'Yemen': '+967', 'Bangladesh': '+880', 'Sri Lanka': '+94',
+      'Germany': '+49', 'France': '+33', 'Italy': '+39', 'Spain': '+34',
+      'Canada': '+1', 'Australia': '+61', 'China': '+86', 'Japan': '+81',
+      'Russia': '+7', 'Brazil': '+55', 'Nigeria': '+234', 'Kenya': '+254',
+      'South Africa': '+27', 'Indonesia': '+62', 'Malaysia': '+60',
+    };
+    return codes[country] ?? '+';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final code = _resolveCode(countryName);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: theme.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              // Country code pill
+              Container(
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: theme.isDark
+                      ? const Color(0xFF1E293B)
+                      : const Color(0xFFF7F8FA),
+                  border: Border.all(
+                    color: theme.isDark
+                        ? const Color(0xFF334155)
+                        : const Color(0xFFD0D5DD),
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      code,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: theme.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.expand_more_rounded,
+                        size: 16, color: theme.textSecondary),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Number field
+              Expanded(
+                child: SizedBox(
+                  height: 52,
+                  child: TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.phone,
+                    style: theme.bodyMedium.copyWith(color: theme.textPrimary),
+                    decoration: theme.inputDecoration(label: '').copyWith(
+                      hintText: '000 000-0000',
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -3701,11 +4149,16 @@ class _FormField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final int maxLines;
+  final IconData? prefixIcon;
+  final bool readOnly;
 
-  const _FormField(
-      {required this.label,
-      required this.controller,
-      this.maxLines = 1});
+  const _FormField({
+    required this.label,
+    required this.controller,
+    this.maxLines = 1,
+    this.prefixIcon,
+    this.readOnly = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -3715,8 +4168,13 @@ class _FormField extends StatelessWidget {
       child: TextField(
         controller: controller,
         maxLines: maxLines,
+        readOnly: readOnly,
         style: theme.bodyMedium.copyWith(color: theme.textPrimary),
-        decoration: theme.inputDecoration(label: label),
+        decoration: theme.inputDecoration(label: label).copyWith(
+          prefixIcon: prefixIcon != null
+              ? Icon(prefixIcon, size: 18, color: theme.primary)
+              : null,
+        ),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/doctak_app_loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -288,7 +289,7 @@ class _LoadingButtonState extends State<LoadingButton> with SingleTickerProvider
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(width: 20, height: 20, child: CupertinoActivityIndicator(color: color)),
+        SizedBox(width: 20, height: 20, child: DoctakAppLoader.compact()),
         const SizedBox(width: 12),
         Text(
           'Please wait...',

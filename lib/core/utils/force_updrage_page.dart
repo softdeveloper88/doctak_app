@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -533,7 +534,7 @@ class _ForceUpgradeState extends State<ForceUpgradePage> {
                           padding: const EdgeInsets.only(top: 16),
                           child: TextButton(
                             onPressed: () {
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SplashScreen()));
+                              AppNavigator.pushReplacement(context, const SplashScreen());
                             },
                             child: Row(
                               mainAxisSize: MainAxisSize.min,

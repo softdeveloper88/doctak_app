@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../repository/case_discussion_repository.dart';
 import '../models/case_discussion_models.dart';
+import '../models/case_vote_snapshot.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EVENTS
@@ -45,6 +46,14 @@ class ToggleLikeDiscussion extends DiscussionListEvent {
   const ToggleLikeDiscussion(this.caseId);
   @override
   List<Object> get props => [caseId];
+}
+
+class VoteDiscussion extends DiscussionListEvent {
+  final int caseId;
+  final String direction;
+  const VoteDiscussion(this.caseId, this.direction);
+  @override
+  List<Object> get props => [caseId, direction];
 }
 
 class ToggleBookmarkDiscussion extends DiscussionListEvent {
@@ -150,6 +159,7 @@ class DiscussionListBloc
     on<UpdateFilters>(_onUpdateFilters);
     on<LoadFilterData>(_onLoadFilterData);
     on<ToggleLikeDiscussion>(_onToggleLike);
+    on<VoteDiscussion>(_onVoteDiscussion);
     on<ToggleBookmarkDiscussion>(_onToggleBookmark);
     on<DeleteDiscussion>(_onDeleteDiscussion);
   }
@@ -279,35 +289,79 @@ class DiscussionListBloc
 
   Future<void> _onToggleLike(
       ToggleLikeDiscussion event, Emitter<DiscussionListState> emit) async {
+    add(VoteDiscussion(event.caseId, 'up'));
+  }
+
+  Future<void> _onVoteDiscussion(
+      VoteDiscussion event, Emitter<DiscussionListState> emit) async {
     final currentState = state;
-    if (currentState is DiscussionListLoaded) {
-      // Find the item
-      final idx =
-          currentState.discussions.indexWhere((d) => d.id == event.caseId);
-      if (idx == -1) return;
-      final item = currentState.discussions[idx];
-      final wasLiked = item.isLiked;
+    if (currentState is! DiscussionListLoaded) return;
 
-      // Optimistic update
-      final updated = item.copyWith(
-        isLiked: !wasLiked,
-        likes: wasLiked ? item.likes - 1 : item.likes + 1,
-      );
-      final updatedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-      updatedList[idx] = updated;
-      emit(currentState.copyWith(discussions: updatedList));
+    final idx = currentState.discussions.indexWhere((d) => d.id == event.caseId);
+    if (idx == -1) return;
+    final item = currentState.discussions[idx];
+    final direction = event.direction;
+    var likes = item.likes;
+    var dislikes = item.dislikes;
+    var isLiked = item.isLiked;
+    var isDisliked = item.isDisliked;
 
-      try {
-        await repository.performCaseAction(
-          caseId: event.caseId,
-          action: wasLiked ? 'unlike' : 'like',
-        );
-      } catch (_) {
-        // Revert on failure
-        final revertedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-        revertedList[idx] = item;
-        emit(currentState.copyWith(discussions: revertedList));
+    if (direction == 'up') {
+      if (isLiked) {
+        isLiked = false;
+        likes -= 1;
+      } else if (isDisliked) {
+        isDisliked = false;
+        isLiked = true;
+        dislikes -= 1;
+        likes += 1;
+      } else {
+        isLiked = true;
+        likes += 1;
       }
+    } else {
+      if (isDisliked) {
+        isDisliked = false;
+        dislikes -= 1;
+      } else if (isLiked) {
+        isLiked = false;
+        isDisliked = true;
+        likes -= 1;
+        dislikes += 1;
+      } else {
+        isDisliked = true;
+        dislikes += 1;
+      }
+    }
+
+    final updated = item.copyWith(
+      likes: likes,
+      dislikes: dislikes,
+      isLiked: isLiked,
+      isDisliked: isDisliked,
+    );
+    final updatedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+    updatedList[idx] = updated;
+    emit(currentState.copyWith(discussions: updatedList));
+
+    try {
+      final response = await repository.voteCase(caseId: event.caseId, direction: direction);
+      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
+      if (snapshot != null) {
+        final synced = updated.copyWith(
+          likes: snapshot.likes,
+          dislikes: snapshot.dislikes,
+          isLiked: snapshot.isLiked,
+          isDisliked: snapshot.isDisliked,
+        );
+        final syncedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+        syncedList[idx] = synced;
+        emit(currentState.copyWith(discussions: syncedList));
+      }
+    } catch (_) {
+      final revertedList = List<CaseDiscussionListItem>.from(currentState.discussions);
+      revertedList[idx] = item;
+      emit(currentState.copyWith(discussions: revertedList));
     }
   }
 

@@ -1,19 +1,31 @@
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/app/app_environment.dart';
+import 'package:doctak_app/presentation/groups_module/screens/group_detail_screen.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/manage_meeting_screen.dart';
-import 'package:doctak_app/presentation/calling_module/screens/call_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/organization_profile/organization_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Deep Link Types supported by the app
-enum DeepLinkType { post, job, conference, meeting, call, profile, unknown }
+enum DeepLinkType {
+  post,
+  job,
+  conference,
+  meeting,
+  call,
+  profile,
+  organization,
+  group,
+  unknown,
+}
 
 /// Model class to hold parsed deep link data
 class DeepLinkData {
@@ -149,6 +161,10 @@ class DeepLinkService {
           case 'profile':
             type = DeepLinkType.profile;
             break;
+          case 'group':
+          case 'groups':
+            type = DeepLinkType.group;
+            break;
         }
         if (type != DeepLinkType.unknown) {
           debugPrint('🔗 DeepLinkService: Parsed custom scheme: type=$type, id=$id');
@@ -193,6 +209,7 @@ class DeepLinkService {
 
         case 'meeting':
         case 'meetings':
+        case 'join-meeting':
           type = DeepLinkType.meeting;
           if (pathSegments.length > 1) {
             id = pathSegments[1];
@@ -213,7 +230,32 @@ class DeepLinkService {
 
         case 'profile':
         case 'user':
+        case 'u': // username-based profile URL
           type = DeepLinkType.profile;
+          if (pathSegments.length > 1) {
+            id = pathSegments[1];
+          } else if (queryParams.containsKey('id')) {
+            id = queryParams['id'];
+          }
+          break;
+
+        case 'b':
+        case 'business':
+        case 'org':
+        case 'organizations':
+          type = DeepLinkType.organization;
+          if (pathSegments.length > 1) {
+            id = pathSegments[1];
+          } else if (queryParams.containsKey('slug')) {
+            id = queryParams['slug'];
+          } else if (queryParams.containsKey('id')) {
+            id = queryParams['id'];
+          }
+          break;
+
+        case 'group':
+        case 'groups':
+          type = DeepLinkType.group;
           if (pathSegments.length > 1) {
             id = pathSegments[1];
           } else if (queryParams.containsKey('id')) {
@@ -286,6 +328,12 @@ class DeepLinkService {
 
         case DeepLinkType.profile:
           return await _handleProfileDeepLink(context, deepLink);
+
+        case DeepLinkType.organization:
+          return await _handleOrganizationDeepLink(context, deepLink);
+
+        case DeepLinkType.group:
+          return await _handleGroupDeepLink(context, deepLink);
 
         case DeepLinkType.unknown:
           debugPrint('🔗 DeepLinkService: Unknown deep link type, navigating to dashboard');
@@ -370,27 +418,58 @@ class DeepLinkService {
     return true;
   }
 
-  /// Handle call deep link
+  /// Handle call deep link.
+  ///
+  /// Calls are delivered exclusively through calling_module_v2 (FCM data push +
+  /// CallKit), never via an app deep link, so this is intentionally a no-op.
   Future<bool> _handleCallDeepLink(BuildContext context, DeepLinkData deepLink) async {
-    final callId = deepLink.id;
-    if (callId == null || callId.isEmpty) {
-      debugPrint('🔗 DeepLinkService: Call ID is missing');
+    debugPrint('🔗 DeepLinkService: call deep links are handled by calling_module_v2 — ignoring');
+    return false;
+  }
+
+  /// Handle business organization profile deep link (`/b/{slug}`).
+  Future<bool> _handleOrganizationDeepLink(
+    BuildContext context,
+    DeepLinkData deepLink,
+  ) async {
+    final identifier = deepLink.id?.trim();
+    if (identifier == null || identifier.isEmpty) {
+      debugPrint('🔗 DeepLinkService: Organization slug/id is missing');
+      const SVDashboardScreen().launch(context, isNewTask: true);
       return false;
     }
 
-    debugPrint('🔗 DeepLinkService: Navigating to call: $callId');
+    debugPrint('🔗 DeepLinkService: Navigating to organization: $identifier');
 
-    // Extract call parameters from query params
-    final params = deepLink.queryParams;
-    final contactId = params['contact_id'] ?? params['user_id'] ?? '';
-    final contactName = params['name'] ?? 'Unknown';
-    final contactAvatar = params['avatar'] ?? '';
-    final isVideo = params['video'] == 'true' || params['has_video'] == 'true';
-
-    // Navigate to call screen
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (context) => CallScreen(callId: callId, contactId: contactId, contactName: contactName, contactAvatar: contactAvatar, isIncoming: true, isVideoCall: isVideo),
+        builder: (context) => OrganizationProfileScreen(identifier: identifier),
+      ),
+      (route) => false,
+    );
+
+    return true;
+  }
+
+  /// Handle group profile deep link (`/groups/{id}?invite={invitationId}`).
+  Future<bool> _handleGroupDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final groupId = deepLink.id?.trim();
+    if (groupId == null || groupId.isEmpty) {
+      debugPrint('🔗 DeepLinkService: Group ID is missing');
+      const SVDashboardScreen().launch(context, isNewTask: true);
+      return false;
+    }
+
+    final invitationId = deepLink.queryParams['invite'];
+
+    debugPrint('🔗 DeepLinkService: Navigating to group: $groupId invite=$invitationId');
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => GroupDetailScreen(
+          groupId: groupId,
+          pendingInvitationId: invitationId,
+        ),
       ),
       (route) => false,
     );
@@ -453,9 +532,10 @@ class DeepLinkService {
     return '$baseUrl/conference/$conferenceId';
   }
 
-  /// Generate a shareable link for a meeting
+  /// Generate a shareable link for a meeting.
+  /// Points to the node server meeting page: /meetings/live/{channel}
   static String generateMeetingLink(String meetingId, {String? title}) {
-    return '$baseUrl/meeting/$meetingId';
+    return '${AppEnvironment.nodeApiUrl}/meetings/live/$meetingId';
   }
 
   /// Generate a shareable link for a call
@@ -515,6 +595,25 @@ class DeepLinkService {
     shareText += '\n\nClick to join:\n$link';
 
     await Share.share(shareText, subject: title ?? 'DocTak Meeting Invitation');
+  }
+
+  /// Generate a shareable link for a user profile
+  static String generateProfileLink(String userId, {String? username}) {
+    // Use username-based URL if available for cleaner links
+    if (username != null && username.isNotEmpty) {
+      return '$baseUrl/u/$username';
+    }
+    return '$baseUrl/profile/$userId';
+  }
+
+  /// Share a user profile via system share sheet
+  static Future<void> shareProfile({required String userId, String? name, String? username}) async {
+    final link = generateProfileLink(userId, username: username);
+    final shareText = (name != null && name.isNotEmpty)
+        ? 'Check out $name\'s profile on DocTak\n\n$link'
+        : 'Check out this profile on DocTak\n\n$link';
+
+    await SharePlus.instance.share(ShareParams(text: shareText, title: name ?? 'DocTak Profile'));
   }
 }
 

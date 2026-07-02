@@ -1,14 +1,15 @@
 import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/data/apiClient/services/network_api_service.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_widgets.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/people_you_may_know_screen.dart';
-import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nb_utils/nb_utils.dart';
 
 import '../../../../localization/app_localization.dart';
 
@@ -34,6 +35,9 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
   List<Map<String, dynamic>> _suggestions = [];
   bool _isLoading = false;
   String _lastQuery = '';
+  String _entityScope = 'all';
+  int _peopleCount = 0;
+  int _organizationCount = 0;
 
   @override
   void initState() {
@@ -72,17 +76,38 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
 
   Future<void> _fetchSuggestions(String query) async {
     try {
-      final result = await _api.searchSuggestions(query: query);
+      final result = await _api.searchSuggestions(
+        query: query,
+        type: _entityScope,
+      );
       if (!mounted) return;
-      if (_lastQuery != query) return; // Stale response
+      if (_lastQuery != query) return;
       final list = (result['suggestions'] as List<dynamic>? ?? [])
           .cast<Map<String, dynamic>>();
+      final counts = result['counts'];
       setState(() {
         _suggestions = list;
         _isLoading = false;
+        if (counts is Map) {
+          _peopleCount =
+              int.tryParse('${counts['people'] ?? 0}') ?? 0;
+          _organizationCount =
+              int.tryParse('${counts['organizations'] ?? 0}') ?? 0;
+        }
       });
     } catch (_) {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _onScopeChanged(String scope) {
+    if (_entityScope == scope) return;
+    setState(() => _entityScope = scope);
+    final query = _searchCtrl.text.trim();
+    if (query.isNotEmpty) {
+      _lastQuery = query;
+      setState(() => _isLoading = true);
+      _fetchSuggestions(query);
     }
   }
 
@@ -91,20 +116,18 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
     if (query.isEmpty) return;
     FocusManager.instance.primaryFocus?.unfocus();
     // Navigate to full search results using existing PeopleYouMayKnowScreen
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => PeopleYouMayKnowScreen(initialSearch: query),
+    AppNavigator.pushReplacement(
+      context,
+      PeopleYouMayKnowScreen(
+        initialSearch: query,
+        initialEntityScope: _entityScope,
       ),
     );
   }
 
-  void _onSuggestionTap(Map<String, dynamic> user) {
+  void _onSuggestionTap(Map<String, dynamic> item) {
     FocusManager.instance.primaryFocus?.unfocus();
-    final userId = user['id']?.toString() ?? '';
-    if (userId.isNotEmpty) {
-      SVProfileFragment(userId: userId)
-          .launch(context, pageRouteAnimation: PageRouteAnimation.Slide);
-    }
+    ProfileNavigation.openFromMap(context, item);
   }
 
   @override
@@ -117,7 +140,22 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
           children: [
             // ── Search Bar Row ──
             _buildSearchBar(theme),
-            // ── Suggestions List ──
+            if (_searchCtrl.text.trim().isNotEmpty)
+              AnimatedSize(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topLeft,
+                child: Container(
+                  color: theme.cardBackground,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                  child: NetworkEntityScopeBar(
+                    selectedScope: _entityScope,
+                    peopleCount: _peopleCount,
+                    organizationCount: _organizationCount,
+                    onChanged: _onScopeChanged,
+                  ),
+                ),
+              ),
             Expanded(child: _buildSuggestionsList(theme)),
           ],
         ),
@@ -261,8 +299,99 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
     );
   }
 
-  Widget _buildSuggestionTile(OneUITheme theme, Map<String, dynamic> user) {
-    final name = user['fullName'] as String? ?? '';
+  Widget _buildSuggestionTile(OneUITheme theme, Map<String, dynamic> item) {
+    if (networkSearchItemIsOrganization(item)) {
+      return _buildOrganizationSuggestionTile(theme, item);
+    }
+    return _buildPeopleSuggestionTile(theme, item);
+  }
+
+  Widget _buildOrganizationSuggestionTile(
+    OneUITheme theme,
+    Map<String, dynamic> org,
+  ) {
+    final name = networkSearchItemName(org);
+    final typeLabel = org['type_label']?.toString() ??
+        org['typeLabel']?.toString() ??
+        'Business';
+    final city = org['city']?.toString() ?? '';
+    final followers = int.tryParse(
+          org['follower_count']?.toString() ?? org['followerCount']?.toString() ?? '',
+        ) ??
+        0;
+    final subtitleParts = <String>[
+      typeLabel,
+      if (city.isNotEmpty) city,
+      if (followers > 0) '${networkFormatCount(followers)} followers',
+    ];
+
+    return InkWell(
+      onTap: () => _onSuggestionTap(org),
+      splashColor: theme.primary.withValues(alpha: 0.05),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            networkOrganizationLogo(organization: org, size: 42),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.titleSmall.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      if (org['is_verified'] == true || org['isVerified'] == true) ...[
+                        const SizedBox(width: 4),
+                        theme.buildVerifiedBadge(size: 14),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitleParts.join(' · '),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.bodySecondary.copyWith(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                _searchCtrl.text = name;
+                _searchCtrl.selection = TextSelection.fromPosition(
+                  TextPosition(offset: name.length),
+                );
+                _onSearchChanged(name);
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Icon(
+                  Icons.north_west_rounded,
+                  size: 16,
+                  color: theme.textTertiary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeopleSuggestionTile(OneUITheme theme, Map<String, dynamic> user) {
+    final name = networkSearchItemName(user);
     final specialty = user['specialty'] as String? ?? '';
     final profilePic = AppData.fullImageUrl(user['profile_pic'] as String? ?? '');
     final degree = user['degree'] as String?;

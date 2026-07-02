@@ -35,9 +35,10 @@ class _VoiceMessagePrecacherState extends State<VoiceMessagePrecacher> {
     return VisibilityDetector(
       key: Key('voice_precacher_${widget.audioUrl}'),
       onVisibilityChanged: (info) {
-        // Start pre-caching when the widget is at least 10% visible
         if (info.visibleFraction > 0.1 && !_hasPrecached) {
-          _precacheAudio();
+          _precacheAudio().catchError((Object e) {
+            debugPrint('Voice precache failed: $e');
+          });
         }
       },
       child: widget.child,

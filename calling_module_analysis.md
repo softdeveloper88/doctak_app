@@ -128,7 +128,8 @@ calling_module/
 
 ### 5. Utilities Layer
 
-#### Constants (`utils/constants.dart`)
+#### Constants (`utils/
+`)
 **Purpose**: Configuration values
 **Features**:
 - Agora configuration

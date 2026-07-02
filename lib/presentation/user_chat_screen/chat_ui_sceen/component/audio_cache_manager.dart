@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -60,8 +61,7 @@ class AudioCacheManager {
     if (lastDot != -1) {
       return path.substring(lastDot);
     }
-    // Default to .aac if no extension found
-    return '.aac';
+    return '.m4a';
   }
 
   Future<String?> getCachedAudioPath(String url) async {
@@ -80,19 +80,17 @@ class AudioCacheManager {
         }
       }
 
-      // Check disk cache
-      final cachePath = _getCacheFilePath(url);
-      final cacheFile = File(cachePath);
-
-      if (await cacheFile.exists()) {
-        // Verify file is not corrupted
-        final fileSize = await cacheFile.length();
-        if (fileSize > 0) {
-          _memoryCache[url] = cachePath;
-          debugPrint('Audio found in cache: $cachePath');
-          return cachePath;
-        } else {
-          // Corrupted file, delete it
+      // Check disk cache (may be stored with content-type extension, e.g. .m4a for .webm URL)
+      for (final ext in ['.m4a', '.webm', '.ogg', '.wav', '.mp3', _getFileExtension(url)]) {
+        final cachePath = '${_cacheDirectory!.path}/${_generateCacheKey(url)}$ext';
+        final cacheFile = File(cachePath);
+        if (await cacheFile.exists()) {
+          final fileSize = await cacheFile.length();
+          if (fileSize > 0) {
+            _memoryCache[url] = cachePath;
+            debugPrint('Audio found in cache: $cachePath');
+            return cachePath;
+          }
           await cacheFile.delete();
         }
       }
@@ -106,17 +104,34 @@ class AudioCacheManager {
     }
   }
 
+  Map<String, String> _downloadHeaders() {
+    final headers = <String, String>{
+      'User-Agent': 'DocTak/1.0',
+      'Accept': 'audio/*,*/*',
+    };
+    final token = AppData.userToken;
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
+  String _extensionFromContentType(String? contentType, String url) {
+    final mime = (contentType ?? '').toLowerCase();
+    if (mime.contains('wav')) return '.wav';
+    if (mime.contains('mpeg') || mime.contains('mp3')) return '.mp3';
+    if (mime.contains('ogg')) return '.ogg';
+    if (mime.contains('webm')) return '.webm';
+    if (mime.contains('mp4') || mime.contains('m4a') || mime.contains('aac')) return '.m4a';
+    return _getFileExtension(url);
+  }
+
   Future<String?> _downloadAndCacheAudio(String url) async {
     try {
-      final cachePath = _getCacheFilePath(url);
+      await _initializeCacheDirectory();
 
-      // Create a temporary file for downloading
-      final tempPath = '$cachePath.tmp';
-      final tempFile = File(tempPath);
-
-      // Download the file
       final response = await http
-          .get(Uri.parse(url), headers: {'User-Agent': 'DocTak/1.0', 'Accept': 'audio/*'})
+          .get(Uri.parse(url), headers: _downloadHeaders())
           .timeout(
             const Duration(minutes: 2),
             onTimeout: () {
@@ -125,17 +140,21 @@ class AudioCacheManager {
           );
 
       if (response.statusCode == 200) {
-        // Write to temporary file
+        final contentType = response.headers['content-type'];
+        final extension = _extensionFromContentType(contentType, url);
+        final finalCachePath = '${_cacheDirectory!.path}/${_generateCacheKey(url)}$extension';
+        final tempPath = '$finalCachePath.tmp';
+        final tempFile = File(tempPath);
+
         await tempFile.writeAsBytes(response.bodyBytes);
 
         // Verify the downloaded file
         final fileSize = await tempFile.length();
         if (fileSize > 0) {
-          // Move temp file to cache file
-          await tempFile.rename(cachePath);
-          _memoryCache[url] = cachePath;
-          debugPrint('Audio cached successfully: $cachePath');
-          return cachePath;
+          await tempFile.rename(finalCachePath);
+          _memoryCache[url] = finalCachePath;
+          debugPrint('Audio cached successfully: $finalCachePath');
+          return finalCachePath;
         } else {
           // Empty file, delete it
           if (await tempFile.exists()) {

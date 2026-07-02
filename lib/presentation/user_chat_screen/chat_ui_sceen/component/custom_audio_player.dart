@@ -3,6 +3,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
 import 'dart:io';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'audio_cache_manager.dart';
 import 'audio_player_manager.dart';
 
@@ -17,7 +18,8 @@ class CustomAudioPlayer extends StatefulWidget {
 }
 
 class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
-  late AudioPlayer _audioPlayer;
+  AudioPlayer? _audioPlayer;
+  bool _playerReady = false;
   bool _isPlaying = false;
   bool _isLoading = false;
   bool _hasError = false;
@@ -32,39 +34,89 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
     _initializePlayer();
   }
 
+  void _disposePlayer() {
+    final player = _audioPlayer;
+    _audioPlayer = null;
+    _playerReady = false;
+    if (player != null) {
+      AudioPlayerManager().unregisterPlayer(player);
+      player.dispose();
+    }
+  }
+
+  Map<String, String> _audioHeaders() {
+    final headers = <String, String>{
+      'User-Agent': 'DocTak/1.0',
+      'Accept': 'audio/*,*/*',
+    };
+    final token = AppData.userToken;
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
   Future<void> _initializePlayer() async {
-    _audioPlayer = AudioPlayer();
+    if (widget.audioUrl.trim().isEmpty) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+          _playerReady = false;
+        });
+      }
+      return;
+    }
+
+    final player = AudioPlayer();
 
     try {
-      setState(() {
-        _isLoading = true;
-        _hasError = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+          _hasError = false;
+          _playerReady = false;
+        });
+      }
 
       // Try to get cached audio first
       final cacheManager = AudioCacheManager();
       final cachedPath = await cacheManager.getCachedAudioPath(widget.audioUrl);
 
-      if (cachedPath != null && await File(cachedPath).exists()) {
-        // Play from cache
-        debugPrint('Playing from cache: $cachedPath');
-        await _audioPlayer.setFilePath(cachedPath);
-      } else {
-        // Fallback to streaming from URL (will be cached for next time)
-        debugPrint('Streaming from URL: ${widget.audioUrl}');
-        await _audioPlayer.setAudioSource(AudioSource.uri(Uri.parse(widget.audioUrl), headers: {'User-Agent': 'DocTak/1.0'}), preload: true);
+      if (!mounted) {
+        await player.dispose();
+        return;
       }
 
+      if (cachedPath != null && await File(cachedPath).exists()) {
+        debugPrint('Playing from cache: $cachedPath');
+        await player.setFilePath(cachedPath);
+      } else {
+        debugPrint('Streaming from URL: ${widget.audioUrl}');
+        await player.setAudioSource(
+          AudioSource.uri(
+            Uri.parse(widget.audioUrl),
+            headers: _audioHeaders(),
+          ),
+          preload: true,
+        );
+      }
+
+      if (!mounted) {
+        await player.dispose();
+        return;
+      }
+
+      _audioPlayer = player;
+
       // Listen to player state
-      _audioPlayer.playerStateStream.listen((state) {
+      player.playerStateStream.listen((state) {
         if (mounted) {
           setState(() {
             _isPlaying = state.playing;
           });
 
-          // Check if playback completed
           if (state.processingState == ProcessingState.completed) {
-            // Just stop playing, keep position at end
             setState(() {
               _isPlaying = false;
             });
@@ -72,8 +124,7 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
         }
       });
 
-      // Listen to duration
-      _audioPlayer.durationStream.listen((duration) {
+      player.durationStream.listen((duration) {
         if (mounted && duration != null) {
           setState(() {
             _duration = duration;
@@ -81,8 +132,7 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
         }
       });
 
-      // Listen to position with smoother updates
-      _audioPlayer.positionStream.listen((position) {
+      player.positionStream.listen((position) {
         if (mounted) {
           setState(() {
             _position = position;
@@ -90,8 +140,7 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
         }
       });
 
-      // Listen for errors
-      _audioPlayer.playbackEventStream.listen(
+      player.playbackEventStream.listen(
         (event) {},
         onError: (Object e, StackTrace stackTrace) {
           if (mounted) {
@@ -103,40 +152,57 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
         },
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _playerReady = true;
+        });
+      }
     } catch (e) {
       debugPrint('Error initializing audio player: $e');
+      await player.dispose();
       if (mounted) {
         setState(() {
           _hasError = true;
           _isLoading = false;
+          _playerReady = false;
         });
       }
     }
   }
 
   @override
+  void didUpdateWidget(CustomAudioPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.audioUrl != widget.audioUrl) {
+      _disposePlayer();
+      _isPlaying = false;
+      _duration = Duration.zero;
+      _position = Duration.zero;
+      _hasError = false;
+      _initializePlayer();
+    }
+  }
+
+  @override
   void dispose() {
-    AudioPlayerManager().unregisterPlayer(_audioPlayer);
-    _audioPlayer.dispose();
+    _disposePlayer();
     super.dispose();
   }
 
   Future<void> _togglePlayPause() async {
+    final player = _audioPlayer;
+    if (player == null) return;
     try {
       if (_isPlaying) {
-        await _audioPlayer.pause();
+        await player.pause();
       } else {
-        // Register this player with the manager (will stop any other playing audio)
-        AudioPlayerManager().registerPlayer(_audioPlayer, widget.audioUrl);
+        AudioPlayerManager().registerPlayer(player, widget.audioUrl);
 
-        // If at the end, seek to beginning first
         if (_position >= _duration && _duration > Duration.zero) {
-          await _audioPlayer.seek(Duration.zero);
+          await player.seek(Duration.zero);
         }
-        await _audioPlayer.play();
+        await player.play();
       }
     } catch (e) {
       debugPrint('Error toggling play/pause: $e');
@@ -144,8 +210,10 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
   }
 
   Future<void> _changeSpeed(double speed) async {
+    final player = _audioPlayer;
+    if (player == null) return;
     try {
-      await _audioPlayer.setSpeed(speed);
+      await player.setSpeed(speed);
       setState(() {
         _currentSpeed = speed;
       });
@@ -180,6 +248,35 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
       );
     }
 
+    if (!_playerReady || _audioPlayer == null) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: widget.isMe ? Colors.white70 : SVAppColorPrimary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Loading voice…',
+              style: TextStyle(
+                fontSize: 12,
+                color: widget.isMe ? Colors.white70 : Colors.grey[600],
+                fontFamily: 'Poppins',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final player = _audioPlayer!;
     return Container(
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65, minWidth: 200),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -225,7 +322,7 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
                     trackHeight: 3,
                   ),
                   child: StreamBuilder<Duration>(
-                    stream: _audioPlayer.positionStream,
+                    stream: player.positionStream,
                     builder: (context, snapshot) {
                       final position = snapshot.data ?? Duration.zero;
                       return Slider(
@@ -233,14 +330,14 @@ class _CustomAudioPlayerState extends State<CustomAudioPlayer> {
                         max: _duration.inMilliseconds.toDouble() > 0 ? _duration.inMilliseconds.toDouble() : 1.0,
                         onChanged: (value) async {
                           final newPosition = Duration(milliseconds: value.toInt());
-                          await _audioPlayer.seek(newPosition);
+                          await player.seek(newPosition);
                         },
                         onChangeStart: (_) {
-                          _audioPlayer.pause();
+                          player.pause();
                         },
                         onChangeEnd: (_) {
                           if (_isPlaying) {
-                            _audioPlayer.play();
+                            player.play();
                           }
                         },
                       );

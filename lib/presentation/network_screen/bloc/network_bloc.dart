@@ -7,10 +7,29 @@ part 'network_state.dart';
 class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
   final NetworkApiService _api = NetworkApiService();
 
+  static bool _networkOrgIsFollowing(Map<String, dynamic> org) {
+    final raw = org['is_following'] ?? org['isFollowing'];
+    if (raw is bool) return raw;
+    if (raw is num) return raw == 1;
+    final text = raw?.toString().toLowerCase() ?? '';
+    return text == '1' || text == 'true';
+  }
+
+  static Map<String, dynamic> _normalizeOrganization(Map<String, dynamic> org) {
+    return {
+      ...org,
+      'is_following': _networkOrgIsFollowing(org),
+    };
+  }
+
   // Cache lists so UI can access them
   List<Map<String, dynamic>> friendRequests = [];
   List<Map<String, dynamic>> connections = [];
   List<Map<String, dynamic>> suggestions = [];
+  List<Map<String, dynamic>> organizations = [];
+  Map<String, dynamic> networkStats = {};
+  String invitationSubtitle = '';
+  List<String> invitationPreviewNames = [];
   int pendingCount = 0;
 
   // Track pagination states per tab
@@ -20,12 +39,16 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
   bool requestsHasMore = false;
   int connectionsPage = 1;
   bool connectionsHasMore = false;
+  int organizationsPage = 1;
+  bool organizationsHasMore = false;
   bool isLoadingMore = false; // Flag for load-more spinner
 
   // Track which tabs have been loaded at least once
+  bool hasLoadedHome = false;
   bool hasLoadedSuggestions = false;
   bool hasLoadedRequests = false;
   bool hasLoadedConnections = false;
+  bool hasLoadedOrganizations = false;
 
   // Track which tab is currently loading
   String? activeLoadType;
@@ -38,8 +61,14 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
   String lastSearchQuery = '';
   String lastSearchSpecialty = '';
   String lastSearchCountry = '';
+  String lastSearchScope = 'all';
+  int searchPeopleCount = 0;
+  int searchOrganizationCount = 0;
 
   NetworkBloc() : super(NetworkInitialState()) {
+    on<LoadNetworkHomeEvent>(_onLoadNetworkHome);
+    on<LoadOrganizationsEvent>(_onLoadOrganizations);
+    on<ToggleOrganizationFollowEvent>(_onToggleOrganizationFollow);
     on<LoadFriendRequestsEvent>(_onLoadFriendRequests);
     on<LoadConnectionsEvent>(_onLoadConnections);
     on<LoadSuggestionsEvent>(_onLoadSuggestions);
@@ -49,6 +78,220 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
     on<CancelFriendRequestEvent>(_onCancelRequest);
     on<RemoveConnectionEvent>(_onRemoveConnection);
     on<NetworkSearchEvent>(_onNetworkSearch);
+  }
+
+  List<Map<String, dynamic>> _parsePaginatorItems(
+    Map<String, dynamic> result,
+    String key,
+  ) {
+    final paginator = result[key];
+    if (paginator is Map) {
+      final data = paginator['data'];
+      if (data is List) {
+        return data.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+      }
+    }
+    if (result['data'] is List) {
+      return (result['data'] as List)
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    }
+    return [];
+  }
+
+  Map<String, dynamic>? _paginatorMeta(
+    Map<String, dynamic> result,
+    String key,
+  ) {
+    final paginator = result[key];
+    return paginator is Map ? Map<String, dynamic>.from(paginator) : null;
+  }
+
+  Future<void> _onLoadNetworkHome(
+    LoadNetworkHomeEvent event,
+    Emitter<NetworkState> emit,
+  ) async {
+    if (!event.silent) {
+      emit(NetworkLoadingState());
+    }
+    try {
+      final result = await _api.getNetworkHome();
+      if (isClosed) return;
+
+      final stats = result['stats'];
+      if (stats is Map) {
+        networkStats = Map<String, dynamic>.from(stats);
+      }
+
+      final preview = result['invitationPreview'];
+      if (preview is Map) {
+        pendingCount = _safeInt(preview['count']) ?? 0;
+        invitationSubtitle = preview['subtitle']?.toString() ?? '';
+        invitationPreviewNames = (preview['names'] as List<dynamic>? ?? [])
+            .map((name) => name.toString())
+            .where((name) => name.isNotEmpty)
+            .toList();
+      }
+
+      friendRequests = _parsePaginatorItems(result, 'requests');
+      suggestions = _parsePaginatorItems(result, 'people');
+      connections = _parsePaginatorItems(result, 'connections');
+      organizations = _parsePaginatorItems(result, 'businesses')
+          .map(_normalizeOrganization)
+          .toList();
+
+      final requestsMeta = _paginatorMeta(result, 'requests');
+      final peopleMeta = _paginatorMeta(result, 'people');
+      final connectionsMeta = _paginatorMeta(result, 'connections');
+      final businessesMeta = _paginatorMeta(result, 'businesses');
+
+      requestsPage = _safeInt(requestsMeta?['current_page']) ?? 1;
+      requestsHasMore =
+          requestsPage < (_safeInt(requestsMeta?['last_page']) ?? 1);
+      suggestionsPage = _safeInt(peopleMeta?['current_page']) ?? 1;
+      suggestionsHasMore =
+          suggestionsPage < (_safeInt(peopleMeta?['last_page']) ?? 1);
+      connectionsPage = _safeInt(connectionsMeta?['current_page']) ?? 1;
+      connectionsHasMore =
+          connectionsPage < (_safeInt(connectionsMeta?['last_page']) ?? 1);
+      organizationsPage = _safeInt(businessesMeta?['current_page']) ?? 1;
+      organizationsHasMore =
+          organizationsPage < (_safeInt(businessesMeta?['last_page']) ?? 1);
+
+      pendingCount = _safeInt(requestsMeta?['total']) ?? pendingCount;
+
+      hasLoadedHome = true;
+      hasLoadedRequests = true;
+      hasLoadedSuggestions = true;
+      hasLoadedConnections = true;
+      hasLoadedOrganizations = true;
+      isLoadingMore = false;
+      activeLoadType = null;
+
+      emit(
+        NetworkLoadedState(
+          items: suggestions,
+          currentPage: suggestionsPage,
+          hasMore: suggestionsHasMore,
+        ),
+      );
+    } catch (e) {
+      if (isClosed) return;
+      hasLoadedHome = true;
+      hasLoadedRequests = true;
+      hasLoadedSuggestions = true;
+      hasLoadedConnections = true;
+      hasLoadedOrganizations = true;
+      emit(NetworkErrorState('Failed to load network: $e'));
+    }
+  }
+
+  Future<void> _onLoadOrganizations(
+    LoadOrganizationsEvent event,
+    Emitter<NetworkState> emit,
+  ) async {
+    activeLoadType = 'organizations';
+    if (event.page == 1) {
+      isLoadingMore = false;
+      if (!hasLoadedOrganizations) {
+        emit(NetworkLoadingState());
+      }
+    } else {
+      isLoadingMore = true;
+      emit(
+        NetworkLoadedState(
+          items: organizations,
+          currentPage: organizationsPage,
+          hasMore: true,
+        ),
+      );
+    }
+
+    try {
+      final result = await _api.getNetworkBusinesses(
+        search: event.search,
+        page: event.page,
+      );
+      if (isClosed) return;
+
+      final items = _parsePaginatorItems(result, 'businesses')
+          .map(_normalizeOrganization)
+          .toList();
+      final meta = _paginatorMeta(result, 'businesses');
+      if (event.page == 1) {
+        organizations = items;
+      } else {
+        organizations.addAll(items);
+      }
+
+      final currentPage = _safeInt(meta?['current_page']) ?? event.page;
+      final lastPage = _safeInt(meta?['last_page']) ?? currentPage;
+      organizationsPage = currentPage;
+      organizationsHasMore = currentPage < lastPage;
+      hasLoadedOrganizations = true;
+      isLoadingMore = false;
+      activeLoadType = null;
+
+      emit(
+        NetworkLoadedState(
+          items: organizations,
+          currentPage: currentPage,
+          hasMore: organizationsHasMore,
+        ),
+      );
+    } catch (e) {
+      if (isClosed) return;
+      isLoadingMore = false;
+      activeLoadType = null;
+      hasLoadedOrganizations = true;
+      emit(NetworkErrorState(e.toString()));
+    }
+  }
+
+  Future<void> _onToggleOrganizationFollow(
+    ToggleOrganizationFollowEvent event,
+    Emitter<NetworkState> emit,
+  ) async {
+    final index = organizations.indexWhere(
+      (org) => org['id']?.toString() == event.organizationId,
+    );
+    if (index < 0) return;
+
+    final org = organizations[index];
+    final isFollowing = _networkOrgIsFollowing(org);
+    try {
+      final result = isFollowing
+          ? await _api.unfollowOrganization(event.organizationId)
+          : await _api.followOrganization(event.organizationId);
+
+      if (isClosed) return;
+
+      final nextFollowing = result['following'];
+      org['is_following'] = nextFollowing != null
+          ? _networkOrgIsFollowing({'is_following': nextFollowing})
+          : !isFollowing;
+      final followers = _safeInt(result['followers_count']) ??
+          _safeInt(org['follower_count']) ??
+          0;
+      org['follower_count'] = followers;
+
+      emit(
+        NetworkActionSuccessState(
+          result['message']?.toString() ??
+              (isFollowing ? 'Unfollowed' : 'Following'),
+        ),
+      );
+      emit(
+        NetworkLoadedState(
+          items: organizations,
+          currentPage: organizationsPage,
+          hasMore: organizationsHasMore,
+        ),
+      );
+    } catch (e) {
+      if (isClosed) return;
+      emit(NetworkErrorState(e.toString()));
+    }
   }
 
   Future<void> _onLoadFriendRequests(
@@ -70,11 +313,12 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
         page: event.page,
       );
       if (isClosed) return;
-      print('getFriendRequests(${event.type}) result keys: ${result.keys.toList()}, total: ${result['total']}');
-      // Backend returns { requests: { data: [...] }, current_page, last_page, total }
+      // Backend returns { requests: { current_page, data: [...], last_page, total } }
       final requestsObj = result['requests'];
-      final List<dynamic> data = requestsObj is Map
-          ? (requestsObj['data'] as List<dynamic>? ?? [])
+      final Map<String, dynamic>? requestsPaginator =
+          requestsObj is Map ? Map<String, dynamic>.from(requestsObj) : null;
+      final List<dynamic> data = requestsPaginator != null
+          ? (requestsPaginator['data'] as List<dynamic>? ?? [])
           : (result['data'] as List<dynamic>? ?? []);
       final items = data
           .map((e) => Map<String, dynamic>.from(e as Map))
@@ -85,9 +329,12 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       } else {
         friendRequests.addAll(items);
       }
-      pendingCount = _safeInt(result['total']) ?? friendRequests.length;
-      final currentPage = _safeInt(result['current_page']) ?? 1;
-      final lastPage = _safeInt(result['last_page']) ?? 1;
+      pendingCount =
+          _safeInt(requestsPaginator?['total'] ?? result['total']) ?? friendRequests.length;
+      final currentPage =
+          _safeInt(requestsPaginator?['current_page'] ?? result['current_page']) ?? 1;
+      final lastPage =
+          _safeInt(requestsPaginator?['last_page'] ?? result['last_page']) ?? 1;
       requestsPage = currentPage;
       requestsHasMore = currentPage < lastPage;
       hasLoadedRequests = true;
@@ -126,12 +373,15 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       final result = await _api.getConnections(
         search: event.search,
         page: event.page,
+        viewUserId: event.viewUserId,
       );
       if (isClosed) return;
-      // Backend returns { connections: { data: [...] }, current_page, last_page, total }
+      // Backend returns { connections: { current_page, data: [...], last_page, total } }
       final connsObj = result['connections'];
-      final List<dynamic> data = connsObj is Map
-          ? (connsObj['data'] as List<dynamic>? ?? [])
+      final Map<String, dynamic>? connsPaginator =
+          connsObj is Map ? Map<String, dynamic>.from(connsObj) : null;
+      final List<dynamic> data = connsPaginator != null
+          ? (connsPaginator['data'] as List<dynamic>? ?? [])
           : (result['data'] as List<dynamic>? ?? []);
       final items = data
           .map((e) => Map<String, dynamic>.from(e as Map))
@@ -141,8 +391,10 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       } else {
         connections.addAll(items);
       }
-      final currentPage = _safeInt(result['current_page']) ?? 1;
-      final lastPage = _safeInt(result['last_page']) ?? 1;
+      final currentPage =
+          _safeInt(connsPaginator?['current_page'] ?? result['current_page']) ?? 1;
+      final lastPage =
+          _safeInt(connsPaginator?['last_page'] ?? result['last_page']) ?? 1;
       connectionsPage = currentPage;
       connectionsHasMore = currentPage < lastPage;
       hasLoadedConnections = true;
@@ -183,10 +435,15 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
         page: event.page,
       );
       if (isClosed) return;
-      final data =
-          result['people'] as List<dynamic>? ??
-          result['data'] as List<dynamic>? ??
-          [];
+      // 'people' is a paginator Map from the server: { current_page, data: [...], last_page, total }
+      final peopleVal = result['people'];
+      final Map<String, dynamic>? peoplePaginator =
+          peopleVal is Map ? Map<String, dynamic>.from(peopleVal) : null;
+      final List<dynamic> data = peoplePaginator != null
+          ? (peoplePaginator['data'] as List<dynamic>? ?? [])
+          : (peopleVal is List
+              ? List<dynamic>.from(peopleVal)
+              : (result['data'] as List<dynamic>? ?? []));
       final items = data
           .map((e) => Map<String, dynamic>.from(e as Map))
           .toList();
@@ -195,8 +452,10 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       } else {
         suggestions.addAll(items);
       }
-      final currentPage = _safeInt(result['current_page']) ?? 1;
-      final lastPage = _safeInt(result['last_page']) ?? 1;
+      final currentPage =
+          _safeInt(peoplePaginator?['current_page'] ?? result['current_page']) ?? 1;
+      final lastPage =
+          _safeInt(peoplePaginator?['last_page'] ?? result['last_page']) ?? 1;
       suggestionsPage = currentPage;
       suggestionsHasMore = currentPage < lastPage;
       hasLoadedSuggestions = true;
@@ -257,6 +516,7 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
         }
       }
       pendingCount = pendingCount > 0 ? pendingCount - 1 : 0;
+      _syncInvitationPreview();
       emit(NetworkActionSuccessState(result['message'] ?? 'Request accepted'));
       emit(NetworkLoadedState(items: friendRequests));
     } catch (e) {
@@ -280,11 +540,32 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
         }
       }
       pendingCount = pendingCount > 0 ? pendingCount - 1 : 0;
+      _syncInvitationPreview();
       emit(NetworkActionSuccessState(result['message'] ?? 'Request rejected'));
       emit(NetworkLoadedState(items: friendRequests));
     } catch (e) {
       if (isClosed) return;
       emit(NetworkErrorState(e.toString()));
+    }
+  }
+
+  void _syncInvitationPreview() {
+    invitationPreviewNames = friendRequests
+        .map(_personNameFromRequest)
+        .where((name) => name.isNotEmpty)
+        .take(3)
+        .toList();
+    if (pendingCount <= 0) {
+      invitationSubtitle = '';
+      return;
+    }
+    if (pendingCount == 1 && invitationPreviewNames.isNotEmpty) {
+      invitationSubtitle = '${invitationPreviewNames.first} wants to connect';
+    } else if (invitationPreviewNames.length >= 2) {
+      invitationSubtitle =
+          '${invitationPreviewNames.first} & ${pendingCount - 1} other${pendingCount - 1 == 1 ? '' : 's'} want to connect';
+    } else {
+      invitationSubtitle = '$pendingCount people want to connect';
     }
   }
 
@@ -345,6 +626,7 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
     lastSearchQuery = event.query;
     lastSearchSpecialty = event.specialty;
     lastSearchCountry = event.country;
+    lastSearchScope = event.scope;
     if (event.page == 1) {
       isLoadingMore = false;
       emit(NetworkLoadingState());
@@ -358,24 +640,74 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
         page: event.page,
         specialty: event.specialty,
         country: event.country,
+        type: event.scope,
       );
       if (isClosed) return;
-      // If query/filters changed while loading, discard results
       if (lastSearchQuery != event.query ||
           lastSearchSpecialty != event.specialty ||
-          lastSearchCountry != event.country) return;
-
-      final data = result['users'] as List<dynamic>? ?? [];
-      final items = data
-          .map((e) => Map<String, dynamic>.from(e as Map))
-          .toList();
-      if (event.page == 1) {
-        searchResults = items;
-      } else {
-        searchResults.addAll(items);
+          lastSearchCountry != event.country ||
+          lastSearchScope != event.scope) {
+        return;
       }
-      final currentPage = _safeInt(result['current_page']) ?? 1;
-      final lastPage = _safeInt(result['last_page']) ?? 1;
+
+      final usersVal = result['users'];
+      final Map<String, dynamic>? usersPaginator =
+          usersVal is Map ? Map<String, dynamic>.from(usersVal) : null;
+      final List<dynamic> userData = usersPaginator != null
+          ? (usersPaginator['data'] as List<dynamic>? ?? [])
+          : (usersVal is List
+              ? List<dynamic>.from(usersVal)
+              : (result['data'] as List<dynamic>? ?? []));
+
+      final orgVal = result['organizations'];
+      final List<dynamic> orgData = orgVal is List
+          ? List<dynamic>.from(orgVal)
+          : (orgVal is Map
+              ? (orgVal['data'] as List<dynamic>? ?? [])
+              : <dynamic>[]);
+
+      final peopleItems = userData
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .map((item) {
+            item.putIfAbsent('entity_type', () => 'people');
+            item.putIfAbsent('type', () => 'people');
+            return item;
+          })
+          .toList();
+
+      final orgItems = orgData
+          .map((e) => _normalizeOrganization(Map<String, dynamic>.from(e as Map)))
+          .map((item) {
+            item['entity_type'] = 'organization';
+            item['type'] = 'organization';
+            return item;
+          })
+          .toList();
+
+      final merged = [...peopleItems, ...orgItems];
+
+      final counts = result['counts'];
+      if (counts is Map) {
+        searchPeopleCount =
+            int.tryParse('${counts['people'] ?? counts['peopleCount'] ?? 0}') ?? 0;
+        searchOrganizationCount = int.tryParse(
+                '${counts['organizations'] ?? counts['organizationCount'] ?? 0}') ??
+            0;
+      } else {
+        searchPeopleCount = peopleItems.length;
+        searchOrganizationCount = orgItems.length;
+      }
+
+      if (event.page == 1) {
+        searchResults = merged;
+      } else {
+        searchResults.addAll(merged);
+      }
+
+      final currentPage =
+          _safeInt(usersPaginator?['current_page'] ?? result['current_page']) ?? event.page;
+      final lastPage =
+          _safeInt(usersPaginator?['last_page'] ?? result['last_page']) ?? 1;
       searchPage = currentPage;
       searchHasMore = currentPage < lastPage;
       hasSearched = true;
@@ -390,6 +722,17 @@ class NetworkBloc extends Bloc<NetworkEvent, NetworkState> {
       isLoadingMore = false;
       emit(NetworkErrorState(e.toString()));
     }
+  }
+
+  String _personNameFromRequest(Map<String, dynamic> request) {
+    final sender = request['sender'];
+    final person = sender is Map
+        ? Map<String, dynamic>.from(sender)
+        : request;
+    final full = person['fullName']?.toString().trim();
+    if (full != null && full.isNotEmpty) return full;
+    return '${person['first_name'] ?? person['name'] ?? ''} ${person['last_name'] ?? ''}'
+        .trim();
   }
 
   /// Safely parse a value that could be int or String to int

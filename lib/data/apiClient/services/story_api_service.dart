@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/story_model/story_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 
 /// API service for Stories/Status feature
 /// Uses v5 API endpoints
@@ -75,8 +77,15 @@ class StoryApiService {
 
       // Media file
       if (mediaFile != null && (type == 'image' || type == 'video')) {
+        final mimeType =
+            lookupMimeType(mediaFile.path) ?? 'application/octet-stream';
+        final parts = mimeType.split('/');
         request.files.add(
-          await http.MultipartFile.fromPath('media', mediaFile.path),
+          await http.MultipartFile.fromPath(
+            'media',
+            mediaFile.path,
+            contentType: MediaType(parts[0], parts.length > 1 ? parts[1] : '*'),
+          ),
         );
       }
 

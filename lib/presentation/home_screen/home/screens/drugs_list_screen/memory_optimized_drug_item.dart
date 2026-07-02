@@ -1,7 +1,9 @@
 import 'package:doctak_app/data/models/drugs_model/drug_v6_models.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drug_ai_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drug_detail_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 
 /// Memory-optimized drug card for the v6 API — Stitch "Drug List Optimized" design.
@@ -24,24 +26,9 @@ class MemoryOptimizedDrugItem extends StatelessWidget {
       child: GestureDetector(
         onTap: () => _openDetail(context),
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.isDark ? theme.border : Colors.grey.shade200,
-              width: 0.8,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(
-                  alpha: theme.isDark ? 0.15 : 0.04,
-                ),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+          margin: const EdgeInsets.fromLTRB(16, 5, 16, 5),
+          clipBehavior: Clip.antiAlias,
+          decoration: theme.cardDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [_buildTopSection(theme), _buildFooter(context, theme)],
@@ -279,11 +266,9 @@ class MemoryOptimizedDrugItem extends StatelessWidget {
   // ── Helpers ───────────────────────────────────────────────────────────────
 
   void _openDetail(BuildContext context) {
-    Navigator.push(
+    AppNavigator.push(
       context,
-      MaterialPageRoute(
-        builder: (_) => DrugDetailScreen(drug: drug, currency: currency),
-      ),
+      DrugDetailScreen(drug: drug, currency: currency),
     );
   }
 

@@ -4,27 +4,12 @@ import 'dart:io';
 import 'package:doctak_app/core/network/network_utils.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/cme/cme_certificate_model.dart';
-import 'package:doctak_app/data/models/cme/cme_dashboard_model.dart';
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
-import 'package:doctak_app/data/models/cme/cme_notification_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 class CmeApiService {
-  static String get _baseUrl => '${AppData.base2}/api/v6/cme';
-
-  // ──────────────────────── Dashboard ────────────────────────
-
-  static Future<CmeDashboardResponse> getDashboard() async {
-    final response = await buildHttpResponse1('$_baseUrl/dashboard');
-    final data = await handleResponse(response);
-    return CmeDashboardResponse.fromJson(data);
-  }
-
-  static Future<Map<String, dynamic>> getStats() async {
-    final response = await buildHttpResponse1('$_baseUrl/stats');
-    return await handleResponse(response);
-  }
+  static String get _baseUrl => '${AppData.remoteUrlV6}/cme';
 
   // ──────────────────────── Events ────────────────────────
 
@@ -178,36 +163,6 @@ class CmeApiService {
     return data['download_url'] ?? '';
   }
 
-  // ──────────────────────── Notifications ────────────────────────
-
-  static Future<CmeNotificationsResponse> getNotifications() async {
-    final response = await buildHttpResponse1('$_baseUrl/notifications');
-    final data = await handleResponse(response);
-    return CmeNotificationsResponse.fromJson(data);
-  }
-
-  static Future<int> getUnreadNotificationCount() async {
-    final response = await buildHttpResponse1('$_baseUrl/notifications/count');
-    final data = await handleResponse(response);
-    return data['count'] ?? 0;
-  }
-
-  static Future<void> markNotificationAsRead(String notificationId) async {
-    final response = await buildHttpResponse1(
-      '$_baseUrl/notifications/$notificationId/read',
-      method: HttpMethod.POST,
-    );
-    await handleResponse(response);
-  }
-
-  static Future<void> markAllNotificationsRead() async {
-    final response = await buildHttpResponse1(
-      '$_baseUrl/notifications/mark-all-read',
-      method: HttpMethod.POST,
-    );
-    await handleResponse(response);
-  }
-
   // ──────────────────────── Waitlist ────────────────────────
 
   static Future<Map<String, dynamic>> joinWaitlist(String eventId) async {
@@ -224,31 +179,6 @@ class CmeApiService {
       method: HttpMethod.DELETE,
     );
     return await handleResponse(response);
-  }
-
-  // ──────────────────────── Search & Filters ────────────────────────
-
-  static Future<Map<String, dynamic>> getFilters() async {
-    final response = await buildHttpResponse1('$_baseUrl/filters');
-    return await handleResponse(response);
-  }
-
-  static Future<List<String>> getCategories() async {
-    final response = await buildHttpResponse1('$_baseUrl/categories');
-    final data = await handleResponse(response);
-    if (data['categories'] != null) {
-      return List<String>.from(data['categories']);
-    }
-    return [];
-  }
-
-  static Future<List<String>> getSpecialties() async {
-    final response = await buildHttpResponse1('$_baseUrl/specialties');
-    final data = await handleResponse(response);
-    if (data['specialties'] != null) {
-      return List<String>.from(data['specialties']);
-    }
-    return [];
   }
 
   // ──────────────────────── Chat ────────────────────────
@@ -351,130 +281,6 @@ class CmeApiService {
       return List<Map<String, dynamic>>.from(data['attempts']);
     }
     return [];
-  }
-
-  // ──────────────────────── Profile/Credits ────────────────────────
-
-  static Future<Map<String, dynamic>> getUserCredits() async {
-    final response = await buildHttpResponse1('$_baseUrl/profile/credits');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getTranscript() async {
-    final response = await buildHttpResponse1('$_baseUrl/profile/transcript');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getAchievements() async {
-    final response = await buildHttpResponse1('$_baseUrl/profile/achievements');
-    return await handleResponse(response);
-  }
-
-  // ──────────────────────── Learning Paths ────────────────────────
-
-  static Future<Map<String, dynamic>> getLearningPaths({int page = 1}) async {
-    final response =
-        await buildHttpResponse1('$_baseUrl/learning-paths?page=$page');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> browseLearningPaths({int page = 1}) async {
-    final response =
-        await buildHttpResponse1('$_baseUrl/learning-paths/browse?page=$page');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getMyEnrolledPaths() async {
-    final response =
-        await buildHttpResponse1('$_baseUrl/learning-paths/my/enrolled');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getMyCompletedPaths() async {
-    final response =
-        await buildHttpResponse1('$_baseUrl/learning-paths/my/completed');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getLearningPathDetail(
-      String pathId) async {
-    final response =
-        await buildHttpResponse1('$_baseUrl/learning-paths/$pathId');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> enrollInLearningPath(
-      String pathId) async {
-    final response = await buildHttpResponse1(
-      '$_baseUrl/learning-paths/$pathId/enroll',
-      method: HttpMethod.POST,
-    );
-    return await handleResponse(response);
-  }
-
-  static Future<void> unenrollFromLearningPath(String enrollmentId) async {
-    final response = await buildHttpResponse1(
-      '$_baseUrl/learning-paths/enrollment/$enrollmentId/unenroll',
-      method: HttpMethod.DELETE,
-    );
-    await handleResponse(response);
-  }
-
-  static Future<void> pauseLearningPath(String enrollmentId) async {
-    final response = await buildHttpResponse1(
-      '$_baseUrl/learning-paths/enrollment/$enrollmentId/pause',
-      method: HttpMethod.POST,
-    );
-    await handleResponse(response);
-  }
-
-  static Future<void> resumeLearningPath(String enrollmentId) async {
-    final response = await buildHttpResponse1(
-      '$_baseUrl/learning-paths/enrollment/$enrollmentId/resume',
-      method: HttpMethod.POST,
-    );
-    await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getEnrollmentProgress(
-      String enrollmentId) async {
-    final response = await buildHttpResponse1(
-        '$_baseUrl/learning-paths/enrollment/$enrollmentId/progress');
-    return await handleResponse(response);
-  }
-
-  // ──────────────────────── Analytics ────────────────────────
-
-  static Future<Map<String, dynamic>> getAnalyticsDashboard() async {
-    final response = await buildHttpResponse1('$_baseUrl/analytics');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getCreditAnalytics() async {
-    final response = await buildHttpResponse1('$_baseUrl/analytics/credits');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getComplianceAnalytics() async {
-    final response = await buildHttpResponse1('$_baseUrl/analytics/compliance');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getPerformanceAnalytics() async {
-    final response =
-        await buildHttpResponse1('$_baseUrl/analytics/performance');
-    return await handleResponse(response);
-  }
-
-  static Future<Map<String, dynamic>> getTrends() async {
-    final response = await buildHttpResponse1('$_baseUrl/analytics/trends');
-    return await handleResponse(response);
-  }
-
-  static Future<String> exportAnalytics() async {
-    final response = await buildHttpResponse1('$_baseUrl/analytics/export');
-    final data = await handleResponse(response);
-    return data['download_url'] ?? '';
   }
 
   // ──────────────────────── Event Creation ────────────────────────

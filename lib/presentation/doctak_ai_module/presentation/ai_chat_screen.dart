@@ -1,4 +1,5 @@
  import 'dart:io';
+import 'dart:async';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
@@ -11,6 +12,8 @@ import 'package:doctak_app/presentation/subscription_screen/subscription_screen.
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:flutter/services.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:doctak_app/core/utils/tts_service.dart';
 import '../blocs/ai_chat/ai_chat_bloc.dart';
 import '../data/models/ai_chat_model/ai_chat_message_model.dart';
 import '../data/models/ai_chat_model/ai_chat_session_model.dart';
@@ -27,9 +30,9 @@ class AiChatScreen extends StatefulWidget {
   State<AiChatScreen> createState() => _AiChatScreenState();
 }
 
-class _AiChatScreenState extends State<AiChatScreen> {
+class _AiChatScreenState extends State<AiChatScreen> with TickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
-  TextEditingController? _inputController;
+  final TextEditingController _inputController = TextEditingController();
   File? _selectedImage;
   bool _showWelcomeScreen = true;
   String _selectedModel = 'gpt-4o';
@@ -43,9 +46,42 @@ class _AiChatScreenState extends State<AiChatScreen> {
   int _lastRenderedMessageCount = -1;
   int _lastLiveAutoScrollAtMs = 0;
 
+  // Typing animation state
+  String _greetingText = '';
+  String _subtitleText = '';
+  bool _greetingDone = false;
+  bool _subtitleDone = false;
+  Timer? _typingTimer;
+  late AnimationController _fadeController;
+  late AnimationController _pulseController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _pulseAnimation;
+
+  // Voice input state
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
+  bool _speechAvailable = false;
+  String _lastPartialWords = ''; // Track partial results for smooth updates
+  bool _userStoppedListening = false; // Distinguish user stop vs auto-stop
+
   @override
   void initState() {
     super.initState();
+
+    // Animation controllers
+    _fadeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _fadeAnimation = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
+    _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1500))..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+
+    // Initialize speech
+    _initSpeech();
+
+    // Start typing animation after a short delay
+    _fadeController.forward();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _startTypingAnimation();
+    });
 
     // Show AI data-sharing consent on first use, then load sessions.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -72,7 +108,146 @@ class _AiChatScreenState extends State<AiChatScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _inputController.dispose();
+    _typingTimer?.cancel();
+    _fadeController.dispose();
+    _pulseController.dispose();
+    if (_isListening) _speech.stop();
+    TtsService.instance.stop();
     super.dispose();
+  }
+
+  void _initSpeech() async {
+    try {
+      _speechAvailable = await _speech.initialize(
+        onError: (error) {
+          debugPrint('Speech error: ${error.errorMsg} permanent: ${error.permanent}');
+          if (mounted) {
+            // Auto-restart on non-permanent errors (e.g. "error_speech_timeout")
+            if (!error.permanent && _isListening && !_userStoppedListening) {
+              _restartListening();
+            } else {
+              setState(() => _isListening = false);
+            }
+          }
+        },
+        onStatus: (status) {
+          debugPrint('Speech status: $status');
+          if (status == 'done' && mounted && _isListening && !_userStoppedListening) {
+            // Auto-restart when speech engine stops but user hasn't tapped stop
+            _restartListening();
+          } else if (status == 'notListening' && mounted && _userStoppedListening) {
+            setState(() => _isListening = false);
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('Speech init error: $e');
+      _speechAvailable = false;
+    }
+  }
+
+  void _toggleListening() async {
+    if (!_speechAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Speech recognition not available'), behavior: SnackBarBehavior.floating),
+      );
+      return;
+    }
+
+    HapticFeedback.mediumImpact();
+
+    if (_isListening) {
+      _userStoppedListening = true;
+      await _speech.stop();
+      setState(() => _isListening = false);
+    } else {
+      _userStoppedListening = false;
+      _lastPartialWords = '';
+      _startListening();
+    }
+  }
+
+  void _startListening() async {
+    try {
+      setState(() => _isListening = true);
+      await _speech.listen(
+        onResult: (result) {
+          if (!mounted) return;
+          final words = result.recognizedWords;
+          // Update text field immediately with partial results for snappy feel
+          if (words.isNotEmpty && words != _lastPartialWords) {
+            _lastPartialWords = words;
+            setState(() {
+              _inputController.text = words;
+              _inputController.selection = TextSelection.fromPosition(
+                TextPosition(offset: words.length),
+              );
+            });
+          }
+          // Don't auto-stop on finalResult — let continuous mode handle it
+        },
+        listenFor: const Duration(minutes: 5),
+        pauseFor: const Duration(seconds: 5),
+        listenOptions: stt.SpeechListenOptions(
+          listenMode: stt.ListenMode.dictation,
+          partialResults: true,
+          cancelOnError: false,
+          autoPunctuation: true,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Speech listen error: $e');
+      if (mounted) setState(() => _isListening = false);
+    }
+  }
+
+  void _restartListening() {
+    // Brief delay before restarting to let the engine fully stop
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted && _isListening && !_userStoppedListening) {
+        _startListening();
+      }
+    });
+  }
+
+  void _startTypingAnimation() {
+    final doctorName = AppData.name.isNotEmpty ? AppData.name.split(' ').first : 'Doctor';
+    final greeting = 'Hello, Dr. $doctorName';
+    const subtitle = "I'm Doctak AI. How can I help you today?";
+
+    int charIndex = 0;
+
+    _typingTimer = Timer.periodic(const Duration(milliseconds: 45), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      if (!_greetingDone) {
+        if (charIndex < greeting.length) {
+          setState(() {
+            _greetingText = greeting.substring(0, charIndex + 1);
+          });
+          charIndex++;
+        } else {
+          setState(() => _greetingDone = true);
+          charIndex = 0;
+        }
+      } else if (!_subtitleDone) {
+        if (charIndex < subtitle.length) {
+          setState(() {
+            _subtitleText = subtitle.substring(0, charIndex + 1);
+          });
+          charIndex++;
+        } else {
+          setState(() {
+            _subtitleDone = true;
+          });
+          timer.cancel();
+        }
+      }
+    });
   }
 
   void _scrollToBottom() {
@@ -196,8 +371,8 @@ class _AiChatScreenState extends State<AiChatScreen> {
       _isWaitingForResponse = true;
 
       // If using input controller, clear it after sending
-      if (_inputController != null && _inputController!.text == message) {
-        _inputController!.clear();
+      if (_inputController.text == message) {
+        _inputController.clear();
       }
     });
 
@@ -335,145 +510,120 @@ class _AiChatScreenState extends State<AiChatScreen> {
   // Enhanced welcome screen with 4 essential medical prompt cards
   Widget _buildWelcomeScreen() {
     final theme = OneUITheme.of(context);
-    final screenSize = MediaQuery.of(context).size;
-    final isSmallScreen = screenSize.width < 400;
-    final isVerySmallScreen = screenSize.height < 700;
 
     return Container(
       color: theme.scaffoldBackground,
-      child: Column(
-        children: [
-            // Compact Hero Header Section
-            Container(
-              margin: EdgeInsets.fromLTRB(24, isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 24), 24, isVerySmallScreen ? 12 : 20),
-              child: Column(
-                children: [
-                  // AI Icon - OneUI 8.5 style
-                  Container(
-                    width: 80,
-                    height: 80,
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 40),
+
+                // Animated AI Icon with pulse
+                ScaleTransition(
+                  scale: _pulseAnimation,
+                  child: Container(
+                    width: 90,
+                    height: 90,
                     decoration: BoxDecoration(
-                      color: theme.primary,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          theme.primary.withValues(alpha: 0.8),
+                          const Color(0xFF00C9A7),
+                        ],
+                      ),
                       shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.3), spreadRadius: 2, blurRadius: 12, offset: const Offset(0, 4))],
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.primary.withValues(alpha: 0.3),
+                          spreadRadius: 4,
+                          blurRadius: 20,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: const Center(child: Icon(Icons.psychology_alt_rounded, color: Colors.white, size: 40)),
+                    child: const Center(
+                      child: Icon(Icons.auto_awesome, color: Colors.white, size: 42),
+                    ),
                   ),
+                ),
 
-                  SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
+                const SizedBox(height: 36),
 
-                  // Title text - OneUI 8.5 style
-                  Text(
-                    translation(context).lbl_doctak_ai_assistant,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Poppins', letterSpacing: 0.5, color: theme.textPrimary),
+                // Typing greeting: "Hello, Dr. Name"
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 100),
+                  child: Text(
+                    _greetingText,
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                      color: theme.textPrimary,
+                      letterSpacing: -0.3,
+                    ),
                     textAlign: TextAlign.center,
                   ),
+                ),
 
-                  SizedBox(height: isVerySmallScreen ? 8 : (isSmallScreen ? 10 : 12)),
+                const SizedBox(height: 12),
 
-                  // Description - OneUI 8.5 style
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      translation(context).lbl_intelligent_medical_companion,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 14, fontFamily: 'Poppins', height: 1.5, color: theme.textSecondary),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Compact Quick Start Section
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  // Section header - OneUI 8.5 style
-                  Text(
-                    translation(context).lbl_quick_start,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.primary),
-                  ),
-
-                  SizedBox(height: isVerySmallScreen ? 16 : (isSmallScreen ? 18 : 22)),
-                ],
-              ),
-            ),
-
-            // Enhanced 4-card grid layout - 2 cards per row
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: isSmallScreen ? 12 : 16,
-                  mainAxisSpacing: isSmallScreen ? 12 : 16,
-                  childAspectRatio: isVerySmallScreen ? 1.0 : (isSmallScreen ? 1.05 : 1.1),
-                  physics: const BouncingScrollPhysics(),
+                // Typing subtitle: "I'm Doctak AI..."
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildEnhancedFeatureCard(
-                      title: translation(context).lbl_diagnosis_support,
-                      description: translation(context).lbl_clinical_decision_assistance,
-                      icon: Icons.medical_services_rounded,
-                      gradientColors: [theme.primary.withValues(alpha: 0.6), theme.primary],
-                      prompt: translation(context).msg_diagnosis_support_prompt,
-                      isSmallScreen: isSmallScreen,
-                      isVerySmallScreen: isVerySmallScreen,
+                    Flexible(
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'Poppins',
+                            height: 1.5,
+                            color: theme.textSecondary,
+                          ),
+                          children: [
+                            if (_subtitleText.startsWith("I'm ")) ...[
+                              const TextSpan(text: "I'm "),
+                              TextSpan(
+                                text: _subtitleText.length > 4
+                                    ? _subtitleText.substring(4, _subtitleText.indexOf('.') > 4 ? _subtitleText.indexOf('.') : _subtitleText.length)
+                                    : '',
+                                style: TextStyle(
+                                  color: theme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              if (_subtitleText.contains('.'))
+                                TextSpan(
+                                  text: _subtitleText.substring(_subtitleText.indexOf('.')),
+                                ),
+                            ] else
+                              TextSpan(text: _subtitleText),
+                          ],
+                        ),
+                      ),
                     ),
-                    _buildEnhancedFeatureCard(
-                      title: translation(context).lbl_drug_information,
-                      description: translation(context).lbl_medication_safety_interactions,
-                      icon: Icons.medication_liquid_rounded,
-                      gradientColors: [theme.primary.withValues(alpha: 0.4), theme.primary.withValues(alpha: 0.8)],
-                      prompt: translation(context).msg_drug_information_prompt,
-                      isSmallScreen: isSmallScreen,
-                      isVerySmallScreen: isVerySmallScreen,
-                    ),
-                    _buildEnhancedFeatureCard(
-                      title: translation(context).lbl_treatment_plans,
-                      description: translation(context).lbl_evidence_based_protocols,
-                      icon: Icons.assignment_turned_in_rounded,
-                      gradientColors: [theme.primary.withValues(alpha: 0.7), theme.primary],
-                      prompt: translation(context).msg_treatment_plans_prompt,
-                      isSmallScreen: isSmallScreen,
-                      isVerySmallScreen: isVerySmallScreen,
-                    ),
-                    _buildEnhancedFeatureCard(
-                      title: translation(context).lbl_medical_codes,
-                      description: translation(context).lbl_icd_cpt_code_lookup,
-                      icon: Icons.qr_code_scanner_rounded,
-                      gradientColors: [theme.primary.withValues(alpha: 0.6), theme.primary],
-                      prompt: translation(context).msg_medical_codes_prompt,
-                      isSmallScreen: isSmallScreen,
-                      isVerySmallScreen: isVerySmallScreen,
-                    ),
-                    _buildEnhancedFeatureCard(
-                      title: translation(context).lbl_patient_education,
-                      description: translation(context).lbl_patient_friendly_explanations,
-                      icon: Icons.groups_rounded,
-                      gradientColors: [theme.primary.withValues(alpha: 0.5), theme.primary.withValues(alpha: 0.9)],
-                      prompt: translation(context).msg_patient_education_prompt,
-                      isSmallScreen: isSmallScreen,
-                      isVerySmallScreen: isVerySmallScreen,
-                    ),
-                    _buildEnhancedFeatureCard(
-                      title: translation(context).lbl_guidelines_summary,
-                      description: translation(context).lbl_latest_clinical_guidelines,
-                      icon: Icons.menu_book_rounded,
-                      gradientColors: [theme.primary.withValues(alpha: 0.6), theme.primary],
-                      prompt: translation(context).msg_guidelines_summary_prompt,
-                      isSmallScreen: isSmallScreen,
-                      isVerySmallScreen: isVerySmallScreen,
-                    ),
+                    // Blinking cursor
+                    if (!_subtitleDone)
+                      _TypingCursor(color: theme.primary),
                   ],
                 ),
-              ),
-            ),
 
-            // Minimal bottom spacing
-            SizedBox(height: isVerySmallScreen ? 12 : (isSmallScreen ? 16 : 20)),
-          ],
+                const SizedBox(height: 48),
+
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
         ),
+      ),
     );
   }
 
@@ -709,7 +859,7 @@ class _AiChatScreenState extends State<AiChatScreen> {
                           ElevatedButton.icon(
                             onPressed: () {
                               // Retry sending the last message
-                              final pendingMessage = _inputController?.text ?? "";
+                              final pendingMessage = _inputController.text;
 
                               if (pendingMessage.isNotEmpty || _selectedImage != null) {
                                 // Re-send the message with the same parameters
@@ -974,11 +1124,13 @@ class _AiChatScreenState extends State<AiChatScreen> {
 
             // Input area
             MessageInput(
-              controller: _inputController = TextEditingController(),
+              controller: _inputController,
               onSendMessage: (_isWaitingForResponse || _quotaInfo?.canUse == false) ? null : _sendMessage,
               onAttachImage: (_isWaitingForResponse || _quotaInfo?.canUse == false) ? null : _pickImage,
               selectedModel: _selectedModel,
-              isWaitingForResponse: _isWaitingForResponse, // Pass waiting state to input
+              isWaitingForResponse: _isWaitingForResponse,
+              onVoiceTap: _toggleListening,
+              isListening: _isListening,
               onModelChanged: (model) {
                 setState(() {
                   _selectedModel = model;
@@ -1437,75 +1589,41 @@ class _AiChatScreenState extends State<AiChatScreen> {
   }
 
   // Professional feature card - OneUI 8.5 styled
-  Widget _buildEnhancedFeatureCard({
-    required String title,
-    required String description,
-    required IconData icon,
-    required List<Color> gradientColors,
-    required String prompt,
-    required bool isSmallScreen,
-    bool isVerySmallScreen = false,
-  }) {
-    final theme = OneUITheme.of(context);
+}
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.lightImpact();
-          _preCreateSession(prompt);
-        },
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.cardBackground,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: theme.primary.withValues(alpha: 0.15), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: theme.primary.withValues(alpha: theme.isDark ? 0.15 : 0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Icon - OneUI 8.5 style
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme.primary,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: theme.primary.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4))],
-                ),
-                child: Icon(icon, color: Colors.white, size: 24),
-              ),
-              const SizedBox(height: 8),
+/// Blinking cursor for the typing animation
+class _TypingCursor extends StatefulWidget {
+  final Color color;
+  const _TypingCursor({required this.color});
 
-              // Title
-              Text(
-                title,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
+  @override
+  State<_TypingCursor> createState() => _TypingCursorState();
+}
 
-              // Description
-              Text(
-                description,
-                style: TextStyle(fontSize: 11, fontFamily: 'Poppins', color: theme.textSecondary),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
+class _TypingCursorState extends State<_TypingCursor> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 530))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller,
+      child: Container(
+        width: 2,
+        height: 20,
+        margin: const EdgeInsets.only(left: 2),
+        color: widget.color,
       ),
     );
   }

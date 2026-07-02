@@ -3,7 +3,7 @@
 /// Constants used throughout the application
 class AppConstants {
   // Agora configuration
-  static const String agoraAppId = "f2cf99f1193a40e69546157883b2159f";
+  static const String agoraAppId = "ee966b91c0a34221b3e0c48e77d5d02a";
 
   // Call configuration
   static const int callReconnectionAttempts = 5;

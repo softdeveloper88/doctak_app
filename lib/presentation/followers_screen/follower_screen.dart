@@ -1,51 +1,63 @@
 import 'dart:async';
 
 import 'package:doctak_app/localization/app_localization.dart';
+import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dart';
+import 'package:doctak_app/presentation/followers_screen/component/follower_widget.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nb_utils/nb_utils.dart';
-
-import 'bloc/followers_bloc.dart';
-import 'component/follower_widget.dart';
 
 class FollowerScreen extends StatefulWidget {
   final Function? backPress;
   final bool isFollowersScreen;
   final String userId;
 
-  const FollowerScreen({this.backPress, super.key, required this.isFollowersScreen, required this.userId});
+  const FollowerScreen({
+    this.backPress,
+    super.key,
+    required this.isFollowersScreen,
+    required this.userId,
+  });
 
   @override
   State<FollowerScreen> createState() => _FollowerScreenState();
 }
 
 class _FollowerScreenState extends State<FollowerScreen> {
-  FollowersBloc followersBloc = FollowersBloc();
+  final FollowersBloc _followersBloc = FollowersBloc();
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
-  bool isSearchShow = false;
 
   @override
   void initState() {
-    followersBloc.add(FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId));
     super.initState();
+    _searchController.addListener(() => setState(() {}));
+    _followersBloc.add(
+      FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId),
+    );
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
+    _followersBloc.close();
     super.dispose();
   }
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-
     _debounce = Timer(const Duration(milliseconds: 500), () {
-      followersBloc.add(FollowersLoadPageEvent(page: 1, searchTerm: query, userId: widget.userId));
+      _followersBloc.add(
+        FollowersLoadPageEvent(
+          page: 1,
+          searchTerm: query,
+          userId: widget.userId,
+        ),
+      );
     });
   }
 
@@ -55,218 +67,254 @@ class _FollowerScreenState extends State<FollowerScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackground,
-      body: Column(
-        children: [
-          // Custom AppBar with DoctakAppBar
-          DoctakAppBar(
-            title: widget.isFollowersScreen ? translation(context).lbl_followers : translation(context).lbl_following,
-            titleIcon: widget.isFollowersScreen ? Icons.people_rounded : Icons.person_add_rounded,
-            actions: [
-              // Search icon button
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-                icon: Icon(isSearchShow ? Icons.close : Icons.search, color: theme.primary, size: 22),
-                onPressed: () {
-                  setState(() {
-                    isSearchShow = !isSearchShow;
-                    if (!isSearchShow) {
-                      _searchController.clear();
-                      followersBloc.add(FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId));
-                    }
-                  });
-                },
-              ),
-              const SizedBox(width: 16),
-            ],
-          ),
+      body: BlocBuilder<FollowersBloc, FollowersState>(
+        bloc: _followersBloc,
+        builder: (context, state) {
+          final data = _followersBloc.followerDataModel;
+          final followersCount = data?.totalFollows?.totalFollowers ?? '';
+          final followingCount = data?.totalFollows?.totalFollowings ?? '';
+          final currentCount = widget.isFollowersScreen ? followersCount : followingCount;
 
-          // Search field with animated visibility
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: isSearchShow ? 72 : 0,
-            color: theme.scaffoldBackground,
-            child: SingleChildScrollView(
-              physics: const NeverScrollableScrollPhysics(),
-              child: isSearchShow
-                  ? Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                      decoration: BoxDecoration(
-                        color: theme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(24.0),
-                        border: Border.all(color: theme.border, width: 1.5),
-                        boxShadow: theme.isDark ? null : [BoxShadow(color: theme.primary.withAlpha(13), offset: const Offset(0, 2), blurRadius: 6, spreadRadius: 0)],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24.0),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                              child: Icon(Icons.search_rounded, color: theme.textSecondary, size: 24),
-                            ),
-                            Expanded(
-                              child: AppTextField(
-                                controller: _searchController,
-                                textFieldType: TextFieldType.NAME,
-                                textStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textPrimary),
-                                onChanged: _onSearchChanged,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: translation(context).lbl_search_people,
-                                  hintStyle: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textTertiary),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 14.0),
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                _searchController.clear();
-                                followersBloc.add(FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId));
-                              },
-                              borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: theme.primary.withAlpha(26),
-                                  borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
-                                ),
-                                child: Icon(Icons.clear, color: theme.textSecondary, size: 24),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : const SizedBox(),
+          return Column(
+            children: [
+              // ── AppBar with count badge ──
+              _FollowerAppBar(
+                title: widget.isFollowersScreen
+                    ? translation(context).lbl_followers
+                    : translation(context).lbl_following,
+                count: currentCount,
+                isFollowersScreen: widget.isFollowersScreen,
+              ),
+
+              // ── Always-visible search bar ──
+              Container(
+                color: theme.cardBackground,
+                padding: const EdgeInsets.fromLTRB(14, 6, 14, 10),
+                child: _SearchBar(
+                  controller: _searchController,
+                  hintText: translation(context).lbl_search_people,
+                  onChanged: _onSearchChanged,
+                  onClear: () {
+                    _searchController.clear();
+                    _onSearchChanged('');
+                  },
+                ),
+              ),
+
+              // ── List ──
+              Expanded(child: _buildList(state, theme)),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildList(FollowersState state, OneUITheme theme) {
+    if (state is FollowersPaginationLoadingState ||
+        state is FollowersPaginationInitialState) {
+      return const ProfileListShimmer();
+    }
+
+    final items = widget.isFollowersScreen
+        ? (_followersBloc.followerDataModel?.followers ?? [])
+        : (_followersBloc.followerDataModel?.following ?? []);
+
+    if (items.isEmpty) {
+      return _EmptyState(isFollowers: widget.isFollowersScreen, theme: theme);
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.only(
+        top: 8,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      physics: const BouncingScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final dynamic element = items[index];
+        return FollowerWidget(
+          userId: widget.userId,
+          bloc: _followersBloc,
+          element: element,
+          isFollowersScreen: widget.isFollowersScreen,
+          showMutualIndicator:
+              widget.isFollowersScreen && (element.isCurrentlyFollow == true),
+          onTap: () async {
+            final isFollowing = element.isCurrentlyFollow == true;
+            if (isFollowing) {
+              _followersBloc.add(SetUserFollow(element.id ?? '', 'unfollow'));
+              element.isCurrentlyFollow = false;
+            } else {
+              _followersBloc.add(SetUserFollow(element.id ?? '', 'follow'));
+              element.isCurrentlyFollow = true;
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+// ── Compact AppBar with count badge ──────────────────────────────────────────
+
+class _FollowerAppBar extends StatelessWidget {
+  final String title;
+  final String count;
+  final bool isFollowersScreen;
+
+  const _FollowerAppBar({
+    required this.title,
+    required this.count,
+    required this.isFollowersScreen,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    return DoctakAppBar(
+      title: title,
+      titleIcon: isFollowersScreen
+          ? Icons.people_rounded
+          : Icons.person_add_rounded,
+      actions: [
+        if (count.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+                decoration: BoxDecoration(
+                  color: theme.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  count,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: theme.primary,
+                  ),
+                ),
+              ),
             ),
           ),
+        IconButton(
+          icon: Icon(CupertinoIcons.search, size: 20, color: theme.iconColor),
+          onPressed: () {},
+        ),
+        const SizedBox(width: 4),
+      ],
+    );
+  }
+}
 
-          // List content
-          BlocConsumer<FollowersBloc, FollowersState>(
-            bloc: followersBloc,
-            listener: (BuildContext context, FollowersState state) {
-              if (state is FollowersDataError) {
-                // Handle error
-              }
-            },
-            builder: (context, state) {
-              if (state is FollowersPaginationLoadingState) {
-                return const Expanded(child: ProfileListShimmer());
-              } else if (state is FollowersPaginationLoadedState) {
-                final bloc = followersBloc;
-                final itemCount = widget.isFollowersScreen ? bloc.followerDataModel?.followers?.length ?? 0 : bloc.followerDataModel?.following?.length ?? 0;
+// ── Search bar ────────────────────────────────────────────────────────────────
 
-                if (itemCount == 0) {
-                  return Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(color: theme.primary.withAlpha(26), shape: BoxShape.circle),
-                            child: Icon(widget.isFollowersScreen ? Icons.people_outline_rounded : Icons.person_add_disabled_rounded, size: 48, color: theme.primary),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            widget.isFollowersScreen ? 'No followers yet' : 'Not following anyone yet',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            widget.isFollowersScreen ? 'When people follow you, they\'ll appear here' : 'Start following people to see them here',
-                            style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
+class _SearchBar extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
 
-                return Expanded(
-                  child: ListView.builder(
-                    padding: EdgeInsets.only(top: 8, bottom: MediaQuery.of(context).padding.bottom + 16, left: 0, right: 0),
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return FollowerWidget(
-                        userId: widget.userId,
-                        bloc: bloc,
-                        element: widget.isFollowersScreen ? bloc.followerDataModel!.followers![index] : bloc.followerDataModel!.following![index],
-                        onTap: () async {
-                          if (widget.isFollowersScreen) {
-                            if (bloc.followerDataModel?.followers![index].isCurrentlyFollow ?? false) {
-                              bloc.add(SetUserFollow(followersBloc.followerDataModel?.followers?[index].id ?? '', 'unfollow'));
+  const _SearchBar({
+    required this.controller,
+    required this.hintText,
+    required this.onChanged,
+    required this.onClear,
+  });
 
-                              bloc.followerDataModel?.followers![index].isCurrentlyFollow = false;
-                            } else {
-                              bloc.add(SetUserFollow(bloc.followerDataModel?.followers![index].id ?? '', 'follow'));
-
-                              bloc.followerDataModel!.followers![index].isCurrentlyFollow = true;
-                            }
-                          } else {
-                            if (bloc.followerDataModel?.following![index].isCurrentlyFollow ?? false) {
-                              bloc.add(SetUserFollow(followersBloc.followerDataModel?.following?[index].id ?? '', 'unfollow'));
-
-                              bloc.followerDataModel?.following![index].isCurrentlyFollow = false;
-                            } else {
-                              bloc.add(SetUserFollow(bloc.followerDataModel?.following![index].id ?? '', 'follow'));
-
-                              bloc.followerDataModel!.following![index].isCurrentlyFollow = true;
-                            }
-                          }
-                        },
-                      );
-                    },
-                    itemCount: itemCount,
-                  ),
-                );
-              } else if (state is FollowersDataError) {
-                return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(color: Colors.red.withAlpha(26), shape: BoxShape.circle),
-                          child: const Icon(Icons.error_outline_rounded, size: 48, color: Colors.red),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Something went wrong',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins', color: theme.textPrimary),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Please try again later',
-                          style: TextStyle(fontSize: 14, fontFamily: 'Poppins', color: theme.textSecondary),
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            followersBloc.add(FollowersLoadPageEvent(page: 1, searchTerm: '', userId: widget.userId));
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              } else {
-                return const Expanded(child: ProfileListShimmer());
-              }
-            },
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.inputBackground,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        style: TextStyle(fontSize: 13.5, color: theme.textPrimary),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(fontSize: 13, color: theme.textSecondary),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 19,
+            color: theme.textSecondary,
           ),
-          // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
+          suffixIcon: controller.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: theme.textSecondary,
+                  ),
+                  onPressed: onClear,
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 10),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  final bool isFollowers;
+  final OneUITheme theme;
+
+  const _EmptyState({required this.isFollowers, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: theme.primary.withAlpha(26),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isFollowers
+                  ? Icons.people_outline_rounded
+                  : Icons.person_add_disabled_rounded,
+              size: 48,
+              color: theme.primary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            isFollowers ? 'No followers yet' : 'Not following anyone yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+              color: theme.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              isFollowers
+                  ? "When people follow you, they'll appear here"
+                  : 'Start following people to see them here',
+              style: TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                color: theme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -53,23 +54,24 @@ class AppCachedNetworkImage extends StatelessWidget {
 
   static const Map<String, String> defaultHeaders = {
     'User-Agent': 'DocTak-Mobile-App/1.0 (Flutter; iOS/Android)',
-    'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Connection': 'keep-alive',
+    'Accept': 'image/webp,image/apng,image/jpeg,image/png,image/*,*/*;q=0.8',
   };
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final safeUrl = imageUrl.trim();
+    final safeUrl = AppData.fullImageUrl(imageUrl);
+    final onError = errorWidget ??
+        (BuildContext ctx, String url, dynamic err) =>
+            _defaultErrorWidget(ctx, url, err, theme);
 
-    // Avoid throwing/stream errors for empty or obviously invalid URLs.
-    if (safeUrl.isEmpty || safeUrl.toLowerCase() == 'null') {
-      return (errorWidget ?? (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme))(context, safeUrl, 'Empty/invalid image url');
+    if (!AppData.isValidHttpImageUrl(safeUrl)) {
+      return onError(context, safeUrl, 'Empty/invalid image url');
     }
 
     return CachedNetworkImage(
       imageUrl: safeUrl,
+      cacheKey: safeUrl,
       width: width,
       height: height,
       fit: fit,
@@ -78,7 +80,7 @@ class AppCachedNetworkImage extends StatelessWidget {
       cacheManager: CustomCacheManager(),
       httpHeaders: httpHeaders ?? defaultHeaders,
       placeholder: placeholder ?? (ctx, url) => _defaultPlaceholder(ctx, url, theme),
-      errorWidget: errorWidget ?? (ctx, url, err) => _defaultErrorWidget(ctx, url, err, theme),
+      errorWidget: onError,
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
       imageBuilder: imageBuilder,
@@ -104,9 +106,6 @@ class AppCachedNetworkImage extends StatelessWidget {
   }
 
   Widget _defaultErrorWidget(BuildContext context, String url, dynamic error, OneUITheme theme) {
-    debugPrint('\ud83d\udea8 AppCachedNetworkImage error for URL: $url');
-    debugPrint('\ud83d\udea8 Error: $error');
-
     return Container(
       width: width,
       height: height,
@@ -119,5 +118,5 @@ class AppCachedNetworkImage extends StatelessWidget {
 /// Extension to easily use CachedNetworkImageProvider with our custom cache manager
 class AppCachedNetworkImageProvider extends CachedNetworkImageProvider {
   AppCachedNetworkImageProvider(String url, {Map<String, String>? headers, int? maxWidth, int? maxHeight})
-    : super(url.trim(), headers: headers ?? AppCachedNetworkImage.defaultHeaders, cacheManager: CustomCacheManager(), maxWidth: maxWidth, maxHeight: maxHeight);
+    : super(AppData.fullImageUrl(url), headers: headers ?? AppCachedNetworkImage.defaultHeaders, cacheManager: CustomCacheManager(), maxWidth: maxWidth, maxHeight: maxHeight);
 }

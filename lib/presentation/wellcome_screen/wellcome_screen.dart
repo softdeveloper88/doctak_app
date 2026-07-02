@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
@@ -59,7 +60,7 @@ class WelcomeScreen extends StatelessWidget {
         // Successful API call, handle the response if needed
         // Show success Snackbar
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent), duration: Duration(seconds: 2)));
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const LoginScreen()));
+        AppNavigator.pushReplacement(context, const LoginScreen());
       } else if (response.statusCode == 422) {
         // Validation error or user email not found
         // Show error Snackbar

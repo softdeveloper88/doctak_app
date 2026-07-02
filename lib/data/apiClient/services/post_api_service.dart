@@ -20,7 +20,7 @@ class PostApiService {
   /// Get posts feed with pagination
   Future<ApiResponse<PostDataModel>> getPosts({required String page}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/posts?page=$page', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/posts?page=$page', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -32,7 +32,7 @@ class PostApiService {
   /// Get post details by ID with comments
   Future<ApiResponse<PostDetailsDataModel>> getPostDetails({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/post-by-comment/$postId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/post-by-comment/$postId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDetailsDataModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);
@@ -44,7 +44,7 @@ class PostApiService {
   /// Get post details with likes information
   Future<ApiResponse<PostDetailModel>> getPostDetailsWithLikes({required String postId}) async {
     try {
-      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponse1('/posts/$postId', method: networkUtils.HttpMethod.GET));
+      final response = await networkUtils.handleResponse(await networkUtils.buildHttpResponseV6('/posts/$postId', method: networkUtils.HttpMethod.GET));
       return ApiResponse.success(PostDetailModel.fromJson(response));
     } on ApiException catch (e) {
       return ApiResponse.error(e.message, statusCode: e.statusCode);

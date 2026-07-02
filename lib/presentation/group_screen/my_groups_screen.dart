@@ -3,7 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
 import 'package:doctak_app/presentation/group_screen/group_create_screen.dart';
-import 'package:doctak_app/presentation/group_screen/group_view_screen.dart';
+import 'package:doctak_app/presentation/groups_module/screens/group_detail_screen.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,7 +82,7 @@ class GroupListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        GroupViewScreen(group.id).launch(context);
+        GroupDetailScreen(groupId: group.id ?? '').launch(context);
       },
       child: Card(
         margin: const EdgeInsets.all(8.0),

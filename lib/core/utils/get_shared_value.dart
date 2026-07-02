@@ -1,5 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:flutter/foundation.dart';
 
 /// Get SecureStorageService instance with retry mechanism for devices
@@ -22,6 +23,8 @@ Future<void> initializeAsync() async {
       String? background = await prefs.getString('background');
       String? email = await prefs.getString('email');
       String? specialty = await prefs.getString('specialty');
+      String? isVerified = await prefs.getString('is_verified');
+      await SpecialtyDisplay.instance.ensureLoaded();
       String? userType = await prefs.getString('user_type') ?? '';
       String? university = await prefs.getString('university') ?? '';
       String? countryName = await prefs.getString('country') ?? '';
@@ -34,7 +37,11 @@ Future<void> initializeAsync() async {
         AppData.profilePicNotifier.value = AppData.profilePicUrl;
         AppData.background = background ?? '';
         AppData.email = email ?? '';
-        AppData.specialty = specialty ?? '';
+        final rawSpecialty = specialty ?? '';
+        AppData.specialty = SpecialtyDisplay.instance.resolve(rawSpecialty).isNotEmpty
+            ? SpecialtyDisplay.instance.resolve(rawSpecialty)
+            : rawSpecialty;
+        AppData.isVerified = isVerified == 'true';
         AppData.university = university;
         AppData.userType = userType;
         AppData.countryName = countryName;

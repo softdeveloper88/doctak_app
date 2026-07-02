@@ -5,6 +5,8 @@ import 'package:doctak_app/data/apiClient/services/profile_api_service.dart';
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:http_parser/http_parser.dart';
+import 'package:mime/mime.dart';
 import 'package:doctak_app/data/models/drugs_model/drugs_model.dart';
 import 'package:doctak_app/data/models/guidelines_model/guidelines_model.dart';
 import 'package:doctak_app/data/models/conference_model/search_conference_model.dart';
@@ -442,7 +444,14 @@ class ApiServiceManager {
     }
   }
 
-  /// Upload profile picture using real multipart file upload
+  /// Returns the MIME MediaType for a given file path based on its extension.
+  MediaType _mediaTypeFor(String filePath) {
+    final mime = lookupMimeType(filePath) ?? 'image/jpeg';
+    return MediaType.parse(mime);
+  }
+
+  /// Upload profile picture using real multipart file upload.
+  /// Sends field 'profile_pic' as multipart/form-data to POST /api/v1/upload-profile-pic.
   Future<dynamic> uploadProfilePicture(String token, String filePath) async {
     try {
       final dioClient = dio.Dio();
@@ -450,6 +459,7 @@ class ApiServiceManager {
         'profile_pic': await dio.MultipartFile.fromFile(
           filePath,
           filename: filePath.split('/').last,
+          contentType: _mediaTypeFor(filePath),
         ),
       });
       final response = await dioClient.post(
@@ -467,14 +477,16 @@ class ApiServiceManager {
     }
   }
 
-  /// Upload cover picture using real multipart file upload
+  /// Upload cover picture using real multipart file upload.
+  /// Sends field 'cover_pic' as multipart/form-data to POST /api/v1/upload-cover-pic.
   Future<dynamic> uploadCoverPicture(String token, String filePath) async {
     try {
       final dioClient = dio.Dio();
       final formData = dio.FormData.fromMap({
-        'background': await dio.MultipartFile.fromFile(
+        'cover_pic': await dio.MultipartFile.fromFile(
           filePath,
           filename: filePath.split('/').last,
+          contentType: _mediaTypeFor(filePath),
         ),
       });
       final response = await dioClient.post(
@@ -679,9 +691,9 @@ class ApiServiceManager {
   // ================================== NOTIFICATIONS BACKWARD COMPATIBILITY ==================================
 
   /// Get my notifications (backward compatibility)
-  Future<dynamic> getMyNotifications(String token, String page) async {
+  Future<dynamic> getMyNotifications(String token, String page, {String? filter}) async {
     try {
-      final response = await sharedApi.getNotifications(page: page);
+      final response = await sharedApi.getNotifications(page: page, filter: filter);
       if (response.success) {
         return response.data;
       } else {
@@ -695,13 +707,12 @@ class ApiServiceManager {
   /// Read all selected notifications (backward compatibility)
   Future<dynamic> readAllSelectedNotifications(String token) async {
     try {
-      final response = await networkUtils.handleResponse(
-        await networkUtils.buildHttpResponse(
-          '/notifications/mark-read',
-          method: networkUtils.HttpMethod.POST,
-        ),
-      );
-      return MockHttpResponse(response: MockResponse(data: Map<String, dynamic>.from(response), statusCode: 200));
+      final response = await sharedApi.markAllNotificationsAsRead();
+      if (response.success) {
+        return MockHttpResponse(response: MockResponse(data: response.data, statusCode: 200));
+      } else {
+        throw Exception(response.message);
+      }
     } catch (e) {
       rethrow;
     }
@@ -860,11 +871,36 @@ class ApiServiceManager {
     }
   }
 
-  /// Search conferences (backward compatibility with 4 parameters)
-  Future<SearchConferenceModel> searchConferences(String token, String page, String country, String search) async {
+  Future<Map<String, dynamic>?> getConferenceDetail(String id) async {
     try {
-      // Use the shared API service with country filter
-      final response = await sharedApi.searchConferences(page: page, keyword: search, country: country);
+      final response = await sharedApi.getConferenceDetail(id: id);
+      if (response.success && response.data != null) {
+        final conference = response.data!['conference'];
+        if (conference is Map<String, dynamic>) {
+          return conference;
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Search conferences (backward compatibility with 4 parameters)
+  Future<SearchConferenceModel> searchConferences(
+    String token,
+    String page,
+    String country,
+    String search, {
+    String? month,
+  }) async {
+    try {
+      final response = await sharedApi.searchConferences(
+        page: page,
+        keyword: search,
+        country: country,
+        month: month,
+      );
       if (response.success && response.data != null) {
         return response.data!;
       }
@@ -1278,8 +1314,19 @@ class ApiServiceManager {
   /// Save suggestion (matches BLoC usage with 5 parameters)
   Future<dynamic> saveSuggestion(String token, String name, String phone, String email, String message) async {
     try {
-      // Mock response for save suggestion
-      return {'success': true, 'message': 'Suggestion saved successfully'};
+      final response = await networkUtils.handleResponse(
+        await networkUtils.buildHttpResponse(
+          '/save-suggestion',
+          method: networkUtils.HttpMethod.POST,
+          request: {
+            'name': name,
+            'phone': phone,
+            'email': email,
+            'message': message,
+          },
+        ),
+      );
+      return response;
     } catch (e) {
       throw Exception('Save suggestion failed: ${e.toString()}');
     }

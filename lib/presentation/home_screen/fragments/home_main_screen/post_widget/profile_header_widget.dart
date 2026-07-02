@@ -1,14 +1,16 @@
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
+import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
   final String profilePicUrl;
   final String userName;
   final String? createdAt;
   final String? specialty;
+  final String? location;
   final VoidCallback onProfileTap;
   final VoidCallback onDeleteTap;
   final bool isCurrentUser;
@@ -16,6 +18,7 @@ class ProfileHeaderWidget extends StatelessWidget {
   final String? userId;
   final VoidCallback? onReportTap;
   final VoidCallback? onBlockTap;
+  final bool isVerified;
 
   const ProfileHeaderWidget({
     super.key,
@@ -23,6 +26,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     required this.userName,
     this.createdAt,
     this.specialty,
+    this.location,
     required this.onProfileTap,
     required this.onDeleteTap,
     required this.isCurrentUser,
@@ -30,6 +34,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     this.userId,
     this.onReportTap,
     this.onBlockTap,
+    this.isVerified = false,
   });
 
   @override
@@ -37,7 +42,7 @@ class ProfileHeaderWidget extends StatelessWidget {
     final theme = OneUITheme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -58,15 +63,15 @@ class ProfileHeaderWidget extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(21),
                       child: profilePicUrl.isNotEmpty
-                          ? CachedNetworkImage(
+                          ? AppCachedNetworkImage(
                               imageUrl: profilePicUrl,
                               height: 42,
                               width: 42,
                               fit: BoxFit.cover,
                               memCacheWidth: 84,
                               memCacheHeight: 84,
-                              fadeInDuration: const Duration(milliseconds: 150),
-                              fadeOutDuration: const Duration(milliseconds: 100),
+                              fadeInDuration: Duration.zero,
+                              fadeOutDuration: Duration.zero,
                               placeholder: (context, url) => Container(
                                 color: theme.avatarBackground,
                                 child: Center(
@@ -114,34 +119,39 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: theme.textPrimary),
                               ),
                             ),
-                            const SizedBox(width: 4),
-                            // Verified Badge
-                            Icon(
-                              CupertinoIcons.checkmark_seal_fill,
-                              size: 14,
-                              color: theme.verifiedBadge,
-                            ),
+                            if (isVerified) ...[
+                              const SizedBox(width: 4),
+                              theme.buildVerifiedBadge(size: 14),
+                            ],
                           ],
                         ),
                         const SizedBox(height: 4),
-                        // Specialty or Time Info
-                        if (specialty != null)
-                          Row(
-                            children: [
-                              Icon(CupertinoIcons.heart_circle, size: 14, color: theme.textSecondary),
-                              const SizedBox(width: 6),
-                              Flexible(
-                                child: Text(
-                                  specialty!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.textSecondary, fontFamily: 'Poppins'),
+                        // Specialty + Location, or Time Info fallback
+                        Builder(builder: (context) {
+                          final resolvedSpecialty = displaySpecialty(specialty);
+                          final hasSpecialty = resolvedSpecialty.isNotEmpty;
+                          final hasLocation = location != null && location!.isNotEmpty;
+                          if (hasSpecialty || hasLocation) {
+                            final parts = <String>[];
+                            if (hasSpecialty) parts.add(resolvedSpecialty);
+                            if (hasLocation) parts.add(location!);
+                            final subtitle = parts.join(' · ');
+                            return Row(
+                              children: [
+                                Icon(hasSpecialty ? CupertinoIcons.heart_circle : CupertinoIcons.location_solid, size: 14, color: theme.textSecondary),
+                                const SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    subtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: theme.textSecondary, fontFamily: 'Poppins'),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          )
-                        else
-                          Row(
+                              ],
+                            );
+                          }
+                          return Row(
                             children: [
                               Text(
                                 createdAt ?? '',
@@ -155,7 +165,8 @@ class ProfileHeaderWidget extends StatelessWidget {
                                 Icon(CupertinoIcons.globe, size: 12, color: theme.textSecondary),
                               ],
                             ],
-                          ),
+                          );
+                        }),
                       ],
                     ),
                   ),

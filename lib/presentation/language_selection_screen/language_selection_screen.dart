@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/splash_screen/unified_splash_upgrade_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -134,10 +135,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen>
 
     // Navigate to the main app flow
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => const UnifiedSplashUpgradeScreen(),
-        ),
+      AppNavigator.pushReplacement(
+        context,
+        const UnifiedSplashUpgradeScreen(),
       );
     }
   }

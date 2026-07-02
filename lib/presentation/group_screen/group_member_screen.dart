@@ -1,16 +1,20 @@
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
 import 'package:doctak_app/presentation/group_screen/bloc/group_bloc.dart';
+import 'package:doctak_app/presentation/group_screen/bloc/group_event.dart';
+import 'package:doctak_app/presentation/group_screen/bloc/group_state.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 class GroupMemberScreen extends StatefulWidget {
   GroupMemberScreen(this.groupBloc, {super.key});
 
-  GroupBloc groupBloc;
+  final GroupBloc groupBloc;
 
   @override
   State<GroupMemberScreen> createState() => _GroupMemberScreenState();
@@ -22,81 +26,110 @@ class _GroupMemberScreenState extends State<GroupMemberScreen> {
 
   @override
   void initState() {
-    admins = widget.groupBloc.groupMemberModel!.groupMembers!.where((member) => member.adminType == 'admin').toList();
-    user = widget.groupBloc.groupMemberModel!.groupMembers!.where((member) => member.adminType == 'user').toList();
-
     super.initState();
+    _syncMembers();
+    final groupId = widget.groupBloc.groupDetailsModel?.group?.id?.trim() ?? '';
+    if (groupId.isNotEmpty) {
+      widget.groupBloc.add(GroupMembersEvent(groupId, ''));
+    }
+  }
+
+  void _syncMembers() {
+    final members = widget.groupBloc.groupMemberModel?.groupMembers ?? [];
+    admins = members.where((member) => member.adminType == 'admin').toList();
+    user = members.where((member) => member.adminType != 'admin').toList();
+  }
+
+  String _joinedLabel(String? joinedAt) {
+    final raw = joinedAt?.trim() ?? '';
+    if (raw.isEmpty) return 'Recently joined';
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return 'Recently joined';
+    return timeAgo.format(parsed);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackground,
-      appBar: DoctakAppBar(
-        title: 'Members',
-        actions: [
-          IconButton(
-            icon: Icon(CupertinoIcons.search, size: 22, color: theme.iconColor),
-            onPressed: () {
-              // Handle search button press
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              color: context.cardColor,
-              child: Column(
-                children: [
-                  SectionTitle(title: 'Admins and Moderators', count: admins.length ?? 0),
-                  ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    shrinkWrap: true,
-                    itemCount: admins.length ?? 0,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return MemberItem(
-                        name: admins[index].name ?? "",
-                        role: admins[index].adminType ?? "user",
-                        joined: timeAgo.format(DateTime.parse(admins[index].joinedAt ?? "")),
-                        avatarUrl: admins[index].profilePic ?? "",
-                        isAdmin: admins[index].adminType == 'admin' ? true : false,
-                      );
-                    },
-                  ),
-                ],
-              ),
+    return BlocListener<GroupBloc, GroupState>(
+      bloc: widget.groupBloc,
+      listener: (context, state) {
+        if (state is PaginationLoadedState) {
+          setState(_syncMembers);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackground,
+        appBar: DoctakAppBar(
+          title: 'Members',
+          actions: [
+            IconButton(
+              icon: Icon(CupertinoIcons.search, size: 22, color: theme.iconColor),
+              onPressed: () {},
             ),
-            SizedBox(height: 10),
-            Container(
-              color: context.cardColor,
-              child: Column(
-                children: [
-                  SectionTitle(title: 'Members', count: user.length),
-                  ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    shrinkWrap: true,
-                    itemCount: user.length,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return MemberItem(
-                        name: user[index].name ?? "",
-                        role: 'member',
-                        joined: "Joined ${timeAgo.format(DateTime.parse(user[index].joinedAt ?? ""))}",
-                        avatarUrl: user[index].profilePic ?? "",
-                        isAdmin: user[index].adminType == 'admin' ? true : false,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(width: 8),
           ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                color: context.cardColor,
+                child: Column(
+                  children: [
+                    SectionTitle(title: 'Admins and Moderators', count: admins.length),
+                    ListView.builder(
+                      padding: const EdgeInsets.all(8),
+                      shrinkWrap: true,
+                      itemCount: admins.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final member = admins[index];
+                        return MemberItem(
+                          name: member.name ?? '',
+                          role: member.adminType ?? 'admin',
+                          joined: _joinedLabel(member.joinedAt),
+                          avatarUrl: member.profilePic ?? '',
+                          isAdmin: member.adminType == 'admin',
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                color: context.cardColor,
+                child: Column(
+                  children: [
+                    SectionTitle(title: 'Members', count: user.length),
+                    if (admins.isEmpty && user.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text('No members loaded yet.'),
+                      ),
+                    ListView.builder(
+                      padding: const EdgeInsets.all(8),
+                      shrinkWrap: true,
+                      itemCount: user.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final member = user[index];
+                        return MemberItem(
+                          name: member.name ?? '',
+                          role: 'member',
+                          joined: 'Joined ${_joinedLabel(member.joinedAt)}',
+                          avatarUrl: member.profilePic ?? '',
+                          isAdmin: member.adminType == 'admin',
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -131,26 +164,35 @@ class MemberItem extends StatelessWidget {
   final String avatarUrl;
   final bool isAdmin;
 
-  const MemberItem({super.key, required this.name, required this.role, required this.joined, required this.avatarUrl, this.isAdmin = false});
+  const MemberItem({
+    super.key,
+    required this.name,
+    required this.role,
+    required this.joined,
+    required this.avatarUrl,
+    this.isAdmin = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedAvatar = AppData.fullImageUrl(avatarUrl);
     return ListTile(
-      leading: CircleAvatar(backgroundImage: NetworkImage(avatarUrl)),
+      leading: CircleAvatar(
+        backgroundImage: resolvedAvatar.isNotEmpty ? NetworkImage(resolvedAvatar) : null,
+        child: resolvedAvatar.isEmpty ? const Icon(Icons.person) : null,
+      ),
       title: Text(name),
       subtitle: Row(
         children: [
           isAdmin ? Image.asset('assets/images/admin.png', height: 16, width: 16) : const Icon(Icons.person, size: 16),
           const SizedBox(width: 4),
           Expanded(
-            child: Text('$role  •  $joined', style: TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
+            child: Text('$role  •  $joined', style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
           ),
         ],
       ),
       trailing: const Icon(Icons.more_vert),
-      onTap: () {
-        // Handle member item tap
-      },
+      onTap: () {},
     );
   }
 }

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.1.23+122
+version: 4.0.0+124
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -40,6 +40,10 @@ dependencies:
   flutter_svg: ^2.0.9
   equatable: ^2.0.5
   flutter_secure_storage: ^10.0.0-beta.5
+  # SharedPreferences (NSUserDefaults on iOS) is cleared on app uninstall —
+  # unlike the Keychain-backed flutter_secure_storage — so it is used to detect
+  # a fresh install and wipe any stale Keychain session (see SessionManager).
+  shared_preferences: ^2.5.5
   # comment_tree: ^0.3.0  # Not used in codebase
   google_sign_in: ^6.2.2
   pin_code_fields: ^8.0.1
@@ -67,8 +71,7 @@ dependencies:
   flutter_linkify: ^6.0.0
   provider: ^6.0.5
   # flutter_switch: ^0.3.2  # Not used in codebase
-  font_awesome_flutter: ^10.5.0
-  pusher_channels_flutter: ^2.4.0
+  font_awesome_flutter: ^11.0.0
   flutter_plugin_android_lifecycle: ^2.0.33
   flutter_chat_bubble: ^2.0.2
   agora_rtc_engine: ^6.5.3
@@ -82,6 +85,7 @@ dependencies:
   overlay_support: ^2.1.0
   sign_in_with_apple: ^7.0.1
   path: ^1.9.1
+  pdf: ^3.11.3
   firebase_core: ^4.2.1
   carousel_slider: ^5.0.0
   google_mobile_ads: ^6.0.0
@@ -91,14 +95,15 @@ dependencies:
   video_player: ^2.9.5
   chewie: ^1.7.1
   flutter_animate: ^4.5.0
-  # lottie: ^3.1.0  # Not used in codebase - can be removed
+  lottie: ^3.1.0
   # flutter_easyloading: ^3.0.5  # Not used in codebase
   crypto: ^3.0.1
   pub_semver: ^2.0.0
   path_provider: ^2.0.2
   gal: ^2.3.0
   photo_view: ^0.15.0
-  image_editor_plus: ^1.0.3
+  image_editor_plus:
+    path: third_party/image_editor_plus
   mime: ^2.0.0
   # Onboarding - consider removing if already completed
   # introduction_screen: ^4.0.0
@@ -123,6 +128,8 @@ dependencies:
   record: ^6.1.2
   record_linux: ^1.2.1
   audio_session: ^0.1.16
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.2.0
   mobx: ^2.3.0+1
   flutter_mobx: ^2.0.6+5
   flutter_callkit_incoming: ^3.0.0
@@ -141,6 +148,8 @@ dependencies:
   qr_flutter: ^4.1.0
 
 dependency_overrides:
+  # Flutter 3.44+ marks IconData as final; v11+ is required.
+  font_awesome_flutter: ^11.0.0
   # Quill packages commented out - flutter_quill is not used
   # quill_native_bridge_windows: ^0.0.2
   # quill_native_bridge_linux: ^0.0.2
@@ -181,8 +190,49 @@ flutter:
     - assets/
     - assets/images/
     - assets/icon/
+    - assets/icon/feed/ic_menu.svg
+    - assets/icon/feed/ic_search.svg
+    - assets/icon/feed/ic_bell.svg
+    - assets/icon/feed/ic_chat.svg
+    - assets/icon/feed/ic_compose_post.svg
+    - assets/icon/feed/ic_compose_poll.svg
+    - assets/icon/feed/ic_compose_blog.svg
+    - assets/icon/feed/ic_story_photo.svg
+    - assets/icon/feed/ic_story_plus.svg
+    - assets/icon/feed/ic_like.svg
+    - assets/icon/feed/ic_comment.svg
+    - assets/icon/feed/ic_repost.svg
+    - assets/icon/feed/ic_send.svg
+    - assets/icon/feed/ic_more.svg
+    - assets/icon/feed/ic_globe.svg
+    - assets/icon/feed/ic_nav_home.svg
+    - assets/icon/feed/ic_nav_network.svg
+    - assets/icon/feed/ic_nav_post.svg
+    - assets/icon/feed/ic_nav_images.svg
+    - assets/icon/feed/ic_nav_profile.svg
+    - assets/icon/drawer/ic_about.svg
+    - assets/icon/drawer/ic_chevron_right.svg
+    - assets/icon/drawer/ic_close.svg
+    - assets/icon/drawer/ic_cme.svg
+    - assets/icon/drawer/ic_conferences.svg
+    - assets/icon/drawer/ic_diagnosis.svg
+    - assets/icon/drawer/ic_discussions.svg
+    - assets/icon/drawer/ic_groups.svg
+    - assets/icon/drawer/ic_doctak_ai.svg
+    - assets/icon/drawer/ic_drugs.svg
+    - assets/icon/drawer/ic_guidelines.svg
+    - assets/icon/drawer/ic_jobs.svg
+    - assets/icon/drawer/ic_meetings.svg
+    - assets/icon/drawer/ic_moderation.svg
+    - assets/icon/drawer/ic_privacy.svg
+    - assets/icon/drawer/ic_settings.svg
+    - assets/icon/drawer/ic_sign_out.svg
+    - assets/icon/drawer/ic_star.svg
+    - assets/icon/drawer/ic_suggestions.svg
+    - assets/icon/drawer/ic_verified.svg
     - assets/ai/
     - assets/logo/
+    - assets/animations/doctak_logo.json
     - images/socialv/faces/
     - images/socialv/
     - images/socialv/icons/

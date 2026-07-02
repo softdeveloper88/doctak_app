@@ -1,27 +1,32 @@
 import 'dart:async';
-import 'dart:isolate';
 
+import 'package:doctak_app/core/notification_counter_service.dart';
+import 'package:doctak_app/data/services/notifications_websocket_service.dart';
+import 'package:doctak_app/routes/app_navigator.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/feed_video_autoplay_registry.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/search_screen.dart';
-import 'package:doctak_app/presentation/home_screen/home/components/SVPostComponent.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/incomplete_profile_card.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/bloc/feed_bloc.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_entries_sliver.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_scroll_activity.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/home_compose_card.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/story_bubbles_row.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_bloc.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/notification_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/user_chat_screen.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
-import '../../../../core/utils/image_constant.dart';
 import '../../../../localization/app_localization.dart';
 import '../../../notification_screen/bloc/notification_state.dart';
 import 'bloc/home_bloc.dart';
@@ -39,11 +44,13 @@ class SVHomeFragment extends StatefulWidget {
   State<SVHomeFragment> createState() => _SVHomeFragmentState();
 }
 
-class _SVHomeFragmentState extends State<SVHomeFragment> {
+class _SVHomeFragmentState extends State<SVHomeFragment>
+    with WidgetsBindingObserver {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
   // HomeBloc widget.homeBloc = HomeBloc();
   final ScrollController _mainScrollController = ScrollController();
+  final FeedBloc _feedBloc = FeedBloc();
   // Use static notification bloc to prevent multiple instances
   static NotificationBloc? _notificationBloc;
   NotificationBloc get notificationBloc {
@@ -54,70 +61,110 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
   // Debounce timer to prevent too many scroll events
   Timer? _scrollDebounce;
   bool _isLoadingTriggered = false;
+  StreamSubscription<FeedState>? _feedStateSub;
+  StreamSubscription<NotificationWsEvent>? _homeRealtimeSub;
+  final ValueNotifier<int> _storyRefresh = ValueNotifier(0);
 
   /// Handle scroll to trigger pagination when near bottom
   void _onScroll() {
-    // Don't process if already triggered loading
     if (_isLoadingTriggered) return;
-
-    // Use hasClients check to avoid errors
     if (!_mainScrollController.hasClients) return;
 
-    final maxScroll = _mainScrollController.position.maxScrollExtent;
-    final currentScroll = _mainScrollController.offset;
-    final threshold = 300.0; // pixels from bottom to trigger
+    final position = _mainScrollController.position;
+    if (!position.hasContentDimensions) return;
+
+    final maxScroll = position.maxScrollExtent;
+    final currentScroll = position.pixels;
+    const threshold = 300.0;
 
     if (maxScroll - currentScroll <= threshold) {
-      // Near bottom - check if we should load more
-      if (widget.homeBloc.pageNumber <= widget.homeBloc.numberOfPage) {
+      if (_feedBloc.canLoadMore) {
         _isLoadingTriggered = true;
-
-        // Debounce to prevent multiple rapid triggers
         _scrollDebounce?.cancel();
         _scrollDebounce = Timer(const Duration(milliseconds: 100), () {
-          widget.homeBloc.add(
-            PostCheckIfNeedMoreDataEvent(
-              index:
-                  widget.homeBloc.postList.length -
-                  widget.homeBloc.nextPageTrigger,
-            ),
-          );
-          // Reset after a delay to allow next pagination
-          Future.delayed(const Duration(milliseconds: 500), () {
-            _isLoadingTriggered = false;
-          });
+          if (!mounted) return;
+          _feedBloc.add(const FeedLoadMoreRequested());
         });
       }
+    } else if (currentScroll < maxScroll - threshold - 100) {
+      // Scrolled away from bottom — allow the next pagination trigger.
+      _isLoadingTriggered = false;
     }
   }
 
   String? emailVerified = '';
   bool isInCompleteProfile = false;
+  final ValueNotifier<bool> _showIncompleteBanner = ValueNotifier(false);
+
   Future<void> getSharedPreferences() async {
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
     emailVerified = await prefs.getString('email_verified_at') ?? '';
-    String? specialty = await prefs.getString('specialty') ?? '';
+    await SpecialtyDisplay.instance.ensureLoaded();
+    final rawSpecialty = await prefs.getString('specialty') ?? '';
+    final specialty = SpecialtyDisplay.instance.resolve(rawSpecialty).isNotEmpty
+        ? SpecialtyDisplay.instance.resolve(rawSpecialty)
+        : rawSpecialty;
     String? countryName = await prefs.getString('country') ?? '';
     String? city = await prefs.getString('city') ?? '';
     isInCompleteProfile = specialty == '' || countryName == '' || city == '';
-    setState(() {});
+    _showIncompleteBanner.value =
+        emailVerified == '' || isInCompleteProfile;
   }
 
   @override
   void initState() {
     super.initState();
 
+    // Register lifecycle observer for app resume
+    WidgetsBinding.instance.addObserver(this);
+
     // Add scroll listener for pagination
     _mainScrollController.addListener(_onScroll);
+    _feedStateSub = _feedBloc.stream.listen((state) {
+      if (state is FeedLoaded && !state.isPaginating) {
+        _isLoadingTriggered = false;
+      }
+    });
 
-    // Load posts first for immediate display
-    widget.homeBloc.add(PostLoadPageEvent(page: 1));
+    // Load the typed home feed (doctak-node /api/feed)
+    _feedBloc.add(const FeedLoadRequested());
 
-    // Defer heavy operations to let UI render smoothly
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      precacheFeedSvgAssets();
+    });
+
+    // Initialize real-time notification counter (UserChannel WebSocket + FCM)
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
-        startIsolate();
+        NotificationCounterService().initialize();
+        _homeRealtimeSub?.cancel();
+        _homeRealtimeSub = NotificationsWebSocketService().events.listen((event) {
+          if (!mounted) return;
+          if (event is FeedPostArrived) {
+            final preview = event.preview.trim().isEmpty
+                ? 'shared a new post'
+                : event.preview.trim();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 88),
+                duration: const Duration(seconds: 5),
+                content: Text('${event.authorName} · $preview'),
+                action: SnackBarAction(
+                  label: 'View',
+                  onPressed: () {
+                    _feedBloc.add(const FeedLoadRequested(refresh: true));
+                  },
+                ),
+              ),
+            );
+            _feedBloc.add(const FeedLoadRequested(refresh: true));
+          }
+        });
+        // Also do initial email verification check
+        notificationBloc.add(NotificationCounter());
         getSharedPreferences();
       }
     });
@@ -130,70 +177,51 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
     });
   }
 
-  Isolate? _isolate;
-  ReceivePort? _receivePort;
-
-  /// Start the isolate and listen for messages
-  void startIsolate() async {
-    _receivePort = ReceivePort();
-
-    // Spawn the isolate and pass the SendPort of the ReceivePort
-    _isolate = await Isolate.spawn(isolateEntry, _receivePort!.sendPort);
-
-    // Listen to messages from the isolate
-    _receivePort!.listen((message) {
-      if (message == 'notificationCounter') {
-        // Call your Bloc event here
-        notificationCounter();
-      }
-    });
+  /// Refresh notification count when app comes back to foreground
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      NotificationCounterService().refreshFromServer();
+      FeedVideoAutoplayRegistry.instance.resume();
+    } else if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      FeedVideoAutoplayRegistry.instance.pauseAll();
+    }
   }
 
-  /// The entry point for the isolate
-  static void isolateEntry(SendPort sendPort) {
-    // Start a periodic timer in the isolate - set to 60 seconds to reduce jank
-    Timer.periodic(const Duration(seconds: 60), (timer) {
-      sendPort.send('notificationCounter');
-    });
-  }
-
-  /// Your notificationCounter function
-  void notificationCounter() {
-    // Removed print statement to reduce debug overhead
-    notificationBloc.add(NotificationCounter());
-  }
-
-  /// Dispose the isolate and ports
+  /// Dispose resources
   @override
   void dispose() {
     // Cancel debounce timer
     _scrollDebounce?.cancel();
+    _feedStateSub?.cancel();
+    _homeRealtimeSub?.cancel();
+    _showIncompleteBanner.dispose();
+    _storyRefresh.dispose();
     // Remove scroll listener
     _mainScrollController.removeListener(_onScroll);
     _mainScrollController.dispose();
-    // Kill the isolate
-    _isolate?.kill(priority: Isolate.immediate);
-    // Close the ReceivePort
-    _receivePort?.close();
+    _feedBloc.close();
+    // Remove lifecycle observer
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   Future<void> _refresh() async {
-    // Simulate network request
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      getSharedPreferences();
-      widget.homeBloc.add(PostLoadPageEvent(page: 1));
-      widget.homeBloc.add(AdsSettingEvent());
-      notificationBloc.add(NotificationCounter());
-    });
+    _storyRefresh.value++;
+    unawaited(getSharedPreferences());
+    _feedBloc.add(const FeedLoadRequested(refresh: true));
+    widget.homeBloc.add(AdsSettingEvent());
+    notificationBloc.add(NotificationCounter());
+    await _feedBloc.stream.firstWhere(
+      (state) => state is FeedLoaded || state is FeedEmpty || state is FeedError,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final bool showIncompleteProfile =
-        emailVerified == '' || isInCompleteProfile;
 
     return Scaffold(
       // resizeToAvoidBottomInset: false,
@@ -217,7 +245,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
                   behavior: SnackBarBehavior.floating,
                   backgroundColor: Colors.red,
                   margin: const EdgeInsets.only(
-                    bottom: kBottomNavigationBarHeight + 20,
+                    bottom: 16,
                     left: 16,
                     right: 16,
                   ),
@@ -236,25 +264,54 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
             backgroundColor: theme.surfaceVariant,
             strokeWidth: 2.5,
             displacement: 40,
-            child: ListView(
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollUpdateNotification ||
+                    notification is ScrollStartNotification) {
+                  FeedScrollActivity.instance.notifyScrollActivity();
+                }
+                return false;
+              },
+              child: CustomScrollView(
               controller: _mainScrollController,
               physics: const BouncingScrollPhysics(
                 parent: AlwaysScrollableScrollPhysics(),
               ),
-              cacheExtent: 800, // Optimized cache extent for memory efficiency
-              addAutomaticKeepAlives:
-                  false, // Disable for better memory management
-              addRepaintBoundaries: true, // Enable for paint isolation
-              children: [
-                const StoryBubblesRow(),
-                if (showIncompleteProfile)
-                  IncompleteProfileCard(
-                    emailVerified == '',
-                    isInCompleteProfile,
+              cacheExtent: 600,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: RepaintBoundary(
+                    child: StoryBubblesRow(refreshListenable: _storyRefresh),
                   ),
-                // Wrap posts in RepaintBoundary for isolation
-                RepaintBoundary(child: SVPostComponent(widget.homeBloc)),
+                ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _showIncompleteBanner,
+                  builder: (_, showIncompleteProfile, __) {
+                    if (!showIncompleteProfile) {
+                      return const SliverToBoxAdapter(child: SizedBox.shrink());
+                    }
+                    return SliverToBoxAdapter(
+                      child: IncompleteProfileCard(
+                        emailVerified == '',
+                        isInCompleteProfile,
+                      ),
+                    );
+                  },
+                ),
+                SliverToBoxAdapter(
+                  child: RepaintBoundary(
+                    child: HomeComposeCard(
+                      onComposed: () =>
+                          _feedBloc.add(const FeedLoadRequested(refresh: true)),
+                    ),
+                  ),
+                ),
+                FeedEntriesSliver(bloc: _feedBloc, homeBloc: widget.homeBloc),
+                const SliverPadding(
+                  padding: EdgeInsets.only(bottom: 16),
+                ),
               ],
+            ),
             ),
           ),
         ),
@@ -269,8 +326,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       title: translation(context).lbl_home,
       showBackButton: false,
       automaticallyImplyLeading: true,
+      titleColor: theme.textPrimary,
+      titleFontSize: 21,
+      titleFontWeight: FontWeight.w600,
+      centerTitle: false,
       customLeading: IconButton(
-        icon: Icon(Icons.menu, size: 22, color: theme.iconColor),
+        icon: FeedIcon(asset: FeedIconAssets.menu, size: 24, color: theme.textPrimary),
         onPressed: () {
           widget.openDrawer();
           FocusManager.instance.primaryFocus?.unfocus();
@@ -278,30 +339,18 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       ),
       actions: [
         IconButton(
-          icon: Icon(CupertinoIcons.search, size: 22, color: theme.iconColor),
+          icon: FeedIcon(asset: FeedIconAssets.search, size: 23, color: theme.textPrimary),
           onPressed: () {
             FocusManager.instance.primaryFocus?.unfocus();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => SearchScreen(backPress: () => Navigator.of(context).pop()),
-              ),
+            AppNavigator.push(
+              context,
+              SearchScreen(backPress: () => Navigator.of(context).pop()),
             );
           },
         ),
         _buildNotificationButton(context, theme),
-        IconButton(
-          icon: SvgPicture.asset(
-            height: 22,
-            width: 22,
-            icChat,
-            color: theme.iconColor,
-          ),
-          onPressed: () async {
-            FocusManager.instance.primaryFocus?.unfocus();
-            UserChatScreen().launch(context);
-          },
-        ),
-        const SizedBox(width: 8),
+        _buildChatButton(context, theme),
+        const SizedBox(width: 4),
       ],
     );
   }
@@ -311,56 +360,39 @@ class _SVHomeFragmentState extends State<SVHomeFragment> {
       alignment: Alignment.center,
       children: [
         IconButton(
-          icon: Icon(CupertinoIcons.bell, size: 20, color: theme.iconColor),
+          icon: FeedIcon(asset: FeedIconAssets.bell, size: 23, color: theme.textPrimary),
           onPressed: () {
             FocusManager.instance.primaryFocus?.unfocus();
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => NotificationScreen(notificationBloc),
-              ),
+            AppNavigator.push(
+              context,
+              NotificationScreen(notificationBloc),
             );
           },
         ),
-        BlocBuilder<NotificationBloc, NotificationState>(
-          bloc: notificationBloc,
-          buildWhen: (previous, current) =>
-              previous != current && current is PaginationLoadedState,
-          builder: (context, state) {
-            if (state is PaginationLoadedState &&
-                notificationBloc.totalNotifications > 0) {
-              return Positioned(
-                right: 4,
-                top: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Center(
-                    child: Text(
-                      notificationBloc.totalNotifications > 99
-                          ? '99+'
-                          : '${notificationBloc.totalNotifications}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
+        StreamBuilder<int>(
+          stream: NotificationCounterService().countStream,
+          initialData: NotificationCounterService().unreadCount,
+          builder: (context, snapshot) {
+            final count = snapshot.data ?? 0;
+            if (count <= 0) return const SizedBox.shrink();
+            return Positioned(
+              right: 4,
+              top: 4,
+              child: theme.buildBadge(count, color: theme.accent),
+            );
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildChatButton(BuildContext context, OneUITheme theme) {
+    return IconButton(
+      icon: FeedIcon(asset: FeedIconAssets.chat, size: 23, color: theme.textPrimary),
+      onPressed: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+        UserChatScreen().launch(context);
+      },
     );
   }
 }

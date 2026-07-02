@@ -1,13 +1,10 @@
 // One UI 8.5 styled Meeting Chat Bottom Sheet
-import 'dart:convert';
-
+import 'dart:async';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
-import 'package:doctak_app/presentation/user_chat_screen/Pusher/PusherConfig.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:pusher_channels_flutter/pusher_channels_flutter.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -39,81 +36,65 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   bool _isSending = false;
-  PusherChannelsFlutter pusher = PusherChannelsFlutter.getInstance();
-  late PusherChannel clientListenChannel;
+
+  // ── Polling (same approach as the web — no Pusher for chat) ──────────────
+  Timer? _pollTimer;
+  String? _lastCreatedAt; // ISO timestamp of the last received message
 
   @override
   void initState() {
     super.initState();
-    _connectPusher();
+    // Initial full load then poll every 3 s (like the web's POLL_MESSAGES_MS).
+    _pollMessages();
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _pollMessages());
   }
 
-  void _connectPusher() async {
+  Future<void> _pollMessages() async {
     try {
-      await pusher.init(
-        apiKey: PusherConfig.key,
-        cluster: PusherConfig.cluster,
-        useTLS: false,
-        onSubscriptionSucceeded: _onSubscriptionSucceeded,
-        onSubscriptionError: _onSubscriptionError,
-        onMemberAdded: _onMemberAdded,
-        onMemberRemoved: _onMemberRemoved,
-        onDecryptionFailure: _onDecryptionFailure,
-        onError: _onError,
-        onSubscriptionCount: _onSubscriptionCount,
-        onAuthorizer: _onAuthorizer,
-      );
+      final result = await getMessages(widget.channelId, afterIso: _lastCreatedAt);
+      if (!mounted) return;
+      if (!result.success) return;
 
-      await pusher.connect();
+      final data = result.data as Map<String, dynamic>?;
+      final rawList = data?['messages'] as List<dynamic>?;
+      if (rawList == null || rawList.isEmpty) return;
 
-      clientListenChannel = await pusher.subscribe(channelName: "meeting-channel${widget.channelId}", onMemberAdded: (member) {}, onMemberRemoved: (member) {}, onEvent: _onEvent);
-    } catch (e) {
-      debugPrint('Pusher connection error: $e');
-    }
-  }
+      bool added = false;
 
-  void _onSubscriptionSucceeded(String channelName, dynamic data) {
-    debugPrint("Chat subscription succeeded: $channelName");
-  }
+      for (final raw in rawList) {
+        final m = raw as Map<String, dynamic>;
+        final serverId = (m['id'] ?? '').toString();
+        final userId = (m['userId'] ?? '').toString();
+        final text = (m['message'] ?? '').toString();
+        final createdAt = (m['createdAt'] ?? '').toString();
 
-  void _onSubscriptionError(String message, dynamic e) {
-    debugPrint("Chat subscription error: $message");
-  }
+        // Always advance the cursor so next poll only gets newer messages.
+        if (createdAt.isNotEmpty) _lastCreatedAt = createdAt.replaceFirst(' ', 'T');
 
-  void _onDecryptionFailure(String event, String reason) {
-    debugPrint("Chat decryption failure: $event");
-  }
+        // Skip if already shown (works across sheet reopens and own messages).
+        if (serverId.isNotEmpty && AppData.seenMessageIds.contains(serverId)) continue;
+        if (serverId.isNotEmpty) AppData.seenMessageIds.add(serverId);
 
-  void _onMemberAdded(String channelName, PusherMember member) {}
+        // Own messages are already in the list (added optimistically by _sendMessage).
+        // Register their server ID above so they aren't added again, then skip.
+        if (userId == AppData.logInUserId) continue;
 
-  void _onMemberRemoved(String channelName, PusherMember member) {}
+        AppData.chatMessages.add(Message(
+          text: text,
+          senderId: userId,
+          profilePic: AppData.fullImageUrl((m['userAvatar'] ?? '').toString()),
+          name: (m['userName'] ?? '').toString(),
+          timestamp: createdAt.isNotEmpty
+              ? DateTime.tryParse(createdAt.replaceFirst(' ', 'T')) ?? DateTime.now()
+              : DateTime.now(),
+          isSentByMe: false,
+        ));
+        added = true;
+      }
 
-  void _onError(String message, int? code, dynamic e) {
-    debugPrint("Pusher error: $message");
-  }
-
-  void _onSubscriptionCount(String channelName, int subscriptionCount) {}
-
-  Future<dynamic>? _onAuthorizer(String channelName, String socketId, dynamic options) async {
-    if (!channelName.startsWith('private-') && !channelName.startsWith('presence-')) {
-      return null;
-    }
-    return null;
-  }
-
-  void _onEvent(PusherEvent event) {
-    String eventName = event.eventName;
-    Map<String, dynamic> jsonMap = jsonDecode(event.data.toString());
-
-    switch (eventName) {
-      case 'new-message':
-        if (AppData.logInUserId != jsonMap['user_id']) {
-          AppData.chatMessages.add(Message(text: jsonMap['message'], senderId: jsonMap['user_id'], profilePic: AppData.fullImageUrl(jsonMap['profile_pic']), name: '', timestamp: DateTime.timestamp(), isSentByMe: false));
-        }
-        if (mounted) setState(() {});
-        break;
-      default:
-        break;
+      if (added) AppData.chatMessagesNotifier.value++;
+    } catch (_) {
+      // Swallow poll errors — next tick will retry.
     }
   }
 
@@ -123,10 +104,22 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
     setState(() => _isSending = true);
 
     try {
-      await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
+      final result = await sendMessage(widget.channelId, _messageController.text, AppData.logInUserId);
+      final data = result.data as Map<String, dynamic>?;
+      final posted = data?['message'] as Map<String, dynamic>?;
+      final serverId = posted?['id']?.toString();
+      final createdAt = posted?['createdAt']?.toString();
+      if (createdAt != null && createdAt.isNotEmpty) {
+        _lastCreatedAt = createdAt.replaceFirst(' ', 'T');
+      }
+      if (serverId != null && serverId.isNotEmpty) {
+        AppData.seenMessageIds.add(serverId);
+      }
       AppData.chatMessages.add(
-        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: '', profilePic: AppData.profilePicUrl),
+        Message(text: _messageController.text, senderId: AppData.logInUserId, timestamp: DateTime.timestamp(), isSentByMe: true, name: AppData.name, profilePic: AppData.profilePicUrl),
       );
+      // Notify all listeners (e.g. badge counters) about the new message.
+      AppData.chatMessagesNotifier.value++;
       _messageController.clear();
       if (mounted) setState(() {});
     } catch (e) {
@@ -140,6 +133,7 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
 
   @override
   void dispose() {
+    _pollTimer?.cancel();
     _messageController.dispose();
     _focusNode.dispose();
     _scrollController.dispose();
@@ -169,8 +163,14 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
           _buildHeader(theme),
           // Divider
           Divider(color: theme.textSecondary.withValues(alpha: 0.1), height: 1),
-          // Chat messages
-          Expanded(child: _buildMessageList(theme)),
+          // Chat messages — rebuilt reactively whenever chatMessagesNotifier
+          // is incremented (by Pusher handler in VideoCallScreen).
+          Expanded(
+            child: ValueListenableBuilder<int>(
+              valueListenable: AppData.chatMessagesNotifier,
+              builder: (context, _, __) => _buildMessageList(theme),
+            ),
+          ),
           // Message input
           _buildMessageInput(theme, bottomInset, bottomPadding),
         ],
@@ -272,25 +272,40 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          if (!isMe) _buildAvatar(theme, message.profilePic),
-          const SizedBox(width: 8),
+          if (!isMe) ...[
+            _buildAvatar(theme, message.profilePic, message.name),
+            const SizedBox(width: 8),
+          ],
           Flexible(
             child: Container(
               constraints: BoxConstraints(maxWidth: 70.w),
               child: Column(
                 crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
+                  // Sender name — only for received messages
+                  if (!isMe && message.name.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 4),
+                      child: Text(
+                        message.name,
+                        style: TextStyle(
+                          color: theme.primary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
                       color: isMe ? theme.primary : theme.inputBackground,
                       borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(20),
+                        topLeft: Radius.circular(isMe ? 20 : 4),
                         topRight: const Radius.circular(20),
-                        bottomLeft: Radius.circular(isMe ? 20 : 4),
+                        bottomLeft: const Radius.circular(20),
                         bottomRight: Radius.circular(isMe ? 4 : 20),
                       ),
                     ),
@@ -311,24 +326,36 @@ class _MeetingChatBottomSheetState extends State<MeetingChatBottomSheet> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          if (isMe) _buildAvatar(theme, message.profilePic),
+          if (isMe) ...[
+            const SizedBox(width: 8),
+            _buildAvatar(theme, message.profilePic, message.name),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildAvatar(OneUITheme theme, String profilePic) {
+  Widget _buildAvatar(OneUITheme theme, String profilePic, String name) {
+    // profilePic already contains the full URL (set via AppData.fullImageUrl at poll time).
+    final imageUrl = profilePic.trim();
+    // Derive initials fallback from name.
+    final initials = name.trim().isNotEmpty
+        ? name.trim().split(' ').take(2).map((w) => w.isNotEmpty ? w[0].toUpperCase() : '').join()
+        : '?';
+
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: theme.inputBackground, width: 2),
       ),
       child: CircleAvatar(
-        radius: 16,
-        backgroundColor: theme.inputBackground,
-        backgroundImage: profilePic.isNotEmpty ? NetworkImage(AppData.fullImageUrl(profilePic)) : null,
-        child: profilePic.isEmpty ? Icon(Icons.person, color: theme.textSecondary, size: 18) : null,
+        radius: 18,
+        backgroundColor: theme.primary.withValues(alpha: 0.15),
+        backgroundImage: imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+        onBackgroundImageError: imageUrl.isNotEmpty ? (_, __) {} : null,
+        child: imageUrl.isEmpty
+            ? Text(initials, style: TextStyle(color: theme.primary, fontSize: 12, fontWeight: FontWeight.w700))
+            : null,
       ),
     );
   }
