@@ -6,6 +6,7 @@ import 'package:doctak_app/presentation/groups_module/bloc/groups_event.dart';
 import 'package:doctak_app/presentation/groups_module/bloc/groups_state.dart';
 import 'package:doctak_app/presentation/groups_module/screens/group_create_screen.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_summary_card.dart';
+import 'package:doctak_app/presentation/groups_module/widgets/group_tab_shimmers.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/groups_empty_state.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -158,12 +159,8 @@ class _GroupsMainScreenState extends State<GroupsMainScreen>
                               const GroupsBrowseRequested(refresh: true),
                             ),
                           )
-                        : state is GroupsLoading
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  color: theme.primary,
-                                ),
-                              )
+                        : (state is GroupsLoading || state is GroupsInitial)
+                            ? const GroupsListShimmer()
                             : TabBarView(
                                 controller: _tabController,
                                 children: [
@@ -215,8 +212,11 @@ class _BrowseTab extends StatelessWidget {
     final suggestions = state?.suggestions ?? [];
     final items = _discoverItems(suggestions, state?.browseItems ?? []);
     final isSearching = (state?.searchKeyword.trim().isNotEmpty ?? false);
+    final isLoading =
+        (state?.browseLoading ?? true) || (state?.suggestionsLoading ?? true);
 
     if (items.isEmpty && suggestions.isEmpty) {
+      if (isLoading) return const GroupsListShimmer();
       return RefreshIndicator(
         onRefresh: () async =>
             bloc.add(const GroupsBrowseRequested(refresh: true)),
@@ -297,7 +297,7 @@ class _BrowseTab extends StatelessWidget {
                 ),
               ),
             ),
-            if (items.isEmpty && isSearching)
+            if (items.isEmpty && isSearching && !isLoading)
               const Padding(
                 padding: EdgeInsets.only(top: 32),
                 child: GroupsEmptyState(
@@ -338,6 +338,7 @@ class _MineTab extends StatelessWidget {
       children: [
         _GroupList(
           items: joined,
+          isLoading: state?.mineLoading ?? true,
           emptyTitle: 'No joined groups',
           emptySubtitle:
               'Browse communities and join groups that interest you.',
@@ -347,6 +348,7 @@ class _MineTab extends StatelessWidget {
         ),
         _GroupList(
           items: created,
+          isLoading: state?.createdLoading ?? true,
           emptyTitle: 'No created groups',
           emptySubtitle: 'Create a group to build your own community.',
           onRefresh: () async {
@@ -360,12 +362,14 @@ class _MineTab extends StatelessWidget {
 
 class _GroupList extends StatelessWidget {
   final List<GroupSummaryModel> items;
+  final bool isLoading;
   final String emptyTitle;
   final String emptySubtitle;
   final Future<void> Function() onRefresh;
 
   const _GroupList({
     required this.items,
+    required this.isLoading,
     required this.emptyTitle,
     required this.emptySubtitle,
     required this.onRefresh,
@@ -373,6 +377,9 @@ class _GroupList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (items.isEmpty && isLoading) {
+      return const GroupsListShimmer();
+    }
     if (items.isEmpty) {
       return RefreshIndicator(
         onRefresh: onRefresh,
@@ -419,6 +426,9 @@ class _InvitationsTab extends StatelessWidget {
     final bloc = context.read<GroupsBloc>();
     final invitations = state?.invitations ?? [];
 
+    if (invitations.isEmpty && (state?.invitationsLoading ?? true)) {
+      return const GroupsListShimmer();
+    }
     if (invitations.isEmpty) {
       return RefreshIndicator(
         onRefresh: () async =>

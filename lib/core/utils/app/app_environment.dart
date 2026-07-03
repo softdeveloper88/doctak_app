@@ -22,7 +22,7 @@ class AppEnvironment {
 
   /// Defaults to production unless ENV=development is explicitly set.
   static bool get isProduction {
-    return _envOverride == 'development';
+    return _envOverride != 'development';
   }
 
   /// Whether the app is running in development mode

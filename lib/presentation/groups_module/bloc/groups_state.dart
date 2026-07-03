@@ -41,6 +41,14 @@ class GroupsLoaded extends GroupsState {
   final Set<String> joiningGroupIds;
   final int dataRevision;
 
+  // First-fetch in-flight flags per section, so a tab can show a shimmer
+  // instead of a premature empty state while its data is still loading.
+  final bool browseLoading;
+  final bool mineLoading;
+  final bool createdLoading;
+  final bool invitationsLoading;
+  final bool suggestionsLoading;
+
   const GroupsLoaded({
     this.browseItems = const [],
     this.browseCursor,
@@ -61,6 +69,11 @@ class GroupsLoaded extends GroupsState {
     this.errorMessage,
     this.joiningGroupIds = const {},
     this.dataRevision = 0,
+    this.browseLoading = false,
+    this.mineLoading = false,
+    this.createdLoading = false,
+    this.invitationsLoading = false,
+    this.suggestionsLoading = false,
   });
 
   /// Hot-reload safe read — older in-memory instances may lack [dataRevision].
@@ -90,6 +103,11 @@ class GroupsLoaded extends GroupsState {
     Set<String>? joiningGroupIds,
     int? dataRevision,
     bool clearError = false,
+    bool? browseLoading,
+    bool? mineLoading,
+    bool? createdLoading,
+    bool? invitationsLoading,
+    bool? suggestionsLoading,
   }) {
     return GroupsLoaded(
       browseItems: browseItems ?? this.browseItems,
@@ -111,6 +129,11 @@ class GroupsLoaded extends GroupsState {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       joiningGroupIds: joiningGroupIds ?? this.joiningGroupIds,
       dataRevision: dataRevision ?? resolvedDataRevision,
+      browseLoading: browseLoading ?? this.browseLoading,
+      mineLoading: mineLoading ?? this.mineLoading,
+      createdLoading: createdLoading ?? this.createdLoading,
+      invitationsLoading: invitationsLoading ?? this.invitationsLoading,
+      suggestionsLoading: suggestionsLoading ?? this.suggestionsLoading,
     );
   }
 
@@ -151,6 +174,11 @@ class GroupsLoaded extends GroupsState {
         errorMessage,
         joiningGroupIds,
         resolvedDataRevision,
+        browseLoading,
+        mineLoading,
+        createdLoading,
+        invitationsLoading,
+        suggestionsLoading,
       ];
 }
 

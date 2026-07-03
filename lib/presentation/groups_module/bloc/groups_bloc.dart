@@ -21,21 +21,35 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
   int _browseRequestSeq = 0;
   int _nextRevision(GroupsLoaded current) => current.resolvedDataRevision + 1;
 
-  GroupsLoaded get _loaded =>
-      state is GroupsLoaded ? state as GroupsLoaded : const GroupsLoaded();
+  // Single source of truth for accumulated list data. Deriving snapshots from
+  // `state` returned an empty GroupsLoaded() whenever state was GroupsLoading,
+  // so the browse/mine/invitations/suggestions fetches fired concurrently on
+  // first load could wipe each other's slice while another request was still
+  // in flight (leaving the list empty until pull-to-refresh). Keeping a
+  // persistent snapshot makes every merge lossless regardless of ordering.
+  GroupsLoaded _data = const GroupsLoaded();
+
+  GroupsLoaded get _loaded => _data;
+
+  void _pushLoaded(Emitter<GroupsState> emit, GroupsLoaded next) {
+    _data = next;
+    emit(next);
+  }
 
   Future<void> _onBrowse(
     GroupsBrowseRequested event,
     Emitter<GroupsState> emit,
   ) async {
-    final snapshot = _loaded;
-    final keyword = event.keyword ?? snapshot.searchKeyword;
+    final keyword = event.keyword ?? _loaded.searchKeyword;
     final requestSeq = ++_browseRequestSeq;
 
-    if (!event.refresh && state is GroupsInitial) {
+    if (!event.refresh && state is! GroupsLoaded) {
+      _data = _data.copyWith(browseLoading: true, clearError: true);
       emit(const GroupsLoading());
     } else if (state is GroupsLoaded) {
-      emit(snapshot.copyWith(clearError: true));
+      _pushLoaded(emit, _loaded.copyWith(browseLoading: true, clearError: true));
+    } else {
+      _data = _data.copyWith(browseLoading: true, clearError: true);
     }
 
     try {
@@ -46,7 +60,8 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
       if (requestSeq != _browseRequestSeq) return;
 
       final latest = _loaded;
-      emit(
+      _pushLoaded(
+        emit,
         GroupsLoaded(
           browseItems: result.items,
           browseCursor: result.nextCursor,
@@ -63,14 +78,19 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
           searchKeyword: keyword,
           joiningGroupIds: latest.joiningGroupIds,
           dataRevision: _nextRevision(latest),
+          browseLoading: false,
+          mineLoading: latest.mineLoading,
+          createdLoading: latest.createdLoading,
+          invitationsLoading: latest.invitationsLoading,
+          suggestionsLoading: latest.suggestionsLoading,
         ),
       );
     } catch (e) {
       if (requestSeq != _browseRequestSeq) return;
-      if (state is GroupsLoading) {
+      if (state is! GroupsLoaded) {
         emit(GroupsFailure('Failed to load groups: $e'));
       } else {
-        emit(_loaded.copyWith(errorMessage: '$e'));
+        _pushLoaded(emit, _loaded.copyWith(browseLoading: false, errorMessage: '$e'));
       }
     }
   }
@@ -82,25 +102,27 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     final current = _loaded;
     if (!current.browseHasMore || current.browseLoadingMore) return;
 
-    emit(current.copyWith(browseLoadingMore: true, clearError: true));
+    _pushLoaded(emit, current.copyWith(browseLoadingMore: true, clearError: true));
     try {
       final result = await GroupsNodeApiService.browseGroups(
         keyword: current.searchKeyword,
         scope: 'all',
         cursor: current.browseCursor,
       );
-      emit(
-        current.copyWith(
-          browseItems: [...current.browseItems, ...result.items],
+      final latest = _loaded;
+      _pushLoaded(
+        emit,
+        latest.copyWith(
+          browseItems: [...latest.browseItems, ...result.items],
           browseCursor: result.nextCursor,
           browseHasMore: result.nextCursor != null,
           browseLoadingMore: false,
-          facets: result.facets ?? current.facets,
-          dataRevision: _nextRevision(current),
+          facets: result.facets ?? latest.facets,
+          dataRevision: _nextRevision(latest),
         ),
       );
     } catch (e) {
-      emit(current.copyWith(browseLoadingMore: false, errorMessage: '$e'));
+      _pushLoaded(emit, _loaded.copyWith(browseLoadingMore: false, errorMessage: '$e'));
     }
   }
 
@@ -108,24 +130,40 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     GroupsMineRequested event,
     Emitter<GroupsState> emit,
   ) async {
-    if (state is GroupsInitial) emit(const GroupsLoading());
+    final isCreated = event.scope == 'mine';
+    if (state is! GroupsLoaded) {
+      _data = _data.copyWith(
+        mineLoading: isCreated ? _data.mineLoading : true,
+        createdLoading: isCreated ? true : _data.createdLoading,
+      );
+      emit(const GroupsLoading());
+    } else {
+      _pushLoaded(
+        emit,
+        _loaded.copyWith(
+          mineLoading: isCreated ? _loaded.mineLoading : true,
+          createdLoading: isCreated ? true : _loaded.createdLoading,
+        ),
+      );
+    }
 
     try {
       final result = await GroupsNodeApiService.browseGroups(
-        scope: event.scope == 'mine' ? 'mine' : 'joined',
+        scope: isCreated ? 'mine' : 'joined',
       );
       final current = _loaded;
-      emit(
+      _pushLoaded(
+        emit,
         GroupsLoaded(
           browseItems: current.browseItems,
           browseCursor: current.browseCursor,
           browseHasMore: current.browseHasMore,
-          mineItems: event.scope == 'mine' ? current.mineItems : result.items,
-          mineCursor: event.scope == 'mine' ? current.mineCursor : result.nextCursor,
-          mineHasMore: event.scope == 'mine' ? current.mineHasMore : result.nextCursor != null,
-          createdItems: event.scope == 'mine' ? result.items : current.createdItems,
-          createdCursor: event.scope == 'mine' ? result.nextCursor : current.createdCursor,
-          createdHasMore: event.scope == 'mine'
+          mineItems: isCreated ? current.mineItems : result.items,
+          mineCursor: isCreated ? current.mineCursor : result.nextCursor,
+          mineHasMore: isCreated ? current.mineHasMore : result.nextCursor != null,
+          createdItems: isCreated ? result.items : current.createdItems,
+          createdCursor: isCreated ? result.nextCursor : current.createdCursor,
+          createdHasMore: isCreated
               ? result.nextCursor != null
               : current.createdHasMore,
           invitations: current.invitations,
@@ -134,13 +172,25 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
           searchKeyword: current.searchKeyword,
           joiningGroupIds: current.joiningGroupIds,
           dataRevision: _nextRevision(current),
+          browseLoading: current.browseLoading,
+          mineLoading: isCreated ? current.mineLoading : false,
+          createdLoading: isCreated ? false : current.createdLoading,
+          invitationsLoading: current.invitationsLoading,
+          suggestionsLoading: current.suggestionsLoading,
         ),
       );
     } catch (e) {
-      if (state is GroupsLoading) {
+      if (state is! GroupsLoaded) {
         emit(GroupsFailure('Failed to load your groups: $e'));
       } else {
-        emit(_loaded.copyWith(errorMessage: '$e'));
+        _pushLoaded(
+          emit,
+          _loaded.copyWith(
+            mineLoading: isCreated ? _loaded.mineLoading : false,
+            createdLoading: isCreated ? false : _loaded.createdLoading,
+            errorMessage: '$e',
+          ),
+        );
       }
     }
   }
@@ -156,12 +206,17 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     GroupsInvitationsRequested event,
     Emitter<GroupsState> emit,
   ) async {
+    if (state is GroupsLoaded) {
+      _pushLoaded(emit, _loaded.copyWith(invitationsLoading: true));
+    } else {
+      _data = _data.copyWith(invitationsLoading: true);
+    }
     try {
       final items = await GroupsNodeApiService.getMyInvitations();
       final current = _loaded;
-      emit(current.copyWith(invitations: items, clearError: true, dataRevision: _nextRevision(current)));
+      _pushLoaded(emit, current.copyWith(invitations: items, clearError: true, invitationsLoading: false, dataRevision: _nextRevision(current)));
     } catch (e) {
-      emit(_loaded.copyWith(errorMessage: '$e'));
+      _pushLoaded(emit, _loaded.copyWith(invitationsLoading: false, errorMessage: '$e'));
     }
   }
 
@@ -169,11 +224,16 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     GroupsSuggestionsRequested event,
     Emitter<GroupsState> emit,
   ) async {
+    if (state is GroupsLoaded) {
+      _pushLoaded(emit, _loaded.copyWith(suggestionsLoading: true));
+    } else {
+      _data = _data.copyWith(suggestionsLoading: true);
+    }
     try {
       final items = await GroupsNodeApiService.getSuggestions(limit: 6);
-      emit(_loaded.copyWith(suggestions: items, clearError: true, dataRevision: _nextRevision(_loaded)));
+      _pushLoaded(emit, _loaded.copyWith(suggestions: items, clearError: true, suggestionsLoading: false, dataRevision: _nextRevision(_loaded)));
     } catch (e) {
-      emit(_loaded.copyWith(errorMessage: '$e'));
+      _pushLoaded(emit, _loaded.copyWith(suggestionsLoading: false, errorMessage: '$e'));
     }
   }
 
@@ -181,10 +241,9 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     GroupJoinRequested event,
     Emitter<GroupsState> emit,
   ) async {
-    final current = _loaded;
     final id = event.group.routeId;
-    final joining = {...current.joiningGroupIds, id};
-    emit(current.copyWith(joiningGroupIds: joining, clearError: true));
+    final joining = {..._loaded.joiningGroupIds, id};
+    _pushLoaded(emit, _loaded.copyWith(joiningGroupIds: joining, clearError: true));
 
     try {
       await GroupsNodeApiService.joinGroup(id);
@@ -217,21 +276,24 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
         );
       }
 
-      emit(
-        current.copyWith(
-          browseItems: current.browseItems.map(patchMembership).toList(),
-          mineItems: current.mineItems.map(patchMembership).toList(),
-          suggestions: current.suggestions.map(patchMembership).toList(),
-          joiningGroupIds: {...joining}..remove(id),
-          dataRevision: _nextRevision(current),
+      final latest = _loaded;
+      _pushLoaded(
+        emit,
+        latest.copyWith(
+          browseItems: latest.browseItems.map(patchMembership).toList(),
+          mineItems: latest.mineItems.map(patchMembership).toList(),
+          suggestions: latest.suggestions.map(patchMembership).toList(),
+          joiningGroupIds: {...latest.joiningGroupIds}..remove(id),
+          dataRevision: _nextRevision(latest),
         ),
       );
       add(const GroupsMineRequested(refresh: true));
       add(const GroupsCreatedRequested(refresh: true));
     } catch (e) {
-      emit(
-        current.copyWith(
-          joiningGroupIds: {...joining}..remove(id),
+      _pushLoaded(
+        emit,
+        _loaded.copyWith(
+          joiningGroupIds: {..._loaded.joiningGroupIds}..remove(id),
           errorMessage: '$e',
         ),
       );
@@ -242,22 +304,22 @@ class GroupsBloc extends Bloc<GroupsEvent, GroupsState> {
     GroupInvitationRespondRequested event,
     Emitter<GroupsState> emit,
   ) async {
-    final current = _loaded;
     try {
       await GroupsNodeApiService.respondInvitation(
         event.invitationId,
         event.accept,
       );
-      final remaining = current.invitations
+      final latest = _loaded;
+      final remaining = latest.invitations
           .where((inv) => inv.id != event.invitationId)
           .toList();
-      emit(current.copyWith(invitations: remaining, clearError: true, dataRevision: _nextRevision(current)));
+      _pushLoaded(emit, latest.copyWith(invitations: remaining, clearError: true, dataRevision: _nextRevision(latest)));
       if (event.accept) {
         add(const GroupsMineRequested(refresh: true));
       add(const GroupsCreatedRequested(refresh: true));
       }
     } catch (e) {
-      emit(current.copyWith(errorMessage: '$e'));
+      _pushLoaded(emit, _loaded.copyWith(errorMessage: '$e'));
     }
   }
 

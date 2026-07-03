@@ -1,16 +1,13 @@
-import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
-import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/fcm_debug_screen/fcm_debug_screen.dart';
-import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/presentation/settings/delete_account_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:http/http.dart' as http;
 
 class AppSettingScreen extends StatefulWidget {
   const AppSettingScreen({super.key});
@@ -333,7 +330,7 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                 boxShadow: theme.isDark ? [] : [BoxShadow(color: Colors.red.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
               ),
               child: InkWell(
-                onTap: () => _deleteAccount(context, theme),
+                onTap: () => AppNavigator.push(context, const DeleteAccountScreen()),
                 borderRadius: BorderRadius.circular(16),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
@@ -373,96 +370,6 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
         ),
       ),
     );
-  }
-
-  void _deleteAccount(BuildContext context, OneUITheme theme) {
-    showDialog(
-      context: context,
-      builder: (BuildContext ctx) {
-        return AlertDialog(
-          backgroundColor: theme.cardBackground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          title: Column(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), shape: BoxShape.circle),
-                child: const Icon(Icons.warning_rounded, color: Colors.red, size: 28),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                translation(context).lbl_delete_account_confirmation,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Poppins', fontSize: 18, fontWeight: FontWeight.w600, color: theme.textPrimary),
-              ),
-            ],
-          ),
-          content: Text(
-            translation(context).msg_delete_account_warning,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Poppins', fontSize: 14, color: theme.textSecondary),
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: [
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: theme.surfaceVariant),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      translation(context).lbl_cancel,
-                      style: TextStyle(color: theme.textSecondary, fontFamily: 'Poppins', fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      var result = await _deleteUserAccount();
-                      if (result) {
-                        AppSharedPreferences().clearSharedPreferencesData(context);
-                        AppNavigator.pushReplacement(context, const LoginScreen());
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text(
-                      translation(context).lbl_delete,
-                      style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<bool> _deleteUserAccount() async {
-    final apiUrl = Uri.parse('${AppData.remoteUrl}/delete-account');
-    try {
-      final response = await http.get(apiUrl, headers: <String, String>{'Authorization': 'Bearer ${AppData.userToken!}'});
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      return false;
-    }
   }
 
   Widget _buildThemeOption({required BuildContext context, required dynamic theme, required IconData icon, required String label, required bool isSelected, required VoidCallback onTap}) {

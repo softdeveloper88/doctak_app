@@ -67,6 +67,73 @@ Widget _shimmerWrap(BuildContext context, Widget child) {
   );
 }
 
+/// Groups hub list (Browse / My Groups / Invites): summary-card placeholders.
+class GroupsListShimmer extends StatelessWidget {
+  final int itemCount;
+
+  const GroupsListShimmer({super.key, this.itemCount = 5});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = OneUITheme.of(context);
+    final palette = _ShimmerPalette.of(context);
+
+    return _shimmerWrap(
+      context,
+      ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+        itemCount: itemCount,
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        itemBuilder: (_, __) => _card(theme, palette),
+      ),
+    );
+  }
+
+  Widget _card(OneUITheme theme, _ShimmerPalette palette) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: theme.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ShimmerBone(color: palette.bone, height: 84, radius: 0),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(radius: 24, backgroundColor: palette.bone),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ShimmerBone(color: palette.bone, height: 13, width: 160),
+                      const SizedBox(height: 8),
+                      _ShimmerBone(color: palette.bone, height: 10, width: 110),
+                      const SizedBox(height: 8),
+                      _ShimmerBone(color: palette.bone, height: 10),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            child: _ShimmerBone(color: palette.bone, height: 38, radius: 10),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Posts tab: compose card + feed post cards.
 class GroupFeedTabShimmer extends StatelessWidget {
   final bool showCompose;

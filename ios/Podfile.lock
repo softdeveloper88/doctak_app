@@ -275,7 +275,6 @@ PODS:
   - nanopb/encode (3.30910.0)
   - nb_utils (0.0.1):
     - Flutter
-  - NWWebSocket (0.5.10)
   - package_info_plus (0.4.5):
     - Flutter
   - permission_handler_apple (9.4.8):
@@ -288,13 +287,6 @@ PODS:
   - PromisesObjC (2.4.1)
   - PromisesSwift (2.4.1):
     - PromisesObjC (= 2.4.1)
-  - pusher_channels_flutter (0.0.1):
-    - Flutter
-    - PusherSwift (~> 10.1.9)
-  - PusherSwift (10.1.10):
-    - NWWebSocket (~> 0.5.10)
-    - PusherTweetNacl (~> 1.2.0)
-  - PusherTweetNacl (1.2.0)
   - RecaptchaInterop (101.0.0)
   - record_ios (1.2.1):
     - Flutter
@@ -361,7 +353,6 @@ DEPENDENCIES:
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/darwin`)
   - pip (from `.symlinks/plugins/pip/ios`)
-  - pusher_channels_flutter (from `.symlinks/plugins/pusher_channels_flutter/ios`)
   - record_ios (from `.symlinks/plugins/record_ios/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -405,11 +396,8 @@ SPEC REPOS:
     - GTMAppAuth
     - GTMSessionFetcher
     - nanopb
-    - NWWebSocket
     - PromisesObjC
     - PromisesSwift
-    - PusherSwift
-    - PusherTweetNacl
     - RecaptchaInterop
     - SDWebImage
     - SwiftyGif
@@ -480,8 +468,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/photo_manager/darwin"
   pip:
     :path: ".symlinks/plugins/pip/ios"
-  pusher_channels_flutter:
-    :path: ".symlinks/plugins/pusher_channels_flutter/ios"
   record_ios:
     :path: ".symlinks/plugins/record_ios/ios"
   share_plus:
@@ -562,16 +548,12 @@ SPEC CHECKSUMS:
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   nb_utils: f4e2d76a9018f7ac0ed7823d8efd6eca639c01a5
-  NWWebSocket: 873eb4b18acd0317da70cdba388d792a3187ce00
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
   photo_manager: 25fd77df14f4f0ba5ef99e2c61814dde77e2bceb
   pip: 6d6bd5ae42bf68b1c34d56dcced0d7c46b683d18
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   PromisesSwift: 217dea0fd5d2ad65222a109c48698add13cc1c5b
-  pusher_channels_flutter: 2723222f2686852dd91d13780938d11cca114a39
-  PusherSwift: 6022fe6584b4317dc5c177091292b2a4d80a8c35
-  PusherTweetNacl: 015f56f2cf010e718703f2bd9bca66fdcc91b208
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   record_ios: 980fd386a97a35987d0fce3dfda4b26a38c90f4c
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
