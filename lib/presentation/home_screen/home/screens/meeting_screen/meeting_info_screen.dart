@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 
 class MeetingInfoScreen extends StatelessWidget {
@@ -73,13 +74,8 @@ class MeetingInfoScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Meeting Options List
-              Container(
-                decoration: BoxDecoration(
-                  color: theme.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
-                  boxShadow: theme.isDark ? [] : theme.cardShadow,
-                ),
+              AppSurfaceCard(
+                padding: EdgeInsets.zero,
                 child: Column(
                   children: List.generate(getMeetingOptions(context).length, (index) {
                     final option = getMeetingOptions(context)[index];

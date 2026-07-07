@@ -4,6 +4,7 @@ import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -138,8 +139,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                _InfoCard(
-                  theme: theme,
+                AppSurfaceCard(
+                  margin: EdgeInsets.zero,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -166,8 +167,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _InfoCard(
-                  theme: theme,
+                AppSurfaceCard(
+                  margin: EdgeInsets.zero,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -209,8 +210,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                 ),
                 const SizedBox(height: 12),
                 if (_status?.hasPending == true)
-                  _InfoCard(
-                    theme: theme,
+                  AppSurfaceCard(
+                    margin: EdgeInsets.zero,
                     borderColor: Colors.orange.withValues(alpha: 0.35),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,8 +247,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                     ),
                   )
                 else ...[
-                  _InfoCard(
-                    theme: theme,
+                  AppSurfaceCard(
+                    margin: EdgeInsets.zero,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -324,8 +325,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                   ),
                 ],
                 const SizedBox(height: 12),
-                _InfoCard(
-                  theme: theme,
+                AppSurfaceCard(
+                  margin: EdgeInsets.zero,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -365,33 +366,6 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                 ],
               ],
             ),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  final OneUITheme theme;
-  final Widget child;
-  final Color? borderColor;
-
-  const _InfoCard({
-    required this.theme,
-    required this.child,
-    this.borderColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor ?? theme.border),
-        boxShadow: theme.isDark ? [] : theme.cardShadow,
-      ),
-      child: child,
     );
   }
 }

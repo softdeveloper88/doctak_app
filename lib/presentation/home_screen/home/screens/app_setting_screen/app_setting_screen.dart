@@ -1,4 +1,5 @@
 import 'package:doctak_app/routes/app_navigator.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
@@ -31,17 +32,10 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
           children: <Widget>[
             // Theme Setting Card
             Observer(
-              builder: (_) => Container(
+              builder: (_) => AppSurfaceCard(
                 margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: theme.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
-                  boxShadow: theme.isDark ? [] : theme.cardShadow,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+                padding: const EdgeInsets.all(16),
+                child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
@@ -127,21 +121,13 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                       ),
                     ],
                   ),
-                ),
               ),
             ),
             // Language Setting Card
-            Container(
+            AppSurfaceCard(
               margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: theme.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
-                boxShadow: theme.isDark ? [] : theme.cardShadow,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+              padding: const EdgeInsets.all(16),
+              child: Row(
                   children: [
                     Container(
                       width: 48,
@@ -273,96 +259,74 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                     ),
                   ],
                 ),
-              ),
             ),
             // FCM Debug Card (debug builds only)
             if (kDebugMode)
-              Container(
+              AppSurfaceCard(
                 margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: theme.cardBackground,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent),
-                  boxShadow: theme.isDark ? [] : theme.cardShadow,
-                ),
-                child: InkWell(
-                  onTap: () => AppNavigator.push(context, const FcmDebugScreen()),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
-                          child: const Icon(Icons.notifications_active_outlined, color: Colors.blue, size: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'FCM Debug',
-                                style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Push token & server registration',
-                                style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(Icons.chevron_right_rounded, color: theme.textSecondary),
-                      ],
+                padding: const EdgeInsets.all(16),
+                onTap: () => AppNavigator.push(context, const FcmDebugScreen()),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), shape: BoxShape.circle),
+                      child: const Icon(Icons.notifications_active_outlined, color: Colors.blue, size: 24),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'FCM Debug',
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: theme.textPrimary),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Push token & server registration',
+                            style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right_rounded, color: theme.textSecondary),
+                  ],
                 ),
               ),
             // Delete Account Card
-            Container(
-              decoration: BoxDecoration(
-                color: theme.cardBackground,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3), width: 1),
-                boxShadow: theme.isDark ? [] : [BoxShadow(color: Colors.red.withValues(alpha: 0.05), offset: const Offset(0, 2), blurRadius: 8, spreadRadius: 0)],
-              ),
-              child: InkWell(
-                onTap: () => AppNavigator.push(context, const DeleteAccountScreen()),
-                borderRadius: BorderRadius.circular(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), shape: BoxShape.circle),
-                        child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 24),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              translation(context).lbl_delete_account,
-                              style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Permanently delete your account',
-                              style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(Icons.chevron_right_rounded, color: Colors.red, size: 24),
-                    ],
+            AppSurfaceCard(
+              borderColor: Colors.red.withValues(alpha: 0.3),
+              padding: const EdgeInsets.all(16),
+              onTap: () => AppNavigator.push(context, const DeleteAccountScreen()),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), shape: BoxShape.circle),
+                    child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 24),
                   ),
-                ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          translation(context).lbl_delete_account,
+                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Permanently delete your account',
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: Colors.red, size: 24),
+                ],
               ),
             ),
             // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()

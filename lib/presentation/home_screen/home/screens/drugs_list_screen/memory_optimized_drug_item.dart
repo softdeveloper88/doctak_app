@@ -23,16 +23,12 @@ class MemoryOptimizedDrugItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     return RepaintBoundary(
-      child: GestureDetector(
+      child: AppSurfaceCard.listItem(
         onTap: () => _openDetail(context),
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 5, 16, 5),
-          clipBehavior: Clip.antiAlias,
-          decoration: theme.cardDecoration,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [_buildTopSection(theme), _buildFooter(context, theme)],
-          ),
+        padding: EdgeInsets.zero,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [_buildTopSection(theme), _buildFooter(context, theme)],
         ),
       ),
     );

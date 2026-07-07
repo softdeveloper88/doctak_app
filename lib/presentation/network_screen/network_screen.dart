@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/capitalize_words.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
@@ -7,6 +6,7 @@ import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/network_screen/bloc/network_bloc.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:doctak_app/widgets/profile_list_item_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -296,172 +296,24 @@ class _ConnectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
-    return GestureDetector(
+    return ProfileListItemCard(
+      title: name,
+      subtitle: specialty.isNotEmpty ? capitalizeWords(specialty) : null,
+      metaText: '✓ Connected',
+      avatarUrl: avatarUrl,
+      titleSuffix: isVerified ? const VerifiedBadge(size: 15) : null,
       onTap: () => ProfileNavigation.openUser(context, userId),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: theme.cardDecoration,
-        child: ClipRRect(
-          borderRadius: theme.radiusL,
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            color: theme.cardBackground,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Avatar
-                _Avatar(name: name, avatarUrl: avatarUrl, theme: theme),
-                const SizedBox(width: 14),
-                // Info column
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: theme.textPrimary,
-                              ),
-                            ),
-                          ),
-                          if (isVerified) ...[  
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.verified_rounded,
-                              size: 15,
-                              color: Color(0xFF1976D2),
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (specialty.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          capitalizeWords(specialty),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: theme.textSecondary,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.check_circle_rounded,
-                              color: Color(0xFF4CAF50), size: 14),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'Connected',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF4CAF50),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                // Three-dot menu
-                PopupMenuButton<String>(
-                  icon: Icon(Icons.more_vert, color: theme.textSecondary),
-                  onSelected: (v) {
-                    if (v == 'remove') onRemove();
-                  },
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(
-                      value: 'remove',
-                      child: Text('Remove Connection'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+      trailing: PopupMenuButton<String>(
+        icon: Icon(Icons.more_vert, color: OneUITheme.of(context).textSecondary),
+        onSelected: (v) {
+          if (v == 'remove') onRemove();
+        },
+        itemBuilder: (_) => const [
+          PopupMenuItem(
+            value: 'remove',
+            child: Text('Remove Connection'),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Avatar ────────────────────────────────────────────────────────────────
-class _Avatar extends StatelessWidget {
-  final String name;
-  final String? avatarUrl;
-  final OneUITheme theme;
-  const _Avatar(
-      {required this.name, required this.avatarUrl, required this.theme});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: theme.avatarBorder, width: 2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: (avatarUrl == null || avatarUrl!.isEmpty)
-            ? Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      theme.primary.withValues(alpha: 0.15),
-                      theme.secondary.withValues(alpha: 0.1),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
-                    style: TextStyle(
-                      color: theme.primary,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Poppins',
-                    ),
-                  ),
-                ),
-              )
-            : CachedNetworkImage(
-                imageUrl: avatarUrl!,
-                height: 56,
-                width: 56,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  color: theme.avatarBackground,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                        color: theme.primary, strokeWidth: 2),
-                  ),
-                ),
-                errorWidget: (_, __, ___) => Container(
-                  color: theme.avatarBackground,
-                  child: Center(
-                    child:
-                        Icon(Icons.person, color: theme.primary, size: 28),
-                  ),
-                ),
-              ),
+        ],
       ),
     );
   }

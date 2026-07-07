@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/core/utils/profile_navigation.dart';
+import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/bloc/meeting_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_api.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
+import 'package:doctak_app/widgets/profile_list_item_card.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -179,119 +179,34 @@ class _SearchUserScreenState extends State<SearchUserScreen> {
   Widget _buildUserCard(MeetingBloc bloc, int index, _OneUITheme theme) {
     final contact = bloc.searchContactsList[index];
     final fullName = "${contact.firstName.validate()} ${contact.lastName.validate()}";
-    final hasProfilePic = contact.profilePic != null && contact.profilePic!.isNotEmpty;
+    final profilePic = contact.profilePic.validate();
 
-    // Generate avatar color based on name
-    final avatarColors = [
-      const Color(0xFF34C759), // Green
-      const Color(0xFF5856D6), // Purple
-      const Color(0xFFFF9500), // Orange
-      const Color(0xFFFF2D55), // Pink
-      const Color(0xFF00C7BE), // Teal
-      const Color(0xFFFFCC00), // Yellow
-      const Color(0xFF007AFF), // Blue
-      const Color(0xFFAF52DE), // Purple light
-    ];
-    final avatarColor = avatarColors[fullName.hashCode.abs() % avatarColors.length];
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(color: theme.surface, borderRadius: BorderRadius.circular(16), boxShadow: theme.cardShadow),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            ProfileNavigation.openUser(context, contact.id);
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Avatar with One UI styling
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: theme.avatarShadow),
-                  child: hasProfilePic
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(26),
-                          child: CachedNetworkImage(
-                            imageUrl: AppData.fullImageUrl(contact.profilePic.validate()),
-                            width: 52,
-                            height: 52,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              color: theme.surfaceVariant,
-                              child: Center(
-                                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: theme.accent)),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => _buildInitialsAvatar(fullName, avatarColor),
-                          ),
-                        )
-                      : _buildInitialsAvatar(fullName, avatarColor),
-                ),
-                const SizedBox(width: 14),
-
-                // Name
-                Expanded(
-                  child: Text(
-                    fullName,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontWeight: FontWeight.w600, fontSize: 15),
-                  ),
-                ),
-                const SizedBox(width: 12),
-
-                // Send Invite button - One UI styled
-                isSending == index
-                    ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, color: theme.accent))
-                    : Material(
-                        color: theme.accent,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          onTap: () async {
-                            isSending = index;
-                            setState(() {});
-                            await sendInviteMeeting(widget.channel, contact.id).then((invite) {
-                              isSending = -1;
-                              setState(() {});
-                              Map<String, dynamic> responseData = json.decode(jsonEncode(invite.data));
-                              toast(responseData['message']);
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: Text(
-                              translation(context).lbl_send_invite,
-                              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
-                            ),
-                          ),
-                        ),
-                      ),
-              ],
+    return ProfileListItemCard(
+      title: fullName,
+      avatarUrl: profilePic.isNotEmpty ? AppData.fullImageUrl(profilePic) : null,
+      onTap: () => ProfileNavigation.openUser(context, contact.id),
+      trailing: isSending == index
+          ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.5, color: theme.accent),
+            )
+          : ProfileListActionButton(
+              label: translation(context).lbl_send_invite,
+              color: theme.accent,
+              filled: true,
+              compact: true,
+              onTap: () async {
+                isSending = index;
+                setState(() {});
+                await sendInviteMeeting(widget.channel, contact.id).then((invite) {
+                  isSending = -1;
+                  setState(() {});
+                  final responseData = json.decode(jsonEncode(invite.data));
+                  toast(responseData['message']);
+                });
+              },
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInitialsAvatar(String name, Color bgColor) {
-    final initials = name.isNotEmpty ? name.split(' ').map((e) => e.isNotEmpty ? e[0].toUpperCase() : '').take(2).join() : 'U';
-
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-      child: Center(
-        child: Text(
-          initials,
-          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600, fontFamily: 'Poppins'),
-        ),
-      ),
     );
   }
 }

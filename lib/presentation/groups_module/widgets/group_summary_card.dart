@@ -3,6 +3,7 @@ import 'package:doctak_app/data/models/group_model/group_enhanced_models.dart';
 import 'package:doctak_app/presentation/groups_module/screens/group_detail_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 
 enum GroupCardVariant { browse, mine, suggested, invitation }
@@ -78,9 +79,8 @@ class _GroupSummaryCardState extends State<GroupSummaryCard> {
     final start = _gradientStart();
     final end = _gradientEnd();
 
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: theme.cardDecoration,
+    return AppSurfaceCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

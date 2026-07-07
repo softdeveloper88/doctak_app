@@ -1,5 +1,6 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 
 class ProfileListItemCard extends StatelessWidget {
@@ -13,7 +14,7 @@ class ProfileListItemCard extends StatelessWidget {
     this.metaText,
     this.trailing,
     this.titleSuffix,
-    this.margin = const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+    this.margin = AppCardLayout.listItemMargin,
   });
 
   final String title;
@@ -33,81 +34,71 @@ class ProfileListItemCard extends StatelessWidget {
     final normalizedSubtitle = subtitle?.trim() ?? '';
     final normalizedMeta = metaText?.trim() ?? '';
 
-    return Container(
+    return AppSurfaceCard.listItem(
       margin: margin,
-      decoration: theme.cardDecoration,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: theme.radiusL,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+      onTap: onTap,
+      child: Row(
+        children: [
+          ProfileAvatarView(
+            imageUrl: avatarUrl,
+            label: normalizedTitle,
+            onTap: onAvatarTap ?? onTap,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ProfileAvatarView(
-                  imageUrl: avatarUrl,
-                  label: normalizedTitle,
-                  onTap: onAvatarTap ?? onTap,
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              normalizedTitle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.titleMedium.copyWith(fontSize: 16),
-                            ),
-                          ),
-                          if (titleSuffix != null) ...[
-                            const SizedBox(width: 4),
-                            titleSuffix!,
-                          ],
-                        ],
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        normalizedTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.titleMedium.copyWith(fontSize: 16),
                       ),
-                      if (normalizedSubtitle.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          normalizedSubtitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.bodySecondary.copyWith(fontSize: 14),
-                        ),
-                      ],
-                      if (normalizedMeta.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          normalizedMeta,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: normalizedMeta.startsWith('↩')
-                              ? theme.caption.copyWith(
-                                  color: theme.primary,
-                                  fontWeight: FontWeight.w600,
-                                )
-                              : normalizedMeta.startsWith('✓')
-                              ? theme.caption.copyWith(
-                                  color: const Color(0xFF34C759),
-                                  fontWeight: FontWeight.w600,
-                                )
-                              : theme.caption,
-                        ),
-                      ],
+                    ),
+                    if (titleSuffix != null) ...[
+                      const SizedBox(width: 4),
+                      titleSuffix!,
                     ],
-                  ),
+                  ],
                 ),
-                if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+                if (normalizedSubtitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    normalizedSubtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.bodySecondary.copyWith(fontSize: 14),
+                  ),
+                ],
+                if (normalizedMeta.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    normalizedMeta,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: normalizedMeta.startsWith('↩')
+                        ? theme.caption.copyWith(
+                            color: theme.primary,
+                            fontWeight: FontWeight.w600,
+                          )
+                        : normalizedMeta.startsWith('✓')
+                        ? theme.caption.copyWith(
+                            color: const Color(0xFF34C759),
+                            fontWeight: FontWeight.w600,
+                          )
+                        : theme.caption,
+                  ),
+                ],
               ],
             ),
           ),
-        ),
+          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
+        ],
       ),
     );
   }

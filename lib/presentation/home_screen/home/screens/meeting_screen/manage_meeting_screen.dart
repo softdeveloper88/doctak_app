@@ -16,6 +16,7 @@ import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/widgets/custome_text_field.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'bloc/meeting_bloc.dart';
@@ -771,110 +772,95 @@ class _ManageMeetingScreenState extends State<ManageMeetingScreen> with SingleTi
   }
 
   Widget _buildHistoryCard({required OneUITheme theme, required MeetingHistoryItem item}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.isDark ? theme.surfaceVariant : Colors.transparent, width: 1),
-        boxShadow: theme.isDark ? [] : [BoxShadow(color: theme.primary.withValues(alpha: 0.08), blurRadius: 8, offset: const Offset(0, 2))],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {},
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return AppSurfaceCard.listItem(
+      margin: const EdgeInsets.only(bottom: AppCardLayout.listGap),
+      onTap: () {},
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                child: Icon(Icons.video_file_rounded, color: theme.primary, size: 24),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: theme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                      child: Icon(Icons.video_file_rounded, color: theme.primary, size: 24),
+                    Text(
+                      item.title,
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: theme.textPrimary),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 4,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.calendar_today_rounded, size: 14, color: theme.textSecondary),
-                                  const SizedBox(width: 4),
-                                  Text(item.date, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
-                                ],
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.access_time_rounded, size: 14, color: theme.textSecondary),
-                                  const SizedBox(width: 4),
-                                  Text(item.formattedDuration, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(Icons.people_rounded, size: 14, color: theme.textSecondary),
-                              const SizedBox(width: 4),
-                              Text('${item.participantsCount} ${translation(context).lbl_participants}', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
-                            ],
-                          ),
-                          if (item.host != null) ...[
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(item.isHost ? Icons.star_rounded : Icons.person_rounded, size: 14, color: item.isHost ? theme.warning : theme.textSecondary),
-                                const SizedBox(width: 4),
-                                Text(
-                                  item.isHost ? translation(context).lbl_you_hosted : '${translation(context).lbl_hosted_by} ${item.host!.name}',
-                                  style: TextStyle(color: item.isHost ? theme.warning : theme.textSecondary, fontSize: 12, fontWeight: item.isHost ? FontWeight.w600 : FontWeight.normal),
-                                ),
-                              ],
-                            ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 4,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.calendar_today_rounded, size: 14, color: theme.textSecondary),
+                            const SizedBox(width: 4),
+                            Text(item.date, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
                           ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.access_time_rounded, size: 14, color: theme.textSecondary),
+                            const SizedBox(width: 4),
+                            Text(item.formattedDuration, style: TextStyle(color: theme.textSecondary, fontSize: 13)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.people_rounded, size: 14, color: theme.textSecondary),
+                        const SizedBox(width: 4),
+                        Text('${item.participantsCount} ${translation(context).lbl_participants}', style: TextStyle(color: theme.textSecondary, fontSize: 13)),
+                      ],
+                    ),
+                    if (item.host != null) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(item.isHost ? Icons.star_rounded : Icons.person_rounded, size: 14, color: item.isHost ? theme.warning : theme.textSecondary),
+                          const SizedBox(width: 4),
+                          Text(
+                            item.isHost ? translation(context).lbl_you_hosted : '${translation(context).lbl_hosted_by} ${item.host!.name}',
+                            style: TextStyle(color: item.isHost ? theme.warning : theme.textSecondary, fontSize: 12, fontWeight: item.isHost ? FontWeight.w600 : FontWeight.normal),
+                          ),
                         ],
                       ),
-                    ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 12),
-                Divider(height: 1, thickness: 1, color: theme.surfaceVariant),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _buildThemedButton(
-                      theme: theme,
-                      label: translation(context).lbl_details,
-                      icon: Icons.info_outline_rounded,
-                      isPrimary: false,
-                      onTap: () {
-                        _showHistoryDetailDialog(theme, item);
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Divider(height: 1, thickness: 1, color: theme.surfaceVariant),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildThemedButton(
+                theme: theme,
+                label: translation(context).lbl_details,
+                icon: Icons.info_outline_rounded,
+                isPrimary: false,
+                onTap: () {
+                  _showHistoryDetailDialog(theme, item);
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

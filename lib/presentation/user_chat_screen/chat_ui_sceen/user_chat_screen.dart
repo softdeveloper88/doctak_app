@@ -12,6 +12,7 @@ import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/user_chat_screen/bloc/chat_bloc.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/search_contact_screen.dart';
+import 'package:doctak_app/widgets/profile_list_item_card.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
@@ -198,7 +199,7 @@ class _UserChatScreenState extends State<UserChatScreen>
   Widget _buildConversationsList(OneUITheme theme) {
     return Expanded(
       child: ListView.builder(
-        padding: EdgeInsets.only(left: 16, right: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 16),
         itemCount: chatBloc.conversationsList.length,
         itemBuilder: (context, index) {
           return _buildConversationCard(theme, chatBloc.conversationsList[index]);
@@ -220,104 +221,33 @@ class _UserChatScreenState extends State<UserChatScreen>
         ? peerId
         : (otherParticipant?.userId?.toString() ?? '');
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Mark as read
-            if (conversation.id != null) {
-              chatBloc.add(MarkConversationReadEvent(conversationId: conversation.id!));
-            }
-            ChatRoomScreen(
-              username: displayName,
-              profilePic: profilePic,
-              id: userId,
-              conversationId: conversation.id ?? 0,
-            ).launch(context).then((_) {
-              // Reload conversations when returning
-              chatBloc.add(LoadPageEvent(page: 1));
-            });
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.cardBackground,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: theme.divider, width: 1),
-              boxShadow: theme.isDark ? null : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
-            ),
-            child: Row(
-              children: [
-                _buildContactAvatar(theme, profilePic, userId),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        sanitizeString(displayName),
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontFamily: 'Poppins', color: theme.textPrimary, fontWeight: FontWeight.w600, fontSize: 16),
-                      ),
-                      const SizedBox(height: 4),
-                      _buildMessagePreview(theme, conversation),
-                    ],
-                  ),
-                ),
-                _buildTimeAndBadge(theme, conversation),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildContactAvatar(OneUITheme theme, String profilePic, String userId) {
-    return InkWell(
+    return ProfileListItemCard(
+      title: sanitizeString(displayName),
+      avatarUrl: AppData.fullImageUrl(profilePic),
+      subtitle: _conversationPreviewText(theme, conversation),
+      trailing: _buildTimeAndBadge(theme, conversation),
       onTap: () {
-        if (userId.isNotEmpty) {
-          SVProfileFragment(userId: userId).launch(context);
+        if (conversation.id != null) {
+          chatBloc.add(MarkConversationReadEvent(conversationId: conversation.id!));
         }
+        ChatRoomScreen(
+          username: displayName,
+          profilePic: profilePic,
+          id: userId,
+          conversationId: conversation.id ?? 0,
+        ).launch(context).then((_) {
+          chatBloc.add(LoadPageEvent(page: 1));
+        });
       },
-      child: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(colors: [theme.primary.withValues(alpha: 0.1), theme.primary.withValues(alpha: 0.05)]),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(2),
-          child: CustomImageView(
-            placeHolder: 'images/socialv/faces/face_5.png',
-            imagePath: AppData.fullImageUrl(profilePic),
-            height: 52,
-            width: 52,
-            fit: BoxFit.cover,
-          ).cornerRadiusWithClipRRect(50),
-        ),
-      ),
+      onAvatarTap: userId.isNotEmpty
+          ? () => SVProfileFragment(userId: userId).launch(context)
+          : null,
     );
   }
 
-  Widget _buildMessagePreview(OneUITheme theme, Conversation conversation) {
+  String _conversationPreviewText(OneUITheme theme, Conversation conversation) {
     if (chatBloc.isConversationTyping(conversation.id)) {
-      return Text(
-        translation(context).lbl_typing,
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          color: theme.primary,
-          fontSize: 14,
-          height: 1.5,
-          fontStyle: FontStyle.italic,
-        ),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      );
+      return translation(context).lbl_typing;
     }
 
     final lastMsg = conversation.lastMessage;
@@ -336,13 +266,7 @@ class _UserChatScreenState extends State<UserChatScreen>
     }
 
     if (preview.length > 30) preview = '${preview.substring(0, 30)}...';
-
-    return Text(
-      preview,
-      style: TextStyle(fontFamily: 'Poppins', color: theme.textSecondary, fontSize: 14, height: 1.5),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
+    return preview;
   }
 
   Widget _buildTimeAndBadge(OneUITheme theme, Conversation conversation) {

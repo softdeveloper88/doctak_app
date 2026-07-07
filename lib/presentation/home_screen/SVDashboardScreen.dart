@@ -29,6 +29,9 @@ class SVDashboardScreen extends StatefulWidget {
 
 class _SVDashboardScreenState extends State<SVDashboardScreen>
     with WidgetsBindingObserver, TickerProviderStateMixin {
+  static const double _kNavIconBandHeight = 28;
+  static const double _kNavLabelSpacing = 4;
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedIndex = 0;
   final HomeBloc homeBloc = HomeBloc();
@@ -168,7 +171,7 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
           bottomInset > 0 ? bottomInset + 6 : 10,
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: isRTL
               ? _buildRTLNavigationItems()
               : _buildLTRNavigationItems(),
@@ -221,6 +224,31 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
     );
   }
 
+  Widget _navIconBand(Widget child) {
+    return SizedBox(
+      height: _kNavIconBandHeight,
+      width: double.infinity,
+      child: Center(child: child),
+    );
+  }
+
+  Widget _navLabel(String label, OneUITheme theme, {required bool isSelected}) {
+    return Text(
+      label,
+      style: _navLabelStyle(theme, isSelected: isSelected),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _navLabelSpacer(OneUITheme theme) {
+    return Opacity(
+      opacity: 0,
+      child: _navLabel(' ', theme, isSelected: false),
+    );
+  }
+
   Widget _buildNavItem(
     int index,
     String svgAsset,
@@ -236,18 +264,15 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FeedIcon(
-              asset: svgAsset,
-              size: 25,
-              color: isSelected ? theme.accentInk : theme.textTertiary,
+            _navIconBand(
+              FeedIcon(
+                asset: svgAsset,
+                size: 25,
+                color: isSelected ? theme.accentInk : theme.textTertiary,
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: _navLabelStyle(theme, isSelected: isSelected),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            const SizedBox(height: _kNavLabelSpacing),
+            _navLabel(label, theme, isSelected: isSelected),
           ],
         ),
       ),
@@ -264,38 +289,33 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: theme.accent,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: theme.accent.withValues(alpha: 0.22),
-                    blurRadius: 6,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 2),
+            _navIconBand(
+              Container(
+                width: _kNavIconBandHeight,
+                height: _kNavIconBandHeight,
+                decoration: BoxDecoration(
+                  color: theme.accent,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.accent.withValues(alpha: 0.22),
+                      blurRadius: 6,
+                      spreadRadius: 0,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: FeedIcon(
+                    asset: FeedIconAssets.navPost,
+                    size: 18,
+                    color: Colors.white,
                   ),
-                ],
-              ),
-              child: Center(
-                child: FeedIcon(
-                  asset: FeedIconAssets.navPost,
-                  size: 20,
-                  color: Colors.white,
                 ),
               ),
             ),
-            const SizedBox(height: 4),
-            // Keeps the + aligned with other tab icons (label row below).
-            Opacity(
-              opacity: 0,
-              child: Text(
-                ' ',
-                style: _navLabelStyle(theme, isSelected: false),
-              ),
-            ),
+            const SizedBox(height: _kNavLabelSpacing),
+            _navLabelSpacer(theme),
           ],
         ),
       ),
@@ -312,48 +332,48 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         onTap: () => _selectTab(3),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 26,
-              height: 26,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected ? theme.accent : Colors.transparent,
-                  width: 2,
+            _navIconBand(
+              Container(
+                width: 26,
+                height: 26,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? theme.accent : Colors.transparent,
+                    width: 2,
+                  ),
                 ),
-              ),
-              child: ClipOval(
-                child: ValueListenableBuilder<String>(
-                  valueListenable: AppData.profilePicNotifier,
-                  builder: (_, picUrl, __) {
-                    final url = picUrl.isNotEmpty
-                        ? picUrl
-                        : AppData.profilePicUrl;
-                    return (url.isNotEmpty && url.toLowerCase() != 'null')
-                        ? AppCachedNetworkImage(
-                            imageUrl: url,
-                            fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) => Image.asset(
+                child: ClipOval(
+                  child: ValueListenableBuilder<String>(
+                    valueListenable: AppData.profilePicNotifier,
+                    builder: (_, picUrl, __) {
+                      final url = picUrl.isNotEmpty
+                          ? picUrl
+                          : AppData.profilePicUrl;
+                      return (url.isNotEmpty && url.toLowerCase() != 'null')
+                          ? AppCachedNetworkImage(
+                              imageUrl: url,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, __, ___) => Image.asset(
+                                'assets/images/person.png',
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Image.asset(
                               'assets/images/person.png',
                               fit: BoxFit.cover,
-                            ),
-                          )
-                        : Image.asset(
-                            'assets/images/person.png',
-                            fit: BoxFit.cover,
-                          );
-                  },
+                            );
+                    },
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
+            const SizedBox(height: _kNavLabelSpacing),
+            _navLabel(
               translation(context).lbl_profile,
-              style: _navLabelStyle(theme, isSelected: isSelected),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              theme,
+              isSelected: isSelected,
             ),
           ],
         ),
@@ -378,32 +398,29 @@ class _SVDashboardScreenState extends State<SVDashboardScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 27,
-              height: 27,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF0EA5E9), Color(0xFF0D9488)],
+            _navIconBand(
+              Container(
+                width: 27,
+                height: 27,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF0EA5E9), Color(0xFF0D9488)],
+                  ),
                 ),
-              ),
-              child: Center(
-                child: FeedIcon(
-                  asset: FeedIconAssets.navImages,
-                  size: 15,
-                  color: Colors.white,
+                child: Center(
+                  child: FeedIcon(
+                    asset: FeedIconAssets.navImages,
+                    size: 15,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              translation(context).lbl_images,
-              style: _navLabelStyle(theme, isSelected: false),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            const SizedBox(height: _kNavLabelSpacing),
+            _navLabel(translation(context).lbl_images, theme, isSelected: false),
           ],
         ),
       ),

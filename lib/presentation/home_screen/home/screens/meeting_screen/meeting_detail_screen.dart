@@ -5,6 +5,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/video_call_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_waiting_room_controller.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
 import 'package:flutter/material.dart';
@@ -232,24 +233,8 @@ class _MeetingDetailScreenState extends State<MeetingDetailScreen> {
                   const SizedBox(height: 20),
 
                   // Meeting info card
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.cardBackground,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: theme.isDark ? theme.surfaceVariant : Colors.transparent,
-                        width: 1,
-                      ),
-                      boxShadow: theme.isDark
-                          ? []
-                          : [
-                              BoxShadow(
-                                color: theme.primary.withValues(alpha: 0.06),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                    ),
+                  AppSurfaceCard(
+                    padding: EdgeInsets.zero,
                     child: Column(
                       children: [
                         _buildInfoRow(

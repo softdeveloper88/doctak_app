@@ -3,6 +3,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_event.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/suggestion_screen/bloc/suggestion_state.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -102,10 +103,9 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
             padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
             children: <Widget>[
               // Header Card
-              Container(
+              AppSurfaceCard(
                 margin: const EdgeInsets.only(bottom: 24),
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(16), boxShadow: theme.cardShadow),
                 child: Column(
                   children: [
                     Container(
@@ -130,10 +130,9 @@ class _SuggestionScreenState extends State<SuggestionScreen> {
                 ),
               ),
               // Form Card
-              Container(
+              AppSurfaceCard(
                 margin: const EdgeInsets.only(bottom: 24),
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: theme.cardBackground, borderRadius: BorderRadius.circular(16), boxShadow: theme.cardShadow),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

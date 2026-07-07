@@ -4,6 +4,7 @@ import 'package:doctak_app/data/models/conference_model/search_conference_model.
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conference_detail_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -90,9 +91,14 @@ class _MemoryOptimizedConferenceItemState
     ];
 
     return RepaintBoundary(
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        decoration: theme.cardDecoration,
+      child: AppSurfaceCard.listItem(
+        padding: EdgeInsets.zero,
+        margin: const EdgeInsets.fromLTRB(
+          AppCardLayout.horizontalInset,
+          0,
+          AppCardLayout.horizontalInset,
+          AppCardLayout.listGap,
+        ),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,

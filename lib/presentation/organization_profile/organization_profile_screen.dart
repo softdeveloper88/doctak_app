@@ -14,6 +14,7 @@ import 'package:doctak_app/presentation/organization_profile/bloc/organization_p
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -458,7 +459,6 @@ class _OrganizationStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
     final stats = [
       _StatData('Posts', organization.stats.posts, null),
       _StatData('Jobs', organization.stats.jobs, null),
@@ -483,13 +483,8 @@ class _OrganizationStatsRow extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.cardBackground,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: theme.border.withValues(alpha: 0.6)),
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: AppCardLayout.horizontalInset),
+      child: AppSurfaceCard(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: stats
@@ -691,7 +686,7 @@ class _ProfileTabContent extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
       children: [
-        _SectionCard(
+        AppSectionCard(
           title: 'About',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -734,7 +729,7 @@ class _ProfileTabContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _SectionCard(
+        AppSectionCard(
           title: 'Contact & details',
           child: Column(
             children: [
@@ -776,7 +771,7 @@ class _ProfileTabContent extends StatelessWidget {
         ),
         if (profile.typeProfile.isNotEmpty) ...[
           const SizedBox(height: 12),
-          _SectionCard(
+          AppSectionCard(
             title: '${org.typeLabel} specifics',
             child: Column(
               children: profile.typeProfile.entries
@@ -974,38 +969,6 @@ class _SurveysTabContent extends StatelessWidget {
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = OneUITheme.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.border.withValues(alpha: 0.55)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: theme.titleSmall.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 12),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
 class _DetailRow extends StatelessWidget {
   const _DetailRow({
     required this.icon,
@@ -1078,47 +1041,40 @@ class _ListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    return Material(
-      color: theme.cardBackground,
-      borderRadius: BorderRadius.circular(14),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: theme.titleSmall.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                    if (subtitle.trim().isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: theme.bodySecondary,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
+    return AppSurfaceCard.listItem(
+      margin: const EdgeInsets.only(bottom: AppCardLayout.listGap),
+      onTap: onTap,
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: theme.titleSmall.copyWith(fontWeight: FontWeight.w700),
                 ),
-              ),
-              if (trailing != null) ...[
-                const SizedBox(width: 8),
-                Text(trailing!, style: theme.caption),
+                if (subtitle.trim().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: theme.bodySecondary,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
-              if (onTap != null) ...[
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right_rounded, color: theme.textTertiary),
-              ],
-            ],
+            ),
           ),
-        ),
+          if (trailing != null) ...[
+            const SizedBox(width: 8),
+            Text(trailing!, style: theme.caption),
+          ],
+          if (onTap != null) ...[
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right_rounded, color: theme.textTertiary),
+          ],
+        ],
       ),
     );
   }

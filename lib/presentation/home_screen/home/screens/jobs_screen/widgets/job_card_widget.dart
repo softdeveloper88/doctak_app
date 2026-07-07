@@ -29,26 +29,19 @@ class JobCardWidget extends StatelessWidget {
     final isDark = theme.isDark;
     final material = Theme.of(context);
 
-    return InkWell(
+    return AppSurfaceCard.listItem(
       onTap: onJobTap,
-      borderRadius: BorderRadius.circular(AppCardLayout.radius),
-      child: Container(
-        margin: AppCardLayout.listItemMargin,
-        padding: const EdgeInsets.all(16),
-        clipBehavior: Clip.antiAlias,
-        decoration: theme.cardDecoration,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildJobHeader(material, isDark),
-            const SizedBox(height: 16),
-            _buildJobMetadataRow(isDark),
-            const SizedBox(height: 20),
-            _buildDateBoxes(isDark),
-            const SizedBox(height: 20),
-            _buildActionRow(material, isDark, context),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildJobHeader(material, isDark),
+          const SizedBox(height: 16),
+          _buildJobMetadataRow(isDark),
+          const SizedBox(height: 20),
+          _buildDateBoxes(isDark),
+          const SizedBox(height: 20),
+          _buildActionRow(material, isDark, context),
+        ],
       ),
     );
   }

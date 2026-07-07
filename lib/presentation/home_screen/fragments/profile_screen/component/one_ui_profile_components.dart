@@ -1,4 +1,5 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:flutter/material.dart';
 
 /// Shared OneUI 8.5 components for profile screens
@@ -57,9 +58,9 @@ class OneUIProfileSection extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final color = iconColor ?? theme.primary;
 
-    return Container(
+    return AppSurfaceCard(
       margin: margin ?? const EdgeInsets.only(bottom: 16),
-      decoration: theme.cardDecoration,
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -338,9 +339,9 @@ class OneUIWorkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
 
-    return Container(
+    return AppSurfaceCard(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: theme.cardDecoration,
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

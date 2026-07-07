@@ -36,25 +36,19 @@ class _MemoryOptimizedJobItemState extends State<MemoryOptimizedJobItem> {
     final isDark = theme.isDark;
 
     return RepaintBoundary(
-      child: GestureDetector(
+      child: AppSurfaceCard.listItem(
         onTap: widget.onJobTap,
-        child: Container(
-          margin: AppCardLayout.listItemMargin,
-          padding: const EdgeInsets.all(16),
-          clipBehavior: Clip.antiAlias,
-          decoration: theme.cardDecoration,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildJobHeader(theme, isDark),
-              const SizedBox(height: 16),
-              _buildJobMetadataRow(theme, isDark),
-              const SizedBox(height: 20),
-              _buildDateBoxes(theme, isDark),
-              const SizedBox(height: 20),
-              _buildActionRow(theme, isDark),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildJobHeader(theme, isDark),
+            const SizedBox(height: 16),
+            _buildJobMetadataRow(theme, isDark),
+            const SizedBox(height: 20),
+            _buildDateBoxes(theme, isDark),
+            const SizedBox(height: 20),
+            _buildActionRow(theme, isDark),
+          ],
         ),
       ),
     );
