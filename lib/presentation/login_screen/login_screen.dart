@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:doctak_app/core/utils/saved_login_credentials.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
@@ -11,6 +12,7 @@ import 'package:doctak_app/presentation/forgot_password/forgot_password.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_event.dart';
 import 'package:doctak_app/presentation/login_screen/bloc/login_state.dart';
+import 'package:doctak_app/presentation/login_screen/two_factor_challenge_screen.dart';
 import 'package:doctak_app/presentation/sign_up_screen/sign_up_screen.dart';
 import 'package:doctak_app/presentation/auth/auth_screen_widgets.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -21,13 +23,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
-import '../../core/utils/app/AppData.dart';
 import '../../core/utils/secure_storage_service.dart';
-import '../../widgets/show_loading_dialog.dart';
+import 'package:doctak_app/widgets/email_verification_actions.dart';
 import 'bloc/login_bloc.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -45,55 +45,8 @@ class LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   LoginBloc loginBloc = LoginBloc();
-  Future<void> sendVerificationLink(String email, BuildContext context) async {
-    showLoadingDialog(context);
-    // Show the loading dialog
-    // showDialog(
-    //   context: context,
-    //   barrierDismissible: false, // Disallow dismissing while loading
-    //   builder: (BuildContext context) {
-    //     return SimpleDialog(
-    //       title: const Text('Sending Verification Link'),
-    //       children: [
-    //         Center(
-    //           child: CircularProgressIndicator(
-    //             color: svGetBodyColor(),
-    //           ),
-    //         ),
-    //       ],
-    //     );
-    //   },
-    // );
-    try {
-      final response = await http.post(Uri.parse('${AppData.remoteUrl}/send-verification-link'), body: {'email': email});
-
-      // Close the loading dialog
-      Navigator.of(context).pop();
-
-      if (response.statusCode == 200) {
-        // Successful API call, handle the response if needed
-        // Show success Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent), duration: const Duration(seconds: 2)));
-      } else if (response.statusCode == 422) {
-        // Validation error or user email not found
-        // Show error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), duration: const Duration(seconds: 2)));
-      } else if (response.statusCode == 404) {
-        // User already verified
-        // Show info Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_user_already_verified), duration: const Duration(seconds: 2)));
-      } else {
-        // Something went wrong
-        // Show error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), duration: const Duration(seconds: 2)));
-      }
-    } catch (e) {
-      // Handle network errors or other exceptions
-      // Close the loading dialog
-      Navigator.of(context).pop();
-
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), duration: const Duration(seconds: 2)));
-    }
+  Future<void> sendVerificationLink(String email, BuildContext context) {
+    return requestEmailVerificationLink(context: context, email: email);
   }
 
   bool _rememberMe = false;
@@ -309,18 +262,35 @@ class LoginScreenState extends State<LoginScreen> {
   void _onUsernameSelected(String username) async {
     Navigator.of(context).pop(); // Close the bottom sheet
     emailController.text = username;
+
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
-    String? password = await prefs.getString('password_$username');
-    if (password != null) {
-      passwordController.text = password;
+
+    // After a web password reset we clear cached passwords — never auto-login with a stale one.
+    final pending = await prefs.getString(SavedLoginCredentials.passwordResetPendingKey);
+    if (pending == '1') {
+      await SavedLoginCredentials.consumePasswordResetPending();
+      passwordController.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Your password was reset. Enter your new password.'),
+        ));
+      }
+      return;
     }
+
+    String? password = await prefs.getString('password_$username');
+    if (password == null || password.isEmpty) {
+      passwordController.clear();
+      return;
+    }
+
+    passwordController.text = password;
     // new changes
     await prefs.setBool('acceptTerms', true);
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
     }
-    print('object');
 
     final token = await _getSafeFcmToken();
     loginBloc.add(LoginButtonPressed(username: emailController.text, password: passwordController.text, rememberMe: true, deviceToken: token));
@@ -329,7 +299,28 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     _loadSavedUsernames();
+    _applyPasswordResetPendingState();
     super.initState();
+  }
+
+  Future<void> _applyPasswordResetPendingState() async {
+    final pending = await SavedLoginCredentials.consumePasswordResetPending();
+    if (!pending || !mounted) return;
+
+    passwordController.clear();
+    setState(() {
+      _rememberMe = false;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final theme = OneUITheme.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('Your password was reset. Sign in with your new password.'),
+        backgroundColor: theme.success,
+        duration: const Duration(seconds: 6),
+      ));
+    });
   }
 
   @override
@@ -348,6 +339,20 @@ class LoginScreenState extends State<LoginScreen> {
           listener: (context, state) {
             if (state is LoginSuccess) {
               loginApp(context);
+            } else if (state is LoginRequiresTwoFactor) {
+              if (!mounted) return;
+              AppNavigator.push(
+                context,
+                TwoFactorChallengeScreen(
+                  pendingToken: state.pendingToken,
+                  methods: state.methods,
+                  maskedEmail: state.maskedEmail,
+                  rememberMe: state.rememberMe,
+                  deviceToken: state.deviceToken,
+                  initialMessage: state.message,
+                  autoResendEmail: state.methods['email'] == true && !state.emailSent,
+                ),
+              );
             } else if (state is SocialLoginSuccess) {
               if (mounted) {
                 toasty(context, translation(context).msg_login_success, bgColor: theme.success, textColor: Colors.white);

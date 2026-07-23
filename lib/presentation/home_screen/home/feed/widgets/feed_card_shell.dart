@@ -1,9 +1,12 @@
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_card_menu.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_motion.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/premium/premium_mark.dart';
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:doctak_app/core/utils/display_identity.dart';
 
 /// Horizontal inset for home feed cards and strip sections (matches reference `.post` margin).
 const double kFeedHorizontalGutter = 12.0;
@@ -275,6 +278,7 @@ class FeedOverlapAvatar extends StatelessWidget {
   final String secondaryName;
   final String? secondaryAvatarUrl;
   final double size;
+  final bool secondaryPremium;
 
   const FeedOverlapAvatar({
     super.key,
@@ -283,6 +287,7 @@ class FeedOverlapAvatar extends StatelessWidget {
     required this.secondaryName,
     this.secondaryAvatarUrl,
     this.size = 40,
+    this.secondaryPremium = false,
   });
 
   @override
@@ -318,8 +323,17 @@ class FeedOverlapAvatar extends StatelessWidget {
               decoration: BoxDecoration(
                 color: theme.cardBackground,
                 shape: BoxShape.circle,
-                border: Border.all(color: theme.cardBackground, width: 2),
+                border: Border.all(
+                  color: secondaryPremium ? PremiumStyle.gold : theme.cardBackground,
+                  width: secondaryPremium ? 2 : 2,
+                ),
                 boxShadow: [
+                  if (secondaryPremium)
+                    BoxShadow(
+                      color: PremiumStyle.gold.withValues(alpha: 0.45),
+                      blurRadius: 0,
+                      spreadRadius: 1.5,
+                    ),
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.12),
                     blurRadius: 6,
@@ -397,6 +411,7 @@ class FeedGroupPostHeader extends StatelessWidget {
   final String? posterAvatarUrl;
   final String? createdAt;
   final bool posterVerified;
+  final bool posterPremium;
   final String? trailingBadge;
   final VoidCallback? onGroupTap;
   final VoidCallback? onPosterTap;
@@ -409,6 +424,7 @@ class FeedGroupPostHeader extends StatelessWidget {
     this.posterAvatarUrl,
     this.createdAt,
     this.posterVerified = false,
+    this.posterPremium = false,
     this.trailingBadge,
     this.onGroupTap,
     this.onPosterTap,
@@ -429,6 +445,7 @@ class FeedGroupPostHeader extends StatelessWidget {
             primaryAvatarUrl: groupLogoUrl,
             secondaryName: posterName,
             secondaryAvatarUrl: posterAvatarUrl,
+            secondaryPremium: posterPremium,
           ),
         ),
         const SizedBox(width: 10),
@@ -470,7 +487,7 @@ class FeedGroupPostHeader extends StatelessWidget {
                             ),
                             if (posterVerified) ...[
                               const SizedBox(width: 4),
-                              theme.buildVerifiedBadge(size: 14),
+                              theme.buildVerifiedBadge(size: 14, isPremium: posterPremium),
                             ],
                           ],
                         ),
@@ -507,6 +524,7 @@ class FeedAuthorHeader extends StatelessWidget {
   final String subtitle;
   final String? createdAt;
   final bool verified;
+  final bool isPremium;
   final String? trailingBadge;
   final Color? trailingBadgeColor;
   final String? visibility;
@@ -529,6 +547,7 @@ class FeedAuthorHeader extends StatelessWidget {
     this.subtitle = '',
     this.createdAt,
     this.verified = false,
+    this.isPremium = false,
     this.trailingBadge,
     this.trailingBadgeColor,
     this.visibility,
@@ -570,7 +589,7 @@ class FeedAuthorHeader extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              name,
+                              formatDisplayName(name, 'Member'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.titleSmall,
@@ -578,7 +597,11 @@ class FeedAuthorHeader extends StatelessWidget {
                           ),
                           if (verified) ...[
                             const SizedBox(width: 4),
-                            theme.buildVerifiedBadge(size: 16),
+                            theme.buildVerifiedBadge(size: 16, isPremium: isPremium),
+                          ],
+                          if (isPremium) ...[
+                            const SizedBox(width: 4),
+                            const PremiumMark(size: 14, openUpgradeOnTap: true),
                           ],
                         ],
                       ),
@@ -655,40 +678,46 @@ class FeedAuthorHeader extends StatelessWidget {
     const size = 48.0;
     const radius = size / 2;
     final url = avatarUrl;
-    final fallback = Container(
+    final fallback = ClipRRect(
+      borderRadius: BorderRadius.circular(radius),
+      child: buildDefaultAvatarWidget(size: size, kind: DefaultAvatarKind.user),
+    );
+    final image = (url == null || url.isEmpty || isDefaultAvatarUrl(url))
+        ? fallback
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: AppCachedNetworkImage(
+              imageUrl: url,
+              width: size,
+              height: size,
+              fit: BoxFit.cover,
+              memCacheWidth: feedMemCachePx(context, size),
+              memCacheHeight: feedMemCachePx(context, size),
+              fadeInDuration: Duration.zero,
+              fadeOutDuration: Duration.zero,
+              filterQuality: FilterQuality.low,
+              placeholder: (_, __) => fallback,
+              errorWidget: (_, __, ___) => fallback,
+            ),
+          );
+
+    if (!isPremium) return image;
+
+    return Container(
       width: size,
       height: size,
-      alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: theme.avatarBackground,
-        borderRadius: BorderRadius.circular(radius),
+        shape: BoxShape.circle,
+        border: Border.all(color: PremiumStyle.gold, width: 2.5),
+        boxShadow: [
+          BoxShadow(
+            color: PremiumStyle.gold.withValues(alpha: 0.45),
+            blurRadius: 0,
+            spreadRadius: 2,
+          ),
+        ],
       ),
-      child: Text(
-        feedAvatarInitial(name),
-        style: TextStyle(
-          color: theme.avatarText,
-          fontWeight: FontWeight.w700,
-          fontSize: 18,
-          fontFamily: 'Poppins',
-        ),
-      ),
-    );
-    if (url == null || url.isEmpty) return fallback;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: AppCachedNetworkImage(
-        imageUrl: url,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        memCacheWidth: feedMemCachePx(context, size),
-        memCacheHeight: feedMemCachePx(context, size),
-        fadeInDuration: Duration.zero,
-        fadeOutDuration: Duration.zero,
-        filterQuality: FilterQuality.low,
-        placeholder: (_, __) => fallback,
-        errorWidget: (_, __, ___) => fallback,
-      ),
+      child: ClipOval(child: image),
     );
   }
 }
@@ -725,7 +754,7 @@ class FeedActionButton extends StatelessWidget {
     final displayLabel =
         iconOnly ? label : feedActionLabel(label, count ?? 0);
     return Expanded(
-      child: InkWell(
+      child: FeedPressScale(
         onTap: onTap,
         borderRadius: theme.radiusM,
         child: Padding(

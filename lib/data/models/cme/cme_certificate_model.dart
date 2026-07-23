@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/app/app_environment.dart';
 
 CmeCertificatesResponse cmeCertificatesResponseFromJson(String str) =>
     CmeCertificatesResponse.fromJson(json.decode(str));
@@ -160,8 +161,7 @@ class CmeCertificateData {
 
   static String? webViewUrl(String? id) {
     if (id == null || id.trim().isEmpty) return null;
-    final base = AppData.base2.replaceAll(RegExp(r'/$'), '');
-    return '$base/cme/certificates/${id.trim()}';
+    return '${AppEnvironment.publicWebUrl}/cme/certificates/${id.trim()}';
   }
 
   static String? _resolveAssetUrl(String? raw) {

@@ -95,7 +95,7 @@ class _JobApplicantScreenState extends State<JobApplicantScreen> {
                                 boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.3), spreadRadius: 1, blurRadius: 5, offset: const Offset(0, 2))],
                               ),
                               child: CustomImageView(
-                                placeHolder: 'images/socialv/faces/face_5.png',
+                                placeHolder: 'assets/images/socialv/faces/face_5.png',
                                 imagePath: AppData.fullImageUrl(user?.profilePic.validate()),
                                 height: 60,
                                 width: 60,

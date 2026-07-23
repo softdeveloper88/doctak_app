@@ -1,9 +1,11 @@
+import 'package:doctak_app/core/utils/age_assurance.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 
 class AppSharedPreferences {
   Future<void> clearSharedPreferencesData(context) async {
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
+    await AgeAssurance.clear();
     await prefs.remove('rememberMe');
     await prefs.remove('token');
     await prefs.remove('token');

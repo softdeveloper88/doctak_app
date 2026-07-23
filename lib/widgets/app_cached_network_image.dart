@@ -78,7 +78,9 @@ class AppCachedNetworkImage extends StatelessWidget {
       color: color,
       colorBlendMode: colorBlendMode,
       cacheManager: CustomCacheManager(),
-      httpHeaders: httpHeaders ?? defaultHeaders,
+      // Bearer token is attached for DocTak hosts only (private media such
+      // as chat attachments requires an authenticated request).
+      httpHeaders: AppData.mediaHeadersFor(safeUrl, baseHeaders: httpHeaders ?? defaultHeaders),
       placeholder: placeholder ?? (ctx, url) => _defaultPlaceholder(ctx, url, theme),
       errorWidget: onError,
       memCacheWidth: memCacheWidth,
@@ -118,5 +120,14 @@ class AppCachedNetworkImage extends StatelessWidget {
 /// Extension to easily use CachedNetworkImageProvider with our custom cache manager
 class AppCachedNetworkImageProvider extends CachedNetworkImageProvider {
   AppCachedNetworkImageProvider(String url, {Map<String, String>? headers, int? maxWidth, int? maxHeight})
-    : super(AppData.fullImageUrl(url), headers: headers ?? AppCachedNetworkImage.defaultHeaders, cacheManager: CustomCacheManager(), maxWidth: maxWidth, maxHeight: maxHeight);
+    : super(
+        AppData.fullImageUrl(url),
+        headers: AppData.mediaHeadersFor(
+          AppData.fullImageUrl(url),
+          baseHeaders: headers ?? AppCachedNetworkImage.defaultHeaders,
+        ),
+        cacheManager: CustomCacheManager(),
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+      );
 }

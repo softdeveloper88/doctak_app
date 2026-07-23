@@ -78,13 +78,20 @@ class _CmeMainScreenState extends State<CmeMainScreen>
       return;
     }
 
-    _tabController?.removeListener(_onTabIndexChanged);
-    _tabController?.dispose();
+    final old = _tabController;
+    old?.removeListener(_onTabIndexChanged);
 
     _tabProviderMode = providerMode;
     final length = providerMode ? _providerTabs.length : _learnerTabs.length;
     _tabController = TabController(length: length, vsync: this);
     _tabController!.addListener(_onTabIndexChanged);
+
+    // Defer dispose so in-flight TabBar / TabBarView animations release first.
+    if (old != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        old.dispose();
+      });
+    }
   }
 
   void _onTabIndexChanged() {

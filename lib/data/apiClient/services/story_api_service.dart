@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/story_model/story_model.dart';
 import 'package:http/http.dart' as http;
@@ -18,11 +19,12 @@ class StoryApiService {
   static String get _baseUrl =>
       AppData.remoteUrl2.replaceAll('/v4', '/v5');
 
-  /// Build headers with Bearer token
+  /// Build headers with Bearer token + acting business-page context
   Map<String, String> _headers() {
     return {
       'Authorization': 'Bearer ${AppData.userToken}',
       'Accept': 'application/json',
+      ...ActingContextService.instance.actingHeaders(),
     };
   }
 
@@ -62,9 +64,10 @@ class StoryApiService {
       final uri = Uri.parse('$_baseUrl/stories');
       final request = http.MultipartRequest('POST', uri);
 
-      // Auth header
+      // Auth header + acting business-page context (story attributed to page)
       request.headers['Authorization'] = 'Bearer ${AppData.userToken}';
       request.headers['Accept'] = 'application/json';
+      request.headers.addAll(ActingContextService.instance.actingHeaders());
 
       // Fields
       request.fields['type'] = type;

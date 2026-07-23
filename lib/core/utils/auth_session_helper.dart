@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/notification_service.dart';
+import 'package:doctak_app/core/utils/age_assurance.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
@@ -22,6 +24,8 @@ class AuthSessionHelper {
     PostLoginDeviceAuthResp response, {
     required String deviceToken,
     bool rememberMe = true,
+    /// Optional YYYY-MM-DD from signup when the auth payload omits `dob`.
+    String? dateOfBirthOverride,
   }) async {
     final prefs = SecureStorageService.instance;
     await prefs.initialize();
@@ -60,7 +64,10 @@ class AuthSessionHelper {
     await prefs.setString('countryOrigin', response.user?.countryOrigin ?? '');
     await prefs.setString('college', response.user?.college ?? '');
     await prefs.setString('clinicName', response.user?.clinicName ?? '');
-    await prefs.setString('dob', response.user?.dob ?? '');
+    final resolvedDob = (response.user?.dob != null && response.user!.dob!.trim().isNotEmpty)
+        ? response.user!.dob!.trim()
+        : (dateOfBirthOverride?.trim() ?? '');
+    await prefs.setString('dob', resolvedDob);
     await prefs.setString('user_type', response.user?.userType ?? '');
     await prefs.setString('countryName', response.country?.countryName ?? '');
     await prefs.setString('currency', response.country?.currency ?? '');
@@ -125,9 +132,33 @@ class AuthSessionHelper {
 
       // Register FCM with the server after login (non-blocking).
       unawaited(NotificationService.syncDeviceToken());
+
+      // Age assurance: if profile already has a qualifying DOB, mark verified.
+      final dobRaw = response.user?.dob ?? await prefs.getString('dob') ?? '';
+      final parsedDob = AgeAssurance.tryParseDob(dobRaw);
+      if (parsedDob != null && AgeAssurance.meetsMinimumAge(parsedDob)) {
+        await AgeAssurance.markConfirmed(
+          dateOfBirth: parsedDob,
+          userId: userId,
+        );
+      }
     }
 
     // ── Populate subscription globals (v6) ──
     AppData.updateSubscriptionData(response.subscription, response.features);
+
+    // Fresh sign-in should always open the personal workspace — not the last
+    // business page stored in users.active_organization_id on the server.
+    await _resetActingToPersonal();
+  }
+
+  static Future<void> _resetActingToPersonal() async {
+    await ActingContextService.instance.clear();
+    try {
+      await ActingContextService.instance.switchToPersonal();
+    } catch (e) {
+      // Keep local state personal even if the switch API is unreachable.
+      await ActingContextService.instance.clear();
+    }
   }
 }

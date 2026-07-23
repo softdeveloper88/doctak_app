@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
 import 'package:doctak_app/data/apiClient/api_service_manager.dart';
@@ -306,6 +307,7 @@ class AddPostBloc extends Bloc<AddPostEvent, AddPostState> {
       ..fields['feeling'] = feeling
       ..fields['privacy'] = privacy
       ..headers['Authorization'] = 'Bearer ${AppData.userToken}'; // Add token bearer header
+    request.headers.addAll(ActingContextService.instance.actingHeaders());
 
     print('$title,$locationName,$latitude,$longitude,$backgroundColor,$tagging,$feeling');
     for (var xFile in imagefiles) {

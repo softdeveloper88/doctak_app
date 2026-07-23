@@ -2,28 +2,42 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_environment.dart';
+import 'package:doctak_app/data/apiClient/jobs/jobs_node_api_service.dart';
+import 'package:doctak_app/core/utils/saved_login_credentials.dart';
+import 'package:doctak_app/core/utils/secure_storage_service.dart';
+import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/presentation/blog/blog_detail_screen.dart';
 import 'package:doctak_app/presentation/groups_module/screens/group_detail_screen.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/manage_meeting_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
+import 'package:doctak_app/presentation/case_discussion/screens/discussion_detail_screen.dart';
 import 'package:doctak_app/presentation/organization_profile/organization_profile_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Deep Link Types supported by the app
 enum DeepLinkType {
   post,
   job,
+  jobManage,
   conference,
   meeting,
   call,
   profile,
   organization,
   group,
+  blog,
+  discussCase,
+  emailVerify,
+  login,
   unknown,
 }
 
@@ -58,8 +72,8 @@ class DeepLinkService {
   /// Flag to track initialization
   bool _isInitialized = false;
 
-  /// Base URL for generating shareable links
-  static const String baseUrl = 'https://doctak.net';
+  /// Base URL for generating shareable links (always the live public site).
+  static String get baseUrl => AppEnvironment.publicWebUrl;
 
   /// Getters
   DeepLinkData? get pendingDeepLink => _pendingDeepLink;
@@ -136,8 +150,40 @@ class DeepLinkService {
     // or doctak://open?type=post&id=123
     if (uri.scheme == 'doctak') {
       if (uri.host == 'open' && pathSegments.isNotEmpty) {
-        // doctak://open/post/123 format
-        // pathSegments would be ['post', '123']
+        final segment = pathSegments.first.toLowerCase();
+        switch (segment) {
+          case 'post':
+          case 'posts':
+            type = DeepLinkType.post;
+            if (pathSegments.length > 1) id = pathSegments[1];
+            break;
+          case 'job':
+          case 'jobs':
+            type = DeepLinkType.job;
+            if (pathSegments.length > 1) id = pathSegments[1];
+            break;
+          case 'profile':
+          case 'user':
+            type = DeepLinkType.profile;
+            if (pathSegments.length > 1) id = pathSegments[1];
+            break;
+          case 'login':
+            type = DeepLinkType.login;
+            break;
+          case 'verify-email':
+          case 'verify_email':
+            type = DeepLinkType.emailVerify;
+            break;
+        }
+        if (type != DeepLinkType.unknown) {
+          debugPrint('🔗 DeepLinkService: Parsed custom scheme path: type=$type, id=$id');
+          return DeepLinkData(
+            type: type,
+            id: id,
+            queryParams: Map<String, String>.from(queryParams),
+            originalUri: uri,
+          );
+        }
       } else if (queryParams.containsKey('type')) {
         // doctak://open?type=post&id=123 format
         final typeParam = queryParams['type']?.toLowerCase();
@@ -165,6 +211,13 @@ class DeepLinkService {
           case 'groups':
             type = DeepLinkType.group;
             break;
+          case 'login':
+            type = DeepLinkType.login;
+            break;
+          case 'verify-email':
+          case 'verify_email':
+            type = DeepLinkType.emailVerify;
+            break;
         }
         if (type != DeepLinkType.unknown) {
           debugPrint('🔗 DeepLinkService: Parsed custom scheme: type=$type, id=$id');
@@ -189,11 +242,18 @@ class DeepLinkService {
 
         case 'job':
         case 'jobs':
-          type = DeepLinkType.job;
-          if (pathSegments.length > 1) {
-            id = pathSegments[1];
-          } else if (queryParams.containsKey('id')) {
-            id = queryParams['id'];
+          // /jobs/manage/{id} or /jobs/manage/{id}/payment-success
+          if (pathSegments.length >= 3 &&
+              pathSegments[1].toLowerCase() == 'manage') {
+            type = DeepLinkType.jobManage;
+            id = pathSegments[2];
+          } else {
+            type = DeepLinkType.job;
+            if (pathSegments.length > 1) {
+              id = pathSegments[1];
+            } else if (queryParams.containsKey('id')) {
+              id = queryParams['id'];
+            }
           }
           break;
 
@@ -211,7 +271,10 @@ class DeepLinkService {
         case 'meetings':
         case 'join-meeting':
           type = DeepLinkType.meeting;
-          if (pathSegments.length > 1) {
+          if (pathSegments.length >= 3 &&
+              pathSegments[1].toLowerCase() == 'live') {
+            id = pathSegments[2];
+          } else if (pathSegments.length > 1) {
             id = pathSegments[1];
           } else if (queryParams.containsKey('id')) {
             id = queryParams['id'];
@@ -263,6 +326,39 @@ class DeepLinkService {
           }
           break;
 
+        case 'blog':
+        case 'blogs':
+        case 'article':
+        case 'articles':
+          type = DeepLinkType.blog;
+          if (pathSegments.length > 1) {
+            id = pathSegments[1];
+          } else if (queryParams.containsKey('id')) {
+            id = queryParams['id'];
+          }
+          break;
+
+        case 'discuss-case':
+        case 'discuss_case':
+        case 'case':
+        case 'cases':
+          type = DeepLinkType.discussCase;
+          if (pathSegments.length > 1) {
+            id = pathSegments[1];
+          } else if (queryParams.containsKey('id')) {
+            id = queryParams['id'];
+          }
+          break;
+
+        case 'verify-email':
+        case 'verify_email':
+          type = DeepLinkType.emailVerify;
+          break;
+
+        case 'login':
+          type = DeepLinkType.login;
+          break;
+
         default:
           // Check if it's a numeric ID directly (legacy format)
           if (int.tryParse(firstSegment) != null) {
@@ -302,6 +398,18 @@ class DeepLinkService {
   Future<bool> handleDeepLink(BuildContext context, DeepLinkData deepLink) async {
     debugPrint('🔗 DeepLinkService: Handling deep link: $deepLink');
 
+    // Email verification + post-verify login links work without an existing session.
+    if (deepLink.type == DeepLinkType.emailVerify) {
+      return await _handleEmailVerifyDeepLink(context, deepLink);
+    }
+    if (deepLink.type == DeepLinkType.login &&
+        (deepLink.queryParams['verified'] == '1' || deepLink.queryParams['verified'] == 'already')) {
+      return await _handleLoginVerifiedDeepLink(context, deepLink);
+    }
+    if (deepLink.type == DeepLinkType.login && deepLink.queryParams['reset'] == '1') {
+      return await _handleLoginPasswordResetDeepLink(context, deepLink);
+    }
+
     // Check if user is logged in
     if (AppData.userToken == null || AppData.userToken!.isEmpty) {
       debugPrint('🔗 DeepLinkService: User not logged in, storing pending link');
@@ -316,6 +424,9 @@ class DeepLinkService {
 
         case DeepLinkType.job:
           return await _handleJobDeepLink(context, deepLink);
+
+        case DeepLinkType.jobManage:
+          return await _handleJobManageDeepLink(context, deepLink);
 
         case DeepLinkType.conference:
           return await _handleConferenceDeepLink(context, deepLink);
@@ -334,6 +445,18 @@ class DeepLinkService {
 
         case DeepLinkType.group:
           return await _handleGroupDeepLink(context, deepLink);
+
+        case DeepLinkType.blog:
+          return await _handleBlogDeepLink(context, deepLink);
+
+        case DeepLinkType.discussCase:
+          return await _handleDiscussCaseDeepLink(context, deepLink);
+
+        case DeepLinkType.emailVerify:
+          return await _handleEmailVerifyDeepLink(context, deepLink);
+
+        case DeepLinkType.login:
+          return await _handleLoginVerifiedDeepLink(context, deepLink);
 
         case DeepLinkType.unknown:
           debugPrint('🔗 DeepLinkService: Unknown deep link type, navigating to dashboard');
@@ -386,6 +509,34 @@ class DeepLinkService {
     // Navigate to job details screen
     Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => JobsDetailsScreen(jobId: jobId, isFromSplash: true)), (route) => false);
 
+    return true;
+  }
+
+  /// Handle /jobs/manage/{id} (e.g. return from Stripe promotion payment)
+  Future<bool> _handleJobManageDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final jobId = deepLink.id;
+    final promo = deepLink.queryParams['promo'];
+    debugPrint('🔗 DeepLinkService: Navigating to jobs manage: $jobId promo=$promo');
+
+    if (!context.mounted) return false;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => JobsScreen(manageJobId: jobId),
+      ),
+      (route) => false,
+    );
+
+    // Toast after navigation frame so it isn't lost under the route transition.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (promo == 'ok') {
+        toast('Promotion payment successful');
+      } else if (promo == 'cancel') {
+        toast('Payment cancelled — listing saved as free');
+      } else if (promo == 'error') {
+        toast('Payment received but verification failed. Contact support if needed.');
+      }
+    });
     return true;
   }
 
@@ -477,6 +628,45 @@ class DeepLinkService {
     return true;
   }
 
+  /// Handle discuss-case deep link (`/discuss-case/{id}`).
+  Future<bool> _handleDiscussCaseDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final caseIdRaw = deepLink.id?.trim();
+    final caseId = int.tryParse(caseIdRaw ?? '');
+    if (caseId == null) {
+      debugPrint('🔗 DeepLinkService: Invalid discuss-case id: $caseIdRaw');
+      const SVDashboardScreen().launch(context, isNewTask: true);
+      return false;
+    }
+
+    debugPrint('🔗 DeepLinkService: Navigating to discuss case: $caseId');
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => DiscussionDetailScreen(caseId: caseId)),
+      (route) => false,
+    );
+    return true;
+  }
+
+  /// Handle blog/article deep link (`/blogs/{id}` or `/articles/{id}`).
+  Future<bool> _handleBlogDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final blogId = deepLink.id?.trim();
+    if (blogId == null || blogId.isEmpty) {
+      debugPrint('🔗 DeepLinkService: Blog ID is missing');
+      const SVDashboardScreen().launch(context, isNewTask: true);
+      return false;
+    }
+
+    debugPrint('🔗 DeepLinkService: Navigating to blog: $blogId');
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (context) => BlogDetailScreen(blogId: blogId),
+      ),
+      (route) => false,
+    );
+
+    return true;
+  }
+
   /// Handle profile deep link
   Future<bool> _handleProfileDeepLink(BuildContext context, DeepLinkData deepLink) async {
     final userId = deepLink.id;
@@ -493,6 +683,82 @@ class DeepLinkService {
       (route) => false,
     );
 
+    return true;
+  }
+
+  /// Opened from https://doctak.net/verify-email?token=... (Universal / App Link).
+  Future<bool> _handleEmailVerifyDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final token = deepLink.queryParams['token']?.trim() ?? '';
+    if (token.isEmpty) {
+      toast('Verification link is missing a token.');
+      return false;
+    }
+
+    try {
+      final base = AppEnvironment.nodeApiUrl.replaceAll(RegExp(r'/$'), '');
+      // Server page verifies the token when loaded.
+      final response = await http.get(Uri.parse('$base/verify-email?token=${Uri.encodeComponent(token)}'));
+      final body = response.body;
+      final ok = response.statusCode >= 200 &&
+          response.statusCode < 400 &&
+          !body.contains('Verification link invalid') &&
+          !body.contains('error=invalid');
+
+      if (!ok) {
+        toast('That verification link is invalid or expired.');
+        return false;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('email_verified_at', DateTime.now().toIso8601String());
+      if (context.mounted) {
+        toast('Email verified successfully');
+        if (AppData.userToken != null && AppData.userToken!.isNotEmpty) {
+          const SVDashboardScreen().launch(context, isNewTask: true);
+        }
+      }
+      return true;
+    } catch (e) {
+      debugPrint('🔗 DeepLinkService: email verify failed: $e');
+      toast('Could not verify email. Open the link in your browser.');
+      return false;
+    }
+  }
+
+  /// Website verified then bounced back via doctak://open/login?verified=1
+  Future<bool> _handleLoginVerifiedDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('email_verified_at', DateTime.now().toIso8601String());
+    if (context.mounted) {
+      toast('Email verified');
+      if (AppData.userToken != null && AppData.userToken!.isNotEmpty) {
+        const SVDashboardScreen().launch(context, isNewTask: true);
+      }
+    }
+    return true;
+  }
+
+  /// Password reset completed on web → doctak://open/login?reset=1
+  Future<bool> _handleLoginPasswordResetDeepLink(BuildContext context, DeepLinkData deepLink) async {
+    await SavedLoginCredentials.prepareForNewPasswordLogin();
+
+    // Drop any cached session so splash/auto-login cannot skip the new password.
+    AppData.userToken = null;
+    AppData.logInUserId = null;
+    try {
+      final prefs = SecureStorageService.instance;
+      await prefs.initialize();
+      await prefs.remove('token');
+      await prefs.remove('token_expires_at');
+      await prefs.setBool('rememberMe', false);
+    } catch (_) {
+      // Login screen still works even if secure storage clear fails.
+    }
+
+    if (context.mounted) {
+      toast('Password updated. Sign in with your new password.');
+      const LoginScreen().launch(context, isNewTask: true);
+    }
     return true;
   }
 
@@ -533,9 +799,27 @@ class DeepLinkService {
   }
 
   /// Generate a shareable link for a meeting.
-  /// Points to the node server meeting page: /meetings/live/{channel}
+  /// Points to the public meeting page: /meetings/live/{channel}
   static String generateMeetingLink(String meetingId, {String? title}) {
-    return '${AppEnvironment.nodeApiUrl}/meetings/live/$meetingId';
+    return '$baseUrl/meetings/live/$meetingId';
+  }
+
+  /// Generate a shareable link for a blog/article.
+  static String generateBlogLink(String blogId, {String? slug}) {
+    if (slug != null && slug.isNotEmpty) {
+      return '$baseUrl/blogs/$slug';
+    }
+    return '$baseUrl/blogs/$blogId';
+  }
+
+  /// Generate a shareable link for a case discussion.
+  static String generateCaseLink(int caseId) {
+    return '$baseUrl/discuss-case/$caseId';
+  }
+
+  /// Generate a shareable link for a group.
+  static String generateGroupLink(String groupSlugOrId) {
+    return '$baseUrl/groups/$groupSlugOrId';
   }
 
   /// Generate a shareable link for a call
@@ -569,6 +853,7 @@ class DeepLinkService {
     shareText += '\n\n$link';
 
     await Share.share(shareText, subject: title ?? 'DocTak Job Opportunity');
+    JobsNodeApiService.track(jobId, type: 'share');
   }
 
   /// Share a conference via system share sheet

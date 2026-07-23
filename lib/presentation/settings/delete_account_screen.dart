@@ -6,6 +6,7 @@ import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
+import 'package:doctak_app/widgets/one_ui_form_field.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,6 +28,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   bool _obscurePassword = true;
   AccountDeletionRequestStatus? _status;
   String? _error;
+
+  static const _pagePadding = EdgeInsets.fromLTRB(20, 16, 20, 32);
+  static const _cardPadding = EdgeInsets.fromLTRB(18, 18, 18, 18);
+  static const _sectionGap = SizedBox(height: 14);
 
   @override
   void initState() {
@@ -123,6 +128,31 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     return '${parsed.year}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}';
   }
 
+  Widget _sectionTitle(OneUITheme theme, String text, {double size = 16}) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: size,
+        fontWeight: FontWeight.w700,
+        color: theme.textPrimary,
+        height: 1.3,
+      ),
+    );
+  }
+
+  Widget _bodyText(OneUITheme theme, String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontFamily: 'Poppins',
+        fontSize: 14,
+        color: theme.textSecondary,
+        height: 1.5,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
@@ -137,67 +167,55 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       body: _loading
           ? Center(child: CircularProgressIndicator(color: theme.primary))
           : ListView(
-              padding: const EdgeInsets.all(16),
+              padding: _pagePadding,
               children: [
                 AppSurfaceCard(
                   margin: EdgeInsets.zero,
+                  padding: _cardPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Delete your DocTak account',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: theme.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
+                      _sectionTitle(theme, 'Delete your DocTak account', size: 18),
+                      const SizedBox(height: 10),
+                      _bodyText(
+                        theme,
                         'Your account will be deactivated immediately and permanently deleted after a 30-day grace period. Sign in before the scheduled date to cancel.',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          color: theme.textSecondary,
-                          height: 1.45,
-                        ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                _sectionGap,
                 AppSurfaceCard(
                   margin: EdgeInsets.zero,
+                  padding: _cardPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Data that will be deleted',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: theme.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
+                      _sectionTitle(theme, 'Data that will be deleted'),
+                      const SizedBox(height: 14),
                       ...AccountDeletionApiService.dataCategories.map(
                         (item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.only(bottom: 12),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.circle, size: 6, color: theme.textSecondary),
-                              const SizedBox(width: 10),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 7),
+                                child: Icon(
+                                  Icons.circle,
+                                  size: 6,
+                                  color: theme.textTertiary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   item,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
-                                    fontSize: 13,
+                                    fontSize: 13.5,
                                     color: theme.textSecondary,
-                                    height: 1.4,
+                                    height: 1.45,
                                   ),
                                 ),
                               ),
@@ -208,160 +226,161 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                _sectionGap,
                 if (_status?.hasPending == true)
                   AppSurfaceCard(
                     margin: EdgeInsets.zero,
+                    padding: _cardPadding,
                     borderColor: Colors.orange.withValues(alpha: 0.35),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Deletion scheduled',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: theme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
+                        _sectionTitle(theme, 'Deletion scheduled'),
+                        const SizedBox(height: 10),
+                        _bodyText(
+                          theme,
                           'Your account is scheduled for deletion on ${_formatDate(_status?.scheduledAt)}.',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            color: theme.textSecondary,
-                            height: 1.45,
-                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 18),
                         SizedBox(
                           width: double.infinity,
+                          height: 48,
                           child: OutlinedButton(
                             onPressed: _cancelling ? null : _cancelDeletion,
-                            child: Text(_cancelling ? 'Cancelling…' : 'Cancel deletion request'),
+                            child: Text(
+                              _cancelling ? 'Cancelling…' : 'Cancel deletion request',
+                            ),
                           ),
                         ),
                       ],
                     ),
                   )
-                else ...[
+                else
                   AppSurfaceCard(
                     margin: EdgeInsets.zero,
+                    padding: _cardPadding,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          t.lbl_delete_account_confirmation,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: theme.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          t.msg_delete_account_warning,
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 13,
-                            color: theme.textSecondary,
-                            height: 1.45,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
+                        _sectionTitle(theme, t.lbl_delete_account_confirmation),
+                        const SizedBox(height: 10),
+                        _bodyText(theme, t.msg_delete_account_warning),
+                        const SizedBox(height: 20),
+                        OneUIFormField(
+                          label: 'Reason (optional)',
+                          hintText: 'Tell us why you are leaving…',
                           controller: _reasonController,
-                          maxLines: 3,
+                          maxLines: 4,
+                          minLines: 3,
                           maxLength: 1000,
-                          decoration: InputDecoration(
-                            labelText: 'Reason (optional)',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.multiline,
                         ),
-                        const SizedBox(height: 12),
-                        TextField(
+                        const SizedBox(height: 16),
+                        OneUIFormField(
+                          label: 'Current password',
+                          hintText: 'Enter your password',
                           controller: _passwordController,
+                          required: true,
                           obscureText: _obscurePassword,
-                          decoration: InputDecoration(
-                            labelText: 'Current password',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.visiblePassword,
+                          suffixIcon: IconButton(
+                            tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined,
+                              color: theme.textSecondary,
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _confirmController,
-                          decoration: InputDecoration(
-                            labelText: 'Type DELETE to confirm',
-                            hintText: 'DELETE',
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            onPressed: () =>
+                                setState(() => _obscurePassword = !_obscurePassword),
                           ),
                         ),
                         const SizedBox(height: 16),
+                        OneUIFormField(
+                          label: 'Type DELETE to confirm',
+                          hintText: 'DELETE',
+                          controller: _confirmController,
+                          required: true,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) {
+                            if (!_submitting) _submitDeletion();
+                          },
+                        ),
+                        const SizedBox(height: 22),
                         SizedBox(
                           width: double.infinity,
+                          height: 50,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: theme.error,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                             onPressed: _submitting ? null : _submitDeletion,
                             child: Text(
                               _submitting ? 'Submitting…' : 'Schedule account deletion',
-                              style: const TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ],
-                const SizedBox(height: 12),
+                _sectionGap,
                 AppSurfaceCard(
                   margin: EdgeInsets.zero,
+                  padding: _cardPadding,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Web deletion page',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: theme.textPrimary,
-                        ),
+                      _sectionTitle(theme, 'Web deletion page'),
+                      const SizedBox(height: 10),
+                      _bodyText(
+                        theme,
+                        'You can also schedule deletion from the website if you prefer.',
                       ),
-                      const SizedBox(height: 8),
-                      Text(
+                      const SizedBox(height: 10),
+                      SelectableText(
                         AccountDeletionApiService.publicDeleteUrl,
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 13,
+                          fontSize: 13.5,
                           color: theme.primary,
+                          height: 1.4,
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      OutlinedButton.icon(
-                        onPressed: _openWebDeletionPage,
-                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                        label: const Text('Open in browser'),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: _openWebDeletionPage,
+                          icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                          label: const Text('Open in browser'),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 if (_error != null) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     _error!,
-                    style: const TextStyle(color: Colors.red, fontFamily: 'Poppins', fontSize: 13),
+                    style: TextStyle(
+                      color: theme.error,
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
                   ),
                 ],
               ],

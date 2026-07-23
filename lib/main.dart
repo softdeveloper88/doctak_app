@@ -1282,7 +1282,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/asset_guard.dart';
 import 'package:doctak_app/core/utils/auth_token_service.dart';
+import 'package:doctak_app/core/utils/session_manager.dart';
 import 'package:doctak_app/presentation/case_discussion/screens/discussion_list_screen.dart';
 import 'package:doctak_app/presentation/NoInternetScreen.dart';
 // Legacy calling_module disconnected — calling is handled solely by
@@ -1343,6 +1345,37 @@ import 'package:overlay_support/overlay_support.dart';
 import 'presentation/calling_module_v2/calling_module_v2.dart' show CallingModuleV2, CallControllerV2;
 // Removed path_provider import - using direct paths to avoid Pigeon channel issues in release mode
 
+/// Paths that can open the app via Universal Links / App Links.
+/// Keep in sync with `public/.well-known/apple-app-site-association`.
+bool _isUniversalLinkRoute(String routeName) {
+  if (routeName.isEmpty || routeName == '/') return false;
+  const prefixes = <String>[
+    '/post/',
+    '/posts/',
+    '/job/',
+    '/jobs/',
+    '/conference/',
+    '/conferences/',
+    '/meeting/',
+    '/meetings/',
+    '/join-meeting/',
+    '/call/',
+    '/calls/',
+    '/profile/',
+    '/u/',
+    '/b/',
+    '/groups/',
+    '/blogs/',
+    '/articles/',
+    '/discuss-case/',
+    '/cme/',
+  ];
+  for (final prefix in prefixes) {
+    if (routeName.startsWith(prefix)) return true;
+  }
+  return false;
+}
+
 /// Waits for native plugin channels to be ready.
 /// In release mode, there can be a race condition where Dart code starts
 /// executing before native plugin channels are fully established.
@@ -1366,7 +1399,10 @@ Future<void> _waitForPluginChannels() async {
 AppStore appStore = AppStore();
 var globalMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-bool _isNonFatalImageFailure(FlutterErrorDetails details) {
+/// Soft failures that must not be filed as Crashlytics FATALS.
+/// Includes network image/codec errors, missing SVG assets (handled by
+/// errorBuilder), layout overflows, and known framework debug asserts.
+bool _isNonFatalFlutterFailure(FlutterErrorDetails details) {
   final libraryName = details.library?.toLowerCase() ?? '';
   if (libraryName.contains('image') || libraryName.contains('painting')) {
     return true;
@@ -1382,12 +1418,22 @@ bool _isNonFatalImageFailure(FlutterErrorDetails details) {
   if (stack.contains('image.dart') ||
       stack.contains('image_stream.dart') ||
       stack.contains('multi_image_stream_completer.dart') ||
-      stack.contains('cached_network_image')) {
+      stack.contains('cached_network_image') ||
+      stack.contains('vector_graphics.dart') ||
+      stack.contains('flutter_svg')) {
     if (stack.contains('ImageStreamCompleter') ||
         stack.contains('MultiFrameImageStreamCompleter') ||
-        stack.contains('MultiImageStreamCompleter')) {
+        stack.contains('MultiImageStreamCompleter') ||
+        stack.contains('_VectorGraphicWidgetState') ||
+        stack.contains('SvgLoader') ||
+        stack.contains('PlatformAssetBundle.load')) {
       return true;
     }
+  }
+
+  // TabController dispose races show as null-checks inside material/tabs.dart.
+  if (_isTabControllerNullRace(stack)) {
+    return true;
   }
 
   final message = details.exceptionAsString().toLowerCase();
@@ -1398,7 +1444,21 @@ bool _isNonFatalImageFailure(FlutterErrorDetails details) {
       message.contains('image codec') ||
       message.contains('resolving an image codec') ||
       message.contains('connection closed before full header') ||
-      message.contains('clientexception');
+      message.contains('clientexception') ||
+      message.contains('unable to load asset') ||
+      message.contains('a renderflex overflowed') ||
+      message.contains('listtile background color or ink splashes') ||
+      message.contains('singletickerproviderstatemixin but multiple tickers') ||
+      message.contains('activity_not_found') ||
+      message.contains('no activity found to handle intent') ||
+      message.contains('could not find a generator for route');
+}
+
+bool _isTabControllerNullRace(String stack) {
+  return stack.contains('material/tabs.dart') &&
+      (stack.contains('_DragAnimation') ||
+          stack.contains('_TabBarViewState') ||
+          stack.contains('_IndicatorPainter'));
 }
 
 // Flag to indicate if we're handling a call at app startup
@@ -1711,16 +1771,24 @@ Future<void> main() async {
 
     baseUrl = await _getBaseUrlFromPrefs();
 
+    // Learn which assets exist in the installed release so patched code never
+    // requests SVGs that Shorebird couldn't ship ("Unable to load asset").
+    unawaited(AssetGuard.warmUp());
+
     // Set up Crashlytics ONLY if Firebase initialized successfully
     if (firebaseInitialized) {
       try {
         FlutterError.onError = (errorDetails) {
-          if (_isNonFatalImageFailure(errorDetails)) {
+          if (_isNonFatalFlutterFailure(errorDetails)) {
             if (kDebugMode) {
               debugPrint(
-                '🖼️ Image load error (non-fatal): ${errorDetails.exceptionAsString()}',
+                '⚠️ Non-fatal Flutter error: ${errorDetails.exceptionAsString()}',
               );
             }
+            // Still record for trends, but never as FATAL.
+            try {
+              FirebaseCrashlytics.instance.recordFlutterError(errorDetails);
+            } catch (_) {}
             return;
           }
 
@@ -1760,8 +1828,11 @@ Future<void> main() async {
               typeName.contains('ClientException') ||
               message.contains('image codec') ||
               message.contains('connection closed before full header') ||
+              message.contains('unable to load asset') ||
               stackText.contains('multi_image_stream_completer.dart') ||
               stackText.contains('cached_network_image') ||
+              stackText.contains('vector_graphics.dart') ||
+              stackText.contains('flutter_svg') ||
               (stackText.contains('image.dart') &&
                   stackText.contains('ImageStreamCompleter')) ||
               (stackText.contains('image_stream.dart') &&
@@ -1978,6 +2049,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       }
       // Refresh JWT before it expires so API calls don't fail with 401.
       AuthTokenService.instance.refreshIfExpiringSoon();
+      // If this device was signed out from Connected Devices, leave the feed.
+      SessionManager.validateActiveSession();
       // Re-register FCM in case token rotated or server registration was missed.
       NotificationService.syncDeviceToken();
       // Catch up on a call accepted in the FCM background isolate while the app
@@ -2219,21 +2292,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         );
                       }
 
-                      // Handle deep link paths from App Links / Universal Links
-                      // When flutter_deeplinking_enabled is true, the deep link URL
-                      // path (e.g. /post/123) overrides initialRoute. We must handle
-                      // these paths here, otherwise the app shows a route-not-found error.
+                      // Handle deep link paths from App Links / Universal Links.
+                      // When FlutterDeepLinkingEnabled is true, iOS sets the route to
+                      // the URL path (e.g. /discuss-case/123). Unhandled paths show a
+                      // blank "route not found" screen — treat as cold-start deep links.
                       final routeName = settings.name ?? '';
-                      if (routeName.startsWith('/post/') ||
-                          routeName.startsWith('/job/') ||
-                          routeName.startsWith('/conference/') ||
-                          routeName.startsWith('/meeting/') ||
-                          routeName.startsWith('/join-meeting/') ||
-                          routeName.startsWith('/profile/') ||
-                          routeName.startsWith('/posts/') ||
-                          routeName.startsWith('/jobs/')) {
-                        // Route to splash screen — it will pick up the deep link
-                        // via deepLinkService.getInitialLink() and navigate properly.
+                      if (_isUniversalLinkRoute(routeName)) {
                         return MaterialPageRoute(
                           settings: const RouteSettings(name: '/'),
                           builder: (context) => UnifiedSplashUpgradeScreen(),
@@ -2242,6 +2306,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
                       // Let other routes be handled by the routes map
                       return null;
+                    },
+
+                    onUnknownRoute: (settings) {
+                      debugPrint('⚠️ Unknown route: ${settings.name}');
+                      return MaterialPageRoute(
+                        settings: const RouteSettings(name: '/'),
+                        builder: (context) => UnifiedSplashUpgradeScreen(),
+                      );
                     },
 
                     routes: {

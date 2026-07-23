@@ -52,6 +52,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   /// conversationId -> expiry timestamp (ms) for chat-list typing preview.
   final Map<int, int> typingExpiryByConversationId = {};
 
+  /// Negative ids for optimistic (pending) outbound messages.
+  int _pendingMessageId = 0;
+
   // Legacy compatibility fields
   int pageNumber = 1;
   int numberOfPage = 1;
@@ -139,7 +142,25 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         limit: 50,
       );
       // Reverse so newest message is at index 0 (for reverse:true ListView)
-      conversationMessages = (response.messages ?? []).reversed.toList();
+      final fetched = (response.messages ?? []).reversed.toList();
+      if (event.isFirstLoading || conversationMessages.isEmpty) {
+        conversationMessages = fetched;
+      } else {
+        // Refresh (60s fallback timer): merge instead of replacing the list.
+        // A blind replace drops messages that were sent/received via WebSocket
+        // while this fetch was in flight, making them flicker (appear → hide).
+        final fetchedIds =
+            fetched.map((m) => m.id).whereType<int>().toSet();
+        final newestFetchedId =
+            fetched.isNotEmpty ? (fetched.first.id ?? 0) : 0;
+        final localNewer = conversationMessages
+            .where((m) =>
+                m.id != null &&
+                m.id! > newestFetchedId &&
+                !fetchedIds.contains(m.id))
+            .toList();
+        conversationMessages = [...localNewer, ...fetched];
+      }
       hasMoreMessages = response.hasMore ?? false;
 
       // Auto-mark as read using the latest message id
@@ -191,8 +212,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     SendConversationMessageEvent event,
     Emitter<ChatState> emit,
   ) async {
+    int? pendingId;
     try {
-      // Check moderation
+      // Check moderation before showing the optimistic bubble.
       if (event.receiverId != null && event.receiverId!.isNotEmpty) {
         final canComm = await ModerationApiService().canCommunicate(
           targetUserId: event.receiverId!,
@@ -203,52 +225,103 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         }
       }
 
+      pendingId = _insertPendingMessage(event);
+      emit(PaginationLoadedState());
+
       ConversationMessage sentMessage;
 
       if (event.attachmentType == 'voice' && event.filePath != null && event.filePath!.isNotEmpty) {
-        // Voice message
-        emit(FileUploadingState());
         sentMessage = await _chatApi.sendVoiceMessage(
           conversationId: event.conversationId,
           audioPath: event.filePath!,
         );
-        emit(FileUploadedState());
       } else if (event.filePath != null && event.filePath!.isNotEmpty) {
-        // File attachment
         final file = File(event.filePath!);
         if (await file.exists()) {
-          emit(FileUploadingState());
           sentMessage = await _chatApi.sendFileMessage(
             conversationId: event.conversationId,
             filePath: event.filePath!,
             caption: event.message,
           );
-          emit(FileUploadedState());
         } else {
-          // File doesn't exist, send as text
           sentMessage = await _chatApi.sendTextMessage(
             conversationId: event.conversationId,
             body: event.message ?? 'File not found',
           );
         }
       } else {
-        // Text message
-        emit(FileUploadingState());
         sentMessage = await _chatApi.sendTextMessage(
           conversationId: event.conversationId,
           body: event.message ?? '',
         );
-        emit(FileUploadedState());
       }
 
-      // Insert at the beginning (newest first)
-      conversationMessages.insert(0, sentMessage);
+      _finalizePendingMessage(pendingId, sentMessage);
       emit(PaginationLoadedState());
     } catch (e) {
       debugPrint('Error sending message: $e');
-      emit(FileUploadedState());
-      emit(PaginationLoadedState());
+      if (pendingId != null) {
+        _removePendingMessage(pendingId);
+        emit(PaginationLoadedState());
+      }
+      showToast('Failed to send message');
     }
+  }
+
+  int _insertPendingMessage(SendConversationMessageEvent event) {
+    final pendingId = --_pendingMessageId;
+    final now = DateTime.now().toUtc().toIso8601String();
+    final isVoice = event.attachmentType == 'voice' &&
+        event.filePath != null &&
+        event.filePath!.isNotEmpty;
+    final hasFile = event.filePath != null && event.filePath!.isNotEmpty;
+
+    conversationMessages.insert(
+      0,
+      ConversationMessage(
+        id: pendingId,
+        conversationId: event.conversationId,
+        senderId: AppData.logInUserId,
+        type: isVoice ? 'voice' : (hasFile ? 'file' : 'text'),
+        body: event.message ?? '',
+        content: event.message ?? '',
+        receiptState: 'pending',
+        createdAt: now,
+        fileUrl: hasFile && !isVoice ? event.filePath : null,
+      ),
+    );
+    return pendingId;
+  }
+
+  void _finalizePendingMessage(int pendingId, ConversationMessage serverMsg) {
+    _removePendingMessage(pendingId);
+    final normalized = serverMsg.receiptState == null ||
+            serverMsg.receiptState == 'pending'
+        ? serverMsg.copyWith(receiptState: 'sent')
+        : serverMsg;
+    _upsertConversationMessage(normalized);
+  }
+
+  void _removePendingMessage(int pendingId) {
+    conversationMessages.removeWhere((m) => m.id == pendingId);
+  }
+
+  void _removeAllPendingMessages() {
+    conversationMessages.removeWhere((m) => (m.id ?? 0) < 0);
+  }
+
+  /// Insert [msg] at the top, or replace the existing entry with the same id.
+  /// This is the single guard against duplicate bubbles when the same message
+  /// arrives from multiple sources (REST send response + WS echo + poll).
+  void _upsertConversationMessage(ConversationMessage msg) {
+    if (msg.id != null) {
+      final idx = conversationMessages.indexWhere((m) => m.id == msg.id);
+      if (idx != -1) {
+        conversationMessages[idx] = msg;
+        return;
+      }
+    }
+    conversationMessages.insert(0, msg);
   }
 
   Future<void> _onDeleteConversationMessage(
@@ -303,10 +376,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ) async {
     // Add to messages list if we're in the same conversation
     if (currentConversationId == event.message.conversationId) {
-      // Avoid duplicates
-      if (!conversationMessages.any((m) => m.id == event.message.id)) {
-        conversationMessages.insert(0, event.message);
-      }
+      _upsertConversationMessage(event.message);
     }
     emit(PaginationLoadedState());
   }
@@ -485,11 +555,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         (msgConvId == null && currentConversationId != null);
 
     if (belongsHere) {
+      if (!isIncoming) {
+        _removeAllPendingMessages();
+      }
+
       final idx = conversationMessages.indexWhere((m) => m.id == event.message.id);
       if (idx != -1) {
         conversationMessages[idx] = _mergeIncomingMessage(conversationMessages[idx], event.message);
       } else {
-        conversationMessages.insert(0, event.message);
+        _upsertConversationMessage(event.message);
       }
       // User is viewing this conversation — mark as read (covers delivered too)
       final effectiveConvId = msgConvId ?? currentConversationId;
@@ -780,8 +854,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // Update currentConversationId if not set
       currentConversationId ??= convId;
 
-      // Insert into conversation messages
-      conversationMessages.insert(0, sentMessage);
+      // Upsert (dedup) — same guard as the primary send path.
+      _upsertConversationMessage(sentMessage);
       emit(PaginationLoadedState());
     } catch (e) {
       debugPrint('Error sending message: $e');

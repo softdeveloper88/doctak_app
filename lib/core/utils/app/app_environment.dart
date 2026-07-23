@@ -66,6 +66,9 @@ class AppEnvironment {
   static String get _devChatApiUrl => 'http://$_localIp:$_localPort/api/chat';
   static String get _devImageUrl => 'http://$_localIp:$_localPort/r2-media/';
 
+  /// Canonical public website origin for share links (always production).
+  static const String publicWebUrl = _prodHost;
+
   // ===================== Active URLs =====================
   static String get base => isProduction ? _prodBase : _devBase;
   static String get base2 => isProduction ? _prodBase2 : _devBase2;

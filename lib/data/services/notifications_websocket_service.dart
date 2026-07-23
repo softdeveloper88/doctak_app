@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io' as io;
+import 'dart:typed_data';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
 
@@ -65,6 +66,24 @@ class FeedPostArrived extends NotificationWsEvent {
     this.authorAvatar,
     required this.preview,
   });
+}
+
+class FeedPostUpdated extends NotificationWsEvent {
+  final String postId;
+  final String? body;
+  final String? title;
+  final String? preview;
+  FeedPostUpdated({
+    required this.postId,
+    this.body,
+    this.title,
+    this.preview,
+  });
+}
+
+class FeedPostDeleted extends NotificationWsEvent {
+  final String postId;
+  FeedPostDeleted(this.postId);
 }
 
 class NotificationWsPong extends NotificationWsEvent {}
@@ -243,9 +262,19 @@ class NotificationsWebSocketService {
   }
 
   void _onWsMessage(dynamic raw) {
-    if (raw is! String) return;
+    String? text;
+    if (raw is String) {
+      text = raw;
+    } else if (raw is Uint8List) {
+      text = utf8.decode(raw);
+    } else if (raw is List<int>) {
+      text = utf8.decode(raw);
+    }
+    if (text == null || text.isEmpty) return;
     try {
-      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final decoded = jsonDecode(text);
+      if (decoded is! Map) return;
+      final json = Map<String, dynamic>.from(decoded);
       _dispatchEvent(json);
     } catch (_) {}
   }
@@ -329,6 +358,25 @@ class NotificationsWebSocketService {
               preview: (map['preview'] ?? 'shared a new post').toString(),
             ));
           }
+        }
+      case 'feed.post.updated':
+        final post = json['post'];
+        if (post is Map) {
+          final map = Map<String, dynamic>.from(post);
+          final postId = (map['id'] ?? '').toString();
+          if (postId.isNotEmpty) {
+            _controller.add(FeedPostUpdated(
+              postId: postId,
+              body: map['body']?.toString(),
+              title: map['title']?.toString(),
+              preview: map['preview']?.toString(),
+            ));
+          }
+        }
+      case 'feed.post.deleted':
+        final postId = (json['postId'] ?? '').toString();
+        if (postId.isNotEmpty) {
+          _controller.add(FeedPostDeleted(postId));
         }
       case 'meeting.ended':
         _controller.add(MeetingEnded(

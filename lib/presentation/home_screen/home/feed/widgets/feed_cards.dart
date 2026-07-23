@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_post_display.dart';
@@ -138,7 +139,15 @@ bool _isFeedItemOwner(FeedItem item) {
   final authorId = item.authorId ?? item.str('authorId');
   if (authorId != null && authorId == myId) return true;
   final ownerUserId = item.str('ownerUserId');
-  return ownerUserId != null && ownerUserId == myId;
+  if (ownerUserId != null && ownerUserId == myId) return true;
+  // Acting as the business page that published this post — treat as owner
+  // (mirrors web FeedCardShell's isOrganizationOwner check).
+  final orgId = item.str('organizationId');
+  final actingOrgId = ActingContextService.instance.organization?.id;
+  return orgId != null &&
+      orgId.isNotEmpty &&
+      actingOrgId != null &&
+      orgId == actingOrgId;
 }
 
 class _FeedMediaEntry {
@@ -683,6 +692,10 @@ class FeedPostCardOptions {
   final int? postIdForComments;
   final HomeBloc? homeBloc;
 
+  /// Show owner actions (edit/delete) even when the viewer is not the post's
+  /// author — used by org owners/admins managing their business page.
+  final bool treatAsOwner;
+
   const FeedPostCardOptions({
     this.onDelete,
     this.onEdit,
@@ -695,6 +708,7 @@ class FeedPostCardOptions {
     this.onUserBlocked,
     this.postIdForComments,
     this.homeBloc,
+    this.treatAsOwner = false,
   });
 }
 
@@ -1203,7 +1217,8 @@ class _FeedPostCardState extends State<FeedPostCard> {
         ? (isArticle ? 'Article' : _groupPostTypeBadge(item))
         : _postTypeBadge(item);
     final authorId = item.authorId ?? item.str('authorId');
-    final isOwner = _isFeedItemOwner(item);
+    final isOwner =
+        widget.options?.treatAsOwner == true || _isFeedItemOwner(item);
     final visibility = _formatVisibility(item.str('privacy'));
     final groupPosterName =
         item.str('posterName') ?? item.str('authorName') ?? 'Member';
@@ -1234,6 +1249,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
               createdAt: item.createdAt,
               posterVerified:
                   item.flag('posterVerified') || item.flag('authorVerified'),
+              posterPremium: item.flag('authorPremium') || item.flag('posterPremium'),
               trailingBadge: badge,
               onGroupTap: () => _openFeedGroup(context, item),
               onPosterTap: () => _openFeedGroupPosterProfile(context, item),
@@ -1245,6 +1261,7 @@ class _FeedPostCardState extends State<FeedPostCard> {
               subtitle: _authorSubtitle(item),
               createdAt: item.createdAt,
               verified: item.flag('authorVerified'),
+              isPremium: item.flag('authorPremium') || item.flag('posterPremium'),
               trailingBadge: badge,
               visibility: visibility,
               onTap: _openProfile,
@@ -1593,9 +1610,10 @@ class _FeedBlogCardState extends State<FeedBlogCard> {
 
   void _share() {
     final slug = widget.item.str('slug');
-    final url = slug != null
-        ? 'https://doctak.net/blogs/$slug'
-        : 'https://doctak.net/blogs/${widget.item.id}';
+    final url = DeepLinkService.generateBlogLink(
+      widget.item.id,
+      slug: slug,
+    );
     SharePlus.instance.share(
       ShareParams(
         text: url,
@@ -1683,6 +1701,7 @@ class _FeedBlogCardState extends State<FeedBlogCard> {
             subtitle: _authorSubtitle(item),
             createdAt: item.createdAt,
             verified: item.flag('authorVerified'),
+            isPremium: item.flag('authorPremium') || item.flag('posterPremium'),
             trailingBadge: 'Article',
             onTap: () => _openFeedAuthorProfile(context, item),
             isCurrentUser: isOwner,
@@ -1736,7 +1755,17 @@ class _FeedBlogCardState extends State<FeedBlogCard> {
 // ─── Case ──────────────────────────────────────────────────────────────
 
 bool _caseIsLiked(FeedItem item) {
+  final vote = item.payload['user_vote'] ?? item.payload['userVote'];
+  if (vote == 'up') return true;
+  if (vote == 'down') return false;
   final v = item.payload['is_liked'] ?? item.payload['isLiked'];
+  return v == true || v == 1;
+}
+
+bool _caseIsDisliked(FeedItem item) {
+  final vote = item.payload['user_vote'] ?? item.payload['userVote'];
+  if (vote == 'down') return true;
+  final v = item.payload['is_disliked'] ?? item.payload['isDisliked'];
   return v == true || v == 1;
 }
 
@@ -1832,7 +1861,7 @@ class _FeedCaseCardState extends State<FeedCaseCard> {
     final title = widget.item.str('title') ?? 'Case discussion';
     SharePlus.instance.share(
       ShareParams(
-        text: 'https://doctak.net/discuss-case/$id',
+        text: DeepLinkService.generateCaseLink(id),
         title: title,
       ),
     );
@@ -1870,6 +1899,7 @@ class _FeedCaseCardState extends State<FeedCaseCard> {
             subtitle: _authorSubtitle(item),
             createdAt: item.createdAt,
             verified: item.flag('authorVerified'),
+            isPremium: item.flag('authorPremium') || item.flag('posterPremium'),
             trailingBadge: 'Case',
             onTap: () => _openFeedAuthorProfile(context, item),
           ),
@@ -1993,6 +2023,16 @@ class FeedJobCard extends StatelessWidget {
     final location = item.str('location');
     final salary = item.str('salaryRange');
     final image = item.str('image');
+    final jobTypeRaw = item.str('jobType') ?? item.str('job_type');
+    final jobTypeLabel = switch ((jobTypeRaw ?? '').toLowerCase()) {
+      'full_time' || 'full-time' => 'Full-time',
+      'part_time' || 'part-time' => 'Part-time',
+      'contract' => 'Contract',
+      'locum' => 'Locum',
+      'internship' => 'Internship',
+      '' => null,
+      _ => jobTypeRaw,
+    };
 
     void open() => JobsDetailsScreen(jobId: item.id).launch(context);
 
@@ -2012,7 +2052,9 @@ class FeedJobCard extends StatelessWidget {
           Text(jobTitle, style: theme.titleSmall.copyWith(fontSize: 16)),
           const SizedBox(height: 4),
           Text(
-            [company, location, 'Full-time'].where((e) => e != null && e.isNotEmpty).join(' · '),
+            [company, location, jobTypeLabel]
+                .where((e) => e != null && e.isNotEmpty)
+                .join(' · '),
             style: theme.bodySecondary,
           ),
           const SizedBox(height: 10),
@@ -2106,6 +2148,7 @@ class _FeedCmeCardState extends State<FeedCmeCard> {
             subtitle: item.str('providerTagline') ?? 'ACCME-accredited provider',
             createdAt: item.createdAt,
             verified: item.flag('organizationVerified'),
+            isPremium: false,
             trailingBadge: 'CME',
             onTap: () => _openFeedAuthorProfile(context, item),
           ),
@@ -2421,6 +2464,7 @@ class _FeedGroupPostCardState extends State<FeedGroupPostCard> {
             posterAvatarUrl: item.str('authorAvatar'),
             createdAt: item.createdAt,
             posterVerified: item.flag('posterVerified'),
+            posterPremium: item.flag('authorPremium') || item.flag('posterPremium'),
             trailingBadge: typeBadge,
             onGroupTap: () => _openFeedGroup(context, item),
             onPosterTap: () => _openFeedGroupPosterProfile(context, item),

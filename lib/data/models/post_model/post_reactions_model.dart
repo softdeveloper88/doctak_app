@@ -85,6 +85,7 @@ class PostReactionUser {
   final String? specialty;
   final String? location;
   final bool isVerified;
+  final bool isPremium;
   final bool isFollowing;
 
   const PostReactionUser({
@@ -95,6 +96,7 @@ class PostReactionUser {
     this.specialty,
     this.location,
     this.isVerified = false,
+    this.isPremium = false,
     this.isFollowing = false,
   });
 
@@ -124,6 +126,8 @@ class PostReactionUser {
       location: location.isEmpty ? null : location,
       isVerified: (u['is_verified'] ?? json['is_verified']) == true ||
           (u['is_verified'] ?? json['is_verified']) == 1,
+      isPremium: (u['is_premium'] ?? json['is_premium']) == true ||
+          (u['is_premium'] ?? json['is_premium']) == 1,
       isFollowing: (u['is_following'] ?? json['is_following']) == true ||
           (u['is_following'] ?? json['is_following']) == 1,
     );

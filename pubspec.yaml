@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 4.0.2+126
+version: 4.0.5+132
 
 environment:
   sdk: '>=3.10.0 <4.0.0'
@@ -117,6 +117,7 @@ dependencies:
   build_runner: ^2.4.8
   flutter_markdown: ^0.7.3
   share_plus: ^12.0.1
+  open_filex: ^4.7.0
   clear_all_notifications: ^1.0.0
   device_info_plus: ^12.2.0
   file_picker: ^10.3.2
@@ -137,7 +138,9 @@ dependencies:
   uuid: ^4.0.0
   wakelock_plus: ^1.2.11
   # PIP package for picture-in-picture (using pip package, fl_pip removed due to iOS crashes)
-  pip: ^0.0.3
+  # 0.0.4 fixes the FATAL PipController.dispose / onDetachedFromEngine crash
+  # (Crashlytics 2a4e8a3efde4846c) — native fix, needs a new store release.
+  pip: ^0.0.4
   get_it: ^9.1.0
   # pretty_dio_logger: ^1.4.0  # Not used in codebase - use logger package instead
   flutter_staggered_animations: ^1.1.1
@@ -146,6 +149,7 @@ dependencies:
   bloc_concurrency: ^0.3.0
   stream_transform: ^2.1.1
   qr_flutter: ^4.1.0
+  share_handler: ^0.0.25
 
 dependency_overrides:
   # Flutter 3.44+ marks IconData as final; v11+ is required.
@@ -169,10 +173,15 @@ dev_dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 flutter_launcher_icons:
-   android: "launcher_icon"
-   ios: true
-   image_path: "assets/icon/icon.png"
-   min_sdk_android: 21
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/app_launcher_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logo/logo.png"
+  adaptive_icon_foreground_inset: 18
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"
+  min_sdk_android: 21
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -189,6 +198,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/avatars/
     - assets/icon/
     - assets/icon/feed/ic_menu.svg
     - assets/icon/feed/ic_search.svg
@@ -230,13 +240,10 @@ flutter:
     - assets/icon/drawer/ic_star.svg
     - assets/icon/drawer/ic_suggestions.svg
     - assets/icon/drawer/ic_verified.svg
-    - assets/ai/
     - assets/logo/
     - assets/animations/doctak_logo.json
-    - images/socialv/faces/
-    - images/socialv/
-    - images/socialv/icons/
-#    - images/socialv/gifs/
+    - assets/images/socialv/faces/
+    - assets/images/socialv/icons/
     - shorebird.yaml
   fonts:
     - family: Raleway

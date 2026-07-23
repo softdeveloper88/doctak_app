@@ -149,6 +149,31 @@ class FeedItem {
         'promoted': promoted,
         'payload': payload,
       };
+
+  FeedItem patchPayload(Map<String, String?> patch) {
+    if (patch.isEmpty) return this;
+    final next = Map<String, dynamic>.from(payload);
+    patch.forEach((key, value) {
+      if (value != null) next[key] = value;
+    });
+    return FeedItem(
+      type: type,
+      id: id,
+      payload: next,
+      createdAt: createdAt,
+      authorId: authorId,
+      specialtyId: specialtyId,
+      engagement: engagement,
+      promoted: promoted,
+    );
+  }
+
+  bool referencesPostId(String postId) {
+    if (id == postId) return true;
+    if (id.startsWith('repost_${postId}_')) return true;
+    final payloadPostId = str('postId');
+    return payloadPostId == postId;
+  }
 }
 
 /// Whether the viewer is registered for a CME item in the home feed payload.

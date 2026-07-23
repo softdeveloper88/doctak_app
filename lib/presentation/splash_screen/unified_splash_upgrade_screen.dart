@@ -4,6 +4,7 @@ import 'dart:io';
 
 // TODO: app_links temporarily disabled due to SDK compatibility
 // import 'package:app_links/app_links.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/notification_navigation.dart';
@@ -11,7 +12,9 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/core/utils/app/app_shared_preferences.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
+import 'package:doctak_app/core/utils/incoming_share_service.dart';
 import 'package:doctak_app/core/utils/session_manager.dart';
+import 'package:doctak_app/presentation/age_assurance/age_assurance_screen.dart';
 import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/language_selection_screen/language_selection_screen.dart';
@@ -30,8 +33,6 @@ import 'package:sizer/sizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum ScreenState { loading, upgrade, splash }
-
-ScreenState _currentState = ScreenState.splash;
 
 class UnifiedSplashUpgradeScreen extends StatefulWidget {
   const UnifiedSplashUpgradeScreen({super.key});
@@ -78,12 +79,14 @@ class LightBeamPainter extends CustomPainter {
 
 class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     with SingleTickerProviderStateMixin {
-  // Screen state management
+  ScreenState _currentState = ScreenState.loading;
 
   // Version information
-  final String _versionNumber = '';
+  String _versionNumber = '';
   String _latestVersionString = '';
   String _currentVersionString = '';
+  String _upgradeMessage = '';
+  String? _updateUrl;
   bool? _isSkippible;
   PackageInfo? _packageInfo;
 
@@ -128,17 +131,21 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
   // Initialize package info
   Future<void> _initializePackageInfo() async {
-    // try {
-    //   _packageInfo = await PackageInfo.fromPlatform();
-    //   if (mounted) {
-    //     setState(() {
-    //       _versionNumber = _packageInfo!.version;
-    //       _currentVersionString = _packageInfo!.version;
-    //     });
-    //   }
-    // } catch (e) {
-    //   debugPrint('Error getting version info: $e');
-    // }
+    try {
+      _packageInfo = await PackageInfo.fromPlatform();
+      if (mounted) {
+        setState(() {
+          _versionNumber = _packageInfo!.version;
+          _currentVersionString = _packageInfo!.version;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error getting version info: $e');
+    }
+  }
+
+  bool _isMandatoryValue(dynamic value) {
+    return value == true || value == 1 || value == '1';
   }
 
   // Check if app needs updating
@@ -149,17 +156,25 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       final latestVersionInfo = await _fetchLatestVersion();
       var latestVersion;
       String? latestVersionLocal;
-      var mandatory;
+      var mandatory = false;
+      String upgradeMessage = '';
+      String? updateUrl;
 
-      if (latestVersionInfo.isNotEmpty) {
-        latestVersion = latestVersionInfo['data']['version'];
-        await prefs.setString('latest_version', latestVersion);
+      if (latestVersionInfo.isNotEmpty && latestVersionInfo['data'] != null) {
+        final data = latestVersionInfo['data'] as Map<String, dynamic>;
+        latestVersion = data['version'];
+        await prefs.setString('latest_version', '$latestVersion');
         latestVersionLocal = await prefs.getString('latest_version');
-        mandatory = latestVersionInfo['data']['mandatory'];
+        mandatory = _isMandatoryValue(data['mandatory']);
+        upgradeMessage = (data['message'] as String?)?.trim() ?? '';
+        updateUrl = (data['update_url'] as String?)?.trim();
+        if (updateUrl != null && updateUrl.isEmpty) updateUrl = null;
         if (mounted) {
           setState(() {
             _latestVersionString = latestVersionLocal ?? '';
             _currentVersionString = _packageInfo!.version;
+            _upgradeMessage = upgradeMessage;
+            _updateUrl = updateUrl;
           });
         }
       } else {
@@ -176,14 +191,14 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         Version version1 = Version.parse(_packageInfo!.version);
         Version version2 = Version.parse(latestVersionLocal ?? '1.0.1');
 
-        if (version1 < version2 && mandatory == 1) {
+        if (version1 < version2 && mandatory) {
           if (mounted) {
             setState(() {
               _isSkippible = false;
               _currentState = ScreenState.upgrade;
             });
           }
-        } else if (version1 < version2 && mandatory == 0) {
+        } else if (version1 < version2 && !mandatory) {
           if (mounted) {
             setState(() {
               _isSkippible = true;
@@ -358,6 +373,8 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       AppData.currency = await prefs.getString('currency') ?? '';
       // Re-register FCM after restoring a remembered session (non-blocking).
       unawaited(NotificationService.syncDeviceToken());
+      // Restore personal ↔ business workspace before opening the home shell.
+      await ActingContextService.instance.initialize();
     }
 
     await _ensureMinSplashElapsed();
@@ -399,12 +416,22 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
         return;
       }
 
-      // No deep link, navigate to dashboard
-      const SVDashboardScreen().launch(context, isNewTask: true);
+      // No deep link, navigate to dashboard (age assurance first if needed)
+      await openAfterAgeAssurance(
+        context,
+        destination: const SVDashboardScreen(),
+      );
       await Future.delayed(const Duration(milliseconds: 350));
       if (mounted) {
         await NotificationNavigation.consumePendingTap();
       }
+
+      // Receive OS share intents (Chrome / WhatsApp → compose)
+      unawaited(
+        IncomingShareService.instance.start().then(
+          (_) => IncomingShareService.instance.consumePending(),
+        ),
+      );
 
       // Start listening for future deep links
       deepLinkService.listenForLinks((uri) {
@@ -416,22 +443,29 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       debugPrint('Error initializing deep links: $e');
       // Always ensure we navigate somewhere on error
       if (mounted) {
-        const SVDashboardScreen().launch(context, isNewTask: true);
+        await openAfterAgeAssurance(
+          context,
+          destination: const SVDashboardScreen(),
+        );
       }
     }
   }
 
   // Launch app store for update
-  void _launchAppOrPlayStore() {
-    AppSharedPreferences().clearSharedPreferencesData(context);
+  Future<void> _launchAppOrPlayStore() async {
+    await AppSharedPreferences().clearSharedPreferencesData(context);
 
     final appId = Platform.isAndroid ? _packageInfo!.packageName : '6448684340';
-    final url = Uri.parse(
-      Platform.isAndroid
-          ? "market://details?id=$appId"
-          : "https://apps.apple.com/app/id$appId",
-    );
-    launchUrl(url, mode: LaunchMode.externalApplication);
+    final fallbackUrl = Platform.isAndroid
+        ? 'https://play.google.com/store/apps/details?id=$appId'
+        : 'https://apps.apple.com/app/id$appId';
+    final target = (_updateUrl != null && _updateUrl!.isNotEmpty)
+        ? _updateUrl!
+        : fallbackUrl;
+    final url = Uri.tryParse(target);
+    if (url == null) return;
+
+    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   @override
@@ -663,6 +697,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   // MARK: - Upgrade Screen
   Widget _buildUpgradeScreen() {
     final theme = OneUITheme.of(context);
+    final maxWidth = MediaQuery.of(context).size.width - 48;
 
     return Container(
       key: const ValueKey<String>('upgradeScreen'),
@@ -680,173 +715,76 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Spacer(),
-              // App Logo
-              Hero(
-                tag: 'app_logo',
-                child: Image.asset(
-                  'assets/logo/logo.png',
-                  width: MediaQuery.of(context).size.width * 0.4,
-                ),
-              ).animate().fadeIn(duration: 800.ms),
-              const SizedBox(height: 40),
-              // Update Illustration
-              _buildUpdateAnimation(),
-              const SizedBox(height: 32),
-              // Update Title
-              Text(
-                'New Version Available',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: theme.primary,
-                ),
-                textAlign: TextAlign.center,
-              ).animate().fadeIn(duration: 800.ms),
-              const SizedBox(height: 16),
-              // Update Message
-              Text(
-                _isSkippible ?? false
-                    ? 'A new version of DocTak is available with exciting new features and improvements!'
-                    : 'Please update to the latest version of the app to continue using all features.',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  color: theme.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ).animate().fadeIn(duration: 800.ms),
-              const SizedBox(height: 32),
-              // Current and New Version Display
-              _buildVersionInfoRow(),
-              const SizedBox(height: 40),
-              // Features list
-              _buildFeaturesList(),
-
-              const SizedBox(height: 30),
-
-              // Update Button
-              Container(
-                width: double.infinity,
-                height: 54,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withValues(alpha: 0.7),
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(
-                        context,
-                      ).primaryColor.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Stack(
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
                   alignment: Alignment.center,
-                  children: [
-                    // Shimmer effect
-                    if (_isSkippible == false)
-                      Positioned.fill(child: _buildShimmerEffect()),
-
-                    // Button
-                    ElevatedButton(
-                      onPressed: _launchAppOrPlayStore,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _isSkippible ?? false
-                                ? 'Update Now'
-                                : 'Update Required',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: theme.buttonPrimaryText,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            _isSkippible ?? false
-                                ? Icons.file_download_outlined
-                                : Icons.priority_high_rounded,
-                            color: theme.buttonPrimaryText,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ).animate().fadeIn(duration: 800.ms),
-
-              // Skip Button (if update is optional)
-              if (_isSkippible ?? false)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentState = ScreenState.splash;
-                      });
-                      _initializeSplashScreen();
-                    },
-                    child: Row(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        _buildUpdateAnimation(size: 140),
+                        const SizedBox(height: 12),
                         Text(
-                          'Skip for now',
+                          'New Version Available',
                           style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context).primaryColor,
+                            fontFamily: 'Poppins',
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primary,
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 12,
-                          color: Theme.of(context).primaryColor,
-                        ),
+                          textAlign: TextAlign.center,
+                        ).animate().fadeIn(duration: 800.ms),
+                        const SizedBox(height: 8),
+                        Text(
+                          _upgradeMessage.isNotEmpty
+                              ? _upgradeMessage
+                              : (_isSkippible ?? false
+                                  ? 'A new version of DocTak is available with exciting new features and improvements!'
+                                  : 'Please update to the latest version of the app to continue using all features.'),
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            color: theme.textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ).animate().fadeIn(duration: 800.ms),
+                        const SizedBox(height: 12),
+                        _buildVersionInfoRow(compact: true),
+                        const SizedBox(height: 12),
+                        _buildFeaturesList(compact: true),
+                        const SizedBox(height: 16),
+                        _buildUpgradeButton(theme),
+                        if (_isSkippible ?? false) ...[
+                          const SizedBox(height: 8),
+                          _buildSkipButton(),
+                        ],
                       ],
                     ),
                   ),
-                ).animate().fadeIn(duration: 800.ms),
-              const Spacer(),
-
-              // Powered by DocTak.net
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.verified_rounded,
-                    size: 16,
+                    size: 14,
                     color: theme.primary.withValues(alpha: 0.7),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Text(
                     "Powered by DocTak.net",
                     style: TextStyle(
                       color: theme.textSecondary,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Poppins',
                       letterSpacing: 0.5,
@@ -854,13 +792,108 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                   ),
                 ],
               ).animate().fadeIn(delay: 600.ms, duration: 800.ms),
-
-              const SizedBox(height: 16),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildUpgradeButton(OneUITheme theme) {
+    return Container(
+      width: double.infinity,
+      height: 48,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).primaryColor.withValues(alpha: 0.7),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (_isSkippible == false)
+            Positioned.fill(child: _buildShimmerEffect()),
+          ElevatedButton(
+            onPressed: _launchAppOrPlayStore,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _isSkippible ?? false ? 'Update Now' : 'Update Required',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: theme.buttonPrimaryText,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  _isSkippible ?? false
+                      ? Icons.file_download_outlined
+                      : Icons.priority_high_rounded,
+                  color: theme.buttonPrimaryText,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 800.ms);
+  }
+
+  Widget _buildSkipButton() {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _currentState = ScreenState.splash;
+        });
+        _initializeSplashScreen();
+      },
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Skip for now',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 12,
+            color: Theme.of(context).primaryColor,
+          ),
+        ],
+      ),
+    ).animate().fadeIn(duration: 800.ms);
   }
 
   // MARK: - Shared UI Components
@@ -1017,19 +1050,23 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   // MARK: - Upgrade Screen Components
 
   // Update animation illustration
-  Widget _buildUpdateAnimation() {
+  Widget _buildUpdateAnimation({double size = 220}) {
     final theme = OneUITheme.of(context);
+    final middleSize = size * 180 / 220;
+    final centerSize = size * 110 / 220;
+    final iconSize = size * 50 / 220;
+
     return Container(
-      height: 220,
-      width: 220,
+      height: size,
+      width: size,
       alignment: Alignment.center,
       child: Stack(
         alignment: Alignment.center,
         children: [
           // Outer circle (pulsing effect)
           Container(
-                width: 220,
-                height: 220,
+                width: size,
+                height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
@@ -1058,8 +1095,8 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
           // Middle circle
           Container(
-            width: 180,
-            height: 180,
+            width: middleSize,
+            height: middleSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: theme.cardBackground,
@@ -1074,12 +1111,12 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
           ).animate().fadeIn(duration: 800.ms),
 
           // Update animation effects
-          _buildUpdateEffects(),
+          _buildUpdateEffects(size: size),
 
           // Center icon
           Container(
-                width: 110,
-                height: 110,
+                width: centerSize,
+                height: centerSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -1103,7 +1140,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                     _isSkippible ?? false
                         ? Icons.rocket_launch_rounded
                         : Icons.system_update_rounded,
-                    size: 50,
+                    size: iconSize,
                     color: theme.buttonPrimaryText,
                   ),
                 ),
@@ -1121,14 +1158,15 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   }
 
   // Update effects (floating elements)
-  Widget _buildUpdateEffects() {
+  Widget _buildUpdateEffects({double size = 220}) {
+    final scale = size / 220;
     return Stack(
       alignment: Alignment.center,
       children: [
         // Top right dot
         Positioned(
-          top: 30,
-          right: 40,
+          top: 30 * scale,
+          right: 40 * scale,
           child: _buildFloatingElement(
             icon: Icons.auto_awesome,
             size: 16,
@@ -1138,8 +1176,8 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
         // Bottom left dot
         Positioned(
-          bottom: 30,
-          left: 40,
+          bottom: 30 * scale,
+          left: 40 * scale,
           child: _buildFloatingElement(
             icon: Icons.add_moderator,
             size: 16,
@@ -1149,8 +1187,8 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
 
         // Left side dot
         Positioned(
-          left: 20,
-          top: 100,
+          left: 20 * scale,
+          top: 100 * scale,
           child: _buildFloatingElement(
             icon: Icons.security_update_good,
             size: 18,
@@ -1192,10 +1230,13 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   }
 
   // Version comparison row
-  Widget _buildVersionInfoRow() {
+  Widget _buildVersionInfoRow({bool compact = false}) {
     final theme = OneUITheme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      padding: EdgeInsets.symmetric(
+        vertical: compact ? 12 : 20,
+        horizontal: compact ? 16 : 24,
+      ),
       decoration: BoxDecoration(
         color: theme.cardBackground.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
@@ -1317,7 +1358,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   }
 
   // Features list for update screen
-  Widget _buildFeaturesList() {
+  Widget _buildFeaturesList({bool compact = false}) {
     final theme = OneUITheme.of(context);
     final features = _isSkippible ?? false
         ? [
@@ -1330,16 +1371,17 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
             "Important compatibility improvements",
             "Essential bug fixes and stability enhancements",
           ];
+    final visibleFeatures = compact ? features.take(2).toList() : features;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 8, bottom: 12),
+          padding: EdgeInsets.only(left: 8, bottom: compact ? 6 : 12),
           child: Text(
             "What's New:",
             style: TextStyle(
-              fontSize: 14,
+              fontSize: compact ? 13 : 14,
               fontWeight: FontWeight.w600,
               color: theme.textPrimary,
               fontFamily: 'Poppins',
@@ -1347,15 +1389,15 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(compact ? 10 : 16),
           decoration: BoxDecoration(
             color: theme.cardBackground.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: theme.border.withValues(alpha: 0.3)),
           ),
           child: Column(
-            children: features
-                .map((feature) => _buildFeatureItem(feature))
+            children: visibleFeatures
+                .map((feature) => _buildFeatureItem(feature, compact: compact))
                 .toList(),
           ),
         ),
@@ -1364,10 +1406,10 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
   }
 
   // Feature item with icon
-  Widget _buildFeatureItem(String feature) {
+  Widget _buildFeatureItem(String feature, {bool compact = false}) {
     final theme = OneUITheme.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: compact ? 6 : 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1385,7 +1427,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
             child: Text(
               feature,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: compact ? 13 : 14,
                 color: theme.textSecondary,
                 fontFamily: 'Poppins',
               ),
@@ -1411,7 +1453,7 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
             left: -100,
             child:
                 Container(
-                      height: 54,
+                      height: 48,
                       width: 80,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(

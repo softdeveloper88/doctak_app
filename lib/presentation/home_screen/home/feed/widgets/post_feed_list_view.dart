@@ -50,6 +50,10 @@ class PostFeedListView extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final bool trimTopCardGap;
 
+  /// Treat every post as owned by the viewer (org owner/admin managing their
+  /// business page) so edit/delete actions are available on all cards.
+  final bool canModerate;
+
   const PostFeedListView({
     super.key,
     required this.posts,
@@ -63,6 +67,7 @@ class PostFeedListView extends StatelessWidget {
     this.hooks = const PostFeedCardHooks(),
     this.padding,
     this.trimTopCardGap = false,
+    this.canModerate = false,
   });
 
   int get _itemCount {
@@ -124,9 +129,10 @@ class PostFeedListView extends StatelessWidget {
 
         final post = posts[adjusted];
         final postId = post.id ?? 0;
-        final isOwner = post.userId == AppData.logInUserId;
+        final isOwner = canModerate || post.userId == AppData.logInUserId;
         final feedItem = PostFeedAdapter.fromPost(post);
         final options = FeedPostCardOptions(
+          treatAsOwner: canModerate,
           onDelete: isOwner && hooks.onDelete != null
               ? () => hooks.onDelete!(post)
               : null,

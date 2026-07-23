@@ -54,7 +54,7 @@ class ReplyCommentComponent extends StatelessWidget {
                               ' · ',
                               style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
                             ),
-                            Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
+                            Image.asset('assets/images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
                           ],
                         ),
                         // RichText(

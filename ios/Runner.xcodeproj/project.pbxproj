@@ -20,6 +20,11 @@
 		A44FE377B12A2FF997E4FFAF /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F400BB84016F74A078756CA /* Pods_Runner.framework */; };
 		BCAST0001000000000000001 /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCAST0002000000000000001 /* SampleHandler.swift */; };
 		BCAST0015000000000000001 /* BroadcastUploadExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BCAST0006000000000000001 /* BroadcastUploadExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+
+		SHARE0015000000000000001 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = SHARE0006000000000000001 /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		SHARE0017000000000000001 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHARE0002000000000000001 /* ShareViewController.swift */; };
+		SHARE0018000000000000001 /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = SHARE0008000000000000001 /* MainInterface.storyboard */; };
+		SHARE0019000000000000001 /* Pods_ShareExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = SHARE0009000000000000001 /* Pods_ShareExtension.framework */; };
 		CD76F662D311285E17A58709 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 25A9A66BB537AC3EE505B740 /* Pods_RunnerTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -37,6 +42,14 @@
 			proxyType = 1;
 			remoteGlobalIDString = BCAST0010000000000000001;
 			remoteInfo = BroadcastUploadExtension;
+		};
+
+		SHARE001A000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = SHARE0010000000000000001;
+			remoteInfo = ShareExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -58,6 +71,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				BCAST0015000000000000001 /* BroadcastUploadExtension.appex in Embed Foundation Extensions */,
+				SHARE0015000000000000001 /* ShareExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -100,6 +114,16 @@
 		CCC1AFA4AC81A7B0A4D22AE3 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		E24543EAA976B2ACC09EF5CC /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		E3D9E6192D0D747A20F40DE8 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
+
+		SHARE0002000000000000001 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		SHARE0004000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		SHARE0005000000000000001 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
+		SHARE0006000000000000001 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		SHARE0007000000000000001 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		SHARE0009000000000000001 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		SHARE000A000000000000001 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		SHARE000B000000000000001 /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
+		SHARE000C000000000000001 /* Pods-ShareExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.profile.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.profile.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +152,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+
+		SHARE0012000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				SHARE0019000000000000001 /* Pods_ShareExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -151,6 +184,9 @@
 				4F5DAF664020FA28E9F400B4 /* Pods-BroadcastUploadExtension.debug.xcconfig */,
 				742FB73D812430A4280E7026 /* Pods-BroadcastUploadExtension.release.xcconfig */,
 				5936736563067B091A85C2C0 /* Pods-BroadcastUploadExtension.profile.xcconfig */,
+				SHARE000A000000000000001 /* Pods-ShareExtension.debug.xcconfig */,
+				SHARE000B000000000000001 /* Pods-ShareExtension.release.xcconfig */,
+				SHARE000C000000000000001 /* Pods-ShareExtension.profile.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -174,6 +210,7 @@
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				BCAST0007000000000000001 /* BroadcastUploadExtension */,
+				SHARE000D000000000000001 /* ShareExtension */,
 				96F9E7E404182B34C307B983 /* Pods */,
 				F63CD0EE052FF83A5427B871 /* Frameworks */,
 			);
@@ -185,6 +222,7 @@
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
 				BCAST0006000000000000001 /* BroadcastUploadExtension.appex */,
+				SHARE0006000000000000001 /* ShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -206,6 +244,18 @@
 			path = Runner;
 			sourceTree = "<group>";
 		};
+
+		SHARE000D000000000000001 /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				SHARE0002000000000000001 /* ShareViewController.swift */,
+				SHARE0004000000000000001 /* Info.plist */,
+				SHARE0005000000000000001 /* ShareExtension.entitlements */,
+				SHARE0008000000000000001 /* MainInterface.storyboard */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
 		BCAST0007000000000000001 /* BroadcastUploadExtension */ = {
 			isa = PBXGroup;
 			children = (
@@ -224,6 +274,7 @@
 				4F400BB84016F74A078756CA /* Pods_Runner.framework */,
 				25A9A66BB537AC3EE505B740 /* Pods_RunnerTests.framework */,
 				3A7934DF81EA992C16C741FA /* Pods_BroadcastUploadExtension.framework */,
+				SHARE0009000000000000001 /* Pods_ShareExtension.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -271,6 +322,7 @@
 			);
 			dependencies = (
 				BCAST0016000000000000001 /* PBXTargetDependency */,
+				SHARE001B000000000000001 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -295,6 +347,25 @@
 			productReference = BCAST0006000000000000001 /* BroadcastUploadExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+
+		SHARE0010000000000000001 /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = SHARE0020000000000000001 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				SHARE001E000000000000001 /* [CP] Check Pods Manifest.lock */,
+				SHARE0011000000000000001 /* Sources */,
+				SHARE0012000000000000001 /* Frameworks */,
+				SHARE0013000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			productName = ShareExtension;
+			productReference = SHARE0006000000000000001 /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -316,6 +387,9 @@
 					BCAST0010000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
+					SHARE0010000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
 				};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
@@ -334,6 +408,7 @@
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
 				BCAST0010000000000000001 /* BroadcastUploadExtension */,
+				SHARE0010000000000000001 /* ShareExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -362,6 +437,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+
+		SHARE0013000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				SHARE0018000000000000001 /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -537,6 +621,29 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+
+		SHARE001E000000000000001 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-ShareExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -565,6 +672,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+
+		SHARE0011000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				SHARE0017000000000000001 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -577,6 +693,12 @@
 			isa = PBXTargetDependency;
 			target = BCAST0010000000000000001 /* BroadcastUploadExtension */;
 			targetProxy = BCAST0003000000000000001 /* PBXContainerItemProxy */;
+		};
+
+		SHARE001B000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = SHARE0010000000000000001 /* ShareExtension */;
+			targetProxy = SHARE001A000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -595,6 +717,15 @@
 				97C147001CF9000F007C117D /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+
+		SHARE0008000000000000001 /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				SHARE0007000000000000001 /* Base */,
+			);
+			name = MainInterface.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1008,6 +1139,90 @@
 			};
 			name = Profile;
 		};
+
+		SHARE0021000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = SHARE000A000000000000001 /* Pods-ShareExtension.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = WXF27GH385;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DocTak;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctak.ios.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		SHARE0022000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = SHARE000B000000000000001 /* Pods-ShareExtension.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = WXF27GH385;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DocTak;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctak.ios.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		SHARE0023000000000000001 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = SHARE000C000000000000001 /* Pods-ShareExtension.profile.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = WXF27GH385;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DocTak;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.doctak.ios.ShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1047,6 +1262,17 @@
 				BCAST0021000000000000001 /* Debug */,
 				BCAST0022000000000000001 /* Release */,
 				BCAST0023000000000000001 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		SHARE0020000000000000001 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				SHARE0021000000000000001 /* Debug */,
+				SHARE0022000000000000001 /* Release */,
+				SHARE0023000000000000001 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

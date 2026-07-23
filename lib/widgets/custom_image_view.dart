@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -115,46 +116,56 @@ class CustomImageView extends StatelessWidget {
 
   Widget _buildImageView() {
     final validPath = _getValidImageUrl(imagePath);
-    
+
+    if (validPath != null && isDefaultAvatarUrl(validPath)) {
+      final size = width ?? height ?? 48;
+      return buildDefaultAvatarWidget(size: size, kind: DefaultAvatarKind.user);
+    }
+
     if (validPath != null) {
       switch (validPath.imageType) {
         case ImageType.svg:
           return SizedBox(
-            // height: height,
             width: width,
+            height: height,
             child: SvgPicture.asset(
               validPath,
-              // height: height,
               width: width,
+              height: height,
               fit: fit ?? BoxFit.contain,
-              colorFilter: ColorFilter.mode(color ?? Colors.transparent, BlendMode.srcIn),
+              colorFilter: color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
+              placeholderBuilder: (_) => _defaultAvatarPlaceholder(),
+              errorBuilder: (_, __, ___) => _defaultAvatarPlaceholder(),
             ),
           );
         case ImageType.file:
           return Image.file(
             File(validPath),
-            // height: height,
             width: width,
+            height: height,
             fit: fit ?? BoxFit.cover,
             color: color,
+            errorBuilder: (_, __, ___) => _defaultAvatarPlaceholder(),
           );
         case ImageType.network:
           return CachedNetworkImage(
-            // height: height,
             width: width,
+            height: height,
             fit: fit ?? BoxFit.cover,
             imageUrl: AppData.fullImageUrl(validPath),
             color: color,
             cacheManager: CustomCacheManager(),
             fadeInDuration: const Duration(milliseconds: 150),
             fadeOutDuration: const Duration(milliseconds: 100),
-            // Enhanced headers for better compatibility
-            httpHeaders: const {
-              'User-Agent': 'Mozilla/5.0 (compatible; DocTak/1.0)',
-              'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/jpeg,image/png,image/gif,image/*,*/*;q=0.8',
-              'Accept-Encoding': 'gzip, deflate, br',
-              'Connection': 'keep-alive',
-            },
+            httpHeaders: AppData.mediaHeadersFor(
+              AppData.fullImageUrl(validPath),
+              baseHeaders: const {
+                'User-Agent': 'Mozilla/5.0 (compatible; DocTak/1.0)',
+                'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/jpeg,image/png,image/gif,image/*,*/*;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive',
+              },
+            ),
             placeholder: (context, url) => Container(
               height: height ?? 200,
               width: width,
@@ -167,27 +178,13 @@ class CustomImageView extends StatelessWidget {
                 ),
               ),
             ),
-            // errorWidget: (context, url,error) =>  Center(
-            //   child: SizedBox(
-            //     height: 60,
-            //     width: 60,
-            //     child: CircularProgressIndicator(
-            //       color: Colors.grey[300],
-            //       strokeWidth: 8,
-            //       strokeCap: StrokeCap.round,
-            //       backgroundColor: Colors.white,
-            //     ),
-            //   ),
-            // ),
             errorWidget: (context, url, error) {
-              // Log the error in debug mode
               assert(() {
                 print('🖼️ Image load failed: $url');
                 print('🖼️ Error: $error');
                 return true;
               }());
-              
-              // Check if it's actually a video file being loaded as image
+
               final videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v'];
               final lowerUrl = url.toLowerCase();
               final isVideoFile = videoExtensions.any((ext) => lowerUrl.endsWith(ext));
@@ -213,65 +210,39 @@ class CustomImageView extends StatelessWidget {
                 );
               }
 
+              if (isDefaultAvatarUrl(url)) {
+                return _defaultAvatarPlaceholder();
+              }
+
               return Image.asset(
                 placeHolder,
-                // height: height,
                 width: width,
+                height: height,
                 fit: fit ?? BoxFit.cover,
+                errorBuilder: (_, __, ___) => _defaultAvatarPlaceholder(),
               );
             },
           );
         case ImageType.video:
-          // return Container(
-          //   width: width,
-          //   height: height??300,
-          //   decoration: BoxDecoration(
-          //     color: Colors.black87,
-          //     borderRadius: radius,
-          //   ),
-          //   child: Stack(
-          //     alignment: Alignment.center,
-          //     children: [
-          //       Icon(
-          //         Icons.play_circle_filled,
-          //         color: Colors.white,
-          //         size: 48,
-          //       ),
-          //       Positioned(
-          //         bottom: 8,
-          //         left: 8,
-          //         child: Container(
-          //           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          //           decoration: BoxDecoration(
-          //             color: Colors.black54,
-          //             borderRadius: BorderRadius.circular(4),
-          //           ),
-          //           child: const Text(
-          //             'VIDEO',
-          //             style: TextStyle(
-          //               color: Colors.white,
-          //               fontSize: 10,
-          //               fontWeight: FontWeight.bold,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // );
           return VideoPlayerWidget(videoUrl: validPath);
         case ImageType.png:
         default:
           return Image.asset(
             validPath,
-            // height: height,
             width: width,
+            height: height,
             fit: fit ?? BoxFit.cover,
             color: color,
+            errorBuilder: (_, __, ___) => _defaultAvatarPlaceholder(),
           );
       }
     }
     return const SizedBox();
+  }
+
+  Widget _defaultAvatarPlaceholder() {
+    final size = width ?? height ?? 48;
+    return buildDefaultAvatarWidget(size: size, kind: DefaultAvatarKind.user);
   }
 }
 

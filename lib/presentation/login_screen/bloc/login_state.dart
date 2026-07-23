@@ -45,3 +45,27 @@ class LoginFailure extends LoginState {
   @override
   List<Object> get props => [error];
 }
+
+class LoginRequiresTwoFactor extends LoginState {
+  LoginRequiresTwoFactor({
+    required this.pendingToken,
+    required this.methods,
+    this.maskedEmail,
+    this.message,
+    this.emailSent = true,
+    required this.rememberMe,
+    required this.deviceToken,
+  });
+
+  final String pendingToken;
+  final Map<String, bool> methods;
+  final String? maskedEmail;
+  final String? message;
+  final bool emailSent;
+  final bool rememberMe;
+  final String deviceToken;
+
+  @override
+  List<Object?> get props =>
+      [pendingToken, methods, maskedEmail, message, emailSent, rememberMe, deviceToken];
+}

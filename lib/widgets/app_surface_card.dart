@@ -50,21 +50,26 @@ class AppSurfaceCard extends StatelessWidget {
             border: Border.all(color: borderColor!),
           );
 
-    Widget card = Container(
+    // Material must sit *inside* the DecoratedBox so ListTile / SwitchListTile
+    // ink & selected backgrounds paint on a Material ancestor above the card fill
+    // (avoids Flutter's "ListTile background color or ink splashes may be invisible").
+    final content = padding != null
+        ? Padding(padding: padding!, child: child)
+        : child;
+
+    return Container(
       margin: margin,
       clipBehavior: clipBehavior,
       decoration: decoration,
-      child: padding != null ? Padding(padding: padding!, child: child) : child,
-    );
-
-    if (onTap == null) return card;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppCardLayout.radius),
-        child: card,
+      child: Material(
+        color: Colors.transparent,
+        child: onTap == null
+            ? content
+            : InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(AppCardLayout.radius),
+                child: content,
+              ),
       ),
     );
   }

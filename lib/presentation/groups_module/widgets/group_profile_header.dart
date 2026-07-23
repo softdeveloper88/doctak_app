@@ -171,7 +171,7 @@ class GroupProfileHeader extends StatelessWidget {
                               child: Icon(
                                 Icons.verified_rounded,
                                 size: 18,
-                                color: theme.primary,
+                                color: const Color(0xFF1DA1F2),
                               ),
                             ),
                         ],

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 
 JobsModel jobsModelFromJson(String str) => JobsModel.fromJson(json.decode(str));
 String jobsModelToJson(JobsModel data) => json.encode(data.toJson());
@@ -164,7 +165,7 @@ class Data {
     id = json['id'];
     jobTitle = json['job_title']?.toString();
     jobType = json['job_type']?.toString();
-    companyName = json['company_name']?.toString();
+    companyName = formatDisplayName(json['company_name']?.toString());
     experience = json['experience']?.toString();
     location = json['location']?.toString();
     description = json['description']?.toString();
@@ -271,7 +272,7 @@ class User {
 
   User.fromJson(dynamic json) {
     id = json['id']?.toString();
-    name = json['name']?.toString();
+    name = formatDisplayName(json['name']?.toString());
     profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());
   }
   String? id;
@@ -333,11 +334,11 @@ class Applicants {
 
   Applicants.fromJson(dynamic json) {
     id = json['id']?.toString();
-    firstName = json['first_name']?.toString();
-    lastName = json['last_name']?.toString();
+    firstName = formatDisplayName(json['first_name']?.toString());
+    lastName = formatDisplayName(json['last_name']?.toString());
     emailVerifiedAt = json['email_verified_at']?.toString();
     userType = json['user_type']?.toString();
-    name = json['name']?.toString();
+    name = formatDisplayName(json['name']?.toString());
     email = json['email']?.toString();
     token = json['token'];
     phone = json['phone']?.toString();
@@ -347,7 +348,7 @@ class Applicants {
     role = json['role']?.toString();
     gender = json['gender']?.toString();
     dob = json['dob']?.toString();
-    clinicName = json['clinic_name']?.toString();
+    clinicName = formatDisplayName(json['clinic_name']?.toString());
     college = json['college']?.toString();
     countryOrigin = json['country_origin']?.toString();
     profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());

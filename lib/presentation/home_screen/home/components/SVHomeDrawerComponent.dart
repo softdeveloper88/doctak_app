@@ -1,4 +1,5 @@
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/notification_counter_service.dart';
 import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -20,8 +21,9 @@ import 'package:doctak_app/presentation/doctak_ai_module/presentation/ai_chat_sc
 import 'package:doctak_app/presentation/groups_module/groups_main_screen.dart';
 import 'package:doctak_app/presentation/guideline_module/blocs/guideline_agent/guideline_agent_bloc.dart';
 import 'package:doctak_app/presentation/guideline_module/presentation/guideline_agent_screen.dart';
+import 'package:doctak_app/widgets/premium/premium_mark.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/drawer_icons.dart';
-import 'package:doctak_app/presentation/home_screen/home/screens/app_setting_screen/app_setting_screen.dart';
+import 'package:doctak_app/presentation/settings/account_settings_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/conferences_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/drugs_list_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_screen.dart';
@@ -33,10 +35,10 @@ import 'package:doctak_app/presentation/subscription_screen/subscription_screen.
 import 'package:doctak_app/presentation/web_screen/web_page_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
+import 'package:doctak_app/widgets/workspace_switcher_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -60,6 +62,9 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   void initState() {
     super.initState();
     _refreshSpecialtyLabel();
+    ActingContextService.instance.addListener(_onActingChanged);
+    // ignore: discarded_futures
+    ActingContextService.instance.initialize();
     if (_cachedVersion == null) {
       PackageInfo.fromPlatform().then((info) {
         _cachedVersion = 'DocTak · Version ${info.version} (Build ${info.buildNumber})';
@@ -67,6 +72,19 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
       });
     }
   }
+
+  @override
+  void dispose() {
+    ActingContextService.instance.removeListener(_onActingChanged);
+    super.dispose();
+  }
+
+  void _onActingChanged() {
+    if (mounted) setState(() {});
+  }
+
+  ActingOrganization? get _actingOrg =>
+      ActingContextService.instance.organization;
 
   Future<void> _refreshSpecialtyLabel() async {
     final resolved = await displaySpecialtyAsync(AppData.specialty);
@@ -118,6 +136,13 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   String get _displayName {
     final name = capitalizeWords(AppData.name);
     return AppData.userType == 'doctor' ? 'Dr. $name' : name;
+  }
+
+  String get _headerSubtitle {
+    final org = _actingOrg;
+    if (org == null) return _subtitleLine;
+    final role = org.roleDisplay;
+    return role.isEmpty ? org.typeDisplay : '${org.typeDisplay} · $role';
   }
 
   String get _subtitleLine {
@@ -173,6 +198,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   }
 
   Widget _buildHeader(BuildContext context, OneUITheme theme) {
+    final acting = ActingContextService.instance;
+
     return Container(
       decoration: BoxDecoration(
         gradient: theme.drawerHeaderGradient,
@@ -182,81 +209,134 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
         ),
       ),
       child: Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildAvatar(theme),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Flexible(
-                              child: Text(
-                                _displayName,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: theme.textPrimary,
-                                  letterSpacing: -0.2,
+        padding: const EdgeInsets.fromLTRB(20, 6, 10, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Close temporarily hidden — restore when needed.
+            // Align(
+            //   alignment: Alignment.centerRight,
+            //   child: _iconCircleButton(
+            //     theme,
+            //     onTap: () => Navigator.of(context).pop(),
+            //     child: DrawerIcon(
+            //       asset: DrawerIconAssets.close,
+            //       size: 18,
+            //       color: theme.textPrimary,
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 4),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _actingOrg != null
+                    ? _buildOrgAvatar(theme, _actingOrg!)
+                    : _buildAvatar(theme),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    _actingOrg?.name ?? _displayName,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w700,
+                                      color: theme.textPrimary,
+                                      letterSpacing: -0.1,
+                                      height: 1.2,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                                if (_actingOrg == null &&
+                                    AppData.isVerified) ...[
+                                  const SizedBox(width: 4),
+                                  theme.buildVerifiedBadge(
+                                    size: 14,
+                                    isPremium: AppData.isPremium,
+                                  ),
+                                ],
+                                if (_actingOrg == null && AppData.isPremium) ...[
+                                  const SizedBox(width: 4),
+                                  const PremiumMark(size: 14),
+                                ],
+                              ],
                             ),
-                            if (AppData.isVerified) ...[
-                              const SizedBox(width: 4),
-                              theme.buildVerifiedBadge(size: 16),
-                            ],
-                          ],
-                        ),
-                        if (_subtitleLine.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            _subtitleLine,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: theme.textSecondary,
-                              height: 1.3,
+                          ),
+                          const SizedBox(width: 4),
+                          _iconCircleButton(
+                            theme,
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              const AccountSettingsScreen().launch(context);
+                            },
+                            child: Icon(
+                              Icons.settings_rounded,
+                              size: 18,
+                              color: theme.primary,
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(width: 4),
+                          _iconCircleButton(
+                            theme,
+                            onTap: acting.isSwitching
+                                ? () {}
+                                : () => showWorkspaceSwitcherSheet(context),
+                            child: acting.isSwitching
+                                ? SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: theme.primary,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.swap_horiz_rounded,
+                                    size: 18,
+                                    color: theme.primary,
+                                  ),
                           ),
                         ],
+                      ),
+                      if (_headerSubtitle.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          _headerSubtitle,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            color: theme.textSecondary,
+                            height: 1.25,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
-                    ),
+                    ],
                   ),
-                  const SizedBox(width: 36),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildPlanCard(context, theme),
-            ],
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: _iconCircleButton(
-              theme,
-              onTap: () => Navigator.of(context).pop(),
-              child: DrawerIcon(asset: DrawerIconAssets.close, size: 18, color: theme.textPrimary),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
+            const SizedBox(height: 12),
+            _buildPlanCard(context, theme),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAvatar(OneUITheme theme) {
+    final isPremium = AppData.isPremium;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -270,7 +350,16 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
               end: Alignment.bottomRight,
               colors: [theme.primary, theme.secondary],
             ),
+            border: isPremium
+                ? Border.all(color: PremiumStyle.gold, width: 2.5)
+                : null,
             boxShadow: [
+              if (isPremium)
+                BoxShadow(
+                  color: PremiumStyle.gold.withValues(alpha: 0.45),
+                  blurRadius: 0,
+                  spreadRadius: 2,
+                ),
               BoxShadow(
                 color: theme.primary.withValues(alpha: 0.25),
                 blurRadius: 12,
@@ -328,6 +417,37 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
     );
   }
 
+  Widget _buildOrgAvatar(OneUITheme theme, ActingOrganization org) {
+    final logo = (org.logoUrl != null && org.logoUrl!.isNotEmpty)
+        ? AppData.fullImageUrl(org.logoUrl!)
+        : '';
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: theme.cardBackground,
+        border: Border.all(color: theme.primary.withValues(alpha: 0.25)),
+        boxShadow: [
+          BoxShadow(
+            color: theme.primary.withValues(alpha: 0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: logo.isNotEmpty
+          ? AppCachedNetworkImage(
+              imageUrl: logo,
+              fit: BoxFit.cover,
+              errorWidget: (_, _, _) =>
+                  Icon(Icons.business_rounded, color: theme.primary, size: 26),
+            )
+          : Icon(Icons.business_rounded, color: theme.primary, size: 26),
+    );
+  }
+
   Widget _buildPlanCard(BuildContext context, OneUITheme theme) {
     final isPremium = AppData.isPremium;
     final planLabel = isPremium
@@ -347,16 +467,24 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: theme.accentSoft,
+              color: isPremium
+                  ? PremiumStyle.gold.withValues(alpha: 0.12)
+                  : theme.accentSoft,
               borderRadius: BorderRadius.circular(11),
-              border: Border.all(color: theme.primary.withValues(alpha: 0.12)),
+              border: Border.all(
+                color: isPremium
+                    ? PremiumStyle.gold.withValues(alpha: 0.35)
+                    : theme.primary.withValues(alpha: 0.12),
+              ),
             ),
             alignment: Alignment.center,
-            child: DrawerIcon(
-              asset: DrawerIconAssets.star,
-              size: 18,
-              color: isPremium ? theme.warning : theme.primary,
-            ),
+            child: isPremium
+                ? const PremiumMark(size: 16)
+                : DrawerIcon(
+                    asset: DrawerIconAssets.star,
+                    size: 18,
+                    color: theme.primary,
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -681,7 +809,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
         case 7:
           const SuggestionScreen().launch(context);
         case 8:
-          const AppSettingScreen().launch(context);
+          const AccountSettingsScreen().launch(context);
         case 9:
           AppNavigator.push(
             context,
@@ -762,6 +890,7 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
                           try {
                             await NotificationService.deregisterDeviceToken();
                             NotificationCounterService().dispose();
+                            await ActingContextService.instance.clear();
                             final prefs = SecureStorageService.instance;
                             await prefs.initialize();
                             await AppSharedPreferences().clearSharedPreferencesData(dialogContext);

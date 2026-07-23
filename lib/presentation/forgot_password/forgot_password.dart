@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/saved_login_credentials.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/forgot_password/bloc/forgot_event.dart';
@@ -39,26 +38,24 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           bloc: forgotBloc,
           listener: (context, state) {
             if (state is ForgotSuccess) {
-              var data = jsonDecode(state.response);
-              if (data['success']) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent), backgroundColor: theme.success));
-                AppNavigator.pushAndRemoveAll(context, const LoginScreen());
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), backgroundColor: theme.error));
-              }
+              SavedLoginCredentials.prepareForNewPasswordLogin(email: emailController.text);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(state.message),
+                backgroundColor: theme.success,
+                duration: const Duration(seconds: 5),
+              ));
+              AppNavigator.pushAndRemoveAll(context, const LoginScreen());
             } else if (state is ForgotFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), backgroundColor: theme.error));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(state.error),
+                backgroundColor: theme.error,
+              ));
             }
           },
           builder: (context, state) {
             String message = '';
-            if (state is ForgotSuccess) {
-              var data = jsonDecode(state.response);
-              if (!data['success']) {
-                message = translation(context).msg_validation_error;
-              }
-            } else if (state is ForgotFailure) {
-              message = translation(context).msg_validation_error;
+            if (state is ForgotFailure) {
+              message = state.error;
             }
 
             return Container(
@@ -108,7 +105,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           Text(translation(context).lbl_forgot_password_title, style: theme.authTitleStyle),
                           const SizedBox(height: 8),
                           // Subtitle
-                          Text(translation(context).msg_enter_email_to_reset, textAlign: TextAlign.center, style: theme.authSubtitleStyle),
+                          Text(
+                            'Enter your account email. If it exists, we email a secure reset link. Open that link to set a new password — it works on this phone.',
+                            textAlign: TextAlign.center,
+                            style: theme.authSubtitleStyle,
+                          ),
                           const SizedBox(height: 32),
                           // Form Card
                           Container(

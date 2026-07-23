@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/location_display.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/one_ui_shimmer.dart';
@@ -13,7 +15,7 @@ abstract final class NetworkLayout {
   static const double organizationCardWidth = 174;
   static const double personCoverHeight = 48;
   static const double personCardAvatarSize = 52;
-  static const double personCardHeight = 218;
+  static const double personCardHeight = 248;
   static const double organizationCardHeight = 198;
   static const double organizationCoverHeight = 44;
   static const double organizationCardLogoSize = 46;
@@ -38,15 +40,17 @@ bool networkSearchItemIsOrganization(Map<String, dynamic> item) {
 
 String networkSearchItemName(Map<String, dynamic> item) {
   if (networkSearchItemIsOrganization(item)) {
-    return (item['name'] ?? 'Organization').toString();
+    return formatDisplayName((item['name'] ?? 'Organization').toString(), 'Organization');
   }
   final fullName = (item['fullName'] ?? item['name'] ?? '').toString().trim();
-  if (fullName.isNotEmpty && fullName.toLowerCase() != 'unknown') return fullName;
+  if (fullName.isNotEmpty && fullName.toLowerCase() != 'unknown') {
+    return formatDisplayName(fullName, 'Member');
+  }
   final firstLast =
       '${item['first_name'] ?? item['firstName'] ?? ''} ${item['last_name'] ?? item['lastName'] ?? ''}'
           .trim();
-  if (firstLast.isNotEmpty) return firstLast;
-  return (item['username'] ?? '').toString();
+  if (firstLast.isNotEmpty) return formatDisplayName(firstLast, 'Member');
+  return formatDisplayName((item['username'] ?? '').toString(), 'Member');
 }
 
 /// Segmented filter for people / organizations / all in network search.
@@ -250,24 +254,34 @@ Map<String, dynamic> networkPersonFromRequest(Map<String, dynamic> request) {
 }
 
 String networkPersonName(Map<String, dynamic> person) {
-  final full = person['fullName']?.toString().trim();
-  if (full != null && full.isNotEmpty) return full;
-  return '${person['first_name'] ?? person['name'] ?? ''} ${person['last_name'] ?? ''}'
-      .trim();
+  return networkSearchItemName(person);
+}
+
+String networkPersonSpecialty(Map<String, dynamic> person) {
+  final raw = person['specialty']?.toString() ??
+      person['speciality']?.toString() ??
+      person['title']?.toString();
+  final specialty = specialtyLabelOrNull(raw) ?? '';
+  return specialty.isEmpty ? '' : formatDisplayName(specialty);
+}
+
+/// City, state, and country (deduped) for network user rows.
+String networkPersonLocation(Map<String, dynamic> person) {
+  return joinLocationLabels([
+        person['city']?.toString(),
+        person['state']?.toString() ?? person['region']?.toString(),
+        person['country']?.toString() ?? person['countryName']?.toString(),
+      ]) ??
+      '';
 }
 
 String networkPersonHeadline(Map<String, dynamic> person) {
-  final specialty = person['specialty']?.toString() ?? '';
-  final country = person['country']?.toString() ??
-      person['countryName']?.toString() ??
-      person['city']?.toString() ??
-      '';
-  if (specialty.isNotEmpty && country.isNotEmpty) {
-    return '${capitalizeWords(specialty)} · $country';
+  final specialty = networkPersonSpecialty(person);
+  final location = networkPersonLocation(person);
+  if (specialty.isNotEmpty && location.isNotEmpty) {
+    return '$specialty · $location';
   }
-  return specialty.isNotEmpty
-      ? capitalizeWords(specialty)
-      : capitalizeWords(country);
+  return specialty.isNotEmpty ? specialty : location;
 }
 
 String? networkPersonAvatar(Map<String, dynamic> person) {
@@ -330,19 +344,22 @@ class NetworkUserAvatar extends StatelessWidget {
   final String? imageUrl;
   final String name;
   final double size;
+  final String? gender;
 
   const NetworkUserAvatar({
     super.key,
     required this.imageUrl,
     required this.name,
     required this.size,
+    this.gender,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     final palette = networkAvatarPaletteForName(name);
-    final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
+    final safeUrl = imageUrl?.trim() ?? '';
+    final hasImage = safeUrl.isNotEmpty && !isDefaultAvatarUrl(safeUrl);
 
     return Container(
       width: size,
@@ -354,7 +371,7 @@ class NetworkUserAvatar extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: hasImage
           ? CachedNetworkImage(
-              imageUrl: imageUrl!,
+              imageUrl: safeUrl,
               width: size,
               height: size,
               fit: BoxFit.cover,
@@ -369,15 +386,10 @@ class NetworkUserAvatar extends StatelessWidget {
     ({Color background, Color foreground}) palette,
     OneUITheme theme,
   ) {
-    return Container(
-      color: palette.background,
-      child: Center(
-        child: Icon(
-          Icons.person_rounded,
-          color: palette.foreground,
-          size: size * 0.48,
-        ),
-      ),
+    return buildDefaultAvatarWidget(
+      size: size,
+      kind: DefaultAvatarKind.user,
+      gender: gender,
     );
   }
 }
@@ -991,7 +1003,13 @@ class NetworkOrganizationGridCard extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final name = organization['name']?.toString() ?? 'Organization';
     final typeLabel = organization['type_label']?.toString() ?? 'Business';
-    final city = organization['city']?.toString() ?? '';
+    final locationLine = organizationLocationSubtitle(
+      typeLabel: typeLabel,
+      city: organization['city']?.toString(),
+      state: organization['state']?.toString(),
+      country: organization['country']?.toString() ??
+          organization['countryName']?.toString(),
+    );
     final followers = int.tryParse(
           organization['follower_count']?.toString() ?? '',
         ) ??
@@ -1006,8 +1024,7 @@ class NetworkOrganizationGridCard extends StatelessWidget {
         child: NetworkOrganizationCardBody(
           organization: organization,
           name: name,
-          typeLabel: typeLabel,
-          city: city,
+          locationLine: locationLine,
           followers: followers,
           isFollowing: isFollowing,
           onFollowToggle: onFollowToggle,
@@ -1034,7 +1051,13 @@ class NetworkOrganizationListTile extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final name = organization['name']?.toString() ?? 'Organization';
     final typeLabel = organization['type_label']?.toString() ?? 'Business';
-    final city = organization['city']?.toString() ?? '';
+    final locationLine = organizationLocationSubtitle(
+      typeLabel: typeLabel,
+      city: organization['city']?.toString(),
+      state: organization['state']?.toString(),
+      country: organization['country']?.toString() ??
+          organization['countryName']?.toString(),
+    );
     final followers = int.tryParse(
           organization['follower_count']?.toString() ?? '',
         ) ??
@@ -1064,8 +1087,8 @@ class NetworkOrganizationListTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    city.isNotEmpty ? '$typeLabel · $city' : typeLabel,
-                    maxLines: 1,
+                    locationLine,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodySecondary.copyWith(
                       fontSize: NetworkTypography.listSubtitle,
@@ -1149,12 +1172,14 @@ class NetworkPersonCardAvatar extends StatelessWidget {
   final String? imageUrl;
   final String name;
   final bool isVerified;
+  final String? gender;
 
   const NetworkPersonCardAvatar({
     super.key,
     required this.imageUrl,
     required this.name,
     this.isVerified = false,
+    this.gender,
   });
 
   @override
@@ -1184,6 +1209,7 @@ class NetworkPersonCardAvatar extends StatelessWidget {
             imageUrl: imageUrl,
             name: name,
             size: size,
+            gender: gender,
           ),
         ),
         if (isVerified)
@@ -1253,7 +1279,8 @@ class NetworkPersonSuggestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     final name = networkPersonName(person);
-    final headline = networkPersonHeadline(person);
+    final specialty = networkPersonSpecialty(person);
+    final location = networkPersonLocation(person);
     final mutualCount = int.tryParse(
           person['mutualCount']?.toString() ??
               person['mutual_count']?.toString() ??
@@ -1298,6 +1325,7 @@ class NetworkPersonSuggestionCard extends StatelessWidget {
                       imageUrl: networkPersonAvatar(person),
                       name: name,
                       isVerified: isVerified,
+                      gender: person['gender']?.toString() ?? person['sex']?.toString(),
                     ),
                   ),
                 ],
@@ -1322,17 +1350,49 @@ class NetworkPersonSuggestionCard extends StatelessWidget {
                         color: theme.textPrimary,
                       ),
                     ),
-                    if (headline.isNotEmpty) ...[
+                    if (specialty.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
-                        headline,
-                        maxLines: 1,
+                        specialty,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
                         style: theme.bodySecondary.copyWith(
                           fontSize: NetworkTypography.personCardSubtitle,
-                          height: 1.2,
+                          height: 1.25,
+                          fontWeight: FontWeight.w500,
                         ),
+                      ),
+                    ],
+                    if (location.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 1),
+                            child: Icon(
+                              Icons.location_on_outlined,
+                              size: 12,
+                              color: theme.textTertiary,
+                            ),
+                          ),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: Text(
+                              location,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: theme.caption.copyWith(
+                                fontSize: NetworkTypography.cardMeta,
+                                height: 1.25,
+                                color: theme.textTertiary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                     if (mutualCount > 0) ...[
@@ -1423,7 +1483,13 @@ class NetworkOrganizationCard extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final name = organization['name']?.toString() ?? 'Organization';
     final typeLabel = organization['type_label']?.toString() ?? 'Business';
-    final city = organization['city']?.toString() ?? '';
+    final locationLine = organizationLocationSubtitle(
+      typeLabel: typeLabel,
+      city: organization['city']?.toString(),
+      state: organization['state']?.toString(),
+      country: organization['country']?.toString() ??
+          organization['countryName']?.toString(),
+    );
     final followers = int.tryParse(
           organization['follower_count']?.toString() ?? '',
         ) ??
@@ -1443,8 +1509,7 @@ class NetworkOrganizationCard extends StatelessWidget {
         child: NetworkOrganizationCardBody(
           organization: organization,
           name: name,
-          typeLabel: typeLabel,
-          city: city,
+          locationLine: locationLine,
           followers: followers,
           isFollowing: isFollowing,
           onFollowToggle: onFollowToggle,
@@ -1459,8 +1524,7 @@ class NetworkOrganizationCard extends StatelessWidget {
 class NetworkOrganizationCardBody extends StatelessWidget {
   final Map<String, dynamic> organization;
   final String name;
-  final String typeLabel;
-  final String city;
+  final String locationLine;
   final int followers;
   final bool isFollowing;
   final VoidCallback onFollowToggle;
@@ -1469,8 +1533,7 @@ class NetworkOrganizationCardBody extends StatelessWidget {
     super.key,
     required this.organization,
     required this.name,
-    required this.typeLabel,
-    required this.city,
+    required this.locationLine,
     required this.followers,
     required this.isFollowing,
     required this.onFollowToggle,
@@ -1527,12 +1590,12 @@ class NetworkOrganizationCardBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  city.isNotEmpty ? '$typeLabel · $city' : typeLabel,
-                  maxLines: 1,
+                  locationLine,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.bodySecondary.copyWith(
                     fontSize: NetworkTypography.organizationCardSubtitle,
-                    height: 1.2,
+                    height: 1.25,
                   ),
                 ),
                 const SizedBox(height: 2),

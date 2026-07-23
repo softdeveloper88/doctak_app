@@ -3,6 +3,7 @@ import 'dart:convert';
 
 // TODO: app_links temporarily disabled due to SDK compatibility
 // import 'package:app_links/app_links.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -10,6 +11,7 @@ import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/core/utils/session_manager.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/data/models/subscription/subscription_data_model.dart';
+import 'package:doctak_app/presentation/age_assurance/age_assurance_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_bloc.dart';
 import 'package:doctak_app/presentation/splash_screen/bloc/splash_event.dart';
@@ -95,9 +97,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> initDeepLinks(context) async {
     // TODO: Deep links temporarily disabled - app_links SDK incompatible
-    // For now, just navigate to dashboard
     try {
-      const SVDashboardScreen().launch(context, isNewTask: true);
+      await openAfterAgeAssurance(
+        context,
+        destination: const SVDashboardScreen(),
+      );
     } catch (e) {
       print('error $e');
     }
@@ -207,6 +211,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // Re-register FCM after restoring a remembered session (non-blocking).
       unawaited(NotificationService.syncDeviceToken());
+      // Restore personal ↔ business workspace before opening the home shell.
+      await ActingContextService.instance.initialize();
     }
     // Ensure splash shows for at least minSplashDuration regardless of how fast init completes
     final elapsed = DateTime.now().difference(splashStart);

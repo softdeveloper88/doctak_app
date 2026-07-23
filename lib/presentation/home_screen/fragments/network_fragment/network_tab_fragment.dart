@@ -599,7 +599,7 @@ class _ConnectionListTile extends StatelessWidget {
                     const SizedBox(height: 1),
                     Text(
                       subtitle,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.bodySecondary.copyWith(
                         fontSize: NetworkTypography.listSubtitle,

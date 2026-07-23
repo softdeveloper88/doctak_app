@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 
 JobApplicantsModel jobApplicantsModelFromJson(String str) => JobApplicantsModel.fromJson(json.decode(str));
 String jobApplicantsModelToJson(JobApplicantsModel data) => json.encode(data.toJson());
@@ -75,7 +76,7 @@ class User {
 
   User.fromJson(dynamic json) {
     id = json['id']?.toString();
-    name = json['name']?.toString();
+    name = formatDisplayName(json['name']?.toString());
     profilePic = AppData.fullImageUrl(json['profile_pic']?.toString());
     email = json['email']?.toString();
   }

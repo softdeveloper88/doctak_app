@@ -1,4 +1,5 @@
 import 'package:chewie/chewie.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:doctak_app/main.dart';
@@ -25,7 +26,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   Future<void> initializeVideoPlayer() async {
     try {
-      _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
+      // Chat attachments are private: DocTak hosts require the bearer token.
+      _controller = VideoPlayerController.networkUrl(
+        Uri.parse(widget.videoUrl),
+        httpHeaders: AppData.mediaHeadersFor(widget.videoUrl),
+      )
         ..initialize()
             .then((_) {
               if (mounted) {

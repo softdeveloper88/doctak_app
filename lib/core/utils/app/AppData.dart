@@ -30,6 +30,16 @@ class AppData {
   static const String _legacyS3Marker = 'amazonaws.com';
   static const String _legacyBucketHostPrefix = 'doctak-file';
 
+  static String _rewriteLegacyProfileMediaUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return url;
+    if (uri.path.startsWith('/profile-media/')) {
+      final key = uri.path.substring('/profile-media/'.length);
+      return _joinMedia(key);
+    }
+    return url;
+  }
+
   static bool _isLegacyObjectStorageHost(String host) {
     final h = host.toLowerCase();
     return h.contains(_legacyS3Marker) || h.startsWith(_legacyBucketHostPrefix);
@@ -61,6 +71,12 @@ class AppData {
     if (p.startsWith('http://') || p.startsWith('https://')) {
       final uri = Uri.tryParse(p);
       if (uri != null) {
+        // Private media on any host → authenticated Node proxy.
+        final privateKey = _privateMediaKeyFromUri(uri);
+        if (privateKey != null) {
+          return '$base2/profile-media/$privateKey';
+        }
+
         // Rewrite localhost/dev URLs onto the active API host so mobile builds
         // can load media that was saved with a local absolute URL.
         final host = uri.host.toLowerCase();
@@ -69,8 +85,14 @@ class AppData {
             host == '0.0.0.0' ||
             host == '10.0.2.2' ||
             host == '[::1]') {
-          if (uri.path.startsWith('/profile-media/') ||
-              uri.path.startsWith('/r2-media/') ||
+          if (uri.path.startsWith('/profile-media/')) {
+            final key = uri.path.substring('/profile-media/'.length);
+            if (_isPrivateMediaKey(key)) {
+              return '$base2/profile-media/$key';
+            }
+            return _joinMedia(key);
+          }
+          if (uri.path.startsWith('/r2-media/') ||
               uri.path.startsWith('/legacy-media/')) {
             return '$base2${uri.path}';
           }
@@ -78,27 +100,77 @@ class AppData {
 
         if (_isLegacyObjectStorageHost(uri.host)) {
           final key = _extractLegacyStorageKey(uri);
-          if (key != null) return _joinMedia(key);
+          if (key != null) {
+            if (_isPrivateMediaKey(key)) {
+              return '$base2/profile-media/$key';
+            }
+            return _joinMedia(key);
+          }
         } else if (p.contains(_legacyS3Marker)) {
           final key = _extractLegacyStorageKey(uri);
-          if (key != null) return _joinMedia(key);
+          if (key != null) {
+            if (_isPrivateMediaKey(key)) {
+              return '$base2/profile-media/$key';
+            }
+            return _joinMedia(key);
+          }
         }
       }
-      return p;
+      return _rewriteLegacyProfileMediaUrl(p);
     }
 
-    // Node-served media proxies (profile media, legacy disk files, R2 proxy).
-    // In development the Next.js API returns these as host-relative paths
-    // (e.g. /legacy-media/..., /r2-media/...); prefix the active node host
-    // instead of nesting them under the R2 media base.
-    if (p.startsWith('/profile-media/') || p.startsWith('profile-media/') ||
-        p.startsWith('/legacy-media/') || p.startsWith('legacy-media/') ||
-        p.startsWith('/r2-media/') || p.startsWith('r2-media/')) {
+    // Private keys (cvs/chat/licenses/verification) must stay on the authenticated
+    // Node proxy — never rewrite onto the public R2 CDN base.
+    if (p.startsWith('/profile-media/') || p.startsWith('profile-media/')) {
+      final key = p.replaceFirst(RegExp(r'^/?profile-media/'), '');
+      if (_isPrivateMediaKey(key)) {
+        return '$base2/profile-media/$key';
+      }
+      return _joinMedia(key);
+    }
+
+    // Node-served media proxies (legacy disk files, R2 proxy).
+    if (p.startsWith('/legacy-media/') ||
+        p.startsWith('legacy-media/') ||
+        p.startsWith('/r2-media/') ||
+        p.startsWith('r2-media/')) {
       final path = p.startsWith('/') ? p : '/$p';
       return '$base2$path';
     }
 
+    // Bare private keys (cvs/..., chat/...).
+    if (_isPrivateMediaKey(p)) {
+      final key = p.startsWith('/') ? p.substring(1) : p;
+      return '$base2/profile-media/$key';
+    }
+
     return _joinMedia(p);
+  }
+
+  static bool _isPrivateMediaKey(String key) {
+    final k = key.replaceFirst(RegExp(r'^/+'), '').toLowerCase();
+    return k.startsWith('cvs/') ||
+        k.startsWith('chat/') ||
+        k.startsWith('licenses/') ||
+        k.startsWith('verification/');
+  }
+
+  /// Extract a private media object key from a URL path if present.
+  static String? _privateMediaKeyFromUri(Uri uri) {
+    final path = uri.path;
+    for (final prefix in ['/profile-media/', '/r2-media/']) {
+      if (path.startsWith(prefix)) {
+        final key = Uri.decodeComponent(path.substring(prefix.length));
+        if (_isPrivateMediaKey(key)) return key;
+      }
+    }
+    // CDN-style …/cvs/{userId}/file.docx
+    final idx = path.indexOf('/cvs/');
+    if (idx >= 0) {
+      final key = Uri.decodeComponent(path.substring(idx + 1));
+      if (_isPrivateMediaKey(key)) return key;
+    }
+    return null;
   }
 
   /// Returns true when [raw] resolves to a loadable http(s) image URL.
@@ -226,6 +298,34 @@ class AppData {
     }
 
     return fullImageUrl(trimmed);
+  }
+
+  /// Returns true when [url] points at a DocTak host (API or media proxy),
+  /// i.e. it is safe to attach the user's bearer token to the request.
+  static bool isOwnMediaUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.host.isEmpty) return false;
+    final host = uri.host.toLowerCase();
+    bool matches(String baseUrl) {
+      final baseUri = Uri.tryParse(baseUrl);
+      return baseUri != null &&
+          baseUri.host.isNotEmpty &&
+          baseUri.host.toLowerCase() == host;
+    }
+
+    return matches(base) || matches(base2) || matches(imageUrl);
+  }
+
+  /// Headers for fetching private media (chat attachments, documents) served
+  /// by doctak-node. Adds the bearer token only for our own hosts so the
+  /// token is never leaked to third-party servers.
+  static Map<String, String> mediaHeadersFor(String url, {Map<String, String>? baseHeaders}) {
+    final headers = <String, String>{...?baseHeaders};
+    final token = userToken;
+    if (token != null && token.isNotEmpty && isOwnMediaUrl(url)) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
   }
 
   /// Notifier that fires whenever the user's profile picture changes.

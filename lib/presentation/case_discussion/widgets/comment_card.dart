@@ -250,34 +250,49 @@ class _CommentCardState extends State<CommentCard> {
                           ),
                         ],
                       ),
-                      if (_showReplies && widget.comment.replies.isNotEmpty)
+                      if (_showReplies &&
+                          (widget.comment.replies.isNotEmpty ||
+                              widget.comment.repliesCount > 0))
                         Padding(
                           padding: const EdgeInsets.only(top: 12),
-                          child: Column(
-                            children: widget.comment.replies.map((reply) {
-                              return _ReplyCard(
-                                reply: reply,
-                                theme: theme,
-                                onUpvote: widget.onVoteReply == null
-                                    ? null
-                                    : () => widget.onVoteReply!(reply.id, 'up'),
-                                onDownvote: widget.onVoteReply == null
-                                    ? null
-                                    : () =>
-                                        widget.onVoteReply!(reply.id, 'down'),
-                                onDelete: reply.isOwner &&
-                                        widget.onDeleteReply != null
-                                    ? () => _confirmDeleteReply(
-                                        context, theme, reply.id)
-                                    : null,
-                                onUpdate: reply.isOwner &&
-                                        widget.onUpdateReply != null
-                                    ? (text) =>
-                                        widget.onUpdateReply!(reply.id, text)
-                                    : null,
-                              );
-                            }).toList(),
-                          ),
+                          child: widget.comment.replies.isEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  child: SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: theme.primary,
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  children: widget.comment.replies.map((reply) {
+                                    return _ReplyCard(
+                                      reply: reply,
+                                      theme: theme,
+                                      onUpvote: widget.onVoteReply == null
+                                          ? null
+                                          : () => widget.onVoteReply!(
+                                              reply.id, 'up'),
+                                      onDownvote: widget.onVoteReply == null
+                                          ? null
+                                          : () => widget.onVoteReply!(
+                                              reply.id, 'down'),
+                                      onDelete: reply.isOwner &&
+                                              widget.onDeleteReply != null
+                                          ? () => _confirmDeleteReply(
+                                              context, theme, reply.id)
+                                          : null,
+                                      onUpdate: reply.isOwner &&
+                                              widget.onUpdateReply != null
+                                          ? (text) => widget.onUpdateReply!(
+                                              reply.id, text)
+                                          : null,
+                                    );
+                                  }).toList(),
+                                ),
                         ),
                       if (_showReplyInput ||
                           (_showReplies && widget.comment.repliesCount > 0))
@@ -362,6 +377,9 @@ class _CommentCardState extends State<CommentCard> {
       _showReplyInput = false;
       _showReplies = true;
     });
+    if (widget.comment.replies.isEmpty && widget.onLoadReplies != null) {
+      widget.onLoadReplies!(widget.comment.id);
+    }
   }
 
   void _startEditComment() {

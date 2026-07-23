@@ -15,6 +15,7 @@ class OneUIFormField extends StatelessWidget {
   final TextInputAction textInputAction;
   final int maxLines;
   final int minLines;
+  final int? maxLength;
   final bool readOnly;
   final bool obscureText;
   final Widget? prefixIcon;
@@ -36,6 +37,7 @@ class OneUIFormField extends StatelessWidget {
     this.textInputAction = TextInputAction.next,
     this.maxLines = 1,
     this.minLines = 1,
+    this.maxLength,
     this.readOnly = false,
     this.obscureText = false,
     this.prefixIcon,
@@ -82,8 +84,9 @@ class OneUIFormField extends StatelessWidget {
           focusNode: focusNode,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
-          maxLines: maxLines,
-          minLines: minLines,
+          maxLines: obscureText ? 1 : maxLines,
+          minLines: obscureText ? 1 : minLines,
+          maxLength: maxLength,
           readOnly: readOnly,
           obscureText: obscureText,
           onChanged: onChanged,
@@ -110,6 +113,11 @@ class OneUIFormField extends StatelessWidget {
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 14,
+            ),
+            counterStyle: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              color: theme.textTertiary,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

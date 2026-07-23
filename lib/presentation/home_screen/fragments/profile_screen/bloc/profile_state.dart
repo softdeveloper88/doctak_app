@@ -40,6 +40,7 @@ class FullProfileLoadedState extends ProfileState {
   String selectedSecondDropdownValue;
   List<String> specialtyDropdownValue;
   String selectedSpecialtyDropdownValue;
+  final int profileRevision;
 
   FullProfileLoadedState({
     this.firstDropdownValues = const [],
@@ -48,6 +49,7 @@ class FullProfileLoadedState extends ProfileState {
     this.selectedSecondDropdownValue = '',
     this.specialtyDropdownValue = const [],
     this.selectedSpecialtyDropdownValue = '',
+    this.profileRevision = 0,
   });
 }
 

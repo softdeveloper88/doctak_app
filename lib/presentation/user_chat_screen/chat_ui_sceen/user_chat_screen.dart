@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:doctak_app/ads_setting/ads_widget/banner_ads_widget.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/data/models/chat_model/conversation_message_model.dart';
 import 'package:doctak_app/data/models/chat_model/conversation_model.dart';
 import 'package:doctak_app/data/services/notifications_websocket_service.dart';
@@ -222,7 +223,7 @@ class _UserChatScreenState extends State<UserChatScreen>
         : (otherParticipant?.userId?.toString() ?? '');
 
     return ProfileListItemCard(
-      title: sanitizeString(displayName),
+      title: sanitizeString(formatDisplayName(displayName, 'Unknown')),
       avatarUrl: AppData.fullImageUrl(profilePic),
       subtitle: _conversationPreviewText(theme, conversation),
       trailing: _buildTimeAndBadge(theme, conversation),

@@ -1,6 +1,8 @@
+import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
+import 'package:doctak_app/widgets/premium/premium_mark.dart';
 import 'package:flutter/material.dart';
 
 class ProfileListItemCard extends StatelessWidget {
@@ -30,8 +32,10 @@ class ProfileListItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
-    final normalizedTitle = title.trim().isEmpty ? 'Unknown' : title.trim();
-    final normalizedSubtitle = subtitle?.trim() ?? '';
+    final normalizedTitle = formatDisplayName(title, 'Unknown');
+    final normalizedSubtitle = subtitle == null || subtitle!.trim().isEmpty
+        ? ''
+        : formatDisplayName(subtitle);
     final normalizedMeta = metaText?.trim() ?? '';
 
     return AppSurfaceCard.listItem(
@@ -70,7 +74,7 @@ class ProfileListItemCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     normalizedSubtitle,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.bodySecondary.copyWith(fontSize: 14),
                   ),
@@ -111,12 +115,18 @@ class ProfileAvatarView extends StatelessWidget {
     this.imageUrl,
     this.onTap,
     this.size = 56,
+    this.gender,
+    this.kind = DefaultAvatarKind.user,
+    this.isPremium = false,
   });
 
   final String label;
   final String? imageUrl;
   final VoidCallback? onTap;
   final double size;
+  final String? gender;
+  final DefaultAvatarKind kind;
+  final bool isPremium;
 
   @override
   Widget build(BuildContext context) {
@@ -128,8 +138,17 @@ class ProfileAvatarView extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: theme.avatarBorder, width: 2),
+        border: Border.all(
+          color: isPremium ? PremiumStyle.gold : theme.avatarBorder,
+          width: isPremium ? 2.5 : 2,
+        ),
         boxShadow: [
+          if (isPremium)
+            BoxShadow(
+              color: PremiumStyle.gold.withValues(alpha: 0.45),
+              blurRadius: 0,
+              spreadRadius: 2,
+            ),
           BoxShadow(
             color: palette.$1.withValues(alpha: 0.14),
             blurRadius: 10,
@@ -153,7 +172,9 @@ class ProfileAvatarView extends StatelessWidget {
     final theme = OneUITheme.of(context);
     final safeUrl = imageUrl?.trim() ?? '';
 
-    if (safeUrl.isNotEmpty && safeUrl.toLowerCase() != 'null') {
+    if (safeUrl.isNotEmpty &&
+        safeUrl.toLowerCase() != 'null' &&
+        !isDefaultAvatarUrl(safeUrl)) {
       return AppCachedNetworkImage(
         imageUrl: safeUrl,
         fit: BoxFit.cover,
@@ -168,26 +189,7 @@ class ProfileAvatarView extends StatelessWidget {
   }
 
   Widget _buildFallback(OneUITheme theme, (Color, Color) palette) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [palette.$1, palette.$2],
-        ),
-      ),
-      child: Center(
-        child: Text(
-          _initials(label),
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size * 0.34,
-            fontWeight: FontWeight.w700,
-            fontFamily: 'Poppins',
-          ),
-        ),
-      ),
-    );
+    return buildDefaultAvatarWidget(size: size, kind: kind, gender: gender);
   }
 
   static String _initials(String value) {
@@ -333,18 +335,15 @@ class ProfileListIconAction extends StatelessWidget {
 }
 
 /// Verified badge shown next to a user's name.
-/// Displays a blue checkmark icon like social media apps.
+/// Gold when [isPremium], otherwise DocTak blue.
 class VerifiedBadge extends StatelessWidget {
-  const VerifiedBadge({super.key, this.size = 18});
+  const VerifiedBadge({super.key, this.size = 18, this.isPremium = false});
 
   final double size;
+  final bool isPremium;
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.verified_rounded,
-      size: size,
-      color: const Color(0xFF1DA1F2),
-    );
+    return DocTakVerifiedBadge(size: size, isPremium: isPremium);
   }
 }

@@ -72,21 +72,21 @@ class SystemPermissionHandler {
           context: context,
           barrierDismissible: false,
           builder: (dialogContext) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             backgroundColor: theme.cardBackground,
             contentPadding: EdgeInsets.zero,
             content: Container(
               width: MediaQuery.of(context).size.width * 0.85,
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: const BoxConstraints(maxWidth: 340),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 32),
-                  
+                  const SizedBox(height: 24),
+
                   // Header Icon
                   Container(
-                    width: 80,
-                    height: 80,
+                    width: 56,
+                    height: 56,
                     decoration: BoxDecoration(
                       color: theme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
@@ -98,34 +98,34 @@ class SystemPermissionHandler {
                     child: Icon(
                       Icons.layers_rounded,
                       color: theme.primary,
-                      size: 36,
+                      size: 26,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  
+                  const SizedBox(height: 14),
+
                   // Title
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
                       'Display Over Other Apps',
                       style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         fontFamily: 'Poppins',
                         color: theme.textPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  
+                  const SizedBox(height: 6),
+
                   // Description
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
-                      'DocTak needs permission to display\nover other apps for:',
+                      'DocTak needs permission to display over other apps for:',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 12.5,
                         fontFamily: 'Poppins',
                         color: theme.textSecondary,
                         height: 1.4,
@@ -133,11 +133,11 @@ class SystemPermissionHandler {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  
+                  const SizedBox(height: 16),
+
                   // Features List
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
                         _buildFeatureItem(
@@ -145,13 +145,13 @@ class SystemPermissionHandler {
                           Icons.picture_in_picture_alt_rounded,
                           'Picture-in-Picture mode during video calls',
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         _buildFeatureItem(
                           theme,
                           Icons.call_rounded,
                           'Incoming call notifications',
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         _buildFeatureItem(
                           theme,
                           Icons.stay_current_portrait_rounded,
@@ -160,16 +160,19 @@ class SystemPermissionHandler {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  
+                  const SizedBox(height: 16),
+
                   // Info Banner
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.warning.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(
                           color: theme.warning.withValues(alpha: 0.2),
                           width: 1,
@@ -180,14 +183,14 @@ class SystemPermissionHandler {
                           Icon(
                             Icons.info_outline_rounded,
                             color: theme.warning,
-                            size: 22,
+                            size: 18,
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'You\'ll be redirected to Settings to\nenable this permission.',
+                              'You\'ll be redirected to Settings to enable this permission.',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 11.5,
                                 fontFamily: 'Poppins',
                                 color: theme.textPrimary,
                                 height: 1.4,
@@ -198,21 +201,21 @@ class SystemPermissionHandler {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 28),
-                  
+                  const SizedBox(height: 20),
+
                   // Action Buttons
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () => Navigator.of(dialogContext).pop(false),
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              side: BorderSide(color: theme.border, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 11),
+                              side: BorderSide(color: theme.border, width: 1),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               backgroundColor: Colors.transparent,
                             ),
@@ -220,23 +223,23 @@ class SystemPermissionHandler {
                               'Not Now',
                               style: TextStyle(
                                 fontFamily: 'Poppins',
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: theme.textSecondary,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () => Navigator.of(dialogContext).pop(true),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: theme.primary,
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 11),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               elevation: 0,
                             ),
@@ -244,8 +247,8 @@ class SystemPermissionHandler {
                               'Continue',
                               style: TextStyle(
                                 fontFamily: 'Poppins',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -253,7 +256,7 @@ class SystemPermissionHandler {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -270,21 +273,21 @@ class SystemPermissionHandler {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: theme.cardBackground,
         contentPadding: EdgeInsets.zero,
         content: Container(
           width: MediaQuery.of(context).size.width * 0.85,
-          constraints: const BoxConstraints(maxWidth: 400),
+          constraints: const BoxConstraints(maxWidth: 340),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 32),
-              
+              const SizedBox(height: 24),
+
               // Header Icon
               Container(
-                width: 80,
-                height: 80,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
                   color: theme.warning.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
@@ -296,34 +299,34 @@ class SystemPermissionHandler {
                 child: Icon(
                   Icons.settings_rounded,
                   color: theme.warning,
-                  size: 36,
+                  size: 26,
                 ),
               ),
-              const SizedBox(height: 20),
-              
+              const SizedBox(height: 14),
+
               // Title
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
                   'Permission Required',
                   style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     fontFamily: 'Poppins',
                     color: theme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 12),
-              
+              const SizedBox(height: 6),
+
               // Description
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'To enable Picture-in-Picture mode and\ncall features:',
+                  'To enable Picture-in-Picture mode and call features:',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12.5,
                     fontFamily: 'Poppins',
                     color: theme.textSecondary,
                     height: 1.4,
@@ -331,36 +334,36 @@ class SystemPermissionHandler {
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 24),
-              
+              const SizedBox(height: 16),
+
               // Steps
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
                     _buildStep(theme, 1, 'Open Settings'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     _buildStep(theme, 2, 'Find "DocTak" in the app list'),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     _buildStep(theme, 3, 'Enable "Display over other apps"'),
                   ],
                 ),
               ),
-              const SizedBox(height: 28),
-              
+              const SizedBox(height: 20),
+
               // Action Buttons
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(dialogContext).pop(),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          side: BorderSide(color: theme.border, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          side: BorderSide(color: theme.border, width: 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           backgroundColor: Colors.transparent,
                         ),
@@ -368,14 +371,14 @@ class SystemPermissionHandler {
                           'Maybe Later',
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: theme.textSecondary,
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
@@ -385,9 +388,9 @@ class SystemPermissionHandler {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: theme.warning,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 0,
                         ),
@@ -395,8 +398,8 @@ class SystemPermissionHandler {
                           'Open Settings',
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
@@ -404,7 +407,7 @@ class SystemPermissionHandler {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -417,25 +420,25 @@ class SystemPermissionHandler {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
             color: theme.primary.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, size: 18, color: theme.primary),
+          child: Icon(icon, size: 15, color: theme.primary),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 4),
             child: Text(
               text,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12.5,
                 fontFamily: 'Poppins',
                 color: theme.textSecondary,
-                height: 1.4,
+                height: 1.35,
               ),
             ),
           ),
@@ -449,8 +452,8 @@ class SystemPermissionHandler {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 28,
+          height: 28,
           decoration: BoxDecoration(
             color: theme.warning.withValues(alpha: 0.15),
             shape: BoxShape.circle,
@@ -459,7 +462,7 @@ class SystemPermissionHandler {
             child: Text(
               '$step',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: theme.warning,
                 fontFamily: 'Poppins',
@@ -467,17 +470,17 @@ class SystemPermissionHandler {
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 4),
             child: Text(
               text,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12.5,
                 fontFamily: 'Poppins',
                 color: theme.textSecondary,
-                height: 1.4,
+                height: 1.35,
               ),
             ),
           ),

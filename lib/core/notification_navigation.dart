@@ -168,8 +168,10 @@ class NotificationNavigation {
     if (_isMessageType(type)) {
       final conversationId = _int(data, ['conversationId', 'conversation_id', 'entityId', 'id']) ?? 0;
       final senderId = _str(data, ['actorUserId', 'senderId', 'sender_id', 'userId', 'user_id']) ?? '';
-      final username = _str(data, ['title']) ?? 'Chat';
-      final profilePic = AppData.fullImageUrl(_str(data, ['image', 'profile_pic']));
+      // Prefer the explicit senderName the API now sends; `title` may be a
+      // generic push title ("New message") rather than the sender's name.
+      final username = _str(data, ['senderName', 'sender_name', 'title']) ?? 'Chat';
+      final profilePic = AppData.fullImageUrl(_str(data, ['profile_pic', 'image']));
       return ChatRoomScreen(
         id: senderId,
         conversationId: conversationId,

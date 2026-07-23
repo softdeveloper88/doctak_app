@@ -482,21 +482,21 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
     final theme = OneUITheme.of(context);
 
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       contentPadding: EdgeInsets.zero,
       backgroundColor: theme.cardBackground,
       content: Container(
         width: MediaQuery.of(context).size.width * 0.85,
-        constraints: const BoxConstraints(maxWidth: 400),
+        constraints: const BoxConstraints(maxWidth: 340),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
             // Header Icon
             Container(
-              width: 80,
-              height: 80,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: theme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
@@ -508,39 +508,39 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
               child: Icon(
                 widget.isVideoCall ? Icons.videocam_rounded : Icons.mic_rounded,
                 color: theme.primary,
-                size: 36,
+                size: 26,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
 
             // Title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 widget.isVideoCall
-                    ? 'Camera & Microphone\nAccess'
+                    ? 'Camera & Microphone Access'
                     : 'Microphone Access',
                 style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   fontFamily: 'Poppins',
                   color: theme.textPrimary,
-                  height: 1.2,
+                  height: 1.25,
                 ),
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
             // Subtitle
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 widget.isVideoCall
-                    ? 'Enable the following permissions to join\nthe video call'
+                    ? 'Enable the following permissions to join the video call'
                     : 'Enable microphone access to join the call',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12.5,
                   fontFamily: 'Poppins',
                   color: theme.textSecondary,
                   height: 1.4,
@@ -548,11 +548,11 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 18),
 
             // Permission Switches
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: _isLoading
                   ? Padding(
                       padding: const EdgeInsets.symmetric(vertical: 20),
@@ -579,7 +579,7 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                         ),
 
                         if (widget.isVideoCall) ...[
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           // Camera Permission
                           _buildPermissionRow(
                             context: context,
@@ -601,21 +601,21 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                     ),
             ),
 
-            const SizedBox(height: 28),
+            const SizedBox(height: 20),
 
             // Action Buttons
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _onCancel,
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: theme.border, width: 1.5),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        side: BorderSide(color: theme.border, width: 1),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         backgroundColor: Colors.transparent,
                       ),
@@ -623,27 +623,27 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                         'Cancel',
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: theme.textSecondary,
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _allRequiredPermissionsGranted
                           ? _onContinue
                           : null,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 11),
                         backgroundColor: theme.primary,
                         disabledBackgroundColor: theme.surfaceVariant,
                         foregroundColor: Colors.white,
                         disabledForegroundColor: theme.textTertiary,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         elevation: 0,
                       ),
@@ -653,8 +653,8 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                             : 'Enable All',
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -663,7 +663,7 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -706,27 +706,27 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
 
     return InkWell(
       onTap: isEnabled ? null : onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(color: borderColor, width: 1),
         ),
         child: Row(
           children: [
             // Icon
             Container(
-              width: 44,
-              height: 44,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: iconBgColor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 22),
+              child: Icon(icon, color: iconColor, size: 18),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
 
             // Title and Subtitle
             Expanded(
@@ -736,17 +736,17 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
                       color: theme.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11.5,
                       fontFamily: 'Poppins',
                       color: needsSettings
                           ? theme.warning
@@ -759,13 +759,13 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
 
             // Switch/Status Indicator - Fixed to prevent scrolling
             SizedBox(
-              width: 51,
-              height: 31,
+              width: 42,
+              height: 26,
               child: _isRequesting && !isEnabled
                   ? Center(
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 18,
+                        height: 18,
                         child: CupertinoActivityIndicator(color: theme.primary),
                       ),
                     )
@@ -774,24 +774,24 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                       child: Icon(
                         Icons.settings_outlined,
                         color: theme.warning,
-                        size: 24,
+                        size: 20,
                       ),
                     )
                   : isEnabled
                   // Fixed switch indicator for enabled state - prevents scroll issue
                   ? Container(
-                      width: 51,
-                      height: 31,
+                      width: 42,
+                      height: 26,
                       decoration: BoxDecoration(
                         color: theme.success,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(13),
                       ),
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Container(
                           margin: const EdgeInsets.all(2),
-                          width: 27,
-                          height: 27,
+                          width: 22,
+                          height: 22,
                           decoration: const BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
@@ -800,10 +800,13 @@ class _PermissionStatusDialogState extends State<_PermissionStatusDialog> {
                       ),
                     )
                   // Interactive switch for disabled state
-                  : CupertinoSwitch(
-                      value: false,
-                      activeTrackColor: theme.success,
-                      onChanged: (_) => onTap(),
+                  : Transform.scale(
+                      scale: 0.82,
+                      child: CupertinoSwitch(
+                        value: false,
+                        activeTrackColor: theme.success,
+                        onChanged: (_) => onTap(),
+                      ),
                     ),
             ),
           ],

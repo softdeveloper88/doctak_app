@@ -164,7 +164,15 @@ Commenter commenterFromJson(String str) => Commenter.fromJson(json.decode(str));
 String commenterToJson(Commenter data) => json.encode(data.toJson());
 
 class Commenter {
-  Commenter({this.id, this.firstName, this.lastName, this.profilePic, this.specialty, this.isVerified});
+  Commenter({
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.profilePic,
+    this.specialty,
+    this.isVerified,
+    this.isPremium,
+  });
 
   Commenter.fromJson(dynamic json) {
     id = json['id'];
@@ -178,6 +186,7 @@ class Commenter {
     profilePic = resolveCommentProfilePic(json);
     specialty = json['specialty']?.toString() ?? json['specialization']?.toString();
     isVerified = parseCommenterVerified(json);
+    isPremium = parseCommenterPremium(json);
   }
 
   static bool parseCommenterVerified(dynamic json) {
@@ -187,12 +196,22 @@ class Commenter {
         json['commenter_is_verified'];
     return raw == true || raw == 1 || raw == '1';
   }
+
+  static bool parseCommenterPremium(dynamic json) {
+    if (json is! Map) return false;
+    final raw = json['is_premium'] ??
+        json['commenterIsPremium'] ??
+        json['commenter_is_premium'];
+    return raw == true || raw == 1 || raw == '1';
+  }
+
   dynamic id;
   String? firstName;
   String? lastName;
   String? profilePic;
   String? specialty;
   bool? isVerified;
+  bool? isPremium;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -202,6 +221,7 @@ class Commenter {
     map['profile_pic'] = profilePic;
     map['specialty'] = specialty;
     map['is_verified'] = isVerified;
+    map['is_premium'] = isPremium;
     return map;
   }
 }

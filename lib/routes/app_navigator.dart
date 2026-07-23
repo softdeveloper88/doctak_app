@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'package:doctak_app/core/utils/age_assurance.dart';
 import 'package:doctak_app/core/utils/common_navigator.dart'
     show PageRouteAnimation, buildPageRoute;
 import 'package:doctak_app/core/utils/navigator_service.dart';
 
 // Typed destinations.
+import 'package:doctak_app/presentation/age_assurance/age_assurance_screen.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/presentation/cme_module/screens/cme_event_detail_screen.dart';
 import 'package:doctak_app/presentation/diagnosis_module/screens/diagnosis_detail_screen.dart';
@@ -137,11 +139,31 @@ class AppNavigator {
   // ---------------------------------------------------------------------------
 
   /// Home dashboard. Clears the back stack by default (post-login / logout).
+  /// Runs age assurance before opening the shell when needed.
   static Future<T?> toDashboard<T>(
     BuildContext context, {
     bool clearStack = true,
-  }) {
+  }) async {
     const screen = SVDashboardScreen();
+    final confirmed = await AgeAssurance.isConfirmedForCurrentUser();
+    if (!context.mounted) return null;
+        if (!confirmed) {
+      await Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (gateCtx) => AgeAssuranceScreen(
+            allowExitToLogin: true,
+            onConfirmed: () {
+              Navigator.of(gateCtx).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => screen),
+                (_) => false,
+              );
+            },
+          ),
+        ),
+        (_) => false,
+      );
+      return null;
+    }
     return clearStack
         ? pushAndRemoveAll<T>(context, screen,
             animation: PageRouteAnimation.Slide)

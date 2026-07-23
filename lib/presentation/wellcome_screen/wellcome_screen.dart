@@ -2,11 +2,10 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
+import 'package:doctak_app/core/utils/email_verification_service.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http/http.dart' as http;
-import '../../core/utils/app/AppData.dart';
 
 class WelcomeScreen extends StatelessWidget {
   final String email;
@@ -47,39 +46,43 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   Future<void> sendVerificationLink(String email, BuildContext context) async {
-    // Show the loading dialog
     showLoadingDialog(context);
 
     try {
-      final response = await http.post(Uri.parse('${AppData.remoteUrl}/send-verification-link'), body: {'email': email});
+      final result = await EmailVerificationService.resend(email);
+      if (!context.mounted) return;
+      hideLoadingDialog(context);
 
-      // Close the loading dialog
-      Navigator.of(context).pop();
-
-      if (response.statusCode == 200) {
-        // Successful API call, handle the response if needed
-        // Show success Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent), duration: Duration(seconds: 2)));
+      if (result.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.message.isNotEmpty
+                  ? result.message
+                  : translation(context).msg_verification_link_sent,
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
         AppNavigator.pushReplacement(context, const LoginScreen());
-      } else if (response.statusCode == 422) {
-        // Validation error or user email not found
-        // Show error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), duration: Duration(seconds: 2)));
-      } else if (response.statusCode == 404) {
-        // User already verified
-        // Show info Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_user_already_verified), duration: Duration(seconds: 2)));
-      } else {
-        // Something went wrong
-        // Show error Snackbar
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), duration: Duration(seconds: 2)));
+        return;
       }
-    } catch (e) {
-      // Handle network errors or other exceptions
-      // Close the loading dialog
-      Navigator.of(context).pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_wrong), duration: Duration(seconds: 2)));
+      final text = result.message.isNotEmpty
+          ? result.message
+          : translation(context).msg_something_wrong;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(text), duration: const Duration(seconds: 3)),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      hideLoadingDialog(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(translation(context).msg_something_wrong),
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 }

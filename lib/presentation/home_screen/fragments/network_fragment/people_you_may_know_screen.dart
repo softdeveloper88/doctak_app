@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/core/utils/location_display.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_widgets.dart';
@@ -71,6 +71,9 @@ class _PeopleYouMayKnowScreenState extends State<PeopleYouMayKnowScreen> {
     }
     _scrollCtrl.addListener(_onScroll);
     preloadSpecialties().then((_) {
+      if (mounted) setState(() {});
+    });
+    preloadLocations().then((_) {
       if (mounted) setState(() {});
     });
     _loadFilters();
@@ -1108,6 +1111,7 @@ String _resolvePersonName(Map<String, dynamic> person) {
 class NetworkUserData {
   final String name;
   final String specialty;
+  final String location;
   final int mutualCount;
   final String? avatarUrl;
   final String status;
@@ -1118,6 +1122,7 @@ class NetworkUserData {
   const NetworkUserData._({
     required this.name,
     required this.specialty,
+    required this.location,
     required this.mutualCount,
     required this.avatarUrl,
     required this.status,
@@ -1128,8 +1133,8 @@ class NetworkUserData {
 
   factory NetworkUserData.fromMap(Map<String, dynamic> person) {
     final name = _resolvePersonName(person);
-    final specialty =
-        specialtyLabelOrNull(person['specialty']?.toString()) ?? '';
+    final specialty = networkPersonSpecialty(person);
+    final location = networkPersonLocation(person);
     final mutualRaw = person['mutualCount'] ?? person['mutual_count'] ?? 0;
     final mutualCount =
         mutualRaw is int ? mutualRaw : int.tryParse(mutualRaw.toString()) ?? 0;
@@ -1146,6 +1151,7 @@ class NetworkUserData {
     return NetworkUserData._(
       name: name,
       specialty: specialty,
+      location: location,
       mutualCount: mutualCount,
       avatarUrl: avatarUrl,
       status: status,
@@ -1242,10 +1248,31 @@ class NetworkUserListTile extends StatelessWidget {
                   if (data.specialty.isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      capitalizeWords(data.specialty),
-                      maxLines: 1,
+                      data.specialty,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.bodySecondary.copyWith(fontSize: 12.5),
+                    ),
+                  ],
+                  if (data.location.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(Icons.location_on_outlined,
+                            size: 13, color: theme.textTertiary),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            data.location,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.caption.copyWith(
+                              fontSize: 11.5,
+                              color: theme.textTertiary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                   if (data.mutualCount > 0) ...[

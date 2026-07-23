@@ -646,12 +646,21 @@ class PiPService {
 
   /// Dispose the service
   void dispose() {
-    if (Platform.isAndroid) {
-      _pipAndroid.unregisterStateChangedObserver();
-    } else if (Platform.isIOS) {
-      _iosAgoraPiPSubscription?.cancel();
-      _iosAgoraPiPService.dispose();
+    try {
+      if (Platform.isAndroid) {
+        // Stopping first avoids IllegalStateException when the Activity is
+        // already exiting (Crashlytics: PipController.dispose / token isExiting).
+        unawaited(_pipAndroid.stop().catchError((_) {}));
+        _pipAndroid.unregisterStateChangedObserver();
+      } else if (Platform.isIOS) {
+        _iosAgoraPiPSubscription?.cancel();
+        _iosAgoraPiPService.dispose();
+      }
+    } catch (e) {
+      debugPrint('📺 PiP: dispose ignored error: $e');
     }
-    _statusController.close();
+    if (!_statusController.isClosed) {
+      _statusController.close();
+    }
   }
 }

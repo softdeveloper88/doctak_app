@@ -163,27 +163,20 @@ android {
     }
     buildTypes {
         release {
-            // ========================================
-            // TEMPORARILY DISABLE CODE SHRINKING FOR TESTING
-            // ========================================
-            // Set to false to test if issues are related to R8/ProGuard
-            // After testing, change back to true
+            // R8: shrink + obfuscate + optimize (required for Play optimization score)
             minifyEnabled true
             shrinkResources true
             multiDexEnabled true
 
-            // ProGuard/R8 configuration (only used when minifyEnabled is true)
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), 'proguard-rules.pro', 'r8-rules.pro', 'proguard-additions.pro'
+            // Use the *optimize* defaults so bytecode optimizations are enabled
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), 'proguard-rules.pro', 'r8-rules.pro', 'proguard-additions.pro'
 
-            // Set to false for production release
             debuggable false
-
-            // Configure signing
             signingConfig = signingConfigs.release
-            
-            // Configure Firebase Crashlytics
+
+            // Upload mapping so Crashlytics can deobfuscate release crashes
             firebaseCrashlytics {
-                mappingFileUploadEnabled false
+                mappingFileUploadEnabled true
             }
         }
         

@@ -38,6 +38,10 @@ class ChatGptApiService {
       return 'image/gif';
     } else if (filename.endsWith('.webp')) {
       return 'image/webp';
+    } else if (filename.endsWith('.heic')) {
+      return 'image/heic';
+    } else if (filename.endsWith('.heif')) {
+      return 'image/heif';
     }
     return 'image/jpeg'; // Default to jpeg for medical images
   }

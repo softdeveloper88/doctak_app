@@ -127,40 +127,55 @@
             <meta-data
                 android:name="flutter_deeplinking_enabled"
                 android:value="true" />
-            <!-- Deep links for doctak.net (all paths in one filter for reliable verification) -->
+            <!-- App Links verification: host-only filter (paths in separate filter below) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="doctak.net" />
-                <data android:pathPrefix="/post/" />
-                <data android:pathPrefix="/job/" />
-                <data android:pathPrefix="/conference/" />
-                <data android:pathPrefix="/meeting/" />
-                <data android:pathPrefix="/join-meeting/" />
-                <data android:pathPrefix="/call/" />
-                <data android:pathPrefix="/profile/" />
             </intent-filter>
-            <!-- Deep links for www.doctak.net -->
-            <intent-filter android:autoVerify="true">
+            <!-- Deep link paths for doctak.net -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="www.doctak.net" />
-                <data android:pathPrefix="/post/" />
-                <data android:pathPrefix="/job/" />
-                <data android:pathPrefix="/conference/" />
-                <data android:pathPrefix="/meeting/" />
-                <data android:pathPrefix="/join-meeting/" />
-                <data android:pathPrefix="/call/" />
-                <data android:pathPrefix="/profile/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/post/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/job/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/jobs/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/conference/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/meeting/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/meetings/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/meetings/live/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/join-meeting/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/call/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/profile/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/u/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/b/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/groups/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/blogs/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/articles/" />
+                <data android:scheme="https" android:host="doctak.net" android:pathPrefix="/discuss-case/" />
             </intent-filter>
-            <!-- Deep links for Firebase Dynamic Links domain -->
-            <intent-filter android:autoVerify="true">
+            <!-- www.doctak.net paths (no autoVerify until www domain is live) -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="doctak.page.link" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/post/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/job/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/jobs/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/conference/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/meeting/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/meetings/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/join-meeting/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/call/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/profile/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/u/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/b/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/groups/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/blogs/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/articles/" />
+                <data android:scheme="https" android:host="www.doctak.net" android:pathPrefix="/discuss-case/" />
             </intent-filter>
             <!-- Custom URL Scheme (works without server verification) -->
             <intent-filter>
@@ -168,6 +183,23 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="doctak" android:host="open" />
+            </intent-filter>
+
+            <!-- Receive shares from other apps (Chrome, WhatsApp, etc.) -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
 

@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/utils/asset_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -78,6 +79,14 @@ IconData? feedMaterialIconForAsset(String asset) {
       return Icons.poll_outlined;
     case FeedIconAssets.composeBlog:
       return Icons.article_outlined;
+    case FeedIconAssets.navHome:
+      return Icons.home_outlined;
+    case FeedIconAssets.navNetwork:
+      return Icons.people_outline_rounded;
+    case FeedIconAssets.navPost:
+      return Icons.add_rounded;
+    case FeedIconAssets.navImages:
+      return Icons.image_outlined;
     default:
       return null;
   }
@@ -85,7 +94,9 @@ IconData? feedMaterialIconForAsset(String asset) {
 
 /// Warm SVG asset cache once (call from home init — no [BuildContext] needed).
 Future<void> precacheFeedSvgAssets() async {
+  await AssetGuard.warmUp();
   for (final asset in FeedIconAssets.allAssets) {
+    if (!AssetGuard.has(asset)) continue;
     try {
       final loader = SvgAssetLoader(asset);
       await svg.cache.putIfAbsent(
@@ -99,6 +110,9 @@ Future<void> precacheFeedSvgAssets() async {
 }
 
 /// Renders a reference-design SVG icon with optional tint.
+///
+/// Bottom-nav icons prefer SVG so a broken / tree-shaken MaterialIcons font
+/// (which can paint CJK glyphs for PUA codepoints) never shows in the tab bar.
 class FeedIcon extends StatelessWidget {
   final String asset;
   final double size;
@@ -111,8 +125,18 @@ class FeedIcon extends StatelessWidget {
     this.color,
   });
 
+  static bool _isNavAsset(String asset) =>
+      asset == FeedIconAssets.navHome ||
+      asset == FeedIconAssets.navNetwork ||
+      asset == FeedIconAssets.navPost ||
+      asset == FeedIconAssets.navImages;
+
   @override
   Widget build(BuildContext context) {
+    // Old store releases patched via Shorebird may not contain SVGs that were
+    // added later (patches can't ship assets). Skip the load entirely so we
+    // never throw "Unable to load asset" — the top Crashlytics issue.
+    if (!AssetGuard.has(asset)) return _fallback();
     return SvgPicture.asset(
       asset,
       width: size,
@@ -120,13 +144,124 @@ class FeedIcon extends StatelessWidget {
       colorFilter:
           color != null ? ColorFilter.mode(color!, BlendMode.srcIn) : null,
       placeholderBuilder: (_) => _fallback(),
-      errorBuilder: (_, __, ___) => _fallback(),
+      errorBuilder: (_, error, stackTrace) => _fallback(),
     );
   }
 
-  Widget _fallback() => Icon(
-        Icons.image_outlined,
-        size: size,
-        color: color ?? Colors.grey,
+  Widget _fallback() {
+    final tint = color ?? Colors.grey;
+    if (_isNavAsset(asset)) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: CustomPaint(
+          painter: _NavShapePainter(asset: asset, color: tint),
+        ),
       );
+    }
+    return Icon(
+      feedMaterialIconForAsset(asset) ?? Icons.image_outlined,
+      size: size,
+      color: tint,
+    );
+  }
+}
+
+/// Fontless shapes so nav never shows CJK glyphs when MaterialIcons is missing.
+class _NavShapePainter extends CustomPainter {
+  _NavShapePainter({required this.asset, required this.color});
+
+  final String asset;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.shortestSide * 0.1
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final s = size.shortestSide;
+    final o = Offset((size.width - s) / 2, (size.height - s) / 2);
+
+    switch (asset) {
+      case FeedIconAssets.navPost:
+        canvas.drawLine(
+          o + Offset(s * 0.5, s * 0.22),
+          o + Offset(s * 0.5, s * 0.78),
+          paint,
+        );
+        canvas.drawLine(
+          o + Offset(s * 0.22, s * 0.5),
+          o + Offset(s * 0.78, s * 0.5),
+          paint,
+        );
+        break;
+      case FeedIconAssets.navHome:
+        final path = Path()
+          ..moveTo(o.dx + s * 0.18, o.dy + s * 0.48)
+          ..lineTo(o.dx + s * 0.5, o.dy + s * 0.18)
+          ..lineTo(o.dx + s * 0.82, o.dy + s * 0.48)
+          ..lineTo(o.dx + s * 0.82, o.dy + s * 0.82)
+          ..lineTo(o.dx + s * 0.55, o.dy + s * 0.82)
+          ..lineTo(o.dx + s * 0.55, o.dy + s * 0.58)
+          ..lineTo(o.dx + s * 0.45, o.dy + s * 0.58)
+          ..lineTo(o.dx + s * 0.45, o.dy + s * 0.82)
+          ..lineTo(o.dx + s * 0.18, o.dy + s * 0.82)
+          ..close();
+        canvas.drawPath(path, paint);
+        break;
+      case FeedIconAssets.navNetwork:
+        canvas.drawCircle(o + Offset(s * 0.35, s * 0.32), s * 0.12, paint);
+        canvas.drawCircle(o + Offset(s * 0.65, s * 0.32), s * 0.12, paint);
+        canvas.drawArc(
+          Rect.fromCenter(
+            center: o + Offset(s * 0.35, s * 0.72),
+            width: s * 0.42,
+            height: s * 0.32,
+          ),
+          3.4,
+          2.5,
+          false,
+          paint,
+        );
+        canvas.drawArc(
+          Rect.fromCenter(
+            center: o + Offset(s * 0.65, s * 0.72),
+            width: s * 0.42,
+            height: s * 0.32,
+          ),
+          3.4,
+          2.5,
+          false,
+          paint,
+        );
+        break;
+      case FeedIconAssets.navImages:
+      default:
+        final rrect = RRect.fromRectAndRadius(
+          Rect.fromLTWH(o.dx + s * 0.18, o.dy + s * 0.22, s * 0.64, s * 0.56),
+          Radius.circular(s * 0.08),
+        );
+        canvas.drawRRect(rrect, paint);
+        canvas.drawCircle(o + Offset(s * 0.38, s * 0.4), s * 0.07, paint);
+        canvas.drawLine(
+          o + Offset(s * 0.22, s * 0.68),
+          o + Offset(s * 0.42, s * 0.52),
+          paint,
+        );
+        canvas.drawLine(
+          o + Offset(s * 0.42, s * 0.52),
+          o + Offset(s * 0.78, s * 0.7),
+          paint,
+        );
+        break;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _NavShapePainter oldDelegate) =>
+      oldDelegate.asset != asset || oldDelegate.color != color;
 }

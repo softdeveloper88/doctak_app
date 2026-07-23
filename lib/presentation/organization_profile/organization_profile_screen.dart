@@ -1,13 +1,21 @@
 import 'dart:ui';
 
+import 'package:doctak_app/core/acting/acting_context_service.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/data/apiClient/services/organization_profile_api_service.dart';
+import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 import 'package:doctak_app/data/models/organization_profile/organization_public_profile_model.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/add_post/compose_content_screen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_widgets.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/adapters/post_feed_adapter.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/post_feed_list_view.dart';
+import 'package:doctak_app/data/models/jobs/job_dto.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
+import 'package:doctak_app/presentation/jobs_module/widgets/job_card.dart';
 import 'package:doctak_app/presentation/organization_profile/organization_people_list_screen.dart';
+import 'package:doctak_app/presentation/organization_profile/organization_profile_edit_screen.dart';
 import 'package:doctak_app/presentation/organization_profile/bloc/organization_profile_bloc.dart';
 import 'package:doctak_app/presentation/organization_profile/bloc/organization_profile_event.dart';
 import 'package:doctak_app/presentation/organization_profile/bloc/organization_profile_state.dart';
@@ -15,6 +23,7 @@ import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
+import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,9 +40,17 @@ enum OrganizationProfileTab {
 }
 
 class OrganizationProfileScreen extends StatefulWidget {
-  const OrganizationProfileScreen({required this.identifier, super.key});
+  const OrganizationProfileScreen({
+    required this.identifier,
+    this.showBackButton = true,
+    super.key,
+  });
 
   final String identifier;
+
+  /// When false (bottom-nav profile tab), hide the back control — same as
+  /// personal [SVProfileFragment] on the dashboard tab.
+  final bool showBackButton;
 
   @override
   State<OrganizationProfileScreen> createState() =>
@@ -68,9 +85,16 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen>
         _tabs.every((tab) => nextTabs.contains(tab))) {
       return;
     }
-    _tabController?.dispose();
+    // Never dispose a TabController during build — TabBarView animations still
+    // hold the old parent animation and crash with a null check.
+    final old = _tabController;
     _tabs = nextTabs;
     _tabController = TabController(length: nextTabs.length, vsync: this);
+    if (old != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        old.dispose();
+      });
+    }
   }
 
   @override
@@ -109,10 +133,13 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen>
               appBar: AppBar(
                 backgroundColor: theme.scaffoldBackground,
                 elevation: 0,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  onPressed: () => Navigator.pop(context),
-                ),
+                automaticallyImplyLeading: widget.showBackButton,
+                leading: widget.showBackButton
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                        onPressed: () => Navigator.pop(context),
+                      )
+                    : null,
               ),
               body: RetryWidget(
                 errorMessage: state.message,
@@ -147,10 +174,13 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen>
                 SliverToBoxAdapter(
                   child: _OrganizationProfileHeader(
                     profile: profile,
+                    showBackButton: widget.showBackButton,
                     isFollowBusy: loadedState.isFollowBusy,
                     onFollowToggle: () =>
                         _bloc.add(const ToggleOrganizationFollowEvent()),
                     onMessageOwner: () => _openOwnerChat(profile),
+                    onEditProfile: () => _openEditProfile(profile),
+                    onCreatePost: () => _openBusinessComposer(profile),
                   ),
                 ),
                 SliverOverlapAbsorber(
@@ -170,7 +200,16 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen>
               body: TabBarView(
                 controller: _tabController,
                 children: _tabs
-                    .map((tab) => _OrganizationTabBody(tab: tab, profile: profile))
+                    .map(
+                      (tab) => _OrganizationTabBody(
+                        tab: tab,
+                        profile: profile,
+                        onContentChanged: _reload,
+                        onDeletePage: _isOwner(profile)
+                            ? () => _confirmDeleteBusiness(profile)
+                            : null,
+                      ),
+                    )
                     .toList(),
               ),
             ),
@@ -190,26 +229,111 @@ class _OrganizationProfileScreenState extends State<OrganizationProfileScreen>
       conversationId: 0,
     ).launch(context);
   }
+
+  void _reload() {
+    _bloc.add(LoadOrganizationProfileEvent(identifier: widget.identifier));
+  }
+
+  Future<void> _openEditProfile(OrganizationPublicProfileModel profile) async {
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OrganizationProfileEditScreen(profile: profile),
+      ),
+    );
+    if (changed == true && mounted) _reload();
+  }
+
+  bool _isOwner(OrganizationPublicProfileModel profile) {
+    final viewer = profile.viewer;
+    if (viewer == null) return false;
+    final ownerId = viewer.ownerUserId?.toString() ?? '';
+    if (ownerId.isEmpty) return false;
+    return ownerId == viewer.userId.toString() ||
+        ownerId == AppData.logInUserId.toString();
+  }
+
+  Future<void> _confirmDeleteBusiness(
+    OrganizationPublicProfileModel profile,
+  ) async {
+    final ok = await showOneUIConfirmDialog(
+      context,
+      title: 'Delete business page?',
+      subtitle:
+          'You will lose all your data for “${profile.organization.name}”, including posts, jobs, members, and settings. This cannot be undone.',
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      destructive: true,
+    );
+    if (!ok || !mounted) return;
+    try {
+      await OrganizationProfileApiService().deleteBusiness(
+        businessId: profile.organization.id,
+      );
+      final acting = ActingContextService.instance;
+      if (acting.organization?.id == profile.organization.id) {
+        await acting.switchToPersonal();
+      }
+      if (!mounted) return;
+      toast('Business page deleted');
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      toast(e.toString());
+    }
+  }
+
+  /// Opens the composer attributed to this business page. If the user is not
+  /// currently acting as this organization, switch first (same as opening the
+  /// workspace on the website).
+  Future<void> _openBusinessComposer(
+    OrganizationPublicProfileModel profile,
+  ) async {
+    final acting = ActingContextService.instance;
+    if (acting.organization?.id != profile.organization.id) {
+      try {
+        await acting.switchToOrganization(profile.organization.id);
+      } catch (_) {
+        if (mounted) toast('Could not switch to this business page.');
+        return;
+      }
+    }
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ComposeContentScreen(onPosted: _reload),
+      ),
+    );
+  }
 }
 
 class _OrganizationProfileHeader extends StatelessWidget {
   const _OrganizationProfileHeader({
     required this.profile,
+    required this.showBackButton,
     required this.isFollowBusy,
     required this.onFollowToggle,
     required this.onMessageOwner,
+    required this.onEditProfile,
+    required this.onCreatePost,
   });
 
   final OrganizationPublicProfileModel profile;
+  final bool showBackButton;
   final bool isFollowBusy;
   final VoidCallback onFollowToggle;
   final VoidCallback onMessageOwner;
+  final VoidCallback onEditProfile;
+  final VoidCallback onCreatePost;
 
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
     final org = profile.organization;
     final viewer = profile.viewer;
+    final canManage = viewer?.canManage ?? false;
     final isFollowing = viewer?.isFollowingOrganization ?? false;
     final canMessage = (viewer?.ownerUserId ?? '').isNotEmpty &&
         !(viewer?.isMember ?? false);
@@ -249,14 +373,15 @@ class _OrganizationProfileHeader extends StatelessWidget {
                 ),
               ),
             ),
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 16,
-              child: _OrgCoverButton(
-                icon: Icons.arrow_back_ios_new_rounded,
-                onTap: () => Navigator.pop(context),
+            if (showBackButton)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 8,
+                left: 16,
+                child: _OrgCoverButton(
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () => Navigator.pop(context),
+                ),
               ),
-            ),
             Positioned(
               top: 168 - 44,
               left: 20,
@@ -339,51 +464,70 @@ class _OrganizationProfileHeader extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-          child: Row(
-            children: [
-              if (canMessage) ...[
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onMessageOwner,
-                    icon: const Icon(Icons.message_outlined, size: 18),
-                    label: const Text('Message'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: theme.textPrimary,
-                      side: BorderSide(color: theme.border),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+          child: canManage
+              // Own business page — manage instead of follow (mirrors the
+              // website's "Manage workspace" hero action).
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: onEditProfile,
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('Edit page'),
+                        style: OneUIButtons.outlined(theme),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: FilledButton(
-                  onPressed: isFollowBusy ? null : onFollowToggle,
-                  style: FilledButton.styleFrom(
-                    backgroundColor:
-                        isFollowing ? theme.cardBackground : theme.primary,
-                    foregroundColor:
-                        isFollowing ? theme.textPrimary : Colors.white,
-                    side: isFollowing ? BorderSide(color: theme.border) : null,
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: onCreatePost,
+                        icon: const Icon(Icons.add_rounded, size: 20),
+                        label: const Text('Create post'),
+                        style: OneUIButtons.filled(theme),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    isFollowBusy
-                        ? '...'
-                        : isFollowing
-                            ? 'Following'
-                            : 'Follow',
-                  ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    if (canMessage) ...[
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: onMessageOwner,
+                          icon: const Icon(Icons.message_outlined, size: 18),
+                          label: const Text('Message'),
+                          style: OneUIButtons.outlined(theme),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: isFollowBusy ? null : onFollowToggle,
+                        style: OneUIButtons.filled(theme).copyWith(
+                          backgroundColor: WidgetStatePropertyAll(
+                            isFollowing ? theme.cardBackground : theme.primary,
+                          ),
+                          foregroundColor: WidgetStatePropertyAll(
+                            isFollowing ? theme.textPrimary : Colors.white,
+                          ),
+                          side: WidgetStatePropertyAll(
+                            isFollowing
+                                ? BorderSide(color: theme.border)
+                                : BorderSide.none,
+                          ),
+                        ),
+                        child: Text(
+                          isFollowBusy
+                              ? '...'
+                              : isFollowing
+                                  ? 'Following'
+                                  : 'Follow',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
         const SizedBox(height: 16),
         _OrganizationStatsRow(organization: org),
@@ -615,21 +759,32 @@ class _OrgTabBarDelegate extends SliverPersistentHeaderDelegate {
 }
 
 class _OrganizationTabBody extends StatelessWidget {
-  const _OrganizationTabBody({required this.tab, required this.profile});
+  const _OrganizationTabBody({
+    required this.tab,
+    required this.profile,
+    required this.onContentChanged,
+    this.onDeletePage,
+  });
 
   final OrganizationProfileTab tab;
   final OrganizationPublicProfileModel profile;
+  final VoidCallback onContentChanged;
+  final VoidCallback? onDeletePage;
 
   @override
   Widget build(BuildContext context) {
     final content = switch (tab) {
-      OrganizationProfileTab.profile =>
-        _ProfileTabContent(profile: profile),
+      OrganizationProfileTab.profile => _ProfileTabContent(
+          profile: profile,
+          onDeletePage: onDeletePage,
+        ),
       OrganizationProfileTab.jobs =>
         _JobsTabContent(jobs: profile.sections.jobs),
       OrganizationProfileTab.posts => _PostsTabContent(
           posts: profile.sections.posts,
           organization: profile.organization,
+          canManage: profile.viewer?.canManage ?? false,
+          onContentChanged: onContentChanged,
         ),
       OrganizationProfileTab.cme =>
         _CmeTabContent(events: profile.sections.cmeEvents),
@@ -671,9 +826,13 @@ class _OrgNestedTabScrollView extends StatelessWidget {
 }
 
 class _ProfileTabContent extends StatelessWidget {
-  const _ProfileTabContent({required this.profile});
+  const _ProfileTabContent({
+    required this.profile,
+    this.onDeletePage,
+  });
 
   final OrganizationPublicProfileModel profile;
+  final VoidCallback? onDeletePage;
 
   @override
   Widget build(BuildContext context) {
@@ -788,6 +947,31 @@ class _ProfileTabContent extends StatelessWidget {
             ),
           ),
         ],
+        if (onDeletePage != null) ...[
+          const SizedBox(height: 12),
+          AppSectionCard(
+            title: 'Danger zone',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'You will lose all your data for this business page, including posts, jobs, members, and settings. This cannot be undone.',
+                  style: theme.bodySecondary.copyWith(height: 1.4),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: kOneUIButtonHeight,
+                  child: OutlinedButton(
+                    onPressed: onDeletePage,
+                    style: OneUIButtons.outlined(theme, destructive: true),
+                    child: const Text('Delete business page'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -811,22 +995,24 @@ class _JobsTabContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (jobs.isEmpty) return _EmptyTab(message: 'No open roles published yet.');
-    return ListView.separated(
+    return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
       itemCount: jobs.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (context, index) {
         final job = jobs[index];
-        return _ListCard(
-          title: job.title,
-          subtitle: [
-            if ((job.location ?? '').isNotEmpty) job.location,
-            if ((job.country ?? '').isNotEmpty) job.country,
-            if ((job.jobType ?? '').isNotEmpty) _sentenceCase(job.jobType!),
-          ].whereType<String>().join(' · '),
-          trailing: '${job.applicants} applicants',
+        return JobCard(
+          job: JobCardDto(
+            id: job.id,
+            title: job.title,
+            location: job.location,
+            country: job.country,
+            jobType: job.jobType,
+            createdAt: job.createdAt,
+            stats: JobStatsDto(applicants: job.applicants),
+          ),
+          showBookmark: false,
           onTap: () => JobsDetailsScreen(jobId: job.id).launch(context),
         );
       },
@@ -838,10 +1024,14 @@ class _PostsTabContent extends StatefulWidget {
   const _PostsTabContent({
     required this.posts,
     required this.organization,
+    this.canManage = false,
+    this.onContentChanged,
   });
 
   final List<OrganizationPostSummary> posts;
   final OrganizationSummary organization;
+  final bool canManage;
+  final VoidCallback? onContentChanged;
 
   @override
   State<_PostsTabContent> createState() => _PostsTabContentState();
@@ -854,6 +1044,41 @@ class _PostsTabContentState extends State<_PostsTabContent> {
   void dispose() {
     _homeBloc.close();
     super.dispose();
+  }
+
+  Future<void> _confirmDelete(Post post) async {
+    final theme = OneUITheme.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: theme.cardBackground,
+        title: Text('Delete post?', style: theme.titleSmall),
+        content: Text(
+          'This post will be removed from the business page.',
+          style: theme.bodySecondary,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('Cancel', style: TextStyle(color: theme.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('Delete', style: TextStyle(color: theme.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final res = await SharedApiService().deletePostV1(postId: '${post.id}');
+    if (!mounted) return;
+    if (res.success) {
+      toast('Post deleted');
+      widget.onContentChanged?.call();
+    } else {
+      toast(res.message ?? 'Failed to delete post');
+    }
   }
 
   @override
@@ -885,6 +1110,10 @@ class _PostsTabContentState extends State<_PostsTabContent> {
       scrollMode: PostFeedScrollMode.nested,
       padding: EdgeInsets.zero,
       trimTopCardGap: true,
+      canModerate: widget.canManage,
+      hooks: widget.canManage
+          ? PostFeedCardHooks(onDelete: _confirmDelete)
+          : const PostFeedCardHooks(),
     );
   }
 }

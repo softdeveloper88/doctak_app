@@ -27,6 +27,27 @@ class FeedLoadMoreRequested extends FeedEvent {
   const FeedLoadMoreRequested();
 }
 
+/// Realtime patch from UserChannel WebSocket (`feed.post.updated`).
+class FeedPostUpdatedEvent extends FeedEvent {
+  final String postId;
+  final String? body;
+  final String? title;
+  final String? preview;
+
+  const FeedPostUpdatedEvent({
+    required this.postId,
+    this.body,
+    this.title,
+    this.preview,
+  });
+}
+
+/// Realtime removal from UserChannel WebSocket (`feed.post.deleted`).
+class FeedPostDeletedEvent extends FeedEvent {
+  final String postId;
+  const FeedPostDeletedEvent(this.postId);
+}
+
 /// Background first-page enrich (case/survey modules) — separate handler so emit stays valid after await.
 class FeedEnrichFirstPageRequested extends FeedEvent {
   final int generation;
@@ -112,6 +133,8 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<FeedLoadRequested>(_onLoad);
     on<FeedLoadMoreRequested>(_onLoadMore);
     on<FeedEnrichFirstPageRequested>(_onEnrichFirstPage);
+    on<FeedPostUpdatedEvent>(_onPostUpdated);
+    on<FeedPostDeletedEvent>(_onPostDeleted);
   }
 
   bool get canLoadMore => _hasMore && !_isFetching;
@@ -375,5 +398,128 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       _seenKeys.add(key);
       _entries.add(entry);
     }
+  }
+
+  bool _itemReferencesPost(FeedItem item, String postId) =>
+      item.referencesPostId(postId);
+
+  FeedItem? _patchItem(FeedItem item, String postId, FeedPostUpdatedEvent event) {
+    if (!_itemReferencesPost(item, postId)) return null;
+    return item.patchPayload({
+      if (event.body != null) 'body': event.body,
+      if (event.title != null) 'title': event.title,
+      if (event.preview != null) 'preview': event.preview,
+      if (event.preview != null) 'description': event.preview,
+    });
+  }
+
+  Future<void> _onPostUpdated(
+    FeedPostUpdatedEvent event,
+    Emitter<FeedState> emit,
+  ) async {
+    final postId = event.postId.trim();
+    if (postId.isEmpty || _entries.isEmpty) return;
+
+    var changed = false;
+    final nextEntries = <FeedEntry>[];
+
+    for (final entry in _entries) {
+      if (entry.kind == FeedEntryKind.item) {
+        final item = entry.item;
+        if (item == null) {
+          nextEntries.add(entry);
+          continue;
+        }
+        final patched = _patchItem(item, postId, event);
+        if (patched != null) {
+          changed = true;
+          nextEntries.add(FeedEntry.itemEntry(patched));
+        } else {
+          nextEntries.add(entry);
+        }
+        continue;
+      }
+
+      final patchedItems = entry.items
+          .map((item) => _patchItem(item, postId, event) ?? item)
+          .toList();
+      if (!_listsEqual(entry.items, patchedItems)) changed = true;
+      nextEntries.add(FeedEntry.stripEntry(entry.stripType, patchedItems));
+    }
+
+    if (!changed) return;
+
+    _entries
+      ..clear()
+      ..addAll(nextEntries);
+    _emitLoaded(emit);
+    unawaited(_feedCache.saveFeed(
+      entries: _entries,
+      nextCursor: _cursor,
+      hasMore: _hasMore,
+      replace: true,
+    ));
+  }
+
+  Future<void> _onPostDeleted(
+    FeedPostDeletedEvent event,
+    Emitter<FeedState> emit,
+  ) async {
+    final postId = event.postId.trim();
+    if (postId.isEmpty || _entries.isEmpty) return;
+
+    final keysToRemove = <String>{};
+    final nextEntries = <FeedEntry>[];
+
+    for (final entry in _entries) {
+      if (entry.kind == FeedEntryKind.item) {
+        final item = entry.item;
+        if (item != null && _itemReferencesPost(item, postId)) {
+          keysToRemove.add(entry.dedupeKey);
+          continue;
+        }
+        nextEntries.add(entry);
+        continue;
+      }
+
+      final remaining = entry.items
+          .where((item) => !_itemReferencesPost(item, postId))
+          .toList();
+      if (remaining.length == entry.items.length) {
+        nextEntries.add(entry);
+        continue;
+      }
+      for (final removed in entry.items) {
+        if (_itemReferencesPost(removed, postId)) {
+          keysToRemove.add('${entry.stripType}_${removed.id}');
+        }
+      }
+      if (remaining.isNotEmpty) {
+        nextEntries.add(FeedEntry.stripEntry(entry.stripType, remaining));
+      }
+    }
+
+    if (keysToRemove.isEmpty && nextEntries.length == _entries.length) return;
+
+    _seenKeys.removeAll(keysToRemove);
+    _entries
+      ..clear()
+      ..addAll(nextEntries);
+    _emitLoaded(emit);
+    unawaited(_feedCache.saveFeed(
+      entries: _entries,
+      nextCursor: _cursor,
+      hasMore: _hasMore,
+      replace: true,
+    ));
+  }
+
+  bool _listsEqual(List<FeedItem> a, List<FeedItem> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (!identical(a[i], b[i])) return false;
+    }
+    return true;
   }
 }

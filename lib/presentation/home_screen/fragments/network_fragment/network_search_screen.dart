@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
-import 'package:doctak_app/core/utils/capitalize_words.dart';
+import 'package:doctak_app/core/utils/location_display.dart';
 import 'package:doctak_app/data/apiClient/services/network_api_service.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_widgets.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/people_you_may_know_screen.dart';
@@ -314,14 +314,18 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
     final typeLabel = org['type_label']?.toString() ??
         org['typeLabel']?.toString() ??
         'Business';
-    final city = org['city']?.toString() ?? '';
+    final locationLabel = joinLocationLabels([
+      org['city']?.toString(),
+      org['state']?.toString(),
+      org['country']?.toString() ?? org['countryName']?.toString(),
+    ]);
     final followers = int.tryParse(
           org['follower_count']?.toString() ?? org['followerCount']?.toString() ?? '',
         ) ??
         0;
     final subtitleParts = <String>[
       typeLabel,
-      if (city.isNotEmpty) city,
+      if (locationLabel != null && locationLabel.isNotEmpty) locationLabel,
       if (followers > 0) '${networkFormatCount(followers)} followers',
     ];
 
@@ -392,19 +396,18 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
 
   Widget _buildPeopleSuggestionTile(OneUITheme theme, Map<String, dynamic> user) {
     final name = networkSearchItemName(user);
-    final specialty = user['specialty'] as String? ?? '';
+    final specialty = networkPersonSpecialty(user);
+    final location = networkPersonLocation(user);
     final profilePic = AppData.fullImageUrl(user['profile_pic'] as String? ?? '');
     final degree = user['degree'] as String?;
-    final country = user['country'] as String? ?? '';
 
-    // Build subtitle: "specialty · country" or just one
     String subtitle = '';
-    if (specialty.isNotEmpty && country.isNotEmpty) {
-      subtitle = '${capitalizeWords(specialty)} · $country';
+    if (specialty.isNotEmpty && location.isNotEmpty) {
+      subtitle = '$specialty · $location';
     } else if (specialty.isNotEmpty) {
-      subtitle = capitalizeWords(specialty);
-    } else if (country.isNotEmpty) {
-      subtitle = country;
+      subtitle = specialty;
+    } else if (location.isNotEmpty) {
+      subtitle = location;
     }
 
     return InkWell(
@@ -479,7 +482,7 @@ class _NetworkSearchScreenState extends State<NetworkSearchScreen> {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.bodySecondary.copyWith(fontSize: 12),
                     ),

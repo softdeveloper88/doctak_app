@@ -1511,14 +1511,19 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
         // Camera always produces a single shot; Gallery with limit=1 also single
         final XFile? file = await picker.pickImage(
           source: source,
-          imageQuality: 90,
+          // Prefer JPEG output — HEIC labeled as JPEG breaks Gemini analysis.
+          imageQuality: 85,
+          maxWidth: 2048,
+          maxHeight: 2048,
         );
         if (file != null) picked = [file];
       } else {
         // Gallery multi-select (X-ray / Mammography allow up to 2)
         // Note: limit parameter not universally supported on Android — enforce via sublist
         final List<XFile> files = await picker.pickMultiImage(
-          imageQuality: 90,
+          imageQuality: 85,
+          maxWidth: 2048,
+          maxHeight: 2048,
         );
         picked = files;
       }

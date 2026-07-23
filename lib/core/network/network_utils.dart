@@ -31,6 +31,10 @@ Map<String, String> buildHeaderTokens({
     header[HttpHeaders.authorizationHeader] = 'Bearer $token';
   }
 
+  // Acting-as business page (mirrors web `doctak_acting_org` cookie) —
+  // makes posts/comments/likes/reposts attribute to the active workspace.
+  header.addAll(ActingContextService.instance.actingHeaders());
+
   return header;
 }
 

@@ -1015,7 +1015,23 @@ class AgoraPiPController: NSObject, AVPictureInPictureControllerDelegate {
 
             let dict = payload.dictionaryPayload
             let extra = dict["extra"] as? [String: Any] ?? [:]
+            let signalType = (extra["type"] as? String) ?? (dict["type"] as? String) ?? ""
             let callId = (dict["id"] as? String) ?? (extra["callId"] as? String) ?? UUID().uuidString
+
+            // VoIP cancel — dismiss CallKit without starting a new ring.
+            if signalType == "call_cancelled" {
+                let endData = flutter_callkit_incoming.Data(
+                    id: callId,
+                    nameCaller: "",
+                    handle: "",
+                    type: 0
+                )
+                endData.extra = extra as NSDictionary
+                SwiftFlutterCallkitIncomingPlugin.sharedInstance?.endCall(endData)
+                completion()
+                return
+            }
+
             let nameCaller = (dict["nameCaller"] as? String) ?? (extra["callerName"] as? String) ?? "Unknown"
             let avatar = (dict["avatar"] as? String) ?? (extra["callerAvatar"] as? String) ?? ""
             let callTypeInt = (dict["type"] as? Int) ?? ((extra["callType"] as? String) == "video" ? 1 : 0)

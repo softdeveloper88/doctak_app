@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
@@ -239,6 +240,7 @@ class CommentSheetAvatar extends StatelessWidget {
   final String? imageUrl;
   final double size;
   final VoidCallback? onTap;
+  final bool isPremium;
 
   const CommentSheetAvatar({
     super.key,
@@ -246,6 +248,7 @@ class CommentSheetAvatar extends StatelessWidget {
     this.imageUrl,
     this.size = CommentSheetTokens.avatarMain,
     this.onTap,
+    this.isPremium = false,
   });
 
   @override
@@ -271,7 +274,22 @@ class CommentSheetAvatar extends StatelessWidget {
     Widget avatar = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: isPremium
+            ? Border.all(color: const Color(0xFFE6B422), width: 2)
+            : null,
+        boxShadow: isPremium
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFE6B422).withValues(alpha: 0.45),
+                  blurRadius: 0,
+                  spreadRadius: 1.5,
+                ),
+              ]
+            : null,
+      ),
       clipBehavior: Clip.antiAlias,
       child: hasImage
           ? AppCachedNetworkImage(
@@ -298,6 +316,7 @@ class CommentSheetBubble extends StatelessWidget {
   final String body;
   final String? specialty;
   final bool verified;
+  final bool isPremium;
   final OneUITheme theme;
 
   const CommentSheetBubble({
@@ -306,6 +325,7 @@ class CommentSheetBubble extends StatelessWidget {
     required this.body,
     this.specialty,
     this.verified = false,
+    this.isPremium = false,
     required this.theme,
   });
 
@@ -340,7 +360,7 @@ class CommentSheetBubble extends StatelessWidget {
                     ),
                     if (verified) ...[
                       const SizedBox(width: 4),
-                      theme.buildVerifiedBadge(size: 12),
+                      theme.buildVerifiedBadge(size: 12, isPremium: isPremium),
                     ],
                   ],
                 ),
@@ -590,15 +610,32 @@ class CommentSheetComposer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (showAvatar) ...[
-            ValueListenableBuilder<String>(
-              valueListenable: AppData.profilePicNotifier,
-              builder: (_, picUrl, __) {
-                final url =
-                    picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
-                return CommentSheetAvatar(
-                  name: AppData.name.isNotEmpty ? AppData.name : 'You',
-                  imageUrl: url.isNotEmpty ? url : null,
-                  size: CommentSheetTokens.avatarComposer,
+            Builder(
+              builder: (context) {
+                // When acting as a business page, comments are attributed to
+                // the page — show its logo instead of the personal avatar.
+                final org = ActingContextService.instance.organization;
+                if (org != null) {
+                  final logo = (org.logoUrl != null && org.logoUrl!.isNotEmpty)
+                      ? AppData.fullImageUrl(org.logoUrl!)
+                      : '';
+                  return CommentSheetAvatar(
+                    name: org.name,
+                    imageUrl: logo.isNotEmpty ? logo : null,
+                    size: CommentSheetTokens.avatarComposer,
+                  );
+                }
+                return ValueListenableBuilder<String>(
+                  valueListenable: AppData.profilePicNotifier,
+                  builder: (_, picUrl, __) {
+                    final url =
+                        picUrl.isNotEmpty ? picUrl : AppData.profilePicUrl;
+                    return CommentSheetAvatar(
+                      name: AppData.name.isNotEmpty ? AppData.name : 'You',
+                      imageUrl: url.isNotEmpty ? url : null,
+                      size: CommentSheetTokens.avatarComposer,
+                    );
+                  },
                 );
               },
             ),

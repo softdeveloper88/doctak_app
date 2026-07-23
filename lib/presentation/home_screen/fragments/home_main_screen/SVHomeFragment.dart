@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:doctak_app/core/notification_counter_service.dart';
-import 'package:doctak_app/data/services/notifications_websocket_service.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/feed_video_autoplay_registry.dart';
@@ -9,6 +8,8 @@ import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/s
 import 'package:doctak_app/presentation/home_screen/home/components/incomplete_profile_card.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/bloc/feed_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_entries_sliver.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_realtime_service.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_new_posts_pill.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_scroll_activity.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/home_compose_card.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/story_bubbles_row.dart';
@@ -41,10 +42,10 @@ class SVHomeFragment extends StatefulWidget {
   final HomeBloc homeBloc;
 
   @override
-  State<SVHomeFragment> createState() => _SVHomeFragmentState();
+  State<SVHomeFragment> createState() => SVHomeFragmentState();
 }
 
-class _SVHomeFragmentState extends State<SVHomeFragment>
+class SVHomeFragmentState extends State<SVHomeFragment>
     with WidgetsBindingObserver {
   var scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -62,8 +63,70 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
   Timer? _scrollDebounce;
   bool _isLoadingTriggered = false;
   StreamSubscription<FeedState>? _feedStateSub;
-  StreamSubscription<NotificationWsEvent>? _homeRealtimeSub;
   final ValueNotifier<int> _storyRefresh = ValueNotifier(0);
+  VoidCallback? _pendingPostsListener;
+  static const double _scrollAwayThreshold = 80;
+
+  bool get _isScrolledAwayFromTop {
+    if (!_mainScrollController.hasClients) return false;
+    return _mainScrollController.position.pixels > _scrollAwayThreshold;
+  }
+
+  bool get _showNewPostsPill =>
+      FeedRealtimeService.instance.hasPending && _isScrolledAwayFromTop;
+
+  /// Scroll home feed to top; optionally refresh when already at top (home re-tap).
+  Future<void> scrollToTop({bool refreshIfAlreadyAtTop = false}) async {
+    if (FeedRealtimeService.instance.hasPending) {
+      await _loadPendingNewPosts();
+      return;
+    }
+
+    final atTop = !_isScrolledAwayFromTop;
+    if (atTop) {
+      if (refreshIfAlreadyAtTop) {
+        await _refresh();
+      }
+      return;
+    }
+
+    if (!_mainScrollController.hasClients) return;
+    await _mainScrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Future<void> _loadPendingNewPosts() async {
+    if (!mounted) return;
+    FeedRealtimeService.instance.clearPending();
+
+    if (_mainScrollController.hasClients && _isScrolledAwayFromTop) {
+      await _mainScrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    }
+
+    _feedBloc.add(const FeedLoadRequested(refresh: true));
+    await _feedBloc.stream.firstWhere(
+      (state) => state is FeedLoaded || state is FeedEmpty || state is FeedError,
+    );
+    FeedRealtimeService.instance.markFeedRefreshed();
+  }
+
+  void _onPendingPostsChanged() {
+    if (!mounted) return;
+    if (FeedRealtimeService.instance.hasPending && !_isScrolledAwayFromTop) {
+      FeedRealtimeService.instance.clearPending();
+      _feedBloc.add(const FeedLoadRequested(refresh: true));
+      FeedRealtimeService.instance.markFeedRefreshed();
+      return;
+    }
+    setState(() {});
+  }
 
   /// Handle scroll to trigger pagination when near bottom
   void _onScroll() {
@@ -89,6 +152,10 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
     } else if (currentScroll < maxScroll - threshold - 100) {
       // Scrolled away from bottom — allow the next pagination trigger.
       _isLoadingTriggered = false;
+    }
+
+    if (FeedRealtimeService.instance.hasPending && mounted) {
+      setState(() {});
     }
   }
 
@@ -130,6 +197,23 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
     // Load the typed home feed (doctak-node /api/feed)
     _feedBloc.add(const FeedLoadRequested());
 
+    FeedRealtimeService.instance.start();
+    FeedRealtimeService.instance.onPostUpdated = (event) {
+      if (!mounted) return;
+      _feedBloc.add(FeedPostUpdatedEvent(
+        postId: event.postId,
+        body: event.body,
+        title: event.title,
+        preview: event.preview,
+      ));
+    };
+    FeedRealtimeService.instance.onPostDeleted = (event) {
+      if (!mounted) return;
+      _feedBloc.add(FeedPostDeletedEvent(event.postId));
+    };
+    _pendingPostsListener = _onPendingPostsChanged;
+    FeedRealtimeService.instance.pendingCount.addListener(_pendingPostsListener!);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       precacheFeedSvgAssets();
@@ -139,31 +223,6 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         NotificationCounterService().initialize();
-        _homeRealtimeSub?.cancel();
-        _homeRealtimeSub = NotificationsWebSocketService().events.listen((event) {
-          if (!mounted) return;
-          if (event is FeedPostArrived) {
-            final preview = event.preview.trim().isEmpty
-                ? 'shared a new post'
-                : event.preview.trim();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 88),
-                duration: const Duration(seconds: 5),
-                content: Text('${event.authorName} · $preview'),
-                action: SnackBarAction(
-                  label: 'View',
-                  onPressed: () {
-                    _feedBloc.add(const FeedLoadRequested(refresh: true));
-                  },
-                ),
-              ),
-            );
-            _feedBloc.add(const FeedLoadRequested(refresh: true));
-          }
-        });
-        // Also do initial email verification check
         notificationBloc.add(NotificationCounter());
         getSharedPreferences();
       }
@@ -183,6 +242,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
     if (state == AppLifecycleState.resumed && mounted) {
       NotificationCounterService().refreshFromServer();
       FeedVideoAutoplayRegistry.instance.resume();
+      FeedRealtimeService.instance.pollNow();
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
@@ -196,7 +256,12 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
     // Cancel debounce timer
     _scrollDebounce?.cancel();
     _feedStateSub?.cancel();
-    _homeRealtimeSub?.cancel();
+    if (_pendingPostsListener != null) {
+      FeedRealtimeService.instance.pendingCount
+          .removeListener(_pendingPostsListener!);
+      _pendingPostsListener = null;
+    }
+    FeedRealtimeService.instance.stop();
     _showIncompleteBanner.dispose();
     _storyRefresh.dispose();
     // Remove scroll listener
@@ -209,6 +274,7 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
   }
 
   Future<void> _refresh() async {
+    FeedRealtimeService.instance.markFeedRefreshed();
     _storyRefresh.value++;
     unawaited(getSharedPreferences());
     _feedBloc.add(const FeedLoadRequested(refresh: true));
@@ -254,7 +320,9 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
             }
           }
         },
-        child: GestureDetector(
+        child: Stack(
+          children: [
+            GestureDetector(
           onTap: () {
             FocusManager.instance.primaryFocus?.unfocus();
           },
@@ -314,6 +382,17 @@ class _SVHomeFragmentState extends State<SVHomeFragment>
             ),
             ),
           ),
+        ),
+            if (_showNewPostsPill)
+              Positioned(
+                top: 8,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: FeedNewPostsPill(onTap: _loadPendingNewPosts),
+                ),
+              ),
+          ],
         ),
       ),
     );

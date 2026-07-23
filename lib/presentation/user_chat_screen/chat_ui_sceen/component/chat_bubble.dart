@@ -61,6 +61,23 @@ class _ChatBubbleState extends State<ChatBubble> {
       (widget.attachmentJson != null && widget.attachmentJson!.isNotEmpty) ||
       _isVoiceAttachment;
 
+  Widget _buildReceiptIcon() {
+    final state = widget.receiptState ?? 'sent';
+    final muted = Colors.white.withValues(alpha: 0.7);
+
+    if (state == 'pending') {
+      return Icon(Icons.access_time_rounded, size: 14, color: muted);
+    }
+    if (state == 'seen') {
+      return const Icon(Icons.done_all_rounded, size: 16, color: Colors.lightBlueAccent);
+    }
+    if (state == 'delivered') {
+      return Icon(Icons.done_all_rounded, size: 16, color: muted);
+    }
+    // sent (single tick)
+    return Icon(Icons.done_rounded, size: 16, color: muted);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
@@ -156,15 +173,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                                 color: Colors.white.withValues(alpha: 0.8)),
                           ),
                           const SizedBox(width: 6),
-                          if (widget.isMe)
-                            Icon(
-                              widget.receiptState == 'seen' || widget.receiptState == 'delivered'
-                                  ? Icons.done_all_rounded
-                                  : Icons.done_rounded,
-                              size: 16,
-                              color: widget.receiptState == 'seen'
-                                    ? Colors.lightBlueAccent
-                                    : Colors.white.withValues(alpha: 0.7)),
+                          if (widget.isMe) _buildReceiptIcon(),
                         ],
                       ),
                     ],

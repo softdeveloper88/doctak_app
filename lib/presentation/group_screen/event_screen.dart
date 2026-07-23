@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -149,34 +150,28 @@ class EventCard extends StatelessWidget {
               const Positioned(top: 8.0, right: 8.0, child: Icon(Icons.favorite_border, color: Colors.black)),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Global Medical Conference 2024', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8.0),
+                const Text('Global Medical Conference 2024', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8.0),
                 Row(
                   children: [
-                    CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/img_avtar.png'), // Replace with your avatar asset
-                    ),
-                    CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/img_avtar.png'), // Replace with your avatar asset
-                    ),
-                    CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/img_avtar.png'), // Replace with your avatar asset
-                    ),
-                    SizedBox(width: 8.0),
-                    Text('50 Participants'),
-                    Spacer(),
-                    Text('Free', style: TextStyle(color: Colors.green)),
+                    ClipOval(child: buildDefaultAvatarWidget(size: 40)),
+                    ClipOval(child: buildDefaultAvatarWidget(size: 40)),
+                    ClipOval(child: buildDefaultAvatarWidget(size: 40)),
+                    const SizedBox(width: 8.0),
+                    const Text('50 Participants'),
+                    const Spacer(),
+                    const Text('Free', style: TextStyle(color: Colors.green)),
                   ],
                 ),
-                SizedBox(height: 8.0),
-                Row(children: [Icon(Icons.calendar_today, size: 16.0), SizedBox(width: 4.0), Text('July 15, 2024, 9:00 AM')]),
-                SizedBox(height: 8.0),
-                Row(children: [Icon(Icons.location_on, size: 16.0), SizedBox(width: 4.0), Text('Boston Medical Convention Center')]),
+                const SizedBox(height: 8.0),
+                const Row(children: [Icon(Icons.calendar_today, size: 16.0), SizedBox(width: 4.0), Text('July 15, 2024, 9:00 AM')]),
+                const SizedBox(height: 8.0),
+                const Row(children: [Icon(Icons.location_on, size: 16.0), SizedBox(width: 4.0), Text('Boston Medical Convention Center')]),
               ],
             ),
           ),

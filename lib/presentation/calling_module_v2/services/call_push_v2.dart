@@ -9,6 +9,7 @@ import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import '../controller/call_controller_v2.dart';
 import '../models/call_protocol.dart';
 import 'call_api_v2.dart';
+import 'call_dismiss_registry.dart';
 import 'callkit_v2.dart';
 
 /// Calling module v2 — push entry points (§5).
@@ -34,6 +35,7 @@ class CallPushV2 {
     if (type == 'incoming_call') {
       final push = IncomingCallPushV2.tryParse(data);
       if (push == null) return true;
+      if (await _shouldIgnoreIncoming(push)) return true;
       debugPrint('📞 [CallPushV2] incoming_call ${push.callId}');
       await CallControllerV2.instance.handleIncomingPush(push);
       return true;
@@ -42,9 +44,7 @@ class CallPushV2 {
     if (type == 'call_cancelled') {
       final callId = data['callId']?.toString() ?? '';
       debugPrint('📞 [CallPushV2] call_cancelled $callId');
-      // Routes through the self-dismiss guard so the native decline echo is
-      // never sent to the server as a user reject.
-      await CallControllerV2.instance.dismissCancelledCall(callId);
+      await _handleCancel(callId);
       return true;
     }
 
@@ -66,6 +66,7 @@ class CallPushV2 {
     if (type == 'incoming_call') {
       final push = IncomingCallPushV2.tryParse(data);
       if (push == null || push.isExpired) return true;
+      if (await _shouldIgnoreIncoming(push)) return true;
 
       // Cross-isolate busy guard: this device may already be on a call in the
       // main isolate (whose state the background isolate can't see). If so,
@@ -77,17 +78,47 @@ class CallPushV2 {
         return true;
       }
 
+      // Authoritative check before ringing — skip ghost rings when offline
+      // delivery arrives after the caller already hung up.
+      final snapshot = await CallApiV2.instance.getCall(push.callId);
+      if (snapshot != null && snapshot.state != CallState.ringing) {
+        debugPrint('📞 [CallPushV2] skip stale incoming ${push.callId} (${snapshot.state})');
+        await CallDismissRegistry.markDismissed(push.callId);
+        return true;
+      }
+
       await CallKitV2.instance.showIncoming(push);
-      await _superviseBackgroundRing(push);
+      // Do NOT await — return quickly so a queued `call_cancelled` FCM can
+      // be processed while this isolate supervises the ring.
+      unawaited(_superviseBackgroundRing(push));
       return true;
     }
 
     if (type == 'call_cancelled') {
       final callId = data['callId']?.toString() ?? '';
-      if (callId.isNotEmpty) await CallKitV2.instance.end(callId);
+      await _handleCancel(callId);
       return true;
     }
 
+    return false;
+  }
+
+  static Future<void> _handleCancel(String callId) async {
+    if (callId.isEmpty) return;
+    await CallDismissRegistry.markDismissed(callId);
+    await CallKitV2.instance.end(callId);
+    // Controller may not be alive in the background isolate.
+    try {
+      await CallControllerV2.instance.dismissCancelledCall(callId);
+    } catch (_) {}
+  }
+
+  static Future<bool> _shouldIgnoreIncoming(IncomingCallPushV2 push) async {
+    if (push.isExpired) return true;
+    if (await CallDismissRegistry.isDismissed(push.callId)) {
+      debugPrint('📞 [CallPushV2] ignore dismissed incoming ${push.callId}');
+      return true;
+    }
     return false;
   }
 
@@ -128,12 +159,17 @@ class CallPushV2 {
       }
     });
 
-    // Answered/cancelled elsewhere while we hold this isolate: the
-    // call_cancelled FCM is queued BEHIND this handler, so poll the
-    // authoritative state instead.
-    final poll = Timer.periodic(const Duration(seconds: 3), (_) async {
+    // Answered/cancelled elsewhere: poll authoritative state (cancel FCM may
+    // now arrive in parallel since the handler returns without awaiting us).
+    final poll = Timer.periodic(const Duration(seconds: 1), (_) async {
+      if (await CallDismissRegistry.isDismissed(push.callId) && !accepted) {
+        await CallKitV2.instance.end(push.callId);
+        finish();
+        return;
+      }
       final snapshot = await CallApiV2.instance.getCall(push.callId);
       if (snapshot != null && snapshot.state != CallState.ringing && !accepted) {
+        await CallDismissRegistry.markDismissed(push.callId);
         await CallKitV2.instance.end(push.callId);
         finish();
       }
@@ -149,6 +185,7 @@ class CallPushV2 {
       cap.cancel();
       poll.cancel();
       await sub.cancel();
+      await CallDismissRegistry.markDismissed(push.callId);
     }
   }
 

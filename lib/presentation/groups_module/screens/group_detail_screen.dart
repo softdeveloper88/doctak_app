@@ -11,9 +11,11 @@ import 'package:doctak_app/presentation/groups_module/widgets/group_options_menu
 import 'package:doctak_app/presentation/groups_module/widgets/group_pending_invite_banner.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_polls_tab.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_profile_header.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_button.dart';
+import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_tab_bar_delegate.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -216,31 +218,18 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   }
 
   Future<void> _confirmDeleteGroup() async {
-    final theme = OneUITheme.of(context);
     final group = _group;
     if (group == null) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: theme.cardBackground,
-        title: Text('Delete group?', style: TextStyle(color: theme.textPrimary)),
-        content: Text(
+    final confirmed = await showOneUIConfirmDialog(
+      context,
+      title: 'Delete group?',
+      subtitle:
           'This permanently deletes "${group.name}" and all of its content. This cannot be undone.',
-          style: TextStyle(color: theme.textSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: TextStyle(color: theme.textSecondary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Delete', style: TextStyle(color: theme.error)),
-          ),
-        ],
-      ),
+      confirmLabel: 'Delete',
+      cancelLabel: 'Cancel',
+      destructive: true,
     );
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
     try {
       await GroupsNodeApiService.deleteGroup(group.routeId);
       if (mounted) Navigator.of(context).maybePop();
@@ -276,7 +265,7 @@ class _GroupDetailScreenState extends State<GroupDetailScreen>
   void _shareGroup() {
     final group = _group;
     if (group == null) return;
-    final link = 'https://doctak.net/groups/${group.publicSlug}';
+    final link = DeepLinkService.generateGroupLink(group.publicSlug);
     Share.share('Join ${group.name} on Doctak\n$link');
   }
 

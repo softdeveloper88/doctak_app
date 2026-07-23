@@ -3,9 +3,8 @@ import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:doctak_app/widgets/show_loading_dialog.dart';
+import 'package:doctak_app/widgets/email_verification_actions.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// OneUI 8.5 styled incomplete profile and email verification cards
@@ -16,26 +15,8 @@ class IncompleteProfileCard extends StatelessWidget {
   final bool isEmailVerified;
   final bool isInCompleteProfile;
 
-  Future<void> sendVerificationLink(String email, BuildContext context) async {
-    showLoadingDialog(context);
-    try {
-      final response = await http.post(Uri.parse('${AppData.remoteUrl}/send-verification-link'), body: {'email': email});
-
-      Navigator.of(context).pop();
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_verification_link_sent_success), duration: const Duration(seconds: 2)));
-      } else if (response.statusCode == 422) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_validation_error), duration: const Duration(seconds: 2)));
-      } else if (response.statusCode == 404) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_user_already_verified), duration: const Duration(seconds: 2)));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_went_wrong), duration: const Duration(seconds: 2)));
-      }
-    } catch (e) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).msg_something_went_wrong), duration: const Duration(seconds: 2)));
-    }
+  Future<void> sendVerificationLink(String email, BuildContext context) {
+    return requestEmailVerificationLink(context: context, email: email);
   }
 
   @override

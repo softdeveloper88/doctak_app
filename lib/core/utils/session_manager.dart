@@ -178,6 +178,24 @@ class SessionManager {
     }
   }
 
+  /// Lightweight live check used when the app resumes from background so a
+  /// session revoked from Connected Devices logs the user out of the home feed
+  /// without waiting for the next feed API 401.
+  static Future<SessionCheck> validateActiveSession() async {
+    final token = AppData.userToken?.trim() ?? '';
+    if (token.isEmpty) return SessionCheck.invalid;
+
+    final result = await _validateTokenWithServer(
+      token: token,
+      userId: AppData.logInUserId,
+    );
+
+    if (result == SessionCheck.invalid) {
+      await forceLogoutToLogin(reason: 'session-revoked');
+    }
+    return result;
+  }
+
   /// Called when an authenticated request comes back unauthorized (HTTP 401 or a
   /// session-expiry redirect) while the app is running. Clears the session and
   /// routes to login.

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/network/network_utils.dart' as networkUtils;
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:http/http.dart' as http;
@@ -189,7 +190,7 @@ class SharedApiService {
     }
   }
 
-  /// Forgot password
+  /// Forgot password — checks email exists, then emails a mobile-friendly reset link.
   Future<ApiResponse<Map<String, dynamic>>> forgotPassword({
     required String email,
   }) async {
@@ -198,7 +199,10 @@ class SharedApiService {
         await networkUtils.buildHttpResponse(
           '/forgot_password',
           method: networkUtils.HttpMethod.POST,
-          request: {'email': email},
+          request: {
+            'email': email,
+            'device_type': Platform.isIOS ? 'ios' : 'android',
+          },
         ),
       );
       return ApiResponse.success(Map<String, dynamic>.from(response));
@@ -598,6 +602,7 @@ class SharedApiService {
         request.headers['Authorization'] = 'Bearer $token';
       }
       request.headers['Accept'] = 'application/json';
+      request.headers.addAll(ActingContextService.instance.actingHeaders());
 
       final name = file.path.split('/').last.toLowerCase();
       var mime = 'image/jpeg';
@@ -1448,9 +1453,6 @@ class SharedApiService {
       case 'x-ray':
       case 'xray':
         return 'xray';
-      case 'ecg':
-      case 'ekg':
-        return 'ecg';
       case 'ct scan':
       case 'ctscan':
         return 'ctscan';
@@ -1500,6 +1502,9 @@ class SharedApiService {
         if (name.endsWith('.png')) return 'image/png';
         if (name.endsWith('.gif')) return 'image/gif';
         if (name.endsWith('.webp')) return 'image/webp';
+        // iPhone camera roll often yields HEIC — label correctly so Gemini can decode it.
+        if (name.endsWith('.heic')) return 'image/heic';
+        if (name.endsWith('.heif')) return 'image/heif';
         return 'image/jpeg';
       }
 

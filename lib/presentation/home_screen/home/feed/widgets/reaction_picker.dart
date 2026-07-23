@@ -1,5 +1,6 @@
 import 'package:doctak_app/data/models/feed_model/feed_models.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_motion.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -344,6 +345,21 @@ class _ReactionButtonState extends State<ReactionButton> {
     );
   }
 
+  Widget _animatedLeading(OneUITheme theme, FeedReaction? active, double size) {
+    final leading = _reactionLeading(theme, active, size: size);
+    if (!FeedMotion.enabled(context)) return leading;
+
+    return TweenAnimationBuilder<double>(
+      key: ValueKey(widget.currentReaction ?? 'none'),
+      tween: Tween(begin: 0.88, end: 1.0),
+      duration: FeedMotion.entrance,
+      curve: FeedMotion.curve,
+      builder: (context, scale, child) =>
+          Transform.scale(scale: scale, child: child),
+      child: leading,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
@@ -352,19 +368,18 @@ class _ReactionButtonState extends State<ReactionButton> {
     return Material(
       key: _anchorKey,
       color: Colors.transparent,
-      child: InkWell(
+      child: FeedPressScale(
         onTap: _onTap,
         onLongPress: _showPicker,
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
           child: widget.iconOnly
-              ? _reactionLeading(theme, active, size: 20)
+              ? _animatedLeading(theme, active, 20)
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _reactionLeading(theme, active, size: 18),
+                    _animatedLeading(theme, active, 18),
                     const SizedBox(height: 2),
                     Text(
                       active?.label ?? 'Like',

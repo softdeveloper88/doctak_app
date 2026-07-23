@@ -80,6 +80,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
               name: name,
               imageUrl: commenter?.profilePic,
               size: CommentSheetTokens.avatarMain,
+              isPremium: commenter?.isPremium == true,
               onTap: () => ProfileNavigation.openUser(
                     context,
                     commenter?.id?.toString(),
@@ -95,6 +96,7 @@ class _MemoryOptimizedCommentItemState extends State<MemoryOptimizedCommentItem>
                     body: comment.comment ?? '',
                     specialty: _resolvedSpecialty(commenter?.specialty),
                     verified: commenter?.isVerified == true,
+                    isPremium: commenter?.isPremium == true,
                     theme: theme,
                   ),
                   CommentSheetActionRow(

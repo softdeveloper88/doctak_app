@@ -110,17 +110,27 @@ class _GroupSummaryCardState extends State<GroupSummaryCard> {
                           end: end,
                         ),
                       ),
-                      Text(
-                        group.name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.01,
-                          color: theme.textPrimary,
-                          height: 1.35,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              group.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.01,
+                                color: theme.textPrimary,
+                                height: 1.35,
+                              ),
+                            ),
+                          ),
+                          if (group.isVerified) ...[
+                            const SizedBox(width: 4),
+                            theme.buildVerifiedBadge(size: 16),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(

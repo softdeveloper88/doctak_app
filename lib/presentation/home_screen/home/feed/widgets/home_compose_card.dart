@@ -1,3 +1,4 @@
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/compose_content_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_card_shell.dart';
@@ -129,6 +130,37 @@ class HomeComposeCard extends StatelessWidget {
   }
 
   Widget _avatar(OneUITheme theme) {
+    // Composing as a business page — show its logo (like the website).
+    final org = ActingContextService.instance.organization;
+    if (org != null) {
+      final logo = (org.logoUrl != null && org.logoUrl!.isNotEmpty)
+          ? AppData.fullImageUrl(org.logoUrl!)
+          : '';
+      final orgFallback = Container(
+        width: 42,
+        height: 42,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: theme.accentSoft,
+        ),
+        child: Icon(Icons.business_rounded, size: 20, color: theme.primary),
+      );
+      if (logo.isEmpty) return orgFallback;
+      return ClipOval(
+        child: AppCachedNetworkImage(
+          imageUrl: logo,
+          width: 42,
+          height: 42,
+          fit: BoxFit.cover,
+          memCacheWidth: 84,
+          memCacheHeight: 84,
+          placeholder: (_, __) => orgFallback,
+          errorWidget: (_, __, ___) => orgFallback,
+        ),
+      );
+    }
+
     final initials = AppData.name.isNotEmpty
         ? AppData.name.trim().split(' ').map((p) => p.isNotEmpty ? p[0] : '').take(2).join()
         : 'AK';

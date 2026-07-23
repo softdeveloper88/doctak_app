@@ -1,4 +1,4 @@
-// Models for /api/v6/subscription/plans and /api/v6/subscription/status responses.
+// Models for doctak-node /api/v1/subscription/plans and /subscription/status.
 
 import 'package:doctak_app/data/models/subscription/subscription_data_model.dart';
 
@@ -58,20 +58,29 @@ class SubscriptionPlanItem {
   });
 
   factory SubscriptionPlanItem.fromJson(Map<String, dynamic> json) {
-    final featuresJson = json['features'] as Map<String, dynamic>? ?? {};
-    final features = featuresJson.map((key, val) =>
-        MapEntry(key, PlanFeatureRow.fromJson(val as Map<String, dynamic>)));
+    final features = <String, PlanFeatureRow>{};
+    final rawFeatures = json['features'];
+    if (rawFeatures is Map) {
+      rawFeatures.forEach((key, val) {
+        if (val is Map) {
+          features[key.toString()] = PlanFeatureRow.fromJson(
+            Map<String, dynamic>.from(val),
+          );
+        }
+      });
+    }
 
     return SubscriptionPlanItem(
       id: _parseInt(json['id']),
       slug: json['slug']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString(),
-      priceMonthly: _parseDouble(json['price_monthly']),
+      priceMonthly: _parseDouble(json['price_monthly'] ?? json['price']),
       priceYearly: _parseDouble(json['price_yearly']),
       currency: json['currency']?.toString() ?? 'USD',
       isDefault: json['is_default'] == true,
-      isFree: json['is_free'] == true,
+      isFree: json['is_free'] == true ||
+          _parseDouble(json['price_monthly'] ?? json['price']) <= 0,
       features: features,
     );
   }

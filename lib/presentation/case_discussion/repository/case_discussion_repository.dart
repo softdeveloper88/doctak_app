@@ -495,10 +495,11 @@ class CaseDiscussionRepository {
     required String direction,
   }) async {
     try {
+      final action = direction == 'down' || direction == 'dislike' ? 'dislike' : 'like';
       final response = await _dio.post(
         '$baseUrl/api/discuss-case/$caseId/like',
         data: {
-          'direction': direction,
+          'action': action,
         },
       );
       final data = response.data;
@@ -516,11 +517,12 @@ class CaseDiscussionRepository {
     String targetType = 'comment',
   }) async {
     try {
+      final action = direction == 'down' || direction == 'dislike' ? 'dislike' : 'like';
       final response = await _dio.post(
         '$baseUrl/api/v1/cases/comment-action',
         data: {
           'comment_id': commentId,
-          'direction': direction,
+          'action': action,
           'target_type': targetType,
         },
       );

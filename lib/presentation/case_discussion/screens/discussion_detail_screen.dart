@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/app/app_environment.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -459,14 +460,14 @@ class _DiscussionDetailScreenState extends State<DiscussionDetailScreen> {
   }
 
   void _shareCase(CaseDiscussion discussion) {
-    final url = '${AppData.base2}/discuss-cases/${discussion.id}';
+    final url = DeepLinkService.generateCaseLink(discussion.id);
     SharePlus.instance.share(ShareParams(
       text: '${discussion.title}\n\n$url',
     ));
   }
 
   void _copyLink(CaseDiscussion discussion) {
-    final url = '${AppData.base2}/discuss-cases/${discussion.id}';
+    final url = DeepLinkService.generateCaseLink(discussion.id);
     Clipboard.setData(ClipboardData(text: url));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Link copied to clipboard')),

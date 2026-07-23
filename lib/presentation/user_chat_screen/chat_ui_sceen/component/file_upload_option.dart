@@ -104,7 +104,7 @@ class _FileUploadOptionState extends State<FileUploadOption> {
                     width: 52,
                     color: context.cardColor,
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                    child: Image.asset('images/socialv/icons/ic_CameraPost.png', height: 22, width: 22, fit: BoxFit.cover),
+                    child: Image.asset('assets/images/socialv/icons/ic_CameraPost.png', height: 22, width: 22, fit: BoxFit.cover),
                   ),
                 ),
                 BlocBuilder<ChatBloc, ChatState>(
@@ -158,22 +158,22 @@ class _FileUploadOptionState extends State<FileUploadOption> {
                 onTap: () {
                   openVideo();
                 },
-                child: Image.asset('images/socialv/icons/ic_Video.png', height: 32, width: 32, fit: BoxFit.cover),
+                child: Image.asset('assets/images/socialv/icons/ic_Video.png', height: 32, width: 32, fit: BoxFit.cover),
               ),
               GestureDetector(
                 onTap: () {
                   openCamera();
                 },
-                child: Image.asset('images/socialv/icons/ic_CameraPost.png', height: 32, width: 32, fit: BoxFit.cover),
+                child: Image.asset('assets/images/socialv/icons/ic_CameraPost.png', height: 32, width: 32, fit: BoxFit.cover),
               ),
-              // Image.asset('images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
+              // Image.asset('assets/images/socialv/icons/ic_Voice.png', height: 32, width: 32, fit: BoxFit.cover),
               GestureDetector(
                 onTap: () {
                   checkInPlaceBottomSheet(context, widget.searchPeopleBloc);
                 },
-                child: Image.asset('images/socialv/icons/ic_Location.png', height: 32, width: 32, fit: BoxFit.cover),
+                child: Image.asset('assets/images/socialv/icons/ic_Location.png', height: 32, width: 32, fit: BoxFit.cover),
               ),
-              Image.asset('images/socialv/icons/ic_Paper.png', height: 32, width: 32, fit: BoxFit.cover),
+              Image.asset('assets/images/socialv/icons/ic_Paper.png', height: 32, width: 32, fit: BoxFit.cover),
             ],
           ),
         ],

@@ -5,6 +5,7 @@
 
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 import 'clinical_snapshot.dart';
 
 /// Safely parse a dynamic value to int (handles String, int, double, null).
@@ -85,12 +86,12 @@ class CaseDiscussionListItem {
       promoted: json['promoted'] == 1 || json['promoted'] == true,
       createdAt: DateTime.parse(
           json['created_at'] ?? DateTime.now().toIso8601String()),
-      name: json['name'] ?? 'Unknown User',
+      name: formatDisplayName(json['name']?.toString(), 'Unknown User'),
       profilePic: AppData.fullImageUrl(json['profile_pic']),
       specialty: json['specialty']?.toString(),
       commentsCount: _parseInt(json['comments_count'] ?? json['comments']),
-      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || json['user_vote'] == 'up',
-      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || json['user_vote'] == 'down',
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || (json['user_vote'] == 'up' || json['user_vote'] == 'like'),
+      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || (json['user_vote'] == 'down' || json['user_vote'] == 'dislike'),
       isBookmarked: json['is_bookmarked'] == true || json['is_bookmarked'] == 1,
       isOwner: json['is_owner'] == true || json['is_owner'] == 1,
       isVerified: json['is_verified'] == true || json['is_verified'] == 1,
@@ -267,14 +268,19 @@ class CaseDiscussion {
       final u = caseData['user'] as Map<String, dynamic>;
       author = CaseAuthor(
         id: u['id'] ?? 0,
-        name: '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'.trim(),
+        name: formatDisplayName(
+          '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'.trim().isNotEmpty
+              ? '${u['first_name'] ?? ''} ${u['last_name'] ?? ''}'.trim()
+              : u['name']?.toString(),
+          'Unknown User',
+        ),
         specialty: u['specialty'] ?? caseData['specialty'] ?? '',
         profilePic: AppData.fullImageUrl(u['profile_pic']),
       );
     } else {
       author = CaseAuthor(
         id: caseData['user_id'] ?? 0,
-        name: caseData['name'] ?? 'Unknown User',
+        name: formatDisplayName(caseData['name']?.toString(), 'Unknown User'),
         specialty: caseData['specialty'] ?? '',
         profilePic: AppData.fullImageUrl(caseData['profile_pic']),
         isVerified: caseData['is_verified'] == true ||
@@ -356,8 +362,8 @@ class CaseDiscussion {
       relatedCases: relatedCases,
       commentsCount: _parseInt(caseData['comments_count'] ?? caseData['comments']),
       followersCount: _parseInt(data['followers_count']),
-      isLiked: data['is_liked'] == true || data['is_liked'] == 1 || data['user_vote'] == 'up',
-      isDisliked: data['is_disliked'] == true || data['is_disliked'] == 1 || data['user_vote'] == 'down',
+      isLiked: data['is_liked'] == true || data['is_liked'] == 1 || (data['user_vote'] == 'up' || data['user_vote'] == 'like'),
+      isDisliked: data['is_disliked'] == true || data['is_disliked'] == 1 || (data['user_vote'] == 'down' || data['user_vote'] == 'dislike'),
       isBookmarked:
           data['is_bookmarked'] == true || data['is_bookmarked'] == 1,
       isFollowing:
@@ -518,14 +524,14 @@ class CaseAuthor {
   });
 
   factory CaseAuthor.fromJson(Map<String, dynamic> json) {
-    String name = json['name'] ?? '';
+    String name = json['name']?.toString() ?? '';
     if (name.isEmpty) {
       name =
           '${json['first_name'] ?? ''} ${json['last_name'] ?? ''}'.trim();
     }
     return CaseAuthor(
       id: json['id'] ?? 0,
-      name: name.isEmpty ? 'Unknown User' : name,
+      name: formatDisplayName(name, 'Unknown User'),
       specialty: json['specialty'] ?? '',
       profilePic: AppData.fullImageUrl(json['profile_pic']),
       isVerified: json['is_verified'] == true ||
@@ -722,8 +728,8 @@ class CaseComment {
       author: author,
       repliesCount: _parseInt(json['replies_count'],
           replies.isNotEmpty ? replies.length : 0),
-      isLiked: json['is_liked'] == true || json['is_liked'] == 1,
-      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1,
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || (json['user_vote'] == 'up' || json['user_vote'] == 'like'),
+      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || (json['user_vote'] == 'down' || json['user_vote'] == 'dislike'),
       isOwner: json['is_owner'] == true || json['is_owner'] == 1,
       replies: replies,
     );
@@ -848,8 +854,8 @@ class CaseReply {
       author: author,
       likes: _parseInt(json['likes']),
       dislikes: _parseInt(json['dislikes']),
-      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || json['user_vote'] == 'up',
-      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || json['user_vote'] == 'down',
+      isLiked: json['is_liked'] == true || json['is_liked'] == 1 || (json['user_vote'] == 'up' || json['user_vote'] == 'like'),
+      isDisliked: json['is_disliked'] == true || json['is_disliked'] == 1 || (json['user_vote'] == 'down' || json['user_vote'] == 'dislike'),
       isOwner: json['is_owner'] == true || json['is_owner'] == 1,
     );
   }

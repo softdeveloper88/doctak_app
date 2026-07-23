@@ -1,13 +1,15 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/age_assurance.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/core/utils/common_navigator.dart';
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/presentation/auth/auth_screen_widgets.dart';
-import 'package:doctak_app/presentation/home_screen/SVDashboardScreen.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/bloc/profile_bloc.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
 import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -38,6 +40,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final ProfileBloc profileBloc = ProfileBloc();
   bool _isChecked = false;
   bool _autoValidate = false;
+  bool _ageConfirmed = false;
+  DateTime? _dateOfBirth;
   Map<String, String> _fieldErrors = {};
 
   TextEditingController? firstnameController;
@@ -103,6 +107,154 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return '';
   }
 
+  Future<void> _pickDateOfBirth() async {
+    final theme = OneUITheme.of(context);
+    final now = DateTime.now();
+    final min = DateTime(now.year - 100, now.month, now.day);
+    // Cap picker at minimum age so underage dates cannot be chosen.
+    final max = DateTime(now.year - AgeAssurance.minimumAge, now.month, now.day);
+    DateTime temp = _dateOfBirth ?? DateTime(now.year - 25, now.month, now.day);
+    if (temp.isAfter(max)) temp = max;
+    if (temp.isBefore(min)) temp = min;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: theme.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: SizedBox(
+            height: 280,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Date of birth',
+                          style: theme.titleSmall.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() => _dateOfBirth = temp);
+                          Navigator.pop(ctx);
+                        },
+                        style: OneUIButtons.text(theme),
+                        child: const Text('Done'),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: CupertinoTheme(
+                    data: CupertinoThemeData(
+                      brightness: theme.isDark ? Brightness.dark : Brightness.light,
+                    ),
+                    child: CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.date,
+                      initialDateTime: temp.isBefore(min)
+                          ? min
+                          : (temp.isAfter(max) ? max : temp),
+                      minimumDate: min,
+                      maximumDate: max,
+                      onDateTimeChanged: (d) => temp = d,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _dobField(OneUITheme theme) {
+    final dob = _dateOfBirth;
+    final age = dob != null ? AgeAssurance.ageFromDateOfBirth(dob) : null;
+    final eligible = dob != null && AgeAssurance.meetsMinimumAge(dob);
+    final error = _fieldErrors['dob'];
+
+    return AuthField(
+      label: 'Date of birth *',
+      error: error,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Material(
+            color: theme.cardBackground,
+            borderRadius: BorderRadius.circular(14),
+            child: InkWell(
+              onTap: _pickDateOfBirth,
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: error != null
+                        ? theme.error
+                        : (!eligible && dob != null)
+                            ? theme.error
+                            : theme.border,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(CupertinoIcons.calendar, size: 20, color: theme.textTertiary),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        dob != null ? AgeAssurance.formatDob(dob) : 'Select date of birth',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: dob != null ? theme.textPrimary : theme.textTertiary,
+                        ),
+                      ),
+                    ),
+                    if (age != null)
+                      Text(
+                        'Age $age',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          color: eligible ? theme.success : theme.error,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (dob != null && !eligible)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                'You must be at least ${AgeAssurance.minimumAge} years old. Account creation is blocked.',
+                style: TextStyle(fontSize: 12, color: theme.error, fontFamily: 'Poppins'),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                'Required for age verification (minimum ${AgeAssurance.minimumAge}+).',
+                style: TextStyle(fontSize: 12, color: theme.textTertiary, fontFamily: 'Poppins'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
@@ -143,7 +295,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 );
               }
             } else if (state is SocialLoginSuccess) {
-              AppNavigator.pushAndRemoveAll(context, const SVDashboardScreen());
+              AppNavigator.toDashboard(context);
             } else if (state is DataError || state is DropdownError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(translation(context).msg_something_wrong), backgroundColor: theme.error),
@@ -193,6 +345,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               error: _fieldErrors['email'],
                               child: _emailInput(theme),
                             ),
+                            _dobField(theme),
+                            theme.buildCheckboxRow(
+                              value: _ageConfirmed,
+                              onChanged: (value) => setState(() => _ageConfirmed = value ?? false),
+                              label:
+                                  'I confirm I am at least ${AgeAssurance.minimumAge} years old. Underage accounts cannot be created.',
+                            ),
                             AuthField(
                               label: 'Create password',
                               error: _fieldErrors['password'],
@@ -215,6 +374,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 theme,
                                 isConfirm: true,
                               ),
+                            ),
+                          ],
+                          if (isSocial) ...[
+                            _dobField(theme),
+                            theme.buildCheckboxRow(
+                              value: _ageConfirmed,
+                              onChanged: (value) => setState(() => _ageConfirmed = value ?? false),
+                              label:
+                                  'I confirm I am at least ${AgeAssurance.minimumAge} years old. Underage accounts cannot be created.',
                             ),
                           ],
                           theme.buildCheckboxRow(
@@ -340,6 +508,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> onTapSignUp(BuildContext context) async {
+    final isSocial = widget.isSocialLogin ?? false;
     setState(() => _autoValidate = true);
     if (!(_formKey.currentState?.validate() ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translation(context).err_msg_please_enter_valid_text)));
@@ -348,7 +517,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _formKey.currentState?.save();
     setState(() => _fieldErrors = {});
 
-    if (passwordController.text != confirmPasswordController.text) {
+    if (_dateOfBirth == null) {
+      setState(() => _fieldErrors = {'dob': 'Date of birth is required.'});
+      toast('Please select your date of birth.');
+      return;
+    }
+    if (!AgeAssurance.meetsMinimumAge(_dateOfBirth!)) {
+      setState(() {
+        _fieldErrors = {
+          'dob':
+              'You must be at least ${AgeAssurance.minimumAge} years old to use DocTak.',
+        };
+      });
+      toast(
+        'DocTak is only available to users age ${AgeAssurance.minimumAge} and older.',
+      );
+      return;
+    }
+    if (!_ageConfirmed) {
+      toast(
+        'Please confirm you are at least ${AgeAssurance.minimumAge} years old.',
+      );
+      return;
+    }
+
+    if (!isSocial && passwordController.text != confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Passwords do not match')),
       );
@@ -361,6 +554,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     try {
       final token = await _getSafeFcmToken();
+      if (isSocial) {
+        await AgeAssurance.markConfirmed(
+          dateOfBirth: _dateOfBirth!,
+          userId: AppData.logInUserId?.toString(),
+        );
+        dropdownBloc.add(
+          SocialButtonPressed(
+            token: widget.token ?? '',
+            firstName: firstnameController!.text,
+            lastName: lastNameController!.text,
+            phone: '',
+            country: profileBloc.country ?? 'United Arab Emirates',
+            state: profileBloc.stateName ?? 'DUBAI',
+            specialty: profileBloc.specialtyName ?? '',
+            userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
+            deviceToken: token,
+          ),
+        );
+        return;
+      }
       dropdownBloc.add(
         SignUpButtonPressed(
           username: emailController.text,
@@ -372,6 +585,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           specialty: profileBloc.specialtyName ?? '',
           userType: dropdownBloc.isDoctorRole ? 'doctor' : 'student',
           deviceToken: token,
+          dob: AgeAssurance.formatDob(_dateOfBirth!),
         ),
       );
     } catch (_) {

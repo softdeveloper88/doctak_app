@@ -229,7 +229,7 @@ class ChatWebSocketService {
   /// Dedup is handled upstream in the BLoC.
   void _startSafetyPoll(int conversationId) {
     _safetyPollTimer?.cancel();
-    _safetyPollTimer = Timer.periodic(const Duration(seconds: 8), (_) async {
+    _safetyPollTimer = Timer.periodic(const Duration(seconds: 4), (_) async {
       if (_currentConversationId != conversationId) return;
       try {
         final resp = await _api.getMessagesSince(

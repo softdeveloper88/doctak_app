@@ -238,8 +238,8 @@
 }
 -keep,allowobfuscation @interface com.google.gson.annotations.SerializedName
 
-## Keep all getter/setter methods for JSON models
--keepclassmembers public class * {
+## Keep all getter/setter methods for JSON models (allow renaming)
+-keepclassmembers,allowobfuscation public class * {
     public void set*(***);
     public *** get*();
     public *** is*();
@@ -258,11 +258,11 @@
 }
 
 ## ========================================
-## DISABLE AGGRESSIVE OPTIMIZATIONS
+## R8 OPTIMIZATION TUNING
 ## ========================================
-## These optimizations can break API calls
--optimizations !code/simplification/arithmetic,!code/simplification/cast,!field/*,!class/merging/*
--dontpreverify
+## Do NOT disable arithmetic/cast/field/class-merging optimizations —
+## that tanks Play Console Optimization + Shrinking scores.
+## Flutter/plugin keep rules in proguard-rules.pro protect reflection edges.
 
 ## ========================================
 ## KEEP EXCEPTION STACK TRACES

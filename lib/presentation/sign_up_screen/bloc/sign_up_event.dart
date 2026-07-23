@@ -54,6 +54,8 @@ class SignUpButtonPressed extends DropdownEvent {
   final String specialty;
   final String userType;
   final String deviceToken;
+  /// YYYY-MM-DD — required for App Store age assurance (13+).
+  final String dob;
 
   SignUpButtonPressed({
     required this.username,
@@ -65,10 +67,22 @@ class SignUpButtonPressed extends DropdownEvent {
     required this.specialty,
     required this.userType,
     required this.deviceToken,
+    required this.dob,
   });
 
   @override
-  List<Object> get props => [username, password, firstName, lastName, country, state, specialty, userType, deviceToken];
+  List<Object> get props => [
+        username,
+        password,
+        firstName,
+        lastName,
+        country,
+        state,
+        specialty,
+        userType,
+        deviceToken,
+        dob,
+      ];
 }
 
 class SocialButtonPressed extends DropdownEvent {

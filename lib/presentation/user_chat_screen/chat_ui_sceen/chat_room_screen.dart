@@ -79,6 +79,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   // Online presence
   bool _isOtherUserOnline = false;
 
+  // Peer display info. Notification deep-links often pass a generic title
+  // ("Chat") and an empty profilePic/id, so these start from the widget values
+  // and are back-filled from the loaded conversation messages.
+  String _peerName = '';
+  String _peerAvatar = '';
+  String _peerId = '';
+
   // List<SelectedByte> selectedFiles = [];
   bool isMessageLoaded = false; // Initialize it as per your logic
   bool _isFileUploading = false;
@@ -137,6 +144,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     setStatusBarColor(svGetScaffoldColor());
     _scrollController.addListener(_checkScrollPosition);
     _initRecorder();
+
+    _peerName = widget.username;
+    _peerAvatar = widget.profilePic;
+    _peerId = widget.id;
 
     if (widget.conversationId > 0) {
       NotificationService.activeChatConversationId = widget.conversationId;
@@ -206,10 +217,78 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
     }
   }
 
+  /// Fill in missing peer info (name / avatar / user id) from the loaded
+  /// conversation. Needed when the screen is opened from a push notification,
+  /// which only carries the push title (often just "Chat") and no avatar.
+  void _resolvePeerDetails() {
+    final needName =
+        _peerName.trim().isEmpty || _peerName.trim().toLowerCase() == 'chat';
+    final needAvatar = _peerAvatar.trim().isEmpty;
+    final needId = _peerId.trim().isEmpty;
+    if (!needName && !needAvatar && !needId) return;
+
+    final myId = AppData.logInUserId?.toString() ?? '';
+
+    // 1. The chat list (if loaded) knows the conversation's peer.
+    String? foundId, foundName, foundAvatar;
+    final convId = chatBloc.currentConversationId ?? widget.conversationId;
+    for (final conv in chatBloc.conversationsList) {
+      if (conv.id != convId) continue;
+      final peer = conv.peer;
+      final peerId = peer?.id ?? '';
+      if (peerId.isNotEmpty) foundId = peerId;
+      final peerName = peer?.name ?? '';
+      if (peerName.trim().isNotEmpty) foundName = peerName;
+      final peerAvatar = peer?.avatarUrl ?? '';
+      if (peerAvatar.trim().isNotEmpty) foundAvatar = peerAvatar;
+      break;
+    }
+
+    // 2. Otherwise derive the peer from any incoming message's sender.
+    for (final msg in chatBloc.conversationMessages) {
+      if (foundId != null && foundName != null && foundAvatar != null) break;
+      final senderId = msg.senderId?.toString() ?? '';
+      if (senderId.isEmpty || senderId == myId) continue;
+      foundId ??= senderId;
+      final sender = msg.sender;
+      if (sender == null) continue;
+      if (foundName == null && sender.fullName.trim().isNotEmpty) {
+        foundName = sender.fullName;
+      }
+      final avatar = sender.displayAvatar ?? '';
+      if (foundAvatar == null && avatar.trim().isNotEmpty) {
+        foundAvatar = avatar;
+      }
+    }
+
+    var changed = false;
+    if (needId && foundId != null) {
+      _peerId = foundId;
+      changed = true;
+    }
+    if (needName && foundName != null) {
+      _peerName = foundName;
+      changed = true;
+    }
+    if (needAvatar && foundAvatar != null) {
+      _peerAvatar = foundAvatar;
+      changed = true;
+    }
+    if (changed && mounted) {
+      setState(() {});
+      // The initial permission check is skipped when the peer id was unknown.
+      if (_communicationPermission == null) {
+        _checkCommunicationPermission();
+      }
+    }
+  }
+
   /// Check whether the current user can communicate with the target user.
   Future<void> _checkCommunicationPermission() async {
+    final peerId = _peerId.trim().isNotEmpty ? _peerId : widget.id;
+    if (peerId.trim().isEmpty) return;
     try {
-      final permission = await CommunicationService().checkPermission(widget.id);
+      final permission = await CommunicationService().checkPermission(peerId);
       if (mounted) {
         setState(() {
           _communicationPermission = permission;
@@ -236,8 +315,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
         CommunicationRestrictionSheet.show(
           context: context,
           permission: permission,
-          targetUserName: widget.username,
-          targetUserId: widget.id,
+          targetUserName: _peerName,
+          targetUserId: _resolvePeerId(),
           onActionDone: () {
             // Re-check after user action
             _checkCommunicationPermission();
@@ -258,12 +337,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             Expanded(
               child: Text(
                 text,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: theme.textSecondary,
-                  fontFamily: 'Inter',
-                  height: 1.4,
-                ),
+                style: theme.bodySecondary.copyWith(height: 1.4),
               ),
             ),
             Icon(Icons.chevron_right_rounded, color: theme.textSecondary, size: 20),
@@ -318,6 +392,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
   /// resolved peer) pass it empty, which surfaced as "Could not identify this
   /// user". Fall back to the loaded conversation's other participant.
   String _resolvePeerId() {
+    if (_peerId.trim().isNotEmpty) return _peerId;
     if (widget.id.trim().isNotEmpty) return widget.id;
     final convId = chatBloc.currentConversationId ?? widget.conversationId;
 
@@ -377,12 +452,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                     await CommunicationGate.guardCall(
                       context: context,
                       targetUserId: peerId,
-                      targetUserName: widget.username,
+                      targetUserName: _peerName,
                       onAllowed: () {
                         startOutgoingCallV2(
                           peerId,
-                          widget.username,
-                          widget.profilePic,
+                          _peerName,
+                          _peerAvatar,
                           isVideo,
                         );
                       },
@@ -558,6 +633,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
             setState(() {
               _isFileUploading = false;
             });
+            _resolvePeerDetails();
             final count = chatBloc.conversationMessages.length;
             if (count > _lastMessageCount && (isBottom ?? true)) {
               WidgetsBinding.instance.addPostFrameCallback((_) => scrollToBottom());
@@ -622,7 +698,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                         userId: AppData.logInUserId?.toString() ?? '',
                         conversationId:
                             chatBloc.currentConversationId ?? widget.conversationId,
-                        profilePic: widget.profilePic,
+                        profilePic: _peerAvatar,
                         scrollController: _scrollController,
                         isSomeoneTyping: isSomeoneTyping,
                         onEditRequested: (msg) {
@@ -651,7 +727,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                               conversationId: convId,
                               filePath: path,
                               attachmentType: 'voice',
-                              receiverId: widget.id,
+                              receiverId: _resolvePeerId(),
                             ));
                           }
                           setState(() {
@@ -699,7 +775,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                               chatBloc.add(SendConversationMessageEvent(
                                 conversationId: convId,
                                 message: message,
-                                receiverId: widget.id,
+                                receiverId: _resolvePeerId(),
                               ));
                             }
                           }
@@ -857,7 +933,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
           conversationId: convId,
           filePath: recordFilePath,
           attachmentType: 'voice',
-          receiverId: widget.id,
+          receiverId: _resolvePeerId(),
         ));
       }
       scrollToBottom();
@@ -939,7 +1015,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                                 filePath: sendFile.path,
                                 message: caption.isNotEmpty ? caption : null,
                                 attachmentType: 'file',
-                                receiverId: widget.id,
+                                receiverId: _resolvePeerId(),
                               ));
                             }
 
@@ -1031,21 +1107,19 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               children: [
                 Text(
                   'Editing message',
-                  style: TextStyle(
+                  style: theme.bodySecondary.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: theme.primary,
-                    fontFamily: 'Poppins',
                   ),
                 ),
                 Text(
                   preview,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: theme.bodyMedium.copyWith(
                     fontSize: 13,
                     color: theme.textSecondary,
-                    fontFamily: 'Poppins',
                   ),
                 ),
               ],
@@ -1080,7 +1154,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
       ),
       title: InkWell(
         onTap: () {
-          ProfileNavigation.openUser(context, widget.id);
+          final peerId = _resolvePeerId();
+          if (peerId.isNotEmpty) {
+            ProfileNavigation.openUser(context, peerId);
+          }
         },
         child: Row(
           children: [
@@ -1097,7 +1174,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: widget.profilePic == ''
+                child: _peerAvatar.trim().isEmpty
                     ? Center(
                         child: Icon(
                           Icons.person_rounded,
@@ -1107,7 +1184,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                       )
                     : CustomImageView(
                         imagePath:
-                            AppData.fullImageUrl(widget.profilePic.validate()),
+                            AppData.fullImageUrl(_peerAvatar.validate()),
                         height: 40,
                         width: 40,
                         fit: BoxFit.cover,
@@ -1121,7 +1198,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    widget.username,
+                    _peerName.trim().isEmpty ? 'Chat' : _peerName,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

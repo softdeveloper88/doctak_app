@@ -435,9 +435,8 @@ class NotificationService {
         message.data['banner'] ?? '',
       );
     } else {
-      // Message has a `notification` payload: while backgrounded the Android
-      // system tray already displays it automatically. Posting our own here too
-      // produced a DUPLICATE notification, so we skip manual display.
+      // Message has a `notification` payload: while backgrounded the OS
+      // displays it automatically (iOS). Android server payloads are data-only.
       debugPrint('Background notification has a notification payload — letting the OS display it (no duplicate)');
     }
   }
@@ -497,16 +496,22 @@ class NotificationService {
       return 'call_${message.data['call_id']}';
     }
 
-    // For other notifications, generate an ID based on content
     final String type = message.data['type'] ?? '';
-    final String id = message.data['id'] ?? '';
-    final String title = message.notification?.title ?? '';
+    final String messageId = message.data['messageId'] ?? '';
+    if (messageId.isNotEmpty && type.contains('message')) {
+      return 'message:$messageId';
+    }
 
-    // Include a timestamp in the ID to make it unique for recurring notifications
-    // but don't make it too granular to allow for some deduplication
-    final int timestamp = (DateTime.now().millisecondsSinceEpoch / 10000).floor();
+    final String notificationId = message.data['notificationId'] ?? '';
+    if (notificationId.isNotEmpty) {
+      return 'notif:$notificationId';
+    }
 
-    return '$type:$id:${title.hashCode}:$timestamp';
+    // For other notifications, generate an ID based on content
+    final String id = message.data['id'] ?? message.data['entityId'] ?? '';
+    final String title = message.notification?.title ?? message.data['title'] ?? '';
+
+    return '$type:$id:${title.hashCode}';
   }
 
   // Clean up notification entries older than 10 minutes
@@ -562,13 +567,13 @@ class NotificationService {
     debugPrint('📱 Badge permission: ${settings.badge}');
     debugPrint('📱 Sound permission: ${settings.sound}');
 
-    // iOS: allow FCM to surface foreground notifications via the system UI too
-    // (we also show a local notification in onMessage for both platforms).
+    // iOS: badge only in foreground — we show one tray notification ourselves.
+    // Showing both the system FCM banner and a local notification duplicated chat alerts.
     if (Platform.isIOS) {
       await _firebaseMessaging.setForegroundNotificationPresentationOptions(
-        alert: true,
+        alert: false,
         badge: true,
-        sound: true,
+        sound: false,
       );
     }
 
@@ -603,9 +608,8 @@ class NotificationService {
         return;
       }
 
-      // v2 calls already handled above. Show the notification FIRST — badge/
-      // counter updates must never block it. Skip silent data messages that
-      // would otherwise show as an empty "Doctak".
+      // v2 calls already handled above. Show one local notification in foreground.
+      // iOS system banner is disabled above (alert: false) to avoid duplicates.
       if (_hasDisplayableContent(message)) {
         try {
           await _showLocalNotification(message);
@@ -822,7 +826,34 @@ class NotificationService {
   }
 
   @pragma('vm:entry-point')
+  static int _stableNotificationId(Map<String, dynamic> data) {
+    final messageId = (data['messageId'] ?? data['notificationId'] ?? '').toString();
+    if (messageId.isNotEmpty) {
+      return messageId.hashCode & 0x7fffffff;
+    }
+
+    final type = (data['type'] ?? '').toString();
+    final entityId = (data['entityId'] ?? data['id'] ?? '').toString();
+    final title = (data['title'] ?? '').toString();
+    return '$type:$entityId:$title'.hashCode & 0x7fffffff;
+  }
+
+  @pragma('vm:entry-point')
+  static String? _androidNotificationTag(Map<String, dynamic> data) {
+    final messageId = (data['messageId'] ?? '').toString();
+    if (messageId.isNotEmpty) return 'msg:$messageId';
+
+    final notificationId = (data['notificationId'] ?? '').toString();
+    if (notificationId.isNotEmpty) return 'notif:$notificationId';
+
+    return null;
+  }
+
+  @pragma('vm:entry-point')
   static Future<void> showNotificationWithCustomIcon(notification, data, String title, String body, String imageUrl, String bannerImage) async {
+    final payloadMap = Map<String, dynamic>.from(data);
+    final androidTag = _androidNotificationTag(payloadMap);
+    final notificationId = _stableNotificationId(payloadMap);
     final ByteArrayAndroidBitmap? largeIcon = imageUrl != '' ? await _getImageFromUrl(imageUrl) : null;
     final ByteArrayAndroidBitmap? banner = bannerImage != '' ? await _getImageFromUrl(bannerImage) : null;
 
@@ -850,14 +881,13 @@ class NotificationService {
       category: AndroidNotificationCategory.message,
       visibility: NotificationVisibility.public,
       color: Colors.transparent,
+      tag: androidTag,
       largeIcon: largeIcon,
       styleInformation: banner != null
           ? BigPictureStyleInformation(banner, contentTitle: title, summaryText: body)
           : null,
     );
 
-    final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(100000);
-    final payloadMap = Map<String, dynamic>.from(data);
     payloadMap.putIfAbsent('title', () => title);
     payloadMap.putIfAbsent('body', () => body);
     if (imageUrl.isNotEmpty) payloadMap.putIfAbsent('image', () => imageUrl);

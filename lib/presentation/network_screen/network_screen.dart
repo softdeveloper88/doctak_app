@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:doctak_app/core/utils/capitalize_words.dart';
-import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/core/utils/profile_navigation.dart';
+import 'package:doctak_app/core/utils/specialty_display.dart';
+import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/network_widgets.dart';
 import 'package:doctak_app/presentation/home_screen/utils/shimmer_widget.dart';
 import 'package:doctak_app/presentation/network_screen/bloc/network_bloc.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
@@ -173,7 +173,8 @@ class _NetworkScreenState extends State<NetworkScreen> {
         final person = items[i];
         return _ConnectionCard(
           name: _resolveName(person),
-          specialty: _resolveSpecialty(person),
+          specialty: networkPersonSpecialty(person),
+          location: networkPersonLocation(person),
           avatarUrl: AppData.fullImageUrl(person['profile_pic'] as String?),
           userId: person['id']?.toString() ?? '',
           isVerified: person['is_verified'] == true || person['is_verified'] == 1,
@@ -206,14 +207,6 @@ class _NetworkScreenState extends State<NetworkScreen> {
       ),
     );
   }
-}
-
-// ── Specialty resolver ───────────────────────────────────────────────────
-String _resolveSpecialty(Map<String, dynamic> person) {
-  final raw = (person['specialty'] ?? person['speciality'] ?? person['title'] ?? '')
-      .toString()
-      .trim();
-  return specialtyLabelOrNull(raw) ?? '';
 }
 
 // ── Name resolver ────────────────────────────────────────────────────────
@@ -280,6 +273,7 @@ class _ConnectionsAppBar extends StatelessWidget {
 class _ConnectionCard extends StatelessWidget {
   final String name;
   final String specialty;
+  final String location;
   final String? avatarUrl;
   final String userId;
   final bool isVerified;
@@ -288,6 +282,7 @@ class _ConnectionCard extends StatelessWidget {
   const _ConnectionCard({
     required this.name,
     required this.specialty,
+    required this.location,
     required this.avatarUrl,
     required this.userId,
     required this.isVerified,
@@ -296,9 +291,13 @@ class _ConnectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final subtitleParts = <String>[
+      if (specialty.isNotEmpty) specialty,
+      if (location.isNotEmpty) location,
+    ];
     return ProfileListItemCard(
       title: name,
-      subtitle: specialty.isNotEmpty ? capitalizeWords(specialty) : null,
+      subtitle: subtitleParts.isNotEmpty ? subtitleParts.join(' · ') : null,
       metaText: '✓ Connected',
       avatarUrl: avatarUrl,
       titleSuffix: isVerified ? const VerifiedBadge(size: 15) : null,

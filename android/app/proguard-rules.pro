@@ -103,10 +103,6 @@
 -keep class io.flutter.plugins.firebase.crashlytics.** { *; }
 -keep class io.flutter.plugins.firebase.crashlytics.FlutterFirebaseCrashlyticsPlugin { *; }
 
-# 13. Firebase Dynamic Links
--keep class io.flutter.plugins.firebase.dynamiclinks.** { *; }
--keep class io.flutter.plugins.firebase.dynamiclinks.FlutterFirebaseDynamicLinksPlugin { *; }
-
 # 14. Firebase Messaging
 -keep class io.flutter.plugins.firebase.messaging.** { *; }
 -keep class io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingPlugin { *; }
@@ -320,11 +316,11 @@
 # OkHttp (used by Dio internally)
 -keepattributes Signature
 -keepattributes *Annotation*
--keep class okhttp3.** { *; }
+-keep,allowobfuscation class okhttp3.** { *; }
 -keep interface okhttp3.** { *; }
 -dontwarn okhttp3.**
 -dontwarn okio.**
--keep class okio.** { *; }
+-keep,allowobfuscation class okio.** { *; }
 
 # Retrofit (if used)
 -keep class retrofit2.** { *; }
@@ -385,7 +381,7 @@
 # ========================================
 # FIREBASE - CRITICAL FOR PUSH NOTIFICATIONS
 # ========================================
--keep class com.google.firebase.** { *; }
+-keep,allowobfuscation class com.google.firebase.** { *; }
 -keep class io.flutter.plugins.firebasemessaging.** { *; }
 -keep class com.google.firebase.messaging.** { *; }
 -keep class com.google.firebase.installations.** { *; }
@@ -399,12 +395,6 @@
     public *;
 }
 -keepclassmembers class com.google.firebase.messaging.RemoteMessage$Notification {
-    public *;
-}
-
-# Firebase InstanceId and related classes
--keepclassmembers class * {
-    public static <fields>;
     public *;
 }
 
@@ -424,19 +414,24 @@
 
 # Keep Google Sign-In classes
 -keep class io.flutter.plugins.googlesignin.** { *; }
--keep class com.google.android.gms.** { *; }
--keep interface com.google.android.gms.** { *; }
+-keep,allowobfuscation class com.google.android.gms.** { *; }
+-keep,allowobfuscation interface com.google.android.gms.** { *; }
 
 # Keep method channel related classes
 -keepclassmembers class * {
     @io.flutter.embedding.engine.plugins.** *;
 }
 
-# Don't obfuscate
--dontobfuscate
+# NOTE: Do NOT use -dontobfuscate — it zeros Play Console obfuscation score.
+# Flutter/plugin keep rules above preserve what reflection needs; everything
+# else is renamed by R8 (and Crashlytics mapping is uploaded for stack traces).
 
--keep class com.google.android.gms.** { *; }
--keep interface com.google.android.gms.** { *; }
+# Repackage renamed classes into a short package (Play "Repackage Classes")
+-repackageclasses 'o'
+-allowaccessmodification
+
+-keep,allowobfuscation class com.google.android.gms.** { *; }
+-keep,allowobfuscation interface com.google.android.gms.** { *; }
 -keepclassmembers class com.google.android.gms.** { *; }
 -dontwarn com.google.android.gms.**
 
@@ -626,9 +621,9 @@
 # NETWORK & HTTP CLASSES
 # ========================================
 # Keep all networking libraries intact
--keep class okhttp3.** { *; }
+-keep,allowobfuscation class okhttp3.** { *; }
 -keep class com.squareup.okhttp3.** { *; }
--keep class okio.** { *; }
+-keep,allowobfuscation class okio.** { *; }
 -keep class retrofit2.** { *; }
 -keepclasseswithmembers class * {
     @retrofit2.http.* <methods>;
@@ -657,45 +652,23 @@
 # ========================================
 # FIREBASE & GOOGLE PLAY SERVICES
 # ========================================
-# Critical for push notifications and authentication
--keep class com.google.firebase.** { *; }
--keep interface com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
--keep interface com.google.android.gms.** { *; }
--keep class com.google.android.gms.internal.** { *; }
--keep interface com.google.android.gms.internal.** { *; }
+# Keep names/members needed for reflection; allow R8 to rename packages where safe.
+-keep,allowobfuscation class com.google.firebase.** { *; }
+-keep,allowobfuscation interface com.google.firebase.** { *; }
+-keep,allowobfuscation class com.google.android.gms.** { *; }
+-keep,allowobfuscation interface com.google.android.gms.** { *; }
 
--keepclassmembers class com.google.firebase.** { *; }
--keepclassmembers class com.google.android.gms.** { *; }
-
-# Firebase Messaging
--keep class com.google.firebase.messaging.** { *; }
+# Firebase Messaging entry points (must keep names for manifest/reflection)
+-keep class com.google.firebase.messaging.FirebaseMessagingService { *; }
 -keep class com.google.firebase.messaging.RemoteMessage { *; }
--keep class com.google.firebase.messaging.FirebaseMessaging { *; }
--keepclassmembers class com.google.firebase.messaging.RemoteMessage$Notification {
-    public *;
-}
+-keep class * extends com.google.firebase.messaging.FirebaseMessagingService { *; }
 
-# Firebase Crashlytics
+# Firebase Crashlytics / Auth / Analytics — consumer rules cover most; keep entry types
 -keep class com.google.firebase.crashlytics.** { *; }
--keep class com.google.firebase.crashlytics.internal.** { *; }
-
-# Firebase Auth
 -keep class com.google.firebase.auth.** { *; }
--keep class com.google.android.gms.auth.** { *; }
 
-# Firebase Analytics
--keep class com.google.firebase.analytics.** { *; }
-
-# Google Play Services specific classes
--keep class com.google.android.gms.common.** { *; }
--keep class com.google.android.gms.tasks.** { *; }
--keep class com.google.android.gms.signin.** { *; }
-
-# Don't warn about Play Services
 -dontwarn com.google.firebase.**
 -dontwarn com.google.android.gms.**
-
 # ========================================
 # PLUGIN COMMUNICATION CHANNELS
 # ========================================
@@ -780,10 +753,11 @@
 # ========================================
 # ANDROIDX & SUPPORT LIBRARIES
 # ========================================
--keep class androidx.** { *; }
--keep interface androidx.** { *; }
--keep class android.support.** { *; }
--keep interface android.support.** { *; }
+# Prefer allowobfuscation so unused AndroidX code can still be renamed/shrunk.
+# Entry points needed via reflection stay via more specific rules above.
+-keep,allowobfuscation class androidx.** { *; }
+-keep,allowobfuscation interface androidx.** { *; }
+-dontwarn androidx.**
 
 # WorkManager
 -keep class androidx.work.** { *; }
@@ -796,10 +770,14 @@
 # ========================================
 # KOTLIN COROUTINES
 # ========================================
--keep class kotlin.** { *; }
--keep class kotlinx.coroutines.** { *; }
--keep class kotlinx.coroutines.flow.** { *; }
--keep interface kotlinx.coroutines.** { *; }
+-keepclassmembers class kotlin.Metadata { *; }
+-dontwarn kotlin.**
+-dontwarn kotlinx.coroutines.**
+-keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
+-keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
+-keepclassmembernames class kotlinx.** {
+    volatile <fields>;
+}
 
 # ========================================
 # NATIVE METHODS
@@ -856,12 +834,7 @@
 # ========================================
 # FINAL SAFETY RULES
 # ========================================
-# Ensure critical entry points are preserved
--keepclasseswithmembernames class * {
-    public <init>(...);
-}
-
-# Keep all custom applications
+# Keep Application subclasses (manifest entry points)
 -keep class * extends android.app.Application
 
 # Keep Exception classes for meaningful stack traces
@@ -872,14 +845,7 @@
     <init>(java.lang.String, java.lang.Throwable);
 }
 
-# Preserve toString, equals, hashCode for debugging
--keepclassmembers class * {
-    public java.lang.String toString();
-    public int hashCode();
-    public boolean equals(java.lang.Object);
-}
-
-# Allow access modification
+# Allow access modification (used with -repackageclasses / R8 full mode)
 -allowaccessmodification
 
 # ========================================

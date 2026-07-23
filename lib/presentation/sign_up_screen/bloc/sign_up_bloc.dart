@@ -1,5 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:doctak_app/core/utils/age_assurance.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/auth_session_helper.dart';
 import 'package:doctak_app/core/utils/progress_dialog_utils.dart';
@@ -83,6 +84,7 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
             'device_token': event.deviceToken,
             'device_type': deviceType,
             'device_id': deviceId,
+            'dob': event.dob,
           }),
         );
       } on DioException catch (dioError) {
@@ -123,7 +125,16 @@ class DropdownBloc extends Bloc<DropdownEvent, DropdownState> {
             response,
             deviceToken: event.deviceToken,
             rememberMe: true,
+            dateOfBirthOverride: event.dob,
           );
+
+          final parsedDob = AgeAssurance.tryParseDob(event.dob);
+          if (parsedDob != null && AgeAssurance.meetsMinimumAge(parsedDob)) {
+            await AgeAssurance.markConfirmed(
+              dateOfBirth: parsedDob,
+              userId: response.user?.id,
+            );
+          }
 
           if (hasEmailError) {
             print('Email sending failed but registration succeeded - continuing to dashboard');

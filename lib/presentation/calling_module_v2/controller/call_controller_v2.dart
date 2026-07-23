@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/call_protocol.dart';
+import '../services/call_dismiss_registry.dart';
 import '../screens/call_screen_v2.dart';
 import '../services/call_agora_v2.dart';
 import '../services/call_api_v2.dart';
@@ -352,6 +353,7 @@ class CallControllerV2 extends ChangeNotifier {
   /// runs on the next launch via [_resumeAfterColdStart].)
   Future<void> handleIncomingPush(IncomingCallPushV2 push) async {
     if (push.isExpired) return; // ghost-ring guard (edge 26)
+    if (await CallDismissRegistry.isDismissed(push.callId)) return;
 
     if (isLive && callId != push.callId) {
       // Already on a call — auto-busy (§9 rows 8/20).
@@ -388,6 +390,7 @@ class CallControllerV2 extends ChangeNotifier {
           snapshot.state == CallState.ended &&
           callId == push.callId &&
           phase == CallPhaseV2.incoming) {
+        await CallDismissRegistry.markDismissed(push.callId);
         await _selfEndCallKit(push.callId);
         dismissTakenElsewhere();
       }
@@ -444,6 +447,7 @@ class CallControllerV2 extends ChangeNotifier {
   /// decline echo is never sent to the server as a user reject.
   Future<void> dismissCancelledCall(String cancelledCallId) async {
     if (cancelledCallId.isEmpty) return;
+    await CallDismissRegistry.markDismissed(cancelledCallId);
     // If we're the device carrying this call (already connecting/active), the
     // cancel is the "answered elsewhere" fan-out reaching us — ignore it.
     final carrying = callId == cancelledCallId &&

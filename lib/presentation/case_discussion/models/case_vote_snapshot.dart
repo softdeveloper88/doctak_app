@@ -30,8 +30,8 @@ class CaseVoteSnapshot {
     }
 
     final userVote = userVoteRaw?.toString() ?? '';
-    final isLiked = userVote == 'up' || source['liked'] == true || response['liked'] == true;
-    final isDisliked = userVote == 'down';
+    final isLiked = userVote == 'up' || userVote == 'like' || source['liked'] == true || response['liked'] == true;
+    final isDisliked = userVote == 'down' || userVote == 'dislike';
 
     return CaseVoteSnapshot(
       likes: _parseVoteInt(likesRaw),

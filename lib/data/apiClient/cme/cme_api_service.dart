@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/network/network_utils.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/cme/cme_certificate_model.dart';
@@ -307,6 +308,7 @@ class CmeApiService {
       request.headers['Authorization'] = 'Bearer ${AppData.userToken}';
     }
     request.headers['Accept'] = 'application/json';
+    request.headers.addAll(ActingContextService.instance.actingHeaders());
 
     eventData.forEach((key, value) {
       request.fields[key] = value;

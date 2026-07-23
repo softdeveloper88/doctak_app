@@ -341,6 +341,33 @@ class UpdateAboutMeV5Event extends ProfileEvent {
   List<Object?> get props => [aboutMe, address, birthplace, livesIn, languages];
 }
 
+/// V5 — Save personal details (user + profile fields) in one sequential update.
+class UpdatePersonalDetailsV5Event extends ProfileEvent {
+  final String? firstName;
+  final String? lastName;
+  final String? dob;
+  final String? gender;
+  final String? birthplace;
+  final String? livesIn;
+  final String? address;
+  final String? languages;
+
+  UpdatePersonalDetailsV5Event({
+    this.firstName,
+    this.lastName,
+    this.dob,
+    this.gender,
+    this.birthplace,
+    this.livesIn,
+    this.address,
+    this.languages,
+  });
+
+  @override
+  List<Object?> get props =>
+      [firstName, lastName, dob, gender, birthplace, livesIn, address, languages];
+}
+
 class LoadDataValues extends ProfileEvent {
   @override
   List<Object?> get props => [];

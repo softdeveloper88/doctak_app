@@ -6,6 +6,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:doctak_app/core/utils/app/AppData.dart';
 import '../repository/case_discussion_repository.dart';
 import '../models/case_discussion_models.dart';
 import '../models/case_vote_snapshot.dart';
@@ -874,25 +875,91 @@ class DiscussionDetailBloc
   Future<void> _onAddReply(
       AddReply event, Emitter<DiscussionDetailState> emit) async {
     final currentState = state;
-    if (currentState is DiscussionDetailLoaded) {
-      try {
-        final newReply = await repository.addReply(
-          commentId: event.commentId,
-          reply: event.reply,
-        );
+    if (currentState is! DiscussionDetailLoaded) return;
 
-        final updatedComments = currentState.comments.map((c) {
-          if (c.id == event.commentId) {
-            return c.copyWith(
-              repliesCount: c.repliesCount + 1,
-              replies: [...c.replies, newReply],
-            );
-          }
-          return c;
-        }).toList();
+    final text = event.reply.trim();
+    if (text.isEmpty) return;
 
-        emit(currentState.copyWith(comments: updatedComments));
-      } catch (_) {}
+    final commentIdx =
+        currentState.comments.indexWhere((c) => c.id == event.commentId);
+    if (commentIdx == -1) return;
+
+    final comment = currentState.comments[commentIdx];
+    final tempId = -DateTime.now().millisecondsSinceEpoch;
+    final optimisticReply = CaseReply(
+      id: tempId,
+      commentId: event.commentId,
+      userId: AppData.logInUserId ?? 0,
+      reply: text,
+      createdAt: DateTime.now(),
+      author: CaseAuthor(
+        id: AppData.logInUserId ?? 0,
+        name: AppData.name.isNotEmpty ? AppData.name : 'You',
+        specialty: '',
+        profilePic: AppData.profilePicUrl.isNotEmpty ? AppData.profilePicUrl : null,
+        isVerified: false,
+      ),
+      isOwner: true,
+    );
+
+    final optimisticComments = List<CaseComment>.from(currentState.comments);
+    optimisticComments[commentIdx] = comment.copyWith(
+      repliesCount: comment.repliesCount + 1,
+      replies: [...comment.replies, optimisticReply],
+    );
+    emit(currentState.copyWith(comments: optimisticComments));
+
+    try {
+      final newReply = await repository.addReply(
+        commentId: event.commentId,
+        reply: text,
+      );
+
+      final latestState = state;
+      if (latestState is! DiscussionDetailLoaded) return;
+
+      final idx =
+          latestState.comments.indexWhere((c) => c.id == event.commentId);
+      if (idx == -1) return;
+
+      final latestComment = latestState.comments[idx];
+      final mergedReplies = latestComment.replies
+          .where((r) => r.id != tempId)
+          .toList();
+      if (!mergedReplies.any((r) => r.id == newReply.id)) {
+        mergedReplies.add(newReply);
+      }
+
+      final syncedComments = List<CaseComment>.from(latestState.comments);
+      syncedComments[idx] = latestComment.copyWith(
+        replies: mergedReplies,
+        repliesCount: mergedReplies.length > latestComment.repliesCount
+            ? mergedReplies.length
+            : latestComment.repliesCount,
+      );
+
+      emit(latestState.copyWith(comments: syncedComments));
+    } catch (_) {
+      final latestState = state;
+      if (latestState is! DiscussionDetailLoaded) return;
+
+      final idx =
+          latestState.comments.indexWhere((c) => c.id == event.commentId);
+      if (idx == -1) return;
+
+      final failedComment = latestState.comments[idx];
+      final revertedReplies = failedComment.replies
+          .where((r) => r.id != tempId)
+          .toList();
+      final revertedComments = List<CaseComment>.from(latestState.comments);
+      revertedComments[idx] = failedComment.copyWith(
+        replies: revertedReplies,
+        repliesCount: failedComment.repliesCount > 0
+            ? failedComment.repliesCount - 1
+            : 0,
+      );
+
+      emit(latestState.copyWith(comments: revertedComments));
     }
   }
 

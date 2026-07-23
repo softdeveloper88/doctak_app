@@ -66,7 +66,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
                                   ' · ',
                                   style: TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.bold),
                                 ),
-                                Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
+                                Image.asset('assets/images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover),
                               ],
                             ),
                             // RichText(
@@ -256,7 +256,7 @@ class _SVCommentComponentState extends State<SVCommentComponent> {
     //                 ),
     //                 const SizedBox(
     //                     width: 6), // Added margin between name and verified icon
-    //                 Image.asset('images/socialv/icons/ic_TickSquare.png',
+    //                 Image.asset('assets/images/socialv/icons/ic_TickSquare.png',
     //                     height: 14, width: 14, fit: BoxFit.cover),
     //               ],
     //             ),

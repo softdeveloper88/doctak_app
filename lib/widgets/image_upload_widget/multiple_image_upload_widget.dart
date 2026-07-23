@@ -28,7 +28,7 @@ class MultipleImageUploadWidget extends StatefulWidget {
 }
 
 class _MultipleImageUploadWidgetState extends State<MultipleImageUploadWidget> {
-  // List<String> list = ['images/socialv/posts/post_one.png', 'images/socialv/posts/post_two.png', 'images/socialv/posts/post_three.png', 'images/socialv/postImage.png'];
+  // List<String> list = ['assets/images/socialv/posts/post_one.png', 'assets/images/socialv/posts/post_two.png', 'assets/images/socialv/posts/post_three.png', 'assets/images/socialv/postImage.png'];
   int selectTab = 0;
 
   @override

@@ -101,6 +101,8 @@ class _FullScreenImagePageState extends State<FullScreenImagePage> {
     final safe = _safeUrl(url);
     return CachedNetworkImageProvider(
       safe,
+      // Private media (e.g. chat attachments) requires the bearer token.
+      headers: AppData.mediaHeadersFor(safe),
       cacheManager: CustomCacheManager(),
     );
   }

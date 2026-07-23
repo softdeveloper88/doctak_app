@@ -1,7 +1,9 @@
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/bloc/feed_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_entry_view.dart';
+import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_motion.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_offline_banner.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
@@ -96,51 +98,56 @@ class FeedEntriesSliver extends StatelessWidget {
         (!state.hasMore && !state.isPaginating ? 1 : 0) +
         (showOfflineBanner ? 1 : 0);
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (showOfflineBanner && index == 0) {
-            return FeedOfflineBanner(
-              onRetry: () =>
-                  bloc.add(const FeedLoadRequested(refresh: true)),
-            );
-          }
-
-          final entryIndex = showOfflineBanner ? index - 1 : index;
-          if (entryIndex < entries.length) {
-            final entry = entries[entryIndex];
-            return RepaintBoundary(
-              key: ValueKey(entry.dedupeKey),
-              child: FeedEntryView(
-                entry,
-                onFeedChanged: () =>
+    return AnimationLimiter(
+      child: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (showOfflineBanner && index == 0) {
+              return FeedOfflineBanner(
+                onRetry: () =>
                     bloc.add(const FeedLoadRequested(refresh: true)),
-                homeBloc: homeBloc,
+              );
+            }
+
+            final entryIndex = showOfflineBanner ? index - 1 : index;
+            if (entryIndex < entries.length) {
+              final entry = entries[entryIndex];
+              return RepaintBoundary(
+                key: ValueKey(entry.dedupeKey),
+                child: FeedCardEntrance(
+                  listIndex: entryIndex,
+                  child: FeedEntryView(
+                    entry,
+                    onFeedChanged: () =>
+                        bloc.add(const FeedLoadRequested(refresh: true)),
+                    homeBloc: homeBloc,
+                  ),
+                ),
+              );
+            }
+
+            final footerIndex = entryIndex - entries.length;
+            if (state.isPaginating && footerIndex == 0) {
+              return const Padding(
+                padding: EdgeInsets.only(top: 4, bottom: 12),
+                child: PostShimmerLoader(itemCount: 2),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(
+                  "You're all caught up",
+                  style: theme.bodySecondary,
+                ),
               ),
             );
-          }
-
-          final footerIndex = entryIndex - entries.length;
-          if (state.isPaginating && footerIndex == 0) {
-            return const Padding(
-              padding: EdgeInsets.only(top: 4, bottom: 12),
-              child: PostShimmerLoader(itemCount: 2),
-            );
-          }
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(
-                "You're all caught up",
-                style: theme.bodySecondary,
-              ),
-            ),
-          );
-        },
-        childCount: entries.length + extra,
-        addAutomaticKeepAlives: false,
-        addRepaintBoundaries: false,
+          },
+          childCount: entries.length + extra,
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
+        ),
       ),
     );
   }

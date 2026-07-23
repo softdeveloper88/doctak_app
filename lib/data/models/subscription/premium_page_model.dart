@@ -1,5 +1,5 @@
-/// Models for /api/v6/subscription/premium-page response.
-/// Mirrors the exact data rendered on the /try-premium web page.
+/// Models for doctak-node `GET /api/v1/subscription/premium-page`.
+/// Kept in sync with the web `/upgrade-professional` plan cards.
 
 class PremiumPageResponse {
   final bool success;
@@ -92,9 +92,16 @@ class PremiumPlan {
       isFree: json['is_free'] == true,
       isCurrent: json['is_current'] == true,
       badge: json['badge']?.toString(),
-      highlights: (json['highlights'] as List<dynamic>? ?? [])
-          .map((h) => PlanHighlight.fromJson(h as Map<String, dynamic>))
-          .toList(),
+      highlights: (json['highlights'] as List<dynamic>? ?? []).map((h) {
+        if (h is Map) {
+          return PlanHighlight.fromJson(Map<String, dynamic>.from(h));
+        }
+        return PlanHighlight(
+          icon: 'check_circle',
+          type: 'included',
+          text: h.toString(),
+        );
+      }).toList(),
     );
   }
 

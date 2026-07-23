@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/app/app_environment.dart';
 import 'package:doctak_app/data/models/subscription/premium_page_model.dart';
 import 'package:doctak_app/data/models/subscription/subscription_plan_model.dart';
 import 'package:doctak_app/presentation/subscription_screen/bloc/subscription_bloc.dart';
 import 'package:doctak_app/presentation/subscription_screen/bloc/subscription_event.dart';
 import 'package:doctak_app/presentation/subscription_screen/bloc/subscription_state.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/premium/premium_mark.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -51,7 +53,8 @@ class _SubscriptionContentState extends State<SubscriptionContent>
   }
 
   Future<void> _openTryPremium() async {
-    final url = Uri.parse('${AppData.remoteUrl2}/try-premium');
+    // Open the website checkout page in the system browser (Stripe lives there).
+    final url = Uri.parse('${AppEnvironment.publicWebUrl}/upgrade-professional');
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
@@ -305,21 +308,27 @@ class SubscriptionMyPlanTab extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
             child: Column(
               children: [
-                // Premium Plans badge
+                // Premium Plans badge — gold DocTak logo
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [kSubPurple, kSubElite]),
+                    color: PremiumStyle.gold.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: PremiumStyle.gold.withValues(alpha: 0.35)),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
-                      const SizedBox(width: 5),
+                      PremiumMark(size: 16),
+                      SizedBox(width: 8),
                       Text(
-                        hero.badge.toUpperCase(),
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2),
+                        'PREMIUM',
+                        style: TextStyle(
+                          color: PremiumStyle.goldDeep,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ],
                   ),
@@ -1024,7 +1033,7 @@ class _SubscriptionHistoryTabState extends State<SubscriptionHistoryTab>
     try {
       final dio = Dio();
       final resp = await dio.get(
-        '${AppData.remoteUrlV6}/subscription/history',
+        '${AppEnvironment.nodeApiUrl}/api/v1/subscription/history',
         options: Options(headers: {'Authorization': 'Bearer ${AppData.userToken}'}),
       );
       final data = resp.data is Map ? Map<String, dynamic>.from(resp.data as Map) : <String, dynamic>{};

@@ -17,11 +17,13 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/profile_image_screen/profile_image_screen.dart';
 import 'package:doctak_app/presentation/user_chat_screen/chat_ui_sceen/chat_room_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
+import 'package:doctak_app/presentation/settings/account_settings_screen.dart';
 import 'package:doctak_app/presentation/verification/verification_screen.dart';
 import 'package:doctak_app/widgets/communication/communication_gate.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/report_content_bottom_sheet.dart';
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
+import 'package:doctak_app/widgets/premium/premium_mark.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -297,7 +299,14 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                     // Right-side actions
                     Row(
                       children: [
-                        if (widget.isMe ?? false)
+                        if (widget.isMe ?? false) ...[
+                          _CoverButton(
+                            icon: Icons.settings_rounded,
+                            onTap: () {
+                              const AccountSettingsScreen().launch(context);
+                            },
+                          ),
+                          const SizedBox(width: 8),
                           _CoverButton(
                             icon: Icons.camera_alt_outlined,
                             onTap: () async {
@@ -309,6 +318,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                               if (hasPermission) _showFileOptions(false);
                             },
                           ),
+                        ],
                         if (!(widget.isMe ?? false)) ...[
                           _CoverButton(icon: Icons.share, onTap: _shareProfile),
                           const SizedBox(width: 8),
@@ -373,11 +383,16 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                       if (widget.profileBoc?.fullProfile?.user?.verified ==
                           true) ...[
                         const SizedBox(width: 4),
-                        const Icon(
-                          Icons.verified_rounded,
+                        DocTakVerifiedBadge(
                           size: 20,
-                          color: Color(0xFF1DA1F2),
+                          isPremium: (widget.isMe ?? false)
+                              ? AppData.isPremium
+                              : false,
                         ),
+                      ],
+                      if ((widget.isMe ?? false) && AppData.isPremium) ...[
+                        const SizedBox(width: 6),
+                        const PremiumMark(size: 16),
                       ],
                     ],
                   ),
@@ -655,6 +670,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
 
   // ── Avatar with verified badge ──
   Widget _buildAvatar(OneUITheme theme) {
+    final isOwnPremium = (widget.isMe ?? false) && AppData.isPremium;
     return Stack(
       children: [
         Container(
@@ -663,10 +679,18 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-              color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,
-              width: 3.5,
+              color: isOwnPremium
+                  ? PremiumStyle.gold
+                  : (theme.isDark ? const Color(0xFF0F172A) : Colors.white),
+              width: isOwnPremium ? 3.5 : 3.5,
             ),
             boxShadow: [
+              if (isOwnPremium)
+                BoxShadow(
+                  color: PremiumStyle.gold.withValues(alpha: 0.5),
+                  blurRadius: 0,
+                  spreadRadius: 3,
+                ),
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 12,
@@ -687,7 +711,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                       (widget.userProfile?.profilePicture == null ||
                           widget.userProfile!.profilePicture!.isEmpty)
                       ? Image.asset(
-                          'images/socialv/faces/face_5.png',
+                          'assets/images/socialv/faces/face_5.png',
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
@@ -719,7 +743,7 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
                             ),
                           ),
                           errorWidget: (context, url, error) => Image.asset(
-                            'images/socialv/faces/face_5.png',
+                            'assets/images/socialv/faces/face_5.png',
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
@@ -739,7 +763,9 @@ class _SVProfileHeaderComponentState extends State<SVProfileHeaderComponent>
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                color: theme.primary,
+                color: ((widget.isMe ?? false) && AppData.isPremium)
+                    ? PremiumStyle.gold
+                    : theme.primary,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: theme.isDark ? const Color(0xFF0F172A) : Colors.white,

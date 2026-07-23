@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_content.dart';
@@ -496,7 +497,7 @@ class _AboutTab extends StatelessWidget {
     // Build profile URL using username
     final username = user?.username ?? '';
     final profileUrl = username.isNotEmpty
-        ? '${AppEnvironment.base2}/u/$username'
+        ? '${AppEnvironment.publicWebUrl}/u/$username'
         : '';
 
     // Convenience flag for own-profile editing mode
@@ -732,8 +733,14 @@ class _AboutTab extends StatelessWidget {
                   if (!isOwn && hasAnyPersonalData && !hasVisiblePersonal)
                     const _PrivacyBanner()
                   else ...[
-                    if (_canView('gender') && hasGender)
-                      _InfoRow(icon: Icons.wc_outlined, label: translation(context).lbl_gender, value: user!.gender![0].toUpperCase() + user.gender!.substring(1)),
+                    if (isOwn || (_canView('gender') && hasGender))
+                      _InfoRow(
+                        icon: Icons.wc_outlined,
+                        label: translation(context).lbl_gender,
+                        value: hasGender
+                            ? formatDisplayName(user!.gender)
+                            : 'Not added',
+                      ),
                     if (_canView('dob') && hasDob)
                       _InfoRow(icon: Icons.cake_outlined, label: translation(context).lbl_birthday, value: user!.dob!),
                     if (_canView('birthplace') && hasBirthplace)
@@ -2836,13 +2843,11 @@ void _showPersonalDetailsForm(BuildContext context, ProfileBloc bloc) {
               final languages = languagesCtrl.text;
               _sheetMounted = false;
               Navigator.pop(ctx);
-              _safeBlocAdd(bloc, UpdateProfileV5Event(
+              _safeBlocAdd(bloc, UpdatePersonalDetailsV5Event(
                 firstName: firstName.isNotEmpty ? firstName : null,
                 lastName: lastName.isNotEmpty ? lastName : null,
                 dob: dob.isNotEmpty ? dob : null,
                 gender: gender.isNotEmpty ? gender : null,
-              ));
-              _safeBlocAdd(bloc, UpdateAboutMeV5Event(
                 birthplace: birthplace.isNotEmpty ? birthplace : null,
                 livesIn: livesIn.isNotEmpty ? livesIn : null,
                 address: address.isNotEmpty ? address : null,

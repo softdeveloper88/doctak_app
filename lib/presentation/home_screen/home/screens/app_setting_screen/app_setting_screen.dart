@@ -4,7 +4,6 @@ import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/fcm_debug_screen/fcm_debug_screen.dart';
-import 'package:doctak_app/presentation/settings/delete_account_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -295,40 +294,6 @@ class _AppSettingScreenState extends State<AppSettingScreen> {
                   ],
                 ),
               ),
-            // Delete Account Card
-            AppSurfaceCard(
-              borderColor: Colors.red.withValues(alpha: 0.3),
-              padding: const EdgeInsets.all(16),
-              onTap: () => AppNavigator.push(context, const DeleteAccountScreen()),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(color: Colors.red.withValues(alpha: 0.1), shape: BoxShape.circle),
-                    child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 24),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          translation(context).lbl_delete_account,
-                          style: const TextStyle(fontFamily: 'Poppins', fontSize: 16, fontWeight: FontWeight.w600, color: Colors.red),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Permanently delete your account',
-                          style: TextStyle(fontFamily: 'Poppins', fontSize: 13, color: theme.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Icon(Icons.chevron_right_rounded, color: Colors.red, size: 24),
-                ],
-              ),
-            ),
             // if (AppData.isShowGoogleBannerAds ?? false) BannerAdWidget()
           ],
         ),

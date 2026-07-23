@@ -1,5 +1,5 @@
-// Model classes for v6 API subscription and feature data.
-// These are returned inside login/register/social-login responses.
+// Model classes for doctak-node subscription + feature payloads
+// (login/register responses and /api/v1/subscription/status).
 
 class SubscriptionData {
   final bool isPremium;

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/unified_gallery_picker.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
@@ -370,6 +371,12 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
 
   // ── User Profile Section ──
   Widget _buildUserProfileSection(OneUITheme theme, bool isDark) {
+    // Posting as a business page when the workspace is switched (like web).
+    final actingOrg = ActingContextService.instance.organization;
+    final orgLogo =
+        (actingOrg?.logoUrl != null && actingOrg!.logoUrl!.isNotEmpty)
+            ? AppData.fullImageUrl(actingOrg.logoUrl!)
+            : '';
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Row(
@@ -390,34 +397,60 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                 padding: const EdgeInsets.all(1),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
-                  child: ValueListenableBuilder<String>(
-                    valueListenable: AppData.profilePicNotifier,
-                    builder: (_, picUrl, __) {
-                      final url = picUrl.isNotEmpty
-                          ? picUrl
-                          : AppData.profilePicUrl;
-                      return CachedNetworkImage(
-                        imageUrl: url,
-                        height: 56,
-                        width: 56,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: theme.surfaceVariant,
-                          child: const Center(
-                            child: CupertinoActivityIndicator(),
-                          ),
+                  child: actingOrg != null
+                      ? (orgLogo.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: orgLogo,
+                              height: 56,
+                              width: 56,
+                              fit: BoxFit.cover,
+                              errorWidget: (context, url, error) => Container(
+                                color: theme.surfaceVariant,
+                                child: Icon(
+                                  Icons.business_rounded,
+                                  color: theme.primary,
+                                  size: 28,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              color: theme.surfaceVariant,
+                              child: Icon(
+                                Icons.business_rounded,
+                                color: theme.primary,
+                                size: 28,
+                              ),
+                            ))
+                      : ValueListenableBuilder<String>(
+                          valueListenable: AppData.profilePicNotifier,
+                          builder: (_, picUrl, __) {
+                            final url = picUrl.isNotEmpty
+                                ? picUrl
+                                : AppData.profilePicUrl;
+                            return CachedNetworkImage(
+                              imageUrl: url,
+                              height: 56,
+                              width: 56,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: theme.surfaceVariant,
+                                child: const Center(
+                                  child: CupertinoActivityIndicator(),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: theme.surfaceVariant,
+                                child: Icon(
+                                  CupertinoIcons.person_fill,
+                                  color: isDark
+                                      ? Colors.grey[500]
+                                      : Colors.grey[400],
+                                  size: 28,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        errorWidget: (context, url, error) => Container(
-                          color: theme.surfaceVariant,
-                          child: Icon(
-                            CupertinoIcons.person_fill,
-                            color: isDark ? Colors.grey[500] : Colors.grey[400],
-                            size: 28,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ),
               // Green online dot
@@ -446,7 +479,9 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppData.name,
+                  actingOrg?.name ?? AppData.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w700,
@@ -458,10 +493,11 @@ class _SVAddPostFragmentState extends State<SVAddPostFragment>
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    if (AppData.specialty.isNotEmpty) ...[
+                    if ((actingOrg?.typeDisplay ?? AppData.specialty)
+                        .isNotEmpty) ...[
                       Flexible(
                         child: Text(
-                          AppData.specialty,
+                          actingOrg?.typeDisplay ?? AppData.specialty,
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,

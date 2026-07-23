@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:doctak_app/core/acting/acting_context_service.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/groups/groups_node_api_service.dart';
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
@@ -98,6 +99,12 @@ class ComposeContentScreen extends StatefulWidget {
   final ComposeEditData? editData;
   final ComposeGroupTarget? groupTarget;
 
+  /// Prefill Update-tab body (e.g. shared URL / text from another app).
+  final String? initialBody;
+
+  /// Local image paths to attach on create (e.g. shared gallery images).
+  final List<String> initialImagePaths;
+
   /// Called after a successful create so the caller can refresh the feed.
   final VoidCallback onPosted;
 
@@ -106,6 +113,8 @@ class ComposeContentScreen extends StatefulWidget {
     this.initialTab = ComposeTab.update,
     this.editData,
     this.groupTarget,
+    this.initialBody,
+    this.initialImagePaths = const [],
     required this.onPosted,
   });
 
@@ -171,10 +180,25 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
   void initState() {
     super.initState();
     _applyEditData();
+    _applyInitialSharePrefill();
     _loadBlogCategories();
     _blogTitleCtrl.addListener(_syncBlogSlugFromTitle);
     if (_isEdit && widget.editData!.tab == ComposeTab.update) {
       _loadPostMediaForEdit(widget.editData!.id);
+    }
+  }
+
+  void _applyInitialSharePrefill() {
+    if (_isEdit) return;
+    final initial = widget.initialBody?.trim();
+    if (initial != null && initial.isNotEmpty && _bodyCtrl.text.isEmpty) {
+      _bodyCtrl.text = initial;
+    }
+    for (final path in widget.initialImagePaths) {
+      if (path.trim().isEmpty) continue;
+      _addPostBloc.add(
+        SelectedFiles(pickedfiles: XFile(path), isRemove: false),
+      );
     }
   }
 
@@ -876,7 +900,40 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
     );
   }
 
+  /// Business page currently being acted as (null → personal profile).
+  ActingOrganization? get _actingOrg =>
+      ActingContextService.instance.organization;
+
+  Widget _orgAvatar(OneUITheme theme, ActingOrganization org, double size) {
+    final logo = (org.logoUrl != null && org.logoUrl!.isNotEmpty)
+        ? AppData.fullImageUrl(org.logoUrl!)
+        : '';
+    final fallback = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: theme.avatarBackground,
+        borderRadius: BorderRadius.circular(size * 0.28),
+      ),
+      child: Icon(Icons.business_rounded,
+          size: size * 0.5, color: theme.primary),
+    );
+    if (logo.isEmpty) return fallback;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.28),
+      child: CachedNetworkImage(
+        imageUrl: logo,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => fallback,
+        errorWidget: (_, __, ___) => fallback,
+      ),
+    );
+  }
+
   Widget _buildPollingAsRow(OneUITheme theme) {
+    final org = _actingOrg;
     final specialty = AppData.specialty;
     return Container(
       width: double.infinity,
@@ -888,27 +945,31 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
       ),
       child: Row(
         children: [
-          ValueListenableBuilder<String>(
-            valueListenable: AppData.profilePicNotifier,
-            builder: (_, pic, __) {
-              final url = pic.isNotEmpty ? pic : AppData.profilePicUrl;
-              if (url.isEmpty) {
-                return CircleAvatar(
-                  radius: 18,
-                  backgroundColor: theme.avatarBackground,
-                  child: Icon(Icons.person, size: 18, color: theme.avatarText),
+          if (org != null)
+            _orgAvatar(theme, org, 36)
+          else
+            ValueListenableBuilder<String>(
+              valueListenable: AppData.profilePicNotifier,
+              builder: (_, pic, __) {
+                final url = pic.isNotEmpty ? pic : AppData.profilePicUrl;
+                if (url.isEmpty) {
+                  return CircleAvatar(
+                    radius: 18,
+                    backgroundColor: theme.avatarBackground,
+                    child:
+                        Icon(Icons.person, size: 18, color: theme.avatarText),
+                  );
+                }
+                return ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: url,
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                  ),
                 );
-              }
-              return ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: url,
-                  width: 36,
-                  height: 36,
-                  fit: BoxFit.cover,
-                ),
-              );
-            },
-          ),
+              },
+            ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -923,10 +984,13 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
                   ),
                 ),
                 Text(
-                  AppData.name.isNotEmpty ? AppData.name : 'You',
+                  org?.name ??
+                      (AppData.name.isNotEmpty ? AppData.name : 'You'),
                   style: theme.titleSmall.copyWith(fontSize: 14),
                 ),
-                if (specialty.isNotEmpty)
+                if (org != null)
+                  Text(org.typeDisplay, style: theme.caption)
+                else if (specialty.isNotEmpty)
                   Text(specialty, style: theme.caption),
               ],
             ),
@@ -939,13 +1003,20 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
   Widget _buildAuthorRow(OneUITheme theme) {
     if (_isGroupMode) {
       final target = widget.groupTarget!;
+      final actingOrg = _actingOrg;
       final logoUrl = AppData.fullImageUrl(target.groupLogo);
+      final primaryName = actingOrg?.name ??
+          (AppData.name.isNotEmpty ? AppData.name : 'You');
+      final primaryAvatar = actingOrg != null
+          ? ((actingOrg.logoUrl != null && actingOrg.logoUrl!.isNotEmpty)
+              ? AppData.fullImageUrl(actingOrg.logoUrl!)
+              : null)
+          : (AppData.profilePicUrl.isEmpty ? null : AppData.profilePicUrl);
       return Row(
         children: [
           FeedOverlapAvatar(
-            primaryName: AppData.name.isNotEmpty ? AppData.name : 'You',
-            primaryAvatarUrl:
-                AppData.profilePicUrl.isEmpty ? null : AppData.profilePicUrl,
+            primaryName: primaryName,
+            primaryAvatarUrl: primaryAvatar,
             secondaryName: target.groupName,
             secondaryAvatarUrl: logoUrl.isEmpty ? null : logoUrl,
             size: 44,
@@ -956,7 +1027,7 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  AppData.name.isNotEmpty ? AppData.name : 'You',
+                  primaryName,
                   style: theme.titleSmall,
                 ),
                 const SizedBox(height: 4),
@@ -985,6 +1056,30 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
                     ],
                   ),
                 ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final org = _actingOrg;
+    if (org != null) {
+      // Acting as a business page — the post is attributed to the page.
+      return Row(
+        children: [
+          _orgAvatar(theme, org, 44),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(org.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.titleSmall),
+                const SizedBox(height: 4),
+                _buildPrivacyChip(theme),
               ],
             ),
           ),
@@ -1033,7 +1128,8 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
   }
 
   Widget _buildPrivacyChip(OneUITheme theme) {
-    final specialty = AppData.specialty;
+    final org = _actingOrg;
+    final specialty = org?.typeDisplay ?? AppData.specialty;
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: () => _showPrivacySheet(theme),

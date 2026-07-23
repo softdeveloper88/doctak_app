@@ -55,7 +55,7 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
               border: InputBorder.none,
               hintText: 'Search',
               hintStyle: secondaryTextStyle(color: svGetBodyColor()),
-              suffixIcon: Image.asset('images/socialv/icons/ic_Search.png', height: 16, width: 16, fit: BoxFit.cover, color: svGetBodyColor()).paddingAll(16),
+              suffixIcon: Image.asset('assets/images/socialv/icons/ic_Search.png', height: 16, width: 16, fit: BoxFit.cover, color: svGetBodyColor()).paddingAll(16),
             ),
           ),
         ),
@@ -109,7 +109,7 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
                                     Text('${bloc.placeList[index].description}', style: boldTextStyle()),
                                     6.width,
                                     // e.isOfficialAccount.validate()
-                                    //     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
+                                    //     ? Image.asset('assets/images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
                                     //     : Offstage(),
                                   ],
                                 ),
@@ -150,7 +150,7 @@ class _CheckPlaceBottomSheetState extends State<CheckPlaceBottomSheet> {
         //                 Text(e.name.validate(), style: boldTextStyle()),
         //                 6.width,
         //                 e.isOfficialAccount.validate()
-        //                     ? Image.asset('images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
+        //                     ? Image.asset('assets/images/socialv/icons/ic_TickSquare.png', height: 14, width: 14, fit: BoxFit.cover)
         //                     : Offstage(),
         //               ],
         //               mainAxisSize: MainAxisSize.min,

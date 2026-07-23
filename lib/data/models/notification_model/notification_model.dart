@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/display_identity.dart';
 
 NotificationModel notificationModelFromJson(String str) => NotificationModel.fromJson(json.decode(str));
 String notificationModelToJson(NotificationModel data) => json.encode(data.toJson());
@@ -387,12 +388,11 @@ class Data {
 
   String get displayActorName {
     final fromApi = (actorName ?? '').trim();
-    if (fromApi.isNotEmpty) return fromApi;
+    if (fromApi.isNotEmpty) return formatDisplayName(fromApi, 'Member');
     final combined = '${senderFirstName ?? ''} ${senderLastName ?? ''}'.trim();
-    if (combined.isNotEmpty) return combined;
-    return (userName ?? '').toString().trim().isNotEmpty
-        ? userName.toString()
-        : 'Member';
+    if (combined.isNotEmpty) return formatDisplayName(combined, 'Member');
+    final fallback = (userName ?? '').toString().trim();
+    return formatDisplayName(fallback.isNotEmpty ? fallback : 'Member', 'Member');
   }
 
   bool get isUnread => isRead != 1;

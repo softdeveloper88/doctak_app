@@ -531,32 +531,48 @@ class OneUITheme {
     ),
   );
 
-  /// Build an avatar with One UI styling
-  Widget buildAvatar({String? imageUrl, String? fallbackText, double size = 48, VoidCallback? onTap}) => GestureDetector(
-    onTap: onTap,
-    child: Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: avatarBorder, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: primary.withValues(alpha: isDark ? 0.2 : 0.1),
-            spreadRadius: 1,
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+  /// Build an avatar with One UI styling. Premium members get a gold ring.
+  Widget buildAvatar({
+    String? imageUrl,
+    String? fallbackText,
+    double size = 48,
+    VoidCallback? onTap,
+    bool isPremium = false,
+  }) =>
+      GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isPremium ? const Color(0xFFE6B422) : avatarBorder,
+              width: isPremium ? 2.5 : 2,
+            ),
+            boxShadow: [
+              if (isPremium)
+                BoxShadow(
+                  color: const Color(0xFFE6B422).withValues(alpha: 0.45),
+                  spreadRadius: 2,
+                  blurRadius: 0,
+                ),
+              BoxShadow(
+                color: primary.withValues(alpha: isDark ? 0.2 : 0.1),
+                spreadRadius: 1,
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(size / 2),
-        child: imageUrl != null && imageUrl.isNotEmpty
-            ? Image.network(AppData.fullImageUrl(imageUrl), fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildAvatarFallback(fallbackText ?? 'U', size))
-            : _buildAvatarFallback(fallbackText ?? 'U', size),
-      ),
-    ),
-  );
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(size / 2),
+            child: imageUrl != null && imageUrl.isNotEmpty
+                ? Image.network(AppData.fullImageUrl(imageUrl), fit: BoxFit.cover, errorBuilder: (_, __, ___) => _buildAvatarFallback(fallbackText ?? 'U', size))
+                : _buildAvatarFallback(fallbackText ?? 'U', size),
+          ),
+        ),
+      );
 
   Widget _buildAvatarFallback(String text, double size) => Container(
     color: avatarBackground,
@@ -568,11 +584,11 @@ class OneUITheme {
     ),
   );
 
-  /// Build a verification badge (matches profile screen style)
-  Widget buildVerifiedBadge({double size = 14}) => Icon(
+  /// Build a verification badge (gold when [isPremium], otherwise DocTak blue).
+  Widget buildVerifiedBadge({double size = 14, bool isPremium = false}) => Icon(
     Icons.verified_rounded,
     size: size,
-    color: const Color(0xFF1DA1F2),
+    color: isPremium ? const Color(0xFFE6B422) : const Color(0xFF1DA1F2),
   );
 
   /// Build action button (like, comment, share row)

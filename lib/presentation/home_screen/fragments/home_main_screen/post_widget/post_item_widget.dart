@@ -335,13 +335,13 @@ class _PostItemWidgetState extends State<PostItemWidget> {
             //         children: [
             //           widget.isLiked
             //               ? Image.asset(
-            //                   'images/socialv/icons/ic_HeartFilled.png',
+            //                   'assets/images/socialv/icons/ic_HeartFilled.png',
             //                   height: 20,
             //                   width: 22,
             //                   fit: BoxFit.fill,
             //                 )
             //               : Image.asset(
-            //                   'images/socialv/icons/ic_Heart.png',
+            //                   'assets/images/socialv/icons/ic_Heart.png',
             //                   height: 22,
             //                   width: 22,
             //                   fit: BoxFit.cover,
@@ -364,7 +364,7 @@ class _PostItemWidgetState extends State<PostItemWidget> {
             //       child: Column(
             //         children: [
             //           Image.asset(
-            //             'images/socialv/icons/ic_Chat.png',
+            //             'assets/images/socialv/icons/ic_Chat.png',
             //             height: 22,
             //             width: 22,
             //             fit: BoxFit.cover,

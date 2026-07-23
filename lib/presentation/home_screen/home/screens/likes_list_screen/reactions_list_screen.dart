@@ -157,6 +157,7 @@ class _ReactionsListScreenState extends State<ReactionsListScreen> {
         specialty: user.specialty,
         location: user.location,
         isVerified: user.isVerified,
+        isPremium: user.isPremium,
         isFollowing: following,
       );
     });
@@ -427,27 +428,44 @@ class _ReactionUserRow extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  ClipOval(
-                    child: pic.isNotEmpty
-                        ? AppCachedNetworkImage(
-                            imageUrl: pic,
-                            width: 40,
-                            height: 40,
-                            fit: BoxFit.cover,
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: user.isPremium
+                        ? BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFE6B422), width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFE6B422).withValues(alpha: 0.45),
+                                blurRadius: 0,
+                                spreadRadius: 1.5,
+                              ),
+                            ],
                           )
-                        : Container(
-                            width: 40,
-                            height: 40,
-                            color: theme.primary.withValues(alpha: 0.12),
-                            alignment: Alignment.center,
-                            child: Text(
-                              name.isNotEmpty ? name[0].toUpperCase() : 'M',
-                              style: TextStyle(
-                                color: theme.primary,
-                                fontWeight: FontWeight.w700,
+                        : null,
+                    child: ClipOval(
+                      child: pic.isNotEmpty
+                          ? AppCachedNetworkImage(
+                              imageUrl: pic,
+                              width: 40,
+                              height: 40,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              width: 40,
+                              height: 40,
+                              color: theme.primary.withValues(alpha: 0.12),
+                              alignment: Alignment.center,
+                              child: Text(
+                                name.isNotEmpty ? name[0].toUpperCase() : 'M',
+                                style: TextStyle(
+                                  color: theme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
-                          ),
+                    ),
                   ),
                   if (reaction != null)
                     Positioned(
@@ -487,7 +505,7 @@ class _ReactionUserRow extends StatelessWidget {
                       ),
                       if (user.isVerified) ...[
                         const SizedBox(width: 4),
-                        theme.buildVerifiedBadge(size: 14),
+                        theme.buildVerifiedBadge(size: 14, isPremium: user.isPremium),
                       ],
                     ],
                   ),

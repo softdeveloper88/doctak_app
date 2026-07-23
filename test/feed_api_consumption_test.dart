@@ -37,7 +37,7 @@ void main() {
     expect(post.meta, isNotNull);
     expect(post.meta!.type, 'post');
     expect(post.meta!.deepLink, 'doctak://post/${post.id}');
-    expect(post.meta!.webUrl, contains('/posts/${post.id}'));
+    expect(post.meta!.webUrl, contains('/post/${post.id}'));
   });
 
   test('feed is active-only and author-diversified (no consecutive same author)', () {

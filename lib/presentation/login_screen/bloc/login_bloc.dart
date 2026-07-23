@@ -64,7 +64,11 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final dio = Dio(BaseOptions(
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
-        headers: const {'Accept': 'application/json'},
+        headers: const {
+          'Accept': 'application/json',
+          // Opt into server-side 2FA challenge (store builds omit this and keep legacy login).
+          'X-Doctak-Supports-2FA': '1',
+        },
       ));
 
       final response1 = await dio.post(
@@ -76,10 +80,36 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           'device_type': deviceInfo['device_type'],
           'device_id': deviceInfo['device_id'],
           'remember': event.rememberMe ? '1' : '0',
+          'supports_2fa': '1',
         }),
       );
 
-      final response = PostLoginDeviceAuthResp.fromJson(response1.data);
+      final raw = response1.data;
+      if (raw is Map && raw['requires_2fa'] == true) {
+        ProgressDialogUtils.hideProgressDialog();
+        final methodsRaw = raw['methods'];
+        final methods = <String, bool>{
+          'email': methodsRaw is Map ? methodsRaw['email'] == true : false,
+          'app': methodsRaw is Map ? methodsRaw['app'] == true : false,
+        };
+        final pendingToken = (raw['pending_token'] ?? '').toString();
+        if (pendingToken.isEmpty || (!methods['email']! && !methods['app']!)) {
+          emit(LoginFailure(error: 'Two-factor challenge could not be started. Please try again.'));
+          return;
+        }
+        emit(LoginRequiresTwoFactor(
+          pendingToken: pendingToken,
+          methods: methods,
+          maskedEmail: raw['masked_email']?.toString(),
+          message: raw['message']?.toString(),
+          emailSent: raw['email_sent'] != false,
+          rememberMe: event.rememberMe,
+          deviceToken: event.deviceToken,
+        ));
+        return;
+      }
+
+      final response = PostLoginDeviceAuthResp.fromJson(raw);
 
       if (response.success == true && (response.token?.isNotEmpty ?? false)) {
         await AuthSessionHelper.persistSession(

@@ -59,6 +59,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   String? currentUserId; // Track which user's profile is loaded
   int _imageVersion = 0; // Incremented after profile/cover pic upload
   int get imageVersion => _imageVersion;
+  int _profileRevision = 0;
   List<ExperienceModel> experiences = [];
   List<EducationDetailModel> educationList = [];
   List<PublicationModel> publications = [];
@@ -119,6 +120,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // ── V5 Profile & About Me Update Handlers ──
     on<UpdateProfileV5Event>(_onUpdateProfileV5);
     on<UpdateAboutMeV5Event>(_onUpdateAboutMeV5);
+    on<UpdatePersonalDetailsV5Event>(_onUpdatePersonalDetailsV5);
 
     on<CheckIfNeedMoreDataEvent>((event, emit) async {
       if (event.index == postList.length - nextPageTrigger) {
@@ -380,6 +382,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onUpdateProfileV5(UpdateProfileV5Event event, Emitter<ProfileState> emit) async {
     try {
+      _applyProfileV5Patch(event);
+      _bumpProfileRevision();
+      _emitCurrentLoadedState(emit);
+
       ProgressDialogUtils.showProgressDialog();
       final response = await v5Api.updateProfile(
         firstName: event.firstName,
@@ -400,7 +406,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ProgressDialogUtils.hideProgressDialog();
       if (response.success) {
         showToast('Profile updated successfully');
-        // Re-fetch full profile to sync
         await _refreshFullProfile(emit);
       } else {
         showToast(response.message ?? 'Failed to update profile');
@@ -410,6 +415,135 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       print('Error updating profile v5: $e');
       showToast('Failed to update profile');
     }
+  }
+
+  Future<void> _onUpdatePersonalDetailsV5(
+    UpdatePersonalDetailsV5Event event,
+    Emitter<ProfileState> emit,
+  ) async {
+    try {
+      _applyProfileV5Patch(UpdateProfileV5Event(
+        firstName: event.firstName,
+        lastName: event.lastName,
+        dob: event.dob,
+        gender: event.gender,
+      ));
+      _applyAboutMeV5Patch(UpdateAboutMeV5Event(
+        birthplace: event.birthplace,
+        livesIn: event.livesIn,
+        address: event.address,
+        languages: event.languages,
+      ));
+      _bumpProfileRevision();
+      _emitCurrentLoadedState(emit);
+
+      ProgressDialogUtils.showProgressDialog();
+
+      final hasUserFields = event.firstName != null ||
+          event.lastName != null ||
+          event.dob != null ||
+          event.gender != null;
+      final hasAboutFields = event.birthplace != null ||
+          event.livesIn != null ||
+          event.address != null ||
+          event.languages != null;
+
+      if (hasUserFields) {
+        final response = await v5Api.updateProfile(
+          firstName: event.firstName,
+          lastName: event.lastName,
+          dob: event.dob,
+          gender: event.gender,
+        );
+        if (!response.success) {
+          ProgressDialogUtils.hideProgressDialog();
+          showToast(response.message ?? 'Failed to update profile');
+          return;
+        }
+      }
+
+      if (hasAboutFields) {
+        final response = await v5Api.updateAboutMe(
+          birthplace: event.birthplace,
+          livesIn: event.livesIn,
+          address: event.address,
+          languages: event.languages,
+        );
+        if (!response.success) {
+          ProgressDialogUtils.hideProgressDialog();
+          showToast(response.message ?? 'Failed to update personal details');
+          return;
+        }
+      }
+
+      ProgressDialogUtils.hideProgressDialog();
+      showToast('Personal details updated successfully');
+      await _refreshFullProfile(emit);
+    } catch (e) {
+      ProgressDialogUtils.hideProgressDialog();
+      print('Error updating personal details v5: $e');
+      showToast('Failed to update personal details');
+    }
+  }
+
+  void _applyProfileV5Patch(UpdateProfileV5Event event) {
+    final user = fullProfile?.user;
+    if (user != null) {
+      if (event.firstName != null) user.firstName = event.firstName;
+      if (event.lastName != null) user.lastName = event.lastName;
+      if (event.phone != null) user.phone = event.phone;
+      if (event.licenseNo != null) user.licenseNo = event.licenseNo;
+      if (event.specialty != null) user.specialty = event.specialty;
+      if (event.dob != null) user.dob = event.dob;
+      if (event.gender != null) user.gender = event.gender;
+      if (event.country != null) user.country = event.country;
+      if (event.city != null) user.city = event.city;
+      if (event.state != null) user.state = event.state;
+      if (event.countryOrigin != null) user.countryOrigin = event.countryOrigin;
+      if (event.stateOrigin != null) user.stateOrigin = event.stateOrigin;
+      if (event.clinicName != null) user.clinicName = event.clinicName;
+      if (event.college != null) user.college = event.college;
+    }
+
+    final legacyUser = userProfile?.user;
+    if (legacyUser != null) {
+      if (event.firstName != null) legacyUser.firstName = event.firstName;
+      if (event.lastName != null) legacyUser.lastName = event.lastName;
+      if (event.phone != null) legacyUser.phone = event.phone;
+      if (event.licenseNo != null) legacyUser.licenseNo = event.licenseNo;
+      if (event.specialty != null) legacyUser.specialty = event.specialty;
+      if (event.dob != null) legacyUser.dob = event.dob;
+      if (event.gender != null) legacyUser.gender = event.gender;
+      if (event.country != null) legacyUser.country = event.country;
+      if (event.city != null) legacyUser.city = event.city;
+      if (event.state != null) legacyUser.state = event.state;
+      if (event.clinicName != null) legacyUser.clinicName = event.clinicName;
+      if (event.college != null) legacyUser.college = event.college;
+    }
+  }
+
+  void _applyAboutMeV5Patch(UpdateAboutMeV5Event event) {
+    fullProfile ??= FullProfileModel();
+    fullProfile!.profile ??= FullProfileInfo();
+    final profile = fullProfile!.profile!;
+    if (event.aboutMe != null) profile.aboutMe = event.aboutMe;
+    if (event.address != null) profile.address = event.address;
+    if (event.birthplace != null) profile.birthplace = event.birthplace;
+    if (event.livesIn != null) profile.livesIn = event.livesIn;
+    if (event.languages != null) profile.languages = event.languages;
+
+    userProfile ??= UserProfile();
+    userProfile!.profile ??= Profile();
+    final legacyProfile = userProfile!.profile!;
+    if (event.aboutMe != null) legacyProfile.aboutMe = event.aboutMe;
+    if (event.address != null) legacyProfile.address = event.address;
+    if (event.birthplace != null) legacyProfile.birthplace = event.birthplace;
+    if (event.livesIn != null) legacyProfile.livesIn = event.livesIn;
+    if (event.languages != null) legacyProfile.languages = event.languages;
+  }
+
+  void _bumpProfileRevision() {
+    _profileRevision++;
   }
 
   Future<void> _onUpdateAboutMeV5(UpdateAboutMeV5Event event, Emitter<ProfileState> emit) async {
@@ -499,6 +633,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         if ('$userId' == '${AppData.logInUserId}') {
           await _syncOwnProfileGlobals(fpUser);
         }
+        _bumpProfileRevision();
         _emitCurrentLoadedState(emit);
         print('📋 [ProfileBloc] Profile re-fetched after v5 update');
       }
@@ -523,6 +658,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       await prefs.initialize();
       if (resolvedSpecialty.isNotEmpty) {
         await prefs.setString('specialty', resolvedSpecialty);
+      }
+      if (fpUser.gender != null && fpUser.gender!.isNotEmpty) {
+        await prefs.setString('gender', fpUser.gender!);
       }
       await prefs.setString('is_verified', AppData.isVerified.toString());
     } catch (_) {}
@@ -817,6 +955,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           selectedSecondDropdownValue: s.selectedSecondDropdownValue,
           specialtyDropdownValue: s.specialtyDropdownValue,
           selectedSpecialtyDropdownValue: s.selectedSpecialtyDropdownValue,
+          profileRevision: _profileRevision,
         ));
       } else if (state is PaginationLoadedState) {
         emit(
@@ -904,6 +1043,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       selectedSecondDropdownValue: selectedState ?? '',
       specialtyDropdownValue: specialties ?? specialtyList ?? [],
       selectedSpecialtyDropdownValue: selectedSpecialty ?? specialtyName ?? '',
+      profileRevision: _profileRevision,
     ));
   }
 
@@ -919,9 +1059,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         selectedSecondDropdownValue: s.selectedSecondDropdownValue,
         specialtyDropdownValue: s.specialtyDropdownValue,
         selectedSpecialtyDropdownValue: s.selectedSpecialtyDropdownValue,
+        profileRevision: _profileRevision,
       ));
     } else {
-      emit(FullProfileLoadedState());
+      emit(FullProfileLoadedState(profileRevision: _profileRevision));
     }
   }
 
@@ -970,6 +1111,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         selectedSecondDropdownValue: selectedSecondDropdownValue ?? d.selectedSecondDropdownValue,
         specialtyDropdownValue: specialtyDropdownValue ?? d.specialtyDropdownValue,
         selectedSpecialtyDropdownValue: selectedSpecialtyDropdownValue ?? d.selectedSpecialtyDropdownValue,
+        profileRevision: _profileRevision,
       ));
     } else {
       emit(PaginationLoadedState(

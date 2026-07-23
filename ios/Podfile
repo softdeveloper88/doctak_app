@@ -36,6 +36,13 @@ target 'Runner' do
   target 'RunnerTests' do
     inherit! :search_paths
   end
+
+  # Incoming share sheet (Share Extension) — must use the same Models pod
+  # as share_handler_ios so SharedMedia serialization matches the host app.
+  target 'ShareExtension' do
+    inherit! :search_paths
+    pod 'share_handler_ios_models', :path => '.symlinks/plugins/share_handler_ios/ios/Models'
+  end
 end
 
 # BroadcastUploadExtension target for iOS screen sharing

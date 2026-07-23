@@ -168,7 +168,7 @@ const imgSignal = '$imagePath/img_signal.svg';
 
 const imgLinkedin = '$imagePath/img_linkedin.svg';
 
-const imgEllipse89 = '$imagePath/img_avtar.png';
+const imgEllipse89 = '$imagePath/image_not_found.png';
 
 const imgHome = '$imagePath/img_home.svg';
 

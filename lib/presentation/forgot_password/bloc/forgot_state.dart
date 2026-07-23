@@ -1,24 +1,30 @@
-// ignore_for_file: must_be_immutable
-
 /// Represents the state of Forgot in the application.
 library;
 
-// part 'login_bloc.dart';
+abstract class ForgotState {
+  const ForgotState();
+}
 
-abstract class ForgotState {}
+class ForgotInitial extends ForgotState {
+  const ForgotInitial();
+}
 
-class ForgotInitial extends ForgotState {}
-
-class ForgotLoading extends ForgotState {}
+class ForgotLoading extends ForgotState {
+  const ForgotLoading();
+}
 
 class ForgotSuccess extends ForgotState {
   final String response;
+  final String message;
 
-  ForgotSuccess({required this.response});
+  const ForgotSuccess({
+    required this.response,
+    required this.message,
+  });
 }
 
 class ForgotFailure extends ForgotState {
   final String error;
 
-  ForgotFailure({required this.error});
+  const ForgotFailure({required this.error});
 }

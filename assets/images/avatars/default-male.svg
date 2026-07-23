@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Default male doctor avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1B7BC7"/>
+      <stop offset="100%" stop-color="#0F5A95"/>
+    </linearGradient>
+    <linearGradient id="coat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F8FBFF"/>
+      <stop offset="100%" stop-color="#E4EEF8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="80" fill="url(#bg)"/>
+  <circle cx="80" cy="62" r="28" fill="#F0C7A4"/>
+  <path d="M48 58c2-18 14-30 32-30s30 12 32 30c-6-8-18-12-32-12s-26 4-32 12z" fill="#3A2A22"/>
+  <path d="M36 148c4-34 22-50 44-50s40 16 44 50" fill="url(#coat)"/>
+  <path d="M68 98h24v42H68z" fill="#0F5A95"/>
+  <circle cx="80" cy="112" r="4.5" fill="#F4C15D"/>
+  <path d="M72 112h16" stroke="#D9A63E" stroke-width="2" stroke-linecap="round"/>
+</svg>

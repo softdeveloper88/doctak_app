@@ -114,10 +114,10 @@ class _ChatInputFieldState extends State<ChatInputField> with SingleTickerProvid
                           keyboardType: TextInputType.multiline,
                           maxLines: null,
                           minLines: 1,
-                          style: TextStyle(fontSize: 16, color: theme.textPrimary, fontFamily: 'Poppins'),
+                          style: theme.bodyMedium.copyWith(fontSize: 16, color: theme.textPrimary),
                           decoration: InputDecoration(
                             hintText: translation(context).lbl_type_message_here,
-                            hintStyle: TextStyle(color: theme.textTertiary, fontSize: 16, fontFamily: 'Poppins'),
+                            hintStyle: theme.bodyMedium.copyWith(fontSize: 16, color: theme.textTertiary),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
                           ),

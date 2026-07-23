@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
+import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/likes_list_screen.dart';
 import 'package:doctak_app/data/apiClient/shared_api_service.dart';
@@ -131,7 +132,7 @@ class _BlogDetailScreenState extends State<BlogDetailScreen> {
   void _share() {
     SharePlus.instance.share(
       ShareParams(
-        text: 'https://doctak.net/blogs/${widget.blogId}',
+        text: DeepLinkService.generateBlogLink(widget.blogId),
         title: _blog?.title ?? 'DocTak Article',
       ),
     );
