@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/models/feed_model/feed_models.dart';
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/reactions_list_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// Truncated title shown under "Reactions" in the list header.

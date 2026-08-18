@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 class NotificationsProvider with ChangeNotifier {
   int _totalNotifications = 0;

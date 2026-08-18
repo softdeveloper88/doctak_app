@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import '../theme/one_ui_theme.dart';
 
 /// A reusable DocTak app bar widget that provides consistent One UI 8.5 styling

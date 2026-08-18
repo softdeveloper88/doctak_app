@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/feed/widgets/case_comme
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/blog_comment_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_comment_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_strip.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Renders a single [FeedEntry] — either an inline typed card or a strip rail.
 class FeedEntryView extends StatelessWidget {

@@ -11,7 +11,7 @@ import 'package:doctak_app/presentation/chat_gpt_screen/widgets/chat_bubble.dart
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/AnimatedBackground.dart';
 import 'package:doctak_app/widgets/shimmer_widget/chat_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:sizer/sizer.dart';
 

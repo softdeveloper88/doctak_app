@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sizer/sizer.dart';
 
 /// Fixed Sizer wrapper that forces consistent responsive dimensions

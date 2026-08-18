@@ -6,7 +6,7 @@ import 'package:doctak_app/widgets/app_button.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_form_dropdown.dart';
 import 'package:doctak_app/widgets/one_ui_form_field.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class GroupCreateScreen extends StatefulWidget {
   const GroupCreateScreen({super.key});

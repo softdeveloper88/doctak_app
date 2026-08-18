@@ -4,7 +4,7 @@ import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/premium/premium_mark.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:doctak_app/core/utils/display_identity.dart';
 

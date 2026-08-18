@@ -3,7 +3,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/p
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/lazy_video_player_widget.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/widgets/custom_image_view.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class PostMediaWidget extends StatelessWidget {
   final List<Media> mediaList;

@@ -6,7 +6,7 @@ import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_button.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_form_field.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Create a long-form group article (blog post_type).

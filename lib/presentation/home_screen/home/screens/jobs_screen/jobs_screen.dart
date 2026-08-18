@@ -1,5 +1,5 @@
 import 'package:doctak_app/presentation/jobs_module/jobs_hub_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Entry point kept for existing navigators (drawer, feed “See all”).
 /// Delegates to the redesigned [JobsHubScreen].

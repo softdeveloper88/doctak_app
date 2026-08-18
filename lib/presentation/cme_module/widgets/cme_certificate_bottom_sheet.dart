@@ -5,7 +5,7 @@ import 'package:doctak_app/presentation/cme_module/utils/cme_certificate_pdf_ser
 import 'package:doctak_app/presentation/cme_module/widgets/cme_certificate_print_widget.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> showCmeCertificateBottomSheet(

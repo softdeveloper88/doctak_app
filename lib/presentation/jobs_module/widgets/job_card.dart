@@ -4,7 +4,7 @@ import 'package:doctak_app/presentation/jobs_module/widgets/job_display_utils.da
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_search_header.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_theme.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shared job list card — Browse / Saved / Applications / Manage / search / feed.
 /// Layout aligned with doctak-node [JobCard] (website jobs browse).

@@ -17,7 +17,7 @@ import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_button.dart';
 import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_tab_bar_delegate.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:share_plus/share_plus.dart';
 
 class GroupDetailScreen extends StatefulWidget {

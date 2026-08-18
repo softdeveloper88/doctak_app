@@ -7,7 +7,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/st
 import 'package:doctak_app/presentation/home_screen/home/screens/story_screen/create_story_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Horizontal row of story bubbles at the top of the home feed

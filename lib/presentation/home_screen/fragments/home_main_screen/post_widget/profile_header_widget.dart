@@ -2,8 +2,8 @@ import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/block_user_dialog.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ProfileHeaderWidget extends StatelessWidget {
   final String profilePicUrl;

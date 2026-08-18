@@ -4,7 +4,7 @@ import 'package:doctak_app/data/apiClient/shared_api_service.dart';
 import 'package:doctak_app/data/models/blog_model/blog_detail_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_card_shell.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// Blog/article comments — same UX as [SVCommentScreen] for posts.

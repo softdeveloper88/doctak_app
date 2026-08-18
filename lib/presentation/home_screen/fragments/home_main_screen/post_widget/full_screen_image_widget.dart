@@ -2,7 +2,7 @@ import 'package:doctak_app/data/models/feed_model/feed_models.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 void showFullScreenImage(

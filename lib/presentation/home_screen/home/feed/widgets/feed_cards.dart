@@ -29,7 +29,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/core/utils/deep_link_service.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/survey_screen/survey_fill_screen.dart';

@@ -4,7 +4,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/search_screen/s
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SVSearchFragment extends StatefulWidget {
   final Function? backPress;

@@ -2,7 +2,7 @@ import 'package:doctak_app/data/models/post_comment_model/reply_comment_model.da
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 import '../../../../core/utils/app/AppData.dart';

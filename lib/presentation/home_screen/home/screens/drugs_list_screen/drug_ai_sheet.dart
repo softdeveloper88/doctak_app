@@ -5,7 +5,7 @@ import 'package:doctak_app/data/models/drugs_model/drug_v6_models.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/ai_data_consent_dialog.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:nb_utils/nb_utils.dart';

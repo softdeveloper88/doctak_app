@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:doctak_app/core/notification_service.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 /// A simple on-screen diagnostics page for FCM push notifications.

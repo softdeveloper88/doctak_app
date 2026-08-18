@@ -3,7 +3,7 @@ import 'package:doctak_app/data/models/cme/cme_segment_utils.dart';
 import 'package:doctak_app/presentation/cme_module/widgets/cme_status_badge.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
 class CmeEventCard extends StatelessWidget {

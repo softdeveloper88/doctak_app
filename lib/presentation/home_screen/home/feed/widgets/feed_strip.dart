@@ -13,7 +13,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/job
 import 'package:doctak_app/presentation/home_screen/home/screens/survey_screen/survey_fill_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/survey_screen/surveys_browse_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// Horizontal rail of compact tiles — mirrors doctak-web `FeedStrip` and the

@@ -1,5 +1,5 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// One UI 8 compact control height (dialogs, bottom bars, sheets).
 const double kOneUIButtonHeight = 40;

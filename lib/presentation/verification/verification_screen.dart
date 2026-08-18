@@ -5,7 +5,7 @@ import 'package:doctak_app/data/apiClient/services/verification_api_service.dart
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key});

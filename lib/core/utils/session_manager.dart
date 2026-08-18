@@ -6,7 +6,7 @@ import 'package:doctak_app/core/notification_service.dart';
 import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 

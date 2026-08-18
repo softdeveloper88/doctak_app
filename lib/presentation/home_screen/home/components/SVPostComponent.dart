@@ -7,7 +7,7 @@ import 'package:doctak_app/widgets/custom_alert_dialog.dart';
 import 'package:doctak_app/widgets/offline_retry_banner.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/post_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Search (and other legacy) post list — renders via shared [PostFeedListView]
 /// so UI matches the home feed cards.

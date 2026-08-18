@@ -4,7 +4,7 @@ import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Design tokens matching the DocTak mobile comments reference
 /// (`dt-comments` / `dt-modal__comments` in _home-feed.scss).

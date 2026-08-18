@@ -9,7 +9,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/blo
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/post_feed_list_view.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/custom_alert_dialog.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Profile posts tab — same feed card UI as home/search via [PostFeedListView].
 class MyPostComponent extends StatefulWidget {

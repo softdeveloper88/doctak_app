@@ -9,7 +9,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/doc
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/jobs_details_screen.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/jobs_screen/widgets/memory_optimized_job_item.dart';
 import 'package:doctak_app/widgets/shimmer_widget/jobs_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 

@@ -2,7 +2,7 @@ import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_condition_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Key used to persist the user's AI data consent decision.
 const String kAiDataConsentKey = 'ai_data_consent_granted';

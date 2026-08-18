@@ -7,7 +7,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/upcoming_meeting_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class MeetingScreen extends StatefulWidget {
   const MeetingScreen({super.key});

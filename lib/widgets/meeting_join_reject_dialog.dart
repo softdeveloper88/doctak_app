@@ -1,5 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:sizer/sizer.dart';
 
 class MeetingJoinRejectDialog extends StatelessWidget {

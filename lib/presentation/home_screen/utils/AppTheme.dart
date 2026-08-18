@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/utils/edge_to_edge_helper.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:nb_utils/nb_utils.dart';
 

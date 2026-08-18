@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Locks text scale while keeping the real device size and safe-area insets.
 class SimpleFixedMediaQuery {

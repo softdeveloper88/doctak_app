@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../../core/app_export.dart';
 part 'theme_event.dart';
 part 'theme_state.dart';

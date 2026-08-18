@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:doctak_app/core/utils/app/AppData.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';

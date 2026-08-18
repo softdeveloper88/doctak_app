@@ -1,6 +1,6 @@
 import 'package:doctak_app/presentation/groups_module/widgets/group_nested_tab_scroll.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class _ShimmerPalette {

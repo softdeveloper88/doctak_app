@@ -1,6 +1,6 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Error dialog with OneUI 8.5 theming
 class ErrorDialog extends StatelessWidget {

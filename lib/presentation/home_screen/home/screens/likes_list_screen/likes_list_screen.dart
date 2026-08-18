@@ -1,6 +1,6 @@
 export 'reactions_navigation.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/likes_list_screen/reactions_list_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Legacy entry point — opens the reactions list screen.
 class LikesListScreen extends StatelessWidget {

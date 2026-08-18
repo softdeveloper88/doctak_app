@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/jobs_module/widgets/job_chips.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_sheet_shell.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// Candidate-facing AI insight sheets: "AI Brief" (promoted-job summary) and

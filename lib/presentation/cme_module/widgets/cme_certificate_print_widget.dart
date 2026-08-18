@@ -1,6 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/cme/cme_certificate_model.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
 /// Web-parity certificate layout (`CmeCertificatePrint` / `dt-cme-cert-print`).

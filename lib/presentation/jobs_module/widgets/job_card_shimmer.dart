@@ -1,5 +1,5 @@
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shimmer/shimmer.dart';
 
 class JobCardShimmer extends StatelessWidget {

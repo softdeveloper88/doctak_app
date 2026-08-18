@@ -1,6 +1,6 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shared OneUI 8.5 components for profile screens
 /// This eliminates code duplication across profile info screens

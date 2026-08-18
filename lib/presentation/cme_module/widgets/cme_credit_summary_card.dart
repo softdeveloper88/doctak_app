@@ -3,7 +3,7 @@ import 'package:doctak_app/presentation/cme_module/cme_hub_controller.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Compact white CME credits summary (web `CmeCreditMini` parity).
 class CmeCreditSummaryCard extends StatelessWidget {

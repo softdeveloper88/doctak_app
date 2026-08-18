@@ -12,7 +12,7 @@ import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_card_
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/hashtag_rich_text.dart';
 import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nb_utils/nb_utils.dart';

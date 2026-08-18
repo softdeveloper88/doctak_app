@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// DocTak web design tokens (`doctak-node/assets/css/doctak.css` --dt-*).
 /// Single source of truth — reference these from [OneUITheme], not hardcoded hex in widgets.

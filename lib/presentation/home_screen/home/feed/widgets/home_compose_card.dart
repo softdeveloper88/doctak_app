@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Top "create" card matching the DocTak Mobile reference composer.
 /// Pass [groupTarget] to post/poll/blog as a group (same screen as home feed).

@@ -1,6 +1,6 @@
 // lib/presentation/call_module/models/call_state.dart
 import 'package:doctak_app/localization/app_localization.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Enum representing the different call types
 enum CallType { audio, video }

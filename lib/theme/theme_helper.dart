@@ -1,5 +1,5 @@
 import 'package:doctak_app/theme/doctak_palette.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import '../../core/app_export.dart';
 

@@ -4,7 +4,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/moderation_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/moderation_screen/report_history_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 /// Main Moderation & Privacy screen — hub for blocked users, reports, and privacy settings

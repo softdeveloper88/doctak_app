@@ -8,8 +8,8 @@ import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_post_event.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/display_video.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:image_picker/image_picker.dart' show XFile;
 
 class SVPostOptionsComponent extends StatefulWidget {

@@ -5,7 +5,7 @@ import 'package:doctak_app/presentation/groups_module/widgets/group_tab_shimmers
 import 'package:doctak_app/presentation/groups_module/screens/group_poll_create_screen.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_poll_card.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/groups_empty_state.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class GroupPollsTab extends StatefulWidget {
   final GroupDetailModel group;

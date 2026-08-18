@@ -3,7 +3,7 @@ import 'package:doctak_app/presentation/jobs_module/widgets/job_application_stag
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_sheet_shell.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_theme.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Professional pipeline stage picker for recruiters.
 Future<String?> showApplicantStageSheet({

@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/apiClient/groups/groups_node_api_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_button.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Accept/decline banner shown when opening a group from an invite notification.
 class GroupPendingInviteBanner extends StatefulWidget {

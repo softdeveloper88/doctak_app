@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/utils/validation_functions.dart';
 import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shared auth layout matching the DocTak standalone HTML composer.
 /// Uses [OneUITheme] / [DoctakPalette] tokens — not hardcoded orange from the mock.

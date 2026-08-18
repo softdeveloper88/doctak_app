@@ -4,7 +4,7 @@ import 'package:doctak_app/data/apiClient/groups/groups_node_api_service.dart';
 import 'package:doctak_app/data/models/group_model/group_enhanced_models.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_button.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class GroupInfoTab extends StatefulWidget {
   final GroupDetailModel group;

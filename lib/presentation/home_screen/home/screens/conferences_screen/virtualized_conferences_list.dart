@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/conferences_scr
 import 'package:doctak_app/presentation/home_screen/home/screens/conferences_screen/memory_optimized_conference_item.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/shimmer_widget/conferences_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class VirtualizedConferencesList extends StatefulWidget {

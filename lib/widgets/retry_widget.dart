@@ -1,7 +1,7 @@
 // retry_widget.dart
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class RetryWidget extends StatelessWidget {
   final String errorMessage;

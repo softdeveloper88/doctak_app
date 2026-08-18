@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/jobs_module/widgets/jobs_theme.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Recruiter-facing job performance analytics (views/clicks/funnel).
 /// Requires a paid promotion tier — free-tier jobs see an upgrade prompt.

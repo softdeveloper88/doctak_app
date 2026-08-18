@@ -13,7 +13,7 @@ import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 enum _JobsHubTab { browse, saved, applications, manage }

@@ -3,7 +3,7 @@ import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/presentation/complete_profile/complete_profile_screen.dart';
 import 'package:doctak_app/widgets/email_verification_actions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class IncompleteProfileCard extends StatelessWidget {

@@ -25,7 +25,7 @@ import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:url_launcher/url_launcher.dart';

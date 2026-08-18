@@ -1,7 +1,7 @@
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/components/check_place_bottom_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/add_post/components/tag_friends_list_bottom_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVColors.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../../main.dart';

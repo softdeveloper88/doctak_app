@@ -1,6 +1,6 @@
 import 'package:doctak_app/data/apiClient/services/communication_service.dart';
 import 'package:doctak_app/widgets/communication/communication_restriction_sheet.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A helper that gates chat / call actions behind a communication permission check.
 ///

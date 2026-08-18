@@ -1,7 +1,7 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/hashtag_rich_text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Collapses long post copy with localized **See more** / **See less** toggles.
 ///

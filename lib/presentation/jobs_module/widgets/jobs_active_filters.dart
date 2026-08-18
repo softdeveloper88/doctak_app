@@ -1,7 +1,7 @@
 import 'package:doctak_app/presentation/jobs_module/widgets/job_display_utils.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_filter_sheet.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Removable filter chips shown below the jobs hub tabs on Browse.
 class JobsActiveFiltersRow extends StatelessWidget {

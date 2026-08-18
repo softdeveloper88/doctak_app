@@ -10,7 +10,7 @@ import 'package:doctak_app/presentation/cme_module/bloc/cme_live_interaction_sta
 import 'package:doctak_app/presentation/cme_module/screens/cme_quiz_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CmeLiveInteractionScreen extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/apiClient/cme/cme_node_api_service.dart';
 import 'package:doctak_app/data/models/cme/cme_credit_history_model.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 
 class CmeCreditsScreen extends StatefulWidget {

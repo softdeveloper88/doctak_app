@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/presentation/splash_screen/splash_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';

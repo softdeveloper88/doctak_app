@@ -1,6 +1,6 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shown above cached feed rows when the server could not be reached.
 class FeedOfflineBanner extends StatelessWidget {

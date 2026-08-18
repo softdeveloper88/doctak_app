@@ -1,7 +1,7 @@
 // lib/presentation/call_module/widgets/connecting_view.dart
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../models/call_state.dart';
 

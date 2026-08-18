@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';

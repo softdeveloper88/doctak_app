@@ -1,5 +1,5 @@
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CommentListShimmer extends StatelessWidget {
   const CommentListShimmer({super.key});

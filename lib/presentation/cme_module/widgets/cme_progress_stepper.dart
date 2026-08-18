@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
 import 'package:doctak_app/presentation/cme_module/utils/cme_progress.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 typedef CmeProgressStepTap = void Function(String stepId);
 

@@ -9,7 +9,7 @@ import 'package:doctak_app/presentation/notification_screen/bloc/notification_st
 import 'package:doctak_app/presentation/notification_screen/notification_screen_widgets.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 

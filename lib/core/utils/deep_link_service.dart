@@ -17,7 +17,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/
 import 'package:doctak_app/presentation/home_screen/fragments/profile_screen/SVProfileFragment.dart';
 import 'package:doctak_app/presentation/case_discussion/screens/discussion_detail_screen.dart';
 import 'package:doctak_app/presentation/organization_profile/organization_profile_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:http/http.dart' as http;
 import 'package:nb_utils/nb_utils.dart';
 import 'package:share_plus/share_plus.dart';

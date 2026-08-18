@@ -6,7 +6,7 @@ import 'package:doctak_app/data/apiClient/cme/cme_api_service.dart';
 import 'package:doctak_app/data/models/cme/cme_event_model.dart';
 import 'package:doctak_app/presentation/cme_module/screens/cme_live_interaction_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Full Agora-powered live meeting screen for CME events.

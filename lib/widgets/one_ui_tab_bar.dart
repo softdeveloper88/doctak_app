@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../theme/one_ui_theme.dart';
 
 /// A reusable One UI–style underline tab bar that matches the Drugs List

@@ -5,7 +5,7 @@ import 'package:doctak_app/presentation/calling_module/services/ios_agora_pip_se
 // fl_pip removed - causes iOS crash due to AppDelegate type mismatch
 // import 'package:fl_pip/fl_pip.dart';
 import 'package:pip/pip.dart' as pip_pkg;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Custom PiP status enum to avoid dependency on fl_pip
 enum PiPServiceStatus { disabled, enabled }

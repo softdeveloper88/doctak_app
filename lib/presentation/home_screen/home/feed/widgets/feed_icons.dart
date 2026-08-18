@@ -1,5 +1,5 @@
 import 'package:doctak_app/core/utils/asset_guard.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// SVG paths extracted from the DocTak Mobile reference design.

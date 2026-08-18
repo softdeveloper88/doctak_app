@@ -2,7 +2,7 @@ import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class EventsScreen extends StatefulWidget {
   EventsScreen(this.id, {super.key});

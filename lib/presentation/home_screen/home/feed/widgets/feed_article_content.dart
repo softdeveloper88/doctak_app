@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/models/feed_model/feed_models.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 bool feedItemIsArticle(FeedItem item) {
   final type = item.str('postType')?.toLowerCase();

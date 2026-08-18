@@ -1,5 +1,5 @@
 import 'package:doctak_app/presentation/guideline_module/data/models/guideline_chat_model.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Quota/usage banner for guideline AI — shows remaining queries.
 /// Matches the upgrade prompt from the reference design.

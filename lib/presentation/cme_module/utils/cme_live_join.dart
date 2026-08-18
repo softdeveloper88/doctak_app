@@ -3,7 +3,7 @@ import 'package:doctak_app/data/apiClient/cme/cme_api_service.dart';
 import 'package:doctak_app/data/apiClient/cme/cme_node_api_service.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/manage_meeting_screen.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Joins a CME live session via the shared meeting module (same flow as web).
 Future<bool> joinCmeLiveMeeting(

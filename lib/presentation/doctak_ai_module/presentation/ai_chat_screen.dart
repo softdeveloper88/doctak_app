@@ -9,7 +9,7 @@ import 'package:doctak_app/widgets/ai_quota_banner.dart';
 import 'package:doctak_app/widgets/ai_data_consent_dialog.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;

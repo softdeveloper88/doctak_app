@@ -5,7 +5,7 @@ import 'package:doctak_app/presentation/cme_module/screens/cme_event_detail_scre
 import 'package:doctak_app/presentation/cme_module/widgets/cme_event_card.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CmeSpeakingScreen extends StatefulWidget {
   const CmeSpeakingScreen({super.key, this.invitationsOnly = false});

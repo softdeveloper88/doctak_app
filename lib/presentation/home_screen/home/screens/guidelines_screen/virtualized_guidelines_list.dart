@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/guidelines_screen/memory_optimized_guideline_item.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/shimmer_widget/guidelines_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class VirtualizedGuidelinesList extends StatefulWidget {

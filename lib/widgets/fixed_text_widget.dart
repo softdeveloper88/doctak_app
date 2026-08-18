@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../core/utils/simple_fixed_media_query.dart';
 
 /// A custom Text widget that ignores device text scaling settings

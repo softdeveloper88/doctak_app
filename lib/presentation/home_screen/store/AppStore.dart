@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobx/mobx.dart';
 import 'package:nb_utils/nb_utils.dart';
 

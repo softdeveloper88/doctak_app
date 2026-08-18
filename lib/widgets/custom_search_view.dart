@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:doctak_app/core/app_export.dart';
 
 class CustomSearchView extends StatelessWidget {

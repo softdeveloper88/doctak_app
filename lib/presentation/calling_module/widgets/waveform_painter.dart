@@ -1,5 +1,5 @@
 // lib/presentation/call_module/widgets/waveform_painter.dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'dart:math' as math;
 
 /// CustomPainter that draws audio waveform pattern

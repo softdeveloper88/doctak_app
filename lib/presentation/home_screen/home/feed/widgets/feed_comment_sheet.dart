@@ -2,7 +2,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/b
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/comment_content_type.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/sv_comment_screen.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shared comment bottom sheet used across feed, profile, and search.
 /// Returns the final comment count when the sheet closes.

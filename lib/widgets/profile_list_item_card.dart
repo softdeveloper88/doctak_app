@@ -3,7 +3,7 @@ import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/widgets/app_surface_card.dart';
 import 'package:doctak_app/widgets/premium/premium_mark.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ProfileListItemCard extends StatelessWidget {
   const ProfileListItemCard({

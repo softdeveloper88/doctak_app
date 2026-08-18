@@ -10,7 +10,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 class SVCommentScreen extends StatefulWidget {

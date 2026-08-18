@@ -150,7 +150,8 @@ dependencies:
   stream_transform: ^2.1.1
   qr_flutter: ^4.1.0
   share_handler: ^0.0.25
-
+  material_ui: ^1.0.0
+  cupertino_ui: ^1.0.0
 dependency_overrides:
   # Flutter 3.44+ marks IconData as final; v11+ is required.
   font_awesome_flutter: ^11.0.0

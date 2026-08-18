@@ -4,7 +4,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/memory_optimized_comment_item.dart';
 import 'package:doctak_app/widgets/shimmer_widget/enhanced_comment_shimmer.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 /// Toggle or expand the reply thread for a comment.

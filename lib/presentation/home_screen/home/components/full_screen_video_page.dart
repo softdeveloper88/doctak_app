@@ -6,7 +6,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/video_url_utils.dart';
 import 'package:doctak_app/core/utils/video_utils.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 

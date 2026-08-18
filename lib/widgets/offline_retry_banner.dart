@@ -4,7 +4,7 @@
 
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A LinkedIn-style banner that appears at the bottom of the screen
 /// when the app is showing cached/offline data

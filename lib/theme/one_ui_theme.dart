@@ -1,8 +1,8 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:doctak_app/widgets/doctak_app_loader.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// One UI 8.5 Design System - Centralized Theme
 /// This file provides a single source of truth for all One UI 8.5 styling

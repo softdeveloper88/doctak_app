@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import '../core/utils/text_scale_helper.dart';
 
 /// A custom MaterialApp that enforces fixed text scaling regardless of device settings

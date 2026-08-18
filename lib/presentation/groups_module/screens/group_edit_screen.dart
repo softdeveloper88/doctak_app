@@ -9,7 +9,7 @@ import 'package:doctak_app/widgets/app_cached_network_image.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_form_dropdown.dart';
 import 'package:doctak_app/widgets/one_ui_form_field.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Edit group settings for owners/admins.

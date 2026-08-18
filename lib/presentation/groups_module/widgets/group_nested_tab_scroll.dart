@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Coordinates tab content with [NestedScrollView] so pinned tabs do not leave
 /// a gap above the first list item.

@@ -10,7 +10,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/n
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 import '../../core/utils/app/AppData.dart';
 import '../../localization/app_localization.dart';

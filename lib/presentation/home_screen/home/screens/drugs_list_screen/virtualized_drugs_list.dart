@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_scre
 import 'package:doctak_app/presentation/home_screen/home/screens/drugs_list_screen/memory_optimized_drug_item.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/shimmer_widget/drugs_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class VirtualizedDrugsList extends StatefulWidget {

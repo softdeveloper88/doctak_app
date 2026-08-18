@@ -4,7 +4,7 @@ import 'package:doctak_app/presentation/case_discussion/models/case_discussion_m
 import 'package:doctak_app/presentation/case_discussion/repository/case_discussion_repository.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_card_shell.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// Case discussion comments — same bottom-sheet UX as post/blog comments.

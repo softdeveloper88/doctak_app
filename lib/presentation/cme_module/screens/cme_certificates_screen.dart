@@ -5,7 +5,7 @@ import 'package:doctak_app/presentation/cme_module/bloc/cme_certificates_state.d
 import 'package:doctak_app/presentation/cme_module/widgets/cme_certificate_bottom_sheet.dart';
 import 'package:doctak_app/presentation/cme_module/widgets/cme_credit_badge.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';

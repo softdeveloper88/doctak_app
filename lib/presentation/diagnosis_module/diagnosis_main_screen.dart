@@ -11,7 +11,7 @@ import 'package:doctak_app/widgets/doctak_app_bar.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
 import 'package:doctak_app/widgets/shimmer_widget/diagnosis_shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DiagnosisMainScreen extends StatefulWidget {

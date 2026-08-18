@@ -1,6 +1,6 @@
 import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/presentation/subscription_screen/subscription_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// A reusable quota banner used across all AI screens.

@@ -1,7 +1,7 @@
 import 'package:doctak_app/presentation/subscription_screen/subscription_content.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Standalone subscription page – wraps the shared [SubscriptionContent]
 /// in a Scaffold with an app bar.

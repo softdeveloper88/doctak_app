@@ -1,5 +1,5 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// LinkedIn-style pill shown when new feed posts arrive while scrolled down.
 class FeedNewPostsPill extends StatelessWidget {

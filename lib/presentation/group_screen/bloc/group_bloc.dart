@@ -7,7 +7,7 @@ import 'package:doctak_app/data/models/group_model/group_list_model.dart';
 import 'package:doctak_app/data/models/group_model/group_member_request_model.dart';
 import 'package:doctak_app/data/models/group_model/group_post_model.dart';
 import 'package:doctak_app/main.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'group_event.dart';

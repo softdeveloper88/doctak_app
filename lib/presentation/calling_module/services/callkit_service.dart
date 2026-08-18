@@ -4,7 +4,7 @@ import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/presentation/calling_module_v2/services/callkit_event_hub.dart';
 import 'call_api_service.dart';
 import '../screens/call_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';

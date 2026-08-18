@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:image_editor_plus/data/image_item.dart';
 
 /// Layer class with some common properties

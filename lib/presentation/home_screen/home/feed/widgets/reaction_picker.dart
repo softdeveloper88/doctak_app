@@ -2,7 +2,7 @@ import 'package:doctak_app/data/models/feed_model/feed_models.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_motion.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A single reaction definition, mirroring the doctak-node website set.
 class FeedReaction {

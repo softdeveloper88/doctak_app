@@ -1,5 +1,5 @@
 import 'package:doctak_app/presentation/groups_module/screens/group_detail_screen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Legacy entry point — routes to the v1 group profile screen.
 class GroupViewScreen extends StatelessWidget {

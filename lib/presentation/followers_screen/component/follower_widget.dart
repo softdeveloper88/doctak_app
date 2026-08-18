@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/followers_screen/bloc/followers_bloc.dar
 import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/profile_list_item_card.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class FollowerWidget extends StatefulWidget {
   final dynamic element;

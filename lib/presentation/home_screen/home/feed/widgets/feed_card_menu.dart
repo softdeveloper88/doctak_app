@@ -3,8 +3,8 @@ import 'package:doctak_app/presentation/home_screen/home/components/moderation/b
 import 'package:doctak_app/presentation/home_screen/home/components/moderation/report_content_bottom_sheet.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_icons.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// Overflow menu on feed cards — edit/delete (own), report/block/not interested (others).

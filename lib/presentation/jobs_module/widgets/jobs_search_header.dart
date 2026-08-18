@@ -1,6 +1,6 @@
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class JobSectionLabel extends StatelessWidget {
   const JobSectionLabel(this.label, {super.key, this.color});

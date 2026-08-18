@@ -4,7 +4,7 @@ import 'package:doctak_app/data/models/anousment_model/announcement_model.dart';
 import 'package:doctak_app/presentation/notification_screen/bloc/notification_event.dart';
 import 'package:doctak_app/presentation/notification_screen/user_announcement_detail_screen.dart';
 import 'package:doctak_app/widgets/shimmer_widget/shimmer_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';

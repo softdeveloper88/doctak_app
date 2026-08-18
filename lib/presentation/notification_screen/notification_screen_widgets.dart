@@ -3,7 +3,7 @@ import 'package:doctak_app/data/models/notification_model/notification_model.dar
 import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class NotificationTokens {
   NotificationTokens._();

@@ -1,7 +1,7 @@
 import 'package:doctak_app/core/utils/email_verification_service.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/show_loading_dialog.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 Future<void> requestEmailVerificationLink({
   required BuildContext context,

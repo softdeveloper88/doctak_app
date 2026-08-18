@@ -11,9 +11,9 @@ import 'package:doctak_app/presentation/terms_and_condition_screen/terms_and_con
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart' hide PageRouteAnimation;
 
 import '../home_screen/fragments/profile_screen/bloc/profile_event.dart';

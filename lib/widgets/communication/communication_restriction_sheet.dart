@@ -2,7 +2,7 @@ import 'package:doctak_app/data/apiClient/services/communication_service.dart';
 import 'package:doctak_app/data/apiClient/services/network_api_service.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A bottom sheet that explains why communication is restricted,
 /// with a call-to-action (connect / unblock / accept request).

@@ -1,5 +1,5 @@
 import 'package:doctak_app/data/models/post_model/post_data_model.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class SharePostBottomDialog extends StatelessWidget {
   SharePostBottomDialog(this.postList, {super.key});

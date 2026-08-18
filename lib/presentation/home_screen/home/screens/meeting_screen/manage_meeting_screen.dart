@@ -9,7 +9,7 @@ import 'package:doctak_app/data/models/meeting_model/meeting_history_model.dart'
 import 'package:doctak_app/data/services/meeting_websocket_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nb_utils/nb_utils.dart';

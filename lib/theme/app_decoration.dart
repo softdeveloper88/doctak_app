@@ -1,6 +1,6 @@
 import 'package:doctak_app/main.dart';
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:doctak_app/core/app_export.dart';
 
 class AppDecoration {

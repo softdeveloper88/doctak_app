@@ -1,6 +1,6 @@
 import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Jobs module tokens — aligned with [OneUITheme] / [DoctakPalette].
 abstract final class JobsTheme {

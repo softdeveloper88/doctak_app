@@ -4,7 +4,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/group_model/group_enhanced_models.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const _kCoverHeight = 140.0;
 const _kAvatarSize = 72.0;

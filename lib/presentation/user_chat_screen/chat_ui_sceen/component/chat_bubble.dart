@@ -3,7 +3,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/models/chat_model/conversation_message_model.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 import 'video_player_widget.dart';

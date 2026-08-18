@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:doctak_app/core/utils/media_type_detector.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/post_widget/video_player_widget.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class PhotoGrid extends StatelessWidget {

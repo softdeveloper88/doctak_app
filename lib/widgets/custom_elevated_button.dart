@@ -1,6 +1,6 @@
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/base_button.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// OneUI 8.5 styled elevated button
 class CustomElevatedButton extends BaseButton {

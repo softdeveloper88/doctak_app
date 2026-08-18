@@ -1,6 +1,6 @@
 import 'package:doctak_app/core/utils/navigator_service.dart';
 import 'package:doctak_app/widgets/doctak_app_loader.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// App-wide blocking progress overlay (login, signup, profile save, meetings, …).
 /// Full-screen dimmed scrim + centered Lottie on a transparent background.

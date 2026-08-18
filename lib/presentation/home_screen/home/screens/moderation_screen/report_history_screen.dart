@@ -1,7 +1,7 @@
 import 'package:doctak_app/data/apiClient/services/moderation_api_service.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/doctak_app_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Screen to view user's report history and check admin response status
 class ReportHistoryScreen extends StatefulWidget {

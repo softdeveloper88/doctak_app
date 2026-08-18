@@ -7,7 +7,7 @@ import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/
 import 'package:doctak_app/presentation/home_screen/utils/SVCommon.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/meeting_screen/meeting_waiting_room_controller.dart';
 import 'package:doctak_app/widgets/toast_widget.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class SetScheduleScreen extends StatefulWidget {

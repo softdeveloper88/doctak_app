@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:doctak_app/data/apiClient/jobs/jobs_node_api_service.dart';
 import 'package:doctak_app/data/models/jobs/job_dto.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class JobsFilterState {
   JobsFilterState({

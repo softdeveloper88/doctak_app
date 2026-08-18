@@ -1,5 +1,5 @@
 import 'package:doctak_app/ads_setting/ad_setting.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class BannerAdWidget extends StatefulWidget {

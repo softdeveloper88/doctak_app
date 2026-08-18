@@ -9,7 +9,7 @@ import 'package:doctak_app/presentation/subscription_screen/bloc/subscription_ev
 import 'package:doctak_app/presentation/subscription_screen/bloc/subscription_state.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/premium/premium_mark.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 

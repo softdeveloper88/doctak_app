@@ -7,7 +7,7 @@ import 'package:doctak_app/presentation/cme_module/widgets/cme_quiz_preview_pane
 import 'package:doctak_app/presentation/cme_module/widgets/cme_shimmer_loader.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/one_ui_tab_bar.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 enum CmeDetailTab { about, agenda, speakers, quiz, feedback }
 

@@ -6,7 +6,7 @@ import 'package:doctak_app/core/utils/video_url_utils.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_image_page.dart';
 import 'package:doctak_app/presentation/home_screen/home/components/full_screen_video_page.dart';
 import 'package:doctak_app/widgets/app_cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 

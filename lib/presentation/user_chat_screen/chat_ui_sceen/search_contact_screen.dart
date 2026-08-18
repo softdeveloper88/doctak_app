@@ -9,7 +9,7 @@ import 'package:doctak_app/widgets/retry_widget.dart';
 import 'package:doctak_app/widgets/doctak_searchable_app_bar.dart';
 import 'package:doctak_app/widgets/profile_list_item_card.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 import '../../home_screen/utils/SVCommon.dart';

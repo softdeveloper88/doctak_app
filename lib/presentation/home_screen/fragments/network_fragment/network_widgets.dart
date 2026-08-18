@@ -7,7 +7,7 @@ import 'package:doctak_app/core/utils/display_identity.dart';
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/one_ui_shimmer.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Reference tokens from `Network Screen - Standalone.html`.
 abstract final class NetworkLayout {

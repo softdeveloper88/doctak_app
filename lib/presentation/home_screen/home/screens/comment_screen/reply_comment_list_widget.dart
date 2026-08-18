@@ -1,6 +1,6 @@
 import 'package:doctak_app/localization/app_localization.dart';
 import 'package:doctak_app/widgets/shimmer_widget/comment_list_shimmer.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
 

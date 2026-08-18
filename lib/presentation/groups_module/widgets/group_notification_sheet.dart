@@ -1,6 +1,6 @@
 import 'package:doctak_app/data/models/group_model/group_enhanced_models.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Per-group notification mute preferences (local until dedicated API exists).

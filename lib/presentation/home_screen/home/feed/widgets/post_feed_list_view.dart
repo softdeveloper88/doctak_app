@@ -6,7 +6,7 @@ import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/adapters/post_feed_adapter.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_cards.dart';
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/blog_comment_sheet.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 /// How the list participates in parent scrolling.

@@ -1,6 +1,6 @@
 import 'package:doctak_app/data/apiClient/cme/cme_node_api_service.dart';
 import 'package:doctak_app/presentation/cme_module/widgets/cme_certificate_bottom_sheet.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Opens the certificate bottom sheet, issuing/generating first when needed.
 Future<void> openEventCertificateSheet(

@@ -1,6 +1,6 @@
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/routes/app_navigator.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Shared premium gold tokens (parity with web `.dt-premium-mark` / avatar ring).
 abstract final class PremiumStyle {

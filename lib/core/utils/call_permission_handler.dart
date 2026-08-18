@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 

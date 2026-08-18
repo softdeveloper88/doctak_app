@@ -8,8 +8,8 @@ import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/n
 import 'package:doctak_app/presentation/home_screen/fragments/network_fragment/people_you_may_know_screen.dart';
 import 'package:doctak_app/core/utils/profile_navigation.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../localization/app_localization.dart';
 

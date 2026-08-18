@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/groups_module/widgets/group_member_optio
 import 'package:doctak_app/presentation/groups_module/widgets/group_nested_tab_scroll.dart';
 import 'package:doctak_app/presentation/groups_module/widgets/group_tab_shimmers.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class GroupMembersTab extends StatefulWidget {
   final GroupDetailModel group;

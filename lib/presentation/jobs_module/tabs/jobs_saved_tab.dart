@@ -6,7 +6,7 @@ import 'package:doctak_app/presentation/jobs_module/widgets/job_card_shimmer.dar
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_empty_state.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_theme.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:nb_utils/nb_utils.dart';
 
 class JobsSavedTab extends StatefulWidget {

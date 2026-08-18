@@ -1,6 +1,6 @@
 import 'package:doctak_app/presentation/guideline_module/data/models/guideline_source_model.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Bottom sheet to select guideline sources (WHO, AHA, NICE, ACC, etc.)
 class GuidelineSourceSelector extends StatefulWidget {
