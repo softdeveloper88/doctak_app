@@ -741,12 +741,13 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
                           textAlign: TextAlign.center,
                         ).animate().fadeIn(duration: 800.ms),
                         const SizedBox(height: 8),
+                        // Generic intro line only — the admin-configured
+                        // upgrade message renders once, in the "What's New"
+                        // list below, instead of being duplicated up here.
                         Text(
-                          _upgradeMessage.isNotEmpty
-                              ? _upgradeMessage
-                              : (_isSkippible ?? false
-                                  ? 'A new version of DocTak is available with exciting new features and improvements!'
-                                  : 'Please update to the latest version of the app to continue using all features.'),
+                          _isSkippible ?? false
+                              ? 'A new version of DocTak is available with exciting new features and improvements!'
+                              : 'Please update to the latest version of the app to continue using all features.',
                           style: TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
@@ -1357,20 +1358,42 @@ class _UnifiedSplashUpgradeScreenState extends State<UnifiedSplashUpgradeScreen>
     );
   }
 
+  /// Splits the admin-configured upgrade message into bullet-sized chunks —
+  /// on explicit line breaks first, else on sentence boundaries. A short
+  /// one-phrase message ("Issues Fixed") comes back as a single bullet.
+  List<String> _splitIntoFeatureItems(String message) {
+    final normalized = message.trim();
+    if (normalized.isEmpty) return const [];
+
+    final parts = normalized
+        .split(RegExp(r'[\n\r]+|(?<=[.!?])\s+'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .toList();
+
+    return parts.isEmpty ? [normalized] : parts;
+  }
+
   // Features list for update screen
   Widget _buildFeaturesList({bool compact = false}) {
     final theme = OneUITheme.of(context);
-    final features = _isSkippible ?? false
-        ? [
-            "New features and improvements",
-            "Bug fixes and performance updates",
-            "Enhanced security measures",
-          ]
-        : [
-            "Critical security update required",
-            "Important compatibility improvements",
-            "Essential bug fixes and stability enhancements",
-          ];
+    // Prefer the admin-configured upgrade message (set per-platform from the
+    // super admin dashboard); only fall back to generic static copy when no
+    // message was configured for this release.
+    final dynamicFeatures = _splitIntoFeatureItems(_upgradeMessage);
+    final features = dynamicFeatures.isNotEmpty
+        ? dynamicFeatures
+        : (_isSkippible ?? false
+            ? [
+                "New features and improvements",
+                "Bug fixes and performance updates",
+                "Enhanced security measures",
+              ]
+            : [
+                "Critical security update required",
+                "Important compatibility improvements",
+                "Essential bug fixes and stability enhancements",
+              ]);
     final visibleFeatures = compact ? features.take(2).toList() : features;
 
     return Column(

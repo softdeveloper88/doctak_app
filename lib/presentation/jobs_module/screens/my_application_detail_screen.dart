@@ -2,8 +2,8 @@ import 'package:doctak_app/data/apiClient/jobs/jobs_node_api_service.dart';
 import 'package:doctak_app/data/models/jobs/job_dto.dart';
 import 'package:doctak_app/presentation/jobs_module/screens/job_cv_viewer_screen.dart';
 import 'package:doctak_app/presentation/jobs_module/screens/job_detail_screen.dart';
+import 'package:doctak_app/presentation/jobs_module/widgets/application_detail_shimmer.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/job_application_stage_stepper.dart';
-import 'package:doctak_app/presentation/jobs_module/widgets/job_card_shimmer.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/job_chips.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/job_display_utils.dart';
 import 'package:doctak_app/presentation/jobs_module/widgets/jobs_empty_state.dart';
@@ -145,11 +145,7 @@ class _MyApplicationDetailScreenState extends State<MyApplicationDetailScreen> {
               ),
             ),
       body: _loading
-          ? const SingleChildScrollView(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              physics: NeverScrollableScrollPhysics(),
-              child: JobCardShimmer(),
-            )
+          ? const ApplicationDetailShimmer()
           : _error != null
               ? JobsEmptyState(
                   title: 'Couldn’t load application',

@@ -10,6 +10,7 @@ import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/core/utils/session_manager.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
+import 'package:doctak_app/data/apiClient/subscription_api_service.dart';
 import 'package:doctak_app/data/models/subscription/subscription_data_model.dart';
 import 'package:doctak_app/presentation/age_assurance/age_assurance_screen.dart';
 import 'package:doctak_app/presentation/login_screen/login_screen.dart';
@@ -108,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   /// Restore subscription & features data from SecureStorage after cold restart.
-  void _restoreSubscriptionData(SecureStorageService prefs) async {
+  Future<void> _restoreSubscriptionData(SecureStorageService prefs) async {
     try {
       final subscriptionJson = await prefs.getString('subscription_json');
       final featuresJson = await prefs.getString('features_json');
@@ -130,6 +131,18 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.updateSubscriptionData(subscription, features);
     } catch (e) {
       debugPrint('Failed to restore subscription data: $e');
+    }
+  }
+
+  /// Pull latest entitlement from the server so Premium is correct after a
+  /// web/Stripe upgrade that happened while the app was closed.
+  Future<void> _refreshSubscriptionFromServer() async {
+    try {
+      final status = await SubscriptionApiService.instance.getStatus();
+      AppData.updateSubscriptionData(status.subscription, status.features);
+      await AppData.persistSubscriptionData();
+    } catch (e) {
+      debugPrint('Failed to refresh subscription status: $e');
     }
   }
 
@@ -207,7 +220,11 @@ class _SplashScreenState extends State<SplashScreen> {
       AppData.currency = currency;
 
       // ── Restore subscription & features data (v6) ──
-      _restoreSubscriptionData(prefs);
+      // Must finish before leaving splash so Premium shows on first frame.
+      await _restoreSubscriptionData(prefs);
+      // Then refresh from the server (non-blocking) so a Stripe upgrade done
+      // on the website is reflected as soon as the status call returns.
+      unawaited(_refreshSubscriptionFromServer());
 
       // Re-register FCM after restoring a remembered session (non-blocking).
       unawaited(NotificationService.syncDeviceToken());

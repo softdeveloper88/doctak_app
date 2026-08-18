@@ -1,4 +1,3 @@
-import 'package:doctak_app/theme/doctak_palette.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,15 +9,20 @@ import 'package:flutter/services.dart';
 /// - This ensures content is not hidden behind system navigation bars on older devices
 class EdgeToEdgeHelper {
   /// Matches [OneUITheme.navBarBackground] dark.
+  /// Kept for callers that still paint Flutter chrome to match the old nav bar.
   static const Color darkNavigationBarColor = Color(0xFF152232);
 
-  /// System overlay for light/dark — status bar stays transparent; nav bar uses theme surface.
+  /// System overlay for light/dark.
+  ///
+  /// Do **not** set [SystemUiOverlayStyle.statusBarColor] /
+  /// [SystemUiOverlayStyle.systemNavigationBarColor] — on Android those
+  /// drive deprecated `Window.setStatusBarColor` /
+  /// `setNavigationBarColor` calls (Play Console edge-to-edge warning).
+  /// Native [enableEdgeToEdge] keeps bars transparent; Flutter draws behind.
   static SystemUiOverlayStyle overlayForTheme({required bool isDark}) {
     return SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
       statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      systemNavigationBarColor:
-          isDark ? darkNavigationBarColor : DoctakPalette.surface,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       systemNavigationBarIconBrightness:
           isDark ? Brightness.light : Brightness.dark,
       systemNavigationBarContrastEnforced: false,

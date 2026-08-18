@@ -20,7 +20,7 @@ class ThemeHelper {
       foregroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
-      systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light),
+      systemOverlayStyle: SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light, statusBarBrightness: Brightness.dark),
     ),
     cardTheme: CardThemeData(elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -90,7 +90,7 @@ class ThemeHelper {
       foregroundColor: Color(0xFF0B0C0C), // Your onPrimary color
       elevation: 0,
       centerTitle: true,
-      systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.dark),
+      systemOverlayStyle: SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark, statusBarBrightness: Brightness.light),
     ),
     cardTheme: CardThemeData(elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
     elevatedButtonTheme: ElevatedButtonThemeData(

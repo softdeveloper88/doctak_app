@@ -369,6 +369,12 @@ class Data {
       'invitationId': invitationId,
       'invitation_id': invitationId,
       'friend_request_id': friendRequestId,
+      // Sender identity for message-type notifications — ChatRoomScreen falls
+      // back to a placeholder name/avatar without these.
+      'senderName': displayActorName,
+      'sender_name': displayActorName,
+      'profile_pic': senderProfilePic,
+      'image': senderProfilePic,
     };
 
     final caseId = resolvedCaseId;

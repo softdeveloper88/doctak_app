@@ -1,0 +1,12 @@
+// ShareExtension's own xcconfig chain — CocoaPods only generates
+// Pods-ShareExtension.*.xcconfig, which does NOT pull in Flutter's
+// Generated.xcconfig. Without it, FLUTTER_BUILD_NAME/FLUTTER_BUILD_NUMBER
+// are undefined for this target, so the CFBundleShortVersionString/
+// CFBundleVersion placeholders in ShareExtension/Info.plist resolve to
+// empty strings and get stripped from the built Info.plist. iOS then
+// refuses to install the app ("Invalid placeholder attributes" /
+// "Failed to create app extension placeholder") since extensions must
+// carry a version. Surviving `pod install` regeneration is why this is
+// a separate file rather than an edit to the CocoaPods-generated one.
+#include "../Flutter/Generated.xcconfig"
+#include? "../Pods/Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"

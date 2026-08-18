@@ -50,7 +50,7 @@ class _SVProfileFragmentState extends State<SVProfileFragment>
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
 
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+      const SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
     );
     super.initState();
   }

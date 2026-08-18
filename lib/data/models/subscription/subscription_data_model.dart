@@ -24,17 +24,32 @@ class SubscriptionData {
 
   factory SubscriptionData.fromJson(Map<String, dynamic> json) {
     return SubscriptionData(
-      isPremium: json['is_premium'] == true,
-      accountType: json['account_type']?.toString() ?? 'free',
-      planName: json['plan_name']?.toString(),
-      planSlug: json['plan_slug']?.toString(),
-      planExpiresAt: json['plan_expires_at']?.toString(),
+      isPremium: _asBool(json['is_premium'] ?? json['isPremium']),
+      accountType: json['account_type']?.toString() ??
+          json['accountType']?.toString() ??
+          'free',
+      planName: json['plan_name']?.toString() ?? json['planName']?.toString(),
+      planSlug: json['plan_slug']?.toString() ?? json['planSlug']?.toString(),
+      planExpiresAt:
+          json['plan_expires_at']?.toString() ?? json['planExpiresAt']?.toString(),
       daysRemaining: json['days_remaining'] != null
           ? int.tryParse(json['days_remaining'].toString())
-          : null,
-      autoRenew: json['auto_renew'] == true,
-      monetizationEnabled: json['monetization_enabled'] == true,
+          : (json['daysRemaining'] != null
+              ? int.tryParse(json['daysRemaining'].toString())
+              : null),
+      autoRenew: _asBool(json['auto_renew'] ?? json['autoRenew']),
+      monetizationEnabled:
+          _asBool(json['monetization_enabled'] ?? json['monetizationEnabled']),
     );
+  }
+
+  static bool _asBool(dynamic value) {
+    if (value == true || value == 1) return true;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      return normalized == 'true' || normalized == '1' || normalized == 'yes';
+    }
+    return false;
   }
 
   Map<String, dynamic> toJson() {
@@ -129,8 +144,11 @@ class FeaturesMap {
     if (json == null) return FeaturesMap(features: {});
     final map = <String, FeatureAccess>{};
     json.forEach((key, value) {
-      if (value is Map<String, dynamic>) {
-        map[key] = FeatureAccess.fromJson(key, value);
+      if (value is Map) {
+        map[key] = FeatureAccess.fromJson(
+          key,
+          Map<String, dynamic>.from(value),
+        );
       }
     });
     return FeaturesMap(features: map);

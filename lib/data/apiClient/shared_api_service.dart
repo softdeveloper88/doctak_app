@@ -1563,7 +1563,14 @@ class SharedApiService {
         await networkUtils.buildHttpResponseV6(
           '/medical-image-analysis/chat',
           method: networkUtils.HttpMethod.POST,
+          // The Node endpoint reads `await request.json()` (see
+          // doctak-node's app/api/v1/medical-image-analysis/chat/route.ts)
+          // and silently swallows a parse failure, falling back to `{}` —
+          // so without jsonBody:true this sent a form-urlencoded body the
+          // server could never read, and session_id/message always came
+          // back "required" no matter what was actually sent.
           request: {'session_id': sessionId, 'message': question},
+          jsonBody: true,
         ),
       );
       return ApiResponse.success(ChatGptAskQuestionResponse.fromJson(response));

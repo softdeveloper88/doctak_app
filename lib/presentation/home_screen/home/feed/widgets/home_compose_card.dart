@@ -106,7 +106,7 @@ class HomeComposeCard extends StatelessWidget {
               _action(
                 theme,
                 asset: FeedIconAssets.composeBlog,
-                label: 'Blog',
+                label: 'Article',
                 color: theme.composeBlogColor,
                 onTap: () => _openComposer(context, ComposeTab.blog),
               ),

@@ -30,6 +30,16 @@ subprojects {
 
                 ndkVersion = "28.1.13356709"
 
+                // Silence "source/target value 8 is obsolete" from plugins still on Java 8.
+                try {
+                    compileOptions {
+                        sourceCompatibility JavaVersion.VERSION_17
+                        targetCompatibility JavaVersion.VERSION_17
+                    }
+                } catch(ignore) {
+                    // Some plugin projects may not expose compileOptions; ignore
+                }
+
                 // Align defaultConfig target/min SDK if present
                 try {
                     defaultConfig {
@@ -41,13 +51,12 @@ subprojects {
                 }
             }
         }
-        
-        // Fix Kotlin null-safety issues in third-party plugins
-        if (project.hasProperty('kotlin')) {
-            project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-                kotlinOptions {
-                    freeCompilerArgs += ['-Xno-call-assertions', '-Xno-receiver-assertions', '-Xno-param-assertions']
-                }
+
+        // Align Kotlin JVM target with the app (Java 17) for every plugin module.
+        project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+            kotlinOptions {
+                jvmTarget = "17"
+                freeCompilerArgs += ['-Xno-call-assertions', '-Xno-receiver-assertions', '-Xno-param-assertions']
             }
         }
     }

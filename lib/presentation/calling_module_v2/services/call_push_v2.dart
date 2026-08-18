@@ -137,7 +137,8 @@ class CallPushV2 {
     final sub = FlutterCallkitIncoming.onEvent.listen((event) async {
       if (event == null) return;
       switch (event) {
-        case CallEventActionCallAccept(:final id) when id == push.callId:
+        case CallEventActionCallAccept(:final callKitParams)
+            when callKitParams.id == push.callId:
           accepted = true;
           debugPrint('📞 [CallPushV2] bg accept ${push.callId} → REST');
           await CallApiV2.instance.action(
@@ -146,13 +147,15 @@ class CallPushV2 {
             deviceId: await _storedDeviceId(),
           );
           finish();
-        case CallEventActionCallDecline(:final id) when id == push.callId:
+        case CallEventActionCallDecline(:final callKitParams)
+            when callKitParams.id == push.callId:
           debugPrint('📞 [CallPushV2] bg decline ${push.callId} → REST');
           await CallApiV2.instance.action(callId: push.callId, action: 'reject');
           finish();
         case CallEventActionCallTimeout(:final id) when id == push.callId:
           finish(); // server ring alarm is authoritative
-        case CallEventActionCallEnded(:final id) when id == push.callId:
+        case CallEventActionCallEnded(:final callKitParams)
+            when callKitParams.id == push.callId:
           finish();
         default:
           break;

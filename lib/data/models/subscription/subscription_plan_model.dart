@@ -141,13 +141,15 @@ class SubscriptionStatusResponse {
   });
 
   factory SubscriptionStatusResponse.fromJson(Map<String, dynamic> json) {
+    final rawSub = json['subscription'];
+    final rawFeatures = json['features'];
     return SubscriptionStatusResponse(
       success: json['success'] == true,
-      subscription: json['subscription'] != null
-          ? SubscriptionData.fromJson(json['subscription'])
+      subscription: rawSub is Map
+          ? SubscriptionData.fromJson(Map<String, dynamic>.from(rawSub))
           : SubscriptionData.free(),
-      features: json['features'] != null
-          ? FeaturesMap.fromJson(Map<String, dynamic>.from(json['features']))
+      features: rawFeatures is Map
+          ? FeaturesMap.fromJson(Map<String, dynamic>.from(rawFeatures))
           : FeaturesMap(features: {}),
     );
   }

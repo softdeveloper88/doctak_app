@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 
 import '../core/network/custom_cache_manager.dart';
 
-/// A wrapper around CachedNetworkImage with OneUI 8.5 theming and custom cache manager
+/// A wrapper around CachedNetworkImage with OneUI 8.5 theming and custom cache manager.
+///
+/// Applies bitmap downsampling via [memCacheWidth]/[memCacheHeight] whenever
+/// layout size is known (Play Console: decode at display size, not full resolution).
 class AppCachedNetworkImage extends StatelessWidget {
   final String imageUrl;
   final double? width;
@@ -27,6 +30,9 @@ class AppCachedNetworkImage extends StatelessWidget {
   final bool matchTextDirection;
   final FilterQuality filterQuality;
   final BorderRadius? borderRadius;
+
+  /// Cap decode dimensions so a full-bleed image still downsamples on large phones.
+  static const int maxDecodePx = 2048;
 
   const AppCachedNetworkImage({
     super.key,
@@ -57,6 +63,11 @@ class AppCachedNetworkImage extends StatelessWidget {
     'Accept': 'image/webp,image/apng,image/jpeg,image/png,image/*,*/*;q=0.8',
   };
 
+  static int? decodePx(double? logical, double devicePixelRatio) {
+    if (logical == null || !logical.isFinite || logical <= 0) return null;
+    return (logical * devicePixelRatio).round().clamp(1, maxDecodePx);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = OneUITheme.of(context);
@@ -69,7 +80,54 @@ class AppCachedNetworkImage extends StatelessWidget {
       return onError(context, safeUrl, 'Empty/invalid image url');
     }
 
-    return CachedNetworkImage(
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final explicitW = memCacheWidth ?? decodePx(width, dpr);
+    final explicitH = memCacheHeight ?? decodePx(height, dpr);
+
+    // When width/height aren't fixed, resolve from parent constraints so we
+    // still downsample (avoids full-res decode into ImageCache).
+    if (explicitW == null && explicitH == null) {
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final cacheW = decodePx(
+            constraints.maxWidth.isFinite ? constraints.maxWidth : null,
+            dpr,
+          );
+          final cacheH = decodePx(
+            constraints.maxHeight.isFinite ? constraints.maxHeight : null,
+            dpr,
+          );
+          return _buildImage(
+            context,
+            theme: theme,
+            safeUrl: safeUrl,
+            onError: onError,
+            memCacheWidth: cacheW,
+            memCacheHeight: cacheH,
+          );
+        },
+      );
+    }
+
+    return _buildImage(
+      context,
+      theme: theme,
+      safeUrl: safeUrl,
+      onError: onError,
+      memCacheWidth: explicitW,
+      memCacheHeight: explicitH,
+    );
+  }
+
+  Widget _buildImage(
+    BuildContext context, {
+    required OneUITheme theme,
+    required String safeUrl,
+    required Widget Function(BuildContext, String, dynamic) onError,
+    required int? memCacheWidth,
+    required int? memCacheHeight,
+  }) {
+    final image = CachedNetworkImage(
       imageUrl: safeUrl,
       cacheKey: safeUrl,
       width: width,
@@ -94,6 +152,8 @@ class AppCachedNetworkImage extends StatelessWidget {
       matchTextDirection: matchTextDirection,
       filterQuality: filterQuality,
     );
+
+    return image;
   }
 
   Widget _defaultPlaceholder(BuildContext context, String url, OneUITheme theme) {

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../bloc/discussion_list_bloc.dart';
+import '../bloc/discussion_detail_bloc.dart';
 import '../bloc/create_discussion_bloc.dart';
 import '../models/case_discussion_models.dart';
 import '../repository/case_discussion_repository.dart';
@@ -365,11 +366,31 @@ class _DiscussionListScreenState extends State<DiscussionListScreen>
 
   // ── Navigation ─────────────────────────────────────────────────────────────
 
-  void _openDetail(int caseId) {
-    AppNavigator.push(
+  Future<void> _openDetail(int caseId) async {
+    final listBloc = context.read<DiscussionListBloc>();
+    // App-level singleton (see main.dart) — still holds this case's state
+    // once the detail route pops, so votes made there can be mirrored here.
+    final detailBloc = context.read<DiscussionDetailBloc>();
+
+    await AppNavigator.push(
       context,
       DiscussionDetailScreen(caseId: caseId),
     );
+
+    final detailState = detailBloc.state;
+    if (detailState is! DiscussionDetailLoaded) return;
+    final discussion = detailState.discussion;
+    if (discussion.id != caseId) return;
+
+    listBloc.add(SyncDiscussionEngagement(
+      caseId: caseId,
+      likes: discussion.likes,
+      dislikes: discussion.dislikes,
+      isLiked: discussion.isLiked,
+      isDisliked: discussion.isDisliked,
+      isBookmarked: discussion.isBookmarked,
+      commentsCount: discussion.commentsCount,
+    ));
   }
 
   void _openCreateScreen() {

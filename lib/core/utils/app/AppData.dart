@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:doctak_app/core/utils/app/app_environment.dart';
 import 'package:doctak_app/core/utils/secure_storage_service.dart';
 import 'package:doctak_app/data/models/ads_model/ads_setting_model.dart';
@@ -394,6 +396,9 @@ class AppData {
   static SubscriptionData? subscriptionData;
   static FeaturesMap? featuresMap;
 
+  /// Fires whenever premium / plan fields change so drawer & badges rebuild.
+  static final ValueNotifier<bool> premiumNotifier = ValueNotifier<bool>(false);
+
   /// Check if user has access to a specific feature
   static bool hasFeatureAccess(String featureSlug) {
     return featuresMap?.hasAccess(featureSlug) ?? false;
@@ -416,10 +421,37 @@ class AppData {
       daysRemaining = subscription.daysRemaining;
       autoRenew = subscription.autoRenew;
       monetizationEnabled = subscription.monetizationEnabled;
+      // ValueNotifier only notifies on value change — force a pulse when the
+      // premium flag is unchanged but plan metadata may have updated.
+      if (premiumNotifier.value == isPremium) {
+        premiumNotifier.value = !isPremium;
+      }
+      premiumNotifier.value = isPremium;
     }
     if (features != null) {
       featuresMap = features;
     }
+  }
+
+  /// Persist the current subscription + features so cold start shows Premium
+  /// immediately without waiting for a network round-trip.
+  static Future<void> persistSubscriptionData() async {
+    try {
+      final prefs = SecureStorageService.instance;
+      await prefs.initialize();
+      final sub = subscriptionData;
+      if (sub != null) {
+        await prefs.setString('is_premium', sub.isPremium.toString());
+        await prefs.setString('account_type', sub.accountType);
+        await prefs.setString('plan_name', sub.planName ?? '');
+        await prefs.setString('plan_slug', sub.planSlug ?? '');
+        await prefs.setString('subscription_json', jsonEncode(sub.toJson()));
+      }
+      final feats = featuresMap;
+      if (feats != null) {
+        await prefs.setString('features_json', jsonEncode(feats.toJson()));
+      }
+    } catch (_) {}
   }
 
   /// Clear subscription data on logout
@@ -438,6 +470,7 @@ class AppData {
     monetizationEnabled = false;
     subscriptionData = null;
     featuresMap = null;
+    premiumNotifier.value = false;
   }
 
   /// Ads Setting

@@ -34,6 +34,12 @@
     <!-- Call Features -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <!-- flutter_callkit_incoming's CallkitNotificationService declares
+         foregroundServiceType="phoneCall|microphone|camera" — Android 14+ (API 34+)
+         requires the matching FOREGROUND_SERVICE_* permission for every type in that
+         set or startForeground() throws SecurityException on call accept. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />

@@ -4,6 +4,7 @@
 // and optimistic like/bookmark actions.
 // ============================================================================
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../repository/case_discussion_repository.dart';
@@ -54,6 +55,32 @@ class VoteDiscussion extends DiscussionListEvent {
   const VoteDiscussion(this.caseId, this.direction);
   @override
   List<Object> get props => [caseId, direction];
+}
+
+/// Pushes engagement counts back from the detail screen so the list card does
+/// not keep showing the pre-vote numbers after the user navigates back.
+class SyncDiscussionEngagement extends DiscussionListEvent {
+  final int caseId;
+  final int likes;
+  final int dislikes;
+  final bool isLiked;
+  final bool isDisliked;
+  final bool isBookmarked;
+  final int commentsCount;
+
+  const SyncDiscussionEngagement({
+    required this.caseId,
+    required this.likes,
+    required this.dislikes,
+    required this.isLiked,
+    required this.isDisliked,
+    required this.isBookmarked,
+    required this.commentsCount,
+  });
+
+  @override
+  List<Object> get props =>
+      [caseId, likes, dislikes, isLiked, isDisliked, isBookmarked, commentsCount];
 }
 
 class ToggleBookmarkDiscussion extends DiscussionListEvent {
@@ -159,8 +186,11 @@ class DiscussionListBloc
     on<UpdateFilters>(_onUpdateFilters);
     on<LoadFilterData>(_onLoadFilterData);
     on<ToggleLikeDiscussion>(_onToggleLike);
-    on<VoteDiscussion>(_onVoteDiscussion);
-    on<ToggleBookmarkDiscussion>(_onToggleBookmark);
+    // Votes must not interleave: concurrent handlers would each apply their
+    // own server snapshot and the slowest response would win with stale counts.
+    on<VoteDiscussion>(_onVoteDiscussion, transformer: sequential());
+    on<SyncDiscussionEngagement>(_onSyncEngagement);
+    on<ToggleBookmarkDiscussion>(_onToggleBookmark, transformer: sequential());
     on<DeleteDiscussion>(_onDeleteDiscussion);
   }
 
@@ -292,6 +322,22 @@ class DiscussionListBloc
     add(VoteDiscussion(event.caseId, 'up'));
   }
 
+  /// Writes [updated] into both the emitted list and the `_discussions`
+  /// pagination cache. Without the cache write, the next load-more/refresh
+  /// re-emits `List.from(_discussions)` and resurrects the pre-vote item.
+  List<CaseDiscussionListItem> _patchDiscussion(
+    List<CaseDiscussionListItem> source,
+    CaseDiscussionListItem updated,
+  ) {
+    final cacheIdx = _discussions.indexWhere((d) => d.id == updated.id);
+    if (cacheIdx != -1) _discussions[cacheIdx] = updated;
+
+    final next = List<CaseDiscussionListItem>.from(source);
+    final idx = next.indexWhere((d) => d.id == updated.id);
+    if (idx != -1) next[idx] = updated;
+    return next;
+  }
+
   Future<void> _onVoteDiscussion(
       VoteDiscussion event, Emitter<DiscussionListState> emit) async {
     final currentState = state;
@@ -300,69 +346,72 @@ class DiscussionListBloc
     final idx = currentState.discussions.indexWhere((d) => d.id == event.caseId);
     if (idx == -1) return;
     final item = currentState.discussions[idx];
-    final direction = event.direction;
-    var likes = item.likes;
-    var dislikes = item.dislikes;
-    var isLiked = item.isLiked;
-    var isDisliked = item.isDisliked;
 
-    if (direction == 'up') {
-      if (isLiked) {
-        isLiked = false;
-        likes -= 1;
-      } else if (isDisliked) {
-        isDisliked = false;
-        isLiked = true;
-        dislikes -= 1;
-        likes += 1;
-      } else {
-        isLiked = true;
-        likes += 1;
-      }
-    } else {
-      if (isDisliked) {
-        isDisliked = false;
-        dislikes -= 1;
-      } else if (isLiked) {
-        isLiked = false;
-        isDisliked = true;
-        likes -= 1;
-        dislikes += 1;
-      } else {
-        isDisliked = true;
-        dislikes += 1;
-      }
-    }
+    final tally = CaseVoteTally.toggle(
+      likes: item.likes,
+      dislikes: item.dislikes,
+      isLiked: item.isLiked,
+      isDisliked: item.isDisliked,
+      direction: event.direction,
+    );
 
     final updated = item.copyWith(
-      likes: likes,
-      dislikes: dislikes,
-      isLiked: isLiked,
-      isDisliked: isDisliked,
+      likes: tally.likes,
+      dislikes: tally.dislikes,
+      isLiked: tally.isLiked,
+      isDisliked: tally.isDisliked,
     );
-    final updatedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-    updatedList[idx] = updated;
-    emit(currentState.copyWith(discussions: updatedList));
+    emit(currentState.copyWith(
+      discussions: _patchDiscussion(currentState.discussions, updated),
+    ));
 
     try {
-      final response = await repository.voteCase(caseId: event.caseId, direction: direction);
+      final response = await repository.voteCase(
+          caseId: event.caseId, direction: event.direction);
       final snapshot = CaseVoteSnapshot.fromApiResponse(response);
-      if (snapshot != null) {
-        final synced = updated.copyWith(
-          likes: snapshot.likes,
-          dislikes: snapshot.dislikes,
-          isLiked: snapshot.isLiked,
-          isDisliked: snapshot.isDisliked,
-        );
-        final syncedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-        syncedList[idx] = synced;
-        emit(currentState.copyWith(discussions: syncedList));
-      }
+      if (snapshot == null) return;
+
+      // Re-read state: the list may have grown/refreshed during the request.
+      final latest = state;
+      if (latest is! DiscussionListLoaded) return;
+      final synced = updated.copyWith(
+        likes: snapshot.likes,
+        dislikes: snapshot.dislikes,
+        isLiked: snapshot.isLiked,
+        isDisliked: snapshot.isDisliked,
+      );
+      emit(latest.copyWith(
+        discussions: _patchDiscussion(latest.discussions, synced),
+      ));
     } catch (_) {
-      final revertedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-      revertedList[idx] = item;
-      emit(currentState.copyWith(discussions: revertedList));
+      final latest = state;
+      if (latest is! DiscussionListLoaded) return;
+      emit(latest.copyWith(
+        discussions: _patchDiscussion(latest.discussions, item),
+      ));
     }
+  }
+
+  Future<void> _onSyncEngagement(
+      SyncDiscussionEngagement event, Emitter<DiscussionListState> emit) async {
+    final currentState = state;
+    if (currentState is! DiscussionListLoaded) return;
+
+    final idx =
+        currentState.discussions.indexWhere((d) => d.id == event.caseId);
+    if (idx == -1) return;
+
+    final synced = currentState.discussions[idx].copyWith(
+      likes: event.likes,
+      dislikes: event.dislikes,
+      isLiked: event.isLiked,
+      isDisliked: event.isDisliked,
+      isBookmarked: event.isBookmarked,
+      commentsCount: event.commentsCount,
+    );
+    emit(currentState.copyWith(
+      discussions: _patchDiscussion(currentState.discussions, synced),
+    ));
   }
 
   Future<void> _onToggleBookmark(
@@ -377,9 +426,9 @@ class DiscussionListBloc
 
       // Optimistic update
       final updated = item.copyWith(isBookmarked: !wasBookmarked);
-      final updatedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-      updatedList[idx] = updated;
-      emit(currentState.copyWith(discussions: updatedList));
+      emit(currentState.copyWith(
+        discussions: _patchDiscussion(currentState.discussions, updated),
+      ));
 
       try {
         await repository.performCaseAction(
@@ -387,9 +436,11 @@ class DiscussionListBloc
           action: wasBookmarked ? 'unbookmark' : 'bookmark',
         );
       } catch (_) {
-        final revertedList = List<CaseDiscussionListItem>.from(currentState.discussions);
-        revertedList[idx] = item;
-        emit(currentState.copyWith(discussions: revertedList));
+        final latest = state;
+        if (latest is! DiscussionListLoaded) return;
+        emit(latest.copyWith(
+          discussions: _patchDiscussion(latest.discussions, item),
+        ));
       }
     }
   }

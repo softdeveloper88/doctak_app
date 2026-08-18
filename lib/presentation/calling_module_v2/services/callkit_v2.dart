@@ -38,14 +38,14 @@ class CallKitV2 {
     _subscription = CallKitEventHub.instance.stream.listen((event) {
       if (event == null) return;
       switch (event) {
-        case CallEventActionCallAccept(:final id):
-          _actions.add(CallKitActionV2(kind: CallKitActionKind.accept, callId: id));
-        case CallEventActionCallDecline(:final id):
-          _actions.add(CallKitActionV2(kind: CallKitActionKind.decline, callId: id));
+        case CallEventActionCallAccept(:final callKitParams):
+          _actions.add(CallKitActionV2(kind: CallKitActionKind.accept, callId: callKitParams.id));
+        case CallEventActionCallDecline(:final callKitParams):
+          _actions.add(CallKitActionV2(kind: CallKitActionKind.decline, callId: callKitParams.id));
         case CallEventActionCallTimeout(:final id):
           _actions.add(CallKitActionV2(kind: CallKitActionKind.timeout, callId: id));
-        case CallEventActionCallEnded(:final id):
-          _actions.add(CallKitActionV2(kind: CallKitActionKind.ended, callId: id));
+        case CallEventActionCallEnded(:final callKitParams):
+          _actions.add(CallKitActionV2(kind: CallKitActionKind.ended, callId: callKitParams.id));
         case CallEventActionDidUpdateDevicePushTokenVoip():
           onVoipTokenUpdated?.call();
         default:

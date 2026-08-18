@@ -1,4 +1,5 @@
 import 'package:doctak_app/core/app_export.dart';
+import 'package:doctak_app/core/utils/edge_to_edge_helper.dart';
 import 'package:doctak_app/core/utils/specialty_display.dart';
 import 'package:doctak_app/presentation/home_screen/fragments/home_main_screen/bloc/home_bloc.dart';
 import 'package:doctak_app/presentation/home_screen/home/screens/comment_screen/bloc/comment_bloc.dart';
@@ -141,12 +142,10 @@ class _SVCommentScreenState extends State<SVCommentScreen> {
 
   Widget _buildFullScreenBody(BuildContext context) {
     final theme = OneUITheme.of(context);
+    // Icon brightness only — avoid statusBarColor / systemNavigationBarColor
+    // (deprecated Window APIs on Android 15+; Play Console edge-to-edge warning).
     final systemUiOverlayStyle =
-        (theme.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
-            .copyWith(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-    );
+        EdgeToEdgeHelper.overlayForTheme(isDark: theme.isDark);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: systemUiOverlayStyle,

@@ -93,8 +93,8 @@
 		4F400BB84016F74A078756CA /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F5DAF664020FA28E9F400B4 /* Pods-BroadcastUploadExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BroadcastUploadExtension.debug.xcconfig"; path = "Target Support Files/Pods-BroadcastUploadExtension/Pods-BroadcastUploadExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		5936736563067B091A85C2C0 /* Pods-BroadcastUploadExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BroadcastUploadExtension.profile.xcconfig"; path = "Target Support Files/Pods-BroadcastUploadExtension/Pods-BroadcastUploadExtension.profile.xcconfig"; sourceTree = "<group>"; };
-		5CC236C32EF5594C00221242 /* AgoraRtcKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = AgoraRtcKit.xcframework; path = Pods/AgoraRtcEngine_iOS/AgoraRtcKit.xcframework; sourceTree = "<group>"; };
-		5CC236C62EF5594C00221243 /* AgoraReplayKitExtension.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = AgoraReplayKitExtension.xcframework; path = Pods/AgoraRtcEngine_iOS/AgoraReplayKitExtension.xcframework; sourceTree = "<group>"; };
+		5CC236C32EF5594C00221242 /* AgoraRtcKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = AgoraRtcKit.xcframework; path = Pods/AgoraRtcEngine_Special_iOS/AgoraRtcKit.xcframework; sourceTree = "<group>"; };
+		5CC236C62EF5594C00221243 /* AgoraReplayKitExtension.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = AgoraReplayKitExtension.xcframework; path = Pods/AgoraRtcEngine_Special_iOS/AgoraReplayKitExtension.xcframework; sourceTree = "<group>"; };
 		742FB73D812430A4280E7026 /* Pods-BroadcastUploadExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BroadcastUploadExtension.release.xcconfig"; path = "Target Support Files/Pods-BroadcastUploadExtension/Pods-BroadcastUploadExtension.release.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -121,6 +121,9 @@
 		SHARE0006000000000000001 /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		SHARE0007000000000000001 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		SHARE0009000000000000001 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		SHARE0030000000000000001 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		SHARE0031000000000000001 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		SHARE0032000000000000001 /* Profile.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Profile.xcconfig; sourceTree = "<group>"; };
 		SHARE000A000000000000001 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		SHARE000B000000000000001 /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
 		SHARE000C000000000000001 /* Pods-ShareExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.profile.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.profile.xcconfig"; sourceTree = "<group>"; };
@@ -252,6 +255,9 @@
 				SHARE0004000000000000001 /* Info.plist */,
 				SHARE0005000000000000001 /* ShareExtension.entitlements */,
 				SHARE0008000000000000001 /* MainInterface.storyboard */,
+				SHARE0030000000000000001 /* Debug.xcconfig */,
+				SHARE0031000000000000001 /* Release.xcconfig */,
+				SHARE0032000000000000001 /* Profile.xcconfig */,
 			);
 			path = ShareExtension;
 			sourceTree = "<group>";
@@ -1030,13 +1036,13 @@
 				DEVELOPMENT_TEAM = WXF27GH385;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_iOS",
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS/*/AgoraRtcKit.xcframework/*",
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS/*/AgoraReplayKitExtension.xcframework/*",
+					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_Special_iOS",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS/*/AgoraRtcKit.xcframework/*",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS/*/AgoraReplayKitExtension.xcframework/*",
 				);
 				"FRAMEWORK_SEARCH_PATHS[arch=*]" = (
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS\n",
-					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_iOS",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS\n",
+					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_Special_iOS",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BroadcastUploadExtension/Info.plist;
@@ -1071,13 +1077,13 @@
 				DEVELOPMENT_TEAM = WXF27GH385;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_iOS",
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS/*/AgoraRtcKit.xcframework/*",
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS/*/AgoraReplayKitExtension.xcframework/*",
+					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_Special_iOS",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS/*/AgoraRtcKit.xcframework/*",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS/*/AgoraReplayKitExtension.xcframework/*",
 				);
 				"FRAMEWORK_SEARCH_PATHS[arch=*]" = (
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS\n",
-					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_iOS",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS\n",
+					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_Special_iOS",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BroadcastUploadExtension/Info.plist;
@@ -1110,13 +1116,13 @@
 				DEVELOPMENT_TEAM = WXF27GH385;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_iOS",
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS/*/AgoraRtcKit.xcframework/*",
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS/*/AgoraReplayKitExtension.xcframework/*",
+					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_Special_iOS",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS/*/AgoraRtcKit.xcframework/*",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS/*/AgoraReplayKitExtension.xcframework/*",
 				);
 				"FRAMEWORK_SEARCH_PATHS[arch=*]" = (
-					"$(PODS_ROOT)/AgoraRtcEngine_iOS\n",
-					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_iOS",
+					"$(PODS_ROOT)/AgoraRtcEngine_Special_iOS\n",
+					"$(PODS_CONFIGURATION_BUILD_DIR)/AgoraRtcEngine_Special_iOS",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = BroadcastUploadExtension/Info.plist;
@@ -1142,7 +1148,7 @@
 
 		SHARE0021000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = SHARE000A000000000000001 /* Pods-ShareExtension.debug.xcconfig */;
+			baseConfigurationReference = SHARE0030000000000000001 /* Debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -1171,7 +1177,7 @@
 		};
 		SHARE0022000000000000001 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = SHARE000B000000000000001 /* Pods-ShareExtension.release.xcconfig */;
+			baseConfigurationReference = SHARE0031000000000000001 /* Release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
@@ -1198,7 +1204,7 @@
 		};
 		SHARE0023000000000000001 /* Profile */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = SHARE000C000000000000001 /* Pods-ShareExtension.profile.xcconfig */;
+			baseConfigurationReference = SHARE0032000000000000001 /* Profile.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;

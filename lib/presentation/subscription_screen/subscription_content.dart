@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/core/utils/app/app_environment.dart';
+import 'package:doctak_app/data/apiClient/subscription_api_service.dart';
 import 'package:doctak_app/data/models/subscription/premium_page_model.dart';
 import 'package:doctak_app/data/models/subscription/subscription_plan_model.dart';
 import 'package:doctak_app/presentation/subscription_screen/bloc/subscription_bloc.dart';
@@ -34,31 +35,78 @@ class SubscriptionContent extends StatefulWidget {
 }
 
 class _SubscriptionContentState extends State<SubscriptionContent>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late final SubscriptionBloc _bloc;
   late final TabController _tabController;
+  bool _checkoutInFlight = false;
+  bool _awaitingCheckoutReturn = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _bloc = SubscriptionBloc()..add(const LoadSubscriptionData());
     _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _bloc.close();
     _tabController.dispose();
     super.dispose();
   }
 
-  Future<void> _openTryPremium() async {
-    // Open the website checkout page in the system browser (Stripe lives there).
-    final url = Uri.parse('${AppEnvironment.publicWebUrl}/upgrade-professional');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _awaitingCheckoutReturn) {
+      _awaitingCheckoutReturn = false;
+      _bloc.add(const RefreshSubscriptionStatus());
     }
-    if (mounted) _bloc.add(const RefreshSubscriptionStatus());
+  }
+
+  Future<void> _openCheckout(PremiumPlan plan, {required bool yearly}) async {
+    if (plan.isFree || plan.isCurrent || _checkoutInFlight) return;
+
+    setState(() => _checkoutInFlight = true);
+    try {
+      final checkoutUrl = await SubscriptionApiService.instance.createCheckoutSession(
+        planSlug: plan.slug,
+        period: yearly ? 'yearly' : 'monthly',
+      );
+      final uri = Uri.tryParse(checkoutUrl);
+      if (uri == null || !(uri.isScheme('https') || uri.isScheme('http'))) {
+        throw StateError('Invalid checkout URL');
+      }
+      _awaitingCheckoutReturn = true;
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!opened) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } on DioException catch (e) {
+      _awaitingCheckoutReturn = false;
+      final message = e.response?.data is Map
+          ? (e.response!.data as Map)['message']?.toString()
+          : null;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message ?? e.message ?? 'Could not start checkout.'),
+          ),
+        );
+      }
+    } catch (_) {
+      _awaitingCheckoutReturn = false;
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open Stripe checkout. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _checkoutInFlight = false);
+      // Refresh even if launch failed — status may already be premium.
+      _bloc.add(const RefreshSubscriptionStatus());
+    }
   }
 
   @override
@@ -115,7 +163,12 @@ class _SubscriptionContentState extends State<SubscriptionContent>
   Widget _buildBody(OneUITheme theme, SubscriptionLoaded state) {
     if (widget.shrinkWrap) {
       // Embedded inside another scrollable (profile tab) – no tabs, just plan content
-      return SubscriptionMyPlanTab(state: state, onUpgrade: _openTryPremium, shrinkWrap: true);
+      return SubscriptionMyPlanTab(
+        state: state,
+        onUpgrade: (plan, {required bool yearly}) =>
+            _openCheckout(plan, yearly: yearly),
+        shrinkWrap: true,
+      );
     }
 
     return Column(
@@ -140,7 +193,11 @@ class _SubscriptionContentState extends State<SubscriptionContent>
           child: TabBarView(
             controller: _tabController,
             children: [
-              SubscriptionMyPlanTab(state: state, onUpgrade: _openTryPremium),
+              SubscriptionMyPlanTab(
+                state: state,
+                onUpgrade: (plan, {required bool yearly}) =>
+                    _openCheckout(plan, yearly: yearly),
+              ),
               const SubscriptionHistoryTab(),
             ],
           ),
@@ -156,7 +213,7 @@ class _SubscriptionContentState extends State<SubscriptionContent>
 
 class SubscriptionMyPlanTab extends StatelessWidget {
   final SubscriptionLoaded state;
-  final VoidCallback onUpgrade;
+  final void Function(PremiumPlan plan, {required bool yearly}) onUpgrade;
   final bool shrinkWrap;
 
   const SubscriptionMyPlanTab({
@@ -230,7 +287,7 @@ class SubscriptionMyPlanTab extends StatelessWidget {
                 return SubscriptionPlanCard(
                   plan: plan,
                   showYearly: showYearly,
-                  onUpgrade: onUpgrade,
+                  onUpgrade: () => onUpgrade(plan, yearly: showYearly),
                 );
               }).toList(),
             );

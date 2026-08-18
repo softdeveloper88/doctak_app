@@ -260,11 +260,11 @@ class CallKitService {
         if (event == null) return;
 
         final callId = switch (event) {
-          CallEventActionCallAccept(:final id) => id,
-          CallEventActionCallDecline(:final id) => id,
-          CallEventActionCallEnded(:final id) => id,
+          CallEventActionCallAccept(:final callKitParams) => callKitParams.id,
+          CallEventActionCallDecline(:final callKitParams) => callKitParams.id,
+          CallEventActionCallEnded(:final callKitParams) => callKitParams.id,
           CallEventActionCallTimeout(:final id) => id,
-          CallEventActionCallStart(:final id) => id,
+          CallEventActionCallStart(:final callKitParams) => callKitParams.id,
           CallEventActionCallCallback(:final id) => id,
           CallEventActionCallIncoming(:final callKitParams) => callKitParams.id,
           _ => '',

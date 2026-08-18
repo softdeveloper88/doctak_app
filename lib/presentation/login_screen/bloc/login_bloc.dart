@@ -36,6 +36,15 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   String _messageFromDio(DioException e, {String fallback = 'An error occurred'}) {
     final data = e.response?.data;
     if (data is Map) {
+      // Check the explicit error code first rather than trusting whatever
+      // `message` string the server currently happens to send — the code is
+      // a stable contract (see buildAuthErrorResponse in the backend's
+      // lib/server/auth.ts), so this can't silently regress into a generic
+      // "invalid credentials" message if the wording changes server-side.
+      final code = data['code'] ?? data['error'];
+      if (code == 'banned') {
+        return 'Your account was deactivated. Contact support to appeal.';
+      }
       final message = data['message'];
       if (message is String && message.trim().isNotEmpty) {
         return message.trim();

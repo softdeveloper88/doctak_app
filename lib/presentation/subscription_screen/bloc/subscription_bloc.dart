@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
 import 'package:doctak_app/data/apiClient/subscription_api_service.dart';
@@ -44,6 +46,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
       final features = statusResp?.features ?? AppData.featuresMap ?? FeaturesMap(features: {});
       if (statusResp != null) {
         AppData.updateSubscriptionData(statusResp.subscription, statusResp.features);
+        unawaited(AppData.persistSubscriptionData());
       }
 
       emit(SubscriptionLoaded(
@@ -73,6 +76,7 @@ class SubscriptionBloc extends Bloc<SubscriptionEvent, SubscriptionState> {
     try {
       final statusResp = await _api.getStatus();
       AppData.updateSubscriptionData(statusResp.subscription, statusResp.features);
+      unawaited(AppData.persistSubscriptionData());
 
       if (state is SubscriptionLoaded) {
         final current = state as SubscriptionLoaded;

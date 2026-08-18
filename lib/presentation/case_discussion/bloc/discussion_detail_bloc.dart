@@ -4,6 +4,7 @@
 // actions, and AI summary generation.
 // ============================================================================
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:doctak_app/core/utils/app/AppData.dart';
@@ -325,10 +326,12 @@ class DiscussionDetailBloc
     on<UpdateReply>(_onUpdateReply);
     on<DeleteReply>(_onDeleteReply);
     on<ToggleLikeComment>(_onToggleLikeComment);
-    on<VoteComment>(_onVoteComment);
-    on<VoteReply>(_onVoteReply);
+    // Votes must not interleave: concurrent handlers would each apply their own
+    // server snapshot and the slowest response would win with stale counts.
+    on<VoteComment>(_onVoteComment, transformer: sequential());
+    on<VoteReply>(_onVoteReply, transformer: sequential());
     on<ToggleLikeCase>(_onToggleLikeCase);
-    on<VoteCase>(_onVoteCase);
+    on<VoteCase>(_onVoteCase, transformer: sequential());
     on<ToggleBookmarkCase>(_onToggleBookmarkCase);
     on<ToggleFollowCase>(_onToggleFollowCase);
     on<GenerateAISummary>(_onGenerateAISummary);
@@ -562,71 +565,74 @@ class DiscussionDetailBloc
     if (idx == -1) return;
 
     final comment = currentState.comments[idx];
-    final direction = event.direction;
-    var likes = comment.likes;
-    var dislikes = comment.dislikes;
-    var isLiked = comment.isLiked;
-    var isDisliked = comment.isDisliked;
-
-    if (direction == 'up') {
-      if (isLiked) {
-        isLiked = false;
-        likes -= 1;
-      } else if (isDisliked) {
-        isDisliked = false;
-        isLiked = true;
-        dislikes -= 1;
-        likes += 1;
-      } else {
-        isLiked = true;
-        likes += 1;
-      }
-    } else {
-      if (isDisliked) {
-        isDisliked = false;
-        dislikes -= 1;
-      } else if (isLiked) {
-        isLiked = false;
-        isDisliked = true;
-        likes -= 1;
-        dislikes += 1;
-      } else {
-        isDisliked = true;
-        dislikes += 1;
-      }
-    }
-
-    final updated = comment.copyWith(
-      likes: likes,
-      dislikes: dislikes,
-      isLiked: isLiked,
-      isDisliked: isDisliked,
+    final tally = CaseVoteTally.toggle(
+      likes: comment.likes,
+      dislikes: comment.dislikes,
+      isLiked: comment.isLiked,
+      isDisliked: comment.isDisliked,
+      direction: event.direction,
     );
+
     final updatedComments = List<CaseComment>.from(currentState.comments);
-    updatedComments[idx] = updated;
+    updatedComments[idx] = comment.copyWith(
+      likes: tally.likes,
+      dislikes: tally.dislikes,
+      isLiked: tally.isLiked,
+      isDisliked: tally.isDisliked,
+    );
     emit(currentState.copyWith(comments: updatedComments));
 
     try {
       final response = await repository.voteComment(
         commentId: event.commentId,
-        direction: direction,
+        direction: event.direction,
       );
       final snapshot = CaseVoteSnapshot.fromApiResponse(response);
-      if (snapshot != null) {
-        final synced = updated.copyWith(
-          likes: snapshot.likes,
-          dislikes: snapshot.dislikes,
-          isLiked: snapshot.isLiked,
-          isDisliked: snapshot.isDisliked,
-        );
-        final syncedComments = List<CaseComment>.from(currentState.comments);
-        syncedComments[idx] = synced;
-        emit(currentState.copyWith(comments: syncedComments));
-      }
+      if (snapshot == null) return;
+      _applyCommentVote(
+        emit,
+        commentId: event.commentId,
+        likes: snapshot.likes,
+        dislikes: snapshot.dislikes,
+        isLiked: snapshot.isLiked,
+        isDisliked: snapshot.isDisliked,
+      );
     } catch (_) {
-      final reverted = List<CaseComment>.from(currentState.comments);
-      emit(currentState.copyWith(comments: reverted));
+      _applyCommentVote(
+        emit,
+        commentId: event.commentId,
+        likes: comment.likes,
+        dislikes: comment.dislikes,
+        isLiked: comment.isLiked,
+        isDisliked: comment.isDisliked,
+      );
     }
+  }
+
+  /// Re-resolves the comment by id against the *latest* state before writing.
+  /// Indexes captured before the request go stale — `AddComment` prepends to
+  /// the list, so a pre-await index would land the vote on the wrong comment.
+  void _applyCommentVote(
+    Emitter<DiscussionDetailState> emit, {
+    required int commentId,
+    required int likes,
+    required int dislikes,
+    required bool isLiked,
+    required bool isDisliked,
+  }) {
+    final latest = state;
+    if (latest is! DiscussionDetailLoaded) return;
+    final idx = latest.comments.indexWhere((c) => c.id == commentId);
+    if (idx == -1) return;
+
+    final comments = List<CaseComment>.from(latest.comments);
+    comments[idx] = comments[idx].copyWith(
+      likes: likes,
+      dislikes: dislikes,
+      isLiked: isLiked,
+      isDisliked: isDisliked,
+    );
+    emit(latest.copyWith(comments: comments));
   }
 
   Future<void> _onVoteReply(
@@ -643,75 +649,84 @@ class DiscussionDetailBloc
     if (replyIdx == -1) return;
 
     final reply = comment.replies[replyIdx];
-    final direction = event.direction;
-    var likes = reply.likes;
-    var dislikes = reply.dislikes;
-    var isLiked = reply.isLiked;
-    var isDisliked = reply.isDisliked;
+    final tally = CaseVoteTally.toggle(
+      likes: reply.likes,
+      dislikes: reply.dislikes,
+      isLiked: reply.isLiked,
+      isDisliked: reply.isDisliked,
+      direction: event.direction,
+    );
 
-    if (direction == 'up') {
-      if (isLiked) {
-        isLiked = false;
-        likes -= 1;
-      } else if (isDisliked) {
-        isDisliked = false;
-        isLiked = true;
-        dislikes -= 1;
-        likes += 1;
-      } else {
-        isLiked = true;
-        likes += 1;
-      }
-    } else {
-      if (isDisliked) {
-        isDisliked = false;
-        dislikes -= 1;
-      } else if (isLiked) {
-        isLiked = false;
-        isDisliked = true;
-        likes -= 1;
-        dislikes += 1;
-      } else {
-        isDisliked = true;
-        dislikes += 1;
-      }
+    _applyReplyVote(
+      emit,
+      commentId: event.commentId,
+      replyId: event.replyId,
+      likes: tally.likes,
+      dislikes: tally.dislikes,
+      isLiked: tally.isLiked,
+      isDisliked: tally.isDisliked,
+    );
+
+    try {
+      final response = await repository.voteComment(
+        commentId: event.replyId,
+        direction: event.direction,
+        targetType: 'reply',
+      );
+      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
+      if (snapshot == null) return;
+      _applyReplyVote(
+        emit,
+        commentId: event.commentId,
+        replyId: event.replyId,
+        likes: snapshot.likes,
+        dislikes: snapshot.dislikes,
+        isLiked: snapshot.isLiked,
+        isDisliked: snapshot.isDisliked,
+      );
+    } catch (_) {
+      _applyReplyVote(
+        emit,
+        commentId: event.commentId,
+        replyId: event.replyId,
+        likes: reply.likes,
+        dislikes: reply.dislikes,
+        isLiked: reply.isLiked,
+        isDisliked: reply.isDisliked,
+      );
     }
+  }
 
-    final updatedReply = reply.copyWith(
+  /// Same re-resolve-by-id rule as [_applyCommentVote], for a nested reply.
+  void _applyReplyVote(
+    Emitter<DiscussionDetailState> emit, {
+    required int commentId,
+    required int replyId,
+    required int likes,
+    required int dislikes,
+    required bool isLiked,
+    required bool isDisliked,
+  }) {
+    final latest = state;
+    if (latest is! DiscussionDetailLoaded) return;
+    final commentIdx = latest.comments.indexWhere((c) => c.id == commentId);
+    if (commentIdx == -1) return;
+
+    final target = latest.comments[commentIdx];
+    final replyIdx = target.replies.indexWhere((r) => r.id == replyId);
+    if (replyIdx == -1) return;
+
+    final replies = List<CaseReply>.from(target.replies);
+    replies[replyIdx] = replies[replyIdx].copyWith(
       likes: likes,
       dislikes: dislikes,
       isLiked: isLiked,
       isDisliked: isDisliked,
     );
-    final updatedReplies = List<CaseReply>.from(comment.replies);
-    updatedReplies[replyIdx] = updatedReply;
-    final updatedComments = List<CaseComment>.from(currentState.comments);
-    updatedComments[commentIdx] = comment.copyWith(replies: updatedReplies);
-    emit(currentState.copyWith(comments: updatedComments));
 
-    try {
-      final response = await repository.voteComment(
-        commentId: event.replyId,
-        direction: direction,
-        targetType: 'reply',
-      );
-      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
-      if (snapshot != null) {
-        final syncedReply = updatedReply.copyWith(
-          likes: snapshot.likes,
-          dislikes: snapshot.dislikes,
-          isLiked: snapshot.isLiked,
-          isDisliked: snapshot.isDisliked,
-        );
-        final syncedReplies = List<CaseReply>.from(comment.replies);
-        syncedReplies[replyIdx] = syncedReply;
-        final syncedComments = List<CaseComment>.from(currentState.comments);
-        syncedComments[commentIdx] = comment.copyWith(replies: syncedReplies);
-        emit(currentState.copyWith(comments: syncedComments));
-      }
-    } catch (_) {
-      emit(currentState);
-    }
+    final comments = List<CaseComment>.from(latest.comments);
+    comments[commentIdx] = target.copyWith(replies: replies);
+    emit(latest.copyWith(comments: comments));
   }
 
   Future<void> _onToggleLikeCase(
@@ -724,65 +739,70 @@ class DiscussionDetailBloc
     final currentState = state;
     if (currentState is! DiscussionDetailLoaded) return;
     final d = currentState.discussion;
-    final direction = event.direction;
-    var likes = d.likes;
-    var dislikes = d.dislikes;
-    var isLiked = d.isLiked;
-    var isDisliked = d.isDisliked;
+    final tally = CaseVoteTally.toggle(
+      likes: d.likes,
+      dislikes: d.dislikes,
+      isLiked: d.isLiked,
+      isDisliked: d.isDisliked,
+      direction: event.direction,
+    );
 
-    if (direction == 'up') {
-      if (isLiked) {
-        isLiked = false;
-        likes -= 1;
-      } else if (isDisliked) {
-        isDisliked = false;
-        isLiked = true;
-        dislikes -= 1;
-        likes += 1;
-      } else {
-        isLiked = true;
-        likes += 1;
-      }
-    } else {
-      if (isDisliked) {
-        isDisliked = false;
-        dislikes -= 1;
-      } else if (isLiked) {
-        isLiked = false;
-        isDisliked = true;
-        likes -= 1;
-        dislikes += 1;
-      } else {
-        isDisliked = true;
-        dislikes += 1;
-      }
+    _applyCaseVote(
+      emit,
+      caseId: event.caseId,
+      likes: tally.likes,
+      dislikes: tally.dislikes,
+      isLiked: tally.isLiked,
+      isDisliked: tally.isDisliked,
+    );
+
+    try {
+      final response = await repository.voteCase(
+          caseId: event.caseId, direction: event.direction);
+      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
+      if (snapshot == null) return;
+      _applyCaseVote(
+        emit,
+        caseId: event.caseId,
+        likes: snapshot.likes,
+        dislikes: snapshot.dislikes,
+        isLiked: snapshot.isLiked,
+        isDisliked: snapshot.isDisliked,
+      );
+    } catch (_) {
+      _applyCaseVote(
+        emit,
+        caseId: event.caseId,
+        likes: d.likes,
+        dislikes: d.dislikes,
+        isLiked: d.isLiked,
+        isDisliked: d.isDisliked,
+      );
     }
+  }
 
-    emit(currentState.copyWith(
-      discussion: d.copyWith(
+  /// Writes vote counts onto the *latest* discussion so comments/updates loaded
+  /// while the request was in flight are not rolled back with it.
+  void _applyCaseVote(
+    Emitter<DiscussionDetailState> emit, {
+    required int caseId,
+    required int likes,
+    required int dislikes,
+    required bool isLiked,
+    required bool isDisliked,
+  }) {
+    final latest = state;
+    if (latest is! DiscussionDetailLoaded) return;
+    if (latest.discussion.id != caseId) return;
+
+    emit(latest.copyWith(
+      discussion: latest.discussion.copyWith(
         likes: likes,
         dislikes: dislikes,
         isLiked: isLiked,
         isDisliked: isDisliked,
       ),
     ));
-
-    try {
-      final response = await repository.voteCase(caseId: event.caseId, direction: direction);
-      final snapshot = CaseVoteSnapshot.fromApiResponse(response);
-      if (snapshot != null) {
-        emit(currentState.copyWith(
-          discussion: d.copyWith(
-            likes: snapshot.likes,
-            dislikes: snapshot.dislikes,
-            isLiked: snapshot.isLiked,
-            isDisliked: snapshot.isDisliked,
-          ),
-        ));
-      }
-    } catch (_) {
-      emit(currentState.copyWith(discussion: d));
-    }
   }
 
   Future<void> _onToggleBookmarkCase(

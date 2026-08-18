@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:doctak_app/core/app_export.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTResponse.dart';
 import 'package:doctak_app/data/models/chat_gpt_model/ChatGPTSessionModel.dart';
-import 'package:doctak_app/data/models/chat_gpt_model/chat_gpt_sesssion/chat_gpt_session.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_bloc.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_event.dart';
 import 'package:doctak_app/presentation/chat_gpt_screen/bloc/chat_gpt_state.dart';
@@ -47,7 +46,9 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
   final ScrollController _scrollController = ScrollController();
   List<ChatGPTResponse> messages = [];
   late Future<List<Session>> futureSessions;
-  int? selectedSessionId = 0;
+  // Not typed int — the v6 backend's session ids are not necessarily
+  // numeric (e.g. UUIDs). See the note on ChatGptSession.newSessionId.
+  dynamic selectedSessionId = 0;
   Future<List<ChatGPTResponse>> futureMessages = Future.value([]);
   final TextEditingController textController = TextEditingController();
   bool isLoadingMessages = true;
@@ -293,7 +294,7 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
         builder: (context, state1) {
           final bloc = BlocProvider.of<ChatGPTBloc>(context);
 
-          if (selectedSessionId == 0 && state1 is DataLoaded) {
+          if ((selectedSessionId == null || selectedSessionId == 0) && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi =
                 (state1.response.sessions?.isNotEmpty == true
@@ -433,12 +434,8 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
                       color: theme.scaffoldBackground,
                       child: Column(
                         children: [
-                          // Compact usage banner in chat view
-                          if (state1.response.usage != null)
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
-                              child: _buildUsageBanner(theme, state1.response.usage!),
-                            ),
+                          // Usage/plan status is already shown by AiQuotaBanner
+                          // above the input field — no need to duplicate it here.
                           Expanded(
                             child: ListView.builder(
                         controller: _scrollController,
@@ -1023,87 +1020,6 @@ class ChatGPTScreenState extends State<ChatGptWithImageScreen>
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // ── Usage / Plan Banner (like website) ────────────────────────────────
-  Widget _buildUsageBanner(dynamic theme, AiUsageInfo usage) {
-    // Premium users don't need to see the quota banner
-    if (usage.isPaid) return const SizedBox.shrink();
-    final isFreePlan = !usage.isPaid;
-    final percent = usage.dailyLimit > 0
-        ? (usage.dailyUsed / usage.dailyLimit).clamp(0.0, 1.0)
-        : 0.0;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isFreePlan
-            ? theme.warning.withValues(alpha: 0.10)
-            : theme.primary.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isFreePlan
-              ? theme.warning.withValues(alpha: 0.30)
-              : theme.primary.withValues(alpha: 0.30),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                isFreePlan ? Icons.workspace_premium : Icons.verified,
-                size: 18,
-                color: isFreePlan ? theme.warning : theme.primary,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                usage.planName.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'Poppins',
-                  color: isFreePlan ? theme.warning : theme.primary,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                '${usage.dailyRemaining} left today',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: theme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: percent,
-              minHeight: 5,
-              backgroundColor: theme.textSecondary.withValues(alpha: 0.15),
-              valueColor: AlwaysStoppedAnimation<Color>(
-                isFreePlan ? theme.warning : theme.primary,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${usage.dailyUsed} of ${usage.dailyLimit} analyses used today',
-            style: TextStyle(
-              fontSize: 10,
-              fontFamily: 'Poppins',
-              color: theme.textSecondary,
-            ),
-          ),
-        ],
       ),
     );
   }

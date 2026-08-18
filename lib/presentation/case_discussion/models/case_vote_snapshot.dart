@@ -1,3 +1,70 @@
+/// Local optimistic vote toggle — mirrors the server's one-choice-per-user rule
+/// (`toggleVote`): tapping the active side clears it, tapping the other side
+/// moves the vote across. Shared by the case list, case detail, comment and
+/// reply handlers so they can never drift apart.
+class CaseVoteTally {
+  final int likes;
+  final int dislikes;
+  final bool isLiked;
+  final bool isDisliked;
+
+  const CaseVoteTally({
+    required this.likes,
+    required this.dislikes,
+    required this.isLiked,
+    required this.isDisliked,
+  });
+
+  /// [direction] is 'up'/'like' or 'down'/'dislike'.
+  factory CaseVoteTally.toggle({
+    required int likes,
+    required int dislikes,
+    required bool isLiked,
+    required bool isDisliked,
+    required String direction,
+  }) {
+    var nextLikes = likes;
+    var nextDislikes = dislikes;
+    var nextLiked = isLiked;
+    var nextDisliked = isDisliked;
+
+    final isUp = direction == 'up' || direction == 'like';
+
+    if (isUp) {
+      if (nextLiked) {
+        nextLiked = false;
+        nextLikes -= 1;
+      } else {
+        if (nextDisliked) {
+          nextDisliked = false;
+          nextDislikes -= 1;
+        }
+        nextLiked = true;
+        nextLikes += 1;
+      }
+    } else {
+      if (nextDisliked) {
+        nextDisliked = false;
+        nextDislikes -= 1;
+      } else {
+        if (nextLiked) {
+          nextLiked = false;
+          nextLikes -= 1;
+        }
+        nextDisliked = true;
+        nextDislikes += 1;
+      }
+    }
+
+    return CaseVoteTally(
+      likes: nextLikes < 0 ? 0 : nextLikes,
+      dislikes: nextDislikes < 0 ? 0 : nextDislikes,
+      isLiked: nextLiked,
+      isDisliked: nextDisliked,
+    );
+  }
+}
+
 /// Parsed like/dislike counts returned by the vote API (source of truth after persist).
 class CaseVoteSnapshot {
   final int likes;

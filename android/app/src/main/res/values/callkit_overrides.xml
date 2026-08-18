@@ -6,8 +6,8 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <!-- Bar colors set via EdgeToEdge / Flutter — avoid deprecated theme attrs. -->
     </style>
     
     <!-- OneUI 8.5 Colors for CallKit -->

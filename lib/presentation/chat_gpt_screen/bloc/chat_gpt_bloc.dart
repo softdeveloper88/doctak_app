@@ -11,7 +11,9 @@ import 'chat_gpt_state.dart';
 
 class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
   final ApiServiceManager apiManager = ApiServiceManager();
-  int newChatSessionId = 0;
+  // Not typed int — the v6 backend's session ids are not necessarily
+  // numeric (e.g. UUIDs). See the note on ChatGptSession.newSessionId.
+  dynamic newChatSessionId = 0;
   bool isWait = false;
   bool isLoadingHistory = false;
   /// Non-null when the last _askQuestion failed. The screen reads this, shows
@@ -214,7 +216,7 @@ class ChatGPTBloc extends Bloc<ChatGPTEvent, ChatGPTState> {
       var response = await apiManager.newChat('Bearer ${AppData.userToken}');
       final dynamic rawSessionId = response.response.data['session_id'] ?? response.response.data['newSessionId'];
       final String sessionIdStr = rawSessionId.toString();
-      newChatSessionId = int.tryParse(sessionIdStr) ?? 0;
+      newChatSessionId = rawSessionId;
       ChatGptMessageHistory response1 = await apiManager.gptChatMessages('Bearer ${AppData.userToken}', sessionIdStr);
       ChatGptSession responseSession = await apiManager.gptChatSession('Bearer ${AppData.userToken}');
       print('New chat session created with id: $sessionIdStr');

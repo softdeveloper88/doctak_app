@@ -35,7 +35,9 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
   List<ChatGPTResponse> messages = []; // Add this line
 
   late Future<List<Session>> futureSessions;
-  int? selectedSessionId = 0; // State variable for tracking selected session
+  // Not typed int — the v6 backend's session ids are not necessarily
+  // numeric (e.g. UUIDs). See the note on ChatGptSession.newSessionId.
+  dynamic selectedSessionId = 0; // State variable for tracking selected session
   Future<List<ChatGPTResponse>> futureMessages = Future.value([]);
   final TextEditingController textController = TextEditingController();
   bool isLoadingMessages = true;
@@ -94,7 +96,7 @@ class _ChatGPTScreenState extends State<ChatDetailScreen> {
       create: (context) => ChatGPTBloc()..add(LoadDataValues()),
       child: BlocBuilder<ChatGPTBloc, ChatGPTState>(
         builder: (context, state1) {
-          if (selectedSessionId == 0 && state1 is DataLoaded) {
+          if ((selectedSessionId == null || selectedSessionId == 0) && state1 is DataLoaded) {
             selectedSessionId = state1.response.newSessionId;
             chatWithAi = state1.response.sessions?.first.name ?? 'Next Session';
           }

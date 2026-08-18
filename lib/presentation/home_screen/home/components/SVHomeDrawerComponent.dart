@@ -200,7 +200,10 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
   Widget _buildHeader(BuildContext context, OneUITheme theme) {
     final acting = ActingContextService.instance;
 
-    return Container(
+    return ValueListenableBuilder<bool>(
+      valueListenable: AppData.premiumNotifier,
+      builder: (context, _, __) {
+        return Container(
       decoration: BoxDecoration(
         gradient: theme.drawerHeaderGradient,
         borderRadius: const BorderRadius.only(
@@ -332,6 +335,8 @@ class _SVHomeDrawerComponentState extends State<SVHomeDrawerComponent>
           ],
         ),
       ),
+    );
+      },
     );
   }
 

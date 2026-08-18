@@ -51,7 +51,8 @@ class GetNewChat extends ChatGPTEvent {
 }
 
 class DeleteChatSession extends ChatGPTEvent {
-  int sessionId;
+  // Not typed int — matches Sessions.id, which is not necessarily numeric.
+  dynamic sessionId;
   DeleteChatSession(this.sessionId);
   @override
   List<Object> get props => [sessionId];

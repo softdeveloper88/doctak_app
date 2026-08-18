@@ -11,6 +11,7 @@ import 'package:doctak_app/presentation/home_screen/fragments/add_post/bloc/add_
 import 'package:doctak_app/presentation/home_screen/home/feed/widgets/feed_card_shell.dart';
 import 'package:doctak_app/theme/one_ui_theme.dart';
 import 'package:doctak_app/widgets/hashtag_rich_text.dart';
+import 'package:doctak_app/widgets/one_ui_confirm_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -627,9 +628,9 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
       if (!mounted) return;
       setState(() => _submitting = false);
       if (res.success) {
-        _done('Blog updated');
+        _done('Article updated');
       } else {
-        toast(res.message ?? 'Failed to update blog');
+        toast(res.message ?? 'Failed to update article');
       }
       return;
     }
@@ -655,9 +656,9 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
     if (!mounted) return;
     setState(() => _submitting = false);
     if (res.success) {
-      _done('Blog published');
+      _done('Article published');
     } else {
-      toast(res.message ?? 'Failed to publish blog');
+      toast(res.message ?? 'Failed to publish article');
     }
   }
 
@@ -871,7 +872,7 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
           tab('Update', ComposeTab.update, Icons.edit_outlined),
           if (!_isGroupMode || widget.groupTarget!.enablePolls)
             tab('Poll', ComposeTab.poll, Icons.bar_chart_rounded),
-          tab('Blog', ComposeTab.blog, Icons.article_outlined),
+          tab('Article', ComposeTab.blog, Icons.article_outlined),
         ],
       ),
     );
@@ -1145,11 +1146,15 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
           children: [
             Icon(Icons.people_alt_outlined, size: 14, color: theme.textSecondary),
             const SizedBox(width: 6),
-            Text(
-              specialty.isNotEmpty
-                  ? '${_privacyLabels[_privacy]} · $specialty'
-                  : '${_privacyLabels[_privacy]}',
-              style: theme.caption.copyWith(color: theme.textSecondary),
+            Flexible(
+              child: Text(
+                specialty.isNotEmpty
+                    ? '${_privacyLabels[_privacy]} · $specialty'
+                    : '${_privacyLabels[_privacy]}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.caption.copyWith(color: theme.textSecondary),
+              ),
             ),
             const SizedBox(width: 2),
             Icon(Icons.keyboard_arrow_down_rounded,
@@ -1482,15 +1487,15 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
               ),
             ),
           if (_pollOptionCtrls.length < 10)
-            OutlinedButton.icon(
-              onPressed: () => setState(
-                  () => _pollOptionCtrls.add(TextEditingController())),
-              icon: Icon(Icons.add, size: 18, color: theme.primary),
-              label: Text('Add option',
-                  style: theme.bodySecondary.copyWith(color: theme.primary)),
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 44),
-                side: BorderSide(color: theme.border),
+            SizedBox(
+              width: double.infinity,
+              height: kOneUIButtonHeight,
+              child: OutlinedButton.icon(
+                onPressed: () => setState(
+                    () => _pollOptionCtrls.add(TextEditingController())),
+                icon: Icon(Icons.add, size: 18, color: theme.primary),
+                label: const Text('Add option'),
+                style: OneUIButtons.outlined(theme),
               ),
             ),
           const SizedBox(height: 16),
@@ -1686,15 +1691,15 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
           onChanged: (_) => setState(() {}),
           style: theme.bodyMedium,
           decoration: theme.inputDecoration(
-            hint: 'Write your blog post here…',
+            hint: 'Write your article here…',
           ),
         ),
         const SizedBox(height: 8),
         TextButton(
           onPressed: () => setState(() => _showBlogSeo = !_showBlogSeo),
+          style: OneUIButtons.text(theme),
           child: Text(
             _showBlogSeo ? 'Hide SEO settings' : 'Show SEO settings',
-            style: TextStyle(color: theme.primary),
           ),
         ),
         if (_showBlogSeo) ...[
@@ -1753,22 +1758,27 @@ class _ComposeContentScreenState extends State<ComposeContentScreen> {
             ),
           Padding(
             padding: const EdgeInsets.all(12),
-            child: OutlinedButton.icon(
-              onPressed: _blogCoverUploading ? null : _pickBlogCover,
-              icon: _blogCoverUploading
-                  ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: theme.primary,
-                      ),
-                    )
-                  : Icon(Icons.upload_outlined, color: theme.primary),
-              label: Text(
-                _blogCoverUploading
-                    ? 'Uploading…'
-                    : (_blogCoverPath != null ? 'Replace cover' : 'Upload cover'),
+            child: SizedBox(
+              width: double.infinity,
+              height: kOneUIButtonHeight,
+              child: OutlinedButton.icon(
+                onPressed: _blogCoverUploading ? null : _pickBlogCover,
+                icon: _blogCoverUploading
+                    ? SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: theme.primary,
+                        ),
+                      )
+                    : Icon(Icons.upload_outlined, size: 18, color: theme.primary),
+                label: Text(
+                  _blogCoverUploading
+                      ? 'Uploading…'
+                      : (_blogCoverPath != null ? 'Replace cover' : 'Upload cover'),
+                ),
+                style: OneUIButtons.outlined(theme),
               ),
             ),
           ),

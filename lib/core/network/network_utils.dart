@@ -453,8 +453,25 @@ Future handleResponse(Response response, [bool? avoidTokenError]) async {
     throw 'Session expired. Please login again.';
   }
 
-  if ((response.statusCode >= 200 && response.statusCode < 300) ||
-      response.statusCode == 403) {
+  if (response.statusCode == 403) {
+    // Previously grouped with the 2xx success branch below, so a 403 body
+    // (e.g. a banned-account rejection, which the backend sends with a real
+    // `message`/`code` — see lib/server/auth.ts's AuthError on the Node side)
+    // was jsonDecode'd and handed to the caller as if it were valid data
+    // instead of surfacing as an error.
+    String? serverMessage;
+    try {
+      final decoded = jsonDecode(response.body);
+      if (decoded is Map && decoded['message'] is String && (decoded['message'] as String).isNotEmpty) {
+        serverMessage = decoded['message'] as String;
+      }
+    } catch (_) {
+      // Not JSON, or no message field — fall back to the generic message below.
+    }
+    throw serverMessage ?? 'Access denied (403).';
+  }
+
+  if (response.statusCode >= 200 && response.statusCode < 300) {
     try {
       return jsonDecode(response.body);
     } on FormatException {

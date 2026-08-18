@@ -62,6 +62,38 @@ class SubscriptionApiService {
     return _asMap(resp.data);
   }
 
+  // ── POST /api/upgrade-professional (Stripe Checkout session) ─────────────────
+
+  /// Creates a Stripe Checkout session for [planSlug] + [period] and returns
+  /// the hosted checkout URL. Uses the app Bearer token so the browser session
+  /// is not required.
+  Future<String> createCheckoutSession({
+    required String planSlug,
+    required String period,
+  }) async {
+    final resp = await _dio.post(
+      '${AppEnvironment.nodeApiUrl}/api/upgrade-professional',
+      data: {
+        'planSlug': planSlug,
+        'period': period,
+        'source': 'mobile',
+      },
+      options: _authOptions,
+    );
+    final data = _asMap(resp.data);
+    final url = data['checkoutUrl']?.toString() ?? data['checkout_url']?.toString();
+    if (url == null || url.isEmpty) {
+      final message = data['message']?.toString() ?? 'Could not start checkout.';
+      throw DioException(
+        requestOptions: resp.requestOptions,
+        response: resp,
+        message: message,
+        type: DioExceptionType.badResponse,
+      );
+    }
+    return url;
+  }
+
   Map<String, dynamic> _asMap(dynamic data) {
     if (data is Map<String, dynamic>) return data;
     if (data is Map) return Map<String, dynamic>.from(data);
